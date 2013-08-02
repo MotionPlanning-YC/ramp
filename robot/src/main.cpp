@@ -3,7 +3,7 @@
 
 Corobot robot;
 
-void trajCallback(const ramp_msgs::TrajectoryWithKnots::ConstPtr& msg) {
+void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
   std::cout<<"\nGot the message!";
   robot.trajectory_ = *msg;
   //robot.updateTrajectory();

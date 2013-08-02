@@ -96,8 +96,8 @@ std::vector<MotionState> Trajectory::generate() {
 
 /** This function returns a JointTrajectory msg based on the trajectory
  *  points_ must not be empty */
-ramp_msgs::TrajectoryWithKnots Trajectory::buildTrajectoryMsg() {
-  ramp_msgs::TrajectoryWithKnots msg;
+ramp_msgs::Trajectory Trajectory::buildTrajectoryMsg() {
+  ramp_msgs::Trajectory msg;
 
   //Push on all of the Motion States
   for(unsigned int i=0;i<points_.size();i++) {

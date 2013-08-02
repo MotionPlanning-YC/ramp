@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS genmsg geometry_msgs std_msgs trajectory
 #######################################
 
 ## Generate messages in the 'msg' folder
-add_message_files(FILES Path.msg TrajectoryWithKnots.msg)
+add_message_files(FILES Path.msg Trajectory.msg)
 
 
 ## Generate added messages and services with any dependencies listed here

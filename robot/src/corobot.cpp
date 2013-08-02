@@ -113,7 +113,7 @@ void Corobot::turn(float speed, float angle) const {
 }
 
 
-void Corobot::updateTrajectory(const ramp_msgs::TrajectoryWithKnots msg) {
+void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
   std::cout<<"\nIn updateTrajectory\n";
   std::cout<<"\ntrajectory.points.size():"<<trajectory_.trajectory.points.size();
 }

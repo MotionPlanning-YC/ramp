@@ -2,7 +2,7 @@
 #define TRAJECTORY_H
 
 #include "ros/ros.h"
-#include "ramp_msgs/TrajectoryWithKnots.h"
+#include "ramp_msgs/Trajectory.h"
 #include "traj_gen_mobile_base/Segment.h"
 #include "geometry_msgs/Pose2D.h"
 #include "utility.h"
@@ -20,7 +20,7 @@ class Trajectory {
     
     std::vector<MotionState> generate();
 
-    ramp_msgs::TrajectoryWithKnots buildTrajectoryMsg();
+    ramp_msgs::Trajectory buildTrajectoryMsg();
     
     //Data Members
     std::vector<geometry_msgs::Pose2D>  knot_points_;

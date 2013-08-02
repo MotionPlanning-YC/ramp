@@ -8,7 +8,7 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "traj_gen_mobile_base");
   ros::NodeHandle handle;
 
-  ros::Publisher pub_traj = handle.advertise<ramp_msgs::TrajectoryWithKnots>("traj", 1000);
+  ros::Publisher pub_traj = handle.advertise<ramp_msgs::Trajectory>("traj", 1000);
 
   /** The following is just for testing purposes. */
 
@@ -95,8 +95,8 @@ int main(int argc, char** argv) {
     }
   }
 
-  //Build a TrajectoryWithKnots msg
-  ramp_msgs::TrajectoryWithKnots msg = traj.buildTrajectoryMsg();
+  //Build a Trajectory msg
+  ramp_msgs::Trajectory msg = traj.buildTrajectoryMsg();
   
   //Print the knot points
   for(unsigned int i=0;i<msg.index_knot_points.size();i++) {
