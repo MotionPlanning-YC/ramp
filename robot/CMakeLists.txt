@@ -1,19 +1,18 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(robot)
 
-find_package(catkin REQUIRED COMPONENTS geometry_msgs message_generation nav_msgs roscpp trajectory_msgs)
+find_package(catkin REQUIRED COMPONENTS genmsg geometry_msgs message_generation nav_msgs ramp_msgs roscpp)
 
 #######################################
 ## Declare ROS messages and services ##
 #######################################
 
 
-generate_messages(DEPENDENCIES trajectory_msgs)
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS geometry_msgs message_generation nav_msgs roscpp trajectory_msgs
+  CATKIN_DEPENDS roscpp 
 #  DEPENDS system_lib
 )
 

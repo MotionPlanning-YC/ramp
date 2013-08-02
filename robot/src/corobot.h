@@ -11,7 +11,7 @@
 #include "corobot_msgs/MotorCommand.h"
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/Pose2D.h"
-#include "trajectory_msgs/JointTrajectory.h"
+#include "ramp_msgs/TrajectoryWithKnots.h"
 #include "tf/transform_datatypes.h"
 
 class Corobot {
@@ -28,7 +28,7 @@ class Corobot {
     void stop() const;
     void updateState(const nav_msgs::Odometry::ConstPtr& msg);
     
-    void updateTrajectory(const trajectory_msgs::JointTrajectory msg); 
+    void updateTrajectory(const ramp_msgs::TrajectoryWithKnots msg); 
     void moveOnTrajectory();
 
     //Data Members
@@ -37,7 +37,7 @@ class Corobot {
     ros::Subscriber                   sub_odometry_;
     geometry_msgs::Pose2D             configuration_; 
     geometry_msgs::Twist              velocity_;
-    trajectory_msgs::JointTrajectory  trajectory_;
+    ramp_msgs::TrajectoryWithKnots    trajectory_;
 
     
     //static const members

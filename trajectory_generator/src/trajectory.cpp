@@ -3,10 +3,17 @@
 
 Trajectory::Trajectory() : k_dof_(3) {}
 
+/** This constructor pushes on all of the poses passed in */
+Trajectory::Trajectory(std::vector<geometry_msgs::Pose2D> kps) : k_dof_(3) {
+  for(unsigned int i=0;i<kps.size();i++) {
+    knot_points_.push_back(kps.at(i));
+  }
+}
+
+
 Trajectory::~Trajectory() {}
 
 void Trajectory::buildSegments() {
-
 
   //Go through the knot points_,
   //Create a segment,
@@ -26,6 +33,8 @@ void Trajectory::buildSegments() {
 
 /** This method returns a MotionState given a segment ID and a time */
 MotionState Trajectory::getMotionState(unsigned int ind_segment, float t) {
+  //std::cout<<"\nIn getMotionState\n";
+  
   MotionState result;
 
   Segment segment = segments_.at(ind_segment);
@@ -52,16 +61,17 @@ MotionState Trajectory::getMotionState(unsigned int ind_segment, float t) {
 
 /** This function generates the set of motion states that represent the trajectory */
 std::vector<MotionState> Trajectory::generate() {
+  //std::cout<<"\nIn generate\n";
 
   //For each segment 
   for(unsigned int i=0;i<segments_.size();i++) { 
     
     //The time of the segment in seconds
     float segment_duration = segments_.at(i).end_t_ - segments_.at(i).start_t_;
-
+    
+    
     //The # of times the trajectory is calculated for the segment, determined by the resolution rate
-    int total_t = segment_duration / (1 / resolutionRate_);
-
+    int total_t = segment_duration / (1.0 / resolutionRate_);
     
     //If we are at the last segment, increase the total_t by 1
     //so that in the following loop, the very last state of motion is tacked on
@@ -71,7 +81,7 @@ std::vector<MotionState> Trajectory::generate() {
     for(unsigned int clock=0;clock<total_t;clock++) {
       
       //Get the time 
-      float t = clock* (1/resolutionRate_);
+      float t = clock * (1.0/resolutionRate_);
       
       //Get the motion state
       points_.push_back(getMotionState(i, t));
@@ -86,9 +96,10 @@ std::vector<MotionState> Trajectory::generate() {
 
 /** This function returns a JointTrajectory msg based on the trajectory
  *  points_ must not be empty */
-trajectory_msgs::JointTrajectory Trajectory::buildTrajectoryMsg() {
-  trajectory_msgs::JointTrajectory msg;
+ramp_msgs::TrajectoryWithKnots Trajectory::buildTrajectoryMsg() {
+  ramp_msgs::TrajectoryWithKnots msg;
 
+  //Push on all of the Motion States
   for(unsigned int i=0;i<points_.size();i++) {
     MotionState m = points_.at(i);
     trajectory_msgs::JointTrajectoryPoint p;
@@ -112,7 +123,17 @@ trajectory_msgs::JointTrajectory Trajectory::buildTrajectoryMsg() {
     p.time_from_start = ros::Duration(i* (1/resolutionRate_));
 
     //Push onto the return value
-    msg.points.push_back(p);
+    msg.trajectory.points.push_back(p);
   }
+
+  //Find the indices of the knot points
+  for(unsigned int i=0;i<segments_.size();i++) {
+    unsigned int index = segments_.at(i).start_t_ * resolutionRate_;
+    std::cout<<"\nindex:"<<index<<"\n";
+    msg.index_knot_points.push_back(index);
+  }
+
+  //Get the last knot point
+  msg.index_knot_points.push_back(segments_.at(segments_.size()-1).end_t_ * resolutionRate_);
   return msg; 
 }

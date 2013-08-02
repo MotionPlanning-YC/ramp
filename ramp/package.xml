@@ -18,6 +18,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <run_depend>ramp_msgs</run_depend>
   <run_depend>ramp_planner</run_depend>
   <run_depend>robot</run_depend>
   <run_depend>trajectory_generator</run_depend>

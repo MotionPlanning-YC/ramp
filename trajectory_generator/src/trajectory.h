@@ -2,7 +2,7 @@
 #define TRAJECTORY_H
 
 #include "ros/ros.h"
-#include "trajectory_msgs/JointTrajectory.h"
+#include "ramp_msgs/TrajectoryWithKnots.h"
 #include "traj_gen_mobile_base/Segment.h"
 #include "geometry_msgs/Pose2D.h"
 #include "utility.h"
@@ -12,6 +12,7 @@ class Trajectory {
   public:
 
     Trajectory();
+    Trajectory(std::vector<geometry_msgs::Pose2D> kps);
     ~Trajectory();
 
     void buildSegments();
@@ -19,7 +20,7 @@ class Trajectory {
     
     std::vector<MotionState> generate();
 
-    trajectory_msgs::JointTrajectory buildTrajectoryMsg();
+    ramp_msgs::TrajectoryWithKnots buildTrajectoryMsg();
     
     //Data Members
     std::vector<geometry_msgs::Pose2D>  knot_points_;
@@ -27,7 +28,7 @@ class Trajectory {
     std::vector<MotionState>            points_;
     std::vector<float>                  t_; //Time per segment
        
-    float resolutionRate_;  //The resolution rate is specified in Hz
+    unsigned int resolutionRate_;  //The resolution rate is specified in Hz
     
   private:
     MotionState getMotionState(unsigned int ind_segment, float t);

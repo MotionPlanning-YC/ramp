@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(trajectory_generator)
 
-find_package(catkin REQUIRED COMPONENTS geometry_msgs message_generation roscpp trajectory_msgs)
+find_package(catkin REQUIRED COMPONENTS geometry_msgs message_generation ramp_msgs roscpp)
 
 
 #######################################
@@ -9,13 +9,13 @@ find_package(catkin REQUIRED COMPONENTS geometry_msgs message_generation roscpp 
 #######################################
 
 
-## Generate added messages and services with any dependencies listed here
-generate_messages(DEPENDENCIES geometry_msgs trajectory_msgs)
+
+
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES trajectory_generator
-  CATKIN_DEPENDS geometry_msgs message_generation roscpp trajectory_msgs
+  CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
 

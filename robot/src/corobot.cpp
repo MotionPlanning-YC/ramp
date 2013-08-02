@@ -113,9 +113,9 @@ void Corobot::turn(float speed, float angle) const {
 }
 
 
-void Corobot::updateTrajectory(const trajectory_msgs::JointTrajectory msg) {
+void Corobot::updateTrajectory(const ramp_msgs::TrajectoryWithKnots msg) {
   std::cout<<"\nIn updateTrajectory\n";
-  std::cout<<"\ntrajectory.points.size():"<<trajectory_.points.size();
+  std::cout<<"\ntrajectory.points.size():"<<trajectory_.trajectory.points.size();
 }
 
 
@@ -151,31 +151,26 @@ float Corobot::getSpeedToWaypoint(trajectory_msgs::JointTrajectoryPoint waypoint
 void Corobot::moveOnTrajectory() {
   
   //Get the number of waypoints
-  int num = trajectory_.points.size();
+  int num = trajectory_.trajectory.points.size();
 
   //Build a vector of the time_from_starts
   std::vector<ros::Time> end_times;
   ros::Time start = ros::Time::now() + ros::Duration(1.0);
 
   for(unsigned int i=0;i<num-1;i++) {
-    end_times.push_back(start + trajectory_.points.at(i+1).time_from_start );
+    end_times.push_back(start + trajectory_.trajectory.points.at(i+1).time_from_start );
   } 
   
   ros::Rate r(25);
   
   geometry_msgs::Twist twist;
   twist.linear.x = 0.5;
+  
   //For each waypoint
   for(unsigned int i=0;i<num-1;i++) {
-    //Get time_from_start of next waypoint
     
-    //float speed = getSpeedToWaypoint(trajectory_.points.at(i), trajectory_.points.at(i+1)); 
-    //std::cout<<"\nspeed:"<<speed<<"\n";
-    
+    //Send the twist msg at some rate r
     while(ros::ok() && ros::Time::now() < end_times.at(i)) {
-      //Move robot at velocity v 
-      //twist.linear.x = speed;
-      
       pub_twist_.publish(twist); 
       r.sleep();
     }
