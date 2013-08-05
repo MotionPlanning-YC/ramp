@@ -4,7 +4,7 @@
 Trajectory::Trajectory() : k_dof_(3) {}
 
 /** This constructor pushes on all of the poses passed in */
-Trajectory::Trajectory(std::vector<geometry_msgs::Pose2D> kps) : k_dof_(3) {
+Trajectory::Trajectory(const std::vector<geometry_msgs::Pose2D> kps) : k_dof_(3) {
   for(unsigned int i=0;i<kps.size();i++) {
     knot_points_.push_back(kps.at(i));
   }
@@ -32,7 +32,7 @@ void Trajectory::buildSegments() {
 
 
 /** This method returns a MotionState given a segment ID and a time */
-MotionState Trajectory::getMotionState(unsigned int ind_segment, float t) {
+const MotionState Trajectory::getMotionState(const unsigned int ind_segment, const float t) {
   //std::cout<<"\nIn getMotionState\n";
   
   MotionState result;
@@ -60,7 +60,7 @@ MotionState Trajectory::getMotionState(unsigned int ind_segment, float t) {
 
 
 /** This function generates the set of motion states that represent the trajectory */
-std::vector<MotionState> Trajectory::generate() {
+const std::vector<MotionState> Trajectory::generate() {
   //std::cout<<"\nIn generate\n";
 
   //For each segment 
@@ -96,7 +96,7 @@ std::vector<MotionState> Trajectory::generate() {
 
 /** This function returns a JointTrajectory msg based on the trajectory
  *  points_ must not be empty */
-ramp_msgs::Trajectory Trajectory::buildTrajectoryMsg() {
+const ramp_msgs::Trajectory Trajectory::buildTrajectoryMsg() const {
   ramp_msgs::Trajectory msg;
 
   //Push on all of the Motion States

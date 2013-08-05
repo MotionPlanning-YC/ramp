@@ -1,0 +1,110 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+Add	path.cpp	/^void Path::Add(const Configuration c) {$/;"	f	class:Path	signature:(const Configuration c)
+Add	path.h	/^    void Add(const Configuration c);$/;"	p	class:Path	access:public	signature:(const Configuration c)
+CONFIGURATION_H	configuration.h	2;"	d
+Configuration	configuration.cpp	/^Configuration::Configuration() {}$/;"	f	class:Configuration	signature:()
+Configuration	configuration.h	/^    Configuration();$/;"	p	class:Configuration	access:public	signature:()
+Configuration	configuration.h	/^class Configuration {$/;"	c
+Configuration::Configuration	configuration.cpp	/^Configuration::Configuration() {}$/;"	f	class:Configuration	signature:()
+Configuration::Configuration	configuration.h	/^    Configuration();$/;"	p	class:Configuration	access:public	signature:()
+Configuration::K_	configuration.h	/^    std::vector<float> K_; $/;"	m	class:Configuration	access:public
+Configuration::random	configuration.cpp	/^Configuration Configuration::random() {$/;"	f	class:Configuration	signature:()
+Configuration::random	configuration.h	/^    Configuration random();$/;"	p	class:Configuration	access:public	signature:()
+Configuration::ranges_	configuration.h	/^    std::vector<Range> ranges_;$/;"	m	class:Configuration	access:public
+Configuration::toString	configuration.cpp	/^const std::string Configuration::toString() const {$/;"	f	class:Configuration	signature:() const
+Configuration::toString	configuration.h	/^    const std::string toString() const;$/;"	p	class:Configuration	access:public	signature:() const
+Configuration::~Configuration	configuration.cpp	/^Configuration::~Configuration() {}$/;"	f	class:Configuration	signature:()
+Configuration::~Configuration	configuration.h	/^    ~Configuration();$/;"	p	class:Configuration	access:public	signature:()
+K_	configuration.h	/^    std::vector<float> K_; $/;"	m	class:Configuration	access:public
+PATH_H	path.h	2;"	d
+PLANNER	planner.h	2;"	d
+Path	path.cpp	/^Path::Path() {}$/;"	f	class:Path	signature:()
+Path	path.cpp	/^Path::Path(Configuration start, Configuration goal) : start_(start), goal_(goal) $/;"	f	class:Path	signature:(Configuration start, Configuration goal)
+Path	path.h	/^    Path();$/;"	p	class:Path	access:public	signature:()
+Path	path.h	/^    Path(Configuration start, Configuration goal);$/;"	p	class:Path	access:public	signature:(Configuration start, Configuration goal)
+Path	path.h	/^class Path {$/;"	c
+Path::Add	path.cpp	/^void Path::Add(const Configuration c) {$/;"	f	class:Path	signature:(const Configuration c)
+Path::Add	path.h	/^    void Add(const Configuration c);$/;"	p	class:Path	access:public	signature:(const Configuration c)
+Path::Path	path.cpp	/^Path::Path() {}$/;"	f	class:Path	signature:()
+Path::Path	path.cpp	/^Path::Path(Configuration start, Configuration goal) : start_(start), goal_(goal) $/;"	f	class:Path	signature:(Configuration start, Configuration goal)
+Path::Path	path.h	/^    Path();$/;"	p	class:Path	access:public	signature:()
+Path::Path	path.h	/^    Path(Configuration start, Configuration goal);$/;"	p	class:Path	access:public	signature:(Configuration start, Configuration goal)
+Path::all_	path.h	/^    std::vector<Configuration> all_;$/;"	m	class:Path	access:public
+Path::goal_	path.h	/^    Configuration goal_;$/;"	m	class:Path	access:public
+Path::start_	path.h	/^    Configuration start_;$/;"	m	class:Path	access:public
+Path::toString	path.cpp	/^const std::string Path::toString() const {$/;"	f	class:Path	signature:() const
+Path::toString	path.h	/^    const std::string toString() const;$/;"	p	class:Path	access:public	signature:() const
+Path::~Path	path.cpp	/^Path::~Path() {}$/;"	f	class:Path	signature:()
+Path::~Path	path.h	/^    ~Path();$/;"	p	class:Path	access:public	signature:()
+Planner	planner.cpp	/^Planner::Planner() : populationSize_(7) {}$/;"	f	class:Planner	signature:()
+Planner	planner.cpp	/^Planner::Planner(const int p) : populationSize_(p) {}$/;"	f	class:Planner	signature:(const int p)
+Planner	planner.h	/^    Planner();$/;"	p	class:Planner	access:public	signature:()
+Planner	planner.h	/^    Planner(const int p);$/;"	p	class:Planner	access:public	signature:(const int p)
+Planner	planner.h	/^class Planner {$/;"	c
+Planner::Planner	planner.cpp	/^Planner::Planner() : populationSize_(7) {}$/;"	f	class:Planner	signature:()
+Planner::Planner	planner.cpp	/^Planner::Planner(const int p) : populationSize_(p) {}$/;"	f	class:Planner	signature:(const int p)
+Planner::Planner	planner.h	/^    Planner();$/;"	p	class:Planner	access:public	signature:()
+Planner::Planner	planner.h	/^    Planner(const int p);$/;"	p	class:Planner	access:public	signature:(const int p)
+Planner::goal_	planner.h	/^    Configuration goal_;$/;"	m	class:Planner	access:public
+Planner::initialization	planner.cpp	/^void Planner::initialization() { $/;"	f	class:Planner	signature:()
+Planner::initialization	planner.h	/^    void initialization();$/;"	p	class:Planner	access:public	signature:()
+Planner::paths_	planner.h	/^    std::vector<Path> paths_;$/;"	m	class:Planner	access:public
+Planner::populationSize_	planner.h	/^    const int populationSize_;$/;"	m	class:Planner	access:private
+Planner::ranges_	planner.h	/^    std::vector<Range> ranges_;$/;"	m	class:Planner	access:public
+Planner::start_	planner.h	/^    Configuration start_;$/;"	m	class:Planner	access:public
+Planner::~Planner	planner.cpp	/^Planner::~Planner() {}$/;"	f	class:Planner	signature:()
+Planner::~Planner	planner.h	/^    ~Planner();$/;"	p	class:Planner	access:public	signature:()
+RANGE_H	range.h	2;"	d
+Range	range.cpp	/^Range::Range() {}$/;"	f	class:Range	signature:()
+Range	range.cpp	/^Range::Range(float min, float max) : min_(min), max_(max) {}$/;"	f	class:Range	signature:(float min, float max)
+Range	range.h	/^    Range();$/;"	p	class:Range	access:public	signature:()
+Range	range.h	/^    Range(float min, float max);$/;"	p	class:Range	access:public	signature:(float min, float max)
+Range	range.h	/^class Range {$/;"	c
+Range::Range	range.cpp	/^Range::Range() {}$/;"	f	class:Range	signature:()
+Range::Range	range.cpp	/^Range::Range(float min, float max) : min_(min), max_(max) {}$/;"	f	class:Range	signature:(float min, float max)
+Range::Range	range.h	/^    Range();$/;"	p	class:Range	access:public	signature:()
+Range::Range	range.h	/^    Range(float min, float max);$/;"	p	class:Range	access:public	signature:(float min, float max)
+Range::max_	range.h	/^    float max_;$/;"	m	class:Range	access:public
+Range::min_	range.h	/^    float min_;$/;"	m	class:Range	access:public
+Range::random	range.cpp	/^float Range::random() {$/;"	f	class:Range	signature:()
+Range::random	range.h	/^    float random();$/;"	p	class:Range	access:public	signature:()
+Range::~Range	range.cpp	/^Range::~Range() {}$/;"	f	class:Range	signature:()
+Range::~Range	range.h	/^    ~Range();$/;"	p	class:Range	access:public	signature:()
+UTILITY_H	utility.h	2;"	d
+Utility	utility.h	/^class Utility {$/;"	c
+all_	path.h	/^    std::vector<Configuration> all_;$/;"	m	class:Path	access:public
+goal_	path.h	/^    Configuration goal_;$/;"	m	class:Path	access:public
+goal_	planner.h	/^    Configuration goal_;$/;"	m	class:Planner	access:public
+init_pub_sub	main.cpp	/^void init_pub_sub() {$/;"	f	signature:()
+initialization	planner.cpp	/^void Planner::initialization() { $/;"	f	class:Planner	signature:()
+initialization	planner.h	/^    void initialization();$/;"	p	class:Planner	access:public	signature:()
+main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+max_	range.h	/^    float max_;$/;"	m	class:Range	access:public
+min_	range.h	/^    float min_;$/;"	m	class:Range	access:public
+paths_	planner.h	/^    std::vector<Path> paths_;$/;"	m	class:Planner	access:public
+populationSize_	planner.h	/^    const int populationSize_;$/;"	m	class:Planner	access:private
+random	configuration.cpp	/^Configuration Configuration::random() {$/;"	f	class:Configuration	signature:()
+random	configuration.h	/^    Configuration random();$/;"	p	class:Configuration	access:public	signature:()
+random	range.cpp	/^float Range::random() {$/;"	f	class:Range	signature:()
+random	range.h	/^    float random();$/;"	p	class:Range	access:public	signature:()
+ranges_	configuration.h	/^    std::vector<Range> ranges_;$/;"	m	class:Configuration	access:public
+ranges_	planner.h	/^    std::vector<Range> ranges_;$/;"	m	class:Planner	access:public
+start_	path.h	/^    Configuration start_;$/;"	m	class:Path	access:public
+start_	planner.h	/^    Configuration start_;$/;"	m	class:Planner	access:public
+toString	configuration.cpp	/^const std::string Configuration::toString() const {$/;"	f	class:Configuration	signature:() const
+toString	configuration.h	/^    const std::string toString() const;$/;"	p	class:Configuration	access:public	signature:() const
+toString	path.cpp	/^const std::string Path::toString() const {$/;"	f	class:Path	signature:() const
+toString	path.h	/^    const std::string toString() const;$/;"	p	class:Path	access:public	signature:() const
+~Configuration	configuration.cpp	/^Configuration::~Configuration() {}$/;"	f	class:Configuration	signature:()
+~Configuration	configuration.h	/^    ~Configuration();$/;"	p	class:Configuration	access:public	signature:()
+~Path	path.cpp	/^Path::~Path() {}$/;"	f	class:Path	signature:()
+~Path	path.h	/^    ~Path();$/;"	p	class:Path	access:public	signature:()
+~Planner	planner.cpp	/^Planner::~Planner() {}$/;"	f	class:Planner	signature:()
+~Planner	planner.h	/^    ~Planner();$/;"	p	class:Planner	access:public	signature:()
+~Range	range.cpp	/^Range::~Range() {}$/;"	f	class:Range	signature:()
+~Range	range.h	/^    ~Range();$/;"	p	class:Range	access:public	signature:()

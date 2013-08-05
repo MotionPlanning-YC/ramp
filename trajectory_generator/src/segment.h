@@ -9,11 +9,11 @@ class Segment {
   
     Segment();
     
-    //TODO: Put all these parameters in a struct
-    Segment(geometry_msgs::Pose2D kp_start, geometry_msgs::Pose2D kp_end, float t_start, float t_end, unsigned int ind);
+    //TODO: Put all these parameters in a struct?
+    Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind);
     ~Segment();
 
-    void build(geometry_msgs::Pose2D kp_start, geometry_msgs::Pose2D kp_end, float t_start, float t_end, unsigned int ind);
+    void build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind);
 
     //State of motion describing the start 
     MotionState start_;
@@ -25,11 +25,13 @@ class Segment {
     std::vector<double> a1_; //the slope
     std::vector<double> a0_; //constant
 
+    //Starting and ending times
     float start_t_;
     float end_t_;
-
-
+    
+    //The segment's index in whichever trajectory it is in
     int index; 
+
   private:
     void buildWork();
     unsigned int k_dof_;

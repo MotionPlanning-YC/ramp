@@ -3,7 +3,7 @@
 
 Segment::Segment() : k_dof_(3) {}
 
-Segment::Segment(geometry_msgs::Pose2D kp_start, geometry_msgs::Pose2D kp_end, float t_start, float t_end, unsigned int ind) : k_dof_(3) 
+Segment::Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind) : k_dof_(3) 
 {
   build(kp_start, kp_end, t_start, t_end, ind);
 }
@@ -12,7 +12,7 @@ Segment::~Segment() {}
 
 
 /** This function assigns the Segment's members and calls buildWork() */
-void Segment::build(geometry_msgs::Pose2D kp_start, geometry_msgs::Pose2D kp_end, float t_start, float t_end, unsigned int ind) {
+void Segment::build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind) {
 
   start_.p_.push_back(kp_start.x);
   start_.p_.push_back(kp_start.y);

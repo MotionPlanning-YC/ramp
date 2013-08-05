@@ -1,9 +1,7 @@
 #ifndef TRAJECTORY_H
 #define TRAJECTORY_H
 
-#include "ros/ros.h"
 #include "ramp_msgs/Trajectory.h"
-#include "traj_gen_mobile_base/Segment.h"
 #include "geometry_msgs/Pose2D.h"
 #include "utility.h"
 #include "segment.h"
@@ -12,15 +10,12 @@ class Trajectory {
   public:
 
     Trajectory();
-    Trajectory(std::vector<geometry_msgs::Pose2D> kps);
+    Trajectory(const std::vector<geometry_msgs::Pose2D> kps);
     ~Trajectory();
 
     void buildSegments();
-
-    
-    std::vector<MotionState> generate();
-
-    ramp_msgs::Trajectory buildTrajectoryMsg();
+    const std::vector<MotionState> generate();
+    const ramp_msgs::Trajectory buildTrajectoryMsg() const;
     
     //Data Members
     std::vector<geometry_msgs::Pose2D>  knot_points_;
@@ -31,7 +26,7 @@ class Trajectory {
     unsigned int resolutionRate_;  //The resolution rate is specified in Hz
     
   private:
-    MotionState getMotionState(unsigned int ind_segment, float t);
+    const MotionState getMotionState(const unsigned int ind_segment, const float t);
     const unsigned int k_dof_;
 };
 

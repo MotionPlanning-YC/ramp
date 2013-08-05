@@ -42,7 +42,7 @@ void Corobot::updateState(const nav_msgs::Odometry::ConstPtr& msg) {
 }
 
 /** Publishes the MotorCommand msg. The Corobot will drive based on the msg. */
-void Corobot::drive(corobot_msgs::MotorCommand msg) const {
+void Corobot::drive(const corobot_msgs::MotorCommand msg) const {
   pub_phidget_motor_.publish(msg);
 }
 
@@ -58,7 +58,7 @@ void Corobot::stop() const {
 }
 
 
-void Corobot::driveStraight(unsigned int speed) const {
+void Corobot::driveStraight(const unsigned int speed) const {
 
   corobot_msgs::MotorCommand msg;
 
@@ -77,7 +77,7 @@ void Corobot::driveStraight(unsigned int speed) const {
 }
 
 
-void Corobot::turn(unsigned int speed, bool cwise) const {
+void Corobot::turn(const unsigned int speed, const bool cwise) const {
 
 
   corobot_msgs::MotorCommand msg;
@@ -102,7 +102,7 @@ void Corobot::turn(unsigned int speed, bool cwise) const {
 }
 
 
-void Corobot::turn(float speed, float angle) const {
+void Corobot::turn(const float speed, const float angle) const {
  geometry_msgs::Twist v;
 
  v.linear.x = 0;
@@ -120,15 +120,13 @@ void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
 
 
 
-float Corobot::getSpeedToWaypoint(trajectory_msgs::JointTrajectoryPoint waypoint1, trajectory_msgs::JointTrajectoryPoint waypoint2) {
+const float Corobot::getSpeedToWaypoint(trajectory_msgs::JointTrajectoryPoint waypoint1, trajectory_msgs::JointTrajectoryPoint waypoint2) {
 
   
-  std::cout<<"\nwaypoint1:";
   for(unsigned int i=0;i<3;i++) {
     std::cout<<waypoint1.positions.at(i)<<", ";
   }
   
-  std::cout<<"\nwaypoint2:";
   for(unsigned int i=0;i<3;i++) {
     std::cout<<waypoint2.positions.at(i)<<", ";
   }
@@ -139,16 +137,13 @@ float Corobot::getSpeedToWaypoint(trajectory_msgs::JointTrajectoryPoint waypoint
   v[1] = waypoint2.positions.at(1) - waypoint1.positions.at(1);
 
   float mag_v = sqrt( pow(v[0],2) + pow(v[1],2) );
-  std::cout<<"\nmag_v:"<<mag_v; 
   float time = waypoint2.time_from_start.toSec() - waypoint1.time_from_start.toSec();
-  std::cout<<"\ntime:"<<time;
   float speed = mag_v / time;
-  std::cout<<"\nspeed:"<<speed;
   return speed;
 }
 
 
-void Corobot::moveOnTrajectory() {
+void Corobot::moveOnTrajectory() const {
   
   //Get the number of waypoints
   int num = trajectory_.trajectory.points.size();

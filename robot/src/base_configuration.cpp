@@ -4,7 +4,7 @@
 
 BaseConfiguration::BaseConfiguration() {}
 
-BaseConfiguration::BaseConfiguration(double x, double y, double theta) {
+BaseConfiguration::BaseConfiguration(const double x, const double y, const double theta) {
   this->x = x;
   this->y = y;
   this->theta = theta;
@@ -13,7 +13,7 @@ BaseConfiguration::BaseConfiguration(double x, double y, double theta) {
 
 
 /** Sets the members based on the pose */
-BaseConfiguration::BaseConfiguration(geometry_msgs::Pose pose) {
+BaseConfiguration::BaseConfiguration(const geometry_msgs::Pose pose) {
   x = pose.position.x;
   y = pose.position.y;
 
@@ -23,7 +23,7 @@ BaseConfiguration::BaseConfiguration(geometry_msgs::Pose pose) {
 BaseConfiguration::~BaseConfiguration() {}
 
 
-double BaseConfiguration::getThetaFromQuat(geometry_msgs::Quaternion quat) {
+const double BaseConfiguration::getThetaFromQuat(geometry_msgs::Quaternion quat) {
 
   return tf::getYaw(quat);
 

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ramp_planner)
 
-find_package(catkin REQUIRED COMPONENTS geometry_msgs message_generation roscpp trajectory_msgs)
+find_package(catkin REQUIRED COMPONENTS geometry_msgs message_generation ramp_msgs roscpp)
 
 
 
@@ -10,13 +10,10 @@ find_package(catkin REQUIRED COMPONENTS geometry_msgs message_generation roscpp 
 #######################################
 
 
-## Generate added messages and services with any dependencies listed here
-generate_messages(DEPENDENCIES geometry_msgs trajectory_msgs)
-
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ramp_planner
-  CATKIN_DEPENDS geometry_msgs message_generation roscpp trajectory_msgs
+  CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
 
@@ -24,8 +21,10 @@ catkin_package(
 ## Build ##
 ###########
 
+include_directories(include ~/catkin_workspace/src/ramp/trajectory_generator/src ${catkin_INCLUDE_DIRS})
+
 ## Declare a cpp executable
-add_executable(ramp_planner src/main.cpp)
+add_executable(ramp_planner src/main.cpp src/planner.cpp src/configuration.cpp src/path.cpp src/range.cpp)
 
 
 ## Specify libraries to link a library or executable target against

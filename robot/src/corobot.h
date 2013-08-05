@@ -22,14 +22,14 @@ class Corobot {
     
     //Member functions 
     void drive(corobot_msgs::MotorCommand msg) const;
-    void driveStraight(unsigned int speed) const;
-    void turn(unsigned int speed, bool cwise) const;
-    void turn(float speed, float angle) const; 
+    void driveStraight(const unsigned int speed) const;
+    void turn(const unsigned int speed, const bool cwise) const;
+    void turn(const float speed, const float angle) const; 
     void stop() const;
     void updateState(const nav_msgs::Odometry::ConstPtr& msg);
     
     void updateTrajectory(const ramp_msgs::Trajectory msg); 
-    void moveOnTrajectory();
+    void moveOnTrajectory() const;
 
     //Data Members
     ros::Publisher                    pub_phidget_motor_;
@@ -48,7 +48,7 @@ class Corobot {
     static const int ACCELERATION_CONSTANT = 50;
 
   private:
-    float getSpeedToWaypoint(trajectory_msgs::JointTrajectoryPoint waypoint1, trajectory_msgs::JointTrajectoryPoint waypoint2);
+    const float getSpeedToWaypoint(trajectory_msgs::JointTrajectoryPoint waypoint1, trajectory_msgs::JointTrajectoryPoint waypoint2);
     
     bool move; 
     std::vector<double> thetas_; //holds the last 5 thetas to average

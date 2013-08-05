@@ -10,11 +10,11 @@ class BaseConfiguration {
   public:
 
     BaseConfiguration();
-    BaseConfiguration(double x, double y, double theta);
-    BaseConfiguration(geometry_msgs::Pose pose);
+    BaseConfiguration(const double x, const double y, const double theta);
+    BaseConfiguration(const geometry_msgs::Pose pose);
     ~BaseConfiguration();
 
-    static double getThetaFromQuat(geometry_msgs::Quaternion quat);
+    static const double getThetaFromQuat(geometry_msgs::Quaternion quat);
 
     double x;
     double y;
