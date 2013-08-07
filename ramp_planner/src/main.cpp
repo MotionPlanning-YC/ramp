@@ -4,21 +4,34 @@
 #include "range.h"
  
 Planner my_planner; 
-ros::Publisher  pub_path;
+ros::Publisher  pub_traj_requests;
 ros::Subscriber sub_traj;
 
 
 void init_pub_sub(ros::NodeHandle& handle, Planner& planner) {
-  pub_path = handle.advertise<ramp_msgs::TrajectoryRequest>("traj_requests", 1000);  
+  pub_traj_requests = handle.advertise<ramp_msgs::TrajectoryRequest>("traj_requests", 1000);  
   sub_traj = handle.subscribe("trajs", 1000, &Planner::trajCallback, &planner);
 }
 
 
 void send_paths() {
   
+  std::vector<float> t;
+
   //For each path...
-  for(unsigned int i=0;i<my_planner;i++) {
+  for(unsigned int i=0;i<my_planner.paths_.size();i++) {
     
+    //Hardcode some times
+    //Eventually, the planner will determine times itself based on real-world constraints 
+    for(unsigned int j=0;j<my_planner.paths_.at(i).all_.size();j++) {
+      t.push_back(j+2);
+    }
+
+    ramp_msgs::TrajectoryRequest msg_request = my_planner.buildTrajectoryRequestMsg(i, t);  
+
+    pub_traj_requests.publish(msg_request);
+
+    t.clear();
   }
 }
 
@@ -55,29 +68,14 @@ int main(int argc, char** argv) {
 
   my_planner.initialization();
 
-  std::cout<<"\nAfter initialization!\n";
-  
-  /*for(unsigned int i=0;i<my_planner.paths_.size();i++) {
-    std::cout<<"\n\nPath "<<i;
-    std::cout<<my_planner.paths_.at(i).toString();
-  }*/
-
-
-  std::cout<<"\n\nPress Enter to publish a Trajectory Request msg!\n";
+  std::cout<<"\n\nPress Enter to publish initial Trajectory Request msgs!\n";
   std::cin.get();
 
-  //Publish
-  std::vector<float> t;
-  for(unsigned int i=0;i<my_planner.paths_.at(0).all_.size()-1;i++) {
-    t.push_back(1);
-  }
+  send_paths();
+  
 
-  ramp_msgs::TrajectoryRequest msg_r = my_planner.buildTrajectoryRequestMsg(0, t, 5);
-  //ramp_msgs::Path msg_p = my_planner.paths_.at(0).buildPathMsg(); 
-  pub_path.publish(msg_r);
-
-
-  ros::spinOnce();
+  std::cout<<"\nSpinning...\n";
+  ros::spin();
 
   std::cout<<"\nExiting Normally\n";
   return 0;

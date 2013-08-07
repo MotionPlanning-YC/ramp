@@ -7,15 +7,11 @@ ros::Subscriber sub_paths;
 
 
 void pathCallback(const ramp_msgs::TrajectoryRequest::ConstPtr& traj_req) {
-  std::cout<<"\nIn pathCallback!";
-  std::cout<<"\nReceived a trajectory request!";
 
   Trajectory traj(*traj_req);
   traj.generate();   
   ramp_msgs::Trajectory msg_traj = traj.buildTrajectoryMsg();
 
-  std::cout<<"\nPress enter to publish the trajectory!\n";
-  std::cin.get();
   pub_trajs.publish(msg_traj);
 }
 
@@ -36,7 +32,7 @@ int main(int argc, char** argv) {
   /** The following is just for testing purposes. */
 
   //Create some knot points
-  geometry_msgs::Pose2D kp_start;
+  /*geometry_msgs::Pose2D kp_start;
   kp_start.x = 0;
   kp_start.y = 0;
   kp_start.theta = 50;
@@ -82,12 +78,10 @@ int main(int argc, char** argv) {
   std::cin.get();
 
   pub_trajs.publish(msg);
-  std::cout<<"\nMessage published!";
+  std::cout<<"\nMessage published!";*/
 
-  
-  std::cout<<"\nPress Enter to start spinning!\n"; 
-  std::cin.get();
 
+  std::cout<<"\nSpinning...\n";  
   ros::spin();
   std::cout<<"\nExiting Normally\n";
   return 0;

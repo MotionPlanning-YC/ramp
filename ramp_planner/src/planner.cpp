@@ -1,14 +1,18 @@
 #include "planner.h"
 
 
-Planner::Planner() : populationSize_(7) {}
+Planner::Planner() : resolutionRate_(5), populationSize_(7) {}
 
-Planner::Planner(const int p) : populationSize_(p) {}
+Planner::Planner(const int p) : resolutionRate_(5), populationSize_(p) {}
+
+Planner::Planner(const unsigned int r) : resolutionRate_(r), populationSize_(7) {}
+
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p) {}
 
 Planner::~Planner() {}
 
 void Planner::trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
-  std::cout<<"\nIn trajCallback!";
+  population_.push_back(*msg);
 }
 
 /** This function generates the initial population of trajectories */
@@ -43,12 +47,12 @@ void Planner::initialization() {
 }
 
 
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(int i_path, std::vector<float> times, int resolution) const {
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(int i_path, std::vector<float> times) const {
   ramp_msgs::TrajectoryRequest result;
 
   result.path = paths_.at(i_path).buildPathMsg();
   result.t    = times;
-  result.resolutionRate = resolution;
+  result.resolutionRate = resolutionRate_;
 
   return result;
 }
