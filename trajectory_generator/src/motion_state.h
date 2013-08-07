@@ -12,6 +12,8 @@ class MotionState {
     std::vector<float> v_;
     std::vector<float> a_;
 
+    const std::string toString() const;
+
   private:
 };
 

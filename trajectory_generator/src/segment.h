@@ -13,7 +13,7 @@ class Segment {
     Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind);
     ~Segment();
 
-    void build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind);
+    //Data members
 
     //State of motion describing the start 
     MotionState start_;
@@ -31,6 +31,11 @@ class Segment {
     
     //The segment's index in whichever trajectory it is in
     int index; 
+    
+    //Methods
+    void build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind);
+
+    const std::string toString() const;
 
   private:
     void buildWork();

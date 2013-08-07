@@ -1,14 +1,37 @@
 #include "ros/ros.h"
 #include "trajectory.h"
+#include "ramp_msgs/TrajectoryRequest.h"
 
+ros::Publisher  pub_trajs;
+ros::Subscriber sub_paths;
+
+
+void pathCallback(const ramp_msgs::TrajectoryRequest::ConstPtr& traj_req) {
+  std::cout<<"\nIn pathCallback!";
+  std::cout<<"\nReceived a trajectory request!";
+
+  Trajectory traj(*traj_req);
+  traj.generate();   
+  ramp_msgs::Trajectory msg_traj = traj.buildTrajectoryMsg();
+
+  std::cout<<"\nPress enter to publish the trajectory!\n";
+  std::cin.get();
+  pub_trajs.publish(msg_traj);
+}
+
+
+void init_pub_sub(ros::NodeHandle& handle) {
+  pub_trajs = handle.advertise<ramp_msgs::Trajectory>("trajs", 1000);
+  sub_paths = handle.subscribe("traj_requests", 1000, pathCallback);
+}
 
 int main(int argc, char** argv) {
   
 
-  ros::init(argc, argv, "traj_gen_mobile_base");
+  ros::init(argc, argv, "trajectory_generator");
   ros::NodeHandle handle;
 
-  ros::Publisher pub_traj = handle.advertise<ramp_msgs::Trajectory>("traj", 1000);
+  init_pub_sub(handle);
 
   /** The following is just for testing purposes. */
 
@@ -43,106 +66,29 @@ int main(int argc, char** argv) {
   traj.t_.push_back(2);
   traj.t_.push_back(1);
    
-  //Build the segments
-  traj.buildSegments(); 
   
-  //Print info on segments
-  //need some toString methods...
-  for(unsigned int i=0;i<traj.segments_.size();i++) {
-    std::cout<<"\nSegment "<<i<<":";
-    std::cout<<"\nX slope:"<<traj.segments_.at(i).a1_.at(0);
-    std::cout<<"\nY slope:"<<traj.segments_.at(i).a1_.at(1);
-    std::cout<<"\nTheta slope:"<<traj.segments_.at(i).a1_.at(2)<<"\n";
-  }
 
   //Generate the trajectory
   std::vector<MotionState> Ms = traj.generate();
   
-  //Print info on the trajectory
-  //need toString...
-  for(unsigned int i=0;i<Ms.size();i++) {
-    std::cout<<"\n\n\nMs["<<i<<"]:";
-    for(unsigned int j=0;j<3;j++) {
-      if (j==0)
-        std::cout<<"\nP.x:";
-      else if(j==1)
-        std::cout<<"\nP.y:";
-      else
-        std::cout<<"\nP.theta:";
-      std::cout<<Ms.at(i).p_.at(j);
-    }
-    
-    
-    for(unsigned int j=0;j<3;j++) {
-      if (j==0)
-        std::cout<<"\nV.x:";
-      else if(j==1)
-        std::cout<<"\nV.y:";
-      else
-        std::cout<<"\nV.theta:";
-      std::cout<<Ms.at(i).v_.at(j);
-    }
-    
-    
-    for(unsigned int j=0;j<3;j++) {
-      if (j==0)
-        std::cout<<"\nA.x:";
-      else if(j==1)
-        std::cout<<"\nA.y:";
-      else
-        std::cout<<"\nA.theta:";
-      std::cout<<Ms.at(i).v_.at(j);
-    }
-  }
-
   //Build a Trajectory msg
   ramp_msgs::Trajectory msg = traj.buildTrajectoryMsg();
   
-  //Print the knot points
-  for(unsigned int i=0;i<msg.index_knot_points.size();i++) {
-    std::cout<<"\nmsg.index_knot_points["<<i<<"]:";
-    for(unsigned int j=0;j<3;j++) {
-      if (j==0)
-        std::cout<<"\nP.x:";
-      else if(j==1)
-        std::cout<<"\nP.y:";
-      else
-        std::cout<<"\nP.theta:";
-      std::cout<<Ms.at(msg.index_knot_points.at(i)).p_.at(j);
-    }
-    
-    
-    for(unsigned int j=0;j<3;j++) {
-      if (j==0)
-        std::cout<<"\nV.x:";
-      else if(j==1)
-        std::cout<<"\nV.y:";
-      else
-        std::cout<<"\nV.theta:";
-      std::cout<<Ms.at(msg.index_knot_points.at(i)).v_.at(j);
-    }
-    
-    
-    for(unsigned int j=0;j<3;j++) {
-      if (j==0)
-        std::cout<<"\nA.x:";
-      else if(j==1)
-        std::cout<<"\nA.y:";
-      else
-        std::cout<<"\nA.theta:";
-      std::cout<<Ms.at(msg.index_knot_points.at(i)).v_.at(j);
-    }
-  }
+
+  std::cout<<"\nTrajectory:"<<traj.toString();
 
   //Publish the message and quit
   std::cout<<"\nPress Enter to publish!\n";
   std::cin.get();
 
-  pub_traj.publish(msg);
+  pub_trajs.publish(msg);
   std::cout<<"\nMessage published!";
 
-  std::cout<<"\nPress Enter to exit\n"; 
+  
+  std::cout<<"\nPress Enter to start spinning!\n"; 
   std::cin.get();
+
+  ros::spin();
   std::cout<<"\nExiting Normally\n";
   return 0;
 }

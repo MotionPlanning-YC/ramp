@@ -60,3 +60,26 @@ void Segment::buildWork() {
   }
 }
 
+
+
+const std::string Segment::toString() const {
+  std::ostringstream result;
+  
+  result<<"\nIndex: "<<index; 
+  result<<"\nInitial state of motion at Time "<<start_t_<<":"<<start_.toString();
+  result<<"\nEnding state of motion at Time "<<end_t_<<":"<<end_.toString();
+  
+  result<<"\na1 coefficients: ("<<a1_.at(0);
+  for(unsigned int i=1;i<a1_.size();i++) {
+    result<<", "<<a1_.at(i);  
+  }
+  result<<")";
+
+  result<<"\na0 coefficients: ("<<a0_.at(0);
+  for(unsigned int i=1;i<a0_.size();i++) {
+    result<<", "<<a0_.at(i);
+  }
+  result<<")";
+  
+  return result.str();
+}

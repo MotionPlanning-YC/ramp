@@ -7,6 +7,9 @@ Planner::Planner(const int p) : populationSize_(p) {}
 
 Planner::~Planner() {}
 
+void Planner::trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
+  std::cout<<"\nIn trajCallback!";
+}
 
 /** This function generates the initial population of trajectories */
 void Planner::initialization() { 
@@ -37,6 +40,15 @@ void Planner::initialization() {
     paths_.push_back(temp_path);
   }
 
+}
 
-  //Send the paths to trajectory_generator package
+
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(int i_path, std::vector<float> times, int resolution) const {
+  ramp_msgs::TrajectoryRequest result;
+
+  result.path = paths_.at(i_path).buildPathMsg();
+  result.t    = times;
+  result.resolutionRate = resolution;
+
+  return result;
 }
