@@ -1,19 +1,28 @@
 #include "planner.h"
 
 
-Planner::Planner() : resolutionRate_(5), populationSize_(7) {}
+Planner::Planner() : resolutionRate_(5), populationSize_(7), h_traj_req_(0) {}
 
-Planner::Planner(const int p) : resolutionRate_(5), populationSize_(p) {}
+Planner::Planner(const int p) : resolutionRate_(5), populationSize_(p), h_traj_req_(0) {}
 
-Planner::Planner(const unsigned int r) : resolutionRate_(r), populationSize_(7) {}
+Planner::Planner(const unsigned int r) : resolutionRate_(r), populationSize_(7), h_traj_req_(0) {}
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p) {}
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0) {}
 
-Planner::~Planner() {}
 
-void Planner::trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
-  population_.push_back(*msg);
+
+Planner::~Planner() {
+  if(h_traj_req_ != 0) {
+    delete h_traj_req_;  
+    h_traj_req_ = 0;
+  }
 }
+
+
+void Planner::init_handlers(const ros::NodeHandle& h) {
+  h_traj_req_ = new TrajectoryRequestHandler(h);
+}
+
 
 /** This function generates the initial population of trajectories */
 void Planner::initialization() { 
@@ -43,13 +52,30 @@ void Planner::initialization() {
     //Add the path to the list of paths
     paths_.push_back(temp_path);
   }
+  
+  std::vector<float> t;
+  //For each path
+  for(unsigned int i=0;i<paths_.size();i++) {
+
+    //Hardcode some times
+    for(unsigned int j=0;j<paths_.at(i).all_.size();j++) {
+      t.push_back(j+2);
+    }
+    
+    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequestMsg(i, t);
+    
+    population_.push_back(h_traj_req_->request(msg_request));   
+
+    t.clear();
+  }
 
 }
 
 
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(int i_path, std::vector<float> times) const {
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const int i_path, const std::vector<float> times) const {
   ramp_msgs::TrajectoryRequest result;
 
+  result.id   = i_path;
   result.path = paths_.at(i_path).buildPathMsg();
   result.t    = times;
   result.resolutionRate = resolutionRate_;

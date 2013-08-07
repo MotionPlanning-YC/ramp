@@ -1,25 +1,11 @@
 #include "ros/ros.h"
 #include "trajectory.h"
+#include "subscribe_and_publish.h"
 #include "ramp_msgs/TrajectoryRequest.h"
 
 ros::Publisher  pub_trajs;
 ros::Subscriber sub_paths;
 
-
-void pathCallback(const ramp_msgs::TrajectoryRequest::ConstPtr& traj_req) {
-
-  Trajectory traj(*traj_req);
-  traj.generate();   
-  ramp_msgs::Trajectory msg_traj = traj.buildTrajectoryMsg();
-
-  pub_trajs.publish(msg_traj);
-}
-
-
-void init_pub_sub(ros::NodeHandle& handle) {
-  pub_trajs = handle.advertise<ramp_msgs::Trajectory>("trajs", 1000);
-  sub_paths = handle.subscribe("traj_requests", 1000, pathCallback);
-}
 
 int main(int argc, char** argv) {
   
@@ -27,7 +13,7 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "trajectory_generator");
   ros::NodeHandle handle;
 
-  init_pub_sub(handle);
+  SubscribeAndPublish sap(handle);
 
   /** The following is just for testing purposes. */
 

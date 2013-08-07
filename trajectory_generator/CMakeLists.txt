@@ -28,7 +28,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 
 ## Declare a cpp executable
-add_executable(trajectory_generator src/main.cpp src/trajectory.cpp src/motion_state.cpp src/segment.cpp)
+add_executable(trajectory_generator src/main.cpp src/trajectory.cpp src/motion_state.cpp src/segment.cpp src/subscribe_and_publish.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(trajectory_generator ${catkin_LIBRARIES})

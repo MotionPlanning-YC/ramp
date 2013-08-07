@@ -2,8 +2,7 @@
 #define PLANNER
 #include "ros/ros.h"
 #include "path.h"
-#include "ramp_msgs/Trajectory.h"
-#include "ramp_msgs/TrajectoryRequest.h"
+#include "trajectory_request_handler.h"
 
 class Planner {
   public:
@@ -19,22 +18,18 @@ class Planner {
     std::vector<Range> ranges_;
     Configuration start_;
     Configuration goal_;
+    TrajectoryRequestHandler* h_traj_req_;
     const unsigned int resolutionRate_;
     
-    ros::Publisher pub_traj_request;
-
-
-
     //Methods
     void initialization();
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(int i_path, std::vector<float> times) const;
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const int i_path, const std::vector<float> times) const;
     void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg);
+    void init_handlers(const ros::NodeHandle& h);
 
   private:
     const int populationSize_;
     ramp_msgs::Trajectory traj_;
-    bool ready_;
-    void waitForTraj();
 };
 
 #endif
