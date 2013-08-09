@@ -2,8 +2,8 @@
 #include "ramp_msgs/Configuration.h"
 #include "planner.h"
 #include "range.h"
+#include "ramp_msgs/ModificationRequest.h"
  
-Planner my_planner; 
 
 
 int main(int argc, char** argv) {
@@ -11,6 +11,7 @@ int main(int argc, char** argv) {
 
   ros::NodeHandle handle;
  
+  Planner my_planner; 
   my_planner.init_handlers(handle); 
   
   srand( time(NULL));
@@ -40,9 +41,17 @@ int main(int argc, char** argv) {
   my_planner.initialization();
 
   std::cout<<"\nmy_planner.population_.size():"<<my_planner.population_.size();
-  std::cout<<"\n\nPress Enter to publish initial Trajectory Request msgs!\n";
-  std::cin.get();
 
+
+  ros::Publisher pub_mod_req = handle.advertise<ramp_msgs::ModificationRequest>("modification_requests", 1000);
+  ramp_msgs::ModificationRequest mod_req;
+  mod_req.trajs.push_back(my_planner.population_.at(0));
+  mod_req.resolutionRate = my_planner.resolutionRate_; 
+  mod_req.id = 1;
+
+  std::cout<<"\n\nPress Enter to publish modification request!\n";
+  std::cin.get();
+  pub_mod_req.publish(mod_req);
 
   std::cout<<"\nSpinning...\n";
   ros::spin();

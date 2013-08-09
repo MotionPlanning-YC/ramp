@@ -11,7 +11,6 @@ class TrajectoryRequestHandler {
 
     ramp_msgs::Trajectory request(const ramp_msgs::TrajectoryRequest r);
     void callback(const ramp_msgs::Trajectory::ConstPtr& msg); 
-
   private:
     ros::NodeHandle  handle_; 
     ros::Publisher   pub_request_;

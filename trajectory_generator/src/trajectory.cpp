@@ -144,7 +144,7 @@ const ramp_msgs::Trajectory Trajectory::buildTrajectoryMsg() const {
     }
 
     //Set the duration for the point
-    p.time_from_start = ros::Duration(i* (1/resolutionRate_));
+    p.time_from_start = ros::Duration(i* (1.0f/resolutionRate_));
 
     //Push onto the return value
     msg.trajectory.points.push_back(p);

@@ -57,9 +57,9 @@ void Planner::initialization() {
   //For each path
   for(unsigned int i=0;i<paths_.size();i++) {
 
-    //Hardcode some times
-    for(unsigned int j=0;j<paths_.at(i).all_.size();j++) {
-      t.push_back(j+2);
+    //Hardcode some times, 2s per segment
+    for(unsigned int j=1;j<paths_.at(i).all_.size();j++) {
+      t.push_back(2);
     }
     
     ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequestMsg(i, t);

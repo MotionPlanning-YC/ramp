@@ -22,6 +22,6 @@ catkin_package(
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(robot src/main.cpp src/corobot.cpp src/base_configuration.cpp src/utility.cpp)
-target_link_libraries(robot ${catkin_LIBRARIES})
-add_dependencies(robot robot_generate_messages_cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/corobot.cpp src/base_configuration.cpp src/utility.cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+add_dependencies(${PROJECT_NAME} robot_generate_messages_cpp)

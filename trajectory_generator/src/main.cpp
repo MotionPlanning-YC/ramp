@@ -3,9 +3,6 @@
 #include "subscribe_and_publish.h"
 #include "ramp_msgs/TrajectoryRequest.h"
 
-ros::Publisher  pub_trajs;
-ros::Subscriber sub_paths;
-
 
 int main(int argc, char** argv) {
   

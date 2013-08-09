@@ -31,8 +31,14 @@ ramp_msgs::Trajectory TrajectoryRequestHandler::request(const ramp_msgs::Traject
   //Set the ID
   desiredId = r.id;
   
+  std::cout<<"\ndesiredId:"<<desiredId;
+  std::cout<<"\nPress enter to publish request\n";
+  std::cin.get();
+  
   //Publish the request
   pub_request_.publish(r);
+
+  std::cout<<"\nPublished the request\n";
   
   //Wait for trajectory to be set
   while(!mutex_) {ros::spinOnce();}

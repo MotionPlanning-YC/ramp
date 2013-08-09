@@ -1,4 +1,3 @@
-Path path
-float32[] t
+Trajectory[] trajs
 uint8 resolutionRate
 uint8 id
