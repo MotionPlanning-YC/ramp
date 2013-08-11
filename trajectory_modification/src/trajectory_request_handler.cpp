@@ -11,9 +11,6 @@ TrajectoryRequestHandler::TrajectoryRequestHandler(const ros::NodeHandle& h) : d
 
 void TrajectoryRequestHandler::callback(const ramp_msgs::Trajectory::ConstPtr& msg) {
   
-  std::cout<<"\nReceived a trajectory!\n";
-  std::cout<<"\nmsg->id:"<<msg->id<<"\n";
-  std::cout<<"\ndesiredId:"<<desiredId<<"\n";
   if(desiredId != 9999 && msg->id == desiredId) {
     received_ = *msg;
     mutex_ = true;
@@ -31,15 +28,9 @@ ramp_msgs::Trajectory TrajectoryRequestHandler::request(const ramp_msgs::Traject
   //Set the ID
   desiredId = r.id;
   
-  std::cout<<"\ndesiredId:"<<desiredId;
-  std::cout<<"\nPress enter to publish request\n";
-  std::cin.get();
-  
   //Publish the request
   pub_request_.publish(r);
 
-  std::cout<<"\nPublished the request\n";
-  
   //Wait for trajectory to be set
   while(!mutex_) {ros::spinOnce();}
 

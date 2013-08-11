@@ -37,13 +37,14 @@ int main(int argc, char** argv) {
   my_planner.start_ = s;
   my_planner.goal_ = g;
 
+  std::cout<<"\nPress Enter to initialize the planner\n";
   std::cin.get();
   my_planner.initialization();
 
   std::cout<<"\nmy_planner.population_.size():"<<my_planner.population_.size();
 
 
-  ros::Publisher pub_mod_req = handle.advertise<ramp_msgs::ModificationRequest>("modification_requests", 1000);
+  /*ros::Publisher pub_mod_req = handle.advertise<ramp_msgs::ModificationRequest>("modification_requests", 1000);
   ramp_msgs::ModificationRequest mod_req;
   mod_req.trajs.push_back(my_planner.population_.at(0));
   mod_req.resolutionRate = my_planner.resolutionRate_; 
@@ -51,7 +52,16 @@ int main(int argc, char** argv) {
 
   std::cout<<"\n\nPress Enter to publish modification request!\n";
   std::cin.get();
-  pub_mod_req.publish(mod_req);
+  pub_mod_req.publish(mod_req);*/
+
+
+  std::cout<<"\nPress Enter to modify a trajectory!\n";
+  std::cin.get();
+  ramp_msgs::Trajectory t = my_planner.modify(0);
+  std::cout<<"\nTrajectory modified!\n";
+  Utility u;
+  std::cout<<u.toString(t); 
+
 
   std::cout<<"\nSpinning...\n";
   ros::spin();

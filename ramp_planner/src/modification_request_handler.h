@@ -13,8 +13,12 @@ class ModificationRequestHandler {
 
   private:
     ros::NodeHandle handle_;
-    ros::Publisher pub_request_;
+    ros::Publisher  pub_request_;
     ros::Subscriber sub_traj_;
+
+    unsigned int desiredId_;
+    ramp_msgs::Trajectory received_;
+    bool mutex_;
 };
 
 #endif

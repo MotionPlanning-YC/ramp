@@ -23,6 +23,26 @@ Configuration::toString	configuration.h	/^    const std::string toString() const
 Configuration::~Configuration	configuration.cpp	/^Configuration::~Configuration() {}$/;"	f	class:Configuration	signature:()
 Configuration::~Configuration	configuration.h	/^    ~Configuration();$/;"	p	class:Configuration	access:public	signature:()
 K_	configuration.h	/^    std::vector<float> K_; $/;"	m	class:Configuration	access:public
+MODIFICATION_REQUEST_HANDLER_H	modification_request_handler.h	2;"	d
+ModificationRequestHandler	modification_request_handler.cpp	/^ModificationRequestHandler::ModificationRequestHandler() : desiredId_(9999), mutex_(false) {} $/;"	f	class:ModificationRequestHandler	signature:()
+ModificationRequestHandler	modification_request_handler.cpp	/^ModificationRequestHandler::ModificationRequestHandler(const ros::NodeHandle& h) : desiredId_(9999), handle_(h), mutex_(false) {$/;"	f	class:ModificationRequestHandler	signature:(const ros::NodeHandle& h)
+ModificationRequestHandler	modification_request_handler.h	/^    ModificationRequestHandler();$/;"	p	class:ModificationRequestHandler	access:public	signature:()
+ModificationRequestHandler	modification_request_handler.h	/^    ModificationRequestHandler(const ros::NodeHandle& h);$/;"	p	class:ModificationRequestHandler	access:public	signature:(const ros::NodeHandle& h)
+ModificationRequestHandler	modification_request_handler.h	/^class ModificationRequestHandler {$/;"	c
+ModificationRequestHandler::ModificationRequestHandler	modification_request_handler.cpp	/^ModificationRequestHandler::ModificationRequestHandler() : desiredId_(9999), mutex_(false) {} $/;"	f	class:ModificationRequestHandler	signature:()
+ModificationRequestHandler::ModificationRequestHandler	modification_request_handler.cpp	/^ModificationRequestHandler::ModificationRequestHandler(const ros::NodeHandle& h) : desiredId_(9999), handle_(h), mutex_(false) {$/;"	f	class:ModificationRequestHandler	signature:(const ros::NodeHandle& h)
+ModificationRequestHandler::ModificationRequestHandler	modification_request_handler.h	/^    ModificationRequestHandler();$/;"	p	class:ModificationRequestHandler	access:public	signature:()
+ModificationRequestHandler::ModificationRequestHandler	modification_request_handler.h	/^    ModificationRequestHandler(const ros::NodeHandle& h);$/;"	p	class:ModificationRequestHandler	access:public	signature:(const ros::NodeHandle& h)
+ModificationRequestHandler::callback	modification_request_handler.cpp	/^void ModificationRequestHandler::callback(const ramp_msgs::Trajectory::ConstPtr& msg) {$/;"	f	class:ModificationRequestHandler	signature:(const ramp_msgs::Trajectory::ConstPtr& msg)
+ModificationRequestHandler::callback	modification_request_handler.h	/^    void callback(const ramp_msgs::Trajectory::ConstPtr& msg);$/;"	p	class:ModificationRequestHandler	access:public	signature:(const ramp_msgs::Trajectory::ConstPtr& msg)
+ModificationRequestHandler::desiredId_	modification_request_handler.h	/^    unsigned int desiredId_;$/;"	m	class:ModificationRequestHandler	access:private
+ModificationRequestHandler::handle_	modification_request_handler.h	/^    ros::NodeHandle handle_;$/;"	m	class:ModificationRequestHandler	access:private
+ModificationRequestHandler::mutex_	modification_request_handler.h	/^    bool mutex_;$/;"	m	class:ModificationRequestHandler	access:private
+ModificationRequestHandler::pub_request_	modification_request_handler.h	/^    ros::Publisher  pub_request_;$/;"	m	class:ModificationRequestHandler	access:private
+ModificationRequestHandler::received_	modification_request_handler.h	/^    ramp_msgs::Trajectory received_;$/;"	m	class:ModificationRequestHandler	access:private
+ModificationRequestHandler::request	modification_request_handler.cpp	/^ramp_msgs::Trajectory ModificationRequestHandler::request(const ramp_msgs::ModificationRequest mr) {$/;"	f	class:ModificationRequestHandler	signature:(const ramp_msgs::ModificationRequest mr)
+ModificationRequestHandler::request	modification_request_handler.h	/^    ramp_msgs::Trajectory request(const ramp_msgs::ModificationRequest m);   $/;"	p	class:ModificationRequestHandler	access:public	signature:(const ramp_msgs::ModificationRequest m)
+ModificationRequestHandler::sub_traj_	modification_request_handler.h	/^    ros::Subscriber sub_traj_;$/;"	m	class:ModificationRequestHandler	access:private
 PATH_H	path.h	2;"	d
 PLANNER	planner.h	2;"	d
 Path	path.cpp	/^Path::Path() {}$/;"	f	class:Path	signature:()
@@ -45,42 +65,43 @@ Path::toString	path.cpp	/^const std::string Path::toString() const {$/;"	f	class
 Path::toString	path.h	/^    const std::string toString() const;$/;"	p	class:Path	access:public	signature:() const
 Path::~Path	path.cpp	/^Path::~Path() {}$/;"	f	class:Path	signature:()
 Path::~Path	path.h	/^    ~Path();$/;"	p	class:Path	access:public	signature:()
-Planner	planner.cpp	/^Planner::Planner() : resolutionRate_(5), populationSize_(7), h_tr_(0) {}$/;"	f	class:Planner	signature:()
-Planner	planner.cpp	/^Planner::Planner(const int p) : resolutionRate_(5), populationSize_(p), h_tr_(0) {}$/;"	f	class:Planner	signature:(const int p)
-Planner	planner.cpp	/^Planner::Planner(const unsigned int r) : resolutionRate_(r), populationSize_(7), h_tr_(0) {}$/;"	f	class:Planner	signature:(const unsigned int r)
-Planner	planner.cpp	/^Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_tr_(0) {}$/;"	f	class:Planner	signature:(const unsigned int r, const int p)
+Planner	planner.cpp	/^Planner::Planner() : resolutionRate_(5), populationSize_(7), h_traj_req_(0) {}$/;"	f	class:Planner	signature:()
+Planner	planner.cpp	/^Planner::Planner(const int p) : resolutionRate_(5), populationSize_(p), h_traj_req_(0) {}$/;"	f	class:Planner	signature:(const int p)
+Planner	planner.cpp	/^Planner::Planner(const unsigned int r) : resolutionRate_(r), populationSize_(7), h_traj_req_(0) {}$/;"	f	class:Planner	signature:(const unsigned int r)
+Planner	planner.cpp	/^Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0) {}$/;"	f	class:Planner	signature:(const unsigned int r, const int p)
 Planner	planner.h	/^    Planner();$/;"	p	class:Planner	access:public	signature:()
 Planner	planner.h	/^    Planner(const int p);$/;"	p	class:Planner	access:public	signature:(const int p)
 Planner	planner.h	/^    Planner(const unsigned int r);$/;"	p	class:Planner	access:public	signature:(const unsigned int r)
 Planner	planner.h	/^    Planner(const unsigned int r, const int p);$/;"	p	class:Planner	access:public	signature:(const unsigned int r, const int p)
 Planner	planner.h	/^class Planner {$/;"	c
-Planner::Planner	planner.cpp	/^Planner::Planner() : resolutionRate_(5), populationSize_(7), h_tr_(0) {}$/;"	f	class:Planner	signature:()
-Planner::Planner	planner.cpp	/^Planner::Planner(const int p) : resolutionRate_(5), populationSize_(p), h_tr_(0) {}$/;"	f	class:Planner	signature:(const int p)
-Planner::Planner	planner.cpp	/^Planner::Planner(const unsigned int r) : resolutionRate_(r), populationSize_(7), h_tr_(0) {}$/;"	f	class:Planner	signature:(const unsigned int r)
-Planner::Planner	planner.cpp	/^Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_tr_(0) {}$/;"	f	class:Planner	signature:(const unsigned int r, const int p)
+Planner::Planner	planner.cpp	/^Planner::Planner() : resolutionRate_(5), populationSize_(7), h_traj_req_(0) {}$/;"	f	class:Planner	signature:()
+Planner::Planner	planner.cpp	/^Planner::Planner(const int p) : resolutionRate_(5), populationSize_(p), h_traj_req_(0) {}$/;"	f	class:Planner	signature:(const int p)
+Planner::Planner	planner.cpp	/^Planner::Planner(const unsigned int r) : resolutionRate_(r), populationSize_(7), h_traj_req_(0) {}$/;"	f	class:Planner	signature:(const unsigned int r)
+Planner::Planner	planner.cpp	/^Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0) {}$/;"	f	class:Planner	signature:(const unsigned int r, const int p)
 Planner::Planner	planner.h	/^    Planner();$/;"	p	class:Planner	access:public	signature:()
 Planner::Planner	planner.h	/^    Planner(const int p);$/;"	p	class:Planner	access:public	signature:(const int p)
 Planner::Planner	planner.h	/^    Planner(const unsigned int r);$/;"	p	class:Planner	access:public	signature:(const unsigned int r)
 Planner::Planner	planner.h	/^    Planner(const unsigned int r, const int p);$/;"	p	class:Planner	access:public	signature:(const unsigned int r, const int p)
-Planner::buildTrajectoryRequestMsg	planner.cpp	/^const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(int i_path, std::vector<float> times) const {$/;"	f	class:Planner	signature:(int i_path, std::vector<float> times) const
-Planner::buildTrajectoryRequestMsg	planner.h	/^    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(int i_path, std::vector<float> times) const;$/;"	p	class:Planner	access:public	signature:(int i_path, std::vector<float> times) const
+Planner::buildModificationRequestMsg	planner.cpp	/^const ramp_msgs::ModificationRequest Planner::buildModificationRequestMsg(const unsigned int i_traj) const {$/;"	f	class:Planner	signature:(const unsigned int i_traj) const
+Planner::buildModificationRequestMsg	planner.h	/^    const ramp_msgs::ModificationRequest buildModificationRequestMsg(const unsigned int i_traj) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_traj) const
+Planner::buildTrajectoryRequestMsg	planner.cpp	/^const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> times) const {$/;"	f	class:Planner	signature:(const unsigned int i_path, const std::vector<float> times) const
+Planner::buildTrajectoryRequestMsg	planner.h	/^    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> times) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_path, const std::vector<float> times) const
 Planner::goal_	planner.h	/^    Configuration goal_;$/;"	m	class:Planner	access:public
-Planner::h_tr_	planner.h	/^    TrajectoryRequestHandler* h_tr_;$/;"	m	class:Planner	access:public
-Planner::init_handlers	planner.cpp	/^void Planner::init_handlers(ros::NodeHandle& h) {$/;"	f	class:Planner	signature:(ros::NodeHandle& h)
-Planner::init_handlers	planner.h	/^    void init_handlers(ros::NodeHandle& h);$/;"	p	class:Planner	access:public	signature:(ros::NodeHandle& h)
+Planner::h_mod_req_	planner.h	/^    ModificationRequestHandler* h_mod_req_;$/;"	m	class:Planner	access:public
+Planner::h_traj_req_	planner.h	/^    TrajectoryRequestHandler*   h_traj_req_;$/;"	m	class:Planner	access:public
+Planner::init_handlers	planner.cpp	/^void Planner::init_handlers(const ros::NodeHandle& h) {$/;"	f	class:Planner	signature:(const ros::NodeHandle& h)
+Planner::init_handlers	planner.h	/^    void init_handlers(const ros::NodeHandle& h);$/;"	p	class:Planner	access:public	signature:(const ros::NodeHandle& h)
 Planner::initialization	planner.cpp	/^void Planner::initialization() { $/;"	f	class:Planner	signature:()
 Planner::initialization	planner.h	/^    void initialization();$/;"	p	class:Planner	access:public	signature:()
+Planner::modify	planner.cpp	/^const ramp_msgs::Trajectory Planner::modify(const unsigned int i_traj) const {$/;"	f	class:Planner	signature:(const unsigned int i_traj) const
+Planner::modify	planner.h	/^    const ramp_msgs::Trajectory modify(const unsigned int i_traj) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_traj) const
 Planner::paths_	planner.h	/^    std::vector<Path> paths_;$/;"	m	class:Planner	access:public
 Planner::populationSize_	planner.h	/^    const int populationSize_;$/;"	m	class:Planner	access:private
 Planner::population_	planner.h	/^    std::vector<ramp_msgs::Trajectory> population_;$/;"	m	class:Planner	access:public
 Planner::ranges_	planner.h	/^    std::vector<Range> ranges_;$/;"	m	class:Planner	access:public
-Planner::ready_	planner.h	/^    bool ready_;$/;"	m	class:Planner	access:private
 Planner::resolutionRate_	planner.h	/^    const unsigned int resolutionRate_;$/;"	m	class:Planner	access:public
 Planner::start_	planner.h	/^    Configuration start_;$/;"	m	class:Planner	access:public
-Planner::trajCallback	planner.cpp	/^void Planner::trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {$/;"	f	class:Planner	signature:(const ramp_msgs::Trajectory::ConstPtr& msg)
-Planner::trajCallback	planner.h	/^    void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg);$/;"	p	class:Planner	access:public	signature:(const ramp_msgs::Trajectory::ConstPtr& msg)
 Planner::traj_	planner.h	/^    ramp_msgs::Trajectory traj_;$/;"	m	class:Planner	access:private
-Planner::waitForTraj	planner.h	/^    void waitForTraj();$/;"	p	class:Planner	access:private	signature:()
 Planner::~Planner	planner.cpp	/^Planner::~Planner() {$/;"	f	class:Planner	signature:()
 Planner::~Planner	planner.h	/^    ~Planner();$/;"	p	class:Planner	access:public	signature:()
 RANGE_H	range.h	2;"	d
@@ -100,80 +121,90 @@ Range::random	range.h	/^    const float random();$/;"	p	class:Range	access:publi
 Range::~Range	range.cpp	/^Range::~Range() {}$/;"	f	class:Range	signature:()
 Range::~Range	range.h	/^    ~Range();$/;"	p	class:Range	access:public	signature:()
 TRAJECTORY_REQUEST_HANDLER_H	trajectory_request_handler.h	2;"	d
-TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler() : desiredId(9999), mutex_(false) {}$/;"	f	class:TrajectoryRequestHandler	signature:()
-TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler(ros::NodeHandle& h) : desiredId(9999), handle_(h), mutex_(false) {$/;"	f	class:TrajectoryRequestHandler	signature:(ros::NodeHandle& h)
+TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler() : desiredId_(9999), mutex_(false) {}$/;"	f	class:TrajectoryRequestHandler	signature:()
+TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler(const ros::NodeHandle& h) : desiredId_(9999), handle_(h), mutex_(false) {$/;"	f	class:TrajectoryRequestHandler	signature:(const ros::NodeHandle& h)
 TrajectoryRequestHandler	trajectory_request_handler.h	/^    TrajectoryRequestHandler();$/;"	p	class:TrajectoryRequestHandler	access:public	signature:()
-TrajectoryRequestHandler	trajectory_request_handler.h	/^    TrajectoryRequestHandler(ros::NodeHandle& h);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(ros::NodeHandle& h)
+TrajectoryRequestHandler	trajectory_request_handler.h	/^    TrajectoryRequestHandler(const ros::NodeHandle& h);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(const ros::NodeHandle& h)
 TrajectoryRequestHandler	trajectory_request_handler.h	/^class TrajectoryRequestHandler {$/;"	c
-TrajectoryRequestHandler::TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler() : desiredId(9999), mutex_(false) {}$/;"	f	class:TrajectoryRequestHandler	signature:()
-TrajectoryRequestHandler::TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler(ros::NodeHandle& h) : desiredId(9999), handle_(h), mutex_(false) {$/;"	f	class:TrajectoryRequestHandler	signature:(ros::NodeHandle& h)
+TrajectoryRequestHandler::TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler() : desiredId_(9999), mutex_(false) {}$/;"	f	class:TrajectoryRequestHandler	signature:()
+TrajectoryRequestHandler::TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler(const ros::NodeHandle& h) : desiredId_(9999), handle_(h), mutex_(false) {$/;"	f	class:TrajectoryRequestHandler	signature:(const ros::NodeHandle& h)
 TrajectoryRequestHandler::TrajectoryRequestHandler	trajectory_request_handler.h	/^    TrajectoryRequestHandler();$/;"	p	class:TrajectoryRequestHandler	access:public	signature:()
-TrajectoryRequestHandler::TrajectoryRequestHandler	trajectory_request_handler.h	/^    TrajectoryRequestHandler(ros::NodeHandle& h);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(ros::NodeHandle& h)
+TrajectoryRequestHandler::TrajectoryRequestHandler	trajectory_request_handler.h	/^    TrajectoryRequestHandler(const ros::NodeHandle& h);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(const ros::NodeHandle& h)
 TrajectoryRequestHandler::callback	trajectory_request_handler.cpp	/^void TrajectoryRequestHandler::callback(const ramp_msgs::Trajectory::ConstPtr& msg) {$/;"	f	class:TrajectoryRequestHandler	signature:(const ramp_msgs::Trajectory::ConstPtr& msg)
 TrajectoryRequestHandler::callback	trajectory_request_handler.h	/^    void callback(const ramp_msgs::Trajectory::ConstPtr& msg); $/;"	p	class:TrajectoryRequestHandler	access:public	signature:(const ramp_msgs::Trajectory::ConstPtr& msg)
-TrajectoryRequestHandler::desiredId	trajectory_request_handler.h	/^    unsigned int desiredId;$/;"	m	class:TrajectoryRequestHandler	access:private
+TrajectoryRequestHandler::desiredId_	trajectory_request_handler.h	/^    unsigned int desiredId_;$/;"	m	class:TrajectoryRequestHandler	access:private
 TrajectoryRequestHandler::handle_	trajectory_request_handler.h	/^    ros::NodeHandle  handle_; $/;"	m	class:TrajectoryRequestHandler	access:private
 TrajectoryRequestHandler::mutex_	trajectory_request_handler.h	/^    bool                   mutex_;$/;"	m	class:TrajectoryRequestHandler	access:private
 TrajectoryRequestHandler::pub_request_	trajectory_request_handler.h	/^    ros::Publisher   pub_request_;$/;"	m	class:TrajectoryRequestHandler	access:private
 TrajectoryRequestHandler::received_	trajectory_request_handler.h	/^    ramp_msgs::Trajectory  received_;$/;"	m	class:TrajectoryRequestHandler	access:private
-TrajectoryRequestHandler::request	trajectory_request_handler.cpp	/^ramp_msgs::Trajectory TrajectoryRequestHandler::request(ramp_msgs::TrajectoryRequest r) {$/;"	f	class:TrajectoryRequestHandler	signature:(ramp_msgs::TrajectoryRequest r)
-TrajectoryRequestHandler::request	trajectory_request_handler.h	/^    ramp_msgs::Trajectory request(ramp_msgs::TrajectoryRequest r);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(ramp_msgs::TrajectoryRequest r)
+TrajectoryRequestHandler::request	trajectory_request_handler.cpp	/^ramp_msgs::Trajectory TrajectoryRequestHandler::request(const ramp_msgs::TrajectoryRequest r) {$/;"	f	class:TrajectoryRequestHandler	signature:(const ramp_msgs::TrajectoryRequest r)
+TrajectoryRequestHandler::request	trajectory_request_handler.h	/^    ramp_msgs::Trajectory request(const ramp_msgs::TrajectoryRequest r);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(const ramp_msgs::TrajectoryRequest r)
 TrajectoryRequestHandler::sub_traj_	trajectory_request_handler.h	/^    ros::Subscriber  sub_traj_;$/;"	m	class:TrajectoryRequestHandler	access:private
 UTILITY_H	utility.h	2;"	d
 Utility	utility.h	/^class Utility {$/;"	c
+Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
+Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
 all_	path.h	/^    std::vector<Configuration> all_;$/;"	m	class:Path	access:public
 buildConfigurationMsg	configuration.cpp	/^const ramp_msgs::Configuration Configuration::buildConfigurationMsg() const {$/;"	f	class:Configuration	signature:() const
 buildConfigurationMsg	configuration.h	/^    const ramp_msgs::Configuration buildConfigurationMsg() const;$/;"	p	class:Configuration	access:public	signature:() const
+buildModificationRequestMsg	planner.cpp	/^const ramp_msgs::ModificationRequest Planner::buildModificationRequestMsg(const unsigned int i_traj) const {$/;"	f	class:Planner	signature:(const unsigned int i_traj) const
+buildModificationRequestMsg	planner.h	/^    const ramp_msgs::ModificationRequest buildModificationRequestMsg(const unsigned int i_traj) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_traj) const
 buildPathMsg	path.cpp	/^const ramp_msgs::Path Path::buildPathMsg() const {$/;"	f	class:Path	signature:() const
 buildPathMsg	path.h	/^    const ramp_msgs::Path buildPathMsg() const; $/;"	p	class:Path	access:public	signature:() const
-buildTrajectoryRequestMsg	planner.cpp	/^const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(int i_path, std::vector<float> times) const {$/;"	f	class:Planner	signature:(int i_path, std::vector<float> times) const
-buildTrajectoryRequestMsg	planner.h	/^    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(int i_path, std::vector<float> times) const;$/;"	p	class:Planner	access:public	signature:(int i_path, std::vector<float> times) const
+buildTrajectoryRequestMsg	planner.cpp	/^const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> times) const {$/;"	f	class:Planner	signature:(const unsigned int i_path, const std::vector<float> times) const
+buildTrajectoryRequestMsg	planner.h	/^    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> times) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_path, const std::vector<float> times) const
+callback	modification_request_handler.cpp	/^void ModificationRequestHandler::callback(const ramp_msgs::Trajectory::ConstPtr& msg) {$/;"	f	class:ModificationRequestHandler	signature:(const ramp_msgs::Trajectory::ConstPtr& msg)
+callback	modification_request_handler.h	/^    void callback(const ramp_msgs::Trajectory::ConstPtr& msg);$/;"	p	class:ModificationRequestHandler	access:public	signature:(const ramp_msgs::Trajectory::ConstPtr& msg)
 callback	trajectory_request_handler.cpp	/^void TrajectoryRequestHandler::callback(const ramp_msgs::Trajectory::ConstPtr& msg) {$/;"	f	class:TrajectoryRequestHandler	signature:(const ramp_msgs::Trajectory::ConstPtr& msg)
 callback	trajectory_request_handler.h	/^    void callback(const ramp_msgs::Trajectory::ConstPtr& msg); $/;"	p	class:TrajectoryRequestHandler	access:public	signature:(const ramp_msgs::Trajectory::ConstPtr& msg)
-desiredId	trajectory_request_handler.h	/^    unsigned int desiredId;$/;"	m	class:TrajectoryRequestHandler	access:private
+desiredId_	modification_request_handler.h	/^    unsigned int desiredId_;$/;"	m	class:ModificationRequestHandler	access:private
+desiredId_	trajectory_request_handler.h	/^    unsigned int desiredId_;$/;"	m	class:TrajectoryRequestHandler	access:private
 goal_	path.h	/^    Configuration goal_;$/;"	m	class:Path	access:public
 goal_	planner.h	/^    Configuration goal_;$/;"	m	class:Planner	access:public
-h_tr_	planner.h	/^    TrajectoryRequestHandler* h_tr_;$/;"	m	class:Planner	access:public
+h_mod_req_	planner.h	/^    ModificationRequestHandler* h_mod_req_;$/;"	m	class:Planner	access:public
+h_traj_req_	planner.h	/^    TrajectoryRequestHandler*   h_traj_req_;$/;"	m	class:Planner	access:public
+handle_	modification_request_handler.h	/^    ros::NodeHandle handle_;$/;"	m	class:ModificationRequestHandler	access:private
 handle_	trajectory_request_handler.h	/^    ros::NodeHandle  handle_; $/;"	m	class:TrajectoryRequestHandler	access:private
-init_handlers	planner.cpp	/^void Planner::init_handlers(ros::NodeHandle& h) {$/;"	f	class:Planner	signature:(ros::NodeHandle& h)
-init_handlers	planner.h	/^    void init_handlers(ros::NodeHandle& h);$/;"	p	class:Planner	access:public	signature:(ros::NodeHandle& h)
-init_pub_sub	main.cpp	/^void init_pub_sub(ros::NodeHandle& handle, Planner& planner) {$/;"	f	signature:(ros::NodeHandle& handle, Planner& planner)
+init_handlers	planner.cpp	/^void Planner::init_handlers(const ros::NodeHandle& h) {$/;"	f	class:Planner	signature:(const ros::NodeHandle& h)
+init_handlers	planner.h	/^    void init_handlers(const ros::NodeHandle& h);$/;"	p	class:Planner	access:public	signature:(const ros::NodeHandle& h)
 initialization	planner.cpp	/^void Planner::initialization() { $/;"	f	class:Planner	signature:()
 initialization	planner.h	/^    void initialization();$/;"	p	class:Planner	access:public	signature:()
 main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
 max_	range.h	/^    float max_;$/;"	m	class:Range	access:public
 min_	range.h	/^    float min_;$/;"	m	class:Range	access:public
+modify	planner.cpp	/^const ramp_msgs::Trajectory Planner::modify(const unsigned int i_traj) const {$/;"	f	class:Planner	signature:(const unsigned int i_traj) const
+modify	planner.h	/^    const ramp_msgs::Trajectory modify(const unsigned int i_traj) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_traj) const
+mutex_	modification_request_handler.h	/^    bool mutex_;$/;"	m	class:ModificationRequestHandler	access:private
 mutex_	trajectory_request_handler.h	/^    bool                   mutex_;$/;"	m	class:TrajectoryRequestHandler	access:private
-my_planner	main.cpp	/^Planner my_planner; $/;"	v
 paths_	planner.h	/^    std::vector<Path> paths_;$/;"	m	class:Planner	access:public
 populationSize_	planner.h	/^    const int populationSize_;$/;"	m	class:Planner	access:private
 population_	planner.h	/^    std::vector<ramp_msgs::Trajectory> population_;$/;"	m	class:Planner	access:public
+pub_request_	modification_request_handler.h	/^    ros::Publisher  pub_request_;$/;"	m	class:ModificationRequestHandler	access:private
 pub_request_	trajectory_request_handler.h	/^    ros::Publisher   pub_request_;$/;"	m	class:TrajectoryRequestHandler	access:private
-pub_traj_requests	main.cpp	/^ros::Publisher  pub_traj_requests;$/;"	v
 random	configuration.cpp	/^Configuration Configuration::random() {$/;"	f	class:Configuration	signature:()
 random	configuration.h	/^    Configuration random();$/;"	p	class:Configuration	access:public	signature:()
 random	range.cpp	/^const float Range::random() {$/;"	f	class:Range	signature:()
 random	range.h	/^    const float random();$/;"	p	class:Range	access:public	signature:()
 ranges_	configuration.h	/^    std::vector<Range> ranges_;$/;"	m	class:Configuration	access:public
 ranges_	planner.h	/^    std::vector<Range> ranges_;$/;"	m	class:Planner	access:public
-ready_	planner.h	/^    bool ready_;$/;"	m	class:Planner	access:private
+received_	modification_request_handler.h	/^    ramp_msgs::Trajectory received_;$/;"	m	class:ModificationRequestHandler	access:private
 received_	trajectory_request_handler.h	/^    ramp_msgs::Trajectory  received_;$/;"	m	class:TrajectoryRequestHandler	access:private
-request	trajectory_request_handler.cpp	/^ramp_msgs::Trajectory TrajectoryRequestHandler::request(ramp_msgs::TrajectoryRequest r) {$/;"	f	class:TrajectoryRequestHandler	signature:(ramp_msgs::TrajectoryRequest r)
-request	trajectory_request_handler.h	/^    ramp_msgs::Trajectory request(ramp_msgs::TrajectoryRequest r);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(ramp_msgs::TrajectoryRequest r)
+request	modification_request_handler.cpp	/^ramp_msgs::Trajectory ModificationRequestHandler::request(const ramp_msgs::ModificationRequest mr) {$/;"	f	class:ModificationRequestHandler	signature:(const ramp_msgs::ModificationRequest mr)
+request	modification_request_handler.h	/^    ramp_msgs::Trajectory request(const ramp_msgs::ModificationRequest m);   $/;"	p	class:ModificationRequestHandler	access:public	signature:(const ramp_msgs::ModificationRequest m)
+request	trajectory_request_handler.cpp	/^ramp_msgs::Trajectory TrajectoryRequestHandler::request(const ramp_msgs::TrajectoryRequest r) {$/;"	f	class:TrajectoryRequestHandler	signature:(const ramp_msgs::TrajectoryRequest r)
+request	trajectory_request_handler.h	/^    ramp_msgs::Trajectory request(const ramp_msgs::TrajectoryRequest r);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(const ramp_msgs::TrajectoryRequest r)
 resolutionRate_	planner.h	/^    const unsigned int resolutionRate_;$/;"	m	class:Planner	access:public
-send_paths	main.cpp	/^void send_paths() {$/;"	f	signature:()
 start_	path.h	/^    Configuration start_;$/;"	m	class:Path	access:public
 start_	planner.h	/^    Configuration start_;$/;"	m	class:Planner	access:public
-sub_traj	main.cpp	/^ros::Subscriber sub_traj;$/;"	v
+sub_traj_	modification_request_handler.h	/^    ros::Subscriber sub_traj_;$/;"	m	class:ModificationRequestHandler	access:private
 sub_traj_	trajectory_request_handler.h	/^    ros::Subscriber  sub_traj_;$/;"	m	class:TrajectoryRequestHandler	access:private
 toString	configuration.cpp	/^const std::string Configuration::toString() const {$/;"	f	class:Configuration	signature:() const
 toString	configuration.h	/^    const std::string toString() const;$/;"	p	class:Configuration	access:public	signature:() const
 toString	path.cpp	/^const std::string Path::toString() const {$/;"	f	class:Path	signature:() const
 toString	path.h	/^    const std::string toString() const;$/;"	p	class:Path	access:public	signature:() const
-trajCallback	planner.cpp	/^void Planner::trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {$/;"	f	class:Planner	signature:(const ramp_msgs::Trajectory::ConstPtr& msg)
-trajCallback	planner.h	/^    void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg);$/;"	p	class:Planner	access:public	signature:(const ramp_msgs::Trajectory::ConstPtr& msg)
+toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
+toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
 traj_	planner.h	/^    ramp_msgs::Trajectory traj_;$/;"	m	class:Planner	access:private
-waitForTraj	planner.h	/^    void waitForTraj();$/;"	p	class:Planner	access:private	signature:()
 ~Configuration	configuration.cpp	/^Configuration::~Configuration() {}$/;"	f	class:Configuration	signature:()
 ~Configuration	configuration.h	/^    ~Configuration();$/;"	p	class:Configuration	access:public	signature:()
 ~Path	path.cpp	/^Path::~Path() {}$/;"	f	class:Path	signature:()

@@ -16,11 +16,17 @@ Planner::~Planner() {
     delete h_traj_req_;  
     h_traj_req_ = 0;
   }
+  
+  if(h_mod_req_ != 0) {
+    delete h_mod_req_;  
+    h_mod_req_ = 0;
+  }
 }
 
 
 void Planner::init_handlers(const ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler(h);
+  h_mod_req_  = new ModificationRequestHandler(h);
 }
 
 
@@ -72,7 +78,17 @@ void Planner::initialization() {
 }
 
 
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const int i_path, const std::vector<float> times) const {
+const ramp_msgs::Trajectory Planner::modify(const unsigned int i_traj) const {
+  ramp_msgs::Trajectory result;
+
+  ramp_msgs::ModificationRequest mr = buildModificationRequestMsg(i_traj);
+  
+  result = h_mod_req_->request(mr);
+
+  return result;
+}
+
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> times) const {
   ramp_msgs::TrajectoryRequest result;
 
   result.id   = i_path;
@@ -82,3 +98,14 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const int 
 
   return result;
 }
+
+const ramp_msgs::ModificationRequest Planner::buildModificationRequestMsg(const unsigned int i_traj) const {
+  ramp_msgs::ModificationRequest result;
+
+  result.id = i_traj;
+  result.trajs.push_back(population_.at(i_traj));
+  result.resolutionRate = resolutionRate_;
+
+  return result;
+}
+

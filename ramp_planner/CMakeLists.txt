@@ -24,7 +24,7 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Declare a cpp executable
-add_executable(${PROJECT_NAME} src/main.cpp src/planner.cpp src/configuration.cpp src/modification_request_handler.cpp src/path.cpp src/range.cpp src/trajectory_request_handler.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/planner.cpp src/configuration.cpp src/modification_request_handler.cpp src/path.cpp src/range.cpp src/trajectory_request_handler.cpp src/utility.cpp)
 
 
 ## Specify libraries to link a library or executable target against

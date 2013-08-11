@@ -17,7 +17,7 @@ class TrajectoryRequestHandler {
     ros::Publisher   pub_request_;
     ros::Subscriber  sub_traj_;
 
-    unsigned int desiredId;
+    unsigned int desiredId_;
     ramp_msgs::Trajectory  received_;
     bool                   mutex_;
 };

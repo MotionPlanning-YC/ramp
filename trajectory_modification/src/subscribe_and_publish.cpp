@@ -105,10 +105,10 @@ void SubscribeAndPublish::callback(const ramp_msgs::ModificationRequest::ConstPt
   msg_traj_req.id = msg->id;
   
    
-  std::cout<<"\nSending request to trajectory_generator!\n";
+
   //Send the request
   ramp_msgs::Trajectory mod_traj = h_traj_req_->request(msg_traj_req);
-  
-  std::cout<<"\nPublishing to modified_trajs!\n";
+ 
+  //Publish the modified trajectory 
   pub_mod_trajs_.publish(mod_traj);
 }
