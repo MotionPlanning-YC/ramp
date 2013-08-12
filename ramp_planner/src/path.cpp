@@ -35,9 +35,9 @@ const ramp_msgs::Path Path::buildPathMsg() const {
 const std::string Path::toString() const {
   std::ostringstream result;
 
+  result<<"\nPath:";
   for(unsigned int i=0;i<all_.size();i++) {
-    result<<"\nConfiguration "<<i<<":";
-    result<<"\n"<<all_.at(i).toString();
+    result<<"\n  "<<i<<": "<<all_.at(i).toString();
   }
   
   return result.str();

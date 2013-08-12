@@ -14,8 +14,8 @@ class Planner {
     ~Planner();
 
     //Data Members
-    std::vector<Path> paths_;
     std::vector<ramp_msgs::Trajectory> population_;
+    std::vector<Path> paths_;
     std::vector<Range> ranges_;
     Configuration start_;
     Configuration goal_;
@@ -26,10 +26,10 @@ class Planner {
     //Methods
     void initialization();
     void init_handlers(const ros::NodeHandle& h);
-    const ramp_msgs::Trajectory modify(const unsigned int i_traj) const;
+    const ramp_msgs::Path modify(const unsigned int i_path) const;
     
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> times) const;
-    const ramp_msgs::ModificationRequest buildModificationRequestMsg(const unsigned int i_traj) const;
+    const ramp_msgs::ModificationRequest buildModificationRequestMsg(const unsigned int i_path) const;
     
 
 

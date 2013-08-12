@@ -24,6 +24,7 @@ const ramp_msgs::Configuration Configuration::buildConfigurationMsg() const {
   //Push all of the DOF values onto the msg's DOF values
   for(unsigned int i=0;i<K_.size();i++) {
     result.K.push_back(K_.at(i));
+    result.ranges.push_back(ranges_.at(i).buildRangeMsg());
   }
 
   return result;

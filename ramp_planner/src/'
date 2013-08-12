@@ -78,14 +78,11 @@ void Planner::initialization() {
 }
 
 
-const ramp_msgs::Path Planner::modify(const unsigned int i_path) const {
-  ramp_msgs::Path result;
+const ramp_msgs::Trajectory Planner::modify(const unsigned int i_traj) const {
+  ramp_msgs::Trajectory result;
 
-  //Build a modification request
-  ramp_msgs::ModificationRequest mr = buildModificationRequestMsg(i_path);
+  ramp_msgs::ModificationRequest mr = buildModificationRequestMsg(i_traj);
   
-  //Request the modification handler to make the modification
-  //It returns the modified Path
   result = h_mod_req_->request(mr);
 
   return result;
@@ -105,8 +102,8 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const unsi
 const ramp_msgs::ModificationRequest Planner::buildModificationRequestMsg(const unsigned int i_path) const {
   ramp_msgs::ModificationRequest result;
 
-  result.id = i_path;
-  result.paths.push_back(paths_.at(i_path).buildPathMsg() );
+  result.id = i_traj;
+  result.trajs.push_back(paths_.at(i_traj));
 
   return result;
 }

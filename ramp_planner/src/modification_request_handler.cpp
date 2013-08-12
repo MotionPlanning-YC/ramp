@@ -6,12 +6,12 @@ ModificationRequestHandler::ModificationRequestHandler() : desiredId_(9999), mut
 ModificationRequestHandler::ModificationRequestHandler(const ros::NodeHandle& h) : desiredId_(9999), handle_(h), mutex_(false) {
   
   pub_request_ = handle_.advertise<ramp_msgs::ModificationRequest>("modification_requests", 1000);
-  sub_traj_ = handle_.subscribe("modified_trajs", 1000, &ModificationRequestHandler::callback, this);
+  sub_traj_ = handle_.subscribe("modified_paths", 1000, &ModificationRequestHandler::callback, this);
 
 }
 
 
-void ModificationRequestHandler::callback(const ramp_msgs::Trajectory::ConstPtr& msg) {
+void ModificationRequestHandler::callback(const ramp_msgs::Path::ConstPtr& msg) {
 
   //Check the id
   if(desiredId_ != 9999 && msg->id == desiredId_) {
@@ -21,7 +21,7 @@ void ModificationRequestHandler::callback(const ramp_msgs::Trajectory::ConstPtr&
 
 }
 
-ramp_msgs::Trajectory ModificationRequestHandler::request(const ramp_msgs::ModificationRequest mr) {
+ramp_msgs::Path ModificationRequestHandler::request(const ramp_msgs::ModificationRequest mr) {
   
   //Set mutex
   mutex_ = false;

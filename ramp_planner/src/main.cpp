@@ -44,24 +44,17 @@ int main(int argc, char** argv) {
   std::cout<<"\nmy_planner.population_.size():"<<my_planner.population_.size();
 
 
-  /*ros::Publisher pub_mod_req = handle.advertise<ramp_msgs::ModificationRequest>("modification_requests", 1000);
-  ramp_msgs::ModificationRequest mod_req;
-  mod_req.trajs.push_back(my_planner.population_.at(0));
-  mod_req.resolutionRate = my_planner.resolutionRate_; 
-  mod_req.id = 1;
 
-  std::cout<<"\n\nPress Enter to publish modification request!\n";
+
+  std::cout<<"\nPress Enter to modify a path!\n";
   std::cin.get();
-  pub_mod_req.publish(mod_req);*/
 
+  std::cout<<"\nModifying Path:\n"<<my_planner.paths_.at(0).toString();
 
-  std::cout<<"\nPress Enter to modify a trajectory!\n";
-  std::cin.get();
-  ramp_msgs::Trajectory t = my_planner.modify(0);
-  std::cout<<"\nTrajectory modified!\n";
+  ramp_msgs::Path p = my_planner.modify(0);
+  std::cout<<"\nPath modified!\n";
   Utility u;
-  std::cout<<u.toString(t); 
-
+  std::cout<<u.toString(p); 
 
   std::cout<<"\nSpinning...\n";
   ros::spin();
