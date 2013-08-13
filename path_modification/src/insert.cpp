@@ -22,4 +22,21 @@ ramp_msgs::Path Insert::perform() {
 
 
   //Generate a new, random knot point
+  ramp_msgs::Configuration c;
+  for(unsigned int i=0;i<path_.configurations.at(0).K.size();i++) {
+
+    //Generate a random value for each K in the specified range
+    double min = path_.configurations.at(0).ranges.at(i).min;
+    double max = path_.configurations.at(0).ranges.at(i).max;
+
+    
+    float temp = ( min + (float)rand() / ((float)RAND_MAX / (max - min)) );
+
+    c.K.push_back(temp);
+  }
+
+
+  //Insert the configuration 
+
+
 }

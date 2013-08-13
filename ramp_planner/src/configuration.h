@@ -6,6 +6,7 @@
 class Configuration {
   public:
     Configuration();
+    Configuration(ramp_msgs::Configuration c);
     ~Configuration();
     
 

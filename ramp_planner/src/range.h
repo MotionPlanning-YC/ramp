@@ -7,6 +7,7 @@ class Range {
   public:
     Range();
     Range(const float min, const float max);
+    Range(ramp_msgs::Range r);
     ~Range();
 
     float min_;

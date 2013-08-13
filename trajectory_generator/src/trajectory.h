@@ -1,7 +1,6 @@
 #ifndef TRAJECTORY_H
 #define TRAJECTORY_H
 
-#include "ramp_msgs/Trajectory.h"
 #include "ramp_msgs/TrajectoryRequest.h"
 #include "geometry_msgs/Pose2D.h"
 #include "utility.h"
@@ -12,7 +11,7 @@ class Trajectory {
 
     Trajectory();
     Trajectory(const std::vector<geometry_msgs::Pose2D> kps);
-    Trajectory(const ramp_msgs::TrajectoryRequest traj_req);
+    Trajectory(const ramp_msgs::TrajectoryRequest::Request traj_req);
     ~Trajectory();
 
     //Data Members

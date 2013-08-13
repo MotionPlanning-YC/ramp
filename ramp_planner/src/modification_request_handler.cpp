@@ -1,41 +1,16 @@
 #include "modification_request_handler.h"
 
 
-ModificationRequestHandler::ModificationRequestHandler() : desiredId_(9999), mutex_(false) {} 
+ModificationRequestHandler::ModificationRequestHandler() {} 
 
-ModificationRequestHandler::ModificationRequestHandler(const ros::NodeHandle& h) : desiredId_(9999), handle_(h), mutex_(false) {
-  
-  pub_request_ = handle_.advertise<ramp_msgs::ModificationRequest>("modification_requests", 1000);
-  sub_traj_ = handle_.subscribe("modified_paths", 1000, &ModificationRequestHandler::callback, this);
-
+ModificationRequestHandler::ModificationRequestHandler(const ros::NodeHandle& h) : handle_(h) {
+  client_ = handle_.serviceClient<ramp_msgs::ModificationRequest>("path_modification");
 }
 
 
-void ModificationRequestHandler::callback(const ramp_msgs::Path::ConstPtr& msg) {
-
-  //Check the id
-  if(desiredId_ != 9999 && msg->id == desiredId_) {
-    received_ = *msg;
-    mutex_    = true;
-  }
-
-}
-
-ramp_msgs::Path ModificationRequestHandler::request(const ramp_msgs::ModificationRequest mr) {
+const bool ModificationRequestHandler::request(ramp_msgs::ModificationRequest& mr) {
+  if(client_.call(mr))
+    return true;
   
-  //Set mutex
-  mutex_ = false;
-
-  //Set the ID
-  desiredId_ = mr.id;
-
-  //Publish the request
-  pub_request_.publish(mr);
-
-  //Wait for trajectory to be set
-  while(!mutex_) {ros::spinOnce();}
-
-  //reset ID and return
-  desiredId_ = 9999;
-  return received_;
+  return false;  
 }

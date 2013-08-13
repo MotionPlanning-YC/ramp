@@ -24,7 +24,7 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Declare a cpp executable
-add_executable(${PROJECT_NAME} src/main.cpp src/insert.cpp src/subscribe_and_publish.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/insert.cpp )
 
 
 ## Specify libraries to link a library or executable target against

@@ -8,6 +8,7 @@ class Path {
 
     Path();
     Path(Configuration start, Configuration goal);
+    Path(ramp_msgs::Path p);
     ~Path();
     
     //Data members

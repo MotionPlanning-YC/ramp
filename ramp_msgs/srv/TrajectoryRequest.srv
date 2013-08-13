@@ -2,3 +2,7 @@ Path path
 float32[] t
 uint8 resolutionRate
 uint8 id
+
+---
+
+Trajectory trajectory

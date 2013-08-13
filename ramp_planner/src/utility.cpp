@@ -22,7 +22,6 @@ const std::string Utility::toString(const ramp_msgs::Path path) const {
 const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
   std::ostringstream result;
 
-  result<<"\nTrajectory "<<traj.id;
   result<<"\n Knot Points:";
 
   for(unsigned int i=0;i<traj.index_knot_points.size();i++) {
@@ -37,6 +36,36 @@ const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
     result<<"\n       Positions: ("<<p.positions.at(0);
     for(unsigned int k=1;k<p.positions.size();k++) {
       result<<", "<<p.positions.at(k);
+    }
+    result<<")";
+
+  }
+
+
+  result<<"\n Points:";
+  for(unsigned int i=0;i<traj.trajectory.points.size();i++) {
+    result<<"\n\n   Point "<<i<<":";
+    
+    trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);
+  
+    //Positions
+    result<<"\n       Positions: ("<<p.positions.at(0);
+    for(unsigned int k=1;k<p.positions.size();k++) {
+      result<<", "<<p.positions.at(k);
+    }
+    result<<")";
+  
+    //Velocities
+    result<<"\n       Velocities: ("<<p.velocities.at(0);
+    for(unsigned int k=1;k<p.velocities.size();k++) {
+      result<<", "<<p.velocities.at(k);
+    }
+    result<<")";
+    
+    //Accelerations
+    result<<"\n       Accelerations: ("<<p.accelerations.at(0);
+    for(unsigned int k=1;k<p.accelerations.size();k++) {
+      result<<", "<<p.accelerations.at(k);
     }
     result<<")";
 

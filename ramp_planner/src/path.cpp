@@ -2,10 +2,23 @@
 
 Path::Path() {}
 
-Path::Path(Configuration start, Configuration goal) : start_(start), goal_(goal) 
-{
+Path::Path(Configuration start, Configuration goal) : start_(start), goal_(goal) {
   all_.push_back(start);
   all_.push_back(goal); 
+}
+
+Path::Path(ramp_msgs::Path p) {
+
+  Configuration s(p.configurations.at(0));
+  start_ = s;
+
+  Configuration g(p.configurations.at(p.configurations.size()-1));
+  goal_ = g;
+
+  for(unsigned int i=0;i<p.configurations.size();i++) {
+    Configuration c(p.configurations.at(i));
+    all_.push_back(c);
+  }
 }
 
 Path::~Path() {}

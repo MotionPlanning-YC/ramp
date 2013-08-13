@@ -4,6 +4,11 @@ Range::Range() {}
 
 Range::Range(const float min, const float max) : min_(min), max_(max) {}
 
+Range::Range(ramp_msgs::Range r) {
+  min_ = r.min;
+  max_ = r.max;
+}
+
 Range::~Range() {}
 
 

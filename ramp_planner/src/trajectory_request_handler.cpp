@@ -1,41 +1,16 @@
 #include "trajectory_request_handler.h"
 
-TrajectoryRequestHandler::TrajectoryRequestHandler() : desiredId_(9999), mutex_(false) {}
+TrajectoryRequestHandler::TrajectoryRequestHandler() {}
 
-TrajectoryRequestHandler::TrajectoryRequestHandler(const ros::NodeHandle& h) : desiredId_(9999), handle_(h), mutex_(false) {
-  pub_request_ = handle_.advertise<ramp_msgs::TrajectoryRequest>("traj_requests", 1000);
-  sub_traj_ = handle_.subscribe("trajs", 1000, &TrajectoryRequestHandler::callback, this); 
+TrajectoryRequestHandler::TrajectoryRequestHandler(const ros::NodeHandle& h) : handle_(h) {
+  client_ = handle_.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");
 }
 
 
-
-void TrajectoryRequestHandler::callback(const ramp_msgs::Trajectory::ConstPtr& msg) {
-
-  //Check the id
-  if(desiredId_ != 9999 && msg->id == desiredId_) {
-    received_ = *msg;
-    mutex_    = true;
-  }
-
-}
-
-
-
-ramp_msgs::Trajectory TrajectoryRequestHandler::request(const ramp_msgs::TrajectoryRequest r) {
+const bool TrajectoryRequestHandler::request(ramp_msgs::TrajectoryRequest& tr) {
   
-  //Set mutex
-  mutex_ = false;
-  
-  //Set the ID
-  desiredId_ = r.id;
-  
-  //Publish the request
-  pub_request_.publish(r);
-  
-  //Wait for trajectory to be set
-  while(!mutex_) {ros::spinOnce();}
+  if(client_.call(tr)) 
+    return true;
 
-  //reset ID and return
-  desiredId_ = 9999;
-  return received_; 
+  return false;
 }

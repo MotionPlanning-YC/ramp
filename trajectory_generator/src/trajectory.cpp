@@ -12,7 +12,7 @@ Trajectory::Trajectory(const std::vector<geometry_msgs::Pose2D> kps) : k_dof_(3)
 }
 
 
-Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest traj_req) : k_dof_(3) {
+Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request traj_req) : k_dof_(3) {
   
   //Push all of the path configurations onto knot_points
   for(unsigned int i=0;i<traj_req.path.configurations.size();i++) {
