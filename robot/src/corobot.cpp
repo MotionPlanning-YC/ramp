@@ -120,7 +120,7 @@ void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
 
 
 
-const float Corobot::getSpeedToWaypoint(trajectory_msgs::JointTrajectoryPoint waypoint1, trajectory_msgs::JointTrajectoryPoint waypoint2) {
+const float Corobot::getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const {
 
   
   for(unsigned int i=0;i<3;i++) {
@@ -159,13 +159,13 @@ void Corobot::moveOnTrajectory() const {
   ros::Rate r(25);
   
   geometry_msgs::Twist twist;
-  twist.linear.x = 0.5;
   
   //For each waypoint
   for(unsigned int i=0;i<num-1;i++) {
     
     //Send the twist msg at some rate r
     while(ros::ok() && ros::Time::now() < end_times.at(i)) {
+      twist.linear.x = getSpeedToWaypoint(trajectory_.trajectory.points.at(i), trajectory_.trajectory.points.at(i+1));
       pub_twist_.publish(twist); 
       r.sleep();
     }

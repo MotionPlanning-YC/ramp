@@ -2,7 +2,6 @@
 #define MODIFICATION_REQUEST_HANDLER_H
 #include "ros/ros.h"
 #include "ramp_msgs/ModificationRequest.h"
-#include "ramp_msgs/ModifiedPath.h"
 
 class ModificationRequestHandler {
   public:
