@@ -45,9 +45,12 @@ int main(int argc, char** argv) {
   robot.trajectory_.trajectory.points.push_back(point);
 
   point.positions.at(0) = 1.0;
+  point.positions.at(2) = 3.14/4;
   point.time_from_start = ros::Duration(6);
   robot.trajectory_.trajectory.points.push_back(point);
 
+  robot.trajectory_.index_knot_points.push_back(0);
+  robot.trajectory_.index_knot_points.push_back(2);
   robot.moveOnTrajectory();*/
   ros::spin();
 

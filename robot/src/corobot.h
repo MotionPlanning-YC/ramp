@@ -49,6 +49,8 @@ class Corobot {
 
   private:
     const float getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const ;
+
+    const float getAngularSpeed(const trajectory_msgs::JointTrajectoryPoint knotpoint1, const trajectory_msgs::JointTrajectoryPoint knotpoint2) const;
     
     bool move; 
     std::vector<double> thetas_; //holds the last 5 thetas to average
