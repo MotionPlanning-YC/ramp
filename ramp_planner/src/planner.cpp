@@ -100,16 +100,16 @@ const bool Planner::requestModification(ramp_msgs::ModificationRequest& mr) cons
 
 
 
-const ramp_msgs::Path Planner::modifyPath(const unsigned int i) const {
-  ramp_msgs::Path result;
+const std::vector<ramp_msgs::Path> Planner::modifyPath(const unsigned int i1, const unsigned int i2) const {
+  std::vector<ramp_msgs::Path> result;
 
   //Build a modification request
-  ramp_msgs::ModificationRequest mr = buildModificationRequestMsg(i);
+  ramp_msgs::ModificationRequest mr = buildModificationRequestMsg(i1, i2);
   
   //Request the modification handler to make the modification
   //It returns the modified Path
   if(requestModification(mr)) {
-    result = mr.response.mod_paths.at(0);
+    result = mr.response.mod_paths;
   }
   else {
     //some error handling
@@ -119,17 +119,29 @@ const ramp_msgs::Path Planner::modifyPath(const unsigned int i) const {
 }
 
 
-const ramp_msgs::Trajectory Planner::modifyTraj(const unsigned int i) const {
+const ramp_msgs::Trajectory Planner::modifyTraj(const unsigned int i) {
   ramp_msgs::Trajectory result;
 
   //The modification operators deal with paths
   //So send the path to be modified
-  ramp_msgs::Path mod_path = modifyPath(i);
+  std::vector<ramp_msgs::Path> mp = modifyPath(i);
 
-  Path p(mod_path);
+  Path mod_path(mp.at(0));
+  std::cout<<"\nnew path:"<<mod_path.toString();
+
+  paths_.push_back(mod_path);
+  
+
+  std::vector<float> t = times_.at(i);
+  //Insert
+  //t.push_back(times_.at(i).at(0));
+  //Delete
+  //t.pop_back();
+
+
 
   //Now build a TrajectoryRequestMsg
-  ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequestMsg(p, times_.at(i));
+  ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequestMsg(mod_path, t);
  
   //Send the request and set the result to the returned trajectory 
   if(requestTrajectory(tr)) {
@@ -144,10 +156,13 @@ const ramp_msgs::Trajectory Planner::modifyTraj(const unsigned int i) const {
 
 
 /** Build a ModificationRequest msg */
-const ramp_msgs::ModificationRequest Planner::buildModificationRequestMsg(const unsigned int i_path) const {
+const ramp_msgs::ModificationRequest Planner::buildModificationRequestMsg(const unsigned int i_path, const unsigned int i_path2) const {
   ramp_msgs::ModificationRequest result;
 
   result.request.paths.push_back(paths_.at(i_path).buildPathMsg() );
+
+  if(i_path2 != -1)
+    result.request.paths.push_back(paths_.at(i_path2).buildPathMsg() );
 
   return result;
 }
@@ -166,12 +181,13 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const Path
 }
 
 
+/** Build a TrajectoryRequest msg */
 const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> times) const {
   ramp_msgs::TrajectoryRequest result;
 
   result.request.path = paths_.at(i_path).buildPathMsg();
   result.request.t    = times;
   result.request.resolutionRate = resolutionRate_;
-
+  
   return result; 
 }

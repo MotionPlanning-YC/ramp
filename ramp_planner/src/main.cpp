@@ -55,18 +55,21 @@ int main(int argc, char** argv) {
   std::cout<<"\nPress Enter to modify a path!\n";
   std::cin.get();
 
-  std::cout<<"\nModifying Path:\n"<<my_planner.paths_.at(0).toString();
+  std::cout<<"\nModifying Path:\n"<<my_planner.paths_.at(0).toString()<<"\n";
+  std::cout<<"\nModifying Path:\n"<<my_planner.paths_.at(1).toString()<<"\n";
 
-  ramp_msgs::Path p = my_planner.modifyPath(0);
-  std::cout<<"\nPath modified!\n";
-  std::cout<<u.toString(p);
+  std::vector<ramp_msgs::Path> ps = my_planner.modifyPath(0, 1);
+  std::cout<<"\nModified Paths!\n";
+  std::cout<<u.toString(ps.at(0));
+  std::cout<<u.toString(ps.at(1));
 
 
-  std::cout<<"\nPress Enter to modify a traj!\n";
+  /*std::cout<<"\nPress Enter to modify a traj!\n";
   std::cin.get();
   ramp_msgs::Trajectory tr = my_planner.modifyTraj(0);
   std::cout<<"\nTrajectory modified!\n";
   std::cout<<u.toString(tr);
+  */
 
   std::cout<<"\nSpinning...\n";
   ros::spin();

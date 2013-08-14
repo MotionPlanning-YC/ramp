@@ -29,8 +29,8 @@ class Planner {
     void initialization();
     void init_handlers(const ros::NodeHandle& h);
     
-    const ramp_msgs::Path modifyPath(const unsigned int i) const;
-    const ramp_msgs::Trajectory modifyTraj(const unsigned int i) const;
+    const std::vector<ramp_msgs::Path> modifyPath(const unsigned int i1, const unsigned int i2=-1) const;
+    const ramp_msgs::Trajectory modifyTraj(const unsigned int i);
 
     //Cannot make tr const because it has no serialize/deserialize
     const bool requestTrajectory(ramp_msgs::TrajectoryRequest& tr) const;
@@ -39,14 +39,14 @@ class Planner {
     const bool requestModification(ramp_msgs::ModificationRequest& mr) const;
 
     //msg building methods...
-    const ramp_msgs::ModificationRequest buildModificationRequestMsg(const unsigned int i_path) const;
+    const ramp_msgs::ModificationRequest buildModificationRequestMsg(const unsigned int i_path, const unsigned int i_path2=-1) const;
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> times) const;
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const Path path, const std::vector<float> times) const;
 
 
 
   private:
-    
+    Utility u; 
     const int populationSize_;
     ramp_msgs::Trajectory traj_;
 };

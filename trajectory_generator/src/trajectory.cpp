@@ -44,6 +44,7 @@ void Trajectory::buildSegments() {
 
     float t_s = (i==0) ? 0 : segments_.at(i-1).end_t_;
     float t_e = t_s + t_.at(i);
+
     temp.build(knot_points_.at(i), knot_points_.at(i+1), t_s, t_e, i);
     
     //Push the segment onto the vector
@@ -54,7 +55,6 @@ void Trajectory::buildSegments() {
 
 /** This method returns a MotionState given a segment ID and a time */
 const MotionState Trajectory::getMotionState(const unsigned int ind_segment, const float t) {
-  //std::cout<<"\nIn getMotionState\n";
   
   MotionState result;
 
@@ -82,7 +82,6 @@ const MotionState Trajectory::getMotionState(const unsigned int ind_segment, con
 
 /** This function generates the set of motion states that represent the trajectory */
 const std::vector<MotionState> Trajectory::generate() {
-  //std::cout<<"\nIn generate\n";
   
   //Build the segments
   buildSegments();
