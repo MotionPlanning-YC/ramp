@@ -31,7 +31,24 @@ int main(int argc, char** argv) {
   ros::Subscriber sub_traj = handle.subscribe("traj", 1000, trajCallback);
   
   init_advertisers_subscribers(robot, handle);
+/*
+  trajectory_msgs::JointTrajectoryPoint point;
+  point.positions.push_back(0);
+  point.positions.push_back(0);
+  point.positions.push_back(0);
+  point.time_from_start = ros::Duration(0);
 
+  robot.trajectory_.trajectory.points.push_back(point);
+
+  point.positions.at(0) = 0.5;
+  point.time_from_start = ros::Duration(2);
+  robot.trajectory_.trajectory.points.push_back(point);
+
+  point.positions.at(0) = 1.0;
+  point.time_from_start = ros::Duration(6);
+  robot.trajectory_.trajectory.points.push_back(point);
+
+  robot.moveOnTrajectory();*/
   ros::spin();
 
   std::cout<<"\nExiting Normally\n";
