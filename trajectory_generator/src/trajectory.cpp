@@ -4,12 +4,13 @@
 Trajectory::Trajectory() : k_dof_(3) {}
 
 /** This constructor pushes on all of the poses passed in */
-Trajectory::Trajectory(const std::vector<geometry_msgs::Pose2D> kps) : k_dof_(3) {
+/*Trajectory::Trajectory(const std::vector<geometry_msgs::Pose2D> kps) : k_dof_(3) {
   for(unsigned int i=0;i<kps.size();i++) {
     knot_points_.push_back(kps.at(i));
-    t_.push_back(i*2.0);
+    
+    //***x***t_.push_back(i*2.0);***x***
   }
-}
+}*/
 
 
 Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request traj_req) : k_dof_(3) {
@@ -23,8 +24,8 @@ Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request traj_req) : k
     knot_points_.push_back( temp );
   }
   
-  for(unsigned int i=0;i<traj_req.t.size();i++) {
-    t_.push_back(traj_req.t.at(i));
+  for(unsigned int i=0;i<traj_req.v.size();i++) {
+    v_.push_back(traj_req.v.at(i));
   }
 
   resolutionRate_ = traj_req.resolutionRate;
@@ -42,10 +43,8 @@ void Trajectory::buildSegments() {
   for(unsigned int i=0;i<knot_points_.size()-1;i++) {
     Segment temp;
 
-    float t_s = (i==0) ? 0 : segments_.at(i-1).end_t_;
-    float t_e = t_s + t_.at(i);
-
-    temp.build(knot_points_.at(i), knot_points_.at(i+1), t_s, t_e, i);
+    //Build the segment
+    temp.build(knot_points_.at(i), knot_points_.at(i+1), v_.at(i), v_.at(i), i);
     
     //Push the segment onto the vector
     segments_.push_back(temp);
@@ -82,16 +81,15 @@ const MotionState Trajectory::getMotionState(const unsigned int ind_segment, con
 
 /** This function generates the set of motion states that represent the trajectory */
 const std::vector<MotionState> Trajectory::generate() {
-  
+
   //Build the segments
   buildSegments();
 
   //For each segment 
   for(unsigned int i=0;i<segments_.size();i++) { 
-    
+
     //The time of the segment in seconds
-    float segment_duration = segments_.at(i).end_t_ - segments_.at(i).start_t_;
-    
+    float segment_duration = segments_.at(i).T_;
     
     //The # of times the trajectory is calculated for the segment, determined by the resolution rate
     int total_t = segment_duration / (1.0 / resolutionRate_);
@@ -149,16 +147,19 @@ const ramp_msgs::Trajectory Trajectory::buildTrajectoryMsg() const {
     msg.trajectory.points.push_back(p);
   }
 
+  msg.index_knot_points.push_back(0);
+  float acc = segments_.at(0).T_;
   //Find the indices of the knot points
-  for(unsigned int i=0;i<segments_.size();i++) {
+  for(unsigned int i=1;i<segments_.size();i++) {
     
-    unsigned int index = segments_.at(i).start_t_ * (float)resolutionRate_;
+    unsigned int index = acc * (float)resolutionRate_; 
+    acc += segments_.at(i).T_;
     
     msg.index_knot_points.push_back(index);
   }
 
   //Get the last knot point
-  msg.index_knot_points.push_back(segments_.at(segments_.size()-1).end_t_ * resolutionRate_);
+  //msg.index_knot_points.push_back(segments_.at(segments_.size()-1).end_t_ * resolutionRate_);
   return msg; 
 }
 

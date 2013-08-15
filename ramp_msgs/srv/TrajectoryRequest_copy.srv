@@ -1,5 +1,5 @@
 Path path
-float32[] v
+float32[] t
 uint8 resolutionRate
 
 ---

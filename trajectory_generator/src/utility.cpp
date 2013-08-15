@@ -24,9 +24,9 @@ const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request 
   result<<"\nPath:"<<tr.path;
 
 
-  result<<"\nt: ("<<tr.t.at(0);
-  for(unsigned int i=0;i<tr.t.size();i++) {
-    result<<", "<<tr.t.at(i);
+  result<<"\nv: ("<<tr.v.at(0);
+  for(unsigned int i=0;i<tr.v.size();i++) {
+    result<<", "<<tr.v.at(i);
   }
   result<<")";
 

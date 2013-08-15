@@ -12,9 +12,8 @@ bool handleRequest(ramp_msgs::ModificationRequest::Request& req,
                    ramp_msgs::ModificationRequest::Response& res)
 {
 
-  //Insert insert(req.paths.at(0));
-  //insert.perform();
-  //res.mod_paths.push_back(insert.path_);
+  Insert insert(req.paths.at(0));
+  res.mod_paths.push_back(insert.perform());
   
   //Delete del(req.paths.at(0));
   //res.mod_paths.push_back(del.perform());
@@ -25,8 +24,8 @@ bool handleRequest(ramp_msgs::ModificationRequest::Request& req,
   //Swap swap(req.paths.at(0));
   //res.mod_paths.push_back(swap.perform());
   
-  Crossover cross(req.paths.at(0), req.paths.at(1));
-  res.mod_paths = cross.perform();
+  //Crossover cross(req.paths.at(0), req.paths.at(1));
+  //res.mod_paths = cross.perform();
   
   //For now, just push back on the paths passed in
   /*for(unsigned int i=0;i<req.paths.size();i++) {

@@ -13,63 +13,72 @@ int main(int argc, char** argv) {
   
   Utility u;
  
+  srand( time(NULL));
+  Range range0(0, 10);
+  Range range1(0, 10);
+  Range range2(30, 90);
+ 
+ 
+  /** Build the Planner */ 
+
   Planner my_planner; 
   my_planner.init_handlers(handle); 
   
-  srand( time(NULL));
-  Range range0(5.2, 911.7);
-  Range range1(0, 180);
-  Range range2(30, 150);
-  
-
-
-  
+  //Set ranges
   my_planner.ranges_.push_back(range0);
   my_planner.ranges_.push_back(range1);
   my_planner.ranges_.push_back(range2);
   
+  //Make Configurations
   Configuration s;
+  Configuration m;
   Configuration g;
   s.ranges_ = my_planner.ranges_;
+  m.ranges_ = my_planner.ranges_;
   g.ranges_ = my_planner.ranges_;
   s.random();
   g.random();
-  std::cout<<"\nStart:"<<s.toString();
-  std::cout<<"\nGoal:"<<g.toString();
 
+  //Set start and goal
   my_planner.start_ = s;
   my_planner.goal_ = g;
+
+  /** End building Planner */
+
+
+
+  
+  std::cout<<"\nStart:"<<s.toString();
+  std::cout<<"\nGoal:"<<g.toString();
 
   std::cout<<"\nPress Enter to initialize the planner\n";
   std::cin.get();
   my_planner.initialization();
 
-  std::cout<<"\nmy_planner.population_.size():"<<my_planner.population_.size();
 
+  std::cout<<"\npopulation size:"<<my_planner.population_.size();
   //Print all the initial trajectories
-  for(unsigned int i=0;i<my_planner.population_.size();i++) {
+  /*for(unsigned int i=0;i<my_planner.population_.size();i++) {
     std::cout<<"\n"<<u.toString(my_planner.population_.at(i)); 
-  }
+  }*/
 
 
   std::cout<<"\nPress Enter to modify a path!\n";
   std::cin.get();
 
   std::cout<<"\nModifying Path:\n"<<my_planner.paths_.at(0).toString()<<"\n";
-  std::cout<<"\nModifying Path:\n"<<my_planner.paths_.at(1).toString()<<"\n";
 
-  std::vector<ramp_msgs::Path> ps = my_planner.modifyPath(0, 1);
+  std::vector<ramp_msgs::Path> ps = my_planner.modifyPath(0);
   std::cout<<"\nModified Paths!\n";
   std::cout<<u.toString(ps.at(0));
-  std::cout<<u.toString(ps.at(1));
 
 
-  /*std::cout<<"\nPress Enter to modify a traj!\n";
+  std::cout<<"\nPress Enter to modify a traj!\n";
   std::cin.get();
-  ramp_msgs::Trajectory tr = my_planner.modifyTraj(0);
+  std::vector<ramp_msgs::Trajectory> trs = my_planner.modifyTraj(0);
   std::cout<<"\nTrajectory modified!\n";
-  std::cout<<u.toString(tr);
-  */
+  std::cout<<u.toString(trs.at(0));
+  
 
   std::cout<<"\nSpinning...\n";
   ros::spin();

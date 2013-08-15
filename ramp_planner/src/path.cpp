@@ -7,6 +7,16 @@ Path::Path(Configuration start, Configuration goal) : start_(start), goal_(goal)
   all_.push_back(goal); 
 }
 
+Path::Path(std::vector<Configuration> all) {
+  start_ = all.at(0);
+  goal_ = all.at(all.size()-1);
+  
+
+  for(unsigned int i=0;i<all.size();i++) {
+    all_.push_back(all.at(i));
+  }
+}
+
 Path::Path(ramp_msgs::Path p) {
 
   Configuration s(p.configurations.at(0));

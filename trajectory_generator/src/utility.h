@@ -10,6 +10,7 @@
 
 class Utility {
   public:
+    
     const std::string toString(const ramp_msgs::TrajectoryRequest::Request tr) const;
     const std::string toString(const ramp_msgs::Path p) const;
 };

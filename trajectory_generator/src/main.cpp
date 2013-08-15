@@ -2,6 +2,7 @@
 #include "trajectory.h"
 #include "ramp_msgs/TrajectoryRequest.h"
 
+Utility u;
 
 bool handleRequest(ramp_msgs::TrajectoryRequest::Request& req, 
                    ramp_msgs::TrajectoryRequest::Response& res) 

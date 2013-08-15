@@ -16,7 +16,7 @@ class Planner {
     /** Data Members */
     std::vector<ramp_msgs::Trajectory> population_;
     std::vector<Path> paths_;
-    std::vector<std::vector<float> > times_;
+    std::vector<std::vector<float> > velocities_;
 
     std::vector<Range> ranges_;
     Configuration start_;
@@ -29,8 +29,9 @@ class Planner {
     void initialization();
     void init_handlers(const ros::NodeHandle& h);
     
+    //Modify
     const std::vector<ramp_msgs::Path> modifyPath(const unsigned int i1, const unsigned int i2=-1) const;
-    const ramp_msgs::Trajectory modifyTraj(const unsigned int i);
+    const std::vector<ramp_msgs::Trajectory> modifyTraj(const unsigned int i1, const unsigned int i2=-1);
 
     //Cannot make tr const because it has no serialize/deserialize
     const bool requestTrajectory(ramp_msgs::TrajectoryRequest& tr) const;
@@ -40,8 +41,8 @@ class Planner {
 
     //msg building methods...
     const ramp_msgs::ModificationRequest buildModificationRequestMsg(const unsigned int i_path, const unsigned int i_path2=-1) const;
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> times) const;
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const Path path, const std::vector<float> times) const;
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> velocities) const;
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const Path path, const std::vector<float> velocities) const;
 
 
 
