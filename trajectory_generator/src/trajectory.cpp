@@ -24,8 +24,9 @@ Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request traj_req) : k
     knot_points_.push_back( temp );
   }
   
-  for(unsigned int i=0;i<traj_req.v.size();i++) {
-    v_.push_back(traj_req.v.at(i));
+  for(unsigned int i=0;i<traj_req.v_start.size();i++) {
+    v_start_.push_back(traj_req.v_start.at(i));
+    v_end_.push_back(traj_req.v_end.at(i));
   }
 
   resolutionRate_ = traj_req.resolutionRate;
@@ -44,7 +45,7 @@ void Trajectory::buildSegments() {
     Segment temp;
 
     //Build the segment
-    temp.build(knot_points_.at(i), knot_points_.at(i+1), v_.at(i), v_.at(i), i);
+    temp.build(knot_points_.at(i), knot_points_.at(i+1), v_start_.at(i), v_end_.at(i), i);
     
     //Push the segment onto the vector
     segments_.push_back(temp);

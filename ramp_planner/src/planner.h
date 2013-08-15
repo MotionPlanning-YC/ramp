@@ -41,8 +41,8 @@ class Planner {
 
     //msg building methods...
     const ramp_msgs::ModificationRequest buildModificationRequestMsg(const unsigned int i_path, const unsigned int i_path2=-1) const;
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> velocities) const;
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const Path path, const std::vector<float> velocities) const;
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
 
 
 

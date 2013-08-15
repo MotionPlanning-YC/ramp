@@ -63,13 +63,13 @@ void Planner::initialization() {
   //For each path
   for(unsigned int i=0;i<paths_.size();i++) {
 
-    //Hardcode some times, 2s per segment
+    //Hardcode some velocities, 1m/s per segment
     for(unsigned int j=1;j<paths_.at(i).all_.size();j++) {
-      v.push_back(10.0f);
+      v.push_back(1.0f);
     }
     
     //Build a TrajectoryRequest 
-    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequestMsg(i,v);
+    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequestMsg(i,v,v);
     
     //Send the request and push the returned Trajectory onto population_
     if(requestTrajectory(msg_request)) {
@@ -141,7 +141,7 @@ const std::vector<ramp_msgs::Trajectory> Planner::modifyTraj(const unsigned int 
     }
 
     //Now build a TrajectoryRequestMsg
-    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequestMsg(mod_path, v);
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequestMsg(mod_path, v, v);
    
     //Send the request and set the result to the returned trajectory 
     if(requestTrajectory(tr)) {
@@ -172,11 +172,12 @@ const ramp_msgs::ModificationRequest Planner::buildModificationRequestMsg(const 
 
 
 /** Build a TrajectoryRequest msg */
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const Path path, const std::vector<float> velocities ) const {
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const Path path, const std::vector<float> v_s, const std::vector<float> v_e ) const {
   ramp_msgs::TrajectoryRequest result;
 
   result.request.path = path.buildPathMsg();
-  result.request.v    = velocities;
+  result.request.v_start    = v_s;
+  result.request.v_end      = v_e;
   result.request.resolutionRate = resolutionRate_;
 
   return result;
@@ -184,11 +185,12 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const Path
 
 
 /** Build a TrajectoryRequest msg */
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> velocities) const {
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const {
   ramp_msgs::TrajectoryRequest result;
 
   result.request.path = paths_.at(i_path).buildPathMsg();
-  result.request.v    = velocities;
+  result.request.v_start    = v_s;
+  result.request.v_end      = v_e;
   result.request.resolutionRate = resolutionRate_;
   
   return result; 

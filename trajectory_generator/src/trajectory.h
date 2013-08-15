@@ -19,6 +19,8 @@ class Trajectory {
     std::vector<Segment>                segments_;
     std::vector<MotionState>            points_;
     std::vector<float>                  v_; //Velocity per segment      
+    std::vector<float>                  v_start_;
+    std::vector<float>                  v_end_;
     unsigned int                        resolutionRate_;  //The resolution rate is specified in Hz
 
     //Methods

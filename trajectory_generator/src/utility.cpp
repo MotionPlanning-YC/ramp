@@ -24,12 +24,18 @@ const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request 
   result<<"\nPath:"<<tr.path;
 
 
-  result<<"\nv: ("<<tr.v.at(0);
-  for(unsigned int i=0;i<tr.v.size();i++) {
-    result<<", "<<tr.v.at(i);
+  result<<"\nv_start: ("<<tr.v_start.at(0);
+  for(unsigned int i=0;i<tr.v_start.size();i++) {
+    result<<", "<<tr.v_start.at(i);
   }
   result<<")";
 
+  result<<"\nv_start: ("<<tr.v_end.at(0);
+  for(unsigned int i=0;i<tr.v_end.size();i++) {
+    result<<", "<<tr.v_end.at(i);
+  }
+  result<<")";
+  
   result<<"\nresolutionRate: "<<tr.resolutionRate;
 
   return result.str();
