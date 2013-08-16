@@ -19,8 +19,10 @@ Configuration::Configuration	configuration.h	/^    Configuration(ramp_msgs::Conf
 Configuration::K_	configuration.h	/^    std::vector<float> K_; $/;"	m	class:Configuration	access:public
 Configuration::buildConfigurationMsg	configuration.cpp	/^const ramp_msgs::Configuration Configuration::buildConfigurationMsg() const {$/;"	f	class:Configuration	signature:() const
 Configuration::buildConfigurationMsg	configuration.h	/^    const ramp_msgs::Configuration buildConfigurationMsg() const;$/;"	p	class:Configuration	access:public	signature:() const
-Configuration::random	configuration.cpp	/^Configuration Configuration::random() {$/;"	f	class:Configuration	signature:()
-Configuration::random	configuration.h	/^    Configuration random();$/;"	p	class:Configuration	access:public	signature:()
+Configuration::equals	configuration.cpp	/^const bool Configuration::equals(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
+Configuration::equals	configuration.h	/^    const bool equals(const Configuration& c) const; $/;"	p	class:Configuration	access:public	signature:(const Configuration& c) const
+Configuration::random	configuration.cpp	/^void Configuration::random() {$/;"	f	class:Configuration	signature:()
+Configuration::random	configuration.h	/^    void random();$/;"	p	class:Configuration	access:public	signature:()
 Configuration::ranges_	configuration.h	/^    std::vector<Range> ranges_;$/;"	m	class:Configuration	access:public
 Configuration::toString	configuration.cpp	/^const std::string Configuration::toString() const {$/;"	f	class:Configuration	signature:() const
 Configuration::toString	configuration.h	/^    const std::string toString() const;$/;"	p	class:Configuration	access:public	signature:() const
@@ -46,18 +48,22 @@ PLANNER	planner.h	2;"	d
 Path	path.cpp	/^Path::Path() {}$/;"	f	class:Path	signature:()
 Path	path.cpp	/^Path::Path(Configuration start, Configuration goal) : start_(start), goal_(goal) {$/;"	f	class:Path	signature:(Configuration start, Configuration goal)
 Path	path.cpp	/^Path::Path(ramp_msgs::Path p) {$/;"	f	class:Path	signature:(ramp_msgs::Path p)
+Path	path.cpp	/^Path::Path(std::vector<Configuration> all) {$/;"	f	class:Path	signature:(std::vector<Configuration> all)
 Path	path.h	/^    Path();$/;"	p	class:Path	access:public	signature:()
 Path	path.h	/^    Path(Configuration start, Configuration goal);$/;"	p	class:Path	access:public	signature:(Configuration start, Configuration goal)
 Path	path.h	/^    Path(ramp_msgs::Path p);$/;"	p	class:Path	access:public	signature:(ramp_msgs::Path p)
+Path	path.h	/^    Path(std::vector<Configuration> all);$/;"	p	class:Path	access:public	signature:(std::vector<Configuration> all)
 Path	path.h	/^class Path {$/;"	c
 Path::Add	path.cpp	/^void Path::Add(const Configuration c) {$/;"	f	class:Path	signature:(const Configuration c)
 Path::Add	path.h	/^    void Add(const Configuration c);$/;"	p	class:Path	access:public	signature:(const Configuration c)
 Path::Path	path.cpp	/^Path::Path() {}$/;"	f	class:Path	signature:()
 Path::Path	path.cpp	/^Path::Path(Configuration start, Configuration goal) : start_(start), goal_(goal) {$/;"	f	class:Path	signature:(Configuration start, Configuration goal)
 Path::Path	path.cpp	/^Path::Path(ramp_msgs::Path p) {$/;"	f	class:Path	signature:(ramp_msgs::Path p)
+Path::Path	path.cpp	/^Path::Path(std::vector<Configuration> all) {$/;"	f	class:Path	signature:(std::vector<Configuration> all)
 Path::Path	path.h	/^    Path();$/;"	p	class:Path	access:public	signature:()
 Path::Path	path.h	/^    Path(Configuration start, Configuration goal);$/;"	p	class:Path	access:public	signature:(Configuration start, Configuration goal)
 Path::Path	path.h	/^    Path(ramp_msgs::Path p);$/;"	p	class:Path	access:public	signature:(ramp_msgs::Path p)
+Path::Path	path.h	/^    Path(std::vector<Configuration> all);$/;"	p	class:Path	access:public	signature:(std::vector<Configuration> all)
 Path::all_	path.h	/^    std::vector<Configuration> all_;$/;"	m	class:Path	access:public
 Path::buildPathMsg	path.cpp	/^const ramp_msgs::Path Path::buildPathMsg() const {$/;"	f	class:Path	signature:() const
 Path::buildPathMsg	path.h	/^    const ramp_msgs::Path buildPathMsg() const; $/;"	p	class:Path	access:public	signature:() const
@@ -67,43 +73,40 @@ Path::toString	path.cpp	/^const std::string Path::toString() const {$/;"	f	class
 Path::toString	path.h	/^    const std::string toString() const;$/;"	p	class:Path	access:public	signature:() const
 Path::~Path	path.cpp	/^Path::~Path() {}$/;"	f	class:Path	signature:()
 Path::~Path	path.h	/^    ~Path();$/;"	p	class:Path	access:public	signature:()
-Planner	planner.cpp	/^Planner::Planner() : resolutionRate_(5), populationSize_(7), h_traj_req_(0) {}$/;"	f	class:Planner	signature:()
-Planner	planner.cpp	/^Planner::Planner(const int p) : resolutionRate_(5), populationSize_(p), h_traj_req_(0) {}$/;"	f	class:Planner	signature:(const int p)
-Planner	planner.cpp	/^Planner::Planner(const unsigned int r) : resolutionRate_(r), populationSize_(7), h_traj_req_(0) {}$/;"	f	class:Planner	signature:(const unsigned int r)
+Planner	planner.cpp	/^Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_mod_req_(0) {}$/;"	f	class:Planner	signature:()
 Planner	planner.cpp	/^Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0) {}$/;"	f	class:Planner	signature:(const unsigned int r, const int p)
 Planner	planner.h	/^    Planner();$/;"	p	class:Planner	access:public	signature:()
-Planner	planner.h	/^    Planner(const int p);$/;"	p	class:Planner	access:public	signature:(const int p)
-Planner	planner.h	/^    Planner(const unsigned int r);$/;"	p	class:Planner	access:public	signature:(const unsigned int r)
 Planner	planner.h	/^    Planner(const unsigned int r, const int p);$/;"	p	class:Planner	access:public	signature:(const unsigned int r, const int p)
 Planner	planner.h	/^class Planner {$/;"	c
-Planner::Planner	planner.cpp	/^Planner::Planner() : resolutionRate_(5), populationSize_(7), h_traj_req_(0) {}$/;"	f	class:Planner	signature:()
-Planner::Planner	planner.cpp	/^Planner::Planner(const int p) : resolutionRate_(5), populationSize_(p), h_traj_req_(0) {}$/;"	f	class:Planner	signature:(const int p)
-Planner::Planner	planner.cpp	/^Planner::Planner(const unsigned int r) : resolutionRate_(r), populationSize_(7), h_traj_req_(0) {}$/;"	f	class:Planner	signature:(const unsigned int r)
+Planner::Planner	planner.cpp	/^Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_mod_req_(0) {}$/;"	f	class:Planner	signature:()
 Planner::Planner	planner.cpp	/^Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0) {}$/;"	f	class:Planner	signature:(const unsigned int r, const int p)
 Planner::Planner	planner.h	/^    Planner();$/;"	p	class:Planner	access:public	signature:()
-Planner::Planner	planner.h	/^    Planner(const int p);$/;"	p	class:Planner	access:public	signature:(const int p)
-Planner::Planner	planner.h	/^    Planner(const unsigned int r);$/;"	p	class:Planner	access:public	signature:(const unsigned int r)
 Planner::Planner	planner.h	/^    Planner(const unsigned int r, const int p);$/;"	p	class:Planner	access:public	signature:(const unsigned int r, const int p)
-Planner::buildModificationRequestMsg	planner.cpp	/^const ramp_msgs::ModificationRequest Planner::buildModificationRequestMsg(const unsigned int i_path) const {$/;"	f	class:Planner	signature:(const unsigned int i_path) const
-Planner::buildModificationRequestMsg	planner.h	/^    const ramp_msgs::ModificationRequest buildModificationRequestMsg(const unsigned int i_path) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_path) const
-Planner::buildTrajectoryRequestMsg	planner.cpp	/^const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const Path path, const std::vector<float> times ) const {$/;"	f	class:Planner	signature:(const Path path, const std::vector<float> times ) const
-Planner::buildTrajectoryRequestMsg	planner.cpp	/^const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> times) const {$/;"	f	class:Planner	signature:(const unsigned int i_path, const std::vector<float> times) const
-Planner::buildTrajectoryRequestMsg	planner.h	/^    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const Path path, const std::vector<float> times) const;$/;"	p	class:Planner	access:public	signature:(const Path path, const std::vector<float> times) const
-Planner::buildTrajectoryRequestMsg	planner.h	/^    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> times) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_path, const std::vector<float> times) const
+Planner::bestTrajec_	planner.h	/^    ramp_msgs::Trajectory bestTrajec_;$/;"	m	class:Planner	access:private
+Planner::buildModificationRequestMsg	planner.cpp	/^const ramp_msgs::ModificationRequest Planner::buildModificationRequestMsg(const unsigned int i_path, const unsigned int i_path2) const {$/;"	f	class:Planner	signature:(const unsigned int i_path, const unsigned int i_path2) const
+Planner::buildModificationRequestMsg	planner.h	/^    const ramp_msgs::ModificationRequest buildModificationRequestMsg(const unsigned int i_path, const unsigned int i_path2=-1) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_path, const unsigned int i_path2=-1) const
+Planner::buildTrajectoryRequestMsg	planner.cpp	/^const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const Path path, const std::vector<float> v_s, const std::vector<float> v_e ) const {$/;"	f	class:Planner	signature:(const Path path, const std::vector<float> v_s, const std::vector<float> v_e ) const
+Planner::buildTrajectoryRequestMsg	planner.cpp	/^const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const {$/;"	f	class:Planner	signature:(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const
+Planner::buildTrajectoryRequestMsg	planner.h	/^    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;$/;"	p	class:Planner	access:public	signature:(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const
+Planner::buildTrajectoryRequestMsg	planner.h	/^    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const
+Planner::current_	planner.h	/^    Configuration current_;$/;"	m	class:Planner	access:private
+Planner::generation_	planner.h	/^    unsigned int generation_;$/;"	m	class:Planner	access:private
+Planner::go	planner.cpp	/^ void Planner::go() {$/;"	f	class:Planner	signature:()
+Planner::go	planner.h	/^    void go();$/;"	p	class:Planner	access:public	signature:()
 Planner::goal_	planner.h	/^    Configuration goal_;$/;"	m	class:Planner	access:public
 Planner::h_mod_req_	planner.h	/^    ModificationRequestHandler* h_mod_req_;$/;"	m	class:Planner	access:public
 Planner::h_traj_req_	planner.h	/^    TrajectoryRequestHandler*   h_traj_req_;$/;"	m	class:Planner	access:public
 Planner::init_handlers	planner.cpp	/^void Planner::init_handlers(const ros::NodeHandle& h) {$/;"	f	class:Planner	signature:(const ros::NodeHandle& h)
 Planner::init_handlers	planner.h	/^    void init_handlers(const ros::NodeHandle& h);$/;"	p	class:Planner	access:public	signature:(const ros::NodeHandle& h)
-Planner::initialization	planner.cpp	/^void Planner::initialization() { $/;"	f	class:Planner	signature:()
-Planner::initialization	planner.h	/^    void initialization();$/;"	p	class:Planner	access:public	signature:()
-Planner::modifyPath	planner.cpp	/^const ramp_msgs::Path Planner::modifyPath(const unsigned int i) const {$/;"	f	class:Planner	signature:(const unsigned int i) const
-Planner::modifyPath	planner.h	/^    const ramp_msgs::Path modifyPath(const unsigned int i) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i) const
-Planner::modifyTraj	planner.cpp	/^const ramp_msgs::Trajectory Planner::modifyTraj(const unsigned int i) const {$/;"	f	class:Planner	signature:(const unsigned int i) const
-Planner::modifyTraj	planner.h	/^    const ramp_msgs::Trajectory modifyTraj(const unsigned int i) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i) const
-Planner::paths_	planner.h	/^    std::vector<Path> paths_;$/;"	m	class:Planner	access:public
+Planner::init_population	planner.cpp	/^void Planner::init_population() { $/;"	f	class:Planner	signature:()
+Planner::init_population	planner.h	/^    void init_population();$/;"	p	class:Planner	access:public	signature:()
+Planner::modifyPath	planner.cpp	/^const std::vector<ramp_msgs::Path> Planner::modifyPath(const unsigned int i1, const unsigned int i2) const {$/;"	f	class:Planner	signature:(const unsigned int i1, const unsigned int i2) const
+Planner::modifyPath	planner.h	/^    const std::vector<ramp_msgs::Path> modifyPath(const unsigned int i1, const unsigned int i2=-1) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i1, const unsigned int i2=-1) const
+Planner::modifyTrajec	planner.cpp	/^const std::vector<ramp_msgs::Trajectory> Planner::modifyTrajec(const unsigned int i1, const unsigned int i2) {$/;"	f	class:Planner	signature:(const unsigned int i1, const unsigned int i2)
+Planner::modifyTrajec	planner.h	/^    const std::vector<ramp_msgs::Trajectory> modifyTrajec(const unsigned int i1, const unsigned int i2=-1);$/;"	p	class:Planner	access:public	signature:(const unsigned int i1, const unsigned int i2=-1)
+Planner::paths_	planner.h	/^    std::vector<Path>                   paths_;$/;"	m	class:Planner	access:public
 Planner::populationSize_	planner.h	/^    const int populationSize_;$/;"	m	class:Planner	access:private
-Planner::population_	planner.h	/^    std::vector<ramp_msgs::Trajectory> population_;$/;"	m	class:Planner	access:public
+Planner::population_	planner.h	/^    std::vector<ramp_msgs::Trajectory>  population_;$/;"	m	class:Planner	access:public
 Planner::ranges_	planner.h	/^    std::vector<Range> ranges_;$/;"	m	class:Planner	access:public
 Planner::requestModification	planner.cpp	/^const bool Planner::requestModification(ramp_msgs::ModificationRequest& mr) const {$/;"	f	class:Planner	signature:(ramp_msgs::ModificationRequest& mr) const
 Planner::requestModification	planner.h	/^    const bool requestModification(ramp_msgs::ModificationRequest& mr) const;$/;"	p	class:Planner	access:public	signature:(ramp_msgs::ModificationRequest& mr) const
@@ -111,9 +114,8 @@ Planner::requestTrajectory	planner.cpp	/^const bool Planner::requestTrajectory(r
 Planner::requestTrajectory	planner.h	/^    const bool requestTrajectory(ramp_msgs::TrajectoryRequest& tr) const;$/;"	p	class:Planner	access:public	signature:(ramp_msgs::TrajectoryRequest& tr) const
 Planner::resolutionRate_	planner.h	/^    const unsigned int resolutionRate_;$/;"	m	class:Planner	access:public
 Planner::start_	planner.h	/^    Configuration start_;$/;"	m	class:Planner	access:public
-Planner::times_	planner.h	/^    std::vector<std::vector<float> > times_;$/;"	m	class:Planner	access:public
-Planner::traj_	planner.h	/^    ramp_msgs::Trajectory traj_;$/;"	m	class:Planner	access:private
 Planner::u	planner.h	/^    Utility u; $/;"	m	class:Planner	access:private
+Planner::velocities_	planner.h	/^    std::vector<std::vector<float> >    velocities_;$/;"	m	class:Planner	access:public
 Planner::~Planner	planner.cpp	/^Planner::~Planner() {$/;"	f	class:Planner	signature:()
 Planner::~Planner	planner.h	/^    ~Planner();$/;"	p	class:Planner	access:public	signature:()
 RANGE_H	range.h	2;"	d
@@ -159,20 +161,27 @@ Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_m
 Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Path path) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path path) const
 Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
 all_	path.h	/^    std::vector<Configuration> all_;$/;"	m	class:Path	access:public
+bestTrajec_	planner.h	/^    ramp_msgs::Trajectory bestTrajec_;$/;"	m	class:Planner	access:private
 buildConfigurationMsg	configuration.cpp	/^const ramp_msgs::Configuration Configuration::buildConfigurationMsg() const {$/;"	f	class:Configuration	signature:() const
 buildConfigurationMsg	configuration.h	/^    const ramp_msgs::Configuration buildConfigurationMsg() const;$/;"	p	class:Configuration	access:public	signature:() const
-buildModificationRequestMsg	planner.cpp	/^const ramp_msgs::ModificationRequest Planner::buildModificationRequestMsg(const unsigned int i_path) const {$/;"	f	class:Planner	signature:(const unsigned int i_path) const
-buildModificationRequestMsg	planner.h	/^    const ramp_msgs::ModificationRequest buildModificationRequestMsg(const unsigned int i_path) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_path) const
+buildModificationRequestMsg	planner.cpp	/^const ramp_msgs::ModificationRequest Planner::buildModificationRequestMsg(const unsigned int i_path, const unsigned int i_path2) const {$/;"	f	class:Planner	signature:(const unsigned int i_path, const unsigned int i_path2) const
+buildModificationRequestMsg	planner.h	/^    const ramp_msgs::ModificationRequest buildModificationRequestMsg(const unsigned int i_path, const unsigned int i_path2=-1) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_path, const unsigned int i_path2=-1) const
 buildPathMsg	path.cpp	/^const ramp_msgs::Path Path::buildPathMsg() const {$/;"	f	class:Path	signature:() const
 buildPathMsg	path.h	/^    const ramp_msgs::Path buildPathMsg() const; $/;"	p	class:Path	access:public	signature:() const
 buildRangeMsg	range.cpp	/^const ramp_msgs::Range Range::buildRangeMsg() const {$/;"	f	class:Range	signature:() const
 buildRangeMsg	range.h	/^    const ramp_msgs::Range buildRangeMsg() const;$/;"	p	class:Range	access:public	signature:() const
-buildTrajectoryRequestMsg	planner.cpp	/^const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const Path path, const std::vector<float> times ) const {$/;"	f	class:Planner	signature:(const Path path, const std::vector<float> times ) const
-buildTrajectoryRequestMsg	planner.cpp	/^const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> times) const {$/;"	f	class:Planner	signature:(const unsigned int i_path, const std::vector<float> times) const
-buildTrajectoryRequestMsg	planner.h	/^    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const Path path, const std::vector<float> times) const;$/;"	p	class:Planner	access:public	signature:(const Path path, const std::vector<float> times) const
-buildTrajectoryRequestMsg	planner.h	/^    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> times) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_path, const std::vector<float> times) const
+buildTrajectoryRequestMsg	planner.cpp	/^const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const Path path, const std::vector<float> v_s, const std::vector<float> v_e ) const {$/;"	f	class:Planner	signature:(const Path path, const std::vector<float> v_s, const std::vector<float> v_e ) const
+buildTrajectoryRequestMsg	planner.cpp	/^const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const {$/;"	f	class:Planner	signature:(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const
+buildTrajectoryRequestMsg	planner.h	/^    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;$/;"	p	class:Planner	access:public	signature:(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const
+buildTrajectoryRequestMsg	planner.h	/^    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const
 client_	modification_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:ModificationRequestHandler	access:private
 client_	trajectory_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:TrajectoryRequestHandler	access:private
+current_	planner.h	/^    Configuration current_;$/;"	m	class:Planner	access:private
+equals	configuration.cpp	/^const bool Configuration::equals(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
+equals	configuration.h	/^    const bool equals(const Configuration& c) const; $/;"	p	class:Configuration	access:public	signature:(const Configuration& c) const
+generation_	planner.h	/^    unsigned int generation_;$/;"	m	class:Planner	access:private
+go	planner.cpp	/^ void Planner::go() {$/;"	f	class:Planner	signature:()
+go	planner.h	/^    void go();$/;"	p	class:Planner	access:public	signature:()
 goal_	path.h	/^    Configuration goal_;$/;"	m	class:Path	access:public
 goal_	planner.h	/^    Configuration goal_;$/;"	m	class:Planner	access:public
 h_mod_req_	planner.h	/^    ModificationRequestHandler* h_mod_req_;$/;"	m	class:Planner	access:public
@@ -181,20 +190,20 @@ handle_	modification_request_handler.h	/^    ros::NodeHandle handle_;$/;"	m	clas
 handle_	trajectory_request_handler.h	/^    ros::NodeHandle  handle_; $/;"	m	class:TrajectoryRequestHandler	access:private
 init_handlers	planner.cpp	/^void Planner::init_handlers(const ros::NodeHandle& h) {$/;"	f	class:Planner	signature:(const ros::NodeHandle& h)
 init_handlers	planner.h	/^    void init_handlers(const ros::NodeHandle& h);$/;"	p	class:Planner	access:public	signature:(const ros::NodeHandle& h)
-initialization	planner.cpp	/^void Planner::initialization() { $/;"	f	class:Planner	signature:()
-initialization	planner.h	/^    void initialization();$/;"	p	class:Planner	access:public	signature:()
+init_population	planner.cpp	/^void Planner::init_population() { $/;"	f	class:Planner	signature:()
+init_population	planner.h	/^    void init_population();$/;"	p	class:Planner	access:public	signature:()
 main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
 max_	range.h	/^    float max_;$/;"	m	class:Range	access:public
 min_	range.h	/^    float min_;$/;"	m	class:Range	access:public
-modifyPath	planner.cpp	/^const ramp_msgs::Path Planner::modifyPath(const unsigned int i) const {$/;"	f	class:Planner	signature:(const unsigned int i) const
-modifyPath	planner.h	/^    const ramp_msgs::Path modifyPath(const unsigned int i) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i) const
-modifyTraj	planner.cpp	/^const ramp_msgs::Trajectory Planner::modifyTraj(const unsigned int i) const {$/;"	f	class:Planner	signature:(const unsigned int i) const
-modifyTraj	planner.h	/^    const ramp_msgs::Trajectory modifyTraj(const unsigned int i) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i) const
-paths_	planner.h	/^    std::vector<Path> paths_;$/;"	m	class:Planner	access:public
+modifyPath	planner.cpp	/^const std::vector<ramp_msgs::Path> Planner::modifyPath(const unsigned int i1, const unsigned int i2) const {$/;"	f	class:Planner	signature:(const unsigned int i1, const unsigned int i2) const
+modifyPath	planner.h	/^    const std::vector<ramp_msgs::Path> modifyPath(const unsigned int i1, const unsigned int i2=-1) const;$/;"	p	class:Planner	access:public	signature:(const unsigned int i1, const unsigned int i2=-1) const
+modifyTrajec	planner.cpp	/^const std::vector<ramp_msgs::Trajectory> Planner::modifyTrajec(const unsigned int i1, const unsigned int i2) {$/;"	f	class:Planner	signature:(const unsigned int i1, const unsigned int i2)
+modifyTrajec	planner.h	/^    const std::vector<ramp_msgs::Trajectory> modifyTrajec(const unsigned int i1, const unsigned int i2=-1);$/;"	p	class:Planner	access:public	signature:(const unsigned int i1, const unsigned int i2=-1)
+paths_	planner.h	/^    std::vector<Path>                   paths_;$/;"	m	class:Planner	access:public
 populationSize_	planner.h	/^    const int populationSize_;$/;"	m	class:Planner	access:private
-population_	planner.h	/^    std::vector<ramp_msgs::Trajectory> population_;$/;"	m	class:Planner	access:public
-random	configuration.cpp	/^Configuration Configuration::random() {$/;"	f	class:Configuration	signature:()
-random	configuration.h	/^    Configuration random();$/;"	p	class:Configuration	access:public	signature:()
+population_	planner.h	/^    std::vector<ramp_msgs::Trajectory>  population_;$/;"	m	class:Planner	access:public
+random	configuration.cpp	/^void Configuration::random() {$/;"	f	class:Configuration	signature:()
+random	configuration.h	/^    void random();$/;"	p	class:Configuration	access:public	signature:()
 random	range.cpp	/^const float Range::random() {$/;"	f	class:Range	signature:()
 random	range.h	/^    const float random();$/;"	p	class:Range	access:public	signature:()
 ranges_	configuration.h	/^    std::vector<Range> ranges_;$/;"	m	class:Configuration	access:public
@@ -210,7 +219,6 @@ requestTrajectory	planner.h	/^    const bool requestTrajectory(ramp_msgs::Trajec
 resolutionRate_	planner.h	/^    const unsigned int resolutionRate_;$/;"	m	class:Planner	access:public
 start_	path.h	/^    Configuration start_;$/;"	m	class:Path	access:public
 start_	planner.h	/^    Configuration start_;$/;"	m	class:Planner	access:public
-times_	planner.h	/^    std::vector<std::vector<float> > times_;$/;"	m	class:Planner	access:public
 toString	configuration.cpp	/^const std::string Configuration::toString() const {$/;"	f	class:Configuration	signature:() const
 toString	configuration.h	/^    const std::string toString() const;$/;"	p	class:Configuration	access:public	signature:() const
 toString	path.cpp	/^const std::string Path::toString() const {$/;"	f	class:Path	signature:() const
@@ -219,8 +227,8 @@ toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path
 toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Path path) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path path) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
-traj_	planner.h	/^    ramp_msgs::Trajectory traj_;$/;"	m	class:Planner	access:private
 u	planner.h	/^    Utility u; $/;"	m	class:Planner	access:private
+velocities_	planner.h	/^    std::vector<std::vector<float> >    velocities_;$/;"	m	class:Planner	access:public
 ~Configuration	configuration.cpp	/^Configuration::~Configuration() {}$/;"	f	class:Configuration	signature:()
 ~Configuration	configuration.h	/^    ~Configuration();$/;"	p	class:Configuration	access:public	signature:()
 ~Path	path.cpp	/^Path::~Path() {}$/;"	f	class:Path	signature:()

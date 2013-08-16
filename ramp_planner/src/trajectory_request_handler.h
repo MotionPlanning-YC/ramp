@@ -5,7 +5,6 @@
 
 class TrajectoryRequestHandler {
   public:
-    TrajectoryRequestHandler();
     TrajectoryRequestHandler(const ros::NodeHandle& h);
 
     //Cannot make r const because it has no serialize/deserialize

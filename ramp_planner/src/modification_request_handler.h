@@ -5,7 +5,6 @@
 
 class ModificationRequestHandler {
   public:
-    ModificationRequestHandler();
     ModificationRequestHandler(const ros::NodeHandle& h);
    
     

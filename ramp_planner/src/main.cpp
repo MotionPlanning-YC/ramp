@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
 
   std::cout<<"\nPress Enter to initialize the planner\n";
   std::cin.get();
-  my_planner.initialization();
+  my_planner.init_population();
 
 
   std::cout<<"\npopulation size:"<<my_planner.population_.size();
@@ -62,20 +62,27 @@ int main(int argc, char** argv) {
     std::cout<<"\n"<<u.toString(my_planner.population_.at(i)); 
   }*/
 
+  my_planner.modifier_->paths_ = my_planner.paths_;
+
+
+  for(unsigned int i=0;i<my_planner.paths_.size();i++) {
+    std::cout<<"\n\nPath "<<i<<"\n";
+    std::cout<<"\n"<<my_planner.paths_.at(i).toString(); 
+  }
 
   std::cout<<"\nPress Enter to modify a path!\n";
   std::cin.get();
 
-  std::cout<<"\nModifying Path:\n"<<my_planner.paths_.at(0).toString()<<"\n";
+  std::vector<Path> ps = my_planner.modifyPath();
 
-  std::vector<ramp_msgs::Path> ps = my_planner.modifyPath(0);
-  std::cout<<"\nModified Paths!\n";
-  std::cout<<u.toString(ps.at(0));
-
+  for(unsigned int i=0;i<ps.size();i++) {
+    std::cout<<"\n\nPath "<<i<<"\n";
+    std::cout<<"\n"<<ps.at(i).toString(); 
+  }
 
   std::cout<<"\nPress Enter to modify a traj!\n";
   std::cin.get();
-  std::vector<ramp_msgs::Trajectory> trs = my_planner.modifyTraj(0);
+  std::vector<ramp_msgs::Trajectory> trs = my_planner.modifyTrajec(0);
   std::cout<<"\nTrajectory modified!\n";
   std::cout<<u.toString(trs.at(0));
   

@@ -3,53 +3,77 @@
 #include "ros/ros.h"
 #include "path.h"
 #include "trajectory_request_handler.h"
-#include "modification_request_handler.h"
+#include "modifier.h"
 
 class Planner {
   public:
     Planner();
-    Planner(const int p);
-    Planner(const unsigned int r);
+    Planner(const ros::NodeHandle& h);
     Planner(const unsigned int r, const int p);
     ~Planner();
 
-    /** Data Members */
-    std::vector<ramp_msgs::Trajectory> population_;
-    std::vector<Path> paths_;
-    std::vector<std::vector<float> > velocities_;
-
-    std::vector<Range> ranges_;
-    Configuration start_;
-    Configuration goal_;
-    TrajectoryRequestHandler*   h_traj_req_;
-    ModificationRequestHandler* h_mod_req_;
+    /*******************************************
+     ************** Data Members ***************
+     *******************************************/
+    
+    Modifier* modifier_;
+    //Hold the population of trajectories, 
+    //the velocities of each trajectory's segments,
+    //the trajectory's path,
+    //and the resolution rate for the trajectories
+    std::vector<ramp_msgs::Trajectory>  population_;
+    std::vector<std::vector<float> >    velocities_;
+    std::vector<Path>                   paths_;
     const unsigned int resolutionRate_;
     
-    /** Methods */
-    void initialization();
+    //Hold the start and goal configurations
+    //and the ranges for each DOF
+    Configuration start_;
+    Configuration goal_;
+    std::vector<Range> ranges_;
+    
+    //Hold the handlers to communicate with other packages
+    TrajectoryRequestHandler*   h_traj_req_;
+    //ModificationRequestHandler* h_mod_req_;
+    
+    
+    /********************************************
+     ***************** Methods ******************
+     ********************************************/
+    
+    //Initialization steps
+    void init_population();
     void init_handlers(const ros::NodeHandle& h);
     
-    //Modify
-    const std::vector<ramp_msgs::Path> modifyPath(const unsigned int i1, const unsigned int i2=-1) const;
-    const std::vector<ramp_msgs::Trajectory> modifyTraj(const unsigned int i1, const unsigned int i2=-1);
+    //Modify trajectory or path
+    const std::vector<Path> modifyPath();
+    const std::vector<ramp_msgs::Trajectory> modifyTrajec(const unsigned int i1, const unsigned int i2=-1);
 
-    //Cannot make tr const because it has no serialize/deserialize
-    const bool requestTrajectory(ramp_msgs::TrajectoryRequest& tr) const;
+    //Request information from other packages
+    //Cannot make the request srvs const because they have no serialize/deserialize
+    const bool requestTrajectory(ramp_msgs::TrajectoryRequest& tr);
+    //const bool requestModification(ramp_msgs::ModificationRequest& mr);
+
+    //Msg building methods
+    const ramp_msgs::ModificationRequest buildModificationRequest(const unsigned int i_path, const unsigned int i_path2=-1) const;
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
+
+
+
+    //Start planning
+    void go();
+
+
     
-    //Cannot make mr const because it has no serialize/deserialize
-    const bool requestModification(ramp_msgs::ModificationRequest& mr) const;
-
-    //msg building methods...
-    const ramp_msgs::ModificationRequest buildModificationRequestMsg(const unsigned int i_path, const unsigned int i_path2=-1) const;
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequestMsg(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
-
 
 
   private:
     Utility u; 
     const int populationSize_;
-    ramp_msgs::Trajectory traj_;
+    Configuration current_;
+    ramp_msgs::Trajectory bestTrajec_;
+    unsigned int generation_;
 };
 
 #endif

@@ -1,37 +1,50 @@
 #include "planner.h"
 
 
-Planner::Planner() : resolutionRate_(5), populationSize_(7), h_traj_req_(0) {}
+/*****************************************************
+ ************ Constructors and destructor ************
+ *****************************************************/
 
-Planner::Planner(const int p) : resolutionRate_(5), populationSize_(p), h_traj_req_(0) {}
+Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), modifier_(0) {}
 
-Planner::Planner(const unsigned int r) : resolutionRate_(r), populationSize_(7), h_traj_req_(0) {}
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), modifier_(0) {}
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0) {}
-
-
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0) {
+  init_handlers(h);
+}
 
 Planner::~Planner() {
-  if(h_traj_req_ != 0) {
+  if(h_traj_req_!= 0) {
     delete h_traj_req_;  
-    h_traj_req_ = 0;
+    h_traj_req_= 0;
   }
   
-  if(h_mod_req_ != 0) {
-    delete h_mod_req_;  
-    h_mod_req_ = 0;
+  if(modifier_!= 0) {
+    delete modifier_;  
+    modifier_= 0;
   }
 }
 
 
+
+
+
+
+/****************************************************
+ ************** Initialization Methods **************
+ ****************************************************/
+
+
+/** Initialize the handlers and allocate them on the heap */
 void Planner::init_handlers(const ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler(h);
-  h_mod_req_  = new ModificationRequestHandler(h);
+  modifier_ = new Modifier(h, paths_);
+  //h_mod_req_  = new ModificationRequestHandler(h);
 }
 
 
 /** This function generates the initial population of trajectories */
-void Planner::initialization() { 
+void Planner::init_population() { 
   
   //Create n random paths, where n=populationSize
   for(unsigned int i=0;i<populationSize_;i++) {
@@ -69,7 +82,7 @@ void Planner::initialization() {
     }
     
     //Build a TrajectoryRequest 
-    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequestMsg(i,v,v);
+    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(i,v,v);
     
     //Send the request and push the returned Trajectory onto population_
     if(requestTrajectory(msg_request)) {
@@ -89,46 +102,44 @@ void Planner::initialization() {
 }
 
 
-const bool Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr) const {
+
+
+
+/*****************************************************
+ ****************** Request Methods ******************
+ *****************************************************/
+
+/** Request a trajectory */
+const bool Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr) {
   return h_traj_req_->request(tr); 
 }
 
-const bool Planner::requestModification(ramp_msgs::ModificationRequest& mr) const {
-  return h_mod_req_->request(mr);
+
+
+/******************************************************
+ ****************** Modifying Methods *****************
+ ******************************************************/
+
+
+/** Modify a Path 
+ *  Can accept 2 ids if the modification operator is binary */
+const std::vector<Path> Planner::modifyPath() { 
+  return modifier_->perform();
 }
 
 
-
-
-const std::vector<ramp_msgs::Path> Planner::modifyPath(const unsigned int i1, const unsigned int i2) const {
-  std::vector<ramp_msgs::Path> result;
-
-  //Build a modification request
-  ramp_msgs::ModificationRequest mr = buildModificationRequestMsg(i1, i2);
-  
-  //Request the modification handler to make the modification
-  //It returns the modified Path
-  if(requestModification(mr)) {
-    result = mr.response.mod_paths;
-  }
-  else {
-    //some error handling
-  }
-
-  return result;
-}
-
-
-const std::vector<ramp_msgs::Trajectory> Planner::modifyTraj(const unsigned int i1, const unsigned int i2) {
+/** Modify a trajectory 
+ *  Can accept 2 ids if the modification operator is binary */
+const std::vector<ramp_msgs::Trajectory> Planner::modifyTrajec(const unsigned int i1, const unsigned int i2) {
   std::vector<ramp_msgs::Trajectory> result;
 
   //The modification operators deal with paths
   //So send the path to be modified
-  std::vector<ramp_msgs::Path> mp = modifyPath(i1, i2);
+  std::vector<Path> mp = modifyPath();
 
   for(unsigned int i=0;i<mp.size();i++) {
     
-    Path mod_path(mp.at(i));
+    Path mod_path = mp.at(i);
     std::cout<<"\nnew path:"<<mod_path.toString();
 
     paths_.push_back(mod_path); 
@@ -141,7 +152,7 @@ const std::vector<ramp_msgs::Trajectory> Planner::modifyTraj(const unsigned int 
     }
 
     //Now build a TrajectoryRequestMsg
-    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequestMsg(mod_path, v, v);
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(mod_path, v, v);
    
     //Send the request and set the result to the returned trajectory 
     if(requestTrajectory(tr)) {
@@ -157,8 +168,15 @@ const std::vector<ramp_msgs::Trajectory> Planner::modifyTraj(const unsigned int 
 }
 
 
+
+
+
+/******************************************************
+ **************** Srv Building Methods ****************
+ ******************************************************/
+
 /** Build a ModificationRequest msg */
-const ramp_msgs::ModificationRequest Planner::buildModificationRequestMsg(const unsigned int i_path, const unsigned int i_path2) const {
+const ramp_msgs::ModificationRequest Planner::buildModificationRequest(const unsigned int i_path, const unsigned int i_path2) const {
   ramp_msgs::ModificationRequest result;
 
   result.request.paths.push_back(paths_.at(i_path).buildPathMsg() );
@@ -172,7 +190,7 @@ const ramp_msgs::ModificationRequest Planner::buildModificationRequestMsg(const 
 
 
 /** Build a TrajectoryRequest msg */
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const Path path, const std::vector<float> v_s, const std::vector<float> v_e ) const {
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e ) const {
   ramp_msgs::TrajectoryRequest result;
 
   result.request.path = path.buildPathMsg();
@@ -185,7 +203,7 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const Path
 
 
 /** Build a TrajectoryRequest msg */
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const {
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const {
   ramp_msgs::TrajectoryRequest result;
 
   result.request.path = paths_.at(i_path).buildPathMsg();
@@ -195,3 +213,36 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequestMsg(const unsi
   
   return result; 
 }
+
+
+
+
+
+
+/*******************************************************
+ ****************** Start the planner ******************
+ *******************************************************/
+
+
+ void Planner::go() {
+
+  //t=0
+  generation_ = 0;
+  
+  //initialize population
+  init_population();
+
+  //int id = evaluate population()
+
+  //bestTrajec_ = population_.at(id);
+   
+  //createSubpopulations();
+  
+  while(!current_.equals(goal_)) {
+    generation_++;
+
+    //Call modification
+    
+  }
+
+ }

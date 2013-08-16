@@ -3,33 +3,24 @@
 
 Trajectory::Trajectory() : k_dof_(3) {}
 
-/** This constructor pushes on all of the poses passed in */
-/*Trajectory::Trajectory(const std::vector<geometry_msgs::Pose2D> kps) : k_dof_(3) {
-  for(unsigned int i=0;i<kps.size();i++) {
-    knot_points_.push_back(kps.at(i));
-    
-    //***x***t_.push_back(i*2.0);***x***
-  }
-}*/
 
-
-Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request traj_req) : k_dof_(3) {
+Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request trajec_req) : k_dof_(3) {
   
   //Push all of the path configurations onto knot_points
-  for(unsigned int i=0;i<traj_req.path.configurations.size();i++) {
+  for(unsigned int i=0;i<trajec_req.path.configurations.size();i++) {
     geometry_msgs::Pose2D temp;
-    temp.x      = traj_req.path.configurations.at(i).K.at(0);
-    temp.y      = traj_req.path.configurations.at(i).K.at(1);
-    temp.theta  = traj_req.path.configurations.at(i).K.at(2);
+    temp.x      = trajec_req.path.configurations.at(i).K.at(0);
+    temp.y      = trajec_req.path.configurations.at(i).K.at(1);
+    temp.theta  = trajec_req.path.configurations.at(i).K.at(2);
     knot_points_.push_back( temp );
   }
   
-  for(unsigned int i=0;i<traj_req.v_start.size();i++) {
-    v_start_.push_back(traj_req.v_start.at(i));
-    v_end_.push_back(traj_req.v_end.at(i));
+  for(unsigned int i=0;i<trajec_req.v_start.size();i++) {
+    v_start_.push_back(trajec_req.v_start.at(i));
+    v_end_.push_back(trajec_req.v_end.at(i));
   }
 
-  resolutionRate_ = traj_req.resolutionRate;
+  resolutionRate_ = trajec_req.resolutionRate;
   
 }
 
