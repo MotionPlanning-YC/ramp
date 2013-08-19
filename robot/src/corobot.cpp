@@ -142,6 +142,15 @@ const float Corobot::getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPo
   return speed;
 }
 
+const float Corobot::getAngularSpeed(const trajectory_msgs::JointTrajectoryPoint knotpoint1, const trajectory_msgs::JointTrajectoryPoint knotpoint2) const {
+
+  float delta_angle = knotpoint2.positions.at(2) - knotpoint1.positions.at(2);
+  float time = 3.0;
+  float speed = delta_angle / time;
+
+  return speed;
+}
+
 
 void Corobot::moveOnTrajectory() const {
   
@@ -152,27 +161,55 @@ void Corobot::moveOnTrajectory() const {
   std::vector<ros::Time> end_times;
   ros::Time start = ros::Time::now() + ros::Duration(1.0);
   std::vector<float> speeds;
+  std::vector<float> angular_speeds;
+
+  int i_knot_points = 1;
 
   for(unsigned int i=0;i<num-1;i++) {
     end_times.push_back(start + trajectory_.trajectory.points.at(i+1).time_from_start );
     speeds.push_back(getSpeedToWaypoint(trajectory_.trajectory.points.at(i), trajectory_.trajectory.points.at(i+1)));
+
+    //calculate the angular speed for each knot points
+    if ( i+1 == trajectory_.index_knot_points.at(i_knot_points))
+    {
+      angular_speeds.push_back(getAngularSpeed(trajectory_.trajectory.points.at(trajectory_.index_knot_points[i_knot_points-1]), trajectory_.trajectory.points.at(i+1)));
+
+      i_knot_points++;
+    }
   } 
   
   ros::Rate r(25);
   
   geometry_msgs::Twist twist;
+  i_knot_points = 1;
   
   //For each waypoint
   for(unsigned int i=0;i<num-1;i++) {
     twist.linear.x = speeds.at(i);
+    twist.angular.z = 0;
     //Send the twist msg at some rate r
     while(ros::ok() && ros::Time::now() < end_times.at(i)) {
       pub_twist_.publish(twist); 
       r.sleep();
     }
+
+    // rotate the robot to the specify angle if a knot point has been reached. 
+    if ( i+1 == trajectory_.index_knot_points.at(i_knot_points))
+    {
+      twist.linear.x = 0;
+      twist.angular.z = angular_speeds.at(i_knot_points-1);
+      //Send the twist msg at some rate r
+      while(ros::ok() && ros::Time::now() < (end_times.at(i) + ros::Duration(3.0))) {
+        pub_twist_.publish(twist); 
+        r.sleep();
+      }
+      //change the index to the next knot point
+      i_knot_points++;
+    }
+
   }
 
-  //Satisfy delta theta 
+  
 }
 
 
