@@ -4,11 +4,12 @@
 
 class Swap {
   public:
-   Swap(const ramp_msgs::Path p);
+    Swap() {} 
+    Swap(const ramp_msgs::Path p);
    
-   const ramp_msgs::Path perform();
+    const ramp_msgs::Path perform();
    
-   ramp_msgs::Path path_; 
+    ramp_msgs::Path path_; 
 };
 
 #endif

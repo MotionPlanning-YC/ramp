@@ -4,6 +4,7 @@
 
 class Insert {
   public:
+    Insert() {}
     Insert(const ramp_msgs::Path p); 
 
     const ramp_msgs::Path perform();

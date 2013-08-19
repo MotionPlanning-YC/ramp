@@ -16,31 +16,9 @@ Modifier::~Modifier() {
   }
 }
 
-/** This method performs all the tasks for path modification */
-std::vector<Path> Modifier::perform() {
-  std::vector<Path> result;
- 
-  //Build a modification request srv 
-  ramp_msgs::ModificationRequest mr = buildModificationRequest(); 
-
-  //If the request was successful
-  if(h_mod_req_->request(mr)) {
-
-    //Push on the modified paths
-    for(unsigned int i=0;i<mr.response.mod_paths.size();i++) {
-      Path temp(mr.response.mod_paths.at(i));
-      result.push_back(temp);
-    }
-  }
-  else {
-    //some error handling
-  }
-
-  return result;
-}
 
 
-/** This method build a ModificationRequest srv */
+/** This method builds a ModificationRequest srv */
 ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
   ramp_msgs::ModificationRequest result;
 
@@ -78,7 +56,45 @@ ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
   }
 
   //Get a random path to modify
-  result.request.paths.push_back(paths_.at(0).buildPathMsg());
+  unsigned int i_1 = rand() % paths_.size();
+  result.request.paths.push_back(paths_.at(i_1).buildPathMsg());
+
+  //If crossover, get a second path
+  if(op == 4) {
+    unsigned int i_2;
+    do { i_2 = rand() % paths_.size(); } 
+    while (i_1 != i_2);
+
+    result.request.paths.push_back(paths_.at(i_2).buildPathMsg());
+  }
+
+  
+  return result;
+}
+
+
+
+
+
+/** This method performs all the tasks for path modification */
+std::vector<Path> Modifier::perform() {
+  std::vector<Path> result;
+ 
+  //Build a modification request srv 
+  ramp_msgs::ModificationRequest mr = buildModificationRequest(); 
+
+  //If the request was successful
+  if(h_mod_req_->request(mr)) {
+
+    //Push on the modified paths
+    for(unsigned int i=0;i<mr.response.mod_paths.size();i++) {
+      Path temp(mr.response.mod_paths.at(i));
+      result.push_back(temp);
+    }
+  }
+  else {
+    //some error handling
+  }
 
   return result;
 }

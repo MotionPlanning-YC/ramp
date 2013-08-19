@@ -4,6 +4,7 @@
 
 class Delete {
   public:
+    Delete() {}
     Delete(const ramp_msgs::Path p);
 
     const ramp_msgs::Path perform();

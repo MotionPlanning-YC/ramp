@@ -1,19 +1,17 @@
 #include "ros/ros.h"
-#include "ramp_msgs/ModificationRequest.h"
 #include "ramp_msgs/Range.h"
 #include "utility.h"
-#include "insert.h"
-#include "delete.h"
-#include "change.h"
-#include "swap.h"
-#include "crossover.h"
+#include "modifier.h"
 
 bool handleRequest(ramp_msgs::ModificationRequest::Request& req,
                    ramp_msgs::ModificationRequest::Response& res)
 {
 
-  Insert insert(req.paths.at(0));
-  res.mod_paths.push_back(insert.perform());
+  Modifier mod(req);
+  res.mod_paths = mod.perform();
+  
+  //Insert insert(req.paths.at(0));
+  //res.mod_paths.push_back(insert.perform());
   
   //Delete del(req.paths.at(0));
   //res.mod_paths.push_back(del.perform());

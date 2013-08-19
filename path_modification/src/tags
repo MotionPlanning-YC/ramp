@@ -5,72 +5,110 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 CHANGE_H	change.h	2;"	d
-Change	change.cpp	/^Change::Change(ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Change	signature:(ramp_msgs::Path p)
-Change	change.h	/^    Change(ramp_msgs::Path p);$/;"	p	class:Change	access:public	signature:(ramp_msgs::Path p)
+CROSSOVER_H	crossover.h	2;"	d
+Change	change.cpp	/^Change::Change(const ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Change	signature:(const ramp_msgs::Path p)
+Change	change.h	/^    Change() {}$/;"	f	class:Change	access:public	signature:()
+Change	change.h	/^    Change(const ramp_msgs::Path p);$/;"	p	class:Change	access:public	signature:(const ramp_msgs::Path p)
 Change	change.h	/^class Change {$/;"	c
-Change::Change	change.cpp	/^Change::Change(ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Change	signature:(ramp_msgs::Path p)
-Change::Change	change.h	/^    Change(ramp_msgs::Path p);$/;"	p	class:Change	access:public	signature:(ramp_msgs::Path p)
+Change::Change	change.cpp	/^Change::Change(const ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Change	signature:(const ramp_msgs::Path p)
+Change::Change	change.h	/^    Change() {}$/;"	f	class:Change	access:public	signature:()
+Change::Change	change.h	/^    Change(const ramp_msgs::Path p);$/;"	p	class:Change	access:public	signature:(const ramp_msgs::Path p)
 Change::path_	change.h	/^    ramp_msgs::Path path_;$/;"	m	class:Change	access:public
-Change::perform	change.cpp	/^ramp_msgs::Path Change::perform() {$/;"	f	class:Change	signature:()
-Change::perform	change.h	/^    ramp_msgs::Path perform();$/;"	p	class:Change	access:public	signature:()
-Change::~Change	change.h	/^    ~Change() {}$/;"	f	class:Change	access:public	signature:()
+Change::perform	change.cpp	/^const ramp_msgs::Path Change::perform() {$/;"	f	class:Change	signature:()
+Change::perform	change.h	/^    const ramp_msgs::Path perform();$/;"	p	class:Change	access:public	signature:()
+Crossover	crossover.cpp	/^Crossover::Crossover(const ramp_msgs::Path p1, const ramp_msgs::Path p2) : path1_(p1), path2_(p2) {} $/;"	f	class:Crossover	signature:(const ramp_msgs::Path p1, const ramp_msgs::Path p2)
+Crossover	crossover.h	/^    Crossover() {}$/;"	f	class:Crossover	access:public	signature:()
+Crossover	crossover.h	/^    Crossover(const ramp_msgs::Path p1, const ramp_msgs::Path p2);$/;"	p	class:Crossover	access:public	signature:(const ramp_msgs::Path p1, const ramp_msgs::Path p2)
+Crossover	crossover.h	/^class Crossover {$/;"	c
+Crossover::Crossover	crossover.cpp	/^Crossover::Crossover(const ramp_msgs::Path p1, const ramp_msgs::Path p2) : path1_(p1), path2_(p2) {} $/;"	f	class:Crossover	signature:(const ramp_msgs::Path p1, const ramp_msgs::Path p2)
+Crossover::Crossover	crossover.h	/^    Crossover() {}$/;"	f	class:Crossover	access:public	signature:()
+Crossover::Crossover	crossover.h	/^    Crossover(const ramp_msgs::Path p1, const ramp_msgs::Path p2);$/;"	p	class:Crossover	access:public	signature:(const ramp_msgs::Path p1, const ramp_msgs::Path p2)
+Crossover::path1_	crossover.h	/^    ramp_msgs::Path path1_;$/;"	m	class:Crossover	access:public
+Crossover::path2_	crossover.h	/^    ramp_msgs::Path path2_;$/;"	m	class:Crossover	access:public
+Crossover::perform	crossover.cpp	/^const std::vector<ramp_msgs::Path> Crossover::perform() {$/;"	f	class:Crossover	signature:()
+Crossover::perform	crossover.h	/^    const std::vector<ramp_msgs::Path> perform();$/;"	p	class:Crossover	access:public	signature:()
 DELETE_H	delete.h	2;"	d
-Delete	delete.cpp	/^Delete::Delete(ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Delete	signature:(ramp_msgs::Path p)
+Delete	delete.cpp	/^Delete::Delete(const ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Delete	signature:(const ramp_msgs::Path p)
 Delete	delete.h	/^    Delete() {}$/;"	f	class:Delete	access:public	signature:()
-Delete	delete.h	/^    Delete(ramp_msgs::Path p);$/;"	p	class:Delete	access:public	signature:(ramp_msgs::Path p)
+Delete	delete.h	/^    Delete(const ramp_msgs::Path p);$/;"	p	class:Delete	access:public	signature:(const ramp_msgs::Path p)
 Delete	delete.h	/^class Delete {$/;"	c
-Delete::Delete	delete.cpp	/^Delete::Delete(ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Delete	signature:(ramp_msgs::Path p)
+Delete::Delete	delete.cpp	/^Delete::Delete(const ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Delete	signature:(const ramp_msgs::Path p)
 Delete::Delete	delete.h	/^    Delete() {}$/;"	f	class:Delete	access:public	signature:()
-Delete::Delete	delete.h	/^    Delete(ramp_msgs::Path p);$/;"	p	class:Delete	access:public	signature:(ramp_msgs::Path p)
+Delete::Delete	delete.h	/^    Delete(const ramp_msgs::Path p);$/;"	p	class:Delete	access:public	signature:(const ramp_msgs::Path p)
 Delete::path_	delete.h	/^    ramp_msgs::Path path_;$/;"	m	class:Delete	access:public
-Delete::perform	delete.cpp	/^ramp_msgs::Path Delete::perform() {$/;"	f	class:Delete	signature:()
-Delete::perform	delete.h	/^    ramp_msgs::Path perform();$/;"	p	class:Delete	access:public	signature:()
-Delete::~Delete	delete.h	/^    ~Delete() {}$/;"	f	class:Delete	access:public	signature:()
+Delete::perform	delete.cpp	/^const ramp_msgs::Path Delete::perform() {$/;"	f	class:Delete	signature:()
+Delete::perform	delete.h	/^    const ramp_msgs::Path perform();$/;"	p	class:Delete	access:public	signature:()
 INSERT_H	insert.h	2;"	d
-Insert	insert.cpp	/^Insert::Insert(ramp_msgs::Path p) {path_ = p;}$/;"	f	class:Insert	signature:(ramp_msgs::Path p)
-Insert	insert.h	/^    Insert(ramp_msgs::Path p); $/;"	p	class:Insert	access:public	signature:(ramp_msgs::Path p)
+Insert	insert.cpp	/^Insert::Insert(const ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Insert	signature:(const ramp_msgs::Path p)
+Insert	insert.h	/^    Insert() {}$/;"	f	class:Insert	access:public	signature:()
+Insert	insert.h	/^    Insert(const ramp_msgs::Path p); $/;"	p	class:Insert	access:public	signature:(const ramp_msgs::Path p)
 Insert	insert.h	/^class Insert {$/;"	c
-Insert::Insert	insert.cpp	/^Insert::Insert(ramp_msgs::Path p) {path_ = p;}$/;"	f	class:Insert	signature:(ramp_msgs::Path p)
-Insert::Insert	insert.h	/^    Insert(ramp_msgs::Path p); $/;"	p	class:Insert	access:public	signature:(ramp_msgs::Path p)
+Insert::Insert	insert.cpp	/^Insert::Insert(const ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Insert	signature:(const ramp_msgs::Path p)
+Insert::Insert	insert.h	/^    Insert() {}$/;"	f	class:Insert	access:public	signature:()
+Insert::Insert	insert.h	/^    Insert(const ramp_msgs::Path p); $/;"	p	class:Insert	access:public	signature:(const ramp_msgs::Path p)
 Insert::path_	insert.h	/^    ramp_msgs::Path path_;$/;"	m	class:Insert	access:public
-Insert::perform	insert.cpp	/^ramp_msgs::Path Insert::perform() {$/;"	f	class:Insert	signature:()
-Insert::perform	insert.h	/^    ramp_msgs::Path perform();$/;"	p	class:Insert	access:public	signature:()
-Insert::~Insert	insert.h	/^    ~Insert() {}$/;"	f	class:Insert	access:public	signature:()
+Insert::perform	insert.cpp	/^const ramp_msgs::Path Insert::perform() {$/;"	f	class:Insert	signature:()
+Insert::perform	insert.h	/^    const ramp_msgs::Path perform();$/;"	p	class:Insert	access:public	signature:()
+MODIFIER_H	modifier.h	2;"	d
+Modifier	modifier.cpp	/^Modifier::Modifier(ramp_msgs::ModificationRequest::Request& req) : mod_req(req) {}$/;"	f	class:Modifier	signature:(ramp_msgs::ModificationRequest::Request& req)
+Modifier	modifier.h	/^    Modifier(ramp_msgs::ModificationRequest::Request& req);$/;"	p	class:Modifier	access:public	signature:(ramp_msgs::ModificationRequest::Request& req)
+Modifier	modifier.h	/^class Modifier {$/;"	c
+Modifier::Modifier	modifier.cpp	/^Modifier::Modifier(ramp_msgs::ModificationRequest::Request& req) : mod_req(req) {}$/;"	f	class:Modifier	signature:(ramp_msgs::ModificationRequest::Request& req)
+Modifier::Modifier	modifier.h	/^    Modifier(ramp_msgs::ModificationRequest::Request& req);$/;"	p	class:Modifier	access:public	signature:(ramp_msgs::ModificationRequest::Request& req)
+Modifier::chg	modifier.h	/^    Change chg;$/;"	m	class:Modifier	access:public
+Modifier::cross	modifier.h	/^    Crossover cross;$/;"	m	class:Modifier	access:public
+Modifier::del	modifier.h	/^    Delete del;$/;"	m	class:Modifier	access:public
+Modifier::in	modifier.h	/^    Insert in;$/;"	m	class:Modifier	access:public
+Modifier::mod_req	modifier.h	/^    ramp_msgs::ModificationRequest::Request mod_req;$/;"	m	class:Modifier	access:public
+Modifier::perform	modifier.cpp	/^std::vector<ramp_msgs::Path> Modifier::perform() {$/;"	f	class:Modifier	signature:()
+Modifier::perform	modifier.h	/^    std::vector<ramp_msgs::Path> perform();$/;"	p	class:Modifier	access:public	signature:()
+Modifier::swap	modifier.h	/^    Swap swap; $/;"	m	class:Modifier	access:public
+Modifier::~Modifier	modifier.h	/^    ~Modifier() {}$/;"	f	class:Modifier	access:public	signature:()
 SWAP_H	swap.h	2;"	d
-Swap	swap.cpp	/^Swap::Swap(ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Swap	signature:(ramp_msgs::Path p)
-Swap	swap.h	/^   Swap(ramp_msgs::Path p);$/;"	p	class:Swap	access:public	signature:(ramp_msgs::Path p)
+Swap	swap.cpp	/^Swap::Swap(const ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Swap	signature:(const ramp_msgs::Path p)
+Swap	swap.h	/^    Swap() {} $/;"	f	class:Swap	access:public	signature:()
+Swap	swap.h	/^    Swap(const ramp_msgs::Path p);$/;"	p	class:Swap	access:public	signature:(const ramp_msgs::Path p)
 Swap	swap.h	/^class Swap {$/;"	c
-Swap::Swap	swap.cpp	/^Swap::Swap(ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Swap	signature:(ramp_msgs::Path p)
-Swap::Swap	swap.h	/^   Swap(ramp_msgs::Path p);$/;"	p	class:Swap	access:public	signature:(ramp_msgs::Path p)
-Swap::path_	swap.h	/^   ramp_msgs::Path path_; $/;"	m	class:Swap	access:public
-Swap::perform	swap.cpp	/^ramp_msgs::Path Swap::perform() {$/;"	f	class:Swap	signature:()
-Swap::perform	swap.h	/^   ramp_msgs::Path perform();$/;"	p	class:Swap	access:public	signature:()
-Swap::~Swap	swap.h	/^   ~Swap() {}$/;"	f	class:Swap	access:public	signature:()
+Swap::Swap	swap.cpp	/^Swap::Swap(const ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Swap	signature:(const ramp_msgs::Path p)
+Swap::Swap	swap.h	/^    Swap() {} $/;"	f	class:Swap	access:public	signature:()
+Swap::Swap	swap.h	/^    Swap(const ramp_msgs::Path p);$/;"	p	class:Swap	access:public	signature:(const ramp_msgs::Path p)
+Swap::path_	swap.h	/^    ramp_msgs::Path path_; $/;"	m	class:Swap	access:public
+Swap::perform	swap.cpp	/^const ramp_msgs::Path Swap::perform() {$/;"	f	class:Swap	signature:()
+Swap::perform	swap.h	/^    const ramp_msgs::Path perform();$/;"	p	class:Swap	access:public	signature:()
 UTILITY_H	utility.h	2;"	d
 Utility	utility.h	/^class Utility {$/;"	c
 Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Configuration c) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Configuration c) const
 Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
 Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Configuration c) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Configuration c) const
 Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Path p) const;    $/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path p) const
+chg	modifier.h	/^    Change chg;$/;"	m	class:Modifier	access:public
+cross	modifier.h	/^    Crossover cross;$/;"	m	class:Modifier	access:public
+del	modifier.h	/^    Delete del;$/;"	m	class:Modifier	access:public
 handleRequest	main.cpp	/^bool handleRequest(ramp_msgs::ModificationRequest::Request& req,$/;"	f	signature:(ramp_msgs::ModificationRequest::Request& req, ramp_msgs::ModificationRequest::Response& res)
+in	modifier.h	/^    Insert in;$/;"	m	class:Modifier	access:public
 main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+mod_req	modifier.h	/^    ramp_msgs::ModificationRequest::Request mod_req;$/;"	m	class:Modifier	access:public
+path1_	crossover.h	/^    ramp_msgs::Path path1_;$/;"	m	class:Crossover	access:public
+path2_	crossover.h	/^    ramp_msgs::Path path2_;$/;"	m	class:Crossover	access:public
 path_	change.h	/^    ramp_msgs::Path path_;$/;"	m	class:Change	access:public
 path_	delete.h	/^    ramp_msgs::Path path_;$/;"	m	class:Delete	access:public
 path_	insert.h	/^    ramp_msgs::Path path_;$/;"	m	class:Insert	access:public
-path_	swap.h	/^   ramp_msgs::Path path_; $/;"	m	class:Swap	access:public
-perform	change.cpp	/^ramp_msgs::Path Change::perform() {$/;"	f	class:Change	signature:()
-perform	change.h	/^    ramp_msgs::Path perform();$/;"	p	class:Change	access:public	signature:()
-perform	delete.cpp	/^ramp_msgs::Path Delete::perform() {$/;"	f	class:Delete	signature:()
-perform	delete.h	/^    ramp_msgs::Path perform();$/;"	p	class:Delete	access:public	signature:()
-perform	insert.cpp	/^ramp_msgs::Path Insert::perform() {$/;"	f	class:Insert	signature:()
-perform	insert.h	/^    ramp_msgs::Path perform();$/;"	p	class:Insert	access:public	signature:()
-perform	swap.cpp	/^ramp_msgs::Path Swap::perform() {$/;"	f	class:Swap	signature:()
-perform	swap.h	/^   ramp_msgs::Path perform();$/;"	p	class:Swap	access:public	signature:()
+path_	swap.h	/^    ramp_msgs::Path path_; $/;"	m	class:Swap	access:public
+perform	change.cpp	/^const ramp_msgs::Path Change::perform() {$/;"	f	class:Change	signature:()
+perform	change.h	/^    const ramp_msgs::Path perform();$/;"	p	class:Change	access:public	signature:()
+perform	crossover.cpp	/^const std::vector<ramp_msgs::Path> Crossover::perform() {$/;"	f	class:Crossover	signature:()
+perform	crossover.h	/^    const std::vector<ramp_msgs::Path> perform();$/;"	p	class:Crossover	access:public	signature:()
+perform	delete.cpp	/^const ramp_msgs::Path Delete::perform() {$/;"	f	class:Delete	signature:()
+perform	delete.h	/^    const ramp_msgs::Path perform();$/;"	p	class:Delete	access:public	signature:()
+perform	insert.cpp	/^const ramp_msgs::Path Insert::perform() {$/;"	f	class:Insert	signature:()
+perform	insert.h	/^    const ramp_msgs::Path perform();$/;"	p	class:Insert	access:public	signature:()
+perform	modifier.cpp	/^std::vector<ramp_msgs::Path> Modifier::perform() {$/;"	f	class:Modifier	signature:()
+perform	modifier.h	/^    std::vector<ramp_msgs::Path> perform();$/;"	p	class:Modifier	access:public	signature:()
+perform	swap.cpp	/^const ramp_msgs::Path Swap::perform() {$/;"	f	class:Swap	signature:()
+perform	swap.h	/^    const ramp_msgs::Path perform();$/;"	p	class:Swap	access:public	signature:()
+swap	modifier.h	/^    Swap swap; $/;"	m	class:Modifier	access:public
 toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Configuration c) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Configuration c) const
 toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Configuration c) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Configuration c) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Path p) const;    $/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path p) const
-~Change	change.h	/^    ~Change() {}$/;"	f	class:Change	access:public	signature:()
-~Delete	delete.h	/^    ~Delete() {}$/;"	f	class:Delete	access:public	signature:()
-~Insert	insert.h	/^    ~Insert() {}$/;"	f	class:Insert	access:public	signature:()
-~Swap	swap.h	/^   ~Swap() {}$/;"	f	class:Swap	access:public	signature:()
+~Modifier	modifier.h	/^    ~Modifier() {}$/;"	f	class:Modifier	access:public	signature:()

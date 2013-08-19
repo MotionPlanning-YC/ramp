@@ -4,6 +4,7 @@
 
 class Crossover {
   public:
+    Crossover() {}
     Crossover(const ramp_msgs::Path p1, const ramp_msgs::Path p2);
 
     const std::vector<ramp_msgs::Path> perform();

@@ -24,7 +24,7 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Declare a cpp executable
-add_executable(${PROJECT_NAME} src/main.cpp src/change.cpp src/crossover.cpp src/delete.cpp src/insert.cpp src/swap.cpp src/utility.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/change.cpp src/crossover.cpp src/delete.cpp src/insert.cpp src/modifier.cpp src/swap.cpp src/utility.cpp)
 
 
 ## Specify libraries to link a library or executable target against

@@ -39,7 +39,6 @@ Planner::~Planner() {
 void Planner::init_handlers(const ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler(h);
   modifier_ = new Modifier(h, paths_);
-  //h_mod_req_  = new ModificationRequestHandler(h);
 }
 
 
@@ -86,7 +85,11 @@ void Planner::init_population() {
     
     //Send the request and push the returned Trajectory onto population_
     if(requestTrajectory(msg_request)) {
-      population_.push_back(msg_request.response.trajectory);
+      RampTrajectory temp;
+      
+      //Set the Trajectory msg
+      temp.trajec_ = msg_request.response.trajectory;
+      population_.add(temp);
     }
     else {
       //some error handling
@@ -121,8 +124,7 @@ const bool Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr) {
  ******************************************************/
 
 
-/** Modify a Path 
- *  Can accept 2 ids if the modification operator is binary */
+/** Modify a Path */
 const std::vector<Path> Planner::modifyPath() { 
   return modifier_->perform();
 }
@@ -130,8 +132,8 @@ const std::vector<Path> Planner::modifyPath() {
 
 /** Modify a trajectory 
  *  Can accept 2 ids if the modification operator is binary */
-const std::vector<ramp_msgs::Trajectory> Planner::modifyTrajec(const unsigned int i1, const unsigned int i2) {
-  std::vector<ramp_msgs::Trajectory> result;
+const std::vector<RampTrajectory> Planner::modifyTrajec(const unsigned int i1, const unsigned int i2) {
+  std::vector<RampTrajectory> result;
 
   //The modification operators deal with paths
   //So send the path to be modified
@@ -156,7 +158,9 @@ const std::vector<ramp_msgs::Trajectory> Planner::modifyTrajec(const unsigned in
    
     //Send the request and set the result to the returned trajectory 
     if(requestTrajectory(tr)) {
-      result.push_back(tr.response.trajectory);
+      RampTrajectory temp;
+      temp.trajec_ = tr.response.trajectory;
+      result.push_back(temp);
     }
     else {
       //some error handling
@@ -174,18 +178,6 @@ const std::vector<ramp_msgs::Trajectory> Planner::modifyTrajec(const unsigned in
 /******************************************************
  **************** Srv Building Methods ****************
  ******************************************************/
-
-/** Build a ModificationRequest msg */
-const ramp_msgs::ModificationRequest Planner::buildModificationRequest(const unsigned int i_path, const unsigned int i_path2) const {
-  ramp_msgs::ModificationRequest result;
-
-  result.request.paths.push_back(paths_.at(i_path).buildPathMsg() );
-
-  if(i_path2 != -1)
-    result.request.paths.push_back(paths_.at(i_path2).buildPathMsg() );
-
-  return result;
-}
 
 
 
@@ -232,17 +224,24 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const unsigne
   //initialize population
   init_population();
 
-  //int id = evaluate population()
+  RampTrajectory T_move = population_.evaluateAndObtainBest();
 
-  //bestTrajec_ = population_.at(id);
-   
   //createSubpopulations();
   
   while(!current_.equals(goal_)) {
     generation_++;
 
     //Call modification
+    std::vector<Path> mod_path = modifier_->perform();
+    //Get trajectories for the modifications
+    //std::vector<RampTrajectory> mod_trajec = modifyTrajec(); 
     
+    //Replace 1-2 in population with mod_path
+    //for(unsigned int i=0;i<mod_path.size();i++) {
+      //population_.add(mod_
+    //}
+  
+  
   }
 
- }
+}

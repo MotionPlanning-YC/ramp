@@ -18,8 +18,8 @@ class Modifier {
 
     //Data members
     std::vector<Path> paths_;
-    ModificationRequestHandler* h_mod_req_;
   private:
+    ModificationRequestHandler* h_mod_req_;
     unsigned int num_ops;
 };
 

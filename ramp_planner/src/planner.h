@@ -2,8 +2,10 @@
 #define PLANNER
 #include "ros/ros.h"
 #include "path.h"
+#include "ramp_trajectory.h"
 #include "trajectory_request_handler.h"
 #include "modifier.h"
+#include "population.h"
 
 class Planner {
   public:
@@ -16,12 +18,13 @@ class Planner {
      ************** Data Members ***************
      *******************************************/
     
-    Modifier* modifier_;
+
     //Hold the population of trajectories, 
     //the velocities of each trajectory's segments,
     //the trajectory's path,
     //and the resolution rate for the trajectories
-    std::vector<ramp_msgs::Trajectory>  population_;
+    Population population_;
+    //std::vector<RampTrajectory>  population_;
     std::vector<std::vector<float> >    velocities_;
     std::vector<Path>                   paths_;
     const unsigned int resolutionRate_;
@@ -34,7 +37,6 @@ class Planner {
     
     //Hold the handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
-    //ModificationRequestHandler* h_mod_req_;
     
     
     /********************************************
@@ -47,15 +49,13 @@ class Planner {
     
     //Modify trajectory or path
     const std::vector<Path> modifyPath();
-    const std::vector<ramp_msgs::Trajectory> modifyTrajec(const unsigned int i1, const unsigned int i2=-1);
+    const std::vector<RampTrajectory> modifyTrajec(const unsigned int i1, const unsigned int i2=-1);
 
     //Request information from other packages
     //Cannot make the request srvs const because they have no serialize/deserialize
     const bool requestTrajectory(ramp_msgs::TrajectoryRequest& tr);
-    //const bool requestModification(ramp_msgs::ModificationRequest& mr);
 
     //Msg building methods
-    const ramp_msgs::ModificationRequest buildModificationRequest(const unsigned int i_path, const unsigned int i_path2=-1) const;
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
 
@@ -72,8 +72,8 @@ class Planner {
     Utility u; 
     const int populationSize_;
     Configuration current_;
-    ramp_msgs::Trajectory bestTrajec_;
     unsigned int generation_;
+    Modifier* modifier_;
 };
 
 #endif
