@@ -10,10 +10,16 @@ class Segment {
     Segment();
     
     //TODO: Put all these parameters in a struct?
-    Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind);
+    Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind);
     ~Segment();
 
-    //Data members
+    /** Methods */
+    void build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind);
+
+    const std::string toString() const;
+    
+    
+    /** Data members */
 
     //State of motion describing the start 
     MotionState start_;
@@ -25,20 +31,21 @@ class Segment {
     std::vector<double> a1_; //the slope
     std::vector<double> a0_; //constant
 
-    //Starting and ending times
-    float start_t_;
-    float end_t_;
+    //The velocities at the bounding knot points of the segment
+    float v_start_;
+    float v_end_;
+
+    //Minimum time required to execute the segment
+    float T_;
     
     //The segment's index in whichever trajectory it is in
     int index; 
     
-    //Methods
-    void build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind);
-
-    const std::string toString() const;
 
   private:
+    float k_dof_;
+    std::vector<float> max_v_;
+    const float calculateMinTime();
     void buildWork();
-    unsigned int k_dof_;
 };
 #endif 

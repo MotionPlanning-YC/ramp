@@ -5,7 +5,7 @@ const std::string Corobot::TOPIC_STR_PHIDGET_MOTOR="PhidgetMotor";
 const std::string Corobot::TOPIC_STR_ODOMETRY="odometry";
 const std::string Corobot::TOPIC_STR_TWIST="twist";
 
-
+ 
 Corobot::Corobot() {
   configuration_.x = 0;
   configuration_.y = 0;

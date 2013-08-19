@@ -16,7 +16,8 @@ class Configuration {
     //This holds the ranges for each DOF
     std::vector<Range> ranges_;
     
-    Configuration random();
+    void random();
+    const bool equals(const Configuration& c) const; 
     const ramp_msgs::Configuration buildConfigurationMsg() const;
     const std::string toString() const;
 };

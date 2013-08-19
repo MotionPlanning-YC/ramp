@@ -10,15 +10,15 @@ class Trajectory {
   public:
 
     Trajectory();
-    Trajectory(const std::vector<geometry_msgs::Pose2D> kps);
-    Trajectory(const ramp_msgs::TrajectoryRequest::Request traj_req);
+    Trajectory(const ramp_msgs::TrajectoryRequest::Request trajec_req);
     ~Trajectory();
 
     //Data Members
     std::vector<geometry_msgs::Pose2D>  knot_points_;
     std::vector<Segment>                segments_;
     std::vector<MotionState>            points_;
-    std::vector<float>                  t_; //Time per segment      
+    std::vector<float>                  v_start_;
+    std::vector<float>                  v_end_;
     unsigned int                        resolutionRate_;  //The resolution rate is specified in Hz
 
     //Methods

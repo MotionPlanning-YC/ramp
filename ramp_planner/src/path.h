@@ -8,6 +8,7 @@ class Path {
 
     Path();
     Path(Configuration start, Configuration goal);
+    Path(std::vector<Configuration> all);
     Path(ramp_msgs::Path p);
     ~Path();
     

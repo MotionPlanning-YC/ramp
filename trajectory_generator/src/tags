@@ -12,45 +12,46 @@ MotionState::toString	motion_state.cpp	/^const std::string MotionState::toString
 MotionState::toString	motion_state.h	/^    const std::string toString() const;$/;"	p	class:MotionState	access:public	signature:() const
 MotionState::v_	motion_state.h	/^    std::vector<float> v_;$/;"	m	class:MotionState	access:public
 SEGMENT	segment.h	2;"	d
-Segment	segment.cpp	/^Segment::Segment() : k_dof_(3) {}$/;"	f	class:Segment	signature:()
-Segment	segment.cpp	/^Segment::Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind) : k_dof_(3) $/;"	f	class:Segment	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind)
+Segment	segment.cpp	/^Segment::Segment() : k_dof_(3), max_v_(1.0f) {}$/;"	f	class:Segment	signature:()
+Segment	segment.cpp	/^Segment::Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind) : k_dof_(3), max_v_(1.0f) $/;"	f	class:Segment	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind)
 Segment	segment.h	/^    Segment();$/;"	p	class:Segment	access:public	signature:()
-Segment	segment.h	/^    Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind);$/;"	p	class:Segment	access:public	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind)
+Segment	segment.h	/^    Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind);$/;"	p	class:Segment	access:public	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind)
 Segment	segment.h	/^class Segment {$/;"	c
-Segment::Segment	segment.cpp	/^Segment::Segment() : k_dof_(3) {}$/;"	f	class:Segment	signature:()
-Segment::Segment	segment.cpp	/^Segment::Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind) : k_dof_(3) $/;"	f	class:Segment	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind)
+Segment::Segment	segment.cpp	/^Segment::Segment() : k_dof_(3), max_v_(1.0f) {}$/;"	f	class:Segment	signature:()
+Segment::Segment	segment.cpp	/^Segment::Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind) : k_dof_(3), max_v_(1.0f) $/;"	f	class:Segment	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind)
 Segment::Segment	segment.h	/^    Segment();$/;"	p	class:Segment	access:public	signature:()
-Segment::Segment	segment.h	/^    Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind);$/;"	p	class:Segment	access:public	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind)
+Segment::Segment	segment.h	/^    Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind);$/;"	p	class:Segment	access:public	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind)
+Segment::T_	segment.h	/^    float T_;$/;"	m	class:Segment	access:public
 Segment::a0_	segment.h	/^    std::vector<double> a0_; \/\/constant$/;"	m	class:Segment	access:public
 Segment::a1_	segment.h	/^    std::vector<double> a1_; \/\/the slope$/;"	m	class:Segment	access:public
-Segment::build	segment.cpp	/^void Segment::build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind) {$/;"	f	class:Segment	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind)
+Segment::build	segment.cpp	/^void Segment::build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind) {$/;"	f	class:Segment	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind)
 Segment::build	segment.h	/^    void build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind);$/;"	p	class:Segment	access:public	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind)
 Segment::buildWork	segment.cpp	/^void Segment::buildWork() {$/;"	f	class:Segment	signature:()
 Segment::buildWork	segment.h	/^    void buildWork();$/;"	p	class:Segment	access:private	signature:()
+Segment::calculateMinTime	segment.cpp	/^const float Segment::calculateMinTime() {$/;"	f	class:Segment	signature:()
+Segment::calculateMinTime	segment.h	/^    const float calculateMinTime();$/;"	p	class:Segment	access:private	signature:()
 Segment::end_	segment.h	/^    MotionState end_;$/;"	m	class:Segment	access:public
-Segment::end_t_	segment.h	/^    float end_t_;$/;"	m	class:Segment	access:public
 Segment::index	segment.h	/^    int index; $/;"	m	class:Segment	access:public
-Segment::k_dof_	segment.h	/^    unsigned int k_dof_;$/;"	m	class:Segment	access:private
+Segment::k_dof_	segment.h	/^    float k_dof_;$/;"	m	class:Segment	access:private
+Segment::max_v_	segment.h	/^    float max_v_;$/;"	m	class:Segment	access:private
 Segment::start_	segment.h	/^    MotionState start_;$/;"	m	class:Segment	access:public
-Segment::start_t_	segment.h	/^    float start_t_;$/;"	m	class:Segment	access:public
 Segment::toString	segment.cpp	/^const std::string Segment::toString() const {$/;"	f	class:Segment	signature:() const
 Segment::toString	segment.h	/^    const std::string toString() const;$/;"	p	class:Segment	access:public	signature:() const
+Segment::v_end_	segment.h	/^    float v_end_;$/;"	m	class:Segment	access:public
+Segment::v_start_	segment.h	/^    float v_start_;$/;"	m	class:Segment	access:public
 Segment::~Segment	segment.cpp	/^Segment::~Segment() {}$/;"	f	class:Segment	signature:()
 Segment::~Segment	segment.h	/^    ~Segment();$/;"	p	class:Segment	access:public	signature:()
 TRAJECTORY_H	trajectory.h	2;"	d
+T_	segment.h	/^    float T_;$/;"	m	class:Segment	access:public
 Trajectory	trajectory.cpp	/^Trajectory::Trajectory() : k_dof_(3) {}$/;"	f	class:Trajectory	signature:()
-Trajectory	trajectory.cpp	/^Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest traj_req) : k_dof_(3) {$/;"	f	class:Trajectory	signature:(const ramp_msgs::TrajectoryRequest traj_req)
-Trajectory	trajectory.cpp	/^Trajectory::Trajectory(const std::vector<geometry_msgs::Pose2D> kps) : k_dof_(3) {$/;"	f	class:Trajectory	signature:(const std::vector<geometry_msgs::Pose2D> kps)
+Trajectory	trajectory.cpp	/^Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request traj_req) : k_dof_(3) {$/;"	f	class:Trajectory	signature:(const ramp_msgs::TrajectoryRequest::Request traj_req)
 Trajectory	trajectory.h	/^    Trajectory();$/;"	p	class:Trajectory	access:public	signature:()
-Trajectory	trajectory.h	/^    Trajectory(const ramp_msgs::TrajectoryRequest traj_req);$/;"	p	class:Trajectory	access:public	signature:(const ramp_msgs::TrajectoryRequest traj_req)
-Trajectory	trajectory.h	/^    Trajectory(const std::vector<geometry_msgs::Pose2D> kps);$/;"	p	class:Trajectory	access:public	signature:(const std::vector<geometry_msgs::Pose2D> kps)
+Trajectory	trajectory.h	/^    Trajectory(const ramp_msgs::TrajectoryRequest::Request traj_req);$/;"	p	class:Trajectory	access:public	signature:(const ramp_msgs::TrajectoryRequest::Request traj_req)
 Trajectory	trajectory.h	/^class Trajectory {$/;"	c
 Trajectory::Trajectory	trajectory.cpp	/^Trajectory::Trajectory() : k_dof_(3) {}$/;"	f	class:Trajectory	signature:()
-Trajectory::Trajectory	trajectory.cpp	/^Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest traj_req) : k_dof_(3) {$/;"	f	class:Trajectory	signature:(const ramp_msgs::TrajectoryRequest traj_req)
-Trajectory::Trajectory	trajectory.cpp	/^Trajectory::Trajectory(const std::vector<geometry_msgs::Pose2D> kps) : k_dof_(3) {$/;"	f	class:Trajectory	signature:(const std::vector<geometry_msgs::Pose2D> kps)
+Trajectory::Trajectory	trajectory.cpp	/^Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request traj_req) : k_dof_(3) {$/;"	f	class:Trajectory	signature:(const ramp_msgs::TrajectoryRequest::Request traj_req)
 Trajectory::Trajectory	trajectory.h	/^    Trajectory();$/;"	p	class:Trajectory	access:public	signature:()
-Trajectory::Trajectory	trajectory.h	/^    Trajectory(const ramp_msgs::TrajectoryRequest traj_req);$/;"	p	class:Trajectory	access:public	signature:(const ramp_msgs::TrajectoryRequest traj_req)
-Trajectory::Trajectory	trajectory.h	/^    Trajectory(const std::vector<geometry_msgs::Pose2D> kps);$/;"	p	class:Trajectory	access:public	signature:(const std::vector<geometry_msgs::Pose2D> kps)
+Trajectory::Trajectory	trajectory.h	/^    Trajectory(const ramp_msgs::TrajectoryRequest::Request traj_req);$/;"	p	class:Trajectory	access:public	signature:(const ramp_msgs::TrajectoryRequest::Request traj_req)
 Trajectory::buildSegments	trajectory.cpp	/^void Trajectory::buildSegments() {$/;"	f	class:Trajectory	signature:()
 Trajectory::buildSegments	trajectory.h	/^    void  buildSegments();$/;"	p	class:Trajectory	access:private	signature:()
 Trajectory::buildTrajectoryMsg	trajectory.cpp	/^const ramp_msgs::Trajectory Trajectory::buildTrajectoryMsg() const {$/;"	f	class:Trajectory	signature:() const
@@ -62,19 +63,23 @@ Trajectory::getMotionState	trajectory.h	/^    const MotionState getMotionState(c
 Trajectory::k_dof_	trajectory.h	/^    const unsigned int k_dof_;$/;"	m	class:Trajectory	access:private
 Trajectory::knot_points_	trajectory.h	/^    std::vector<geometry_msgs::Pose2D>  knot_points_;$/;"	m	class:Trajectory	access:public
 Trajectory::points_	trajectory.h	/^    std::vector<MotionState>            points_;$/;"	m	class:Trajectory	access:public
-Trajectory::resolutionRate_	trajectory.h	/^    unsigned int resolutionRate_;  \/\/The resolution rate is specified in Hz$/;"	m	class:Trajectory	access:public
+Trajectory::resolutionRate_	trajectory.h	/^    unsigned int                        resolutionRate_;  \/\/The resolution rate is specified in Hz$/;"	m	class:Trajectory	access:public
 Trajectory::segments_	trajectory.h	/^    std::vector<Segment>                segments_;$/;"	m	class:Trajectory	access:public
-Trajectory::t_	trajectory.h	/^    std::vector<float>                  t_; \/\/Time per segment      $/;"	m	class:Trajectory	access:public
 Trajectory::toString	trajectory.cpp	/^const std::string Trajectory::toString() const {$/;"	f	class:Trajectory	signature:() const
 Trajectory::toString	trajectory.h	/^    const std::string toString() const;$/;"	p	class:Trajectory	access:public	signature:() const
+Trajectory::v_	trajectory.h	/^    std::vector<float>                  v_; \/\/Velocity per segment      $/;"	m	class:Trajectory	access:public
 Trajectory::~Trajectory	trajectory.cpp	/^Trajectory::~Trajectory() {}$/;"	f	class:Trajectory	signature:()
 Trajectory::~Trajectory	trajectory.h	/^    ~Trajectory();$/;"	p	class:Trajectory	access:public	signature:()
 UTILITY_H	utility.h	2;"	d
 Utility	utility.h	/^class Utility {$/;"	c
+Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
+Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request tr) const {$/;"	f	class:Utility	signature:(const ramp_msgs::TrajectoryRequest::Request tr) const
+Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Path p) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path p) const
+Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::TrajectoryRequest::Request tr) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::TrajectoryRequest::Request tr) const
 a0_	segment.h	/^    std::vector<double> a0_; \/\/constant$/;"	m	class:Segment	access:public
 a1_	segment.h	/^    std::vector<double> a1_; \/\/the slope$/;"	m	class:Segment	access:public
 a_	motion_state.h	/^    std::vector<float> a_;$/;"	m	class:MotionState	access:public
-build	segment.cpp	/^void Segment::build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind) {$/;"	f	class:Segment	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind)
+build	segment.cpp	/^void Segment::build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind) {$/;"	f	class:Segment	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind)
 build	segment.h	/^    void build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind);$/;"	p	class:Segment	access:public	signature:(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind)
 buildSegments	trajectory.cpp	/^void Trajectory::buildSegments() {$/;"	f	class:Trajectory	signature:()
 buildSegments	trajectory.h	/^    void  buildSegments();$/;"	p	class:Trajectory	access:private	signature:()
@@ -82,35 +87,39 @@ buildTrajectoryMsg	trajectory.cpp	/^const ramp_msgs::Trajectory Trajectory::buil
 buildTrajectoryMsg	trajectory.h	/^    const ramp_msgs::Trajectory buildTrajectoryMsg() const;$/;"	p	class:Trajectory	access:public	signature:() const
 buildWork	segment.cpp	/^void Segment::buildWork() {$/;"	f	class:Segment	signature:()
 buildWork	segment.h	/^    void buildWork();$/;"	p	class:Segment	access:private	signature:()
+calculateMinTime	segment.cpp	/^const float Segment::calculateMinTime() {$/;"	f	class:Segment	signature:()
+calculateMinTime	segment.h	/^    const float calculateMinTime();$/;"	p	class:Segment	access:private	signature:()
 end_	segment.h	/^    MotionState end_;$/;"	m	class:Segment	access:public
-end_t_	segment.h	/^    float end_t_;$/;"	m	class:Segment	access:public
 generate	trajectory.cpp	/^const std::vector<MotionState> Trajectory::generate() {$/;"	f	class:Trajectory	signature:()
 generate	trajectory.h	/^    const std::vector<MotionState> generate();$/;"	p	class:Trajectory	access:public	signature:()
 getMotionState	trajectory.cpp	/^const MotionState Trajectory::getMotionState(const unsigned int ind_segment, const float t) {$/;"	f	class:Trajectory	signature:(const unsigned int ind_segment, const float t)
 getMotionState	trajectory.h	/^    const MotionState getMotionState(const unsigned int ind_segment, const float t);$/;"	p	class:Trajectory	access:private	signature:(const unsigned int ind_segment, const float t)
+handleRequest	main.cpp	/^bool handleRequest(ramp_msgs::TrajectoryRequest::Request& req, $/;"	f	signature:(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res)
 index	segment.h	/^    int index; $/;"	m	class:Segment	access:public
-init_pub_sub	main.cpp	/^void init_pub_sub(ros::NodeHandle& handle) {$/;"	f	signature:(ros::NodeHandle& handle)
-k_dof_	segment.h	/^    unsigned int k_dof_;$/;"	m	class:Segment	access:private
+k_dof_	segment.h	/^    float k_dof_;$/;"	m	class:Segment	access:private
 k_dof_	trajectory.h	/^    const unsigned int k_dof_;$/;"	m	class:Trajectory	access:private
 knot_points_	trajectory.h	/^    std::vector<geometry_msgs::Pose2D>  knot_points_;$/;"	m	class:Trajectory	access:public
 main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+max_v_	segment.h	/^    float max_v_;$/;"	m	class:Segment	access:private
 p_	motion_state.h	/^    std::vector<float> p_;$/;"	m	class:MotionState	access:public
-pathCallback	main.cpp	/^void pathCallback(const ramp_msgs::TrajectoryRequest::ConstPtr& traj_req) {$/;"	f	signature:(const ramp_msgs::TrajectoryRequest::ConstPtr& traj_req)
 points_	trajectory.h	/^    std::vector<MotionState>            points_;$/;"	m	class:Trajectory	access:public
-pub_trajs	main.cpp	/^ros::Publisher  pub_trajs;$/;"	v
-resolutionRate_	trajectory.h	/^    unsigned int resolutionRate_;  \/\/The resolution rate is specified in Hz$/;"	m	class:Trajectory	access:public
+resolutionRate_	trajectory.h	/^    unsigned int                        resolutionRate_;  \/\/The resolution rate is specified in Hz$/;"	m	class:Trajectory	access:public
 segments_	trajectory.h	/^    std::vector<Segment>                segments_;$/;"	m	class:Trajectory	access:public
 start_	segment.h	/^    MotionState start_;$/;"	m	class:Segment	access:public
-start_t_	segment.h	/^    float start_t_;$/;"	m	class:Segment	access:public
-sub_paths	main.cpp	/^ros::Subscriber sub_paths;$/;"	v
-t_	trajectory.h	/^    std::vector<float>                  t_; \/\/Time per segment      $/;"	m	class:Trajectory	access:public
 toString	motion_state.cpp	/^const std::string MotionState::toString() const {$/;"	f	class:MotionState	signature:() const
 toString	motion_state.h	/^    const std::string toString() const;$/;"	p	class:MotionState	access:public	signature:() const
 toString	segment.cpp	/^const std::string Segment::toString() const {$/;"	f	class:Segment	signature:() const
 toString	segment.h	/^    const std::string toString() const;$/;"	p	class:Segment	access:public	signature:() const
 toString	trajectory.cpp	/^const std::string Trajectory::toString() const {$/;"	f	class:Trajectory	signature:() const
 toString	trajectory.h	/^    const std::string toString() const;$/;"	p	class:Trajectory	access:public	signature:() const
+toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
+toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request tr) const {$/;"	f	class:Utility	signature:(const ramp_msgs::TrajectoryRequest::Request tr) const
+toString	utility.h	/^    const std::string toString(const ramp_msgs::Path p) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path p) const
+toString	utility.h	/^    const std::string toString(const ramp_msgs::TrajectoryRequest::Request tr) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::TrajectoryRequest::Request tr) const
 v_	motion_state.h	/^    std::vector<float> v_;$/;"	m	class:MotionState	access:public
+v_	trajectory.h	/^    std::vector<float>                  v_; \/\/Velocity per segment      $/;"	m	class:Trajectory	access:public
+v_end_	segment.h	/^    float v_end_;$/;"	m	class:Segment	access:public
+v_start_	segment.h	/^    float v_start_;$/;"	m	class:Segment	access:public
 ~Segment	segment.cpp	/^Segment::~Segment() {}$/;"	f	class:Segment	signature:()
 ~Segment	segment.h	/^    ~Segment();$/;"	p	class:Segment	access:public	signature:()
 ~Trajectory	trajectory.cpp	/^Trajectory::~Trajectory() {}$/;"	f	class:Trajectory	signature:()

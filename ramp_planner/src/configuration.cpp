@@ -14,13 +14,28 @@ Configuration::~Configuration() {}
 
 
 /** Set the configuration to be of random values and return the value of this configuration */
-Configuration Configuration::random() {
+void Configuration::random() {
 
   for(unsigned int i=0;i<ranges_.size();i++) {
     K_.push_back(ranges_.at(i).random());
   }
 
-  return *this;
+}
+
+
+const bool Configuration::equals(const Configuration& c) const {
+  
+  if(K_.size() != c.K_.size()) {
+    return false;
+  }
+  
+  for(unsigned int i=0;i<K_.size();i++) {
+    if(K_.at(i) != c.K_.at(i)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 
