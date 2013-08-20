@@ -64,7 +64,6 @@ class Corobot {
     std::vector<ros::Time> end_times; // Save the ending time of each waypoint
     std::vector<float> speeds; // Linear speed for each trajectory
     std::vector<float> angular_speeds_knotpoints; //Angular Speed needed over 3s to get the correct orientation after each knot point reached.
-    std::vector<float> angular_speeds_waypoints; // Angular Speed needed over 3s to get to the correct direction to be able to reach the next waypoint.
 };
 
 #endif
