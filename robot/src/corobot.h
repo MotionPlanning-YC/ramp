@@ -13,6 +13,7 @@
 #include "geometry_msgs/Pose2D.h"
 #include "ramp_msgs/Trajectory.h"
 #include "tf/transform_datatypes.h"
+#include <math.h>
 
 class Corobot {
   public:
@@ -29,7 +30,7 @@ class Corobot {
     void updateState(const nav_msgs::Odometry::ConstPtr& msg);
     
     void updateTrajectory(const ramp_msgs::Trajectory msg); 
-    void moveOnTrajectory() const;
+    void moveOnTrajectory();
 
     //Data Members
     ros::Publisher                    pub_phidget_motor_;
@@ -50,11 +51,20 @@ class Corobot {
   private:
     const float getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const ;
 
-    const float getAngularSpeed(const trajectory_msgs::JointTrajectoryPoint knotpoint1, const trajectory_msgs::JointTrajectoryPoint knotpoint2) const;
+    const float getAngularSpeed(const float direction1, const float direction2) const;
+    
+    float getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const;
+    
+    void calculateSpeedsAndTime ();
     
     bool move; 
     //holds the last 5 thetas to average
     std::vector<double> thetas_; 
+    
+    std::vector<ros::Time> end_times; // Save the ending time of each waypoint
+    std::vector<float> speeds; // Linear speed for each trajectory
+    std::vector<float> angular_speeds_knotpoints; //Angular Speed needed over 3s to get the correct orientation after each knot point reached.
+    std::vector<float> angular_speeds_waypoints; // Angular Speed needed over 3s to get to the correct direction to be able to reach the next waypoint.
 };
 
 #endif
