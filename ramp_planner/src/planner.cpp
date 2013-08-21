@@ -38,7 +38,7 @@ Planner::~Planner() {
 /** Initialize the handlers and allocate them on the heap */
 void Planner::init_handlers(const ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler(h);
-  modifier_ = new Modifier(h, paths_);
+  modifier_ = new Modifier(h, paths_, velocities_);
 }
 
 
@@ -89,6 +89,8 @@ void Planner::init_population() {
       
       //Set the Trajectory msg
       temp.trajec_ = msg_request.response.trajectory;
+      
+      //Add the trajectory to the population
       population_.add(temp);
     }
     else {
@@ -130,31 +132,141 @@ const std::vector<Path> Planner::modifyPath() {
 }
 
 
+
+
+
+
+/** This method returns the new velocity vector(s) for the modified path(s) */
+const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Path> new_paths, std::vector<int> i_old) {
+  std::vector< std::vector<float> > result; 
+
+
+  if(new_paths.size() == 1) {
+    std::vector<float> temp = velocities_.at(i_old.at(0));
+
+    //Get the old path
+    Path old = paths_.at(i_old.at(0));
+    Path new_path = new_paths.at(0);
+
+    //See if there is a difference in the path sizes
+    int diff = new_path.all_.size() - old.all_.size();
+
+    //Insertion
+    if(diff == 1) {
+    
+      //Find the insertion
+      for(unsigned int i=0;i<new_path.all_.size();i++) {
+        if(!new_path.all_.at(i).equals(old.all_.at(i))) {
+          temp.push_back(temp.at(i-1));
+          i=new_path.all_.size();
+        }
+      } //end for
+    } //end if insertion 
+
+    //Deletion
+    else if(diff == -1) {
+      
+      //Find the deletion
+      for(unsigned int i=0;i<new_path.all_.size();i++) {
+        if(!new_path.all_.at(i).equals(old.all_.at(i))) {
+          temp.erase(temp.begin()+i);
+          i=new_path.all_.size();
+        }
+      } //end for
+    } //end if deletion
+
+    result.push_back(temp);
+  } //end if size==1
+
+
+  //Crossover
+  else {
+    
+    for(unsigned int i=0;i<new_paths.size();i++) {
+    
+      Path old = paths_.at(i_old.at(i)); 
+      Path new_path = new_paths.at(i);
+
+      unsigned int i_crossed = (i==0) ? i_old.at(1) : i_old.at(0);
+      Path crossed_path = paths_.at(i_crossed);
+
+      std::vector<float> temp;
+
+      //Find where the crossover occurred
+      unsigned int i_cross=0;
+      for(unsigned int c=0;c<old.all_.size();c++) {
+        if(!old.all_.at(c).equals(new_path.all_.at(c))) {
+          i_cross = c;
+          c = old.all_.size();
+        }
+        else if(c<old.all_.size()-1) {
+          temp.push_back(velocities_.at(i_old.at(i)).at(c));
+        }
+        else {
+          i_cross = old.all_.size();
+        }
+      } //end for c
+      
+      //Push all the velocity values from the crossed path
+      for(unsigned int c=i_cross;c<crossed_path.all_.size()-1;c++) {
+        temp.push_back(velocities_.at(i_crossed).at(c));
+      }
+      
+      result.push_back(temp); 
+    } //end for
+  }
+  
+  //Swap and Change do not change the size
+
+  return result;
+}
+
+
+
+
+
 /** Modify a trajectory 
  *  Can accept 2 ids if the modification operator is binary */
-const std::vector<RampTrajectory> Planner::modifyTrajec(const unsigned int i1, const unsigned int i2) {
+const std::vector<RampTrajectory> Planner::modifyTrajec() {
   std::vector<RampTrajectory> result;
 
   //The modification operators deal with paths
   //So send the path to be modified
   std::vector<Path> mp = modifyPath();
+  if(mp.size() > 1) {
+  
+    std::vector<int> olds;
+    olds.push_back(modifier_->i_changed1);
+    olds.push_back(modifier_->i_changed2);
 
-  for(unsigned int i=0;i<mp.size();i++) {
-    
-    Path mod_path = mp.at(i);
-    std::cout<<"\nnew path:"<<mod_path.toString();
-
-    paths_.push_back(mod_path); 
-
-    std::vector<float> v = velocities_.at(i);
-    v.push_back(10.0f);
-    std::cout<<"v:";
-    for(unsigned int i=0;i<v.size();i++) {
-      std::cout<<" "<<v.at(i);
+    std::vector< std::vector<float> > vs = getNewVelocities(mp, olds); 
+  
+    //For each modified path,
+    for(unsigned int i=0;i<mp.size();i++) {
+      
+      //Build a TrajectoryRequestMsg
+      ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(mp.at(i), vs.at(i), vs.at(i));
+      
+      //Send the request and set the result to the returned trajectory 
+      if(requestTrajectory(tr)) {
+        RampTrajectory temp;
+        temp.trajec_ = tr.response.trajectory;
+        result.push_back(temp);
+      }
     }
+  }
 
+  else {
+
+    std::vector<int> olds;
+    olds.push_back(modifier_->i_changed1);
+
+
+    //Set the velocities of the new path
+    std::vector<float> v = getNewVelocities(mp, olds).at(0); 
+    
     //Now build a TrajectoryRequestMsg
-    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(mod_path, v, v);
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(mp.at(0), v, v);
    
     //Send the request and set the result to the returned trajectory 
     if(requestTrajectory(tr)) {
@@ -172,7 +284,25 @@ const std::vector<RampTrajectory> Planner::modifyTrajec(const unsigned int i1, c
 }
 
 
+/** Modification procedure will modify 1-2 random trajectories,
+ *  add the new trajectories, evaluate the new trajectories,
+ *  and set tau to the new best, */
+void Planner::modification() {
+  std::vector<RampTrajectory> mod_trajec = modifyTrajec();
+  
+  for(unsigned int i=0;i<mod_trajec.size();i++) {
+    population_.add(mod_trajec.at(i));
+  }
 
+  //Evaluate and obtain the best trajectory
+  //****we need a way to only evaluate the new trajectories****
+  //****once evaluation package exists, make evaluation there****
+  //evaluate mod_trajec
+
+  //Obtain best trajectory
+  bestTrajec_ = population_.getBest();
+  
+}
 
 
 /******************************************************
@@ -232,14 +362,8 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const unsigne
     generation_++;
 
     //Call modification
-    std::vector<Path> mod_path = modifier_->perform();
-    //Get trajectories for the modifications
-    //std::vector<RampTrajectory> mod_trajec = modifyTrajec(); 
-    
-    //Replace 1-2 in population with mod_path
-    //for(unsigned int i=0;i<mod_path.size();i++) {
-      //population_.add(mod_
-    //}
+    modification();
+
   
   
   }

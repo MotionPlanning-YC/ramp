@@ -7,9 +7,14 @@ Utility u;
 bool handleRequest(ramp_msgs::TrajectoryRequest::Request& req, 
                    ramp_msgs::TrajectoryRequest::Response& res) 
 {
+  //std::cout<<"\nRequest received:"<<u.toString(req)<<"\n";
+  
   Trajectory traj(req);
   traj.generate(); 
   res.trajectory = traj.buildTrajectoryMsg();
+  
+  //std::cout<<"\nTotal points:"<<traj.points_.size()<<"\n";
+  
   return true;
 }
 

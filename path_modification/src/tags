@@ -16,6 +16,7 @@ Change::Change	change.h	/^    Change(const ramp_msgs::Path p);$/;"	p	class:Chang
 Change::path_	change.h	/^    ramp_msgs::Path path_;$/;"	m	class:Change	access:public
 Change::perform	change.cpp	/^const ramp_msgs::Path Change::perform() {$/;"	f	class:Change	signature:()
 Change::perform	change.h	/^    const ramp_msgs::Path perform();$/;"	p	class:Change	access:public	signature:()
+Change::u	change.h	/^    Utility u;$/;"	m	class:Change	access:public
 Crossover	crossover.cpp	/^Crossover::Crossover(const ramp_msgs::Path p1, const ramp_msgs::Path p2) : path1_(p1), path2_(p2) {} $/;"	f	class:Crossover	signature:(const ramp_msgs::Path p1, const ramp_msgs::Path p2)
 Crossover	crossover.h	/^    Crossover() {}$/;"	f	class:Crossover	access:public	signature:()
 Crossover	crossover.h	/^    Crossover(const ramp_msgs::Path p1, const ramp_msgs::Path p2);$/;"	p	class:Crossover	access:public	signature:(const ramp_msgs::Path p1, const ramp_msgs::Path p2)
@@ -111,4 +112,5 @@ toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Conf
 toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Configuration c) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Configuration c) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Path p) const;    $/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path p) const
+u	change.h	/^    Utility u;$/;"	m	class:Change	access:public
 ~Modifier	modifier.h	/^    ~Modifier() {}$/;"	f	class:Modifier	access:public	signature:()

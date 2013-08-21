@@ -22,6 +22,8 @@ class Modifier {
 
     ramp_msgs::ModificationRequest::Request mod_req;
     std::vector<ramp_msgs::Path> perform();
+
+    Utility u;
 };
 
 #endif

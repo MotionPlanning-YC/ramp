@@ -5,6 +5,8 @@ Modifier::Modifier(ramp_msgs::ModificationRequest::Request& req) : mod_req(req) 
 std::vector<ramp_msgs::Path> Modifier::perform() {
   std::vector<ramp_msgs::Path> result;
 
+  //std::cout<<"\nModifier received:"<<u.toString(mod_req.paths.at(0))<<"\n";
+
   if(mod_req.op == "insert") {
     in.path_ = mod_req.paths.at(0); 
     result.push_back(in.perform());
@@ -30,6 +32,8 @@ std::vector<ramp_msgs::Path> Modifier::perform() {
     cross.path2_ = mod_req.paths.at(1);
     result = cross.perform();
   }
+
+  //std::cout<<"\nModifier returning:"<<u.toString(result.at(0))<<"\n";
 
   return result;
 }

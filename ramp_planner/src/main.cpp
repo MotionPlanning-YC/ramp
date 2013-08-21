@@ -62,7 +62,8 @@ int main(int argc, char** argv) {
     std::cout<<"\n"<<u.toString(my_planner.population_.at(i)); 
   }*/
 
-  //my_planner.modifier_->paths_ = my_planner.paths_;
+  my_planner.modifier_->paths_ = my_planner.paths_;
+  my_planner.modifier_->velocities_ = my_planner.velocities_;
 
 
   for(unsigned int i=0;i<my_planner.paths_.size();i++) {
@@ -80,11 +81,13 @@ int main(int argc, char** argv) {
     std::cout<<"\n"<<ps.at(i).toString(); 
   }
 
-  /*std::cout<<"\nPress Enter to modify a traj!\n";
+  std::cout<<"\nPress Enter to modify a traj!\n";
   std::cin.get();
-  std::vector<ramp_msgs::Trajectory> trs = my_planner.modifyTrajec(0);
+  std::vector<RampTrajectory> trs = my_planner.modifyTrajec();
   std::cout<<"\nTrajectory modified!\n";
-  std::cout<<u.toString(trs.at(0));*/
+  std::cout<<"\ntrs.size():"<<trs.size()<<"\n";
+  std::cout<<trs.at(0).toString();
+  //std::cout<<trs.at(1).toString();
   
 
   std::cout<<"\nSpinning...\n";

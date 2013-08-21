@@ -139,19 +139,21 @@ const ramp_msgs::Trajectory Trajectory::buildTrajectoryMsg() const {
     msg.trajectory.points.push_back(p);
   }
 
-  msg.index_knot_points.push_back(0);
-  float acc = segments_.at(0).T_;
+  
   //Find the indices of the knot points
-  for(unsigned int i=1;i<segments_.size();i++) {
+  float acc=0;
+  for(unsigned int i=0;i<=segments_.size()-1;i++) {
     
     unsigned int index = acc * (float)resolutionRate_; 
+    
     acc += segments_.at(i).T_;
     
     msg.index_knot_points.push_back(index);
   }
 
-  //Get the last knot point
-  //msg.index_knot_points.push_back(segments_.at(segments_.size()-1).end_t_ * resolutionRate_);
+  //Push the last knot point index on.
+  msg.index_knot_points.push_back(points_.size()-1);
+
   return msg; 
 }
 

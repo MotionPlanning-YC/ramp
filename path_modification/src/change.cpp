@@ -31,6 +31,7 @@ const ramp_msgs::Path Change::perform() {
 
     //Insert the new configuration 
     path_.configurations.insert(path_.configurations.begin()+i_knotPoint, c);
+
   }
 
   return path_;

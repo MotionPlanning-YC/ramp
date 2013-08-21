@@ -1,11 +1,11 @@
 #include "modifier.h"
 
 
-Modifier::Modifier(const ros::NodeHandle& h) : num_ops(6) {
+Modifier::Modifier(const ros::NodeHandle& h) : num_ops(5), i_changed1(-1), i_changed2(-1) {
   h_mod_req_ = new ModificationRequestHandler(h);
 }
 
-Modifier::Modifier(const ros::NodeHandle& h, const std::vector<Path> ps) : num_ops(6), paths_(ps) {
+Modifier::Modifier(const ros::NodeHandle& h, const std::vector<Path> ps, const std::vector< std::vector<float> > vs) : num_ops(5), paths_(ps), velocities_(vs), i_changed1(-1), i_changed2(-1) {
   h_mod_req_ = new ModificationRequestHandler(h);
 }
 
@@ -19,19 +19,19 @@ Modifier::~Modifier() {
 
 
 /** This method builds a ModificationRequest srv */
-ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
+const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
   ramp_msgs::ModificationRequest result;
 
   //First, randomly select an operator
   unsigned int op = rand() % num_ops;
-  
+  std::cout<<"\nop:"<<op<<"\n";
+
   //Assign the correct name for the operator
   switch(op) {
 
     //Insert
     case 0:
       result.request.op = "insert";
-
       break;
 
     //Delete
@@ -55,20 +55,32 @@ ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
       break;
   }
 
-  //Get a random path to modify
-  unsigned int i_1 = rand() % paths_.size();
-  result.request.paths.push_back(paths_.at(i_1).buildPathMsg());
+  //Get random path(s) to modify
+  unsigned int i_p1;
+  i_p1 = rand() % paths_.size();
+
+  //Push the path to change onto the result
+  result.request.paths.push_back(paths_.at(i_p1).buildPathMsg());
+
+  //Set i_changed1
+  i_changed1 = i_p1;
 
   //If crossover, get a second path
   if(op == 4) {
-    unsigned int i_2;
-    do { i_2 = rand() % paths_.size(); } 
-    while (i_1 != i_2);
+    unsigned int i_p2;
+    do { i_p2 = rand() % paths_.size(); } 
+    while (i_p1 == i_p2);
 
-    result.request.paths.push_back(paths_.at(i_2).buildPathMsg());
+    //push the path to change onto the result
+    result.request.paths.push_back(paths_.at(i_p2).buildPathMsg());
+
+    //Set i_changed2
+    i_changed2 = i_p2;
+  }
+  else {
+    i_changed2 = -1;
   }
 
-  
   return result;
 }
 
@@ -76,8 +88,9 @@ ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
 
 
 
+
 /** This method performs all the tasks for path modification */
-std::vector<Path> Modifier::perform() {
+const std::vector<Path> Modifier::perform() {
   std::vector<Path> result;
  
   //Build a modification request srv 

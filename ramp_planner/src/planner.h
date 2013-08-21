@@ -24,7 +24,6 @@ class Planner {
     //the trajectory's path,
     //and the resolution rate for the trajectories
     Population population_;
-    //std::vector<RampTrajectory>  population_;
     std::vector<std::vector<float> >    velocities_;
     std::vector<Path>                   paths_;
     const unsigned int resolutionRate_;
@@ -49,7 +48,7 @@ class Planner {
     
     //Modify trajectory or path
     const std::vector<Path> modifyPath();
-    const std::vector<RampTrajectory> modifyTrajec(const unsigned int i1, const unsigned int i2=-1);
+    const std::vector<RampTrajectory> modifyTrajec();
 
     //Request information from other packages
     //Cannot make the request srvs const because they have no serialize/deserialize
@@ -67,13 +66,20 @@ class Planner {
 
     
 
+    //The best trajectory
+    RampTrajectory bestTrajec_;
 
+    //modifier_ should be private...
+    Modifier* modifier_;
   private:
+    const std::vector< std::vector<float> > getNewVelocities(std::vector<Path> new_path, std::vector<int> i_old);
+    void modification();
+
+
     Utility u; 
     const int populationSize_;
     Configuration current_;
     unsigned int generation_;
-    Modifier* modifier_;
 };
 
 #endif

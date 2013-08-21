@@ -1,6 +1,7 @@
 #ifndef CHANGE_H
 #define CHANGE_H
 #include "ramp_msgs/Path.h"
+#include "utility.h"
 
 class Change {
   public:

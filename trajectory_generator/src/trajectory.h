@@ -30,6 +30,7 @@ class Trajectory {
   private:
     void  buildSegments();
     const MotionState getMotionState(const unsigned int ind_segment, const float t);
+    Utility u;
     const unsigned int k_dof_;
 };
 
