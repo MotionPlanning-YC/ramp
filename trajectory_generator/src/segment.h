@@ -36,10 +36,11 @@ class Segment {
     float v_end_;
 
     //Minimum time required to execute the segment
-    float T_;
+    // This value may need to change to a float in the future
+    unsigned int T_;
     
     //The segment's index in whichever trajectory it is in
-    int index; 
+    int index_; 
     
 
   private:

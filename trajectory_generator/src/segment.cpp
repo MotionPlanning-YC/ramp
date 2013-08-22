@@ -29,7 +29,7 @@ void Segment::build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::P
   end_.p_.push_back(kp_end.y);
   end_.p_.push_back(kp_end.theta); 
   
-  index     = ind;
+  index_     = ind;
   v_start_  = v_start;
   v_end_    = v_end;
 
@@ -39,13 +39,17 @@ void Segment::build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::P
 
 const float Segment::calculateMinTime() {
 
-  T_ = abs((end_.p_.at(0) - start_.p_.at(0)) / max_v_.at(0));
+
+  //We take the ceiling so that the resolution rate will divide evenly into T
+  // e.g. if your resolution rate is 5hz, and T is 3.5, your generated trajectory 
+  // will not have the correct position at the end. There may be better solutions, but this one works for now. 
+  T_ = ceil(fabs((end_.p_.at(0) - start_.p_.at(0)) / max_v_.at(0)));
   
   //Compute the execution time for each k
+  //The maximum of these times is the minimum time for the whole segment
   for(unsigned int i=1;i<k_dof_;i++) {
     
-    float t = (end_.p_.at(i) - start_.p_.at(i)) / max_v_.at(i);
-    
+    int t = ceil(fabs(end_.p_.at(i) - start_.p_.at(i)) / max_v_.at(i));
     if(T_ < t)
       T_ = t;
   }
@@ -89,11 +93,14 @@ void Segment::buildWork() {
 const std::string Segment::toString() const {
   std::ostringstream result;
   
-  result<<"\nIndex: "<<index; 
+  result<<"\nindex_: "<<index_; 
 
   result<<"\nT:"<<T_;
+
+  result<<"\n\nstart:"<<start_.toString();
+  result<<"\n\nend:"<<end_.toString();
   
-  result<<"\na1 coefficients: ("<<a1_.at(0);
+  result<<"\n\na1 coefficients: ("<<a1_.at(0);
   for(unsigned int i=1;i<a1_.size();i++) {
     result<<", "<<a1_.at(i);  
   }

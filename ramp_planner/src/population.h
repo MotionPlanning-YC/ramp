@@ -17,10 +17,10 @@ class Population {
     const RampTrajectory getBest() const;
     const std::string toString() const;
     
+    std::vector<RampTrajectory> population_;
     
   private:
     const unsigned int max_size;
-    std::vector<RampTrajectory> population_;
     unsigned int i_best;
 };
 

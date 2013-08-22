@@ -21,7 +21,6 @@ Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request trajec_req) :
   }
 
   resolutionRate_ = trajec_req.resolutionRate;
-  
 }
 
 
@@ -98,8 +97,9 @@ const std::vector<MotionState> Trajectory::generate() {
       
       //Get the motion state
       points_.push_back(getMotionState(i, t));
-    }
-  }
+
+    } //end for each clock
+  } //end for each segment
 
   return points_;
 }

@@ -37,7 +37,11 @@ void Population::add(const RampTrajectory rt) {
 /** This method should call the evaluate procedure for all of the trajectories
  *  It also finds the best trajectory and sets i_best */
 const RampTrajectory Population::evaluateAndObtainBest() {
+  //***Must evaluate all trajectories***
+  
+  //Set best to index 0 for now
   i_best = 0;
+  return getBest();
 }
 
 

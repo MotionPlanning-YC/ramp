@@ -6,6 +6,7 @@
 #include "trajectory_request_handler.h"
 #include "modifier.h"
 #include "population.h"
+#include "control_handler.h"
 
 class Planner {
   public:
@@ -34,8 +35,6 @@ class Planner {
     Configuration goal_;
     std::vector<Range> ranges_;
     
-    //Hold the handlers to communicate with other packages
-    TrajectoryRequestHandler*   h_traj_req_;
     
     
     /********************************************
@@ -64,7 +63,7 @@ class Planner {
     void go();
 
 
-    
+    void sendBest();
 
     //The best trajectory
     RampTrajectory bestTrajec_;
@@ -73,6 +72,8 @@ class Planner {
     Modifier* modifier_;
   private:
     const std::vector< std::vector<float> > getNewVelocities(std::vector<Path> new_path, std::vector<int> i_old);
+
+    //Modification procedure
     void modification();
 
 
@@ -80,6 +81,10 @@ class Planner {
     const int populationSize_;
     Configuration current_;
     unsigned int generation_;
+
+    //Hold the handlers to communicate with other packages
+    TrajectoryRequestHandler*   h_traj_req_;
+    ControlHandler*             h_control_;
 };
 
 #endif

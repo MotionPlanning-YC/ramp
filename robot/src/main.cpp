@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
    
   ros::init(argc, argv, "robot");
   ros::NodeHandle handle;
-  ros::Subscriber sub_traj = handle.subscribe("traj", 1000, trajCallback);
+  ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
   
   init_advertisers_subscribers(robot, handle);
 /*

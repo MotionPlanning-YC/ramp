@@ -28,10 +28,6 @@ class Modifier {
 
     unsigned int mod_op;
     Utility u;
-
-
-    
-    void setNewVelocities(const unsigned int op, const std::vector<Path> nps);
 };
 
 #endif

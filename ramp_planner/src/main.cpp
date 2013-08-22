@@ -58,16 +58,21 @@ int main(int argc, char** argv) {
 
   //std::cout<<"\npopulation size:"<<my_planner.population_.population_.size();
   //Print all the initial trajectories
-  /*for(unsigned int i=0;i<my_planner.population_.size();i++) {
-    std::cout<<"\n"<<u.toString(my_planner.population_.at(i)); 
+  /*for(unsigned int i=0;i<my_planner.population_.population_.size();i++) {
+    std::cout<<"\n"<<my_planner.population_.population_.at(i).toString(); 
+    std::cout<<"\n"<<my_planner.paths_.at(i).toString();
+    std::cin.get();
   }*/
+
+
+
 
   my_planner.modifier_->paths_ = my_planner.paths_;
   my_planner.modifier_->velocities_ = my_planner.velocities_;
 
 
   for(unsigned int i=0;i<my_planner.paths_.size();i++) {
-    std::cout<<"\n\nPath "<<i<<"\n";
+    std::cout<<"\n\nPath "<<i;
     std::cout<<"\n"<<my_planner.paths_.at(i).toString(); 
   }
 
@@ -77,7 +82,7 @@ int main(int argc, char** argv) {
   std::vector<Path> ps = my_planner.modifyPath();
 
   for(unsigned int i=0;i<ps.size();i++) {
-    std::cout<<"\n\nPath "<<i<<"\n";
+    std::cout<<"\n\nModified Path "<<i;
     std::cout<<"\n"<<ps.at(i).toString(); 
   }
 
@@ -85,9 +90,16 @@ int main(int argc, char** argv) {
   std::cin.get();
   std::vector<RampTrajectory> trs = my_planner.modifyTrajec();
   std::cout<<"\nTrajectory modified!\n";
-  std::cout<<"\ntrs.size():"<<trs.size()<<"\n";
-  std::cout<<trs.at(0).toString();
-  //std::cout<<trs.at(1).toString();
+  for(unsigned int i=0;i<trs.size();i++) {
+    std::cout<<"\n\nModified Trajectory "<<i;
+    std::cout<<trs.at(i).toString();
+  }
+ 
+ 
+  //Test sending the best trajectory 
+  my_planner.bestTrajec_ = my_planner.population_.getBest();
+  my_planner.sendBest();
+
   
 
   std::cout<<"\nSpinning...\n";
