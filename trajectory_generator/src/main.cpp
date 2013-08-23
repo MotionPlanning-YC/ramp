@@ -13,8 +13,7 @@ bool handleRequest(ramp_msgs::TrajectoryRequest::Request& req,
   traj.generate(); 
   res.trajectory = traj.buildTrajectoryMsg();
   
-  //std::cout<<"\nTotal points:"<<traj.points_.size()<<"\n";
-  
+  //std::cout<<"\nSending back:"<<u.toString(res.trajectory);
   return true;
 }
 

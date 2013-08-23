@@ -1,0 +1,7 @@
+Path path
+uint8[] i_segments
+
+---
+
+float32 fitness
+bool feasible

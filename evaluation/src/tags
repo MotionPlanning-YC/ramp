@@ -1,0 +1,32 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+EUCLIDEAN_DISTANCE_H	euclidean_distance.h	2;"	d
+EVALUATE_H	evaluate.h	2;"	d
+EuclideanDistance	euclidean_distance.h	/^    EuclideanDistance();$/;"	p	class:EuclideanDistance	access:public	signature:()
+EuclideanDistance	euclidean_distance.h	/^class EuclideanDistance {$/;"	c
+EuclideanDistance::EuclideanDistance	euclidean_distance.h	/^    EuclideanDistance();$/;"	p	class:EuclideanDistance	access:public	signature:()
+EuclideanDistance::path_	euclidean_distance.h	/^    ramp_msgs::Path path_;$/;"	m	class:EuclideanDistance	access:public
+EuclideanDistance::perform	euclidean_distance.cpp	/^const double EuclideanDistance::perform() {$/;"	f	class:EuclideanDistance	signature:()
+EuclideanDistance::perform	euclidean_distance.h	/^    const double perform();$/;"	p	class:EuclideanDistance	access:public	signature:()
+Evaluate	evaluate.h	/^    Evaluate(const ramp_msgs::EvaluationRequest::Request& er);$/;"	p	class:Evaluate	access:public	signature:(const ramp_msgs::EvaluationRequest::Request& er)
+Evaluate	evaluate.h	/^class Evaluate {$/;"	c
+Evaluate::Evaluate	evaluate.h	/^    Evaluate(const ramp_msgs::EvaluationRequest::Request& er);$/;"	p	class:Evaluate	access:public	signature:(const ramp_msgs::EvaluationRequest::Request& er)
+Evaluate::euc_dist	evaluate.h	/^    EuclideanDistance euc_dist;$/;"	m	class:Evaluate	access:public
+Evaluate::i_segments	evaluate.h	/^    std::vector<unsigned int> i_segments;$/;"	m	class:Evaluate	access:public
+Evaluate::path_	evaluate.h	/^    ramp_msgs::Path path_;$/;"	m	class:Evaluate	access:public
+Evaluate::perform	evaluate.h	/^    const double perform();$/;"	p	class:Evaluate	access:public	signature:()
+UTILITY_H	utility.h	2;"	d
+Utility	utility.h	/^class Utility {$/;"	c
+euc_dist	evaluate.h	/^    EuclideanDistance euc_dist;$/;"	m	class:Evaluate	access:public
+handleRequest	main.cpp	/^bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,$/;"	f	signature:(ramp_msgs::EvaluationRequest::Request& req, ramp_msgs::EvaluationRequest::Response& res)
+i_segments	evaluate.h	/^    std::vector<unsigned int> i_segments;$/;"	m	class:Evaluate	access:public
+main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+path_	euclidean_distance.h	/^    ramp_msgs::Path path_;$/;"	m	class:EuclideanDistance	access:public
+path_	evaluate.h	/^    ramp_msgs::Path path_;$/;"	m	class:Evaluate	access:public
+perform	euclidean_distance.cpp	/^const double EuclideanDistance::perform() {$/;"	f	class:EuclideanDistance	signature:()
+perform	euclidean_distance.h	/^    const double perform();$/;"	p	class:EuclideanDistance	access:public	signature:()
+perform	evaluate.h	/^    const double perform();$/;"	p	class:Evaluate	access:public	signature:()

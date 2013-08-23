@@ -3,6 +3,7 @@
 #include "planner.h"
 #include "range.h"
 #include "ramp_msgs/ModificationRequest.h"
+#include "ramp_msgs/EvaluationRequest.h"
  
 
 
@@ -64,8 +65,16 @@ int main(int argc, char** argv) {
     std::cin.get();
   }*/
 
+  
 
+  ros::ServiceClient client = handle.serviceClient<ramp_msgs::EvaluationRequest>("evaluation");
 
+  ramp_msgs::EvaluationRequest er;
+  er.request.path = my_planner.paths_.at(0).buildPathMsg();
+  if(client.call(er)) {
+    std::cout<<"\nResponse: fitness:"<<er.response.fitness<<" feasible:"<<er.response.feasible;
+    std::cin.get();
+  }
 
   my_planner.modifier_->paths_ = my_planner.paths_;
   my_planner.modifier_->velocities_ = my_planner.velocities_;

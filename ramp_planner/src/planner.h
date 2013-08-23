@@ -1,5 +1,5 @@
 #ifndef PLANNER_H
-#define PLANNER
+#define PLANNER_H
 #include "ros/ros.h"
 #include "path.h"
 #include "ramp_trajectory.h"

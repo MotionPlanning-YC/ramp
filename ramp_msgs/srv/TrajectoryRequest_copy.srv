@@ -1,7 +1,0 @@
-Path path
-float32[] t
-uint8 resolutionRate
-
----
-
-Trajectory trajectory
