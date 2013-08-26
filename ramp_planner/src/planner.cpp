@@ -5,9 +5,9 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), modifier_(0) {}
+Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) {}
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), modifier_(0) {}
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) {}
 
 Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0) {
   init_handlers(h);
@@ -17,6 +17,16 @@ Planner::~Planner() {
   if(h_traj_req_!= 0) {
     delete h_traj_req_;  
     h_traj_req_= 0;
+  }
+
+  if(h_control_ != 0) {
+    delete h_control_;
+    h_control_ = 0;
+  }
+
+  if(h_eval_req_ != 0) {
+    delete h_eval_req_;
+    h_eval_req_ = 0;
   }
   
   if(modifier_!= 0) {
@@ -39,6 +49,7 @@ Planner::~Planner() {
 void Planner::init_handlers(const ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler(h);
   h_control_  = new ControlHandler(h);
+  h_eval_req_ = new EvaluationRequestHandler(h);
   modifier_   = new Modifier(h, paths_, velocities_);
 }
 
@@ -119,6 +130,9 @@ void Planner::init_population() {
 const bool Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr) {
   return h_traj_req_->request(tr); 
 }
+const bool Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er) {
+  return h_eval_req_->request(er);
+}
 
 
 
@@ -132,9 +146,100 @@ const std::vector<Path> Planner::modifyPath() {
   return modifier_->perform();
 }
 
+/** Modify a trajectory 
+ *  Can accept 2 ids if the modification operator is binary */
+const std::vector<RampTrajectory> Planner::modifyTrajec() {
+  std::vector<RampTrajectory> result;
+
+
+  //The modification operators deal with paths
+  //So send the path to be modified
+  std::vector<Path> mp = modifyPath();
+
+  //Hold the ids of the path(s) modified
+  std::vector<int> olds;
+  olds.push_back(modifier_->i_changed1);
+
+  //If a crossover was performed, push on the 2nd path 
+  if(mp.size()>1) {
+    olds.push_back(modifier_->i_changed2);
+  }
+
+  //Hold the new velocity vector(s)
+  std::vector< std::vector<float> > vs = getNewVelocities(mp, olds); 
+  
+  //For each modified path,
+  for(unsigned int i=0;i<mp.size();i++) {
+    
+    //Build a TrajectoryRequestMsg
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(mp.at(i), vs.at(i), vs.at(i));
+    
+    //Send the request and set the result to the returned trajectory 
+    if(requestTrajectory(tr)) {
+      RampTrajectory temp;
+      temp.trajec_ = tr.response.trajectory;
+      result.push_back(temp);
+    }
+  }
+  
+  return result;
+} //End modifyTrajectory
+
+
+/******************************************************
+ **************** Srv Building Methods ****************
+ ******************************************************/
 
 
 
+/** Build a TrajectoryRequest srv */
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e ) const {
+  ramp_msgs::TrajectoryRequest result;
+
+  result.request.path = path.buildPathMsg();
+  result.request.v_start    = v_s;
+  result.request.v_end      = v_e;
+  result.request.resolutionRate = resolutionRate_;
+
+  return result;
+}
+
+
+/** Build a TrajectoryRequest srv */
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const {
+  ramp_msgs::TrajectoryRequest result;
+
+  result.request.path = paths_.at(i_path).buildPathMsg();
+  result.request.v_start    = v_s;
+  result.request.v_end      = v_e;
+  result.request.resolutionRate = resolutionRate_;
+  
+  return result; 
+}
+
+
+/** Build an EvaluationRequest srv */
+const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const unsigned int i_trajec, const std::vector<unsigned int> i_segments) {
+  ramp_msgs::EvaluationRequest result;
+
+  result.request.trajectory = population_.population_.at(i_trajec).trajec_;
+
+  for(unsigned int i=0;i<i_segments.size();i++) {
+    result.request.i_segments.push_back(i_segments.at(i));
+  }
+
+  return result;
+}
+
+
+
+/*******************************************************
+ ******************** Miscellaneous ********************
+ *******************************************************/
+
+void Planner::sendBest() {
+  h_control_->send(bestTrajec_.trajec_);
+}
 
 
 /** This method returns the new velocity vector(s) for the modified path(s) */
@@ -240,48 +345,6 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
 
 
 
-
-
-/** Modify a trajectory 
- *  Can accept 2 ids if the modification operator is binary */
-const std::vector<RampTrajectory> Planner::modifyTrajec() {
-  std::vector<RampTrajectory> result;
-
-
-  //The modification operators deal with paths
-  //So send the path to be modified
-  std::vector<Path> mp = modifyPath();
-
-  //Hold the ids of the path(s) modified
-  std::vector<int> olds;
-  olds.push_back(modifier_->i_changed1);
-
-  //If a crossover was performed, push on the 2nd path 
-  if(mp.size()>1) {
-    olds.push_back(modifier_->i_changed2);
-  }
-
-  //Hold the new velocity vector(s)
-  std::vector< std::vector<float> > vs = getNewVelocities(mp, olds); 
-  
-  //For each modified path,
-  for(unsigned int i=0;i<mp.size();i++) {
-    
-    //Build a TrajectoryRequestMsg
-    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(mp.at(i), vs.at(i), vs.at(i));
-    
-    //Send the request and set the result to the returned trajectory 
-    if(requestTrajectory(tr)) {
-      RampTrajectory temp;
-      temp.trajec_ = tr.response.trajectory;
-      result.push_back(temp);
-    }
-  }
-  
-  return result;
-}
-
-
 /** Modification procedure will modify 1-2 random trajectories,
  *  add the new trajectories, evaluate the new trajectories,
  *  and set tau to the new best, */
@@ -299,51 +362,36 @@ void Planner::modification() {
 
   //Obtain best trajectory
   bestTrajec_ = population_.getBest();
+}
+
+void Planner::evaluatePopulation() {
   
+  //i_segments is the parameter we pass if we only want to evaluate specific segments
+  //in this method, it should be empty because we are evaluating the entire trajectory
+  std::vector<unsigned int> i_segments;
+
+  //Go through each trajectory in the population and evaluate it
+  for(unsigned int i=0;i<population_.population_.size();i++) {
+    ramp_msgs::EvaluationRequest er = buildEvaluationRequest(i, i_segments);
+    
+    //Do the evaluation and set the fitness and feasibility members
+    if(requestEvaluation(er)) {
+      population_.population_.at(i).fitness_   = er.response.fitness;
+      population_.population_.at(i).feasible_  = er.response.feasible;
+    }
+    else {
+      //some error handling
+    }
+
+  } //end for   
+} //End evaluatePopulation
+
+
+/** This method calls evaluatePopulation and population_.getBest() */
+const RampTrajectory Planner::evaluateAndObtainBest() {
+  evaluatePopulation();
+  return population_.getBest();
 }
-
-
-/******************************************************
- **************** Srv Building Methods ****************
- ******************************************************/
-
-
-
-/** Build a TrajectoryRequest msg */
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e ) const {
-  ramp_msgs::TrajectoryRequest result;
-
-  result.request.path = path.buildPathMsg();
-  result.request.v_start    = v_s;
-  result.request.v_end      = v_e;
-  result.request.resolutionRate = resolutionRate_;
-
-  return result;
-}
-
-
-/** Build a TrajectoryRequest msg */
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const {
-  ramp_msgs::TrajectoryRequest result;
-
-  result.request.path = paths_.at(i_path).buildPathMsg();
-  result.request.v_start    = v_s;
-  result.request.v_end      = v_e;
-  result.request.resolutionRate = resolutionRate_;
-  
-  return result; 
-}
-
-
-
-/*******************************************************
- ******************** Miscellaneous ********************
- *******************************************************/
-void Planner::sendBest() {
-  h_control_->send(bestTrajec_.trajec_);
-}
-
-
 
 /*******************************************************
  ****************** Start the planner ******************
@@ -358,7 +406,8 @@ void Planner::sendBest() {
   //initialize population
   init_population();
 
-  RampTrajectory T_move = population_.evaluateAndObtainBest();
+  //***Adjust***
+  RampTrajectory T_move = evaluateAndObtainBest();
 
   //createSubpopulations();
   
@@ -379,7 +428,7 @@ void Planner::sendBest() {
       //
 
       //Evaluate P(t) and obtain best T, T_move=T_best
-      T_move = population_.evaluateAndObtainBest();
+      T_move = evaluateAndObtainBest();
       
       //Send the best trajectory 
       sendBest();

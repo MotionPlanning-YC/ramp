@@ -1,4 +1,4 @@
-Path path
+Trajectory trajectory
 uint8[] i_segments
 
 ---

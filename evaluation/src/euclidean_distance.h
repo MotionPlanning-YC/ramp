@@ -1,7 +1,7 @@
 #ifndef EUCLIDEAN_DISTANCE_H
 #define EUCLIDEAN_DISTANCE_H
 #include "utility.h"
-#include "ramp_msgs/Path.h"
+#include "ramp_msgs/Trajectory.h"
 
 class EuclideanDistance {
   public:
@@ -10,7 +10,7 @@ class EuclideanDistance {
 
     const double perform();
 
-    ramp_msgs::Path path_;
+    ramp_msgs::Trajectory trajectory_;
 
 };
 

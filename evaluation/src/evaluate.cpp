@@ -2,7 +2,7 @@
 
 
 Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) {
-  path_ = req.path;
+  trajectory_ = req.trajectory;
 
   for(unsigned int i=0;i<req.i_segments.size();i++) {
     i_segments_.push_back(req.i_segments.at(i));
@@ -15,12 +15,11 @@ const double Evaluate::perform() {
 
   //Create the path to evaluate
   // We do this because we may only be evaluating parts of a path
-  ramp_msgs::Path p_eval;
-  p_eval = path_;
+  ramp_msgs::Trajectory t_eval;
+  t_eval = trajectory_;
 
-
-  //Set values for euclidean distance
-  euc_dist.path_ = p_eval;
+  //Set values for euclidean distance and add to result
+  euc_dist.trajectory_ = t_eval;
   result+=euc_dist.perform();
 
   return result;

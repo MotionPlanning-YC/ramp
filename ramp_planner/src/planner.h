@@ -3,6 +3,7 @@
 #include "ros/ros.h"
 #include "path.h"
 #include "ramp_trajectory.h"
+#include "evaluation_request_handler.h"
 #include "trajectory_request_handler.h"
 #include "modifier.h"
 #include "population.h"
@@ -41,9 +42,19 @@ class Planner {
      ***************** Methods ******************
      ********************************************/
     
+    //Start planning
+    void go();
+    
     //Initialization steps
     void init_population();
     void init_handlers(const ros::NodeHandle& h);
+    
+    //Send the best trajectory to the control package
+    void sendBest();
+
+    //Evaluate the population 
+    void evaluatePopulation();
+    const RampTrajectory evaluateAndObtainBest();
     
     //Modify trajectory or path
     const std::vector<Path> modifyPath();
@@ -52,22 +63,22 @@ class Planner {
     //Request information from other packages
     //Cannot make the request srvs const because they have no serialize/deserialize
     const bool requestTrajectory(ramp_msgs::TrajectoryRequest& tr);
+    const bool requestEvaluation(ramp_msgs::EvaluationRequest& er);
 
     //Msg building methods
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
+    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const unsigned int i_path, const std::vector<unsigned int> i_segments);
 
 
 
-    //Start planning
-    void go();
 
-
-    void sendBest();
 
     //The best trajectory
     RampTrajectory bestTrajec_;
-
+    
+    
+    
     //modifier_ should be private...
     Modifier* modifier_;
   private:
@@ -75,6 +86,7 @@ class Planner {
 
     //Modification procedure
     void modification();
+
 
 
     Utility u; 
@@ -85,6 +97,8 @@ class Planner {
     //Hold the handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
     ControlHandler*             h_control_;
+    EvaluationRequestHandler*   h_eval_req_;
+
 };
 
 #endif

@@ -12,6 +12,7 @@ class RampTrajectory {
     
     ramp_msgs::Trajectory trajec_;
     double fitness_;
+    bool feasible_;
 
     const std::string toString() const;
   private:

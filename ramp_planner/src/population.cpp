@@ -5,8 +5,6 @@ Population::Population() : max_size(7), i_best(0) {}
 
 Population::Population(const unsigned int size) : max_size(size), i_best(0) {}
 
-const RampTrajectory Population::getBest() const {return population_.at(i_best);}
-
 
 /** This method adds a trajectory to the population. 
  *  If the population is full, a random trajectory (that isn't the best one) is replaced */
@@ -34,14 +32,24 @@ void Population::add(const RampTrajectory rt) {
   }
 }
 
-/** This method should call the evaluate procedure for all of the trajectories
- *  It also finds the best trajectory and sets i_best */
-const RampTrajectory Population::evaluateAndObtainBest() {
-  //***Must evaluate all trajectories***
+/** Return the fittest trajectory */
+const RampTrajectory Population::getBest() const {
   
-  //Set best to index 0 for now
-  i_best = 0;
-  return getBest();
+  //Find first feasible trajectory
+  int i_min = 0;
+  while(i_min < population_.size() && !population_.at(i_min).feasible_) {
+    i_min++;
+  }
+  
+  for(unsigned int i=i_min;i<population_.size();i++) {
+    if( population_.at(i).feasible_ &&
+        population_.at(i).fitness_ < population_.at(i_min).fitness_) 
+    {
+      i_min = i; 
+    }
+  }
+
+  return population_.at(i_min);
 }
 
 
@@ -49,9 +57,7 @@ const RampTrajectory Population::evaluateAndObtainBest() {
 const std::string Population::toString() const {
   std::ostringstream result;
   for(unsigned int i=0;i<population_.size();i++) {
-    result<<"\n"<<population_.at(i).toString();
+    result<<"\nTrajectory "<<i<<": "<<population_.at(i).toString();
   }
   return result.str();
 }
-
-

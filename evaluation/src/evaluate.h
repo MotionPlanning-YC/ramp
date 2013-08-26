@@ -15,7 +15,7 @@ class Evaluate {
     EuclideanDistance euc_dist;
 
     //Information sent by the request
-    ramp_msgs::Path path_;
+    ramp_msgs::Trajectory trajectory_;
     std::vector<unsigned int> i_segments_;
     
 };

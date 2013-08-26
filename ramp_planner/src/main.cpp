@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
   srand( time(NULL));
   Range range0(0, 10);
   Range range1(0, 10);
-  Range range2(30, 90);
+  Range range2(30, 50);
  
  
   /** Build the Planner */ 
@@ -67,16 +67,21 @@ int main(int argc, char** argv) {
 
   
 
-  ros::ServiceClient client = handle.serviceClient<ramp_msgs::EvaluationRequest>("evaluation");
 
-  ramp_msgs::EvaluationRequest er;
-  er.request.path = my_planner.paths_.at(0).buildPathMsg();
-  if(client.call(er)) {
-    std::cout<<"\nResponse: fitness:"<<er.response.fitness<<" feasible:"<<er.response.feasible;
+  std::vector<unsigned int> i_segments;
+  ramp_msgs::EvaluationRequest er = my_planner.buildEvaluationRequest(0, i_segments);
+  if(my_planner.requestEvaluation(er)) {
+    std::cout<<"\nResponse: fitness:"<<er.response.fitness<<" feasible:"<< ((er.response.feasible) ? "true" : "false");
     std::cin.get();
   }
 
-  my_planner.modifier_->paths_ = my_planner.paths_;
+  RampTrajectory bt = my_planner.evaluateAndObtainBest();
+  std::cout<<"\n"<<my_planner.population_.toString();
+  std::cout<<"\nPress enter to view best trajectory\n";
+  std::cin.get();
+  std::cout<<"\n"<<bt.toString();
+
+  /*my_planner.modifier_->paths_ = my_planner.paths_;
   my_planner.modifier_->velocities_ = my_planner.velocities_;
 
 
@@ -107,7 +112,7 @@ int main(int argc, char** argv) {
  
   //Test sending the best trajectory 
   my_planner.bestTrajec_ = my_planner.population_.getBest();
-  my_planner.sendBest();
+  my_planner.sendBest();*/
 
   
 
