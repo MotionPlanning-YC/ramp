@@ -3,19 +3,29 @@
 
 const std::string Corobot::TOPIC_STR_PHIDGET_MOTOR="PhidgetMotor";
 const std::string Corobot::TOPIC_STR_ODOMETRY="odometry";
+const std::string Corobot::TOPIC_STR_UPDATE="update";
 const std::string Corobot::TOPIC_STR_TWIST="twist";
 
 const float timeNeededToTurn = 3.0; 
 
-Corobot::Corobot() {
-  configuration_.x = 0;
-  configuration_.y = 0;
-  configuration_.theta = 0;
+Corobot::Corobot() : k_dof_(3){
+  for(unsigned int i=0;i<k_dof_;i++) {
+    configuration_.K.push_back(0);
+  }
 }
 
 
 Corobot::~Corobot() {}
 
+
+
+void Corobot::setConfiguration(float x, float y, float theta) {
+  configuration_.K.clear();
+
+  configuration_.K.push_back(x);
+  configuration_.K.push_back(y);
+  configuration_.K.push_back(theta);
+}
 
 
 void Corobot::updateState(const nav_msgs::Odometry::ConstPtr& msg) {
@@ -33,9 +43,7 @@ void Corobot::updateState(const nav_msgs::Odometry::ConstPtr& msg) {
     }
     
     //Set configuration
-    configuration_.x = msg->pose.pose.position.x;
-    configuration_.y = msg->pose.pose.position.y;
-    configuration_.theta = avg_theta;
+    setConfiguration(msg->pose.pose.position.x, msg->pose.pose.position.y, avg_theta);
      
     //Clear vector
     thetas_.clear();
@@ -202,6 +210,17 @@ void Corobot::calculateSpeedsAndTime ()
   } 
 }
 
+
+void Corobot::controlCycle(geometry_msgs::Twist twist, ros::Time end_time, ros::Rate r) {
+
+    //Send the twist msg at some rate r
+    //while(ros::ok() && ros::Time::now() < end_times.at(i)) {
+    while(ros::ok() && ros::Time::now() < end_time) {
+      pub_twist_.publish(twist); 
+      r.sleep();
+    }
+}
+
 void Corobot::moveOnTrajectory() 
 {
   int num = trajectory_.trajectory.points.size(); //Get the number of waypoints
@@ -214,7 +233,7 @@ void Corobot::moveOnTrajectory()
   calculateSpeedsAndTime();
   
   
-  //For each knotpoint we publish the Twist message
+  //For each waypoint we publish the Twist message
   for(unsigned int i=0;i<num-1;i++) {
   
     // We need to make sure we are at the correct direction to reach the next waypoint
@@ -223,10 +242,12 @@ void Corobot::moveOnTrajectory()
         twist.linear.x = 0;
         twist.angular.z = angular_speeds_knotpoints.at(i_knot_points);
         start = ros::Time::now();
+
         while(ros::ok() && ros::Time::now() < (start + ros::Duration(timeNeededToTurn))) {
             pub_twist_.publish(twist); 
             r.sleep();
         }
+
         delay += ros::Duration(timeNeededToTurn); //we save as a delay the time it took to turn
         i_knot_points++;
     }
@@ -237,6 +258,8 @@ void Corobot::moveOnTrajectory()
     // Now we can go straight to reach the waypoint
     twist.linear.x = speeds.at(i);
     twist.angular.z = 0;
+
+
     //Send the twist msg at some rate r
     while(ros::ok() && ros::Time::now() < end_times.at(i)) {
       pub_twist_.publish(twist); 
@@ -249,10 +272,12 @@ void Corobot::moveOnTrajectory()
         twist.linear.x = 0;
         twist.angular.z = angular_speeds_knotpoints.at(i_knot_points);
         start = ros::Time::now();
+
         while(ros::ok() && ros::Time::now() < (start + ros::Duration(timeNeededToTurn))) {
             pub_twist_.publish(twist); 
             r.sleep();
         }
+
         delay += ros::Duration(timeNeededToTurn); //we save as a delay the time it took to turn
     }
 

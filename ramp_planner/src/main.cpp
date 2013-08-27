@@ -107,12 +107,14 @@ int main(int argc, char** argv) {
   for(unsigned int i=0;i<trs.size();i++) {
     std::cout<<"\n\nModified Trajectory "<<i;
     std::cout<<trs.at(i).toString();
-  }
+  }*/
  
  
   //Test sending the best trajectory 
+  std::cout<<"\nPress enter to send the best trajectory!\n";
+  std::cin.get();
   my_planner.bestTrajec_ = my_planner.population_.getBest();
-  my_planner.sendBest();*/
+  my_planner.sendBest();
 
   
 
