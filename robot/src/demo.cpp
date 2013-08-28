@@ -1,11 +1,22 @@
 #include <ros/ros.h>
+#include "corobot.h"
 #include "ramp_msgs/Trajectory.h"
+
+Corobot robot;
+
+void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
+  std::cout<<"\nGot the message!";
+  robot.trajectory_ = *msg;
+
+  //Move robot along trajectory
+  robot.moveOnTrajectory(); 
+}
 
 int main(int argc, char** argv) {
    
   ros::init(argc, argv, "robot");
   ros::NodeHandle handle;
-  ros::Subscriber sub_traj = handle.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000);
+  ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
 
   ramp_msgs::Trajectory msg;
 
