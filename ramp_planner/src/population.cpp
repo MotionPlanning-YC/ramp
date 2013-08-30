@@ -30,34 +30,39 @@ void Population::add(const RampTrajectory rt) {
     //Push back the new trajectory
     population_.push_back(rt);
   }
-}
+} //End add
+
+
 
 /** Return the fittest trajectory */
 const RampTrajectory Population::getBest() const {
   
   //Find first feasible trajectory
-  int i_min = 0;
-  while(i_min < population_.size() && !population_.at(i_min).feasible_) {
-    i_min++;
+  int i_max = 0;
+  while(i_max < population_.size() && !population_.at(i_max).feasible_) {
+    i_max++;
   }
   
-  for(unsigned int i=i_min;i<population_.size();i++) {
+  //Find the maximum fitness of all feasible trajectories
+  for(unsigned int i=i_max;i<population_.size();i++) {
     if( population_.at(i).feasible_ &&
-        population_.at(i).fitness_ < population_.at(i_min).fitness_) 
+        population_.at(i).fitness_ > population_.at(i_max).fitness_) 
     {
-      i_min = i; 
+      i_max = i; 
     }
   }
 
-  return population_.at(i_min);
-}
+  return population_.at(i_max);
+} //End getBest
 
 
 /** toString */
 const std::string Population::toString() const {
   std::ostringstream result;
+
   for(unsigned int i=0;i<population_.size();i++) {
     result<<"\nTrajectory "<<i<<": "<<population_.at(i).toString();
   }
+
   return result.str();
-}
+} //End toString

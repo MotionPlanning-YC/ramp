@@ -7,9 +7,5 @@ TrajectoryRequestHandler::TrajectoryRequestHandler(const ros::NodeHandle& h) : h
 
 
 const bool TrajectoryRequestHandler::request(ramp_msgs::TrajectoryRequest& tr) {
-  
-  if(client_.call(tr)) 
-    return true;
-
-  return false;
+  return client_.call(tr);
 }

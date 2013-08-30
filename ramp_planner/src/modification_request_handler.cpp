@@ -7,8 +7,5 @@ ModificationRequestHandler::ModificationRequestHandler(const ros::NodeHandle& h)
 
 
 const bool ModificationRequestHandler::request(ramp_msgs::ModificationRequest& mr) {
-  if(client_.call(mr))
-    return true;
-  
-  return false;  
+  return client_.call(mr);
 }

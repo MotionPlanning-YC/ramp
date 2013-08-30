@@ -2,11 +2,13 @@
 #define CONFIGURATION_H
 #include "range.h"
 #include "ramp_msgs/Configuration.h"
+#include "trajectory_msgs/JointTrajectoryPoint.h"
 
 class Configuration {
   public:
     Configuration();
     Configuration(ramp_msgs::Configuration c);
+    Configuration(trajectory_msgs::JointTrajectoryPoint p, ramp_msgs::Range r);
     ~Configuration();
     
 

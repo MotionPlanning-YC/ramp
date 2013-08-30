@@ -12,7 +12,7 @@ find_package(catkin REQUIRED COMPONENTS genmsg geometry_msgs message_generation 
 add_message_files(FILES Configuration.msg Path.msg Range.msg Trajectory.msg )
 
 ## Generate services in the 'srv' folder
-add_service_files(FILES EvaluationRequest.srv ModificationRequest.srv TrajectoryRequest.srv)
+add_service_files(FILES EvaluationRequest.srv ModificationRequest.srv TrajectoryRequest.srv UpdateRequest.srv)
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(DEPENDENCIES geometry_msgs std_msgs trajectory_msgs)

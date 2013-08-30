@@ -22,7 +22,7 @@ catkin_package(
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(${PROJECT_NAME} src/main.cpp src/corobot.cpp src/base_configuration.cpp src/utility.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/corobot.cpp src/utility.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ramp_msgs_generate_messages_cpp)
 

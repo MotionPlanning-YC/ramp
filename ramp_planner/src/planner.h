@@ -5,6 +5,7 @@
 #include "ramp_trajectory.h"
 #include "evaluation_request_handler.h"
 #include "trajectory_request_handler.h"
+#include "update_request_handler.h"
 #include "modifier.h"
 #include "population.h"
 #include "control_handler.h"
@@ -37,6 +38,13 @@ class Planner {
     std::vector<Range> ranges_;
     
     
+    //The best trajectory
+    RampTrajectory bestTrajec_;
+    
+    
+    
+    //modifier_ should be private...
+    Modifier* modifier_;
     
     /********************************************
      ***************** Methods ******************
@@ -70,34 +78,36 @@ class Planner {
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(const unsigned int i_path, const std::vector<unsigned int> i_segments);
 
+    //Get the starting configuration
+    Configuration getStartConfiguration();
+    void updatePopulation(ros::Duration d);
 
+    //Callback for 
+    void updateCallback(const ramp_msgs::Configuration::ConstPtr& msg);
 
-
-
-    //The best trajectory
-    RampTrajectory bestTrajec_;
     
     
-    
-    //modifier_ should be private...
-    Modifier* modifier_;
+
+
+  
+    void updatePaths(Configuration start, ros::Duration dur);
   private:
+    
     const std::vector< std::vector<float> > getNewVelocities(std::vector<Path> new_path, std::vector<int> i_old);
 
     //Modification procedure
     void modification();
 
-
-
+    bool mutex_start_;
     Utility u; 
     const int populationSize_;
-    Configuration current_;
     unsigned int generation_;
 
     //Hold the handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
     ControlHandler*             h_control_;
     EvaluationRequestHandler*   h_eval_req_;
+    UpdateRequestHandler*       h_update_req_;
 
 };
 

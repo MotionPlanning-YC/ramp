@@ -10,7 +10,7 @@ class RampTrajectory {
     RampTrajectory();
     ~RampTrajectory() {}
     
-    ramp_msgs::Trajectory trajec_;
+    ramp_msgs::Trajectory msg_trajec_;
     double fitness_;
     bool feasible_;
 

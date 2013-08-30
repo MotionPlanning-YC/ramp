@@ -3,7 +3,6 @@
 #define COROBOT_H
 
 #include "ros/ros.h"
-#include "base_configuration.h"
 #include "utility.h"
 
 /** ROS msgs and srvs */

@@ -7,10 +7,15 @@
  
 
 
+Planner my_planner; 
+
+
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "planner");
 
   ros::NodeHandle handle;
+  ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
   
   Utility u;
  
@@ -20,9 +25,7 @@ int main(int argc, char** argv) {
   Range range2(30, 50);
  
  
-  /** Build the Planner */ 
-
-  Planner my_planner; 
+  /** Initialize the Planner's handlers */ 
   my_planner.init_handlers(handle); 
   
   //Set ranges
@@ -56,6 +59,41 @@ int main(int argc, char** argv) {
   std::cin.get();
   my_planner.init_population();
 
+
+  std::vector<trajectory_msgs::JointTrajectoryPoint> points = my_planner.population_.population_.at(0).msg_trajec_.trajectory.points;
+  
+  //Create configuration
+  Configuration c;
+  for(unsigned int i=0;i<points.at(0).positions.size();i++) {
+    c.K_.push_back(points.at(10).positions.at(i));
+  }
+  
+
+
+  //std::cout<<"\nSizes of all the paths before update: ";
+  /*for(unsigned int i=0;i<my_planner.population_.population_.size();i++) {
+    std::cout<<"\n"<<i<<":"<<my_planner.population_.population_.at(i).msg_trajec_.trajectory.points.size();
+  }*/
+  std::cout<<"\nPaths before update: ";
+  for(unsigned int i=0;i<my_planner.paths_.size();i++) {
+    std::cout<<"\n"<<i<<":"<<my_planner.paths_.at(i).toString();
+  }
+
+  ros::Duration d = points.at(points.size()/2).time_from_start+ros::Duration(0.1);
+  d.sleep();
+  my_planner.updatePaths(c, d);
+
+  std::cout<<"\nPaths after update: ";
+  for(unsigned int i=0;i<my_planner.paths_.size();i++) {
+    std::cout<<"\n"<<i<<":"<<my_planner.paths_.at(i).toString();
+  }
+  std::cout<<"\n";
+  std::cin.get();
+  //std::cout<<"\nSizes of all the paths after update: ";
+  /*for(unsigned int i=0;i<my_planner.population_.population_.size();i++) {
+    std::cout<<"\n"<<i<<":"<<my_planner.population_.population_.at(i).msg_trajec_.trajectory.points.size();
+  }*/
+  
 
   //std::cout<<"\npopulation size:"<<my_planner.population_.population_.size();
   //Print all the initial trajectories

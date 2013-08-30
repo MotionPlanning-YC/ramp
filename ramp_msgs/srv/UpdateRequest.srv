@@ -1,0 +1,5 @@
+---
+
+Configuration current
+float32[] velocity
+uint8 knot_points_passed

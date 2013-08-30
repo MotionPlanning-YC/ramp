@@ -5,11 +5,11 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) {}
+Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), h_update_req_(0), modifier_(0), mutex_start_(true) {}
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) {}
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), h_update_req_(0), modifier_(0), mutex_start_(true) {}
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0) {
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true) {
   init_handlers(h);
 }
 
@@ -28,6 +28,11 @@ Planner::~Planner() {
     delete h_eval_req_;
     h_eval_req_ = 0;
   }
+
+  if(h_update_req_ != 0) {
+    delete h_update_req_;
+    h_update_req_ = 0;
+  }
   
   if(modifier_!= 0) {
     delete modifier_;  
@@ -37,7 +42,23 @@ Planner::~Planner() {
 
 
 
+void Planner::updateCallback(const ramp_msgs::Configuration::ConstPtr& msg) {
+  
+  //Wait for mutex to be true
+  while(!mutex_start_) {}
 
+  mutex_start_ = false;
+
+  Configuration temp(*msg);
+  start_ = temp;
+
+  mutex_start_ = true;
+}
+
+Configuration Planner::getStartConfiguration() {
+  while(!mutex_start_) {}
+  return start_;
+}
 
 
 /****************************************************
@@ -100,7 +121,7 @@ void Planner::init_population() {
       RampTrajectory temp;
       
       //Set the Trajectory msg
-      temp.trajec_ = msg_request.response.trajectory;
+      temp.msg_trajec_ = msg_request.response.trajectory;
       
       //Add the trajectory to the population
       population_.add(temp);
@@ -177,7 +198,7 @@ const std::vector<RampTrajectory> Planner::modifyTrajec() {
     //Send the request and set the result to the returned trajectory 
     if(requestTrajectory(tr)) {
       RampTrajectory temp;
-      temp.trajec_ = tr.response.trajectory;
+      temp.msg_trajec_ = tr.response.trajectory;
       result.push_back(temp);
     }
   }
@@ -222,7 +243,7 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const unsigne
 const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const unsigned int i_trajec, const std::vector<unsigned int> i_segments) {
   ramp_msgs::EvaluationRequest result;
 
-  result.request.trajectory = population_.population_.at(i_trajec).trajec_;
+  result.request.trajectory = population_.population_.at(i_trajec).msg_trajec_;
 
   for(unsigned int i=0;i<i_segments.size();i++) {
     result.request.i_segments.push_back(i_segments.at(i));
@@ -238,7 +259,7 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const unsigne
  *******************************************************/
 
 void Planner::sendBest() {
-  h_control_->send(bestTrajec_.trajec_);
+  h_control_->send(bestTrajec_.msg_trajec_);
 }
 
 
@@ -387,6 +408,63 @@ void Planner::evaluatePopulation() {
 } //End evaluatePopulation
 
 
+
+void Planner::updatePopulation(ros::Duration d) {
+  
+  //First, get the updated configuration
+  start_ = getStartConfiguration();
+  
+  updatePaths(getStartConfiguration(), d);
+  
+}
+
+
+
+
+/** This method updates all the paths with the current configuration */
+void Planner::updatePaths(Configuration start, ros::Duration dur) {
+  //std::cout<<"\nUpdating start to: "<<start.toString();
+  //std::cout<<"\ndur: "<<dur<<"\n";
+
+
+  //For each trajectory
+  for(unsigned int i=0;i<population_.population_.size();i++) {
+
+    //Track how many knot points we get rid of
+    unsigned int throwaway=0;
+
+    //For each knot point,
+    for(unsigned int i_kp=0;i_kp<population_.population_.at(i).msg_trajec_.index_knot_points.size();i_kp++) {
+     
+      //Get the point 
+      trajectory_msgs::JointTrajectoryPoint point = population_.population_.at(i).msg_trajec_.trajectory.points.at( population_.population_.at(i).msg_trajec_.index_knot_points.at(i_kp));
+      //std::cout<<"\npoint["<<i<<"].time_from_start:"<<point.time_from_start;
+
+      //Compare the durations
+      if( dur > point.time_from_start) {
+        throwaway++;
+      }
+    }
+
+    //std::cout<<"\nthrowaway:"<<throwaway;
+
+    //Erase the amount of throwaway
+    paths_.at(i).all_.erase( paths_.at(i).all_.begin(), paths_.at(i).all_.begin()+throwaway );
+    
+    //Insert the new starting configuration
+    paths_.at(i).all_.insert( paths_.at(i).all_.begin(), start_);
+
+    //Set start_ to be the new starting configuration of the path
+    paths_.at(i).start_ = start;
+
+  } //end for
+} //End updatePaths
+
+
+
+
+
+
 /** This method calls evaluatePopulation and population_.getBest() */
 const RampTrajectory Planner::evaluateAndObtainBest() {
   evaluatePopulation();
@@ -411,7 +489,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
 
   //createSubpopulations();
   
-  while(!current_.equals(goal_)) {
+  while(!start_.equals(goal_)) {
     
     //t=t+1
     generation_++;
@@ -436,6 +514,5 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
 
   
   
-  }
-
-}
+  } //end while
+} //End go

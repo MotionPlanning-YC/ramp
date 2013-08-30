@@ -10,6 +10,10 @@ Configuration::Configuration(ramp_msgs::Configuration c) {
   }
 }
 
+Configuration::Configuration(trajectory_msgs::JointTrajectoryPoint p, ramp_msgs::Range r) {
+  
+}
+
 Configuration::~Configuration() {}
 
 
