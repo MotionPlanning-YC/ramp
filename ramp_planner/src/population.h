@@ -12,8 +12,12 @@ class Population {
     Population();
     Population(const unsigned int size);
 
+    /* Methods */
+    const unsigned int size() const;
     void  add(const RampTrajectory rt);
-    const RampTrajectory getBest() const;
+    const RampTrajectory findBest();
+    void clear();
+    const bool replaceAll(const std::vector<RampTrajectory> new_pop);
     const std::string toString() const;
     
 

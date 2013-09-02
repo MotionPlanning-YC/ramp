@@ -5,7 +5,7 @@
 #include "ramp_trajectory.h"
 #include "evaluation_request_handler.h"
 #include "trajectory_request_handler.h"
-#include "update_request_handler.h"
+#include "ramp_msgs/Update.h"
 #include "modifier.h"
 #include "population.h"
 #include "control_handler.h"
@@ -41,10 +41,7 @@ class Planner {
     //The best trajectory
     RampTrajectory bestTrajec_;
     
-    
-    
-    //modifier_ should be private...
-    Modifier* modifier_;
+   
     
     /********************************************
      ***************** Methods ******************
@@ -80,35 +77,61 @@ class Planner {
 
     //Get the starting configuration
     Configuration getStartConfiguration();
+
+    //Update the population 
     void updatePopulation(ros::Duration d);
 
-    //Callback for 
-    void updateCallback(const ramp_msgs::Configuration::ConstPtr& msg);
+    //Callback for updating the robot's current configuration 
+    //This method changes the start_ member
+    void updateCallback(const ramp_msgs::Update::ConstPtr& msg);
 
     
     
 
 
   
-    void updatePaths(Configuration start, ros::Duration dur);
   private:
-    
+    /** These are (mostly) utility members that are only used by Planner and should not be used by other classes*/
+
+
+    /** Methods */
+
+    //This gets the new velocities for path segments after a path has been updated
     const std::vector< std::vector<float> > getNewVelocities(std::vector<Path> new_path, std::vector<int> i_old);
 
     //Modification procedure
     void modification();
+    
+    //Updates the paths in P(t) so we can get new trajectories
+    void updatePaths(Configuration start, ros::Duration dur);
 
-    bool mutex_start_;
+    /** Data members */
+
+    //Utility instance
     Utility u; 
+    
+    //Mutex for start_ member
+    bool mutex_start_;
+
+    //Size of population
     const int populationSize_;
+
+    //Generation counter
     unsigned int generation_;
 
-    //Hold the handlers to communicate with other packages
+    //Control cycle - used for determining when to update P(t)
+    ros::Duration controlCycle_;
+
+    //Last time P(t) was updated
+    ros::Time lastUpdate_;
+    
+    //Handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
     ControlHandler*             h_control_;
     EvaluationRequestHandler*   h_eval_req_;
-    UpdateRequestHandler*       h_update_req_;
 
+    //Modifier_ communicates with the path_modification package
+    Modifier* modifier_;
 };
 
 #endif

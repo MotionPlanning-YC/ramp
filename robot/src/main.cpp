@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 #include "corobot.h"
-#include "ramp_msgs/UpdateRequest.h"
+#include "ramp_msgs/Update.h"
 
 Corobot robot;
 
@@ -12,15 +12,6 @@ void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
   robot.moveOnTrajectory(); 
 }
 
-
-bool handleUpdateRequest(ramp_msgs::UpdateRequest::Request& req,
-                         ramp_msgs::UpdateRequest::Response& res) 
-{
-  res.current = robot.configuration_;
-  //res.velocity =
-
-  return true;
-}
 
 /** Initialize the Corobot's publishers and subscibers*/
 void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle) {
@@ -41,7 +32,7 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "robot");
   ros::NodeHandle handle;
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
-  ros::ServiceServer service = handle.advertiseService("update_configuration", handleUpdateRequest); 
+  ros::Publisher pub_update = handle.advertise<ramp_msgs::Update>("update_configuration", 1000); 
   
   init_advertisers_subscribers(robot, handle);
 /*

@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "planner");
 
   ros::NodeHandle handle;
-  ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
+  ros::Subscriber sub_update_ = handle.subscribe("update_configuration", 1000, &Planner::updateCallback, &my_planner);
   
   Utility u;
  
@@ -67,6 +67,7 @@ int main(int argc, char** argv) {
   for(unsigned int i=0;i<points.at(0).positions.size();i++) {
     c.K_.push_back(points.at(10).positions.at(i));
   }
+  c.ranges_ = my_planner.paths_.at(0).all_.at(0).ranges_;
   
 
 
@@ -81,13 +82,18 @@ int main(int argc, char** argv) {
 
   ros::Duration d = points.at(points.size()/2).time_from_start+ros::Duration(0.1);
   d.sleep();
-  my_planner.updatePaths(c, d);
+  my_planner.start_ = c;
+  my_planner.updatePopulation(d);
 
   std::cout<<"\nPaths after update: ";
   for(unsigned int i=0;i<my_planner.paths_.size();i++) {
     std::cout<<"\n"<<i<<":"<<my_planner.paths_.at(i).toString();
   }
   std::cout<<"\n";
+  std::cin.get();
+
+  std::cout<<"\nPopulation after update: ";
+  std::cout<<"\n"<<my_planner.population_.toString();
   std::cin.get();
   //std::cout<<"\nSizes of all the paths after update: ";
   /*for(unsigned int i=0;i<my_planner.population_.population_.size();i++) {
@@ -151,7 +157,7 @@ int main(int argc, char** argv) {
   //Test sending the best trajectory 
   std::cout<<"\nPress enter to send the best trajectory!\n";
   std::cin.get();
-  my_planner.bestTrajec_ = my_planner.population_.getBest();
+  my_planner.bestTrajec_ = my_planner.population_.findBest();
   my_planner.sendBest();
 
   

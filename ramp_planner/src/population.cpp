@@ -6,6 +6,20 @@ Population::Population() : max_size(7), i_best(0) {}
 Population::Population(const unsigned int size) : max_size(size), i_best(0) {}
 
 
+/** Return the size of the population */
+const unsigned int Population::size() const { return population_.size(); }
+
+void Population::clear() { population_.clear(); }
+
+const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
+  if(new_pop.size() == population_.size()) {
+    population_ = new_pop;
+    return true;
+  }
+  
+  return false;
+}
+
 /** This method adds a trajectory to the population. 
  *  If the population is full, a random trajectory (that isn't the best one) is replaced */
 void Population::add(const RampTrajectory rt) {
@@ -35,7 +49,8 @@ void Population::add(const RampTrajectory rt) {
 
 
 /** Return the fittest trajectory */
-const RampTrajectory Population::getBest() const {
+//TODO: If all trajectories are infeasible, pick the fittest infeasible
+const RampTrajectory Population::findBest() {
   
   //Find first feasible trajectory
   int i_max = 0;
@@ -52,6 +67,9 @@ const RampTrajectory Population::getBest() const {
     }
   }
 
+  //Set i_best
+  i_best = i_max;
+  
   return population_.at(i_max);
 } //End getBest
 

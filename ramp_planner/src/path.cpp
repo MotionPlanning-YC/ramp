@@ -38,6 +38,8 @@ void Path::Add(const Configuration c) {
   all_.insert(all_.end()-1, c); 
 }
 
+const unsigned int Path::size() const { return all_.size(); }
+
 
 const ramp_msgs::Path Path::buildPathMsg() const {
   ramp_msgs::Path result;

@@ -5,12 +5,20 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), h_update_req_(0), modifier_(0), mutex_start_(true) {}
+Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true) 
+{
+  controlCycle_ = ros::Duration(3);
+}
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), h_update_req_(0), modifier_(0), mutex_start_(true) {}
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true) 
+{
+  controlCycle_ = ros::Duration(3);
+}
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true) {
-  init_handlers(h);
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true) 
+{
+  init_handlers(h); 
+  controlCycle_ = ros::Duration(3);
 }
 
 Planner::~Planner() {
@@ -28,11 +36,6 @@ Planner::~Planner() {
     delete h_eval_req_;
     h_eval_req_ = 0;
   }
-
-  if(h_update_req_ != 0) {
-    delete h_update_req_;
-    h_update_req_ = 0;
-  }
   
   if(modifier_!= 0) {
     delete modifier_;  
@@ -41,23 +44,24 @@ Planner::~Planner() {
 }
 
 
+/** Getter method for start_. It waits for mutex_start_ to be true before returning. */
+Configuration Planner::getStartConfiguration() {
+  while(!mutex_start_) {}
+  return start_;
+}
 
-void Planner::updateCallback(const ramp_msgs::Configuration::ConstPtr& msg) {
+/** Sets start_ */
+void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
   
   //Wait for mutex to be true
   while(!mutex_start_) {}
 
   mutex_start_ = false;
 
-  Configuration temp(*msg);
+  Configuration temp(msg->configuration);
   start_ = temp;
 
   mutex_start_ = true;
-}
-
-Configuration Planner::getStartConfiguration() {
-  while(!mutex_start_) {}
-  return start_;
 }
 
 
@@ -108,9 +112,9 @@ void Planner::init_population() {
   //For each path
   for(unsigned int i=0;i<paths_.size();i++) {
 
-    //Hardcode some velocities, 1m/s per segment
+    //Hardcode some velocities, 0.5m/s per segment
     for(unsigned int j=1;j<paths_.at(i).all_.size();j++) {
-      v.push_back(1.0f);
+      v.push_back(0.5f);
     }
     
     //Build a TrajectoryRequest 
@@ -130,14 +134,13 @@ void Planner::init_population() {
       //some error handling
     }
 
-    //Push the times vector onto times_
+    //Push the times vector onto velocities_
     velocities_.push_back(v);
 
     //Clear times vector
     v.clear();
-  }
-
-}
+  } //end for
+} //End init_population
 
 
 
@@ -151,6 +154,8 @@ void Planner::init_population() {
 const bool Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr) {
   return h_traj_req_->request(tr); 
 }
+
+/** Request an evaluation */
 const bool Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er) {
   return h_eval_req_->request(er);
 }
@@ -167,11 +172,9 @@ const std::vector<Path> Planner::modifyPath() {
   return modifier_->perform();
 }
 
-/** Modify a trajectory 
- *  Can accept 2 ids if the modification operator is binary */
+/** Modify a trajectory */ 
 const std::vector<RampTrajectory> Planner::modifyTrajec() {
   std::vector<RampTrajectory> result;
-
 
   //The modification operators deal with paths
   //So send the path to be modified
@@ -258,6 +261,7 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const unsigne
  ******************** Miscellaneous ********************
  *******************************************************/
 
+/** Send the fittest feasible trajectory to the robot package */
 void Planner::sendBest() {
   h_control_->send(bestTrajec_.msg_trajec_);
 }
@@ -382,7 +386,7 @@ void Planner::modification() {
   //evaluate mod_trajec
 
   //Obtain best trajectory
-  bestTrajec_ = population_.getBest();
+  bestTrajec_ = population_.findBest();
 }
 
 void Planner::evaluatePopulation() {
@@ -403,21 +407,8 @@ void Planner::evaluatePopulation() {
     else {
       //some error handling
     }
-
   } //end for   
 } //End evaluatePopulation
-
-
-
-void Planner::updatePopulation(ros::Duration d) {
-  
-  //First, get the updated configuration
-  start_ = getStartConfiguration();
-  
-  updatePaths(getStartConfiguration(), d);
-  
-}
-
 
 
 
@@ -446,8 +437,12 @@ void Planner::updatePaths(Configuration start, ros::Duration dur) {
       }
     }
 
-    //std::cout<<"\nthrowaway:"<<throwaway;
-
+    //If the whole path has been passed, adjust throwaway so that 
+    // we are left with a path that is: {new_start_, goal_}
+    if( throwaway >= paths_.at(i).size() ) { 
+      throwaway = paths_.at(i).size()-1;
+    } 
+    
     //Erase the amount of throwaway
     paths_.at(i).all_.erase( paths_.at(i).all_.begin(), paths_.at(i).all_.begin()+throwaway );
     
@@ -457,10 +452,48 @@ void Planner::updatePaths(Configuration start, ros::Duration dur) {
     //Set start_ to be the new starting configuration of the path
     paths_.at(i).start_ = start;
 
+    //Also erase velocities, throwaway-1
+    if(throwaway > 0) {
+      velocities_.at(i).erase( velocities_.at(i).begin(), velocities_.at(i).begin()+throwaway-1);
+    }
   } //end for
 } //End updatePaths
 
 
+/** This method updates the population with the current configuration 
+ *  The duration is used to determine which knot points still remain in the trajectory */
+void Planner::updatePopulation(ros::Duration d) {
+  
+  //First, get the updated current configuration
+  start_ = getStartConfiguration();
+  
+  //Update the paths with the new starting configuration 
+  updatePaths(getStartConfiguration(), d);
+
+  //Create the vector to hold updated trajectories
+  std::vector<RampTrajectory> updatedTrajecs;
+
+  //For each path, get a trajectory
+  for(unsigned int i=0;i<paths_.size();i++) {
+
+    //Build a TrajectoryRequest 
+    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(i, velocities_.at(i), velocities_.at(i));
+    
+    //Send the request 
+    if(requestTrajectory(msg_request)) {
+      RampTrajectory temp;
+      
+      //Set the Trajectory msg
+      temp.msg_trajec_ = msg_request.response.trajectory;
+      
+      //Push onto updatedTrajecs
+      updatedTrajecs.push_back(temp);
+    } //end if
+  } //end for
+
+  //Replace the population's trajectories_ with the updated trajectories
+  population_.replaceAll(updatedTrajecs);
+} //End updatePopulation
 
 
 
@@ -468,7 +501,7 @@ void Planner::updatePaths(Configuration start, ros::Duration dur) {
 /** This method calls evaluatePopulation and population_.getBest() */
 const RampTrajectory Planner::evaluateAndObtainBest() {
   evaluatePopulation();
-  return population_.getBest();
+  return population_.findBest();
 }
 
 /*******************************************************
@@ -498,9 +531,10 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
     modification();
 
     //If end of current control cycle
-    if(generation_ % 3 == 0) {
+    if(ros::Time::now() - lastUpdate_ >= controlCycle_) {
+      //start_ should already be updated
       //Update starting configuration and velocity of P(t)
-      //
+      updatePopulation(controlCycle_);
 
       //Create subpopulations in P(t)
       //
@@ -508,10 +542,12 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
       //Evaluate P(t) and obtain best T, T_move=T_best
       T_move = evaluateAndObtainBest();
       
+      //T_move = T
       //Send the best trajectory 
       sendBest();
     }
 
+    //If new sensing cycle...
   
   
   } //end while

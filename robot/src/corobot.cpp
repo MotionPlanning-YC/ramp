@@ -208,15 +208,6 @@ void Corobot::calculateSpeedsAndTime ()
 }
 
 
-void Corobot::controlCycle(geometry_msgs::Twist twist, ros::Time end_time, ros::Rate r) {
-
-    //Send the twist msg at some rate r
-    //while(ros::ok() && ros::Time::now() < end_times.at(i)) {
-    while(ros::ok() && ros::Time::now() < end_time) {
-      pub_twist_.publish(twist); 
-      r.sleep();
-    }
-}
 
 void Corobot::moveOnTrajectory() 
 {
