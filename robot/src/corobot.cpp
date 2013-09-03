@@ -228,6 +228,10 @@ void Corobot::moveOnTrajectory()
   ros::Duration delay = ros::Duration(0); // Save the time it took to do all the turns
   ros::Time start;
   
+  angular_speeds_knotpoints.clear();
+  orientations_knotpoints.clear();
+  speeds.clear();
+  
   calculateSpeedsAndTime();
   
   
