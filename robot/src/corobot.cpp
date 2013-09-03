@@ -85,6 +85,15 @@ void Corobot::driveStraight(const unsigned int speed) const {
   drive(msg);
 }
 
+void Corobot::updatePublishTimer(const ros::TimerEvent&)
+{
+    ramp_msgs::Update msg;
+    msg.configuration = configuration_;
+    
+    if (pub_update_)
+        pub_update_.publish(msg);
+
+}
 
 void Corobot::turn(const unsigned int speed, const bool cwise) const {
 
@@ -194,6 +203,7 @@ void Corobot::calculateSpeedsAndTime ()
         current_orientation = getTrajectoryOrientation(trajectory_.trajectory.points.at(i), trajectory_.trajectory.points.at(i+1));
         //caculate the angular speed needed before to satisfy the correct direction for the next knotpoint
         angular_speeds_knotpoints.push_back(getAngularSpeed(past_orientation, current_orientation));
+        orientations_knotpoints.push_back(past_orientation);
         past_orientation = current_orientation;
         
         i_knot_points++;
@@ -234,7 +244,11 @@ void Corobot::moveOnTrajectory()
             twist.angular.z = angular_speeds_knotpoints.at(i_knot_points);
             start = ros::Time::now();
 
-            while(ros::ok() && ros::Time::now() < (start + ros::Duration(timeNeededToTurn))) {
+            // We want to turn until we reach the correct angle within a 4 degree range, but if we don't reach it within twice the time we calculated was needed to make the turn then we stop turning.
+            while((ros::ok() && ros::Time::now() < (start + ros::Duration (2* timeNeededToTurn) )) && 
+                    orientations_knotpoints.at(i+1) < configuration_.K.at(2) -2 && 
+                    orientations_knotpoints.at(i+1) > configuration_.K.at(2) +2) 
+            {
                 pub_twist_.publish(twist); 
                 r.sleep();
             }
@@ -246,6 +260,11 @@ void Corobot::moveOnTrajectory()
     
     end_times.at(i) += delay; // we make sure that the time it took us for all the turns doesn't make the robot go straight for less time than it should
      
+    // Stops the wheels before going straight
+    twist.linear.x = 0;
+    twist.angular.z = 0;
+    pub_twist_.publish(twist); 
+    r.sleep();
     
     // Now we can go straight to reach the waypoint
     twist.linear.x = speeds.at(i);
@@ -273,6 +292,11 @@ void Corobot::moveOnTrajectory()
         delay += ros::Duration(timeNeededToTurn); //we save as a delay the time it took to turn
     }
 
+    // Stops the wheels
+    twist.linear.x = 0;
+    twist.angular.z = 0;
+    pub_twist_.publish(twist); 
+    r.sleep();
   }
 }
 
