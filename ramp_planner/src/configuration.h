@@ -8,7 +8,7 @@ class Configuration {
   public:
     Configuration();
     Configuration(ramp_msgs::Configuration c);
-    Configuration(trajectory_msgs::JointTrajectoryPoint p, ramp_msgs::Range r);
+    Configuration(const trajectory_msgs::JointTrajectoryPoint p, const std::vector<Range> r);
     ~Configuration();
     
 

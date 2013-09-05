@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
   
   Utility u;
  
-  srand( time(NULL));
+  srand( time(0));
   Range range0(0, 10);
   Range range1(0, 10);
   Range range2(30, 50);
@@ -49,21 +49,21 @@ int main(int argc, char** argv) {
 
   /** End building Planner */
 
-
-
   
   std::cout<<"\nStart:"<<s.toString();
   std::cout<<"\nGoal:"<<g.toString();
 
-  std::cout<<"\nPress Enter to initialize the planner\n";
+  std::cout<<"\nPress Enter to start the planner!\n";
   std::cin.get();
-  my_planner.init_population();
+  
+
+  my_planner.go();
 
 
-  std::vector<trajectory_msgs::JointTrajectoryPoint> points = my_planner.population_.population_.at(0).msg_trajec_.trajectory.points;
+  //std::vector<trajectory_msgs::JointTrajectoryPoint> points = my_planner.population_.population_.at(0).msg_trajec_.trajectory.points;
   
   //Create configuration
-  Configuration c;
+  /*Configuration c;
   for(unsigned int i=0;i<points.at(0).positions.size();i++) {
     c.K_.push_back(points.at(10).positions.at(i));
   }
@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
   /*for(unsigned int i=0;i<my_planner.population_.population_.size();i++) {
     std::cout<<"\n"<<i<<":"<<my_planner.population_.population_.at(i).msg_trajec_.trajectory.points.size();
   }*/
-  std::cout<<"\nPaths before update: ";
+  /*std::cout<<"\nPaths before update: ";
   for(unsigned int i=0;i<my_planner.paths_.size();i++) {
     std::cout<<"\n"<<i<<":"<<my_planner.paths_.at(i).toString();
   }
@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
   std::cout<<"\n"<<my_planner.population_.toString();
   std::cin.get();
   //std::cout<<"\nSizes of all the paths after update: ";
-  /*for(unsigned int i=0;i<my_planner.population_.population_.size();i++) {
+  for(unsigned int i=0;i<my_planner.population_.population_.size();i++) {
     std::cout<<"\n"<<i<<":"<<my_planner.population_.population_.at(i).msg_trajec_.trajectory.points.size();
   }*/
   
@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
   
 
 
-  std::vector<unsigned int> i_segments;
+  /*std::vector<unsigned int> i_segments;
   ramp_msgs::EvaluationRequest er = my_planner.buildEvaluationRequest(0, i_segments);
   if(my_planner.requestEvaluation(er)) {
     std::cout<<"\nResponse: fitness:"<<er.response.fitness<<" feasible:"<< ((er.response.feasible) ? "true" : "false");
@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
   std::cin.get();
   std::cout<<"\n"<<bt.toString();
 
-  /*my_planner.modifier_->paths_ = my_planner.paths_;
+  my_planner.modifier_->paths_ = my_planner.paths_;
   my_planner.modifier_->velocities_ = my_planner.velocities_;
 
 
@@ -155,10 +155,10 @@ int main(int argc, char** argv) {
  
  
   //Test sending the best trajectory 
-  std::cout<<"\nPress enter to send the best trajectory!\n";
+  /*std::cout<<"\nPress enter to send the best trajectory!\n";
   std::cin.get();
   my_planner.bestTrajec_ = my_planner.population_.findBest();
-  my_planner.sendBest();
+  my_planner.sendBest();*/
 
   
 

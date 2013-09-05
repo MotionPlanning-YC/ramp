@@ -2,6 +2,7 @@
 #define RAMP_TRAJECTORY_H
 
 #include "ramp_msgs/Trajectory.h"
+#include "path.h"
 #include "utility.h"
 
 class RampTrajectory {
@@ -14,6 +15,8 @@ class RampTrajectory {
     double fitness_;
     bool feasible_;
 
+    const Path getPath() const;
+    const std::string fitnessFeasibleToString() const;
     const std::string toString() const;
   private:
     Utility u;

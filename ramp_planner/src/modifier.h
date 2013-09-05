@@ -13,6 +13,8 @@ class Modifier {
 
     //Methods
     const std::vector<Path> perform();
+    void updateAll(const std::vector<Path> ps, std::vector< std::vector<float> > vs);
+    void update(const Path p, const unsigned int i);
     const ramp_msgs::ModificationRequest buildModificationRequest();
 
 

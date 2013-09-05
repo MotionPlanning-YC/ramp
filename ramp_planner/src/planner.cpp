@@ -140,6 +140,10 @@ void Planner::init_population() {
     //Clear times vector
     v.clear();
   } //end for
+
+
+  //Update the modifier
+  modifier_->updateAll(paths_, velocities_);
 } //End init_population
 
 
@@ -173,13 +177,14 @@ const std::vector<Path> Planner::modifyPath() {
 }
 
 /** Modify a trajectory */ 
-const std::vector<RampTrajectory> Planner::modifyTrajec() {
-  std::vector<RampTrajectory> result;
+const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
+  std::vector<ModifiedTrajectory> result;
 
   //The modification operators deal with paths
   //So send the path to be modified
   std::vector<Path> mp = modifyPath();
-
+  //std::cout<<"\nDone modifying path!\n";
+  
   //Hold the ids of the path(s) modified
   std::vector<int> olds;
   olds.push_back(modifier_->i_changed1);
@@ -189,8 +194,23 @@ const std::vector<RampTrajectory> Planner::modifyTrajec() {
     olds.push_back(modifier_->i_changed2);
   }
 
+  /*std::cout<<"\nBefore getNewVelocities\n";
+  for(unsigned int i=0;i<olds.size();i++) {
+    std::cout<<"\nolds["<<i<<"]: "<<olds.at(i);
+    std::cout<<"\nPath "<<olds.at(i)<<": "<<paths_.at(olds.at(i)).toString();
+    std::cout<<"\nvelocities: (";
+    for(unsigned int v=0;v<velocities_.at(olds.at(i)).size();v++) {
+      std::cout<<velocities_.at(olds.at(i)).at(v)<<", ";
+    }
+    std::cout<<")";
+  }*/
+
+  /*for(unsigned int i=0;i<mp.size();i++) 
+    std::cout<<"\nmp["<<i<<"]: "<<mp.at(i).toString();*/
+  
   //Hold the new velocity vector(s)
   std::vector< std::vector<float> > vs = getNewVelocities(mp, olds); 
+  //std::cout<<"\nDone getNewVelocities!\n";
   
   //For each modified path,
   for(unsigned int i=0;i<mp.size();i++) {
@@ -202,10 +222,16 @@ const std::vector<RampTrajectory> Planner::modifyTrajec() {
     if(requestTrajectory(tr)) {
       RampTrajectory temp;
       temp.msg_trajec_ = tr.response.trajectory;
-      result.push_back(temp);
+
+      ModifiedTrajectory mt;
+      mt.trajec_ = temp;
+      mt.velocities_ = vs.at(i); 
+
+      result.push_back(mt);
     }
   }
   
+  //std::cout<<"\nReturning result size:"<<result.size();
   return result;
 } //End modifyTrajectory
 
@@ -255,6 +281,19 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const unsigne
   return result;
 }
 
+/** Build an EvaluationRequest srv */
+const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTrajectory trajec, const std::vector<unsigned int> i_segments) {
+  ramp_msgs::EvaluationRequest result;
+
+  result.request.trajectory = trajec.msg_trajec_;
+
+  for(unsigned int i=0;i<i_segments.size();i++) {
+    result.request.i_segments.push_back(i_segments.at(i));
+  }
+
+  return result;
+}
+
 
 
 /*******************************************************
@@ -273,6 +312,8 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
 
   //If the modification only changed one path, i.e., not a crossover 
   if(new_paths.size() == 1) {
+    //std::cout<<"\nOnly changed one path!\n";
+    //std::cout<<"\ni_old.at(0):"<<i_old.at(0);
 
     //Get the original velocity values
     std::vector<float> v = velocities_.at(i_old.at(0));
@@ -283,13 +324,17 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
 
     //Check the difference in path sizes
     int diff = new_path.all_.size() - old.all_.size();
+    //std::cout<<"\ndiff:"<<diff<<"\n";
 
     //Insertion
     if(diff == 1) {
-    
+     
+      //std::cout<<"\nv.size():"<<v.size()<<"\n";
+      //std::cout<<"\nnew_path.all_.size():"<<new_path.all_.size();
       //Find the insertion
       for(unsigned int i=0;i<new_path.all_.size();i++) {
         if(!new_path.all_.at(i).equals(old.all_.at(i))) {
+          //std::cout<<"\ni:"<<i;
           v.push_back(v.at(i-1));
           i=new_path.all_.size();
         }
@@ -299,9 +344,12 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
     //Deletion
     else if(diff == -1) {
       
+      //std::cout<<"\nv.size():"<<v.size()<<"\n";
+      //std::cout<<"\nnew_path.all_.size():"<<new_path.all_.size();
       //Find the deletion
       for(unsigned int i=0;i<new_path.all_.size();i++) {
         if(!new_path.all_.at(i).equals(old.all_.at(i))) {
+          //std::cout<<"\ni:"<<i;
           v.erase(v.begin()+i);
           i=new_path.all_.size();
         }
@@ -322,19 +370,25 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
       //Get the old and new paths
       Path old = paths_.at(i_old.at(i)); 
       Path new_path = new_paths.at(i);
+      //std::cout<<"\nold path "<<i<<":"<<old.toString();
+      //std::cout<<"\nnew path "<<i<<":"<<new_path.toString();
 
       //Get the id of the path it was crossed with 
       unsigned int i_crossed = (i==0) ? i_old.at(1) : i_old.at(0);
+      //std::cout<<"\ni_crossed:"<<i_crossed<<"\n";
 
       //Make a Path object for it
       Path crossed_path = paths_.at(i_crossed);
+      //std::cout<<"\ncrossed_path:"<<crossed_path.toString()<<"\n";
 
       //This will hold the velocities
       std::vector<float> v;
 
       //Find where the crossover occurred
+      //std::cout<<"\nLooking for crossover!\n";
       unsigned int i_cross=0;
       for(unsigned int c=0;c<old.all_.size();c++) {
+        //std::cout<<"\nc:"<<c<<"\n";
         
         //If the two configurations are different, that is where the crossover occurred
         if(!old.all_.at(c).equals(new_path.all_.at(c))) {
@@ -352,12 +406,21 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
           i_cross = old.all_.size();
         }
       } //end for c
+      //std::cout<<"\nDone looking for crossover!\n";
       
+      //std::cout<<"\ni_cross:"<<i_cross;
+      //std::cout<<"\ncrossed_path.all_.size()-1:"<<crossed_path.all_.size()-1;
+      //std::cout<<"\nvelocities_.at("<<i_crossed<<").size():"<<velocities_.at(i_crossed).size();
       //Push all the velocity values from the crossed path (if not too small)
       for(unsigned int c=i_cross;c<crossed_path.all_.size()-1;c++) {
+        //std::cout<<"\nc:"<<c<<"\n";
         v.push_back(velocities_.at(i_crossed).at(c));
       }
       
+      /*for(unsigned int k=0;k<v.size();k++) {
+        std::cout<<"\nv["<<k<<"]: "<<v.at(k);
+      }*/
+
       //Push the vector of velocities onto the result
       result.push_back(v); 
     } //end for
@@ -374,19 +437,43 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
  *  add the new trajectories, evaluate the new trajectories,
  *  and set tau to the new best, */
 void Planner::modification() {
-  std::vector<RampTrajectory> mod_trajec = modifyTrajec();
+  std::vector<ModifiedTrajectory> mod_trajec = modifyTrajec();
   
+  //Add the modified trajectories to the population
+  //and update the planner and the modifier on the new paths
   for(unsigned int i=0;i<mod_trajec.size();i++) {
-    population_.add(mod_trajec.at(i));
+
+    //Index is where the trajectory was added in the population (may replace another)
+    int index = population_.add(mod_trajec.at(i).trajec_);
+
+    //Update the path and velocities in the planner and modifier
+    paths_.at(index)      = mod_trajec.at(i).trajec_.getPath();
+    velocities_.at(index) = mod_trajec.at(i).velocities_;
+    modifier_->update(paths_.at(index), index);
   }
 
   //Evaluate and obtain the best trajectory
   //****we need a way to only evaluate the new trajectories****
-  //****once evaluation package exists, make evaluation there****
   //evaluate mod_trajec
+  evaluatePopulation();
 
   //Obtain best trajectory
   bestTrajec_ = population_.findBest();
+}
+
+void Planner::evaluateTrajectory(RampTrajectory& trajec, const std::vector<unsigned int> i_segments) {
+
+  ramp_msgs::EvaluationRequest er = buildEvaluationRequest(trajec, i_segments);
+  
+  //Do the evaluation and set the fitness and feasibility members
+  if(requestEvaluation(er)) {
+    trajec.fitness_   = er.response.fitness;
+    trajec.feasible_  = er.response.feasible;
+  }
+  else {
+    //some error handling
+  }
+
 }
 
 void Planner::evaluatePopulation() {
@@ -397,16 +484,7 @@ void Planner::evaluatePopulation() {
 
   //Go through each trajectory in the population and evaluate it
   for(unsigned int i=0;i<population_.population_.size();i++) {
-    ramp_msgs::EvaluationRequest er = buildEvaluationRequest(i, i_segments);
-    
-    //Do the evaluation and set the fitness and feasibility members
-    if(requestEvaluation(er)) {
-      population_.population_.at(i).fitness_   = er.response.fitness;
-      population_.population_.at(i).feasible_  = er.response.feasible;
-    }
-    else {
-      //some error handling
-    }
+    evaluateTrajectory(population_.population_.at(i), i_segments);
   } //end for   
 } //End evaluatePopulation
 
@@ -516,9 +594,24 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   
   //initialize population
   init_population();
+  
+  /*std::cout<<"\nPopulation initialized!\n";
+  for(unsigned int i=0;i<paths_.size();i++) {
+    std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
+  }
+  std::cout<<"\nPress enter to evaluate P(0)\n";
+  std::cin.get();*/
+
+  //Initialize the modifier
+  modifier_->paths_ = paths_;
 
   //***Adjust***
   RampTrajectory T_move = evaluateAndObtainBest();
+  /*std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString(); 
+  std::cout<<"\nPress enter to start the loop!\n";
+  std::cin.get();*/
+  
+
 
   //createSubpopulations();
   
@@ -526,29 +619,46 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
     
     //t=t+1
     generation_++;
-
+    //std::cout<<"\ngeneration_ = "<<generation_;
+    
+    /*std::cout<<"\nPress Enter to start modification!\n";
+    std::cin.get();*/
     //Call modification
     modification();
+    /*std::cout<<"\nmodification completed!\n";
+    std::cout<<"\nPaths are now: ";
+    for(unsigned int i=0;i<paths_.size();i++) {
+      std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
+    }*/
 
+    /*std::cout<<"\n\n\nPress enter to check for end of control cycle!\n";
+    std::cin.get();*/
     //If end of current control cycle
     if(ros::Time::now() - lastUpdate_ >= controlCycle_) {
-      //start_ should already be updated
+      //std::cout<<"\nIn end of control cycle!\n";
+      /*//start_ should already be updated
       //Update starting configuration and velocity of P(t)
+      std::cout<<"\nPress enter to update population!\n";
+      std::cin.get();
       updatePopulation(controlCycle_);
 
       //Create subpopulations in P(t)
       //
 
+      std::cout<<"\nPress enter to evaluate and get best!\n";
+      std::cin.get();
       //Evaluate P(t) and obtain best T, T_move=T_best
       T_move = evaluateAndObtainBest();
       
+      std::cout<<"\nPress enter to send the best trajectory!\n";
+      std::cin.get();
       //T_move = T
       //Send the best trajectory 
-      sendBest();
+      sendBest();*/
     }
 
     //If new sensing cycle...
   
-  
+    ros::spinOnce(); 
   } //end while
 } //End go

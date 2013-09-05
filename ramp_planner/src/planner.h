@@ -10,6 +10,12 @@
 #include "population.h"
 #include "control_handler.h"
 
+
+struct ModifiedTrajectory {
+  RampTrajectory trajec_;
+  std::vector<float> velocities_;
+};
+
 class Planner {
   public:
     Planner();
@@ -58,12 +64,13 @@ class Planner {
     void sendBest();
 
     //Evaluate the population 
+    void evaluateTrajectory(RampTrajectory& trajec, const std::vector<unsigned int> i_segments);
     void evaluatePopulation();
     const RampTrajectory evaluateAndObtainBest();
     
     //Modify trajectory or path
     const std::vector<Path> modifyPath();
-    const std::vector<RampTrajectory> modifyTrajec();
+    const std::vector<ModifiedTrajectory> modifyTrajec();
 
     //Request information from other packages
     //Cannot make the request srvs const because they have no serialize/deserialize
@@ -74,6 +81,7 @@ class Planner {
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(const unsigned int i_path, const std::vector<unsigned int> i_segments);
+    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const RampTrajectory trajec, const std::vector<unsigned int> i_segments);
 
     //Get the starting configuration
     Configuration getStartConfiguration();

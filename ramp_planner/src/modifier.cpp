@@ -17,6 +17,22 @@ Modifier::~Modifier() {
 }
 
 
+void Modifier::updateAll(std::vector<Path> ps, std::vector< std::vector<float> > vs) {
+  paths_.clear();
+  velocities_.clear();
+  
+  for(unsigned int i=0;i<ps.size()-1;i++) {
+    paths_.push_back(ps.at(i));
+    velocities_.push_back(vs.at(i));
+  }
+
+  paths_.push_back(ps.at(ps.size()-1));
+
+}
+
+void Modifier::update(const Path p, const unsigned int i) {
+  paths_.at(i) = p;
+}
 
 /** This method builds a ModificationRequest srv */
 const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
@@ -24,7 +40,7 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
 
   //First, randomly select an operator
   unsigned int op = rand() % num_ops;
-  
+
   //Assign the correct name for the operator
   switch(op) {
 
@@ -57,6 +73,7 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
   //Get random path(s) to modify
   unsigned int i_p1;
   i_p1 = rand() % paths_.size();
+  //std::cout<<"\ni_p1: "<<i_p1;
 
   //Push the path to change onto the result
   result.request.paths.push_back(paths_.at(i_p1).buildPathMsg());
@@ -75,6 +92,8 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
 
     //Set i_changed2
     i_changed2 = i_p2;
+
+    //std::cout<<"\ni_p2: "<<i_p2;
   }
   else {
     i_changed2 = -1;

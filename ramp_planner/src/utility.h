@@ -10,8 +10,13 @@
 #include "ramp_msgs/Path.h"
 #include "ramp_msgs/Trajectory.h"
 
+class Range;
+
 class Utility {
   public:
+    Utility();
+
+    std::vector<Range> standardRanges;
     const std::string toString(const ramp_msgs::Path path) const;
     const std::string toString(const ramp_msgs::Trajectory traj) const;
 };

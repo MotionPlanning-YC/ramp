@@ -1,4 +1,14 @@
 #include "utility.h"
+#include "range.h"
+
+Utility::Utility() {
+  Range range0(0, 10);
+  Range range1(0, 10);
+  Range range2(30, 50);
+  standardRanges.push_back(range0);
+  standardRanges.push_back(range1);
+  standardRanges.push_back(range2);
+}
 
 
 const std::string Utility::toString(const ramp_msgs::Path path) const {

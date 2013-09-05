@@ -21,12 +21,14 @@ const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
 }
 
 /** This method adds a trajectory to the population. 
- *  If the population is full, a random trajectory (that isn't the best one) is replaced */
-void Population::add(const RampTrajectory rt) {
+ *  If the population is full, a random trajectory (that isn't the best one) is replaced.
+ *  Returns the index that the trajectory is added at */
+const unsigned int Population::add(const RampTrajectory rt) {
  
   //If not full, simply push back
   if(population_.size() < max_size) {
     population_.push_back(rt);  
+    return population_.size()-1;
   } 
 
   //If full, replace a trajectory
@@ -43,6 +45,8 @@ void Population::add(const RampTrajectory rt) {
 
     //Push back the new trajectory
     population_.push_back(rt);
+
+    return i;
   }
 } //End add
 
@@ -72,6 +76,19 @@ const RampTrajectory Population::findBest() {
   
   return population_.at(i_max);
 } //End getBest
+
+
+
+/** fitness and feasible toString */
+const std::string Population::fitnessFeasibleToString() const {
+  std::ostringstream result;
+
+  for(unsigned int i=0;i<population_.size();i++) {
+    result<<"\nTrajectory "<<i<<": "<<population_.at(i).fitnessFeasibleToString();
+  }
+
+  return result.str();
+} //End toString
 
 
 /** toString */

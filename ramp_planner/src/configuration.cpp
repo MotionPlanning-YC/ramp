@@ -10,8 +10,16 @@ Configuration::Configuration(ramp_msgs::Configuration c) {
   }
 }
 
-Configuration::Configuration(trajectory_msgs::JointTrajectoryPoint p, ramp_msgs::Range r) {
+
+Configuration::Configuration(const trajectory_msgs::JointTrajectoryPoint p, const std::vector<Range> r) {
+
+  for(unsigned int i=0;i<r.size();i++) {
+    ranges_.push_back(r.at(i));
+  }
   
+  for(unsigned int i=0;i<p.positions.size();i++) {
+    K_.push_back(p.positions.at(i));
+  }
 }
 
 Configuration::~Configuration() {}
