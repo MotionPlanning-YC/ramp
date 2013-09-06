@@ -40,6 +40,7 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
 
   //First, randomly select an operator
   unsigned int op = rand() % num_ops;
+  //std::cout<<"\nop:"<<op;
 
   //Assign the correct name for the operator
   switch(op) {

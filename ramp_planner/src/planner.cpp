@@ -321,6 +321,8 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
     //Get the old and new paths
     Path old = paths_.at(i_old.at(0));
     Path new_path = new_paths.at(0);
+    //std::cout<<"\nold:"<<old.toString();
+    //std::cout<<"\nnew_path:"<<new_path.toString();
 
     //Check the difference in path sizes
     int diff = new_path.all_.size() - old.all_.size();
@@ -530,6 +532,9 @@ void Planner::updatePaths(Configuration start, ros::Duration dur) {
     //Set start_ to be the new starting configuration of the path
     paths_.at(i).start_ = start;
 
+    //Update the modifier
+    modifier_->update(paths_.at(i), i);
+
     //Also erase velocities, throwaway-1
     if(throwaway > 0) {
       velocities_.at(i).erase( velocities_.at(i).begin(), velocities_.at(i).begin()+throwaway-1);
@@ -614,7 +619,8 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
 
 
   //createSubpopulations();
-  
+  int j=0; 
+  lastUpdate_ = ros::Time::now();
   while(!start_.equals(goal_)) {
     
     //t=t+1
@@ -635,15 +641,31 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
     std::cin.get();*/
     //If end of current control cycle
     if(ros::Time::now() - lastUpdate_ >= controlCycle_) {
-      //std::cout<<"\nIn end of control cycle!\n";
-      /*//start_ should already be updated
+      std::cout<<"\nIn end of control cycle!\n";
+      std::cout<<"\nros::Time::now(): "<<ros::Time::now();
+      std::cout<<"\nlastUpdate: "<<lastUpdate_;
+      std::cout<<"\ncontrolCycle: "<<controlCycle_;
+      
+      if(j>0) {
+        for(unsigned int k=0;k<start_.K_.size();k++) {
+          start_.K_.at(k) += 1.5f;
+        }
+      }
+
+      //start_ should already be updated
       //Update starting configuration and velocity of P(t)
       std::cout<<"\nPress enter to update population!\n";
       std::cin.get();
       updatePopulation(controlCycle_);
 
+      std::cout<<"\nPaths are now: ";
+      for(unsigned int i=0;i<paths_.size();i++) {
+        std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
+      }
+      std::cin.get();
+
       //Create subpopulations in P(t)
-      //
+      
 
       std::cout<<"\nPress enter to evaluate and get best!\n";
       std::cin.get();
@@ -654,7 +676,13 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
       std::cin.get();
       //T_move = T
       //Send the best trajectory 
-      sendBest();*/
+      sendBest();
+      lastUpdate_ = ros::Time::now();
+      
+      j++;
+    }
+    else {
+      std::cout<<"\nNot in control cycle!\n";
     }
 
     //If new sensing cycle...
