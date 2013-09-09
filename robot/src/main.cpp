@@ -3,6 +3,7 @@
 #include "ramp_msgs/Update.h"
 
 Corobot robot;
+ros::Timer updateTimer, twistTimer;
 
 void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
   std::cout<<"\nGot the message!";
@@ -25,7 +26,7 @@ void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle) {
   //Subscribers
   robot.sub_odometry_ = handle.subscribe(Corobot::TOPIC_STR_ODOMETRY, 1000, &Corobot::updateState, &robot);
   
-  ros::Timer timer = handle.createTimer(ros::Duration(3), &Corobot::updatePublishTimer, &robot);
+  updateTimer = handle.createTimer(ros::Duration(3), &Corobot::updatePublishTimer, &robot);
 }
 
 int main(int argc, char** argv) {

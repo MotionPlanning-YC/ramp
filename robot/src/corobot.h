@@ -35,7 +35,7 @@ class Corobot {
     void setConfiguration(float x, float y, float theta);
     
     void updatePublishTimer(const ros::TimerEvent&);
-
+    void sendTwist();
     void controlCycle(geometry_msgs::Twist twist, ros::Time end_time, ros::Rate r);
 
     //Data Members
@@ -53,7 +53,7 @@ class Corobot {
     static const std::string TOPIC_STR_ODOMETRY;
     static const std::string TOPIC_STR_UPDATE;
     static const std::string TOPIC_STR_TWIST;
-    static const int POSE_COUNT_THRESHOLD = 5;
+    static const int POSE_COUNT_THRESHOLD = 1;
     static const int ACCELERATION_CONSTANT = 50;
 
   private:
@@ -75,6 +75,7 @@ class Corobot {
     std::vector<float> speeds; // Linear speed for each trajectory
     std::vector<float> angular_speeds_knotpoints; //Angular Speed needed over 3s to get the correct orientation after each knot point reached.
     std::vector<float> orientations_knotpoints; // The orientation needed to be at each knotpoint.
+    geometry_msgs::Twist twist;
 };
 
 #endif
