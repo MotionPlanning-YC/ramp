@@ -76,6 +76,7 @@ class Corobot {
     std::vector<float> angular_speeds_knotpoints; //Angular Speed needed over 3s to get the correct orientation after each knot point reached.
     std::vector<float> orientations_knotpoints; // The orientation needed to be at each knotpoint.
     geometry_msgs::Twist twist;
+    float angle_at_start; // the angle of the robot when the robot gets a trajectory. 
 };
 
 #endif

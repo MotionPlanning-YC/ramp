@@ -28,14 +28,14 @@ int main(int argc, char** argv) {
   point.time_from_start = ros::Duration(10);
   msg.trajectory.points.push_back(point);
   
-  point.positions.at(0) = 1.067 + 6.858; // + 270in
+  point.positions.at(0) = 1.067 + 6.558; // + 270in - 0.3m
   point.positions.at(1) = 0.89;
-  point.time_from_start = ros::Duration(30);
+  point.time_from_start = ros::Duration(35);
   msg.trajectory.points.push_back(point);
   
  /* point.positions.at(0) = 1.067 + 6.858;
   point.positions.at(1) = -1.41; // + 91 in
-  point.time_from_start = ros::Duration(40);
+  point.time_from_start = ros::Duration(45);
   msg.trajectory.points.push_back(point);
   /*
   point.positions.at(0) = 1.143; // - 263in
