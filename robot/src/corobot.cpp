@@ -27,7 +27,7 @@ void Corobot::setConfiguration(float x, float y, float theta) {
   configuration_.K.push_back(x);
   configuration_.K.push_back(y);
   configuration_.K.push_back(theta - angle_at_start);
-  ROS_ERROR("in conf %f, %f", theta, theta - angle_at_start);
+ // ROS_ERROR("in conf %f, %f", theta, theta - angle_at_start);
 }
 
 
@@ -270,16 +270,7 @@ void Corobot::moveOnTrajectory()
                 r.sleep();
             }
 
-	    // Stops the wheels before going straight
-	    twist.linear.x = 0;
-	    twist.angular.z = 0;
-	    while(ros::ok() && ros::Time::now() < start + ros::Duration (2.5* timeNeededToTurn)) {
-	      sendTwist();
-	      ros::spinOnce();
-	      r.sleep();
-	    }
-
-            delay += ros::Duration(2.5*timeNeededToTurn); //we save as a delay the time it took to turn
+            delay += ros::Time::now() - start; //we save as a delay the time it took to turn
         }
         i_knot_points++;
     }
