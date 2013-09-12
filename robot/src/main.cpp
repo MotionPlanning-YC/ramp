@@ -8,8 +8,6 @@ ros::Timer updateTimer;
 void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
   std::cout<<"\nGot the message!";
   std::cout<<"\nmsg size: "<<msg->trajectory.points.size();
-  std::cout<<"\nPress enter to update!\n";
-  std::cin.get();
 
   //Update the robot's trajectory
   robot.updateTrajectory(*msg);

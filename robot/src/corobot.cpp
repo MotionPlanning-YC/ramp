@@ -9,7 +9,7 @@ const float BASE_WIDTH=0.2413;
 
 const float timeNeededToTurn = 2.5; 
 
-Corobot::Corobot() : k_dof_(3), num_traveled(0) {
+Corobot::Corobot() : k_dof_(3), num_traveled(0), restart(false) {
   for(unsigned int i=0;i<k_dof_;i++) {
     configuration_.K.push_back(0);
   }
@@ -138,6 +138,7 @@ void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
   trajectory_ = msg;
   calculateSpeedsAndTime();
   num_traveled = 0;
+  restart = true;
 }
 
 
@@ -286,7 +287,7 @@ void Corobot::moveOnTrajectory()
   //while (speeds.size() > 1) {
   while( (num_traveled+1) < trajectory_.trajectory.points.size()) {
     printVectors();
-    std::cin.get();
+    //std::cin.get();
   //for(int i=0;i<num-1;i++) {
   
     //ROS_ERROR("knotpoint: %d/%d angular speed: %f, linear speed: %f, orientation: %f, configuration: %f\n", i,i_knot_points, angular_speeds_knotpoints.at(i_knot_points), speeds.at(i), orientations_knotpoints.at(i_knot_points), configuration_.K.at(2));
@@ -311,6 +312,11 @@ void Corobot::moveOnTrajectory()
             {
 		            sendTwist();
                 ros::spinOnce();
+                if(restart) {
+                  std::cout<<"\nRestarting in knot point turning\n";
+                  restart = false;
+                  continue;
+                }
                 r.sleep();
             }
 
@@ -338,6 +344,13 @@ void Corobot::moveOnTrajectory()
       twist.angular.z = -3 * ( configuration_.K.at(2) - orientations_knotpoints.at(i_knot_points -1) );
       sendTwist();
       ros::spinOnce();
+      
+      if(restart) {
+        std::cout<<"\nRestart in normal driving\n";
+        restart = false;
+        continue;
+      }
+      
       r.sleep();
     }
 
@@ -359,7 +372,14 @@ void Corobot::moveOnTrajectory()
         while(ros::ok() && ros::Time::now() < (start + ros::Duration(timeNeededToTurn))) {
             sendTwist();
             ros::spinOnce();
-	          r.sleep();
+            
+            if(restart) {
+              std::cout<<"\nRestarting in final orientation turning\n";
+              restart = false;
+              continue;
+            }
+	          
+            r.sleep();
         }
 
         delay += ros::Duration(timeNeededToTurn); //we save as a delay the time it took to turn
