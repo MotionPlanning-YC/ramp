@@ -71,8 +71,16 @@ int main(int argc, char** argv) {
   char temp;
   scanf("%c",&temp);
   printf("Publishing\n");
- traj_pub.publish(msg);
-  
+  traj_pub.publish(msg);
+
+
+  ros::Duration(3).sleep(); 
+  msg.trajectory.points.erase(msg.trajectory.points.begin());
+  printf("\nPublishing 2nd Trajectory!\n");
+  traj_pub.publish(msg);
+
+  printf("\nSpinning...\n");
+ 
   
   ros::spin();
 
