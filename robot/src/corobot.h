@@ -66,6 +66,8 @@ class Corobot {
     float getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const;
     
     void calculateSpeedsAndTime ();
+
+    void printVectors() const;
     
     //holds the last 5 thetas to average
     std::vector<double> thetas_; 
@@ -77,7 +79,7 @@ class Corobot {
     geometry_msgs::Twist twist;
     float angle_at_start; // the angle of the robot when the robot gets a trajectory. 
 
-
+    int num_traveled;
 };
 
 #endif

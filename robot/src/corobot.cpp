@@ -9,7 +9,7 @@ const float BASE_WIDTH=0.2413;
 
 const float timeNeededToTurn = 2.5; 
 
-Corobot::Corobot() : k_dof_(3) {
+Corobot::Corobot() : k_dof_(3), num_traveled(0) {
   for(unsigned int i=0;i<k_dof_;i++) {
     configuration_.K.push_back(0);
   }
@@ -137,6 +137,7 @@ void Corobot::turn(const float speed, const float angle) const {
 void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
   trajectory_ = msg;
   calculateSpeedsAndTime();
+  num_traveled = 0;
 }
 
 
@@ -190,6 +191,7 @@ void Corobot::calculateSpeedsAndTime ()
   angular_speeds_knotpoints.clear();
   orientations_knotpoints.clear();
   speeds.clear();
+  end_times.clear();
 
   int i_knot_points = 0; // Index for going through knotpoints. We don't need the index of the current knot point but the next one
   float past_orientation = 0;
@@ -234,6 +236,35 @@ void Corobot::sendTwist()
 	pub_twist_.publish(twist); 
 }
 
+
+void Corobot::printVectors() const {
+    
+    std::cout<<"\nspeeds: [";
+    for(unsigned int i=0;i<speeds.size()-1;i++) {
+      std::cout<<speeds.at(i)<<", ";
+    }
+    std::cout<<speeds.at(speeds.size()-1)<<"]";
+
+    std::cout<<"\nend_times: [";
+    for(unsigned int i=0;i<end_times.size()-1;i++) {
+      std::cout<<end_times.at(i)<<", ";
+    }
+    std::cout<<end_times.at(end_times.size()-1)<<"]";
+
+    std::cout<<"\nangular_speeds_knotpoints: [";
+    for(unsigned int i=0;i<angular_speeds_knotpoints.size()-1;i++) {
+      std::cout<<angular_speeds_knotpoints.at(i)<<", ";
+    }
+    std::cout<<angular_speeds_knotpoints.at(angular_speeds_knotpoints.size()-1)<<"]";
+    
+    
+    std::cout<<"\norientations_knotpoints: [";
+    for(unsigned int i=0;i<orientations_knotpoints.size()-1;i++) {
+      std::cout<<orientations_knotpoints.at(i)<<", ";
+    }
+    std::cout<<orientations_knotpoints.at(orientations_knotpoints.size()-1)<<"]";
+}
+
 void Corobot::moveOnTrajectory() 
 {
   int num = trajectory_.trajectory.points.size(); //Get the number of waypoints
@@ -245,20 +276,24 @@ void Corobot::moveOnTrajectory()
   
   //angular_speeds_knotpoints.clear();
   //orientations_knotpoints.clear();
-  //speeds.clear();s
+  //speeds.clear();
   angle_at_start = configuration_.K.at(2);
 
   //Calculate the speeds and time
   //calculateSpeedsAndTime();
   
   //For each waypoint we publish the Twist message
-  for(int i=0;i<num-1;i++) {
+  //while (speeds.size() > 1) {
+  while( (num_traveled+1) < trajectory_.trajectory.points.size()) {
+    printVectors();
+    std::cin.get();
+  //for(int i=0;i<num-1;i++) {
   
     //ROS_ERROR("knotpoint: %d/%d angular speed: %f, linear speed: %f, orientation: %f, configuration: %f\n", i,i_knot_points, angular_speeds_knotpoints.at(i_knot_points), speeds.at(i), orientations_knotpoints.at(i_knot_points), configuration_.K.at(2));
 
     // We need to make sure we are at the correct direction to reach the next waypoint, so we turn if nessary
 
-    if (i == trajectory_.index_knot_points.at(i_knot_points))
+    if (num_traveled == trajectory_.index_knot_points.at(i_knot_points))
     {   
 	      // If the robot should turn at a angular speed that is non 0, we turn
         if ((angular_speeds_knotpoints.at(i_knot_points) > 0.01 || angular_speeds_knotpoints.at(i_knot_points) < -0.01) )
@@ -280,31 +315,42 @@ void Corobot::moveOnTrajectory()
             }
 
             delay += ros::Time::now() - start; //we save as a delay the time it took to turn
-        }
+        } //end if turn
+
         i_knot_points++;
-    }
+    } //end if at knotpoint
     
     // we make sure that the time it took us for all the turns 
     // doesn't make the robot go straight for less time than it should
-    end_times.at(i) += delay;
+    //end_times.at(i) += delay;
+    end_times.at(0) += delay;
      
 
     
     // Now we can go straight to reach the waypoint
-    twist.linear.x = speeds.at(i);
+    //twist.linear.x = speeds.at(i);
+    twist.linear.x = speeds.at(0);
     twist.angular.z = 0;
 
 
     //Send the twist msg at some rate r
-    while(ros::ok() && ros::Time::now() < end_times.at(i)) {
+    while(ros::ok() && ros::Time::now() < end_times.at(0)) {
       twist.angular.z = -3 * ( configuration_.K.at(2) - orientations_knotpoints.at(i_knot_points -1) );
       sendTwist();
       //ros::spinOnce();
       r.sleep();
     }
+
+
+    /** Remove the waypoint from the vectors */
+    speeds.erase(speeds.begin());
+    //angular_speeds_knotpoints.erase(angular_speeds_knotpoints.begin());
+    //orientations_knotpoints.erase(orientations_knotpoints.begin());
+    end_times.erase(end_times.begin());
     
     // Satisfy the orientation onces the final knotpoint has been reached
-    if ( i == num-2)
+    //if ( i == num-2)
+    if( speeds.size() == 1)
     {
         twist.linear.x = 0;
         twist.angular.z = angular_speeds_knotpoints.at(i_knot_points);
@@ -323,6 +369,10 @@ void Corobot::moveOnTrajectory()
     twist.linear.x = 0;
     twist.angular.z = 0;
     sendTwist();
+
+    //Increment num_traveled
+    num_traveled++;
+    std::cout<<"\nnum_traveled:"<<num_traveled<<"\n";
 
     //Spin once to check for updates in the trajectory
     ros::spinOnce();

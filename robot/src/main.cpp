@@ -7,6 +7,7 @@ ros::Timer updateTimer;
 
 void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
   std::cout<<"\nGot the message!";
+  std::cout<<"\nmsg size: "<<msg->trajectory.points.size();
   std::cout<<"\nPress enter to update!\n";
   std::cin.get();
 
@@ -39,6 +40,12 @@ int main(int argc, char** argv) {
   
   init_advertisers_subscribers(robot, handle);
   
+  //Start by giving robot an empty trajectory
+  //so that its trajectory_.trajectory.points.size = 0
+  ramp_msgs::Trajectory temp;
+  temp.trajectory.points.clear();
+  robot.trajectory_ = temp;
+
   std::cout<<"\nWaiting for trajectories...\n";
   while(ros::ok()) {
     robot.moveOnTrajectory();
