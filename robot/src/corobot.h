@@ -67,7 +67,6 @@ class Corobot {
     
     void calculateSpeedsAndTime ();
     
-    bool move; 
     //holds the last 5 thetas to average
     std::vector<double> thetas_; 
     
@@ -77,6 +76,8 @@ class Corobot {
     std::vector<float> orientations_knotpoints; // The orientation needed to be at each knotpoint.
     geometry_msgs::Twist twist;
     float angle_at_start; // the angle of the robot when the robot gets a trajectory. 
+
+
 };
 
 #endif

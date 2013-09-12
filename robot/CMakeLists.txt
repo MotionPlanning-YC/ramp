@@ -29,3 +29,8 @@ add_dependencies(${PROJECT_NAME} ramp_msgs_generate_messages_cpp)
 add_executable(demo src/demo.cpp)
 target_link_libraries(demo ${catkin_LIBRARIES})
 add_dependencies(demo ramp_msgs_generate_messages_cpp)
+
+
+add_executable(move src/main_move.cpp)
+target_link_libraries(move ${catkin_LIBRARIES})
+add_dependencies(move ramp_msgs_generate_messages_cpp)

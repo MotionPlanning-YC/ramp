@@ -3,14 +3,15 @@
 #include "ramp_msgs/Update.h"
 
 Corobot robot;
-ros::Timer updateTimer, twistTimer;
+ros::Timer updateTimer;
 
 void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
   std::cout<<"\nGot the message!";
-  robot.trajectory_ = *msg;
+  std::cout<<"\nPress enter to update!\n";
+  std::cin.get();
 
-  //Move robot along trajectory
-  robot.moveOnTrajectory(); 
+  //Update the robot's trajectory
+  robot.updateTrajectory(*msg);
 }
 
 
@@ -26,6 +27,7 @@ void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle) {
   //Subscribers
   robot.sub_odometry_ = handle.subscribe(Corobot::TOPIC_STR_ODOMETRY, 1000, &Corobot::updateState, &robot);
   
+  //Timers
   updateTimer = handle.createTimer(ros::Duration(3), &Corobot::updatePublishTimer, &robot);
 }
 
@@ -36,8 +38,13 @@ int main(int argc, char** argv) {
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
   
   init_advertisers_subscribers(robot, handle);
-
-  ros::spin();
+  
+  std::cout<<"\nWaiting for trajectories...\n";
+  while(ros::ok()) {
+    robot.moveOnTrajectory();
+    std::cout<<"\nDone";
+    ros::spinOnce();
+  }
 
   std::cout<<"\nExiting Normally\n";
   return 0;
