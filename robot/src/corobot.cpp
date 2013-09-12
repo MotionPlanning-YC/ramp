@@ -310,7 +310,7 @@ void Corobot::moveOnTrajectory()
                     (orientations_knotpoints.at(i_knot_points) + 0.10) < configuration_.K.at(2))) 
             {
 		            sendTwist();
-                //ros::spinOnce();
+                ros::spinOnce();
                 r.sleep();
             }
 
@@ -337,7 +337,7 @@ void Corobot::moveOnTrajectory()
     while(ros::ok() && ros::Time::now() < end_times.at(0)) {
       twist.angular.z = -3 * ( configuration_.K.at(2) - orientations_knotpoints.at(i_knot_points -1) );
       sendTwist();
-      //ros::spinOnce();
+      ros::spinOnce();
       r.sleep();
     }
 
@@ -358,7 +358,7 @@ void Corobot::moveOnTrajectory()
 
         while(ros::ok() && ros::Time::now() < (start + ros::Duration(timeNeededToTurn))) {
             sendTwist();
-            //ros::spinOnce();
+            ros::spinOnce();
 	          r.sleep();
         }
 
