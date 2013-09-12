@@ -76,6 +76,11 @@ int main(int argc, char** argv) {
 
   ros::Duration(3).sleep(); 
   msg.trajectory.points.erase(msg.trajectory.points.begin());
+
+  for(unsigned int i=0;i<3;i++) {
+  	msg.trajectory.points.at(i).time_from_start -= ros::Duration(5);
+  }
+  msg.index_knot_points.erase(msg.index_knot_points.begin()+3);
   printf("\nPublishing 2nd Trajectory!\n");
   traj_pub.publish(msg);
 
