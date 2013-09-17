@@ -4,6 +4,8 @@
 Configuration::Configuration() {}
 
 Configuration::Configuration(ramp_msgs::Configuration c) {
+  std::cout<<"\nc.K.size(): "<<c.K.size();
+  std::cout<<"\nc.ranges.size(): "<<c.ranges.size()<<"\n";
   for(unsigned int i=0;i<c.K.size();i++) {
     K_.push_back(c.K.at(i));
     ranges_.push_back(c.ranges.at(i));

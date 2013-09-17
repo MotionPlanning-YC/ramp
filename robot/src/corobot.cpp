@@ -12,6 +12,7 @@ const float timeNeededToTurn = 2.5;
 Corobot::Corobot() : k_dof_(3), num_traveled(0), restart(false) {
   for(unsigned int i=0;i<k_dof_;i++) {
     configuration_.K.push_back(0);
+    configuration_.ranges.push_back(u.standardRanges.at(i));
   }
   angle_at_start = 0;
 }

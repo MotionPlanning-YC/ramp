@@ -26,7 +26,7 @@ const double Evaluate::perform() {
   //Set values for time and add to result
   time_.trajectory_ = t_eval;
   std::cout<<"\ntime value: "<<time_.perform()<<"\n";
-  result+=time_.perform();
+  result+=(1.5*time_.perform());
 
   //Negate the result so the higher values are worse
   result *= -1;

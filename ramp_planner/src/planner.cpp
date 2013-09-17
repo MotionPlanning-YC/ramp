@@ -59,7 +59,10 @@ void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
   mutex_start_ = false;
 
   Configuration temp(msg->configuration);
-  start_ = temp;
+
+  if(temp.K_.size() > 0) {
+    start_ = temp;
+  }
 
   mutex_start_ = true;
 }

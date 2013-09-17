@@ -57,6 +57,8 @@ class Corobot {
     static const int ACCELERATION_CONSTANT = 50;
 
   private:
+    Utility u;
+    
     const unsigned int k_dof_;
 
     const float getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const ;
