@@ -4,8 +4,9 @@
 Configuration::Configuration() {}
 
 Configuration::Configuration(ramp_msgs::Configuration c) {
-  std::cout<<"\nc.K.size(): "<<c.K.size();
-  std::cout<<"\nc.ranges.size(): "<<c.ranges.size()<<"\n";
+  //std::cout<<"\nc.K.size(): "<<c.K.size();
+  //std::cout<<"\nc.ranges.size(): "<<c.ranges.size()<<"\n";
+  
   for(unsigned int i=0;i<c.K.size();i++) {
     K_.push_back(c.K.at(i));
     ranges_.push_back(c.ranges.at(i));
@@ -50,6 +51,23 @@ const bool Configuration::equals(const Configuration& c) const {
   }
 
   return true;
+}
+
+/** This method returns the euclidean distance between this configuration and c */
+const double Configuration::compare(const Configuration& c) const {
+  std::cout<<"\nComparing: "<<toString()<<" and "<<c.toString();
+  double result = 0; 
+
+  //For each DOF, sum the (X2-X1)^2
+  for(unsigned int i=0;i<ranges_.size();i++) {
+    result += pow(c.K_.at(i) - K_.at(i), 2);
+  }
+
+  //Get square root to complete euclidean distance...
+  result = sqrt(result);
+
+  std::cout<<"\nReturning "<<result;
+  return result;
 }
 
 

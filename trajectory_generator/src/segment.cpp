@@ -2,16 +2,16 @@
 
 
 Segment::Segment() : k_dof_(3) {
-  max_v_.push_back(1.0f);
-  max_v_.push_back(1.0f);
-  max_v_.push_back(5.0f);
+  max_v_.push_back(0.5f);
+  max_v_.push_back(0.5f);
+  max_v_.push_back(0.5f);
 }
 
 Segment::Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float t_start, const float t_end, const unsigned int ind) : k_dof_(3) 
 {
-  max_v_.push_back(1.0f);
-  max_v_.push_back(1.0f);
-  max_v_.push_back(5.0f);
+  max_v_.push_back(0.5f);
+  max_v_.push_back(0.5f);
+  max_v_.push_back(0.5f);
   build(kp_start, kp_end, t_start, t_end, ind);
 }
 
@@ -37,12 +37,14 @@ void Segment::build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::P
 }
 
 
+/** This method calculates the minimum time needed to compute the trajectory */
 const float Segment::calculateMinTime() {
 
 
   //We take the ceiling so that the resolution rate will divide evenly into T
   // e.g. if your resolution rate is 5hz, and T is 3.5, your generated trajectory 
   // will not have the correct position at the end. There may be better solutions, but this one works for now. 
+  //We use the max_v to calculate the minimum time needed
   T_ = ceil(fabs((end_.p_.at(0) - start_.p_.at(0)) / max_v_.at(0)));
   
   //Compute the execution time for each k

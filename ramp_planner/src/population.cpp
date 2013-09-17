@@ -44,7 +44,7 @@ const unsigned int Population::add(const RampTrajectory rt) {
     population_.erase(population_.begin()+i);
 
     //Push back the new trajectory
-    population_.push_back(rt);
+    population_.insert(population_.begin()+i, rt);
 
     return i;
   }
@@ -74,7 +74,7 @@ const RampTrajectory Population::findBest() {
   //Set i_best
   i_best = i_max;
   
-  return population_.at(i_max);
+  return population_.at(i_best);
 } //End getBest
 
 

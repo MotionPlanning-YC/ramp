@@ -20,13 +20,11 @@ const double Evaluate::perform() {
 
   //Set values for euclidean distance and add to result
   euc_dist_.trajectory_ = t_eval;
-  std::cout<<"\neuclidean distance value: "<<euc_dist_.perform();
-  result+=euc_dist_.perform();
+  result+=(1.5*euc_dist_.perform());
 
   //Set values for time and add to result
   time_.trajectory_ = t_eval;
-  std::cout<<"\ntime value: "<<time_.perform()<<"\n";
-  result+=(1.5*time_.perform());
+  result+=(time_.perform());
 
   //Negate the result so the higher values are worse
   result *= -1;

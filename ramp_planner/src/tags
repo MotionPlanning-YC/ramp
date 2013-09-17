@@ -24,6 +24,8 @@ Configuration::Configuration	configuration.h	/^    Configuration(ramp_msgs::Conf
 Configuration::K_	configuration.h	/^    std::vector<float> K_; $/;"	m	class:Configuration	access:public
 Configuration::buildConfigurationMsg	configuration.cpp	/^const ramp_msgs::Configuration Configuration::buildConfigurationMsg() const {$/;"	f	class:Configuration	signature:() const
 Configuration::buildConfigurationMsg	configuration.h	/^    const ramp_msgs::Configuration buildConfigurationMsg() const;$/;"	p	class:Configuration	access:public	signature:() const
+Configuration::compare	configuration.cpp	/^const double Configuration::compare(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
+Configuration::compare	configuration.h	/^    const double compare(const Configuration& c) const;$/;"	p	class:Configuration	access:public	signature:(const Configuration& c) const
 Configuration::equals	configuration.cpp	/^const bool Configuration::equals(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
 Configuration::equals	configuration.h	/^    const bool equals(const Configuration& c) const; $/;"	p	class:Configuration	access:public	signature:(const Configuration& c) const
 Configuration::random	configuration.cpp	/^void Configuration::random() {$/;"	f	class:Configuration	signature:()
@@ -314,6 +316,8 @@ clear	population.h	/^    void clear();$/;"	p	class:Population	access:public	sign
 client_	evaluation_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:EvaluationRequestHandler	access:private
 client_	modification_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:ModificationRequestHandler	access:private
 client_	trajectory_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:TrajectoryRequestHandler	access:private
+compare	configuration.cpp	/^const double Configuration::compare(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
+compare	configuration.h	/^    const double compare(const Configuration& c) const;$/;"	p	class:Configuration	access:public	signature:(const Configuration& c) const
 controlCycle_	planner.h	/^    ros::Duration controlCycle_;$/;"	m	class:Planner	access:private
 equals	configuration.cpp	/^const bool Configuration::equals(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
 equals	configuration.h	/^    const bool equals(const Configuration& c) const; $/;"	p	class:Configuration	access:public	signature:(const Configuration& c) const
