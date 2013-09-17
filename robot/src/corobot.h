@@ -81,6 +81,7 @@ class Corobot {
     geometry_msgs::Twist twist;
     float angle_at_start; // the angle of the robot when the robot gets a trajectory. 
 
+    int num;
     int num_traveled;
     bool restart;
 };
