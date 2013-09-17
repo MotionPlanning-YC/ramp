@@ -15,14 +15,14 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "planner");
 
   ros::NodeHandle handle;
-  ros::Subscriber sub_update_ = handle.subscribe("update_configuration", 1000, &Planner::updateCallback, &my_planner);
+  ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
   
   Utility u;
  
   srand( time(0));
   Range range0(0, 10);
-  Range range1(0, 10);
-  Range range2(30, 50);
+  Range range1(0, 1);
+  Range range2(0, 0);
  
  
   /** Initialize the Planner's handlers */ 
@@ -35,13 +35,18 @@ int main(int argc, char** argv) {
   
   //Make Configurations
   Configuration s;
-  Configuration m;
   Configuration g;
   s.ranges_ = my_planner.ranges_;
-  m.ranges_ = my_planner.ranges_;
   g.ranges_ = my_planner.ranges_;
-  s.random();
-  g.random();
+  s.K_.push_back(0);
+  s.K_.push_back(0);
+  s.K_.push_back(0);
+  
+  g.K_.push_back(10);
+  g.K_.push_back(0.5);
+  g.K_.push_back(0);
+  //s.random();
+  //g.random();
 
   //Set start and goal
   my_planner.start_ = s;
@@ -161,9 +166,6 @@ int main(int argc, char** argv) {
   my_planner.sendBest();*/
 
   
-
-  std::cout<<"\nSpinning...\n";
-  ros::spin();
 
   std::cout<<"\nExiting Normally\n";
   return 0;

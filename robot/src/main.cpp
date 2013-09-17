@@ -47,7 +47,6 @@ int main(int argc, char** argv) {
   std::cout<<"\nWaiting for trajectories...\n";
   while(ros::ok()) {
     robot.moveOnTrajectory();
-    std::cout<<"\nDone";
     ros::spinOnce();
   }
 

@@ -19,7 +19,8 @@ const ramp_msgs::Path Change::perform() {
       double min = path_.configurations.at(0).ranges.at(i).min;
       double max = path_.configurations.at(0).ranges.at(i).max;
       
-      float temp = ( min + (float)rand() / ((float)RAND_MAX / (max - min)) );
+      float temp = (min == 0 && max == 0) ? 0 :      
+            ( min + (float)rand() / ((float)RAND_MAX / (max - min)) );
 
       c.K.push_back(temp);
       c.ranges.push_back(path_.configurations.at(0).ranges.at(i));

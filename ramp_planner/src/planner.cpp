@@ -475,7 +475,6 @@ void Planner::evaluateTrajectory(RampTrajectory& trajec, const std::vector<unsig
   else {
     //some error handling
   }
-
 }
 
 void Planner::evaluatePopulation() {
@@ -600,12 +599,10 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   //initialize population
   init_population();
   
-  /*std::cout<<"\nPopulation initialized!\n";
+  std::cout<<"\nPopulation initialized!\n";
   for(unsigned int i=0;i<paths_.size();i++) {
     std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
   }
-  std::cout<<"\nPress enter to evaluate P(0)\n";
-  std::cin.get();*/
 
   //Initialize the modifier
   modifier_->paths_ = paths_;
@@ -621,7 +618,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   //createSubpopulations();
   int j=0; 
   lastUpdate_ = ros::Time::now();
-  while(!start_.equals(goal_)) {
+  while(!start_.equals(goal_) && ros::ok()) {
     
     //t=t+1
     generation_++;
@@ -635,45 +632,46 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
     std::cout<<"\nPaths are now: ";
     for(unsigned int i=0;i<paths_.size();i++) {
       std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
-    }*/
+    }
+    std::cin.get();*/
 
     /*std::cout<<"\n\n\nPress enter to check for end of control cycle!\n";
     std::cin.get();*/
     //If end of current control cycle
     if(ros::Time::now() - lastUpdate_ >= controlCycle_) {
       std::cout<<"\nIn end of control cycle!\n";
-      std::cout<<"\nros::Time::now(): "<<ros::Time::now();
-      std::cout<<"\nlastUpdate: "<<lastUpdate_;
-      std::cout<<"\ncontrolCycle: "<<controlCycle_;
+      //std::cout<<"\nros::Time::now(): "<<ros::Time::now();
+      //std::cout<<"\nlastUpdate: "<<lastUpdate_;
+      //std::cout<<"\ncontrolCycle: "<<controlCycle_;
       
-      if(j>0) {
+      /*if(j>0) {
         for(unsigned int k=0;k<start_.K_.size();k++) {
           start_.K_.at(k) += 1.5f;
         }
-      }
+      }*/
 
       //start_ should already be updated
       //Update starting configuration and velocity of P(t)
-      std::cout<<"\nPress enter to update population!\n";
-      std::cin.get();
+      //std::cout<<"\nPress enter to update population!\n";
+      //std::cin.get();
       updatePopulation(controlCycle_);
 
-      std::cout<<"\nPaths are now: ";
+      /*std::cout<<"\nAfter updatePopulation, Paths are now: ";
       for(unsigned int i=0;i<paths_.size();i++) {
         std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
       }
-      std::cin.get();
+      std::cin.get();*/
 
       //Create subpopulations in P(t)
       
 
-      std::cout<<"\nPress enter to evaluate and get best!\n";
-      std::cin.get();
+      //std::cout<<"\nPress enter to evaluate and get best!\n";
+      //std::cin.get();
       //Evaluate P(t) and obtain best T, T_move=T_best
       T_move = evaluateAndObtainBest();
       
-      std::cout<<"\nPress enter to send the best trajectory!\n";
-      std::cin.get();
+      //std::cout<<"\nPress enter to send the best trajectory!\n";
+      //std::cin.get();
       //T_move = T
       //Send the best trajectory 
       sendBest();

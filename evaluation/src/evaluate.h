@@ -2,6 +2,7 @@
 #define EVALUATE_H
 #include "ramp_msgs/EvaluationRequest.h"
 #include "euclidean_distance.h"
+#include "time.h"
 #include "utility.h"
 
 
@@ -12,7 +13,8 @@ class Evaluate {
 
     const double perform();
 
-    EuclideanDistance euc_dist;
+    EuclideanDistance euc_dist_;
+    Time time_;
 
     //Information sent by the request
     ramp_msgs::Trajectory trajectory_;

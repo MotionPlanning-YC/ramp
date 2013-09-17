@@ -287,10 +287,12 @@ void Corobot::moveOnTrajectory()
   //For each waypoint we publish the Twist message
   //while (speeds.size() > 1) {
   while( (num_traveled+1) < trajectory_.trajectory.points.size()) {
+    std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
+    std::cout<<"\nSize of trajectory: "<<trajectory_.trajectory.points.size();
     //std::cout<<"\nbeginning of outter while loop!";
     //std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
     restart = false;
-    printVectors();
+    //printVectors();
     //std::cin.get();
   //for(int i=0;i<num-1;i++) {
   
@@ -317,8 +319,6 @@ void Corobot::moveOnTrajectory()
 		            sendTwist();
                 ros::spinOnce();
                 if(restart) {
-                  //std::cout<<"\nRestarting in knot point turning\n";
-                  //restart = false;
                   break;
                 }
                 r.sleep();
@@ -326,8 +326,8 @@ void Corobot::moveOnTrajectory()
 		
 	    if(restart) {
 	    	restart=false;
-		i_knot_points=0;
-		continue;
+		    i_knot_points=0;
+		    continue;
 	    }
 
             delay += ros::Time::now() - start; //we save as a delay the time it took to turn
@@ -356,8 +356,6 @@ void Corobot::moveOnTrajectory()
       ros::spinOnce();
       
       if(restart) {
-        //std::cout<<"\nRestart in normal driving\n";
-        //restart = false;
         break;
       }
       
@@ -365,9 +363,9 @@ void Corobot::moveOnTrajectory()
     }
     //std::cout<<"\nright after inner while!\n";   
     if(restart) {
-	restart = true;
-		i_knot_points=0;
-	continue;
+	    restart = true;
+		  i_knot_points=0;
+	    continue;
     }
 
 
@@ -390,8 +388,6 @@ void Corobot::moveOnTrajectory()
             ros::spinOnce();
             
             if(restart) {
-              //std::cout<<"\nRestarting in final orientation turning\n";
-              //restart = false;
               break;
             }
 	          
@@ -399,9 +395,9 @@ void Corobot::moveOnTrajectory()
         }
     
     if(restart) {
-	restart = true;
-		i_knot_points=0;
-	continue;
+	    restart = true;
+		  i_knot_points=0;
+	    continue;
     }
 
         delay += ros::Duration(timeNeededToTurn); //we save as a delay the time it took to turn
@@ -419,7 +415,7 @@ void Corobot::moveOnTrajectory()
     //Spin once to check for updates in the trajectory
     ros::spinOnce();
     r.sleep();
-  } //end for
+  } //end while
 
 } //End moveOnTrajectory
 

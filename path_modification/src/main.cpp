@@ -9,10 +9,11 @@ bool handleRequest(ramp_msgs::ModificationRequest::Request& req,
                    ramp_msgs::ModificationRequest::Response& res)
 {
 
-  std::cout<<"\nPaths received:";
+  /*std::cout<<"\nPaths received:";
   for(unsigned int i=0;i<req.paths.size();i++) {
     std::cout<<"\n"<<u.toString(req.paths.at(i));
-  }
+  }*/
+
   Modifier mod(req);
   res.mod_paths = mod.perform();
   

@@ -13,7 +13,10 @@ Range::~Range() {}
 
 
 const float Range::random() {
- return ( min_ + (float)rand() / ((float)RAND_MAX / (max_ - min_)) ); 
+  if(min_ == 0 && max_ == 0)
+    return 0;
+
+  return ( min_ + (float)rand() / ((float)RAND_MAX / (max_ - min_)) ); 
 }
 
 

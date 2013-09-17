@@ -26,7 +26,7 @@ include_directories(${catkin_INCLUDE_DIRS})
 
 
 ## Declare a cpp executable
-add_executable(${PROJECT_NAME} src/main.cpp src/euclidean_distance.cpp src/evaluate.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/euclidean_distance.cpp src/evaluate.cpp src/time.cpp src/utility.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})

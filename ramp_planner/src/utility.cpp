@@ -3,8 +3,8 @@
 
 Utility::Utility() {
   Range range0(0, 10);
-  Range range1(0, 10);
-  Range range2(30, 50);
+  Range range1(0, 1);
+  Range range2(0, 0);
   standardRanges.push_back(range0);
   standardRanges.push_back(range1);
   standardRanges.push_back(range2);
