@@ -25,7 +25,7 @@ void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle) {
   robot.sub_odometry_ = handle.subscribe(Corobot::TOPIC_STR_ODOMETRY, 1000, &Corobot::updateState, &robot);
   
   //Timers
-  robot.timer_ = handle.createTimer(ros::Duration(3), &Corobot::updatePublishTimer, &robot);
+  robot.timer_ = handle.createTimer(ros::Duration(0.1), &Corobot::updatePublishTimer, &robot);
 }
 
 int main(int argc, char** argv) {

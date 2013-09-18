@@ -27,6 +27,13 @@ Configuration::Configuration(const trajectory_msgs::JointTrajectoryPoint p, cons
 
 Configuration::~Configuration() {}
 
+void Configuration::updatePosition(float x, float y, float theta)
+{
+  K_.clear();
+  K_.push_back(x);
+  K_.push_back(y);
+  K_.push_back(theta);
+}
 
 /** Set the configuration to be of random values and return the value of this configuration */
 void Configuration::random() {

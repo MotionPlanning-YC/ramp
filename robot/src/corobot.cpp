@@ -156,7 +156,7 @@ void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
   //sendTwist();
   //sendTwist();
   
-  angle_at_start = configuration_.K.at(2);
+//  angle_at_start = configuration_.K.at(2);
   restart = true;
   num_traveled = 0;
   i_knot_points = 0;
@@ -185,7 +185,6 @@ const float Corobot::getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPo
 
   float mag_v = sqrt( pow(v[0],2) + pow(v[1],2) );
   float time = waypoint2.time_from_start.toSec() - waypoint1.time_from_start.toSec();
-  std::cout << "time " << time << "mag_v "<< mag_v;
   float speed = mag_v / time;
   return speed;
 }
@@ -205,6 +204,8 @@ float Corobot::getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPo
     float x_dif = waypoint2.positions.at(0) - waypoint1.positions.at(0); // difference in x between the waypoint 2 and 1
     float y_dif = waypoint2.positions.at(1) - waypoint1.positions.at(1); // difference in y between the waypoint 2 and 1
     float angle = asin((y_dif)/(sqrt(x_dif*x_dif + y_dif*y_dif))); // Orientation of this trajectory in the X/Y axes
+    if (x_dif < 0)
+	return M_PI - angle;
     return angle;
 }
 
@@ -222,7 +223,7 @@ void Corobot::calculateSpeedsAndTime ()
   float past_orientation = 0;
   float current_orientation = 0;
   int num = trajectory_.trajectory.points.size(); //Get the number of waypoints
-  ros::Time start = ros::Time::now() + ros::Duration(1.0);
+  ros::Time start = ros::Time::now() + ros::Duration(0.0);
 
   // WE go through all the waypoints
   for(int i=0;i<num-1;i++) {
@@ -296,6 +297,7 @@ void Corobot::moveOnTrajectory()
 {
   restart = false;
   std::cout<<"\nIn moveOnTrajectory!\n";
+  
   //moving_ = true;
   //int num = trajectory_.trajectory.points.size(); //Get the number of waypoints
   //int i_knot_points = 0; // Index for going through knotpoints. We don't need the index of the current knot point but the next one 
@@ -314,10 +316,9 @@ void Corobot::moveOnTrajectory()
 
   //while (speeds.size() > 1) {
   while( (num_traveled+1) < num) {
-    //std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
-    //std::cout<<"\nSize of trajectory: "<<trajectory_.trajectory.points.size();
+
     //std::cout<<"\nbeginning of outter while loop!";
-    //std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
+    std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
     restart = false;
     //printVectors();
     //std::cin.get();
@@ -341,10 +342,10 @@ void Corobot::moveOnTrajectory()
             // we calculated was needed to make the turn then we stop turning.
             float lower = orientations_knotpoints.at(i_knot_points) - 0.10;
             float upper = orientations_knotpoints.at(i_knot_points) + 0.10;
-            float theta = configuration_.K.at(2);
-            while((ros::ok() && ros::Time::now() < (start + ros::Duration (2 * timeNeededToTurn) )) && 
-                    (lower > theta) || 
-                    (upper < theta) ) 
+            ros::Time t = start + ros::Duration (2 * timeNeededToTurn);
+            while((ros::ok() && ros::Time::now() < t) && 
+                    (lower > configuration_.K.at(2)) || 
+                    (upper < configuration_.K.at(2)) ) 
             {
 		            sendTwist();
                 ros::spinOnce();
@@ -359,6 +360,7 @@ void Corobot::moveOnTrajectory()
     		//twist.linear.x = 0;
     		//twist.angular.z = 0;
     		//sendTwist();
+	 	delay = ros::Duration(0);
 	    	restart=false;
 		continue;
 	    }
@@ -400,6 +402,7 @@ void Corobot::moveOnTrajectory()
 	//twist.linear.x = 0;
 	//twist.angular.z = 0;
 	//sendTwist();
+	delay = ros::Duration(0);
 	restart=false;
 	continue;
     }
@@ -434,6 +437,7 @@ void Corobot::moveOnTrajectory()
 	//twist.linear.x = 0;
 	//twist.angular.z = 0;
 	//sendTwist();
+	delay = ros::Duration(0);
 	restart=false;
 	continue;
     }
@@ -442,9 +446,9 @@ void Corobot::moveOnTrajectory()
     }
 
     // Stops the wheels
-    twist.linear.x = 0;
-    twist.angular.z = 0;
-    sendTwist();
+    //twist.linear.x = 0;
+    //twist.angular.z = 0;
+    //sendTwist();
 
     //Increment num_traveled
     num_traveled++;

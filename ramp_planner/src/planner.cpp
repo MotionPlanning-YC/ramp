@@ -58,11 +58,15 @@ void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
 
   mutex_start_ = false;
 
+  
   Configuration temp(msg->configuration);
 
   if(temp.K_.size() > 0) {
     start_ = temp;
   }
+
+  //start_.updatePosition(msg->pose.pose.position.x, msg->pose.pose.position.y, tf::getYaw(msg->pose.pose.orientation));
+  
 
   mutex_start_ = true;
 }
@@ -622,7 +626,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   int j=0; 
   lastUpdate_ = ros::Time::now();
   //while(!start_.equals(goal_) && ros::ok()) {
-  while( (start_.compare(goal_) > 0.1) && ros::ok()) {
+  while( (start_.compare(goal_) > 0.4) && ros::ok()) {
     
     //t=t+1
     generation_++;
@@ -643,7 +647,6 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
     std::cin.get();*/
     //If end of current control cycle
     if(ros::Time::now() - lastUpdate_ >= controlCycle_) {
-      std::cout<<"\nIn end of control cycle!\n";
 
       //std::cout<<"\nros::Time::now(): "<<ros::Time::now();
       //std::cout<<"\nlastUpdate: "<<lastUpdate_;
@@ -664,6 +667,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
       //Update starting configuration and velocity of P(t)
       //std::cout<<"\nPress enter to update population!\n";
       //std::cin.get();
+      ros::spinOnce(); 
       updatePopulation(controlCycle_);
 
 
@@ -688,17 +692,24 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
       //std::cin.get();
       //T_move = T
       //Send the best trajectory 
+      std::cout<<"\nSending new trajectory!\n";
       sendBest();
       lastUpdate_ = ros::Time::now();
       
       j++;
     }
-    else {
-      std::cout<<"\nNot in control cycle!\n";
-    }
+    //else {
+      //std::cout<<"\nNot in control cycle!\n";
+    //}
 
     //If new sensing cycle...
   
     ros::spinOnce(); 
   } //end while
+
+  //Send an empty trajectory
+  ramp_msgs::Trajectory empty;
+  h_control_->send(empty);
+
+  
 } //End go

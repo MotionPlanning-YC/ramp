@@ -23,5 +23,6 @@ class Configuration {
     const double compare(const Configuration& c) const;
     const ramp_msgs::Configuration buildConfigurationMsg() const;
     const std::string toString() const;
+    void updatePosition(float x, float y, float theta);
 };
 #endif
