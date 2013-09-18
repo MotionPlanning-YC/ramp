@@ -10,7 +10,7 @@ const float BASE_WIDTH=0.2413;
 const float timeNeededToTurn = 2.5; 
 
 
-Corobot::Corobot() : k_dof_(3), num_traveled(0), restart(false), num(0) { 
+Corobot::Corobot() : k_dof_(3), num_traveled(0), restart(false), num(0), mutex_(true), moving_(false), i_knot_points(0) { 
   for(unsigned int i=0;i<k_dof_;i++) {
     configuration_.K.push_back(0);
     configuration_.ranges.push_back(u.standardRanges.at(i));
@@ -159,6 +159,7 @@ void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
   angle_at_start = configuration_.K.at(2);
   restart = true;
   num_traveled = 0;
+  i_knot_points = 0;
   trajectory_ = msg;
   num = trajectory_.trajectory.points.size();
   calculateSpeedsAndTime();
@@ -184,6 +185,7 @@ const float Corobot::getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPo
 
   float mag_v = sqrt( pow(v[0],2) + pow(v[1],2) );
   float time = waypoint2.time_from_start.toSec() - waypoint1.time_from_start.toSec();
+  std::cout << "time " << time << "mag_v "<< mag_v;
   float speed = mag_v / time;
   return speed;
 }
@@ -216,7 +218,6 @@ void Corobot::calculateSpeedsAndTime ()
   orientations_knotpoints.clear();
   speeds.clear();
   end_times.clear();
-
   int i_knot_points = 0; // Index for going through knotpoints. We don't need the index of the current knot point but the next one
   float past_orientation = 0;
   float current_orientation = 0;
@@ -294,8 +295,10 @@ void Corobot::printVectors() const {
 void Corobot::moveOnTrajectory() 
 {
   restart = false;
-
-  int i_knot_points = 0; // Index for going through knotpoints. We don't need the index of the current knot point but the next one 
+  std::cout<<"\nIn moveOnTrajectory!\n";
+  //moving_ = true;
+  //int num = trajectory_.trajectory.points.size(); //Get the number of waypoints
+  //int i_knot_points = 0; // Index for going through knotpoints. We don't need the index of the current knot point but the next one 
   ros::Rate r(150);
   
   ros::Duration delay = ros::Duration(0); // Save the time it took to do all the turns
@@ -307,7 +310,7 @@ void Corobot::moveOnTrajectory()
 
   //Calculate the speeds and time
   //calculateSpeedsAndTime();
-  
+
 
   //while (speeds.size() > 1) {
   while( (num_traveled+1) < num) {
@@ -357,7 +360,6 @@ void Corobot::moveOnTrajectory()
     		//twist.angular.z = 0;
     		//sendTwist();
 	    	restart=false;
-		i_knot_points=0;
 		continue;
 	    }
 
@@ -399,7 +401,6 @@ void Corobot::moveOnTrajectory()
 	//twist.angular.z = 0;
 	//sendTwist();
 	restart=false;
-	i_knot_points=0;
 	continue;
     }
 
@@ -434,7 +435,6 @@ void Corobot::moveOnTrajectory()
 	//twist.angular.z = 0;
 	//sendTwist();
 	restart=false;
-	i_knot_points=0;
 	continue;
     }
 
@@ -451,10 +451,14 @@ void Corobot::moveOnTrajectory()
 
     //Spin once to check for updates in the trajectory
     ros::spinOnce();
-    r.sleep();
+
   } //end while
 
-} //End moveOnTrajectory
+    // Stops the wheels
+    twist.linear.x = 0;
+    twist.angular.z = 0;
+    sendTwist();
 
+} //End moveOnTrajectory
 
 

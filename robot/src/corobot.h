@@ -87,6 +87,7 @@ class Corobot {
 
     int num;
     int num_traveled;
+    int i_knot_points;
     bool restart;
 
     bool mutex_;

@@ -6,8 +6,8 @@ Corobot robot;
 
 void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
   std::cout<<"\nGot the message!\n";
-  std::cout<<"\nPress enter to call updateTrajectory\n";
-  std::cin.get();
+ // std::cout<<"\nPress enter to call updateTrajectory\n";
+ // std::cin.get();
   robot.updateTrajectory(*msg);
 }
 
@@ -40,8 +40,12 @@ int main(int argc, char** argv) {
   //Make a blank ramp_msgs::Trajectory
   ramp_msgs::Trajectory init;
   robot.trajectory_ = init;
+  
+  while(ros::ok()) {
+    robot.moveOnTrajectory();
+    ros::spinOnce();
+  }
 
-  ros::spin();
 
   std::cout<<"\nExiting Normally\n";
   return 0;
