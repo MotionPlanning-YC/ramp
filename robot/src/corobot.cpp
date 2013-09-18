@@ -331,7 +331,7 @@ void Corobot::moveOnTrajectory()
     if (num_traveled == trajectory_.index_knot_points.at(i_knot_points))
     {   
 	      // If the robot should turn at a angular speed that is non 0, we turn
-        if ((angular_speeds_knotpoints.at(i_knot_points) > 0.01 || angular_speeds_knotpoints.at(i_knot_points) < -0.01) )
+        if ((angular_speeds_knotpoints.at(i_knot_points) > 0.1 || angular_speeds_knotpoints.at(i_knot_points) < -0.1) )
         {
             twist.angular.z = angular_speeds_knotpoints.at(i_knot_points);
 	          twist.linear.x = fabs(twist.angular.z * BASE_WIDTH * 0.5); // We add some linear speed to turn only one wheel at a time

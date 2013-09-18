@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
   s.K_.push_back(0);
   
   g.K_.push_back(4);
-  g.K_.push_back(0.5);
+  g.K_.push_back(1);
   g.K_.push_back(0);
   //s.random();
   //g.random();

@@ -7,18 +7,18 @@
 
 Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true) 
 {
-  controlCycle_ = ros::Duration(0.25);
+  controlCycle_ = ros::Duration(0.5);
 }
 
 Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true) 
 {
-  controlCycle_ = ros::Duration(0.25);
+  controlCycle_ = ros::Duration(0.5);
 }
 
 Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true) 
 {
   init_handlers(h); 
-  controlCycle_ = ros::Duration(0.25);
+  controlCycle_ = ros::Duration(0.5);
 }
 
 Planner::~Planner() {
