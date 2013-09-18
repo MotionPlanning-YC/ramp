@@ -4,6 +4,9 @@
 #include "euclidean_distance.h"
 #include "time.h"
 #include "utility.h"
+#include "corobot_msgs/SensorMsg.h"
+
+
 
 
 class Evaluate {
@@ -11,7 +14,7 @@ class Evaluate {
     Evaluate(const ramp_msgs::EvaluationRequest::Request& req);
     
 
-    const double perform();
+    const double perform(obstacle_struct obstacle);
 
     EuclideanDistance euc_dist_;
     Time time_;

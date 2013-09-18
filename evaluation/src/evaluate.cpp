@@ -1,6 +1,7 @@
 #include "evaluate.h"
 
 
+
 Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) {
   trajectory_ = req.trajectory;
 
@@ -10,7 +11,7 @@ Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) {
 }
 
 
-const double Evaluate::perform() {
+const double Evaluate::perform(obstacle_struct obstacle) {
   double result=0;
 
   //Create the path to evaluate
@@ -20,7 +21,10 @@ const double Evaluate::perform() {
 
   //Set values for euclidean distance and add to result
   euc_dist_.trajectory_ = t_eval;
-  result+=(1.5*euc_dist_.perform());
+  
+  //Modified: For more efficiency, and to be fast here, I just added the cobstacle check in the euc_dist.
+  // This is not the best implementation, but is the fastest to code and to execute
+  result+=(1.5*euc_dist_.perform(obstacle));
 
   //Set values for time and add to result
   time_.trajectory_ = t_eval;
