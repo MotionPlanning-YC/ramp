@@ -4,7 +4,7 @@
 Utility::Utility() {
   ramp_msgs::Range range0; 
   range0.min = 0;
-  range0.min = 10;
+  range0.min = 4;
 
   ramp_msgs::Range range1; 
   range1.min = 0;

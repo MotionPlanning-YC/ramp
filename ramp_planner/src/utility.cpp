@@ -2,7 +2,7 @@
 #include "range.h"
 
 Utility::Utility() {
-  Range range0(0, 10);
+  Range range0(0, 4);
   Range range1(0, 1);
   Range range2(0, 0);
   standardRanges.push_back(range0);

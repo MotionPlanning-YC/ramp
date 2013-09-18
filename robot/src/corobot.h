@@ -81,14 +81,13 @@ class Corobot {
     std::vector<float> speeds; // Linear speed for each trajectory
     std::vector<float> angular_speeds_knotpoints; //Angular Speed needed over 3s to get the correct orientation after each knot point reached.
     std::vector<float> orientations_knotpoints; // The orientation needed to be at each knotpoint.
-<<<<<<< Updated upstream
+
     geometry_msgs::Twist twist;
     float angle_at_start; // the angle of the robot when the robot gets a trajectory. 
 
     int num;
     int num_traveled;
     bool restart;
-=======
 
     bool mutex_;
     bool trajec_updated_;
@@ -97,7 +96,6 @@ class Corobot {
     void releaseMutex();
 
     bool moving_;
->>>>>>> Stashed changes
 };
 
 #endif

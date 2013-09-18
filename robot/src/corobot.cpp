@@ -9,11 +9,8 @@ const float BASE_WIDTH=0.2413;
 
 const float timeNeededToTurn = 2.5; 
 
-<<<<<<< Updated upstream
+
 Corobot::Corobot() : k_dof_(3), num_traveled(0), restart(false), num(0) { 
-=======
-Corobot::Corobot() : mutex_(true), moving_(false), k_dof_(3){
->>>>>>> Stashed changes
   for(unsigned int i=0;i<k_dof_;i++) {
     configuration_.K.push_back(0);
     configuration_.ranges.push_back(u.standardRanges.at(i));
@@ -152,7 +149,7 @@ void Corobot::turn(const float speed, const float angle) const {
 /** This method updates the Corobot's trajectory
  *   It calls calculateSpeedsAndTimes to update the robot's vectors needed to move */
 void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
-<<<<<<< Updated upstream
+
   // Stops the wheels
   //twist.linear.x = 0;
   //twist.angular.z = 0;
@@ -165,25 +162,6 @@ void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
   trajectory_ = msg;
   num = trajectory_.trajectory.points.size();
   calculateSpeedsAndTime();
-=======
-  std::cout<<"\nIn updateTrajectory\n";
-
-  //Wait until mutex is available
-  lockMutex();
-  
-  trajectory_ = msg;
-  calculateSpeedsAndTime();
-  trajec_updated_ = true;
-
-  //Release mutex
-  releaseMutex();
-
-  //If robot is not moving, begin moving robot along trajectory
-  if(!moving_) {
-    std::cout<<"\nmoving_: "<<moving_;
-    moveOnTrajectory(); 
-  }
->>>>>>> Stashed changes
 }
 
 
@@ -230,7 +208,6 @@ float Corobot::getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPo
 
 /** 
  * Calculate all the necessary values to move the robot: the linear and angular velocities as well as ending times
-<<<<<<< Updated upstream
  * This method sets the vectors speeds, angular_speeds, and end_times
  */
 void Corobot::calculateSpeedsAndTime ()
@@ -240,18 +217,6 @@ void Corobot::calculateSpeedsAndTime ()
   speeds.clear();
   end_times.clear();
 
-=======
- * mutex_ should be locked before calling this method
- */
-void Corobot::calculateSpeedsAndTime ()
-{
-
-  //Clear the vectors
-  angular_speeds_knotpoints.clear();
-  orientations_knotpoints.clear();
-  speeds.clear();
-  
->>>>>>> Stashed changes
   int i_knot_points = 0; // Index for going through knotpoints. We don't need the index of the current knot point but the next one
   float past_orientation = 0;
   float current_orientation = 0;
@@ -328,42 +293,22 @@ void Corobot::printVectors() const {
 
 void Corobot::moveOnTrajectory() 
 {
-<<<<<<< Updated upstream
   restart = false;
-=======
-  std::cout<<"\nIn moveOnTrajectory!\n";
-  moving_ = true;
-  int num = trajectory_.trajectory.points.size(); //Get the number of waypoints
->>>>>>> Stashed changes
+
   int i_knot_points = 0; // Index for going through knotpoints. We don't need the index of the current knot point but the next one 
   ros::Rate r(150);
   
   ros::Duration delay = ros::Duration(0); // Save the time it took to do all the turns
   ros::Time start;
   
-<<<<<<< Updated upstream
   //angular_speeds_knotpoints.clear();
   //orientations_knotpoints.clear();
   //speeds.clear();
 
   //Calculate the speeds and time
   //calculateSpeedsAndTime();
-=======
-  //Lock mutex 
-  lockMutex();
   
-  //Calculate speeds and time 
-  calculateSpeedsAndTime();
-  
-  //Release mutex
-  releaseMutex();
->>>>>>> Stashed changes
-  
-  int i=-1;
-  while(i < num-1) {  
-    i++;
-  //For each waypoint we publish the Twist message
-<<<<<<< Updated upstream
+
   //while (speeds.size() > 1) {
   while( (num_traveled+1) < num) {
     //std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
@@ -374,21 +319,6 @@ void Corobot::moveOnTrajectory()
     //printVectors();
     //std::cin.get();
   //for(int i=0;i<num-1;i++) {
-=======
-  //for(unsigned int i=0;i<num-1;i++) {
-    std::cout<<"\ni:"<<i;
-    //Before moving, lock the mutex in case the trajectory must be updated
-    //If it was locked prior to this call, we know the trajectory has changed
-    lockMutex();
-    if(trajec_updated_) {
-      std::cout<<"\ntrajectory has been updated!\n";
-      i=0;
-      num = trajectory_.trajectory.points.size();   
-      i_knot_points = 0;
-
-      trajec_updated_ = false;
-    }
->>>>>>> Stashed changes
   
     //ROS_ERROR("knotpoint: %d/%d angular speed: %f, linear speed: %f, orientation: %f, configuration: %f\n", i,i_knot_points, angular_speeds_knotpoints.at(i_knot_points), speeds.at(i), orientations_knotpoints.at(i_knot_points), configuration_.K.at(2));
 
@@ -522,18 +452,9 @@ void Corobot::moveOnTrajectory()
     //Spin once to check for updates in the trajectory
     ros::spinOnce();
     r.sleep();
-<<<<<<< Updated upstream
   } //end while
 
 } //End moveOnTrajectory
-=======
 
-    //Release the mutex
-    releaseMutex();
-  }
-
-  moving_ = false;
-}
->>>>>>> Stashed changes
 
 

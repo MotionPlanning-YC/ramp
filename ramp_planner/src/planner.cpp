@@ -644,15 +644,15 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
     //If end of current control cycle
     if(ros::Time::now() - lastUpdate_ >= controlCycle_) {
       std::cout<<"\nIn end of control cycle!\n";
-<<<<<<< Updated upstream
+
       //std::cout<<"\nros::Time::now(): "<<ros::Time::now();
       //std::cout<<"\nlastUpdate: "<<lastUpdate_;
       //std::cout<<"\ncontrolCycle: "<<controlCycle_;
-=======
+
       /*std::cout<<"\nros::Time::now(): "<<ros::Time::now();
       std::cout<<"\nlastUpdate: "<<lastUpdate_;
       std::cout<<"\ncontrolCycle: "<<controlCycle_;*/
->>>>>>> Stashed changes
+
       
       /*if(j>0) {
         for(unsigned int k=0;k<start_.K_.size();k++) {
@@ -666,11 +666,11 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
       //std::cin.get();
       updatePopulation(controlCycle_);
 
-<<<<<<< Updated upstream
+
       /*std::cout<<"\nAfter updatePopulation, Paths are now: ";
-=======
+
       /*std::cout<<"\nPaths are now: ";
->>>>>>> Stashed changes
+
       for(unsigned int i=0;i<paths_.size();i++) {
         std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
       }

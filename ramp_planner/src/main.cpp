@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
   Utility u;
  
   srand( time(0));
-  Range range0(0, 10);
+  Range range0(0, 4);
   Range range1(0, 1);
   Range range2(0, 0);
  
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
   s.K_.push_back(0);
   s.K_.push_back(0);
   
-  g.K_.push_back(10);
+  g.K_.push_back(4);
   g.K_.push_back(0.5);
   g.K_.push_back(0);
   //s.random();
