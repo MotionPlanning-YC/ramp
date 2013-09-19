@@ -38,6 +38,7 @@ void Corobot::setConfiguration(float x, float y, float theta) {
   
   configuration_.K.push_back(x);
   configuration_.K.push_back(y);
+
   configuration_.K.push_back(theta - angle_at_start);
  // ROS_ERROR("in conf %f, %f", theta, theta - angle_at_start);
 }

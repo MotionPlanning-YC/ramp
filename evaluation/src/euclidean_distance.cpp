@@ -22,12 +22,12 @@ const double EuclideanDistance::perform(obstacle_struct obstacle) {
     }
     
     
-    //Modified: here we check if the waypoint go through the obstacle, and if yes we increment the diff by a lot
+    /*//Modified: here we check if the waypoint go through the obstacle, and if yes we increment the diff by a lot
     if (trajec.points.at(i2).positions.at(0) >= obstacle.x1 && trajec.points.at(i2).positions.at(0) <= obstacle.x2 &&
         trajec.points.at(i2).positions.at(1) >= obstacle.y1 && trajec.points.at(i2).positions.at(1) <= obstacle.y2)
     {
         result += 5; // we add a big distance
-    }
+    }*/
     
     
 

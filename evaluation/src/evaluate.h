@@ -3,6 +3,7 @@
 #include "ramp_msgs/EvaluationRequest.h"
 #include "euclidean_distance.h"
 #include "time.h"
+#include "collision_detection.h"
 #include "utility.h"
 #include "corobot_msgs/SensorMsg.h"
 
@@ -16,6 +17,7 @@ class Evaluate {
 
     const double perform(obstacle_struct obstacle);
 
+    /** Different evaluation criteria */
     EuclideanDistance euc_dist_;
     Time time_;
 

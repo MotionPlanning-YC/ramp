@@ -4,29 +4,76 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+COLLISION_DETECTION	collision_detection.h	2;"	d
+CollisionDetection	collision_detection.h	/^    CollisionDetection() {}$/;"	f	class:CollisionDetection	access:public	signature:()
+CollisionDetection	collision_detection.h	/^class CollisionDetection {$/;"	c
+CollisionDetection::CollisionDetection	collision_detection.h	/^    CollisionDetection() {}$/;"	f	class:CollisionDetection	access:public	signature:()
+CollisionDetection::obstacle_list	collision_detection.h	/^    std::vector<obstacle_struct> obstacle_list;$/;"	m	class:CollisionDetection	access:public
+CollisionDetection::perform	collision_detection.cpp	/^const bool CollisionDetection::perform() const {$/;"	f	class:CollisionDetection	signature:() const
+CollisionDetection::perform	collision_detection.h	/^    const bool perform() const;$/;"	p	class:CollisionDetection	access:public	signature:() const
+CollisionDetection::trajectory_	collision_detection.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:CollisionDetection	access:public
 EUCLIDEAN_DISTANCE_H	euclidean_distance.h	2;"	d
 EVALUATE_H	evaluate.h	2;"	d
-EuclideanDistance	euclidean_distance.h	/^    EuclideanDistance();$/;"	p	class:EuclideanDistance	access:public	signature:()
+EuclideanDistance	euclidean_distance.h	/^    EuclideanDistance() {}$/;"	f	class:EuclideanDistance	access:public	signature:()
 EuclideanDistance	euclidean_distance.h	/^class EuclideanDistance {$/;"	c
-EuclideanDistance::EuclideanDistance	euclidean_distance.h	/^    EuclideanDistance();$/;"	p	class:EuclideanDistance	access:public	signature:()
-EuclideanDistance::path_	euclidean_distance.h	/^    ramp_msgs::Path path_;$/;"	m	class:EuclideanDistance	access:public
-EuclideanDistance::perform	euclidean_distance.cpp	/^const double EuclideanDistance::perform() {$/;"	f	class:EuclideanDistance	signature:()
-EuclideanDistance::perform	euclidean_distance.h	/^    const double perform();$/;"	p	class:EuclideanDistance	access:public	signature:()
-Evaluate	evaluate.h	/^    Evaluate(const ramp_msgs::EvaluationRequest::Request& er);$/;"	p	class:Evaluate	access:public	signature:(const ramp_msgs::EvaluationRequest::Request& er)
+EuclideanDistance::EuclideanDistance	euclidean_distance.h	/^    EuclideanDistance() {}$/;"	f	class:EuclideanDistance	access:public	signature:()
+EuclideanDistance::perform	euclidean_distance.cpp	/^const double EuclideanDistance::perform(obstacle_struct obstacle) {$/;"	f	class:EuclideanDistance	signature:(obstacle_struct obstacle)
+EuclideanDistance::perform	euclidean_distance.h	/^    const double perform(obstacle_struct obstacle);$/;"	p	class:EuclideanDistance	access:public	signature:(obstacle_struct obstacle)
+EuclideanDistance::trajectory_	euclidean_distance.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:EuclideanDistance	access:public
+Evaluate	evaluate.cpp	/^Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) {$/;"	f	class:Evaluate	signature:(const ramp_msgs::EvaluationRequest::Request& req)
+Evaluate	evaluate.h	/^    Evaluate(const ramp_msgs::EvaluationRequest::Request& req);$/;"	p	class:Evaluate	access:public	signature:(const ramp_msgs::EvaluationRequest::Request& req)
 Evaluate	evaluate.h	/^class Evaluate {$/;"	c
-Evaluate::Evaluate	evaluate.h	/^    Evaluate(const ramp_msgs::EvaluationRequest::Request& er);$/;"	p	class:Evaluate	access:public	signature:(const ramp_msgs::EvaluationRequest::Request& er)
-Evaluate::euc_dist	evaluate.h	/^    EuclideanDistance euc_dist;$/;"	m	class:Evaluate	access:public
-Evaluate::i_segments	evaluate.h	/^    std::vector<unsigned int> i_segments;$/;"	m	class:Evaluate	access:public
-Evaluate::path_	evaluate.h	/^    ramp_msgs::Path path_;$/;"	m	class:Evaluate	access:public
-Evaluate::perform	evaluate.h	/^    const double perform();$/;"	p	class:Evaluate	access:public	signature:()
+Evaluate::Evaluate	evaluate.cpp	/^Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) {$/;"	f	class:Evaluate	signature:(const ramp_msgs::EvaluationRequest::Request& req)
+Evaluate::Evaluate	evaluate.h	/^    Evaluate(const ramp_msgs::EvaluationRequest::Request& req);$/;"	p	class:Evaluate	access:public	signature:(const ramp_msgs::EvaluationRequest::Request& req)
+Evaluate::euc_dist_	evaluate.h	/^    EuclideanDistance euc_dist_;$/;"	m	class:Evaluate	access:public
+Evaluate::i_segments_	evaluate.h	/^    std::vector<unsigned int> i_segments_;$/;"	m	class:Evaluate	access:public
+Evaluate::perform	evaluate.cpp	/^const double Evaluate::perform(obstacle_struct obstacle) {$/;"	f	class:Evaluate	signature:(obstacle_struct obstacle)
+Evaluate::perform	evaluate.h	/^    const double perform(obstacle_struct obstacle);$/;"	p	class:Evaluate	access:public	signature:(obstacle_struct obstacle)
+Evaluate::time_	evaluate.h	/^    Time time_;$/;"	m	class:Evaluate	access:public
+Evaluate::trajectory_	evaluate.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:Evaluate	access:public
+OBSTACLE_SIZE	main.cpp	/^const float OBSTACLE_SIZE = 0.3; \/\/ size of the obstacle in meters$/;"	v
+TIME_H	time.h	2;"	d
+Time	time.h	/^    Time() {}$/;"	f	class:Time	access:public	signature:()
+Time	time.h	/^class Time {$/;"	c
+Time::Time	time.h	/^    Time() {}$/;"	f	class:Time	access:public	signature:()
+Time::perform	time.cpp	/^const double Time::perform() {$/;"	f	class:Time	signature:()
+Time::perform	time.h	/^    const double perform();$/;"	p	class:Time	access:public	signature:()
+Time::trajectory_	time.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:Time	access:public
 UTILITY_H	utility.h	2;"	d
 Utility	utility.h	/^class Utility {$/;"	c
-euc_dist	evaluate.h	/^    EuclideanDistance euc_dist;$/;"	m	class:Evaluate	access:public
+Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
+Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
+collision_	main.cpp	/^CollisionDetection collision_;$/;"	v
+current	main.cpp	/^ramp_msgs::Configuration current;$/;"	v
+euc_dist_	evaluate.h	/^    EuclideanDistance euc_dist_;$/;"	m	class:Evaluate	access:public
 handleRequest	main.cpp	/^bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,$/;"	f	signature:(ramp_msgs::EvaluationRequest::Request& req, ramp_msgs::EvaluationRequest::Response& res)
-i_segments	evaluate.h	/^    std::vector<unsigned int> i_segments;$/;"	m	class:Evaluate	access:public
+i_segments_	evaluate.h	/^    std::vector<unsigned int> i_segments_;$/;"	m	class:Evaluate	access:public
 main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
-path_	euclidean_distance.h	/^    ramp_msgs::Path path_;$/;"	m	class:EuclideanDistance	access:public
-path_	evaluate.h	/^    ramp_msgs::Path path_;$/;"	m	class:Evaluate	access:public
-perform	euclidean_distance.cpp	/^const double EuclideanDistance::perform() {$/;"	f	class:EuclideanDistance	signature:()
-perform	euclidean_distance.h	/^    const double perform();$/;"	p	class:EuclideanDistance	access:public	signature:()
-perform	evaluate.h	/^    const double perform();$/;"	p	class:Evaluate	access:public	signature:()
+obstacle	main.cpp	/^obstacle_struct obstacle; \/\/Modified: add obstacle_struct variable. I know it is not the best place. But it is fast to do$/;"	v
+obstacle_list	collision_detection.h	/^    std::vector<obstacle_struct> obstacle_list;$/;"	m	class:CollisionDetection	access:public
+obstacle_struct	utility.h	/^struct obstacle_struct \/\/ defines where an obstacle is$/;"	s
+obstacle_struct::x1	utility.h	/^  double x1;$/;"	m	struct:obstacle_struct	access:public
+obstacle_struct::x2	utility.h	/^  double x2;$/;"	m	struct:obstacle_struct	access:public
+obstacle_struct::y1	utility.h	/^  double y1;$/;"	m	struct:obstacle_struct	access:public
+obstacle_struct::y2	utility.h	/^  double y2;$/;"	m	struct:obstacle_struct	access:public
+perform	collision_detection.cpp	/^const bool CollisionDetection::perform() const {$/;"	f	class:CollisionDetection	signature:() const
+perform	collision_detection.h	/^    const bool perform() const;$/;"	p	class:CollisionDetection	access:public	signature:() const
+perform	euclidean_distance.cpp	/^const double EuclideanDistance::perform(obstacle_struct obstacle) {$/;"	f	class:EuclideanDistance	signature:(obstacle_struct obstacle)
+perform	euclidean_distance.h	/^    const double perform(obstacle_struct obstacle);$/;"	p	class:EuclideanDistance	access:public	signature:(obstacle_struct obstacle)
+perform	evaluate.cpp	/^const double Evaluate::perform(obstacle_struct obstacle) {$/;"	f	class:Evaluate	signature:(obstacle_struct obstacle)
+perform	evaluate.h	/^    const double perform(obstacle_struct obstacle);$/;"	p	class:Evaluate	access:public	signature:(obstacle_struct obstacle)
+perform	time.cpp	/^const double Time::perform() {$/;"	f	class:Time	signature:()
+perform	time.h	/^    const double perform();$/;"	p	class:Time	access:public	signature:()
+sensorUpdate	main.cpp	/^void sensorUpdate(const corobot_msgs::SensorMsg &msg)$/;"	f	signature:(const corobot_msgs::SensorMsg &msg)
+time_	evaluate.h	/^    Time time_;$/;"	m	class:Evaluate	access:public
+toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
+toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
+trajectory_	collision_detection.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:CollisionDetection	access:public
+trajectory_	euclidean_distance.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:EuclideanDistance	access:public
+trajectory_	evaluate.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:Evaluate	access:public
+trajectory_	time.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:Time	access:public
+updateCallback	main.cpp	/^void updateCallback(const ramp_msgs::Update& msg) {$/;"	f	signature:(const ramp_msgs::Update& msg)
+x1	utility.h	/^  double x1;$/;"	m	struct:obstacle_struct	access:public
+x2	utility.h	/^  double x2;$/;"	m	struct:obstacle_struct	access:public
+y1	utility.h	/^  double y1;$/;"	m	struct:obstacle_struct	access:public
+y2	utility.h	/^  double y2;$/;"	m	struct:obstacle_struct	access:public
