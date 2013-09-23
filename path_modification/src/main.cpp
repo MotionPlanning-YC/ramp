@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
 
   ros::ServiceServer service = handle.advertiseService("path_modification", handleRequest); 
 
-  Utility u;
+  /*Utility u;
 
   ramp_msgs::Path p1;
   ramp_msgs::Range r;
@@ -88,10 +88,9 @@ int main(int argc, char** argv) {
   //ramp_msgs::Path a = swap.perform();
   std::vector<ramp_msgs::Path> as = cross.perform();
   std::cout<<"\nnew path1:"<<u.toString(as.at(0));
-  std::cout<<"\nnew path2:"<<u.toString(as.at(1));
+  std::cout<<"\nnew path2:"<<u.toString(as.at(1));*/
 
 
-  std::cout<<"\nOutside of perform\n";
   std::cout<<"\nSpinning...\n";
   ros::spin();
   std::cout<<"\nExiting Normally\n";

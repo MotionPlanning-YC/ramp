@@ -590,8 +590,8 @@ void Planner::updatePopulation(ros::Duration d) {
 /** This method calls evaluatePopulation and population_.getBest() */
 const RampTrajectory Planner::evaluateAndObtainBest() {
   evaluatePopulation();
-  std::cout<<"\nPopulation size: "<<population_.size();
-  std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
+  //std::cout<<"\nPopulation size: "<<population_.size();
+  //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
   return population_.findBest();
 }
 
@@ -612,17 +612,17 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   for(unsigned int i=0;i<paths_.size();i++) {
     std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
   }
-  std::cout<<"\nPress enter to continue\n";
-  std::cin.get();
+  //std::cout<<"\nPress enter to continue\n";
+  //std::cin.get();
 
   //Initialize the modifier
   modifier_->paths_ = paths_;
 
   //***Adjust***
   RampTrajectory T_move = evaluateAndObtainBest();
-  std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString(); 
-  std::cout<<"\nPress enter to start the loop!\n";
-  std::cin.get();
+  //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString(); 
+  //std::cout<<"\nPress enter to start the loop!\n";
+  //std::cin.get();
   
 
 

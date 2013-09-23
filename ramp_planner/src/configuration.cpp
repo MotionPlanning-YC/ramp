@@ -62,7 +62,7 @@ const bool Configuration::equals(const Configuration& c) const {
 
 /** This method returns the euclidean distance between this configuration and c */
 const double Configuration::compare(const Configuration& c) const {
-  std::cout<<"\nComparing: "<<toString()<<" and "<<c.toString();
+  //std::cout<<"\nComparing: "<<toString()<<" and "<<c.toString();
   double result = 0; 
 
   //For each DOF, sum the (X2-X1)^2
@@ -73,7 +73,7 @@ const double Configuration::compare(const Configuration& c) const {
   //Get square root to complete euclidean distance...
   result = sqrt(result);
 
-  std::cout<<"\nReturning "<<result;
+  //std::cout<<"\nReturning "<<result;
   return result;
 }
 
