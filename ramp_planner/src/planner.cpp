@@ -5,20 +5,20 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true) 
+Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true) 
 {
-  controlCycle_ = ros::Duration(0.5);
+  controlCycle_ = ros::Duration(0.25);
 }
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true) 
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true)
 {
-  controlCycle_ = ros::Duration(0.5);
+  controlCycle_ = ros::Duration(0.25);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true) 
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true), mutex_pop_(true)
 {
-  init_handlers(h); 
-  controlCycle_ = ros::Duration(0.5);
+  init(h); 
+  controlCycle_ = ros::Duration(0.25);
 }
 
 Planner::~Planner() {
@@ -78,11 +78,14 @@ void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
 
 
 /** Initialize the handlers and allocate them on the heap */
-void Planner::init_handlers(const ros::NodeHandle& h) {
+void Planner::init(const ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler(h);
   h_control_  = new ControlHandler(h);
   h_eval_req_ = new EvaluationRequestHandler(h);
   modifier_   = new Modifier(h, paths_, velocities_);
+
+  timer_ = h.createTimer(ros::Duration(controlCycle_), &Planner::controlCycleCallback, this);
+  timer_.stop();
 }
 
 
@@ -310,6 +313,31 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
 /** Send the fittest feasible trajectory to the robot package */
 void Planner::sendBest() {
   h_control_->send(bestTrajec_.msg_trajec_);
+}
+
+void Planner::controlCycleCallback(const ros::TimerEvent& t) {
+
+  //std::cout<<"\nSpinning once\n";
+  ros::spinOnce(); 
+  
+  while(!mutex_pop_) {}
+  mutex_pop_ = false;
+  //std::cout<<"\nUpdating population\n";
+  updatePopulation(controlCycle_);
+  mutex_pop_ = true;
+  
+  /** TODO **/
+  //Create subpopulations in P(t)
+  
+
+  //Evaluate P(t) and obtain best T, T_move=T_best
+  //std::cout<<"\nEvaluating\n";
+  RampTrajectory T_move = evaluateAndObtainBest();
+  
+  //T_move = T
+  //Send the best trajectory 
+  std::cout<<"\nSending new trajectory!\n";
+  sendBest(); 
 }
 
 
@@ -602,6 +630,8 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
 
  void Planner::go() {
 
+  ros::Rate rate(40);
+
   //t=0
   generation_ = 0;
   
@@ -625,93 +655,41 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   //std::cin.get();
   
 
-
+  /** TODO */
   //createSubpopulations();
-  int j=0; 
-  lastUpdate_ = ros::Time::now();
-  //while(!start_.equals(goal_) && ros::ok()) {
+  
+  timer_.start();
   while( (start_.compare(goal_) > 0.4) && ros::ok()) {
     
     //t=t+1
     generation_++;
-    //std::cout<<"\ngeneration_ = "<<generation_;
     
     /*std::cout<<"\nPress Enter to start modification!\n";
     std::cin.get();*/
+
+    while(!mutex_pop_) {}
+    mutex_pop_ = false;
     //Call modification
     modification();
+    mutex_pop_ = true;
     /*std::cout<<"\nmodification completed!\n";
     std::cout<<"\nPaths are now: ";
     for(unsigned int i=0;i<paths_.size();i++) {
       std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
-    }
-    std::cin.get();*/
-
-    /*std::cout<<"\n\n\nPress enter to check for end of control cycle!\n";
-    std::cin.get();*/
-    //If end of current control cycle
-    if(ros::Time::now() - lastUpdate_ >= controlCycle_) {
-
-      //std::cout<<"\nros::Time::now(): "<<ros::Time::now();
-      //std::cout<<"\nlastUpdate: "<<lastUpdate_;
-      //std::cout<<"\ncontrolCycle: "<<controlCycle_;
-
-      /*std::cout<<"\nros::Time::now(): "<<ros::Time::now();
-      std::cout<<"\nlastUpdate: "<<lastUpdate_;
-      std::cout<<"\ncontrolCycle: "<<controlCycle_;*/
-
-      
-      /*if(j>0) {
-        for(unsigned int k=0;k<start_.K_.size();k++) {
-          start_.K_.at(k) += 1.5f;
-        }
-      }*/
-
-      //start_ should already be updated
-      //Update starting configuration and velocity of P(t)
-      //std::cout<<"\nPress enter to update population!\n";
-      //std::cin.get();
-      ros::spinOnce(); 
-      updatePopulation(controlCycle_);
-
-
-      /*std::cout<<"\nAfter updatePopulation, Paths are now: ";
-
-      for(unsigned int i=0;i<paths_.size();i++) {
-        std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
-      }
-      std::cin.get();*/
-
-      //Create subpopulations in P(t)
-      
-
-      //std::cout<<"\nPress enter to evaluate and get best!\n";
-      //std::cin.get();
-      //Evaluate P(t) and obtain best T, T_move=T_best
-      T_move = evaluateAndObtainBest();
-      
-      //std::cout<<"\nPress enter to send the best trajectory!\n";
-      //std::cin.get();
-      //T_move = T
-      //Send the best trajectory 
-      std::cout<<"\nSending new trajectory!\n";
-      sendBest();
-      lastUpdate_ = ros::Time::now();
-      
-      j++;
-    }
-    //else {
-      //std::cout<<"\nNot in control cycle!\n";
-    //}
-
-    //If new sensing cycle...
-  
+    }*/
+    
+    //spinOnce necessary here?
     ros::spinOnce(); 
+
+    //rate.sleep();
   } //end while
 
   //Send an empty trajectory
   ramp_msgs::Trajectory empty;
   h_control_->send(empty);
+  
+  //Stop timer
+  timer_.stop();
 
   
 } //End go

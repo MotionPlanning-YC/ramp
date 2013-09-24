@@ -18,14 +18,12 @@ const std::vector<ramp_msgs::Path> Crossover::perform() {
     r1.configurations.push_back(path1_.configurations.at(i));
   }
 
-  //If none can be added from the second path, push on the goal
-  if(i_knotPoint1+1 >= path2_.configurations.size() )
-    r1.configurations.push_back(path1_.configurations.at(path1_.configurations.size()-1));
 
   //Push on the second part of the second path
-  for(unsigned int i=i_knotPoint1+1; i<path2_.configurations.size(); i++) {
+  for(unsigned int i=i_knotPoint2+1; i<path2_.configurations.size(); i++) {
     r1.configurations.push_back(path2_.configurations.at(i));
   }
+
 
   ramp_msgs::Path r2;
   //Push on the first part of the second path
@@ -33,12 +31,9 @@ const std::vector<ramp_msgs::Path> Crossover::perform() {
     r2.configurations.push_back(path2_.configurations.at(i));
   }
   
-  //If none can be added from the first path, push on the goal
-  if(i_knotPoint2+1 >= path1_.configurations.size() )
-    r2.configurations.push_back(path2_.configurations.at(path2_.configurations.size()-1));
   
   //Push on the second part of the first path
-  for(unsigned int i=i_knotPoint2+1; i<path1_.configurations.size(); i++) {
+  for(unsigned int i=i_knotPoint1+1; i<path1_.configurations.size(); i++) {
     r2.configurations.push_back(path1_.configurations.at(i));
   }
 

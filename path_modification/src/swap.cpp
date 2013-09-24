@@ -15,6 +15,7 @@ const ramp_msgs::Path Swap::perform() {
       i_knotPoint2 = rand() % (path_.configurations.size()-2) + 1;
     } while(i_knotPoint1 == i_knotPoint2);
 
+    std::cout<<"\ni_knotPoint1: "<<i_knotPoint1<<" i_knotPoint2: "<<i_knotPoint2;
     //Swap the configurations
     ramp_msgs::Configuration temp = path_.configurations.at(i_knotPoint1);
     path_.configurations.at(i_knotPoint1) = path_.configurations.at(i_knotPoint2);

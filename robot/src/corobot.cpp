@@ -10,6 +10,7 @@ const float BASE_WIDTH=0.2413;
 const float timeNeededToTurn = 2.5; 
 
 
+
 Corobot::Corobot() : k_dof_(3), num_traveled(0), restart(false), num(0), mutex_(true), moving_(false), i_knot_points(0) { 
   for(unsigned int i=0;i<k_dof_;i++) {
     configuration_.K.push_back(0);
@@ -297,7 +298,6 @@ void Corobot::printVectors() const {
 void Corobot::moveOnTrajectory() 
 {
   restart = false;
-  std::cout<<"\nIn moveOnTrajectory!\n";
   
   //moving_ = true;
   //int num = trajectory_.trajectory.points.size(); //Get the number of waypoints
@@ -322,8 +322,6 @@ void Corobot::moveOnTrajectory()
     std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
     restart = false;
     //printVectors();
-    //std::cin.get();
-  //for(int i=0;i<num-1;i++) {
   
     //ROS_ERROR("knotpoint: %d/%d angular speed: %f, linear speed: %f, orientation: %f, configuration: %f\n", i,i_knot_points, angular_speeds_knotpoints.at(i_knot_points), speeds.at(i), orientations_knotpoints.at(i_knot_points), configuration_.K.at(2));
 
@@ -357,13 +355,9 @@ void Corobot::moveOnTrajectory()
             }
 		
 	    if(restart) {
-    		// Stops the wheels
-    		//twist.linear.x = 0;
-    		//twist.angular.z = 0;
-    		//sendTwist();
-	 	delay = ros::Duration(0);
+	 	    delay = ros::Duration(0);
 	    	restart=false;
-		continue;
+		    continue;
 	    }
 
             delay += ros::Time::now() - start; //we save as a delay the time it took to turn
@@ -375,7 +369,6 @@ void Corobot::moveOnTrajectory()
     // we make sure that the time it took us for all the turns 
     // doesn't make the robot go straight for less time than it should
     //end_times.at(i) += delay;
-    //end_times.at(0) += delay;
     end_times.at(num_traveled) += delay;
 
     
@@ -397,15 +390,11 @@ void Corobot::moveOnTrajectory()
         break;
       }
     }
-    //std::cout<<"\nright after inner while!\n";   
+    
     if(restart) {
-	// Stops the wheels
-	//twist.linear.x = 0;
-	//twist.angular.z = 0;
-	//sendTwist();
-	delay = ros::Duration(0);
-	restart=false;
-	continue;
+      delay = ros::Duration(0);
+      restart=false;
+      continue;
     }
 
 
@@ -431,20 +420,16 @@ void Corobot::moveOnTrajectory()
             if(restart) {
               break;
             }
-        }
+        } //end while
     
-    if(restart) {
-	// Stops the wheels
-	//twist.linear.x = 0;
-	//twist.angular.z = 0;
-	//sendTwist();
-	delay = ros::Duration(0);
-	restart=false;
-	continue;
-    }
+      if(restart) {
+        delay = ros::Duration(0);
+        restart=false;
+        continue;
+      }
 
         delay += ros::Duration(timeNeededToTurn); //we save as a delay the time it took to turn
-    }
+    } //end if
 
     // Stops the wheels
     //twist.linear.x = 0;

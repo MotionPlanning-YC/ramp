@@ -99,8 +99,8 @@ int main(int argc, char** argv) {
   ros::NodeHandle handle;
 
   ros::ServiceServer service = handle.advertiseService("evaluation", handleRequest);
-  ros::Subscriber sub_irSensor = handle.subscribe("infrared_data", 100, sensorUpdate); //Modified: subscribe to the ir sensor topic
-  ros::Subscriber sub_current = handle.subscribe("update", 100, updateCallback); //Modified: subscribe to the ir sensor topic
+  //ros::Subscriber sub_irSensor = handle.subscribe("infrared_data", 100, sensorUpdate); //Modified: subscribe to the ir sensor topic
+  //ros::Subscriber sub_current = handle.subscribe("update", 100, updateCallback); //Modified: subscribe to the ir sensor topic
 
   std::cout<<"\nSpinning...\n";
   ros::spin();

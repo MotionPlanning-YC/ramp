@@ -47,8 +47,14 @@ class Planner {
     
     //The best trajectory
     RampTrajectory bestTrajec_;
+
+
+    //Timer for sending the best trajec
+    ros::Timer timer_;
     
    
+    //Control cycle - used for determining when to update P(t)
+    ros::Duration controlCycle_;
     
     /********************************************
      ***************** Methods ******************
@@ -59,7 +65,7 @@ class Planner {
     
     //Initialization steps
     void init_population();
-    void init_handlers(const ros::NodeHandle& h);
+    void init(const ros::NodeHandle& h);
     
     //Send the best trajectory to the control package
     void sendBest();
@@ -94,10 +100,9 @@ class Planner {
     //This method changes the start_ member
     void updateCallback(const ramp_msgs::Update::ConstPtr& msg);
 
+    void controlCycleCallback(const ros::TimerEvent& t);
     
     
-
-
   
   private:
     /** These are (mostly) utility members that are only used by Planner and should not be used by other classes*/
@@ -121,15 +126,13 @@ class Planner {
     
     //Mutex for start_ member
     bool mutex_start_;
+    bool mutex_pop_;
 
     //Size of population
     const int populationSize_;
 
     //Generation counter
     unsigned int generation_;
-
-    //Control cycle - used for determining when to update P(t)
-    ros::Duration controlCycle_;
 
     //Last time P(t) was updated
     ros::Time lastUpdate_;

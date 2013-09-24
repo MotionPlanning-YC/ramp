@@ -15,12 +15,11 @@ const std::string Utility::toString(const ramp_msgs::Path path) const {
     result<<")";
 
     
-    for(unsigned int k=1;k<path.configurations.at(i).K.size();k++) {
+    /*for(unsigned int k=0;k<path.configurations.at(i).K.size();k++) {
       result<<"  ranges: ["<<path.configurations.at(k).ranges.at(0).min<<" "<<path.configurations.at(k).ranges.at(0).max<<"]";
       result<<"  ranges: ["<<path.configurations.at(k).ranges.at(1).min<<" "<<path.configurations.at(k).ranges.at(1).max<<"]";
       result<<"  ranges: ["<<path.configurations.at(k).ranges.at(2).min<<" "<<path.configurations.at(k).ranges.at(2).max<<"]";
-    }
-
+    }*/
   }
 
   return result.str();
