@@ -302,7 +302,7 @@ void Corobot::moveOnTrajectory()
   //moving_ = true;
   //int num = trajectory_.trajectory.points.size(); //Get the number of waypoints
   //int i_knot_points = 0; // Index for going through knotpoints. We don't need the index of the current knot point but the next one 
-  ros::Rate r(150);
+  ros::Rate r(75);
   
   ros::Duration delay = ros::Duration(0); // Save the time it took to do all the turns
   ros::Time start;

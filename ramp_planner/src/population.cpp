@@ -65,6 +65,8 @@ const RampTrajectory Population::findBest() {
   if(i_max == population_.size()) {
     std::cout<<"\nNo feasible trajectories!\n";
   }
+
+
   //Find the maximum fitness of all feasible trajectories
   for(unsigned int i=i_max;i<population_.size();i++) {
     if( population_.at(i).feasible_ &&

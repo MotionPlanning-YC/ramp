@@ -27,7 +27,7 @@ const std::string Utility::toString(const ramp_msgs::Path path) const {
 const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request tr) const {
   std::ostringstream result;
   result<<"\nTrajectory Request:";
-  result<<"\nPath:"<<tr.path;
+  result<<"\nPath:"<<toString(tr.path);
 
 
   result<<"\nv_start: ("<<tr.v_start.at(0);

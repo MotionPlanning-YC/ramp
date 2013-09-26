@@ -27,6 +27,7 @@ Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request trajec_req) :
 Trajectory::~Trajectory() {}
 
 void Trajectory::buildSegments() {
+  //std::cout<<"\nIn Trajectory::buildSegments\n";
 
   //Go through the knot points_,
   //Create a segment,
@@ -40,11 +41,13 @@ void Trajectory::buildSegments() {
     //Push the segment onto the vector
     segments_.push_back(temp);
   }
+
 }
 
 
 /** This method returns a MotionState given a segment ID and a time */
 const MotionState Trajectory::getMotionState(const unsigned int ind_segment, const float t) {
+  //std::cout<<"\nin Trajectory::getMotionState\n";
   
   MotionState result;
 
@@ -72,6 +75,7 @@ const MotionState Trajectory::getMotionState(const unsigned int ind_segment, con
 
 /** This function generates the set of motion states that represent the trajectory */
 const std::vector<MotionState> Trajectory::generate() {
+  //std::cout<<"\nIn Trajectory::generate()\n";
 
   //Build the segments
   buildSegments();

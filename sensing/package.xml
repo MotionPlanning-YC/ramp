@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>ramp</name>
+  <name>sensing</name>
   <version>0.0.0</version>
-  <description>The ramp package</description>
+  <description>The sensing package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
@@ -17,22 +17,22 @@
 
 
   <buildtool_depend>catkin</buildtool_depend>
-
-  <run_depend>ramp_msgs</run_depend>
-  <run_depend>ramp_planner</run_depend>
-  <run_depend>robot</run_depend>
-  <run_depend>trajectory_generator</run_depend>
-  <run_depend>path_modification</run_depend>
-  <run_depend>evaluation</run_depend>
-  <run_depend>ramp_launch</run_depend>
-  <run_depend>sensing</run_depend>
   
+  
+  <build_depend>corobot_msgs</build_depend>
+  <build_depend>ramp_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  
+  <run_depend>corobot_msgs</run_depend>
+  <run_depend>ramp_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>message_runtime</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- You can specify that this package is a metapackage here: -->
-    <metapackage/> 
+    <!-- <metapackage/> -->
 
     <!-- Other tools can request additional information be placed here -->
 

@@ -20,6 +20,7 @@ Segment::~Segment() {}
 
 /** This function assigns the Segment's members and calls buildWork() */
 void Segment::build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind) {
+  //std::cout<<"\nIn Segment::build\n";
 
   start_.p_.push_back(kp_start.x);
   start_.p_.push_back(kp_start.y);
@@ -39,6 +40,7 @@ void Segment::build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::P
 
 /** This method calculates the minimum time needed to compute the trajectory */
 const float Segment::calculateMinTime() {
+  //std::cout<<"\nIn Segment::calculateMinTime\n";
 
 
   //We take the ceiling so that the resolution rate will divide evenly into T
@@ -61,6 +63,7 @@ const float Segment::calculateMinTime() {
 
 /** This function initializes the Segment's start and end states of motion, and the segment's a0 and a1 coefficients for interpolation */
 void Segment::buildWork() {
+  //std::cout<<"\nIn Segment::buildWork()\n";
 
   //The initial velocities and accelerations of each segment are 0
   for(unsigned int j=0;j<k_dof_;j++) {

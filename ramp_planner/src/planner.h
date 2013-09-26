@@ -56,6 +56,10 @@ class Planner {
     //Control cycle - used for determining when to update P(t)
     ros::Duration controlCycle_;
     
+    //Sensing cycle
+    ros::Duration sensingCycle_;
+
+
     /********************************************
      ***************** Methods ******************
      ********************************************/
@@ -71,7 +75,7 @@ class Planner {
     void sendBest();
 
     //Evaluate the population 
-    void evaluateTrajectory(RampTrajectory& trajec, const std::vector<unsigned int> i_segments);
+    void evaluateTrajectory(RampTrajectory& trajec);
     void evaluatePopulation();
     const RampTrajectory evaluateAndObtainBest();
     
@@ -87,8 +91,8 @@ class Planner {
     //Msg building methods
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
-    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const unsigned int i_path, const std::vector<unsigned int> i_segments);
-    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const RampTrajectory trajec, const std::vector<unsigned int> i_segments);
+    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const unsigned int i_path);
+    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const RampTrajectory trajec);
 
     //Get the starting configuration
     Configuration getStartConfiguration();
@@ -118,6 +122,7 @@ class Planner {
     
     //Updates the paths in P(t) so we can get new trajectories
     void updatePaths(Configuration start, ros::Duration dur);
+
 
     /** Data members */
 
