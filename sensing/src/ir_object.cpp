@@ -10,10 +10,10 @@ void IrObject::build(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configu
 
   double theta = current.K.at(2); 
   
-  x1 = current.K.at(0) + ( (msg.value/100) * cos(theta)) + ( (OBSTACLE_SIZE/2) * sin(theta) );
+  x1 = current.K.at(0) + ( (msg.value) * cos(theta)) - ( (OBSTACLE_SIZE/2) * sin(theta) );
   x2 = x1 + OBSTACLE_SIZE;
   
-  y1 = current.K.at(1) + ( (msg.value/100) * sin(theta)) + ( (OBSTACLE_SIZE/2) * cos(theta) );
+  y1 = current.K.at(1) + ( (msg.value) * sin(theta)) - ( (OBSTACLE_SIZE/2) * cos(theta) );
   y2 = y1 + OBSTACLE_SIZE;
 
 }

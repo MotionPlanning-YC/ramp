@@ -7,7 +7,7 @@
 <node name="path_modification" pkg="path_modification" type="path_modification" />
 
 <!-- Evaluation -->
-<node name="evaluation" pkg="evaluation" type="evaluation" />
+<node name="evaluation" pkg="evaluation" type="evaluation" output="screen" />
 
 <!-- Planner -->
 <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" />

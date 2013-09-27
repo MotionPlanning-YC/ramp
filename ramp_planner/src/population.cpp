@@ -62,10 +62,14 @@ const RampTrajectory Population::findBest() {
     i_max++;
   }
   
+  // If no feasible trajectory, we give an empty path
   if(i_max == population_.size()) {
+    RampTrajectory emptyTrajectory;
+    emptyTrajectory.feasible_ = true;
+    emptyTrajectory.fitness_ = 0;
     std::cout<<"\nNo feasible trajectories!\n";
+    return emptyTrajectory;
   }
-
 
   //Find the maximum fitness of all feasible trajectories
   for(unsigned int i=i_max;i<population_.size();i++) {

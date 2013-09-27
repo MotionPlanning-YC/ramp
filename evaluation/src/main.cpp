@@ -18,6 +18,19 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   
   //collision_.trajectory_ = req.trajectory;
   //res.feasible = !collision_.perform();
+  if(ev.objList_.ir_object.x1 != 0.0 ||
+     ev.objList_.ir_object.x2 != 0.0 ||
+     ev.objList_.ir_object.y1 != 0.0 ||
+     ev.objList_.ir_object.y2 != 0.0)
+   // we check if we actually have an object, if so we check the collision
+  {
+    std::cout<<"checking if feasible\n";
+    res.feasible  = !ev.performCollisionDetection();
+  }
+  else
+  {
+    res.feasible = true;
+  }
   std::cout<<"\nfeasible: "<<(res.feasible ? "true" : "false")<<"\n";
   return true;
 }
