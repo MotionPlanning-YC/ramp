@@ -1,7 +1,9 @@
 #ifndef IR_OBJECT_H
 #define IR_OBJECT_H
+#include <math.h>
 #include "corobot_msgs/SensorMsg.h"
 #include "ramp_msgs/Configuration.h"
+#include "ramp_msgs/IRObject.h"
 
 class IrObject {
   public:
@@ -10,6 +12,8 @@ class IrObject {
     ~IrObject() {}
 
     void build(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current);
+
+    const ramp_msgs::IRObject buildIRObjectMsg() const;
 
     float x1;
     float x2;

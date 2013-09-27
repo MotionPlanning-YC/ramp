@@ -9,7 +9,7 @@ class EuclideanDistance {
     EuclideanDistance() {}
 
 
-    const double perform(obstacle_struct obstacle);
+    const double perform();
 
     ramp_msgs::Trajectory trajectory_;
 
