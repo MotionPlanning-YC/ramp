@@ -8,13 +8,16 @@ IrObject::IrObject(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configura
 
 void IrObject::build(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current) {
 
-  double theta = current.K.at(2); 
-  
-  x1 = current.K.at(0) + ( (msg.value) * cos(theta)) - ( (OBSTACLE_SIZE/2) * sin(theta) );
-  x2 = x1 + OBSTACLE_SIZE;
-  
-  y1 = current.K.at(1) + ( (msg.value) * sin(theta)) - ( (OBSTACLE_SIZE/2) * cos(theta) );
-  y2 = y1 + OBSTACLE_SIZE;
+  if (current.K.size() >=3)
+  {
+      double theta = current.K.at(2); 
+      
+      x1 = current.K.at(0) + ( (msg.value) * cos(theta)) - ( (OBSTACLE_SIZE/2) * sin(theta) );
+      x2 = x1 + OBSTACLE_SIZE;
+      
+      y1 = current.K.at(1) + ( (msg.value) * sin(theta)) - ( (OBSTACLE_SIZE/2) * cos(theta) );
+      y2 = y1 + OBSTACLE_SIZE;
+  }
 
 }
 
