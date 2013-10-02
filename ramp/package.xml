@@ -26,6 +26,7 @@
   <run_depend>evaluation</run_depend>
   <run_depend>ramp_launch</run_depend>
   <run_depend>sensing</run_depend>
+  <run_depend>trajectory_viewer</run_depend>
   
 
 

@@ -73,6 +73,9 @@ class Planner {
     
     //Send the best trajectory to the control package
     void sendBest();
+    
+    // Send the whole population to the trajectory viewer
+    void sendPopulation();
 
     //Evaluate the population 
     void evaluateTrajectory(RampTrajectory& trajec);
