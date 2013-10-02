@@ -110,3 +110,17 @@ const std::string Population::toString() const {
 
   return result.str();
 } //End toString
+
+//Return a message of type ramp_msgs::Population to be sent to the trajectory viewer 
+ramp_msgs::Population Population::populationMsg()
+{
+    ramp_msgs::Population msg;
+    
+    msg.population.push_back(population_.at(i_best).msg_trajec_);
+    for( int i =0; i<population_.size(); i++)
+    {
+        if (i != i_best)
+            msg.population.push_back(population_.at(i).msg_trajec_);
+    }
+    return msg;
+}

@@ -307,6 +307,11 @@ void Planner::sendBest() {
   h_control_->send(bestTrajec_.msg_trajec_);
 }
 
+/** Send the whole population of trajectories to the trajectory viewer */
+void Planner::sendPopulation() {
+  h_control_->sendPopulation(population_.populationMsg());
+}
+
 void Planner::controlCycleCallback(const ros::TimerEvent& t) {
 
   //std::cout<<"\nSpinning once\n";
@@ -330,6 +335,9 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   //Send the best trajectory 
   std::cout<<"\nSending new trajectory!\n";
   sendBest(); 
+  
+  //Send the whole population to the trajectory viewer
+  sendPopulation();
 }
 
 
