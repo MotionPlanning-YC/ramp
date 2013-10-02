@@ -1,9 +1,9 @@
 #include "population.h"
 
 
-Population::Population() : max_size(7), i_best(0) {}
+Population::Population() : max_size(7), i_best(-1) {}
 
-Population::Population(const unsigned int size) : max_size(size), i_best(0) {}
+Population::Population(const unsigned int size) : max_size(size), i_best(-1) {}
 
 
 /** Return the size of the population */
@@ -34,8 +34,8 @@ const unsigned int Population::add(const RampTrajectory rt) {
   //If full, replace a trajectory
   else {
 
-    //Pick a random id to remove
-    //Don't pick the id of the fittest trajectory!!
+    //Generate a random index for a random trajectory to remove
+    //Don't pick the fittest trajectory!!
     unsigned int i;
     do {i = rand() % max_size;}
     while(i == i_best);
@@ -51,40 +51,53 @@ const unsigned int Population::add(const RampTrajectory rt) {
 } //End add
 
 
+/** This method returns the index of the most fit feasible/infeasible trajectory 
+ *  feasible = true if looking for feasible trajectory, false for infeasible
+ *  Returns -1 if no trajectories of that type exist in the population
+ */
+const int Population::findBestFeasible(bool feasible) const {
+  int result = -1;
 
-/** Return the fittest trajectory */
-//TODO: If all trajectories are infeasible, pick the fittest infeasible
-const RampTrajectory Population::findBest() {
-  
-  //Find first feasible trajectory
-  int i_max = 0;
-  while(i_max < population_.size() && !population_.at(i_max).feasible_) {
-    i_max++;
-  }
-  
-  // If no feasible trajectory, we give an empty path
-  if(i_max == population_.size()) {
-    RampTrajectory emptyTrajectory;
-    emptyTrajectory.feasible_ = true;
-    emptyTrajectory.fitness_ = 0;
-    std::cout<<"\nNo feasible trajectories!\n";
-    return emptyTrajectory;
-  }
+  //Find the first feasible trajectory
+  int i_start    = 0;
+  while(i_start < population_.size() && population_.at(i_start).feasible_ != feasible) {i_start++;}
 
-  //Find the maximum fitness of all feasible trajectories
-  for(unsigned int i=i_max;i<population_.size();i++) {
-    if( population_.at(i).feasible_ &&
-        population_.at(i).fitness_ > population_.at(i_max).fitness_) 
-    {
-      i_max = i; 
+  //If one of the trajectories was desired feasibility
+  if(i_start < population_.size()) {
+    
+    //Set result
+    result = i_start;
+
+    //Go through each trajectory and see it is highest fitness value
+    for(unsigned int i=i_start;i<population_.size();i++) {
+      
+      //If the trajectory feasibility == feasible, and it has the highest fitness so far
+      if(population_.at(i).feasible_ == feasible && population_.at(i).fitness_ > population_.at(result).fitness_) {
+        result = i;
+      }
     }
   }
 
+  return result;
+} //End findBestFeasible
+
+
+
+/** Returns the fittest trajectory and sets i_best */
+const RampTrajectory Population::findBest() {
+
+  //Find both the best feasible and infeasible trajectories
+  int i_bestF   = findBestFeasible(true);
+  int i_bestInf = findBestFeasible(false);
+
   //Set i_best
-  i_best = i_max;
-  
-  return population_.at(i_best);
-} //End getBest
+  if(i_bestF < 0)
+    i_best = i_bestInf;
+  else
+    i_best = i_bestF;
+
+  return population_.at(i_best); 
+} //End getBest 
 
 
 
@@ -93,7 +106,7 @@ const std::string Population::fitnessFeasibleToString() const {
   std::ostringstream result;
 
   for(unsigned int i=0;i<population_.size();i++) {
-    result<<"\nTrajectory "<<i<<": "<<population_.at(i).fitnessFeasibleToString();
+    result<<"\n"<<population_.at(i).fitnessFeasibleToString();
   }
 
   return result.str();

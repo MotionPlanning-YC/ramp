@@ -1,0 +1,42 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+IR_OBJECT_H	ir_object.h	2;"	d
+IrObject	ir_object.cpp	/^IrObject::IrObject() : OBSTACLE_SIZE(0.3) {}$/;"	f	class:IrObject	signature:()
+IrObject	ir_object.cpp	/^IrObject::IrObject(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current) : OBSTACLE_SIZE(0.3){$/;"	f	class:IrObject	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
+IrObject	ir_object.h	/^    IrObject();$/;"	p	class:IrObject	access:public	signature:()
+IrObject	ir_object.h	/^    IrObject(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current);$/;"	p	class:IrObject	access:public	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
+IrObject	ir_object.h	/^class IrObject {$/;"	c
+IrObject::IrObject	ir_object.cpp	/^IrObject::IrObject() : OBSTACLE_SIZE(0.3) {}$/;"	f	class:IrObject	signature:()
+IrObject::IrObject	ir_object.cpp	/^IrObject::IrObject(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current) : OBSTACLE_SIZE(0.3){$/;"	f	class:IrObject	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
+IrObject::IrObject	ir_object.h	/^    IrObject();$/;"	p	class:IrObject	access:public	signature:()
+IrObject::IrObject	ir_object.h	/^    IrObject(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current);$/;"	p	class:IrObject	access:public	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
+IrObject::OBSTACLE_SIZE	ir_object.h	/^    const float OBSTACLE_SIZE;$/;"	m	class:IrObject	access:private
+IrObject::build	ir_object.cpp	/^void IrObject::build(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current) {$/;"	f	class:IrObject	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
+IrObject::build	ir_object.h	/^    void build(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current);$/;"	p	class:IrObject	access:public	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
+IrObject::buildIRObjectMsg	ir_object.cpp	/^const ramp_msgs::IRObject IrObject::buildIRObjectMsg() const {$/;"	f	class:IrObject	signature:() const
+IrObject::buildIRObjectMsg	ir_object.h	/^    const ramp_msgs::IRObject buildIRObjectMsg() const;$/;"	p	class:IrObject	access:public	signature:() const
+IrObject::x1	ir_object.h	/^    float x1;$/;"	m	class:IrObject	access:public
+IrObject::x2	ir_object.h	/^    float x2;$/;"	m	class:IrObject	access:public
+IrObject::y1	ir_object.h	/^    float y1;$/;"	m	class:IrObject	access:public
+IrObject::y2	ir_object.h	/^    float y2;$/;"	m	class:IrObject	access:public
+IrObject::~IrObject	ir_object.h	/^    ~IrObject() {}$/;"	f	class:IrObject	access:public	signature:()
+OBSTACLE_SIZE	ir_object.h	/^    const float OBSTACLE_SIZE;$/;"	m	class:IrObject	access:private
+build	ir_object.cpp	/^void IrObject::build(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current) {$/;"	f	class:IrObject	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
+build	ir_object.h	/^    void build(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current);$/;"	p	class:IrObject	access:public	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
+buildIRObjectMsg	ir_object.cpp	/^const ramp_msgs::IRObject IrObject::buildIRObjectMsg() const {$/;"	f	class:IrObject	signature:() const
+buildIRObjectMsg	ir_object.h	/^    const ramp_msgs::IRObject buildIRObjectMsg() const;$/;"	p	class:IrObject	access:public	signature:() const
+current	main.cpp	/^ramp_msgs::Configuration current;$/;"	v
+irCallback	main.cpp	/^void irCallback(const corobot_msgs::SensorMsg& msg) {$/;"	f	signature:(const corobot_msgs::SensorMsg& msg)
+list	main.cpp	/^ramp_msgs::ObjectList list;$/;"	v
+main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+sendList	main.cpp	/^void sendList(const ros::TimerEvent& e) {$/;"	f	signature:(const ros::TimerEvent& e)
+updateCallback	main.cpp	/^void updateCallback(const ramp_msgs::Update& msg) {$/;"	f	signature:(const ramp_msgs::Update& msg)
+x1	ir_object.h	/^    float x1;$/;"	m	class:IrObject	access:public
+x2	ir_object.h	/^    float x2;$/;"	m	class:IrObject	access:public
+y1	ir_object.h	/^    float y1;$/;"	m	class:IrObject	access:public
+y2	ir_object.h	/^    float y2;$/;"	m	class:IrObject	access:public
+~IrObject	ir_object.h	/^    ~IrObject() {}$/;"	f	class:IrObject	access:public	signature:()
