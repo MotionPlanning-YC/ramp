@@ -52,6 +52,7 @@ TrajectoryView::TrajectoryView(QWidget *parent)
     maxWidthMeters_ = 0;
     maxHeightMeters_ = 0;
 
+    // Setup the scene
     QGraphicsScene *scene = new QGraphicsScene(this);
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     scene->setSceneRect(0, 0, width_, height_);
@@ -68,16 +69,18 @@ TrajectoryView::TrajectoryView(QWidget *parent)
 
 
 void TrajectoryView::size_changed()
+// Change the scene size to the updated one when the user resizes the window
 {
 
     width_ = this->parentWidget()->frameSize().width();
     height_ = this->parentWidget()->frameSize().height();
 
     this->resize(width_,height_);
-    this->scene()->setSceneRect(0, 0, width_-10, height_-10);
+    this->scene()->setSceneRect(0, 0, width_-10, height_-10);// We need to make the scene a little smaller than the frame
 }
 
 void TrajectoryView::population(const ramp_msgs::Population& msg)
+// Update the population and called the drawing function
 {
     population_ = msg;
 
@@ -85,17 +88,21 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
 }
 
 void TrajectoryView::drawPopulation()
+// Draw the trajectories on the scene
 {
     this->scene()->clear();
 
-    QPen pen = QPen( QColor(0,0,0,150) );
+    QPen pen = QPen( QColor(0,0,0,150) ); // Black pen for the normal trajectories
     for(int i = population_.population.size() -1 ; i >=0 ; i--)
+        //go through all the trajectories
     {
         std::vector<trajectory_msgs::JointTrajectoryPoint> points = population_.population.at(i).trajectory.points;
 
         if (i==0)
-           pen = QPen( QColor(255,0,0,255) );
+           pen = QPen( QColor(255,0,0,255) ); // red for the best trajectory
         for(int j = 0 ; j < (points.size() -1 ) ; j++)
+            //go through all the waypoints of the trajectory
+            // We go through the first one at last to make sure it is displayed on top, to make sure we see the red color if some trajectories are the same
         {
             this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
                            metersToPixels(points.at(j).positions.at(1), false),
@@ -109,6 +116,7 @@ void TrajectoryView::drawPopulation()
 }
 
 int const TrajectoryView::metersToPixels(const float value, bool isWidth)
+//Calculate the pixel value of a distance. If width is true, treat the value has a x position, if false treat it as a y position.
 {
     if (isWidth)
     {
