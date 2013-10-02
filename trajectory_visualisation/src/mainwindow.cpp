@@ -16,9 +16,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     trajView.setParent(ui->frame);
 
+    // Connect the ros thread and the trajView
     connect(&r,SIGNAL(population(const ramp_msgs::Population&)),&trajView, SLOT(population(const ramp_msgs::Population&)));
 
-    r.init(0, NULL);
+    r.init(0, NULL); //initialize the ros thread
 }
 
 MainWindow::~MainWindow()

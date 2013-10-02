@@ -25,8 +25,8 @@ signals:
 
 private:
     Ui::MainWindow *ui;
-    TrajectoryView trajView;
-    Ros r;
+    TrajectoryView trajView; // The trajectory visualisation widget
+    Ros r; // The Ros thread that subscribes and advertise topics
     int argc;
     char **argv;
 

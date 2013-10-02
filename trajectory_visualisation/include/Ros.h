@@ -17,12 +17,12 @@ class Ros : public QThread {
 private:
     void subscribe();
 
-    bool initialized;
-    ros::Subscriber popSub_;
+    bool initialized; // tell if the ros thread has been initlized
+    ros::Subscriber popSub_; // population topic subscriber
 
 
 signals :
-    void population(const ramp_msgs::Population&);
+    void population(const ramp_msgs::Population&); // Whole population of trajectories
 
 public slots:
 
@@ -32,7 +32,7 @@ public:
 
 	void run();
     void init(int argc, char *argv[]);
-    void populationCallback(const ramp_msgs::Population& msg);
+    void populationCallback(const ramp_msgs::Population& msg); // Callback of the topic population. We expect the first trajectory to be the best one
 };
 
 

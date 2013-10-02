@@ -51,10 +51,10 @@ class TrajectoryView : public QGraphicsView
 
  public:
      TrajectoryView(QWidget *parent = 0);
-     void size_changed(void);
+     void size_changed(void); // Change the scene size to the updated one when the user resizes the window
 
  public slots:
-     void population(const ramp_msgs::Population& msg);
+     void population(const ramp_msgs::Population& msg); //receive the list of trajectories and display them
 
  signals:
 
@@ -62,14 +62,14 @@ class TrajectoryView : public QGraphicsView
 
 
  private:
-     int height_;
-     int width_;
-     ramp_msgs::Population population_;
-     float maxWidthMeters_;
-     float maxHeightMeters_;
+     int height_; // the height of the scene
+     int width_; // the width of the scene
+     ramp_msgs::Population population_; // the list of trajectories. The first one has to be the best and is displayed in red.
+     float maxWidthMeters_; // The maximum x value amoung all the points in the trajectories
+     float maxHeightMeters_; // The maximum y value amoung all the points in the trajectories
 
-     void drawPopulation();
-     int const metersToPixels(const float value, bool width);
+     void drawPopulation(); // Draw the trajectories on the scene
+     int const metersToPixels(const float value, bool width); //Calculate the pixel value of a distance. If width is true, treat the value has a x position, if false treat it as a y position.
 
 
  };

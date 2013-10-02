@@ -24,11 +24,6 @@ void Ros::subscribe()
 
 {
     ros::NodeHandle n;
-    ros::NodeHandle nh("~");
-
-
-    //Advertise topics
-
 
     //Subscribe to topics
     popSub_= n.subscribe("population",1000, &Ros::populationCallback,this);
@@ -39,6 +34,7 @@ void Ros::subscribe()
 void Ros::init(int argc, char *argv[]){
     ros::init(argc, argv,"trajectory_view");
 
+    // To be able to send a signal with ramp_msgs::Population, we first need to register the type
     qRegisterMetaType<ramp_msgs::Population>("ramp_msgs::Population");
 
     this->subscribe();
