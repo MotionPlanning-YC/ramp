@@ -1,0 +1,42 @@
+<launch>
+
+<!-- Trajectory Generator -->
+<node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" />
+
+<!-- Path Modification -->
+<node name="path_modification" pkg="path_modification" type="path_modification" />
+
+<!-- Evaluation -->
+<node name="evaluation" pkg="evaluation" type="evaluation" output="screen" />
+
+
+<!-- Planner -->
+
+<!-- We need 2 planners, one for the first robot and one for the second robot -->
+<group ns="robot1">
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" />
+</group>
+
+<group ns="robot2">
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" />
+</group>
+
+
+<!-- Start the robot nodes -->
+
+<machine name="robot1" address="192.168.1.103" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" />
+
+  <group ns="robot1" >
+    <node name="robot" pkg="robot" type="robot" machine="robot1" />
+    <include file="$(find corobot_launch)/launch/corobot_software.launch" machine="robot1" />
+  </group>
+
+
+<!-- <machine name="robot2" address="192.168.1.105" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic">
+  <group ns="robot2">
+    <node machine="robot2" name="robot2" pkg="robot" type="robot" />
+  </group>  
+</machine> -->
+
+
+</launch>
