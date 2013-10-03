@@ -27,9 +27,9 @@ class Population {
     std::vector<RampTrajectory> population_;
     
   private:
-
+    const int findBestFeasible(bool) const;
     const unsigned int max_size;
-    unsigned int i_best;
+    int i_best;
 };
 
 #endif

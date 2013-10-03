@@ -10,6 +10,7 @@
 <node name="evaluation" pkg="evaluation" type="evaluation" output="screen" />
 
 <!-- Planner -->
+<!-- <group ns="robot1"> -->
 <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" />
-
+<!-- </group> -->
 </launch>

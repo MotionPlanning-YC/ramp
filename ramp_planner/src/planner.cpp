@@ -5,17 +5,17 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true) 
+Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
   controlCycle_ = ros::Duration(0.25);
 }
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true)
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
   controlCycle_ = ros::Duration(0.25);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true), mutex_pop_(true)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
   init(h); 
   controlCycle_ = ros::Duration(0.25);
@@ -44,6 +44,11 @@ Planner::~Planner() {
 }
 
 
+const unsigned int Planner::getIRT() {
+  return i_rt++;
+}
+
+
 /** Getter method for start_. It waits for mutex_start_ to be true before returning. */
 Configuration Planner::getStartConfiguration() {
   while(!mutex_start_) {}
@@ -52,6 +57,7 @@ Configuration Planner::getStartConfiguration() {
 
 /** Sets start_ */
 void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
+  std::cout<<"\nReceived update!\n";
   
   //Wait for mutex to be true
   while(!mutex_start_) {}
@@ -132,7 +138,7 @@ void Planner::init_population() {
     
     //Send the request and push the returned Trajectory onto population_
     if(requestTrajectory(msg_request)) {
-      RampTrajectory temp;
+      RampTrajectory temp(getIRT());
       
       //Set the Trajectory msg
       temp.msg_trajec_ = msg_request.response.trajectory;
@@ -193,7 +199,6 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
   //The modification operators deal with paths
   //So send the path to be modified
   std::vector<Path> mp = modifyPath();
-  //std::cout<<"\nDone modifying path!\n";
   
   //Hold the ids of the path(s) modified
   std::vector<int> olds;
@@ -204,20 +209,6 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
     olds.push_back(modifier_->i_changed2);
   }
 
-  /*std::cout<<"\nBefore getNewVelocities\n";
-  for(unsigned int i=0;i<olds.size();i++) {
-    std::cout<<"\nolds["<<i<<"]: "<<olds.at(i);
-    std::cout<<"\nPath "<<olds.at(i)<<": "<<paths_.at(olds.at(i)).toString();
-    std::cout<<"\nvelocities: (";
-    for(unsigned int v=0;v<velocities_.at(olds.at(i)).size();v++) {
-      std::cout<<velocities_.at(olds.at(i)).at(v)<<", ";
-    }
-    std::cout<<")";
-  }*/
-
-  /*for(unsigned int i=0;i<mp.size();i++) 
-    std::cout<<"\nmp["<<i<<"]: "<<mp.at(i).toString();*/
-  
   //Hold the new velocity vector(s)
   std::vector< std::vector<float> > vs = getNewVelocities(mp, olds); 
   //std::cout<<"\nDone getNewVelocities!\n";
@@ -230,7 +221,7 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
     
     //Send the request and set the result to the returned trajectory 
     if(requestTrajectory(tr)) {
-      RampTrajectory temp;
+      RampTrajectory temp(getIRT());
       temp.msg_trajec_ = tr.response.trajectory;
 
       ModifiedTrajectory mt;
@@ -322,7 +313,8 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   //std::cout<<"\nUpdating population\n";
   updatePopulation(controlCycle_);
   mutex_pop_ = true;
-  
+  //std::cin.get();
+
   /** TODO **/
   //Create subpopulations in P(t)
   
@@ -422,6 +414,9 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
  *  add the new trajectories, evaluate the new trajectories,
  *  and set tau to the new best, */
 void Planner::modification() {
+  //std::cout<<"\nIn modification\n";
+
+  //Modify 1 or more trajectories
   std::vector<ModifiedTrajectory> mod_trajec = modifyTrajec();
   
   //Add the modified trajectories to the population
@@ -547,7 +542,7 @@ void Planner::updatePopulation(ros::Duration d) {
     
     //Send the request 
     if(requestTrajectory(msg_request)) {
-      RampTrajectory temp;
+      RampTrajectory temp(population_.population_.at(i).id_);
       
       //Set the Trajectory msg
       temp.msg_trajec_ = msg_request.response.trajectory;
@@ -571,6 +566,10 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
   return population_.findBest();
 }
+
+
+
+
 
 /*******************************************************
  ****************** Start the planner ******************
@@ -599,7 +598,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
 
   //***Adjust***
   RampTrajectory T_move = evaluateAndObtainBest();
-  //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString(); 
+  std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString(); 
   //std::cout<<"\nPress enter to start the loop!\n";
   //std::cin.get();
   
@@ -615,12 +614,12 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
     
     /*std::cout<<"\nPress Enter to start modification!\n";
     std::cin.get();*/
-
     while(!mutex_pop_) {}
     mutex_pop_ = false;
     //Call modification
     modification();
     mutex_pop_ = true;
+    //std::cin.get();
     /*std::cout<<"\nmodification completed!\n";
     std::cout<<"\nPaths are now: ";
     for(unsigned int i=0;i<paths_.size();i++) {

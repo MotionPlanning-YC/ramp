@@ -1,7 +1,12 @@
 #include "ramp_trajectory.h"
 
-RampTrajectory::RampTrajectory() : fitness_(-1.0), feasible_(true) {}
+RampTrajectory::RampTrajectory(unsigned int id) : id_(id), fitness_(-1.0), feasible_(true) {}
 
+RampTrajectory::RampTrajectory(const ramp_msgs::Trajectory msg) : fitness_(-1.0), feasible_(true), msg_trajec_(msg) {}
+
+const bool RampTrajectory::equal(const RampTrajectory& other) const {
+  return id_ == other.id_;
+}
 
 
 const Path RampTrajectory::getPath() const {
@@ -23,8 +28,9 @@ const Path RampTrajectory::getPath() const {
 
 const std::string RampTrajectory::fitnessFeasibleToString() const {
   std::ostringstream result;
-  
-  result<<"\nFitness: "<<fitness_<<" Feasible: "<<feasible_;
+ 
+  result<<"\nTrajectory "<<id_; 
+  result<<"\n Fitness: "<<fitness_<<" Feasible: "<<feasible_;
 
   return result.str();
 }
@@ -32,8 +38,10 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
 const std::string RampTrajectory::toString() const {
   std::ostringstream result;
   
-  result<<"\nTrajectory: "<<u.toString(msg_trajec_);
+  result<<"\nTrajectory "<<id_<<": "<<u.toString(msg_trajec_);
   result<<fitnessFeasibleToString();
   
   return result.str();
 }
+
+

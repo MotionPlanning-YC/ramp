@@ -126,11 +126,15 @@ class Planner {
     //Updates the paths in P(t) so we can get new trajectories
     void updatePaths(Configuration start, ros::Duration dur);
 
+    const unsigned int getIRT();
 
     /** Data members */
 
     //Utility instance
     Utility u; 
+
+    //ID counter for trajectories
+    unsigned int i_rt;
     
     //Mutex for start_ member
     bool mutex_start_;
