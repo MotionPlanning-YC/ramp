@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
 
   //Get parameters
   std::string object_topic_name;
-  handle.getParam("sensing/update_topic", object_topic_name);
+  handle.getParam("sensing/other_robot_topic", object_topic_name);
   std::cout<<"\nobject_topic_name:"<<object_topic_name;
   
   

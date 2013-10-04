@@ -63,14 +63,14 @@
 
 <group ns="$(arg robot1_name)">
   <node name="sensing" pkg="sensing" type="sensing" output="screen" >   <!-- machine="robot1"> -->
-    <param name="update_topic" type="string" value="/$(arg robot1_name)/update" />
+    <param name="other_robot_topic" type="string" value="/$(arg robot1_name)/update" />
   </node>
 </group>
 
 
 <group ns="$(arg robot2_name)">
   <node name="sensing" pkg="sensing" type="sensing" output="screen" >   <!-- machine="robot1"> -->
-    <param name="update_topic" type="string" value="/$(arg robot2_name)/update" />
+    <param name="other_robot_topic" type="string" value="/$(arg robot2_name)/update" />
   </node>
 </group>
 
