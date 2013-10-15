@@ -5,45 +5,51 @@
 #include "ir_object.h"
 #include "tf/transform_datatypes.h"
 #include "ramp_msgs/Update.h"
+#include "dynamic_object.h"
 
-ramp_msgs::ObjectList list;
-ramp_msgs::Configuration current;
 ros::Publisher pub_obj;
+ramp_msgs::ObjectList list;
+DynamicObject otherRobot;
 
+/** Get the other robot's current location and update its pose */
+void updateOtherRobotCb(const ramp_msgs::Update& u) {
+  geometry_msgs::Pose current_pose;
 
-/** Get the robot's current configuration so we know where the IR objects are at */
-/*void currentCallback(const nav_msgs::Odometry& msg) {
-  current.K.clear();
+  //Set the x, y, and z positions
+  current_pose.position.x = u.configuration.K.at(0);
+  current_pose.position.y = u.configuration.K.at(1);
+  current_pose.position.z = 0;
 
-  current.K.push_back(msg.pose.pose.position.x);
-  current.K.push_back(msg.pose.pose.position.y);
-  current.K.push_back(tf::getYaw(msg.pose.pose.orientation));
-}*/
-
-/** Get the IR sensor msgs */
-/*void irCallback(const corobot_msgs::SensorMsg& msg) {
-
-  //If infrared
-  if(msg.type == msg.INFRARED_FRONT) {
-
-    //If there is an object in the way
-    if(msg.value < 20) {
-      IrObject obj(msg, current);
-      list.ir_object = obj.buildIRObjectMsg();
-    }
-  }
-}*/
-
-
-void updateCallback(const ramp_msgs::Update& u) {
+  //Create quaternion for pose
+  geometry_msgs::Quaternion q;
+  tf::quaternionTFToMsg(tf::createQuaternionFromRPY(0, 0, u.configuration.K.at(2)), q);  
   
-}
+  //Set quaternion for pose
+  current_pose.orientation = q;
 
+  //Update the other robot's current pose
+  otherRobot.updatePose(current_pose, ros::Time::now());
+
+  //Update the object in the list
+  list.objects.at(0) = otherRobot.buildObjectMsg();
+} //End updateOtherRobotCb
+
+
+
+/** Prepare the object list by adding on all of the objects */
+ramp_msgs::ObjectList prepareList() {
+  ramp_msgs::ObjectList list;
+
+  //Other Robot
+  list.objects.push_back(otherRobot.buildObjectMsg());
+} //End prepareList
 
 /** Publish the list of objects */
 void sendList(const ros::TimerEvent& e) {
-  pub_obj.publish(list);
-}
+  pub_obj.publish(prepareList());
+} //End sendList
+
+
 
 
 int main(int argc, char** argv) {
@@ -52,20 +58,15 @@ int main(int argc, char** argv) {
   
 
   //Get parameters
-  std::string object_topic_name;
-  handle.getParam("sensing/other_robot_topic", object_topic_name);
-  std::cout<<"\nobject_topic_name:"<<object_topic_name;
-  
+  std::string other_robot_topic_name;
+  handle.getParam("sensing/other_robot_topic", other_robot_topic_name);
+  std::cout<<"\nother_robot_topic_name:"<<other_robot_topic_name;
   
   //Subscribers
-  ros::Subscriber sub_other_robot = handle.subscribe(object_topic_name, 100, updateCallback);
-  //ros::Subscriber sub_current = handle.subscribe("odometry", 100, currentCallback);
-  //ros::Subscriber sub_ir = handle.subscribe("infrared_data", 100, irCallback);
-  
+  ros::Subscriber sub_other_robot = handle.subscribe(other_robot_topic_name, 100, updateOtherRobotCb);
 
   //Publishers
   pub_obj = handle.advertise<ramp_msgs::ObjectList>("object_list", 1000);
-
 
   //Timers
   ros::Timer timer = handle.createTimer(ros::Duration(0.01), sendList);

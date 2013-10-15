@@ -4,6 +4,25 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+DYNAMIC_OBJECT_H	dynamic_object.h	2;"	d
+DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject() {$/;"	f	class:DynamicObject	signature:()
+DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject(geometry_msgs::Pose p) : current_pose_(p) {$/;"	f	class:DynamicObject	signature:(geometry_msgs::Pose p)
+DynamicObject	dynamic_object.h	/^    DynamicObject();$/;"	p	class:DynamicObject	access:public	signature:()
+DynamicObject	dynamic_object.h	/^    DynamicObject(geometry_msgs::Pose p);$/;"	p	class:DynamicObject	access:public	signature:(geometry_msgs::Pose p)
+DynamicObject	dynamic_object.h	/^class DynamicObject {$/;"	c
+DynamicObject::DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject() {$/;"	f	class:DynamicObject	signature:()
+DynamicObject::DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject(geometry_msgs::Pose p) : current_pose_(p) {$/;"	f	class:DynamicObject	signature:(geometry_msgs::Pose p)
+DynamicObject::DynamicObject	dynamic_object.h	/^    DynamicObject();$/;"	p	class:DynamicObject	access:public	signature:()
+DynamicObject::DynamicObject	dynamic_object.h	/^    DynamicObject(geometry_msgs::Pose p);$/;"	p	class:DynamicObject	access:public	signature:(geometry_msgs::Pose p)
+DynamicObject::buildObjectMsg	dynamic_object.cpp	/^ramp_msgs::Object DynamicObject::buildObjectMsg() {$/;"	f	class:DynamicObject	signature:()
+DynamicObject::buildObjectMsg	dynamic_object.h	/^    ramp_msgs::Object buildObjectMsg();$/;"	p	class:DynamicObject	access:public	signature:()
+DynamicObject::current_pose_	dynamic_object.h	/^    geometry_msgs::Pose current_pose_;$/;"	m	class:DynamicObject	access:public
+DynamicObject::last_updated_	dynamic_object.h	/^    ros::Time last_updated_;$/;"	m	class:DynamicObject	access:public
+DynamicObject::trajectory_	dynamic_object.h	/^    std::vector<float> trajectory_;$/;"	m	class:DynamicObject	access:public
+DynamicObject::updatePose	dynamic_object.cpp	/^void DynamicObject::updatePose(geometry_msgs::Pose p, ros::Time t) {$/;"	f	class:DynamicObject	signature:(geometry_msgs::Pose p, ros::Time t)
+DynamicObject::updatePose	dynamic_object.h	/^    void updatePose(geometry_msgs::Pose p, ros::Time t);$/;"	p	class:DynamicObject	access:public	signature:(geometry_msgs::Pose p, ros::Time t)
+DynamicObject::~DynamicObject	dynamic_object.cpp	/^DynamicObject::~DynamicObject() {}$/;"	f	class:DynamicObject	signature:()
+DynamicObject::~DynamicObject	dynamic_object.h	/^    ~DynamicObject(); $/;"	p	class:DynamicObject	access:public	signature:()
 IR_OBJECT_H	ir_object.h	2;"	d
 IrObject	ir_object.cpp	/^IrObject::IrObject() : OBSTACLE_SIZE(0.3) {}$/;"	f	class:IrObject	signature:()
 IrObject	ir_object.cpp	/^IrObject::IrObject(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current) : OBSTACLE_SIZE(0.3){$/;"	f	class:IrObject	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
@@ -29,14 +48,23 @@ build	ir_object.cpp	/^void IrObject::build(const corobot_msgs::SensorMsg msg, co
 build	ir_object.h	/^    void build(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current);$/;"	p	class:IrObject	access:public	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
 buildIRObjectMsg	ir_object.cpp	/^const ramp_msgs::IRObject IrObject::buildIRObjectMsg() const {$/;"	f	class:IrObject	signature:() const
 buildIRObjectMsg	ir_object.h	/^    const ramp_msgs::IRObject buildIRObjectMsg() const;$/;"	p	class:IrObject	access:public	signature:() const
-current	main.cpp	/^ramp_msgs::Configuration current;$/;"	v
-irCallback	main.cpp	/^void irCallback(const corobot_msgs::SensorMsg& msg) {$/;"	f	signature:(const corobot_msgs::SensorMsg& msg)
+buildObjectMsg	dynamic_object.cpp	/^ramp_msgs::Object DynamicObject::buildObjectMsg() {$/;"	f	class:DynamicObject	signature:()
+buildObjectMsg	dynamic_object.h	/^    ramp_msgs::Object buildObjectMsg();$/;"	p	class:DynamicObject	access:public	signature:()
+current_pose_	dynamic_object.h	/^    geometry_msgs::Pose current_pose_;$/;"	m	class:DynamicObject	access:public
+last_updated_	dynamic_object.h	/^    ros::Time last_updated_;$/;"	m	class:DynamicObject	access:public
 list	main.cpp	/^ramp_msgs::ObjectList list;$/;"	v
 main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+otherRobot	main.cpp	/^DynamicObject otherRobot;$/;"	v
+pub_obj	main.cpp	/^ros::Publisher pub_obj;$/;"	v
 sendList	main.cpp	/^void sendList(const ros::TimerEvent& e) {$/;"	f	signature:(const ros::TimerEvent& e)
-updateCallback	main.cpp	/^void updateCallback(const ramp_msgs::Update& msg) {$/;"	f	signature:(const ramp_msgs::Update& msg)
+trajectory_	dynamic_object.h	/^    std::vector<float> trajectory_;$/;"	m	class:DynamicObject	access:public
+updateOtherRobotCb	main.cpp	/^void updateOtherRobotCb(const ramp_msgs::Update& u) {$/;"	f	signature:(const ramp_msgs::Update& u)
+updatePose	dynamic_object.cpp	/^void DynamicObject::updatePose(geometry_msgs::Pose p, ros::Time t) {$/;"	f	class:DynamicObject	signature:(geometry_msgs::Pose p, ros::Time t)
+updatePose	dynamic_object.h	/^    void updatePose(geometry_msgs::Pose p, ros::Time t);$/;"	p	class:DynamicObject	access:public	signature:(geometry_msgs::Pose p, ros::Time t)
 x1	ir_object.h	/^    float x1;$/;"	m	class:IrObject	access:public
 x2	ir_object.h	/^    float x2;$/;"	m	class:IrObject	access:public
 y1	ir_object.h	/^    float y1;$/;"	m	class:IrObject	access:public
 y2	ir_object.h	/^    float y2;$/;"	m	class:IrObject	access:public
+~DynamicObject	dynamic_object.cpp	/^DynamicObject::~DynamicObject() {}$/;"	f	class:DynamicObject	signature:()
+~DynamicObject	dynamic_object.h	/^    ~DynamicObject(); $/;"	p	class:DynamicObject	access:public	signature:()
 ~IrObject	ir_object.h	/^    ~IrObject() {}$/;"	f	class:IrObject	access:public	signature:()

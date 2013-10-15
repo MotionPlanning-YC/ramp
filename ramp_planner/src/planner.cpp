@@ -321,8 +321,10 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
 
   //Evaluate P(t) and obtain best T, T_move=T_best
   //std::cout<<"\nEvaluating\n";
-  RampTrajectory T_move = evaluateAndObtainBest();
+  //RampTrajectory T_move = evaluateAndObtainBest();
+  bestTrajec_ = evaluateAndObtainBest();
   
+
   //T_move = T
   //Send the best trajectory 
   std::cout<<"\nSending new trajectory!\n";
@@ -439,7 +441,7 @@ void Planner::modification() {
   }
   
   //Obtain and set best trajectory
-  bestTrajec_ = population_.findBest();
+  bestTrajec_ = population_.findBest(generation_);
 } //End modification
 
 
@@ -562,9 +564,7 @@ void Planner::updatePopulation(ros::Duration d) {
 /** This method calls evaluatePopulation and population_.getBest() */
 const RampTrajectory Planner::evaluateAndObtainBest() {
   evaluatePopulation();
-  //std::cout<<"\nPopulation size: "<<population_.size();
-  //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
-  return population_.findBest();
+  return population_.findBest(generation_);
 }
 
 
@@ -629,6 +629,8 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
     //spinOnce necessary here?
     ros::spinOnce(); 
 
+    std::cout<<"\ngeneration_:"<<generation_;
+
     //rate.sleep();
   } //end while
 
@@ -638,6 +640,4 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   
   //Stop timer
   timer_.stop();
-
-  
 } //End go

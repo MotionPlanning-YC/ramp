@@ -10,10 +10,10 @@ Evaluate ev;
 bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
                    ramp_msgs::EvaluationRequest::Response& res) 
 {
-  std::cout<<"\nIn handling requests!\n";
+  //std::cout<<"\nIn handling requests!\n";
   ev.setRequest(req);
   res.fitness = ev.performFitness();
-  std::cout<<"\nfitness: "<<res.fitness<<"\n";
+  //std::cout<<"\nfitness: "<<res.fitness<<"\n";
 
   
   //collision_.trajectory_ = req.trajectory;
@@ -31,7 +31,8 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   {
     res.feasible = true;
   }
-  std::cout<<"\nfeasible: "<<(res.feasible ? "true" : "false")<<"\n";
+  
+  //std::cout<<"\nfeasible: "<<(res.feasible ? "true" : "false")<<"\n";
   return true;
 }
 
