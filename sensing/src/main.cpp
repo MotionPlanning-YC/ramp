@@ -7,31 +7,14 @@
 #include "ramp_msgs/Update.h"
 #include "dynamic_object.h"
 
+
 ros::Publisher pub_obj;
 ramp_msgs::ObjectList list;
 DynamicObject otherRobot;
 
 /** Get the other robot's current location and update its pose */
-void updateOtherRobotCb(const ramp_msgs::Update& u) {
-  geometry_msgs::Pose current_pose;
-
-  //Set the x, y, and z positions
-  current_pose.position.x = u.configuration.K.at(0);
-  current_pose.position.y = u.configuration.K.at(1);
-  current_pose.position.z = 0;
-
-  //Create quaternion for pose
-  geometry_msgs::Quaternion q;
-  tf::quaternionTFToMsg(tf::createQuaternionFromRPY(0, 0, u.configuration.K.at(2)), q);  
-  
-  //Set quaternion for pose
-  current_pose.orientation = q;
-
-  //Update the other robot's current pose
-  otherRobot.updatePose(current_pose, ros::Time::now());
-
-  //Update the object in the list
-  list.objects.at(0) = otherRobot.buildObjectMsg();
+void updateOtherRobotCb(const nav_msgs::Odometry& o) {
+  otherRobot.update(o);
 } //End updateOtherRobotCb
 
 
@@ -42,6 +25,9 @@ ramp_msgs::ObjectList prepareList() {
 
   //Other Robot
   list.objects.push_back(otherRobot.buildObjectMsg());
+
+  //Misc objects...
+
 } //End prepareList
 
 /** Publish the list of objects */
@@ -58,12 +44,12 @@ int main(int argc, char** argv) {
   
 
   //Get parameters
-  std::string other_robot_topic_name;
-  handle.getParam("sensing/other_robot_topic", other_robot_topic_name);
-  std::cout<<"\nother_robot_topic_name:"<<other_robot_topic_name;
+  std::string other_robot_odom;
+  handle.getParam("sensing/other_robot_odom", other_robot_odom);
+  std::cout<<"\nother_robot_odom:"<<other_robot_odom;
   
   //Subscribers
-  ros::Subscriber sub_other_robot = handle.subscribe(other_robot_topic_name, 100, updateOtherRobotCb);
+  ros::Subscriber sub_other_robot = handle.subscribe(other_robot_odom, 100, updateOtherRobotCb);
 
   //Publishers
   pub_obj = handle.advertise<ramp_msgs::ObjectList>("object_list", 1000);

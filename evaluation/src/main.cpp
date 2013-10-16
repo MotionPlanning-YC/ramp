@@ -36,6 +36,8 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   return true;
 }
 
+
+/** Subscribe to the object_list topic to get the latest list information about objects */
 void objectListCallback(const ramp_msgs::ObjectList& ol) {
   ev.objList_ = ol;
 }

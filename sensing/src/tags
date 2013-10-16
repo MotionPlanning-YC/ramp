@@ -6,21 +6,20 @@
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 DYNAMIC_OBJECT_H	dynamic_object.h	2;"	d
 DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject() {$/;"	f	class:DynamicObject	signature:()
-DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject(geometry_msgs::Pose p) : current_pose_(p) {$/;"	f	class:DynamicObject	signature:(geometry_msgs::Pose p)
+DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject(nav_msgs::Odometry o) {$/;"	f	class:DynamicObject	signature:(nav_msgs::Odometry o)
 DynamicObject	dynamic_object.h	/^    DynamicObject();$/;"	p	class:DynamicObject	access:public	signature:()
-DynamicObject	dynamic_object.h	/^    DynamicObject(geometry_msgs::Pose p);$/;"	p	class:DynamicObject	access:public	signature:(geometry_msgs::Pose p)
+DynamicObject	dynamic_object.h	/^    DynamicObject(nav_msgs::Odometry p);$/;"	p	class:DynamicObject	access:public	signature:(nav_msgs::Odometry p)
 DynamicObject	dynamic_object.h	/^class DynamicObject {$/;"	c
 DynamicObject::DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject() {$/;"	f	class:DynamicObject	signature:()
-DynamicObject::DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject(geometry_msgs::Pose p) : current_pose_(p) {$/;"	f	class:DynamicObject	signature:(geometry_msgs::Pose p)
+DynamicObject::DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject(nav_msgs::Odometry o) {$/;"	f	class:DynamicObject	signature:(nav_msgs::Odometry o)
 DynamicObject::DynamicObject	dynamic_object.h	/^    DynamicObject();$/;"	p	class:DynamicObject	access:public	signature:()
-DynamicObject::DynamicObject	dynamic_object.h	/^    DynamicObject(geometry_msgs::Pose p);$/;"	p	class:DynamicObject	access:public	signature:(geometry_msgs::Pose p)
+DynamicObject::DynamicObject	dynamic_object.h	/^    DynamicObject(nav_msgs::Odometry p);$/;"	p	class:DynamicObject	access:public	signature:(nav_msgs::Odometry p)
 DynamicObject::buildObjectMsg	dynamic_object.cpp	/^ramp_msgs::Object DynamicObject::buildObjectMsg() {$/;"	f	class:DynamicObject	signature:()
 DynamicObject::buildObjectMsg	dynamic_object.h	/^    ramp_msgs::Object buildObjectMsg();$/;"	p	class:DynamicObject	access:public	signature:()
-DynamicObject::current_pose_	dynamic_object.h	/^    geometry_msgs::Pose current_pose_;$/;"	m	class:DynamicObject	access:public
 DynamicObject::last_updated_	dynamic_object.h	/^    ros::Time last_updated_;$/;"	m	class:DynamicObject	access:public
-DynamicObject::trajectory_	dynamic_object.h	/^    std::vector<float> trajectory_;$/;"	m	class:DynamicObject	access:public
-DynamicObject::updatePose	dynamic_object.cpp	/^void DynamicObject::updatePose(geometry_msgs::Pose p, ros::Time t) {$/;"	f	class:DynamicObject	signature:(geometry_msgs::Pose p, ros::Time t)
-DynamicObject::updatePose	dynamic_object.h	/^    void updatePose(geometry_msgs::Pose p, ros::Time t);$/;"	p	class:DynamicObject	access:public	signature:(geometry_msgs::Pose p, ros::Time t)
+DynamicObject::odom_	dynamic_object.h	/^    std::vector<nav_msgs::Odometry> odom_;$/;"	m	class:DynamicObject	access:public
+DynamicObject::update	dynamic_object.cpp	/^void DynamicObject::update(nav_msgs::Odometry o) {$/;"	f	class:DynamicObject	signature:(nav_msgs::Odometry o)
+DynamicObject::update	dynamic_object.h	/^    void update(nav_msgs::Odometry o);$/;"	p	class:DynamicObject	access:public	signature:(nav_msgs::Odometry o)
 DynamicObject::~DynamicObject	dynamic_object.cpp	/^DynamicObject::~DynamicObject() {}$/;"	f	class:DynamicObject	signature:()
 DynamicObject::~DynamicObject	dynamic_object.h	/^    ~DynamicObject(); $/;"	p	class:DynamicObject	access:public	signature:()
 IR_OBJECT_H	ir_object.h	2;"	d
@@ -50,17 +49,17 @@ buildIRObjectMsg	ir_object.cpp	/^const ramp_msgs::IRObject IrObject::buildIRObje
 buildIRObjectMsg	ir_object.h	/^    const ramp_msgs::IRObject buildIRObjectMsg() const;$/;"	p	class:IrObject	access:public	signature:() const
 buildObjectMsg	dynamic_object.cpp	/^ramp_msgs::Object DynamicObject::buildObjectMsg() {$/;"	f	class:DynamicObject	signature:()
 buildObjectMsg	dynamic_object.h	/^    ramp_msgs::Object buildObjectMsg();$/;"	p	class:DynamicObject	access:public	signature:()
-current_pose_	dynamic_object.h	/^    geometry_msgs::Pose current_pose_;$/;"	m	class:DynamicObject	access:public
 last_updated_	dynamic_object.h	/^    ros::Time last_updated_;$/;"	m	class:DynamicObject	access:public
 list	main.cpp	/^ramp_msgs::ObjectList list;$/;"	v
 main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+odom_	dynamic_object.h	/^    std::vector<nav_msgs::Odometry> odom_;$/;"	m	class:DynamicObject	access:public
 otherRobot	main.cpp	/^DynamicObject otherRobot;$/;"	v
+prepareList	main.cpp	/^ramp_msgs::ObjectList prepareList() {$/;"	f	signature:()
 pub_obj	main.cpp	/^ros::Publisher pub_obj;$/;"	v
 sendList	main.cpp	/^void sendList(const ros::TimerEvent& e) {$/;"	f	signature:(const ros::TimerEvent& e)
-trajectory_	dynamic_object.h	/^    std::vector<float> trajectory_;$/;"	m	class:DynamicObject	access:public
-updateOtherRobotCb	main.cpp	/^void updateOtherRobotCb(const ramp_msgs::Update& u) {$/;"	f	signature:(const ramp_msgs::Update& u)
-updatePose	dynamic_object.cpp	/^void DynamicObject::updatePose(geometry_msgs::Pose p, ros::Time t) {$/;"	f	class:DynamicObject	signature:(geometry_msgs::Pose p, ros::Time t)
-updatePose	dynamic_object.h	/^    void updatePose(geometry_msgs::Pose p, ros::Time t);$/;"	p	class:DynamicObject	access:public	signature:(geometry_msgs::Pose p, ros::Time t)
+update	dynamic_object.cpp	/^void DynamicObject::update(nav_msgs::Odometry o) {$/;"	f	class:DynamicObject	signature:(nav_msgs::Odometry o)
+update	dynamic_object.h	/^    void update(nav_msgs::Odometry o);$/;"	p	class:DynamicObject	access:public	signature:(nav_msgs::Odometry o)
+updateOtherRobotCb	main.cpp	/^void updateOtherRobotCb(const nav_msgs::Odometry& u) {$/;"	f	signature:(const nav_msgs::Odometry& u)
 x1	ir_object.h	/^    float x1;$/;"	m	class:IrObject	access:public
 x2	ir_object.h	/^    float x2;$/;"	m	class:IrObject	access:public
 y1	ir_object.h	/^    float y1;$/;"	m	class:IrObject	access:public

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ramp_msgs)
 
-find_package(catkin REQUIRED COMPONENTS genmsg message_generation std_msgs geometry_msgs trajectory_msgs)
+find_package(catkin REQUIRED COMPONENTS genmsg message_generation nav_msgs std_msgs trajectory_msgs)
 
 
 #######################################
@@ -15,7 +15,7 @@ add_message_files(FILES Configuration.msg Path.msg Range.msg Trajectory.msg Upda
 add_service_files(FILES EvaluationRequest.srv ModificationRequest.srv TrajectoryRequest.srv)
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(DEPENDENCIES geometry_msgs std_msgs trajectory_msgs)
+generate_messages(DEPENDENCIES nav_msgs std_msgs trajectory_msgs)
 
-catkin_package(CATKIN_DEPENDS geometry_msgs message_runtime std_msgs trajectory_msgs)
+catkin_package(CATKIN_DEPENDS message_runtime nav_msgs std_msgs trajectory_msgs)
 

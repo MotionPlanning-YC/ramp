@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(sensing)
 
-find_package(catkin REQUIRED COMPONENTS corobot_msgs message_generation ramp_msgs roscpp)
+find_package(catkin REQUIRED COMPONENTS corobot_msgs message_generation ramp_msgs roscpp tf)
 
 #######################################
 ## Declare ROS messages and services ##
