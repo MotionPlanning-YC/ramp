@@ -6,7 +6,7 @@
 #include "collision_detection.h"
 #include "utility.h"
 #include "corobot_msgs/SensorMsg.h"
-#include "ramp_msgs/ObjectList.h"
+#include "ramp_msgs/ObstacleList.h"
 #include "collision_detection.h"
 
 
@@ -15,7 +15,7 @@
 class Evaluate {
   public:
     Evaluate() {}
-    //Evaluate(const ramp_msgs::EvaluationRequest::Request& req);
+    Evaluate(const ramp_msgs::EvaluationRequest::Request& req);
     
     void setRequest(const ramp_msgs::EvaluationRequest::Request& req);
 
@@ -26,9 +26,10 @@ class Evaluate {
     EuclideanDistance euc_dist_;
     Time time_;
 
+
     /** Collision detection */
     CollisionDetection collision_;
-    ramp_msgs::ObjectList objList_;
+    ramp_msgs::ObstacleList obstacleList_;
     
 
     //Information sent by the request

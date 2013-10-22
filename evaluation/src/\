@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
   std::cout<<"\nGot trajectory t\n";
   std::cout<<"\n"<<u.toString(t)<<"\n";
 
-  odom_prev.pose.pose.position.x = 2;
+  odom_prev.pose.pose.position.x = 3;
   odom_prev.pose.pose.position.y = 1;
   odom_prev.pose.pose.position.z = 0;
   odom_prev.twist.twist.linear.x = 0;
@@ -80,11 +80,11 @@ int main(int argc, char** argv) {
   odom_prev.twist.twist.angular.z = 0;
   odom_prev.pose.pose.orientation = q;
   
-  odom.pose.pose.position.x = 2;
+  odom.pose.pose.position.x = 3;
   odom.pose.pose.position.y = 2;
   odom.pose.pose.position.z = 0;
   odom.twist.twist.linear.x = 0;
-  odom.twist.twist.linear.y = 1;
+  odom.twist.twist.linear.y = 2;
   odom.twist.twist.linear.z = 0;
   odom.twist.twist.angular.x = 0;
   odom.twist.twist.angular.y = 0;
@@ -95,11 +95,9 @@ int main(int argc, char** argv) {
   ob.odom_t_prev = odom_prev;
   ramp_msgs::Trajectory t_2 = ev.collision_.getTrajectoryRequest(ob, d); 
 
-  //std::cout<<"\nGot trajectory t_2\n";
-  //std::cout<<"\n"<<u.toString(t_2)<<"\n";
-
-  ev.collision_.trajectory_ = t;
-  ev.collision_.obstacleList_.obstacles.push_back(ob);
+  /** Testing */
+  std::cout<<"\nGot trajectory t_2\n";
+  std::cout<<"\n"<<u.toString(t_2)<<"\n";
 
   std::cout<<"\nev.collision_:"<<ev.collision_.perform();
   /** End Testing */
