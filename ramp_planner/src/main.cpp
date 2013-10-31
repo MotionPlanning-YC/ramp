@@ -12,10 +12,13 @@ Planner my_planner;
 Utility u;
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "planner");
+  ros::init(argc, argv, "ramp_planner");
   ros::NodeHandle handle;
-  ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
+
+  std::string update_topic;
+  handle.getParam("ramp_planner/robot_update", update_topic);
   
+  ros::Subscriber sub_update_ = handle.subscribe(update_topic, 1000, &Planner::updateCallback, &my_planner);
   
   //Make some Ranges 
   srand( time(0));

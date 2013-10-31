@@ -28,6 +28,7 @@ const ramp_msgs::ObstacleList prepareList() {
 
   //Misc objects...
 
+  return list;
 } //End prepareList
 
 /** Publish the list of objects */

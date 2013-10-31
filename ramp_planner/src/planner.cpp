@@ -629,8 +629,6 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
     //spinOnce necessary here?
     ros::spinOnce(); 
 
-    std::cout<<"\ngeneration_:"<<generation_;
-
     //rate.sleep();
   } //end while
 
