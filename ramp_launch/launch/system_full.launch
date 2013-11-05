@@ -89,9 +89,9 @@
 
 
 
-<!-- <include file="$(find ramp_launch)/launch/launch_include/general.launch" /> -->
-<!-- <include file="$(find ramp_launch)/launch/launch_include/phidget_sensors.launch" /> -->
 <group ns="$(arg robot1_name)"> 
+  <include file="$(find ramp_launch)/launch/launch_include/general.launch" />
+  <include file="$(find ramp_launch)/launch/launch_include/phidget_sensors.launch" /> 
   <include file="$(find ramp_launch)/launch/launch_include/motors.launch" />
 </group>
 

@@ -26,9 +26,9 @@
 
 
 
-<rosparam param="ticks_meter">$(arg ticks_meter)</rosparam>
+<rosparam param="ticks_meter">9400</rosparam>
 
-<node pkg="differential-drive" type="pid_velocity.py" name="lpid_velocity">
+<node pkg="differential-drive" type="pid_velocity.py" name="lpid_velocity" machine="robot1">
     <remap from="wheel" to="lwheel"/>
     <remap from="motor_cmd" to="lmotor_cmd"/>
     <remap from="wheel_vtarget" to="lwheel_vtarget"/>
@@ -42,7 +42,7 @@
     <rosparam param="timeout_ticks">4</rosparam>
     <rosparam param="rolling_pts">8</rosparam>
 </node>
-<node pkg="differential-drive" type="pid_velocity.py" name="rpid_velocity">
+<node pkg="differential-drive" type="pid_velocity.py" name="rpid_velocity" machine="robot1">
     <remap from="wheel" to="rwheel"/>
     <remap from="motor_cmd" to="rmotor_cmd"/>
     <remap from="wheel_vtarget" to="rwheel_vtarget"/>
@@ -57,7 +57,7 @@
     <rosparam param="rolling_pts">8</rosparam>
 </node>
 
-<node pkg="differential-drive" type="twist_to_motors.py" name="twist_to_motors">
+<node pkg="differential-drive" type="twist_to_motors.py" name="twist_to_motors" machine="robot1">
   <rosparam param="base_width">$(arg base_width)</rosparam>
 </node>
 
