@@ -73,7 +73,6 @@ const double Configuration::compare(const Configuration& c) const {
   //Get square root to complete euclidean distance...
   result = sqrt(result);
 
-  //std::cout<<"\nReturning "<<result;
   return result;
 }
 
@@ -101,4 +100,18 @@ const std::string Configuration::toString() const {
   result<<")";
 
   return result.str(); 
+}
+
+
+void Configuration::subtract(const Configuration& c) {
+  for(unsigned int i=0;i<c.K_.size();i++) {
+    K_.at(i) = K_.at(i) - c.K_.at(i);
+  }
+}
+
+
+void Configuration::add(const Configuration& c) {
+  for(unsigned int i=0;i<c.K_.size();i++) {
+    K_.at(i) = K_.at(i) + c.K_.at(i);
+  }
 }

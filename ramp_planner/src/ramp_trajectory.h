@@ -30,7 +30,8 @@ class RampTrajectory {
 
 /** Create a struct to implement < comparison between two RampTrajectories */
 struct RampTrajectoryCompare {
-  //Returns true if rt1 < rt2, aka less fit than rt2
+
+  //Returns true if rt1 < rt2, or less "fit" than rt2
   bool operator()(const RampTrajectory& rt1, const RampTrajectory& rt2) const {
     
     //First check for feasible vs. infeasible

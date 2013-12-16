@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS corobot_msgs message_generation ramp_msg
 
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(DEPENDENCIES corobot_msgs ramp_msgs)
+#generate_messages(DEPENDENCIES corobot_msgs ramp_msgs)
 
 catkin_package(
   INCLUDE_DIRS include

@@ -5,9 +5,12 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <math.h>
 #include "geometry_msgs/Pose2D.h"
 #include "ramp_msgs/TrajectoryRequest.h"
 #include "ramp_msgs/Path.h"
+
+#define _USE_MATH_DEFINES
 
 class Utility {
   public:

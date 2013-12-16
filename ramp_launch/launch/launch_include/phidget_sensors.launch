@@ -2,16 +2,30 @@
 
 
 <!-- Define the machine -->
-<machine name="robot1" address="192.168.1.103" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" />
-<!-- <machine name="robot2" address="192.168.1.101" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> -->
 
+<machine name="robot1" address="192.168.1.104" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> 
+<machine name="robot2" address="192.168.1.105" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> 
+
+
+<!-- Set arguments -->
 
 <arg name="phidgetInterfaceKit" value="1"/> 
 <arg name="irFront" value="1"/> <!-- Index of the analog input for the front infrared sensor(default = 1). -1 if this one is not present or the data doesn't have to be read -->
 
 
-<node pkg="corobot_phidget_ik" name="phidget_interface_kit" type="corobot_phidget" machine="robot1">
-  <param name="irFront" type="int" value="$(arg irFront)"/>
-</node>
+
+<!-- Run nodes -->
+<group ns="robot1">
+  <node pkg="corobot_phidget_ik" name="phidget_interface_kit" type="corobot_phidget" machine="robot1">
+    <param name="irFront" type="int" value="$(arg irFront)"/>
+  </node>
+</group> 
+
+
+<group ns="robot2">
+  <node pkg="corobot_phidget_ik" name="phidget_interface_kit" type="corobot_phidget" machine="robot2">
+    <param name="irFront" type="int" value="$(arg irFront)"/>
+  </node>
+</group>
 
 </launch>

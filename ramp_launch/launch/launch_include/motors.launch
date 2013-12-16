@@ -1,8 +1,8 @@
 <launch>
 
 <!-- Define the machine -->
-<machine name="robot1" address="192.168.1.103" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" />
-<!-- <machine name="robot2" address="192.168.1.101" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> -->
+<machine name="robot1" address="192.168.1.104" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> 
+<machine name="robot2" address="192.168.1.105" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> 
 
 
 <!-- Robot attributes -->
@@ -14,52 +14,132 @@
 
 <arg name="twistCommand" value="1"/> 
 
-<node pkg="phidget_motor" name="phidget_motor" type="PhidgetMotor.py" args="" machine="robot1" />
-
-<node pkg="corobot_state_tf" name="corobot_state_tf" type="corobot_state_tf" machine="robot1">
-  <param name="ticks_meter" type="int" value="$(arg ticks_meter)"/>
-  <param name="base_width" type="double" value="$(arg base_width)"/>
-  <param name="TwoWheelDrive" type="bool" value="$(arg TwoWheelDrive)"/>
-  <param name="publish_odom_tf" type="bool" value="1"/>
-</node>
 
 
 
 
-<rosparam param="ticks_meter">9400</rosparam>
+<group ns="robot1">
 
-<node pkg="differential-drive" type="pid_velocity.py" name="lpid_velocity" machine="robot1">
-    <remap from="wheel" to="lwheel"/>
-    <remap from="motor_cmd" to="lmotor_cmd"/>
-    <remap from="wheel_vtarget" to="lwheel_vtarget"/>
-    <remap from="wheel_vel" to="lwheel_vel"/>
-    <rosparam param="Kp">50</rosparam>
-    <rosparam param="Ki">200</rosparam>
-    <rosparam param="Kd">1</rosparam>
-    <rosparam param="out_min">-100</rosparam>
-    <rosparam param="out_max">100</rosparam>
-    <rosparam param="rate">30</rosparam>
-    <rosparam param="timeout_ticks">4</rosparam>
-    <rosparam param="rolling_pts">8</rosparam>
-</node>
-<node pkg="differential-drive" type="pid_velocity.py" name="rpid_velocity" machine="robot1">
-    <remap from="wheel" to="rwheel"/>
-    <remap from="motor_cmd" to="rmotor_cmd"/>
-    <remap from="wheel_vtarget" to="rwheel_vtarget"/>
-    <remap from="wheel_vel" to="rwheel_vel"/>
-    <rosparam param="Kp">50</rosparam>
-    <rosparam param="Ki">200</rosparam>
-    <rosparam param="Kd">1</rosparam>
-    <rosparam param="out_min">-100</rosparam>
-    <rosparam param="out_max">100</rosparam>
-    <rosparam param="rate">30</rosparam>
-    <rosparam param="timeout_ticks">4</rosparam>
-    <rosparam param="rolling_pts">8</rosparam>
-</node>
+  <node pkg="phidget_motor" name="phidget_motor" type="PhidgetMotor.py" args="" machine="robot1" />
 
-<node pkg="differential-drive" type="twist_to_motors.py" name="twist_to_motors" machine="robot1">
-  <rosparam param="base_width">$(arg base_width)</rosparam>
-</node>
+  <node pkg="corobot_state_tf" name="corobot_state_tf" type="corobot_state_tf" machine="robot1">
+    <param name="ticks_meter" type="int" value="9400"/>
+    <param name="base_width" type="double" value="$(arg base_width)"/>
+    <param name="TwoWheelDrive" type="bool" value="$(arg TwoWheelDrive)"/>
+    <param name="publish_odom_tf" type="bool" value="1"/>
+  </node>
+
+
+
+
+  <rosparam param="ticks_meter">12500</rosparam>
+
+  <node pkg="differential-drive" type="pid_velocity.py" name="lpid_velocity" machine="robot1">
+      <remap from="wheel" to="lwheel"/>
+      <remap from="motor_cmd" to="lmotor_cmd"/>
+      <remap from="wheel_vtarget" to="lwheel_vtarget"/>
+      <remap from="wheel_vel" to="lwheel_vel"/>
+      <rosparam param="Kp">50</rosparam>
+      <rosparam param="Ki">200</rosparam>
+      <rosparam param="Kd">1</rosparam>
+      <rosparam param="out_min">-100</rosparam>
+      <rosparam param="out_max">100</rosparam>
+      <rosparam param="rate">30</rosparam>
+      <rosparam param="timeout_ticks">4</rosparam>
+      <rosparam param="rolling_pts">8</rosparam>
+  </node>
+  <node pkg="differential-drive" type="pid_velocity.py" name="rpid_velocity" machine="robot1">
+      <remap from="wheel" to="rwheel"/>
+      <remap from="motor_cmd" to="rmotor_cmd"/>
+      <remap from="wheel_vtarget" to="rwheel_vtarget"/>
+      <remap from="wheel_vel" to="rwheel_vel"/>
+      <rosparam param="Kp">50</rosparam>
+      <rosparam param="Ki">200</rosparam>
+      <rosparam param="Kd">1</rosparam>
+      <rosparam param="out_min">-100</rosparam>
+      <rosparam param="out_max">100</rosparam>
+      <rosparam param="rate">30</rosparam>
+      <rosparam param="timeout_ticks">4</rosparam>
+      <rosparam param="rolling_pts">8</rosparam>
+  </node>
+
+  <node pkg="differential-drive" type="twist_to_motors.py" name="twist_to_motors" machine="robot1">
+    <rosparam param="base_width">$(arg base_width)</rosparam>
+  </node>
+
+</group> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<group ns="robot2">
+
+  <node pkg="phidget_motor" name="phidget_motor" type="PhidgetMotor.py" args="" machine="robot2" />
+
+  <node pkg="corobot_state_tf" name="corobot_state_tf" type="corobot_state_tf" machine="robot2">
+    <!-- param name="ticks_meter" type="int" value="$(arg ticks_meter)"/> -->
+    <param name="ticks_meter" type="int" value="9750"/>
+    <param name="base_width" type="double" value="$(arg base_width)"/>
+    <param name="TwoWheelDrive" type="bool" value="$(arg TwoWheelDrive)"/>
+    <param name="publish_odom_tf" type="bool" value="1"/>
+  </node>
+
+
+
+
+  <rosparam param="ticks_meter">9400</rosparam>
+
+  <node pkg="differential-drive" type="pid_velocity.py" name="lpid_velocity" machine="robot2">
+      <remap from="wheel" to="lwheel"/>
+      <remap from="motor_cmd" to="lmotor_cmd"/>
+      <remap from="wheel_vtarget" to="lwheel_vtarget"/>
+      <remap from="wheel_vel" to="lwheel_vel"/>
+      <rosparam param="Kp">50</rosparam>
+      <rosparam param="Ki">200</rosparam>
+      <rosparam param="Kd">1</rosparam>
+      <rosparam param="out_min">-100</rosparam>
+      <rosparam param="out_max">100</rosparam>
+      <rosparam param="rate">30</rosparam>
+      <rosparam param="timeout_ticks">4</rosparam>
+      <rosparam param="rolling_pts">8</rosparam>
+  </node>
+  <node pkg="differential-drive" type="pid_velocity.py" name="rpid_velocity" machine="robot2">
+      <remap from="wheel" to="rwheel"/>
+      <remap from="motor_cmd" to="rmotor_cmd"/>
+      <remap from="wheel_vtarget" to="rwheel_vtarget"/>
+      <remap from="wheel_vel" to="rwheel_vel"/>
+      <rosparam param="Kp">50</rosparam>
+      <rosparam param="Ki">200</rosparam>
+      <rosparam param="Kd">1</rosparam>
+      <rosparam param="out_min">-100</rosparam>
+      <rosparam param="out_max">100</rosparam>
+      <rosparam param="rate">30</rosparam>
+      <rosparam param="timeout_ticks">4</rosparam>
+      <rosparam param="rolling_pts">8</rosparam>
+  </node>
+
+  <node pkg="differential-drive" type="twist_to_motors.py" name="twist_to_motors" machine="robot2">
+    <rosparam param="base_width">$(arg base_width)</rosparam>
+  </node>
+
+</group>
 
 
 </launch>

@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
+Planner::Planner() : resolutionRate_(5), populationSize_(4), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
   controlCycle_ = ros::Duration(0.25);
 }
@@ -15,7 +15,7 @@ Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), popula
   controlCycle_ = ros::Duration(0.25);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(4), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
   init(h); 
   controlCycle_ = ros::Duration(0.25);
@@ -66,6 +66,7 @@ void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
 
   
   Configuration temp(msg->configuration);
+  temp.add(initial_);
 
   if(temp.K_.size() > 0) {
     start_ = temp;
@@ -128,9 +129,9 @@ void Planner::init_population() {
   //For each path
   for(unsigned int i=0;i<paths_.size();i++) {
 
-    //Hardcode some velocities, 0.5m/s per segment
+    //Hardcode some velocities, 0.25m/s per segment
     for(unsigned int j=1;j<paths_.at(i).all_.size();j++) {
-      v.push_back(0.5f);
+      v.push_back(0.25f);
     }
     
     //Build a TrajectoryRequest 
@@ -295,6 +296,7 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
 
 /** Send the fittest feasible trajectory to the robot package */
 void Planner::sendBest() {
+  std::cout<<"\nSending:"<<u.toString(bestTrajec_.msg_trajec_);
   h_control_->send(bestTrajec_.msg_trajec_);
 }
 
@@ -327,7 +329,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
 
   //T_move = T
   //Send the best trajectory 
-  std::cout<<"\nSending new trajectory!\n";
+  //std::cout<<"\nSending new trajectory!\n";
   sendBest(); 
   
   //Send the whole population to the trajectory viewer
@@ -596,7 +598,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   //Initialize the modifier
   modifier_->paths_ = paths_;
 
-  //***Adjust***
+  //Evaluate the population and get the trajectory to move on
   RampTrajectory T_move = evaluateAndObtainBest();
   std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString(); 
   //std::cout<<"\nPress enter to start the loop!\n";
@@ -607,7 +609,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   //createSubpopulations();
   
   timer_.start();
-  while( (start_.compare(goal_) > 0.4) && ros::ok()) {
+  while( (start_.compare(goal_) > 0.1) && ros::ok()) {
     
     //t=t+1
     generation_++;

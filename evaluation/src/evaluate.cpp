@@ -11,8 +11,7 @@ void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request& req) {
   trajectory_ = req.trajectory;
   
   /*Set the i_segments_ member*/
-  
-  //Clear the vector
+  // First, clear
   i_segments_.clear();
 
   //Set the elements

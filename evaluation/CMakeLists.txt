@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS message_generation ramp_msgs roscpp coro
 #######################################
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(DEPENDENCIES ramp_msgs)
+#generate_messages(DEPENDENCIES ramp_msgs)
 
 catkin_package(
   INCLUDE_DIRS include

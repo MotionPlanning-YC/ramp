@@ -1,7 +1,7 @@
 #include "population.h"
 
 
-Population::Population() : max_size(7), i_best(-1) {}
+Population::Population() : max_size(4), i_best(-1) {}
 
 Population::Population(const unsigned int size) : max_size(size), i_best(-1) {}
 
@@ -86,7 +86,7 @@ const int Population::findBestFeasible(bool feasible, int generation) const {
   }
 
   if(generation > 75) {
-    std::cout<<"\nReturning "<<result_second<<" for feasible: "<<feasible<<"\n";
+    //std::cout<<"\nReturning "<<result_second<<" for feasible: "<<feasible<<"\n";
     return result_second;
   }
   
@@ -108,7 +108,6 @@ const RampTrajectory Population::findBest(int generation) {
   else
     i_best = i_bestF;
 
-  std::cout<<"\ni_best:"<<i_best<<"\n";
   return population_.at(i_best); 
 } //End getBest 
 

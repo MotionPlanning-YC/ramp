@@ -93,6 +93,7 @@ const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
     for(unsigned int k=1;k<p.accelerations.size();k++) {
       result<<", "<<p.accelerations.at(k);
     }
+    result<<")";
 
     result<<"\n       Time From Start: "<<p.time_from_start;
     result<<")";

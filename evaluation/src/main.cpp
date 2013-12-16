@@ -37,8 +37,8 @@ int main(int argc, char** argv) {
 
   geometry_msgs::Quaternion q = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0.3);
 
-  odom_prev.pose.pose.position.x = 1;
-  odom_prev.pose.pose.position.y = 1;
+  odom_prev.pose.pose.position.x = 0;
+  odom_prev.pose.pose.position.y = 0;
   odom_prev.pose.pose.position.z = 0;
   odom_prev.twist.twist.linear.x = 1;
   odom_prev.twist.twist.linear.y = 1;
@@ -48,8 +48,8 @@ int main(int argc, char** argv) {
   odom_prev.twist.twist.angular.z = 0;
   odom_prev.pose.pose.orientation = q;
   
-  odom.pose.pose.position.x = 2;
-  odom.pose.pose.position.y = 2;
+  odom.pose.pose.position.x = 1;
+  odom.pose.pose.position.y = 0;
   odom.pose.pose.position.z = 0;
   odom.twist.twist.linear.x = 1;
   odom.twist.twist.linear.y = 1;
@@ -69,8 +69,8 @@ int main(int argc, char** argv) {
   std::cout<<"\nGot trajectory t\n";
   std::cout<<"\n"<<u.toString(t)<<"\n";
 
-  odom_prev.pose.pose.position.x = 2;
-  odom_prev.pose.pose.position.y = 1;
+  odom_prev.pose.pose.position.x = -1;
+  odom_prev.pose.pose.position.y = 0;
   odom_prev.pose.pose.position.z = 0;
   odom_prev.twist.twist.linear.x = 0;
   odom_prev.twist.twist.linear.y = 1;
@@ -80,8 +80,8 @@ int main(int argc, char** argv) {
   odom_prev.twist.twist.angular.z = 0;
   odom_prev.pose.pose.orientation = q;
   
-  odom.pose.pose.position.x = 2;
-  odom.pose.pose.position.y = 2;
+  odom.pose.pose.position.x = 1;
+  odom.pose.pose.position.y = 0;
   odom.pose.pose.position.z = 0;
   odom.twist.twist.linear.x = 0;
   odom.twist.twist.linear.y = 1;

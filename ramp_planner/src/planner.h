@@ -59,10 +59,18 @@ class Planner {
     //Sensing cycle
     ros::Duration sensingCycle_;
 
+    //Configuraton of initial starting position
+    //We use this to translate each update 
+    Configuration initial_;
 
+
+    
+    
     /********************************************
      ***************** Methods ******************
      ********************************************/
+
+
     
     //Start planning
     void go();
@@ -156,6 +164,7 @@ class Planner {
 
     //Modifier_ communicates with the path_modification package
     Modifier* modifier_;
+
 };
 
 #endif

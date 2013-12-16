@@ -25,7 +25,6 @@ int main(int argc, char** argv) {
 
   ros::ServiceServer service = handle.advertiseService("trajectory_generator", handleRequest);
 
-  /* *** Test generating a trajectory *** */
 
   // Build a Path
   ramp_msgs::Configuration c1;
@@ -36,7 +35,7 @@ int main(int argc, char** argv) {
   ramp_msgs::Configuration c2;
   c2.K.push_back(3);
   c2.K.push_back(3);
-  c2.K.push_back(M_PI / 4);
+  c2.K.push_back(45);
 
   ramp_msgs::Configuration c3;
   c3.K.push_back(5);
@@ -46,40 +45,24 @@ int main(int argc, char** argv) {
   ramp_msgs::Configuration c4;
   c4.K.push_back(5);
   c4.K.push_back(0);
-  c4.K.push_back(-M_PI / 2);
-
-  std::vector<float> v_s;
-  v_s.push_back(0.25);
-  v_s.push_back(0.25);
-  v_s.push_back(0.25);
-
-  std::vector<float> v_g;
-  v_g.push_back(0.25);
-  v_g.push_back(0.25);
-  v_g.push_back(0.25);
+  c4.K.push_back(-90);
 
   ramp_msgs::Path p;
   p.configurations.push_back(c1);
   p.configurations.push_back(c2);
   p.configurations.push_back(c3);
   p.configurations.push_back(c4);
-  
-  ramp_msgs::TrajectoryRequest tr;
-  tr.request.path = p;
-  
-  tr.request.v_start = v_s;
-  tr.request.v_end = v_g;
-  tr.request.resolutionRate = 5;
 
-  std::cout<<"\nConstructing Trajectory\n";
-  Trajectory traj(tr.request);
-  std::cout<<"\nDone constructing\n";
-  std::cout<<"\nGenerating Trajectory\n";
-  traj.generate(); 
-  tr.response.trajectory = traj.buildTrajectoryMsg();
-  
-  std::cout<<"\n"<<u.toString(tr.response.trajectory);
-  
+  vector<float> v_s;
+  v_s.push_back(0.25);
+  v_s.push_back(0.25);
+  v_s.push_back(0.25);
+
+  vector<float> v_g;
+  v_g.push_back(0.25);
+  v_g.push_back(0.25);
+  v_g.push_back(0.25);
+
   std::cout<<"\nSpinning...\n";  
   ros::spin();
   std::cout<<"\nExiting Normally\n";

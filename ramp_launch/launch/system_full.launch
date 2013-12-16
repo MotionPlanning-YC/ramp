@@ -9,8 +9,8 @@
 
 <!-- Define the machines -->
 
-<machine name="robot1" address="192.168.1.103" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" />
-<!-- <machine name="robot2" address="192.168.1.101" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> -->
+<machine name="robot1" address="192.168.1.104" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> 
+<machine name="robot2" address="192.168.1.105" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> 
 
 
 
@@ -34,41 +34,42 @@
   <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" >
     <param name="robot_update" type="str" value="/$(arg robot1_name)/update" />
   </node>
-</group>
+</group> 
 
-<!-- <group ns="$(arg robot2_name)"> -->
-<!--   <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen"> -->
-<!--     <param name="robot_update" type="str" value="/$(arg robot2_name)/update" /> -->
-<!--   </node> -->
-<!-- </group> -->
+<group ns="$(arg robot2_name)"> 
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen"> 
+    <param name="robot_update" type="str" value="/$(arg robot2_name)/update" /> 
+  </node>
+</group> 
 
 
 
 <!-- Sensing nodes -->
 
-<!-- <group ns="$(arg robot1_name)"> --> 
-<!--  <node name="sensing" pkg="sensing" type="sensing" output="screen"> -->
-<!--    <param name="other_robot_odom" type="str" value="/$(arg robot2_name)/odometry" />  -->
-<!--  </node> -->
-<!-- </group> -->
+<group ns="$(arg robot1_name)"> 
+  <node name="sensing" pkg="sensing" type="sensing" output="screen"> 
+    <param name="other_robot_odom" type="str" value="/$(arg robot2_name)/odometry" />  
+  </node> 
+</group> 
 
 
-<!-- <group ns="$(arg robot2_name)"> -->
-<!--   <node name="sensing" pkg="sensing" type="sensing" output="screen">  -->
-<!--     <param name="other_robot_odom" type="str" value="/$(arg robot1_name)/odometry" /> -->
-<!--   </node> -->
-<!-- </group> -->
+<group ns="$(arg robot2_name)"> 
+   <node name="sensing" pkg="sensing" type="sensing" output="screen">  
+     <param name="other_robot_odom" type="str" value="/$(arg robot1_name)/odometry" /> 
+   </node> 
+</group> 
 
 
 
 <!-- Evaluation -->
-  <group ns="$(arg robot1_name)">
-    <node name="evaluation" pkg="evaluation" type="evaluation" output="screen" /> 
-  </group> 
 
-<!--   <group ns="$(arg robot2_name)"> -->
-<!--     <node name="evaluation" pkg="evaluation" type="evaluation" output="screen" /> -->
-<!--   </group> -->
+<group ns="$(arg robot1_name)">
+  <node name="evaluation" pkg="evaluation" type="evaluation" /> 
+</group> 
+
+<group ns="$(arg robot2_name)">
+  <node name="evaluation" pkg="evaluation" type="evaluation" /> 
+</group>
 
 
 
@@ -78,22 +79,20 @@
 <!-- Start the robot nodes -->
 
 <group ns="$(arg robot1_name)" >
-  <node name="robot" pkg="robot" type="robot" machine="robot1" /> 
-</group>
+  <node name="robot" pkg="robot" type="robot" machine="robot1"/> 
+</group> 
 
 
-<!-- <group ns="$(arg robot2_name)"> -->
-<!--  <node name="robot2" pkg="robot" type="robot" machine="robot2" /> -->
-<!-- </group>  -->
+<group ns="$(arg robot2_name)"> 
+  <node name="robot" pkg="robot" type="robot" machine="robot2" /> 
+</group>  
 
 
 
 
-<group ns="$(arg robot1_name)"> 
-  <include file="$(find ramp_launch)/launch/launch_include/general.launch" />
-  <include file="$(find ramp_launch)/launch/launch_include/phidget_sensors.launch" /> 
-  <include file="$(find ramp_launch)/launch/launch_include/motors.launch" />
-</group>
+<include file="$(find ramp_launch)/launch/launch_include/general.launch" />
+<include file="$(find ramp_launch)/launch/launch_include/phidget_sensors.launch" /> 
+<include file="$(find ramp_launch)/launch/launch_include/motors.launch" />
 
 
 
