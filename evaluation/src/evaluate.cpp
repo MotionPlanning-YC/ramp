@@ -50,6 +50,10 @@ const double Evaluate::performFitness() {
 
 
 const bool Evaluate::performCollisionDetection() {
+
+  if(collision_.obstacleList_.obstacles.size() == 0) 
+    return false;
+
   collision_.obstacleList_ = obstacleList_;
   return collision_.perform();  
 }

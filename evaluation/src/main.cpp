@@ -16,6 +16,7 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   //std::cout<<"\nIn handling requests!\n";
   ev.setRequest(req);
   res.fitness = ev.performFitness();
+  res.feasible = !ev.performCollisionDetection();
   //std::cout<<"\nfitness: "<<res.fitness<<"\n";
   //std::cout<<"\nfeasible: "<<(res.feasible ? "true" : "false")<<"\n";
   

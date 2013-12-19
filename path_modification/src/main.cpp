@@ -34,10 +34,10 @@ bool handleRequest(ramp_msgs::ModificationRequest::Request& req,
   //Crossover cross(req.paths.at(0), req.paths.at(1));
   //res.mod_paths = cross.perform();
   
-  //For now, just push back on the paths passed in
-  /*for(unsigned int i=0;i<req.paths.size();i++) {
-    res.mod_paths.push_back(req.paths.at(i));
-  }*/
+  std::cout<<"\nPath(s) after modification:";
+  for(unsigned int i=0;i<res.mod_paths.size();i++) {
+    std::cout<<"\n"<<u.toString(res.mod_paths.at(i));
+  }
 
   return true;
 }

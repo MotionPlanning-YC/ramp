@@ -11,6 +11,7 @@ const bool RampTrajectory::equal(const RampTrajectory& other) const {
 
 const Path RampTrajectory::getPath() const {
   Path result;
+
   for(unsigned int i=0;i<msg_trajec_.index_knot_points.size();i++) {
 
     Configuration c(msg_trajec_.trajectory.points.at( msg_trajec_.index_knot_points.at(i)), u.standardRanges );

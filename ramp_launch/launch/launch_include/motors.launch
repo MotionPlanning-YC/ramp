@@ -2,7 +2,7 @@
 
 <!-- Define the machine -->
 <machine name="robot1" address="192.168.1.104" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> 
-<machine name="robot2" address="192.168.1.105" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> 
+<machine name="robot2" address="192.168.1.100" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" />
 
 
 <!-- Robot attributes -->
@@ -88,13 +88,13 @@
 
 
 
-
+ 
 <group ns="robot2">
 
   <node pkg="phidget_motor" name="phidget_motor" type="PhidgetMotor.py" args="" machine="robot2" />
 
   <node pkg="corobot_state_tf" name="corobot_state_tf" type="corobot_state_tf" machine="robot2">
-    <!-- param name="ticks_meter" type="int" value="$(arg ticks_meter)"/> -->
+    <!-- <param name="ticks_meter" type="int" value="$(arg ticks_meter)"/> -->
     <param name="ticks_meter" type="int" value="9750"/>
     <param name="base_width" type="double" value="$(arg base_width)"/>
     <param name="TwoWheelDrive" type="bool" value="$(arg TwoWheelDrive)"/>
@@ -140,6 +140,7 @@
   </node>
 
 </group>
+
 
 
 </launch>

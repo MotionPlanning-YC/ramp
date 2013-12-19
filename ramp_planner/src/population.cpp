@@ -51,9 +51,10 @@ const unsigned int Population::add(const RampTrajectory rt) {
 } //End add
 
 
-/** This method returns the index of the most fit feasible/infeasible trajectory 
- *  feasible = true if looking for feasible trajectory, false for infeasible
- *  Returns -1 if no trajectories of that type exist in the population
+/**  
+ * This method returns the index of the most fit feasible/infeasible trajectory 
+ * feasible = true if looking for feasible trajectory, false for infeasible
+ * Returns -1 if no trajectories of that type exist in the population
  */
 const int Population::findBestFeasible(bool feasible, int generation) const {
   int result = -1;
@@ -85,10 +86,10 @@ const int Population::findBestFeasible(bool feasible, int generation) const {
     }
   }
 
-  if(generation > 75) {
+  //if(generation > 75) {
     //std::cout<<"\nReturning "<<result_second<<" for feasible: "<<feasible<<"\n";
-    return result_second;
-  }
+    //return result_second;
+  //}
   
   return result;
 } //End findBestFeasible
@@ -97,10 +98,14 @@ const int Population::findBestFeasible(bool feasible, int generation) const {
 
 /** Returns the fittest trajectory and sets i_best */
 const RampTrajectory Population::findBest(int generation) {
+  //std::cout<<"\nIn findBest\n";
 
   //Find both the best feasible and infeasible trajectories
   int i_bestF   = findBestFeasible(true, generation);
   int i_bestInf = findBestFeasible(false, generation);
+  //std::cout<<"\ni_bestF: "<<i_bestF<<"\n";
+  //std::cout<<"\ni_bestInf: "<<i_bestInf<<"\n";
+  
 
   //Set i_best
   if(i_bestF < 0)
@@ -108,6 +113,7 @@ const RampTrajectory Population::findBest(int generation) {
   else
     i_best = i_bestF;
 
+  //std::cout<<"\ni_best: "<<i_best<<"\n";
   return population_.at(i_best); 
 } //End getBest 
 

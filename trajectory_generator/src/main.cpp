@@ -29,40 +29,40 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::Configuration c1;
-  c1.K.push_back(0);
-  c1.K.push_back(0);
+  c1.K.push_back(1);
+  c1.K.push_back(3);
   c1.K.push_back(0);
 
   ramp_msgs::Configuration c2;
-  c2.K.push_back(3);
-  c2.K.push_back(3);
-  c2.K.push_back(M_PI / 4);
+  c2.K.push_back(2.65712);
+  c2.K.push_back(2.89299);
+  c2.K.push_back(0.110012);
 
   ramp_msgs::Configuration c3;
-  c3.K.push_back(5);
+  c3.K.push_back(3);
   c3.K.push_back(3);
   c3.K.push_back(0);
 
-  ramp_msgs::Configuration c4;
+  /*ramp_msgs::Configuration c4;
   c4.K.push_back(5);
   c4.K.push_back(0);
-  c4.K.push_back(-M_PI / 2);
+  c4.K.push_back(-M_PI / 2);*/
 
   std::vector<float> v_s;
   v_s.push_back(0.25);
-  v_s.push_back(0.25);
-  v_s.push_back(0.25);
+  //v_s.push_back(0.25);
+  //v_s.push_back(0.25);
 
   std::vector<float> v_g;
   v_g.push_back(0.25);
-  v_g.push_back(0.25);
-  v_g.push_back(0.25);
+  //v_g.push_back(0.25);
+  //v_g.push_back(0.25);
 
   ramp_msgs::Path p;
   p.configurations.push_back(c1);
-  p.configurations.push_back(c2);
+  //p.configurations.push_back(c2);
   p.configurations.push_back(c3);
-  p.configurations.push_back(c4);
+  //p.configurations.push_back(c4);
   
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;

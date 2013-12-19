@@ -89,16 +89,21 @@ void Segment::buildWork() {
 const void Segment::calculateMinTime() {
   // std::cout<<"\nIn Segment::calculateMinTime\n";
 
+  //std::cout<<"\n\nend_.p_.at(0):"<<end_.p_.at(0)<<" start_.p_.at(0):"<<start_.p_.at(0);
+  //std::cout<<"\nend_.p_.at(1):"<<end_.p_.at(1)<<" start_.p_.at(1):"<<start_.p_.at(1);
+
   // Find Euclidean distance between [x,y] of start and goal
   float d_x = end_.p_.at(0) - start_.p_.at(0);
   float d_y = end_.p_.at(1) - start_.p_.at(1);
   float euc_dist = sqrt( pow(d_x,2) + pow(d_y,2) );
+  //std::cout<<"\nd_x: "<<d_x<<" d_y:"<<d_y<<" euc_dist:"<<euc_dist;
 
   // Calculate time needed to rotate towards goal
   angle_pre = asin(d_y / euc_dist);
   float angle_dist = angle_pre - start_.p_.at(k_dof_-1);
-  T_rotate_pre_ = abs(ceil(angle_dist / max_v_.at(k_dof_-1)));
-  
+  T_rotate_pre_ = ceil(fabs(angle_dist / max_v_.at(k_dof_-1)));
+  //std::cout<<"\nangle_pre:"<<angle_pre<<" angle_dist:"<<angle_dist;
+
   // Then add to T_loc_ the time to go straight towards the goal
   T_loc_ = ceil(euc_dist / max_v_.at(0));
 
@@ -107,6 +112,8 @@ const void Segment::calculateMinTime() {
 
   // Set min_T_
   T_min_ = T_loc_ + T_rotate_pre_ + T_rotate_post_;
+
+  //std::cout<<"\nT_rotate_pre_:"<<T_rotate_pre_<<" T_loc_:"<<T_loc_<<" T_rotate_post_:"<<T_rotate_post_;
 
 } //End calculateMinTime
 

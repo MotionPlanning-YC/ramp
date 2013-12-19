@@ -60,7 +60,7 @@ const MotionState Trajectory::getMotionState(const unsigned int ind_segment, con
 
     // If k is x or y and it is still time to be pre-rotate (rotate towards segment goal)
     // Push on the initial x,y value
-    if(i < 2 && t <= segment.T_rotate_pre_) {
+    if(i < 2 && t <= segment.T_rotate_pre_ && segment.T_rotate_pre_ > 0) {
       result.p_.push_back(segment.a0_.at(i));
       result.v_.push_back(0);
     }
@@ -69,8 +69,7 @@ const MotionState Trajectory::getMotionState(const unsigned int ind_segment, con
     // Push on the next x,y value
     // Need to translate t by the time for pre-rotating
     else if(i < 2 && t <= (segment.T_loc_ + segment.T_rotate_pre_)) {
-      t -= segment.T_rotate_pre_;
-      result.p_.push_back(segment.a0_.at(i) + (segment.a1_.at(i) * t)));
+      result.p_.push_back(segment.a0_.at(i) + (segment.a1_.at(i) * (t - segment.T_rotate_pre_)));
       result.v_.push_back(segment.a1_.at(i));
     }
 
@@ -83,7 +82,7 @@ const MotionState Trajectory::getMotionState(const unsigned int ind_segment, con
 
     // If k is theta and it is time to pre-rotate
     // Push on the value of 
-    else if(i == 2 && t <= segment.T_rotate_pre_) {
+    else if(i == 2 && t <= segment.T_rotate_pre_ && segment.T_rotate_pre_ > 0) {
       result.p_.push_back(segment.a0_.at(i) + segment.a1_.at(i) * t);
       result.v_.push_back(segment.a1_.at(i));
     }
@@ -92,8 +91,7 @@ const MotionState Trajectory::getMotionState(const unsigned int ind_segment, con
     // Push on the next value of theta
     // Need to translate t by the time for pre-rotating and driving straight
     else if(i == 2 && t > (segment.T_rotate_pre_ + segment.T_loc_)) {
-      t -= (segment.T_loc_ - segment.T_rotate_pre_);
-      result.p_.push_back(segment.angle_pre + segment.a1_.at(i+1) * t);
+      result.p_.push_back(segment.angle_pre + segment.a1_.at(i+1) * (t - segment.T_loc_ - segment.T_rotate_pre_));
       result.v_.push_back(segment.a1_.at(i+1));
     }
 
@@ -126,8 +124,8 @@ const std::vector<MotionState> Trajectory::generate() {
 
     Segment segment = segments_.at(i);
     /*std::cout<<"\nSegment "<<i<<":";
-    std::cout<<"\nangle_pre: "<<segment.angle_pre;
-    std::cout<<", "<<segment.angle_pre * 180 / M_PI;
+    std::cout<<"\nangle_pre: "<<segment.angle_pre<<" (radians)";
+    std::cout<<", "<<segment.angle_pre * 180 / M_PI<<" (degrees)";
     std::cout<<"\nT_rotate_pre_: "<<segment.T_rotate_pre_;
     std::cout<<"\nT_loc: "<<segment.T_loc_;
     std::cout<<"\nT_rotate_post_: "<<segment.T_rotate_post_;*/

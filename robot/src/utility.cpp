@@ -11,8 +11,8 @@ Utility::Utility() {
   range1.max = 3.5;
 
   ramp_msgs::Range range2; 
-  range2.min = 0;
-  range2.min = 0;
+  range2.min = -1;
+  range2.min = 1;
 
   standardRanges.push_back(range0);
   standardRanges.push_back(range1);

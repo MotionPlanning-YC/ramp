@@ -10,8 +10,7 @@
 <!-- Define the machines -->
 
 <machine name="robot1" address="192.168.1.104" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> 
-<machine name="robot2" address="192.168.1.105" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> 
-
+<machine name="robot2" address="192.168.1.100" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" />
 
 
 
@@ -52,7 +51,6 @@
   </node> 
 </group> 
 
-
 <group ns="$(arg robot2_name)"> 
    <node name="sensing" pkg="sensing" type="sensing" output="screen">  
      <param name="other_robot_odom" type="str" value="/$(arg robot1_name)/odometry" /> 
@@ -69,7 +67,7 @@
 
 <group ns="$(arg robot2_name)">
   <node name="evaluation" pkg="evaluation" type="evaluation" /> 
-</group>
+</group> 
 
 
 
@@ -85,7 +83,7 @@
 
 <group ns="$(arg robot2_name)"> 
   <node name="robot" pkg="robot" type="robot" machine="robot2" /> 
-</group>  
+</group> 
 
 
 
