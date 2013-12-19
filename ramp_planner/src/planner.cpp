@@ -635,6 +635,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
 
     // rate.sleep();
   } // end while
+  std::cout<<"\nPlanning complete!\n";
 
   // Send an empty trajectory
   ramp_msgs::Trajectory empty;

@@ -75,9 +75,15 @@ void Segment::buildWork() {
   a1_.push_back( (end_.p_.at(1) - start_.p_.at(1)) / T_loc_ );
 
   // a1 for pre_rotation
-  a1_.push_back( (angle_pre - start_.p_.at(2)) / T_rotate_pre_ );
+  if(T_rotate_pre_ > 0)
+    a1_.push_back( (angle_pre - start_.p_.at(2)) / T_rotate_pre_ );
+  else 
+    a1_.push_back(0);
   // a1 for post_rotation
-  a1_.push_back( (end_.p_.at(2) - angle_pre) / T_rotate_post_ );
+  if(T_rotate_post_ > 0)
+    a1_.push_back( (end_.p_.at(2) - angle_pre) / T_rotate_post_ );
+  else
+    a1_.push_back(0);
 
 } // End buildWork
 
@@ -101,14 +107,23 @@ const void Segment::calculateMinTime() {
   // Calculate time needed to rotate towards goal
   angle_pre = asin(d_y / euc_dist);
   float angle_dist = angle_pre - start_.p_.at(k_dof_-1);
-  T_rotate_pre_ = ceil(fabs(angle_dist / max_v_.at(k_dof_-1)));
+  if(angle_dist > 0.05) {
+    T_rotate_pre_ = ceil(fabs(angle_dist / max_v_.at(k_dof_-1)));
+  } 
+  else
+    T_rotate_pre_ = 0;
   //std::cout<<"\nangle_pre:"<<angle_pre<<" angle_dist:"<<angle_dist;
 
   // Then add to T_loc_ the time to go straight towards the goal
   T_loc_ = ceil(euc_dist / max_v_.at(0));
 
   // Now find the time required to rotate to desired goal orientation
-  T_rotate_post_ = ceil(fabs( (end_.p_.at(k_dof_-1) - angle_pre) / max_v_.at(k_dof_-1)));
+  angle_dist = end_.p_.at(k_dof_-1) - angle_pre;
+  if(angle_dist > 0.05)
+    T_rotate_post_ = ceil(fabs( angle_dist / max_v_.at(k_dof_-1)));
+  else
+    T_rotate_post_ = 0;
+  //T_rotate_post_ = ceil(fabs( (end_.p_.at(k_dof_-1) - angle_pre) / max_v_.at(k_dof_-1)));
 
   // Set min_T_
   T_min_ = T_loc_ + T_rotate_pre_ + T_rotate_post_;
