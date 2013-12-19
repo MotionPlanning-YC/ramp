@@ -158,7 +158,7 @@ void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
   calculateSpeedsAndTime();
 
   std::cout<<"\nVectors now:";
-  printVectors();
+  //printVectors();
 }
 
 
@@ -240,6 +240,8 @@ void Corobot::calculateSpeedsAndTime ()
     // Calculate the ending time for each waypoints
     end_times.push_back(start_time + next.time_from_start );
 
+    orientations_knotpoints.push_back(current.positions.at(2));
+
     // Calculate the linear speed between each waypoints
     //speeds.push_back(getSpeedToWaypoint(trajectory_.trajectory.points.at(i), trajectory_.trajectory.points.at(i+1)));
     
@@ -317,46 +319,35 @@ void Corobot::moveOnTrajectory()
     // std::cout<<"\nbeginning of outter while loop!";
     std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
     restart = false;
-    // printVectors();
-
     
+    // printVectors();
     twist.linear.x  = speeds.at(num_traveled);
     twist.angular.z = angular_speeds.at(num_traveled);
     std::cout<<"\ntwist.linear: "<<twist.linear.x;
     std::cout<<"\ntwist.angular: "<<twist.angular.z;
+    std::cout<<"\nend_times.size():"<<end_times.size()<<"\n";
+    std::cout<<"\norientations_knotpoints.size():"<<orientations_knotpoints.size()<<"\n";
 
 
-    start = ros::Time::now();
-
-    // We want to turn until we reach the correct angle within a 4 degree range, 
-    // but if we don't reach it within twice the time we calculated was needed,
-    // then we stop turning
-    float lower = trajectory_.trajectory.points.at(num_traveled+1).positions.at(2) - 0.10;
-    float upper = trajectory_.trajectory.points.at(num_traveled+1).positions.at(2) + 0.10;
-    ros::Time t = start + ros::Duration (2 * timeNeededToTurn);
-
-    // Turn the robot
-    while((ros::ok() && ros::Time::now() < t) && 
-            (lower > configuration_.K.at(2)) || 
-            (upper < configuration_.K.at(2)) ) 
-    {
-        sendTwist();
-        ros::spinOnce();
-        r.sleep();
-
-        // If a new trajectory has been sent
-        if(restart) 
-          break;
-    } // end while
-
+    ros::Time g_time = end_times.at(num_traveled);
+    while(ros::ok() && ros::Time::now() < g_time) {
+    
+      //twist.angular.z = -3 * ( configuration_.K.at(2) - orientations_knotpoints.at(num_traveled) );
+      sendTwist();
+      ros::spinOnce();
+      
+      r.sleep();
+      if(restart) {
+        break;
+      }
+    }
+    
     if(restart) {
       delay = ros::Duration(0);
       restart=false;
       continue;
-    } 
+    }
   
-    delay += ros::Time::now() - start; // we save as a delay the time it took to turn
-
     // If there is angular speed, rotate
     /*if ((angular_speeds.at(num_traveled) > 0.1 || angular_speeds.at(num_traveled) < -0.1) ) {
 

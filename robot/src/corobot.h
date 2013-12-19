@@ -21,7 +21,7 @@ class Corobot {
     Corobot();
     ~Corobot();
     
-    //Member functions 
+    // Member functions 
     void drive(corobot_msgs::MotorCommand msg) const;
     void driveStraight(const unsigned int speed) const;
     void turn(const unsigned int speed, const bool cwise) const;
@@ -40,7 +40,7 @@ class Corobot {
 
 
 
-    //Data Members
+    // Data Members
     ros::Publisher                    pub_phidget_motor_;
     ros::Publisher                    pub_twist_;
     ros::Publisher                    pub_update_;
@@ -51,7 +51,7 @@ class Corobot {
     ros::Timer                        timer_;
 
     
-    //static const members
+    // static const members
     static const std::string TOPIC_STR_PHIDGET_MOTOR;
     static const std::string TOPIC_STR_ODOMETRY;
     static const std::string TOPIC_STR_UPDATE;
@@ -74,12 +74,12 @@ class Corobot {
 
     void printVectors() const;
     
-    //holds the last 5 thetas to average
+    // holds the last 5 thetas to average
     std::vector<double> thetas_; 
     
     std::vector<ros::Time> end_times; // Save the ending time of each waypoint
-    std::vector<float> speeds; // Linear speed for each trajectory
-    std::vector<float> angular_speeds; //Angular Speed needed over 3s to get the correct orientation after each knot point reached.
+    std::vector<float> speeds; //  Linear speed for each trajectory
+    std::vector<float> angular_speeds; // Angular Speed needed over 3s to get the correct orientation after each knot point reached.
     std::vector<float> orientations_knotpoints; // The orientation needed to be at each knotpoint.
 
     geometry_msgs::Twist twist;
