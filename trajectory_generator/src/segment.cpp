@@ -2,16 +2,16 @@
 
 
 Segment::Segment() : k_dof_(3) {
-  max_v_.push_back(0.25f);
-  max_v_.push_back(0.25f);
-  max_v_.push_back(0.25f);
+  max_v_.push_back(0.33f);
+  max_v_.push_back(0.33f);
+  max_v_.push_back(0.33f);
 }
 
 Segment::Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind) : k_dof_(3) 
 {
-  max_v_.push_back(0.25f);
-  max_v_.push_back(0.25f);
-  max_v_.push_back(0.25f);
+  max_v_.push_back(0.33f);
+  max_v_.push_back(0.33f);
+  max_v_.push_back(0.33f);
   build(kp_start, kp_end, v_start, v_end, ind);
 }
 
@@ -107,7 +107,7 @@ const void Segment::calculateMinTime() {
   // Calculate time needed to rotate towards goal
   angle_pre = asin(d_y / euc_dist);
   float angle_dist = angle_pre - start_.p_.at(k_dof_-1);
-  if(angle_dist > 0.05) {
+  if(angle_dist > 0.1) {
     T_rotate_pre_ = ceil(fabs(angle_dist / max_v_.at(k_dof_-1)));
   } 
   else
@@ -119,7 +119,7 @@ const void Segment::calculateMinTime() {
 
   // Now find the time required to rotate to desired goal orientation
   angle_dist = end_.p_.at(k_dof_-1) - angle_pre;
-  if(angle_dist > 0.05)
+  if(angle_dist > 0.1)
     T_rotate_post_ = ceil(fabs( angle_dist / max_v_.at(k_dof_-1)));
   else
     T_rotate_post_ = 0;

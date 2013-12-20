@@ -131,7 +131,7 @@ void Planner::init_population() {
 
     // Hardcode some velocities, 0.25m/s per segment
     for(unsigned int j=1;j<paths_.at(i).all_.size();j++) {
-      v.push_back(0.25f);
+      v.push_back(0.33f);
     }
     
     // Build a TrajectoryRequest 
