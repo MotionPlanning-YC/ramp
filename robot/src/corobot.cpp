@@ -332,7 +332,7 @@ void Corobot::moveOnTrajectory()
     ros::Time g_time = end_times.at(num_traveled);
     while(ros::ok() && ros::Time::now() < g_time) {
     
-      //twist.angular.z = -3 * ( configuration_.K.at(2) - orientations_knotpoints.at(num_traveled) );
+      twist.angular.z = -3 * ( configuration_.K.at(2) - orientations_knotpoints.at(num_traveled) );
       sendTwist();
       ros::spinOnce();
       
