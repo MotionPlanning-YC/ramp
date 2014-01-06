@@ -46,7 +46,8 @@ void Trajectory::buildSegments() {
 }
 
 
-/** This method returns a MotionState given a segment ID and a time 
+/** 
+  * This method returns a MotionState given a segment ID and a time 
   * The method is passed a vector of dof's to compute 
   */
 const MotionState Trajectory::getMotionState(const unsigned int ind_segment, const float t) {
@@ -70,7 +71,7 @@ const MotionState Trajectory::getMotionState(const unsigned int ind_segment, con
     // Need to translate t by the time for pre-rotating
     else if(i < 2 && t <= (segment.T_loc_ + segment.T_rotate_pre_)) {
       result.p_.push_back(segment.a0_.at(i) + (segment.a1_.at(i) * (t - segment.T_rotate_pre_)));
-      result.v_.push_back(segment.a1_.at(i));
+      result.v_.push_back(fabs(segment.a1_.at(i)));
     }
 
     // If k is x or y and it is past time to pre-rotate or drive 
@@ -81,7 +82,7 @@ const MotionState Trajectory::getMotionState(const unsigned int ind_segment, con
     }
 
     // If k is theta and it is time to pre-rotate
-    // Push on the value of 
+    // Push on the value of angle 
     else if(i == 2 && t <= segment.T_rotate_pre_ && segment.T_rotate_pre_ > 0) {
       result.p_.push_back(segment.a0_.at(i) + segment.a1_.at(i) * t);
       result.v_.push_back(segment.a1_.at(i));

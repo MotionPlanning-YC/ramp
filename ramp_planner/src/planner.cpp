@@ -298,6 +298,10 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
 /** Send the fittest feasible trajectory to the robot package */
 void Planner::sendBest() {
   //std::cout<<"\nSending:"<<u.toString(bestTrajec_.msg_trajec_);
+  if(!bestTrajec_.feasible_) {
+    std::cout<<"\nSending infeasible trajectory\n";
+    std::cout<<u.toString(bestTrajec_.msg_trajec_);
+  }
   h_control_->send(bestTrajec_.msg_trajec_);
 }
 
@@ -460,6 +464,10 @@ void Planner::evaluateTrajectory(RampTrajectory& trajec) {
   if(requestEvaluation(er)) {
     trajec.fitness_   = er.response.fitness;
     trajec.feasible_  = er.response.feasible;
+
+    if(!trajec.feasible_) {
+      std::cout<<"\nInfeasible trajectory: "<<u.toString(trajec.msg_trajec_);
+    }
   }
   else {
     // some error handling
@@ -601,7 +609,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
 
   // Evaluate the population and get the trajectory to move on
   RampTrajectory T_move = evaluateAndObtainBest();
-  std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
+  // std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
   // std::cout<<"\nPress enter to start the loop!\n";
   // std::cin.get();
   

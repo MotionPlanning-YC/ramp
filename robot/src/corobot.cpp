@@ -216,13 +216,15 @@ void Corobot::calculateSpeedsAndTime ()
   orientations_knotpoints.clear();
   speeds.clear();
   end_times.clear();
-  int i_knot_points = 0; //  Index for going through knotpoints. We don't need the index of the current knot point but the next one
-  float past_orientation = 0;
-  float current_orientation = 0;
-  int num = trajectory_.trajectory.points.size(); // Get the number of waypoints
+  
+  // Get number of knot points
+  int num = trajectory_.trajectory.points.size(); 
+
+  // Get the starting time
   ros::Time start_time = ros::Time::now() + ros::Duration(0.0);
 
-  //  WE go through all the waypoints
+  float speed_loc;
+  // We go through all the waypoints
   for(int i=0;i<num-1;i++) {
 
     // Get the next points on the trajectory
@@ -230,8 +232,10 @@ void Corobot::calculateSpeedsAndTime ()
     trajectory_msgs::JointTrajectoryPoint next    = trajectory_.trajectory.points.at(i+1);
 
     // Push on the linear speed for the waypoint
-    // x and y will be the same so just take the x
-    speeds.push_back(current.velocities.at(0));
+    // Find the norm of the velocity vector
+    speed_loc = sqrt(pow(current.velocities.at(0),2) + pow(current.velocities.at(1), 2));
+    speeds.push_back(speed_loc);
+    //speeds.push_back(current.velocities.at(0));
 
     // Push on the angular speed for the waypoint
     // Angular speed is at index 2 of the point 
@@ -242,30 +246,6 @@ void Corobot::calculateSpeedsAndTime ()
 
     orientations_knotpoints.push_back(current.positions.at(2));
 
-    // Calculate the linear speed between each waypoints
-    //speeds.push_back(getSpeedToWaypoint(trajectory_.trajectory.points.at(i), trajectory_.trajectory.points.at(i+1)));
-    
-    // Calculate the angle the make sure we are at the correct orientation before trying to reach for the next knotpoint
-    //if (i == trajectory_.index_knot_points.at(i_knot_points))
-    //{
-        // calculate the orientation of each trajectory
-        //current_orientation = getTrajectoryOrientation(trajectory_.trajectory.points.at(i), trajectory_.trajectory.points.at(i+1));
-        // caculate the angular speed needed before to satisfy the correct direction for the next knotpoint.
-	// We divide by 1.22 to take into account the caster problem
-        //angular_speeds.push_back(getAngularSpeed(past_orientation, current_orientation) /*/ 1.11*/);
-	// orientation that the robot need to have before going straight to reach for the next knotpoint
-	//  We remove 22% of the amount it needs to turn in order to turn less, since the robot turns when accelerating due to the caster's position
-        //orientations_knotpoints.push_back(current_orientation/* - (current_orientation - past_orientation)*0.11*/);
-        //past_orientation = current_orientation;
-        
-        //i_knot_points++;
-    //}
-    
-    // calculate the angular speed for the final point
-    //if ( i == num-2)
-    //{
-      //angular_speeds.push_back(getAngularSpeed(current_orientation, trajectory_.trajectory.points.at(i+1).positions.at(2)));
-    //}
   } 
 }
 
@@ -320,7 +300,7 @@ void Corobot::moveOnTrajectory()
     std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
     restart = false;
     
-    // printVectors();
+    // Set velocities
     twist.linear.x  = speeds.at(num_traveled);
     twist.angular.z = angular_speeds.at(num_traveled);
     std::cout<<"\ntwist.linear: "<<twist.linear.x;
@@ -348,111 +328,10 @@ void Corobot::moveOnTrajectory()
       continue;
     }
   
-    // If there is angular speed, rotate
-    /*if ((angular_speeds.at(num_traveled) > 0.1 || angular_speeds.at(num_traveled) < -0.1) ) {
-
-      // Set the twist message
-      twist.angular.z = angular_speeds.at(num_traveled);
-      twist.linear.x = fabs(twist.angular.z * BASE_WIDTH * 0.5); //  We add some linear speed to turn only one wheel at a time
-      start = ros::Time::now();
-
-      // We want to turn until we reach the correct angle within a 4 degree range, 
-      // but if we don't reach it within twice the time we calculated was needed,
-      // then we stop turning
-      float lower = orientations_knotpoints.at(i_knot_points) - 0.10;
-      float upper = orientations_knotpoints.at(i_knot_points) + 0.10;
-      ros::Time t = start + ros::Duration (2 * timeNeededToTurn);
-
-      // Turn the robot
-      while((ros::ok() && ros::Time::now() < t) && 
-              (lower > configuration_.K.at(2)) || 
-              (upper < configuration_.K.at(2)) ) 
-      {
-          sendTwist();
-          ros::spinOnce();
-          r.sleep();
-
-          // If a new trajectory has been sent
-          if(restart) 
-            break;
-      } //end while
-
-      if(restart) {
-        delay = ros::Duration(0);
-        restart=false;
-        continue;
-      } 
-    
-      delay += ros::Time::now() - start; // we save as a delay the time it took to turn
-    } // end if turn */
-
-
-      
-    
-    
-    // Now we can go straight to reach the waypoint
-    // twist.linear.x = speeds.at(i);
-    /*twist.linear.x = speeds.at(num_traveled);
-    twist.angular.z = 0;
-
-
-    // Send the twist msg at some rate r
-    ros::Time g_time = end_times.at(num_traveled);
-    while(ros::ok() && ros::Time::now() < g_time) {
-      twist.angular.z = -3 * ( configuration_.K.at(2) - orientations_knotpoints.at(i_knot_points -1) );
-      sendTwist();
-      ros::spinOnce();
-      
-      r.sleep();
-      if(restart) {
-        break;
-      }
-    }
-    
-    if(restart) {
-      delay = ros::Duration(0);
-      restart=false;
-      continue;
-    }
-
-    //  Satisfy the orientation onces the final knotpoint has been reached
-    if ( num_traveled == num-2)
-    {
-        twist.linear.x = 0;
-        twist.angular.z = angular_speeds.at(i_knot_points);
-        start = ros::Time::now();
-
-        ros::Time g_time = start + ros::Duration(timeNeededToTurn);
-        while(ros::ok() && ros::Time::now() < g_time) {
-            sendTwist();
-            ros::spinOnce();
-            
-            r.sleep();
-            if(restart) {
-              break;
-            }
-        } // end while
-    
-      if(restart) {
-        delay = ros::Duration(0);
-        restart=false;
-        continue;
-      }
-
-        delay += ros::Duration(timeNeededToTurn); // we save as a delay the time it took to turn
-    } // end if
-
-    // Stops the wheels
-    // twist.linear.x = 0;
-    // twist.angular.z = 0;
-    // sendTwist();*/
-
-    // Increment num_traveled
     num_traveled++;
 
     // Spin once to check for updates in the trajectory
     ros::spinOnce();
-
   } // end while
 
     // Stops the wheels

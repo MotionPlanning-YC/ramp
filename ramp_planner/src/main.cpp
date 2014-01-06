@@ -20,21 +20,21 @@ std::vector<Configuration> getStartGoal(bool robot1) {
   Configuration s, g;
   
   if(robot1) {
+    s.K_.push_back(3);
     s.K_.push_back(1);
-    s.K_.push_back(1);
-    s.K_.push_back(0);
+    s.K_.push_back(3.14);
     
-    g.K_.push_back(3);
-    g.K_.push_back(1);
     g.K_.push_back(0);
+    g.K_.push_back(2);
+    g.K_.push_back(3.14);
   }
   else {
     s.K_.push_back(1);
-    s.K_.push_back(3);
+    s.K_.push_back(2);
     s.K_.push_back(0);
     
-    g.K_.push_back(3);
-    g.K_.push_back(3);
+    g.K_.push_back(3.5);
+    g.K_.push_back(1);
     g.K_.push_back(0);
   }
 

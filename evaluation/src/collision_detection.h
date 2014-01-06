@@ -13,7 +13,7 @@ class CollisionDetection {
     CollisionDetection() {}
 
     const bool perform() const;
-    const ramp_msgs::Trajectory getTrajectoryRequest(const ramp_msgs::Obstacle, const ros::Duration) const;
+    const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle, const ros::Duration) const;
     const bool query(const ramp_msgs::Trajectory ob_trajectory) const;
 
     ramp_msgs::Trajectory trajectory_;

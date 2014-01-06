@@ -7,7 +7,7 @@ const bool CollisionDetection::perform() const {
   // For each obstacle
   // Compute its trajectory to query collision detection
   for(unsigned int i=0;i<obstacleList_.obstacles.size();i++) {
-    ramp_msgs::Trajectory ob_trajectory = getTrajectoryRequest(obstacleList_.obstacles.at(i), d); 
+    ramp_msgs::Trajectory ob_trajectory = getPredictedTrajectory(obstacleList_.obstacles.at(i), d); 
     //std::cout<<"\ntrajectory_: "<<u.toString(trajectory_);
     //std::cout<<"\nob_trajectory: "<<u.toString(ob_trajectory);
     if(query(ob_trajectory)) {
@@ -123,7 +123,7 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
 
 
 /** This method returns the predicted trajectory for an obstacle for the future duration d */
-const ramp_msgs::Trajectory CollisionDetection::getTrajectoryRequest(const ramp_msgs::Obstacle ob, const ros::Duration d) const {
+const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ramp_msgs::Obstacle ob, const ros::Duration d) const {
   ramp_msgs::Trajectory result;
 
   // First, identify which type of trajectory it is

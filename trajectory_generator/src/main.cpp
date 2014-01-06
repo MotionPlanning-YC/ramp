@@ -29,19 +29,19 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::Configuration c1;
-  c1.K.push_back(1);
   c1.K.push_back(3);
-  c1.K.push_back(0);
+  c1.K.push_back(1);
+  c1.K.push_back(3.14);
 
   ramp_msgs::Configuration c2;
-  c2.K.push_back(2.65712);
-  c2.K.push_back(2.89299);
-  c2.K.push_back(0.110012);
+  c2.K.push_back(0);
+  c2.K.push_back(2);
+  c2.K.push_back(3.14);
 
-  ramp_msgs::Configuration c3;
+  /*ramp_msgs::Configuration c3;
   c3.K.push_back(3);
   c3.K.push_back(3);
-  c3.K.push_back(0);
+  c3.K.push_back(0);*/
 
   /*ramp_msgs::Configuration c4;
   c4.K.push_back(5);
@@ -60,8 +60,8 @@ int main(int argc, char** argv) {
 
   ramp_msgs::Path p;
   p.configurations.push_back(c1);
-  //p.configurations.push_back(c2);
-  p.configurations.push_back(c3);
+  p.configurations.push_back(c2);
+  //p.configurations.push_back(c3);
   //p.configurations.push_back(c4);
   
   ramp_msgs::TrajectoryRequest tr;
@@ -71,7 +71,8 @@ int main(int argc, char** argv) {
   tr.request.v_end = v_g;
   tr.request.resolutionRate = 5;
 
-  std::cout<<"\nConstructing Trajectory\n";
+  std::cout<<"\nConstructing Trajectory From Request:\n";
+  std::cout<<u.toString(tr.request);
   Trajectory traj(tr.request);
   std::cout<<"\nDone constructing\n";
   std::cout<<"\nGenerating Trajectory\n";

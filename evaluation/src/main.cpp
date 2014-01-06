@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
   ob.odom_t = odom;
   ob.odom_t_prev = odom_prev;
   ros::Duration d(2); 
-  ramp_msgs::Trajectory t = ev.collision_.getTrajectoryRequest(ob, d); 
+  ramp_msgs::Trajectory t = ev.collision_.getPredictedTrajectory(ob, d); 
 
   /** Testing */
   std::cout<<"\nGot trajectory t\n";
@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
 
   ob.odom_t = odom;
   ob.odom_t_prev = odom_prev;
-  ramp_msgs::Trajectory t_2 = ev.collision_.getTrajectoryRequest(ob, d); 
+  ramp_msgs::Trajectory t_2 = ev.collision_.getPredictedTrajectory(ob, d); 
 
   //std::cout<<"\nGot trajectory t_2\n";
   //std::cout<<"\n"<<u.toString(t_2)<<"\n";

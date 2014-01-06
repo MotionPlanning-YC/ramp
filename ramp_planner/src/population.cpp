@@ -58,7 +58,6 @@ const unsigned int Population::add(const RampTrajectory rt) {
  */
 const int Population::findBestFeasible(bool feasible, int generation) const {
   int result = -1;
-  int result_second = result;
 
   //Find the first feasible(or infeasible) trajectory
   int i_start    = 0;
@@ -69,27 +68,18 @@ const int Population::findBestFeasible(bool feasible, int generation) const {
     
     //Set result
     result = i_start;
-    result_second = result;
-
+    
     //Go through each trajectory and see it is highest fitness value
     for(unsigned int i=i_start;i<population_.size();i++) {
       
       //If the trajectory feasibility == feasible, and it has the highest fitness so far
       if(population_.at(i).feasible_ == feasible && population_.at(i).fitness_ > population_.at(result).fitness_) {
-        result_second = result;
         result = i;
       }
+    
+    } //end for
+  } //end if
 
-      else if(population_.at(i).feasible_ == feasible && population_.at(i).fitness_ > population_.at(result_second).fitness_) {
-        result_second = i;
-      }
-    }
-  }
-
-  //if(generation > 75) {
-    //std::cout<<"\nReturning "<<result_second<<" for feasible: "<<feasible<<"\n";
-    //return result_second;
-  //}
   
   return result;
 } //End findBestFeasible
