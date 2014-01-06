@@ -236,6 +236,7 @@ void Corobot::calculateSpeedsAndTime ()
     speed_loc = sqrt(pow(current.velocities.at(0),2) + pow(current.velocities.at(1), 2));
     speeds.push_back(speed_loc);
     //speeds.push_back(current.velocities.at(0));
+      
 
     // Push on the angular speed for the waypoint
     // Angular speed is at index 2 of the point 
@@ -252,36 +253,31 @@ void Corobot::calculateSpeedsAndTime ()
 
 void Corobot::sendTwist()
 {
-	pub_twist_.publish(twist); 
+  pub_twist_.publish(twist); 
 }
 
 
 void Corobot::printVectors() const {
     
-    std::cout<<"\nspeeds: [";
-    for(unsigned int i=0;i<speeds.size()-1;i++) {
-      std::cout<<speeds.at(i)<<", ";
-    }
-    std::cout<<speeds.at(speeds.size()-1)<<"]";
+  std::cout<<"\nspeeds: [";
+  for(unsigned int i=0;i<speeds.size()-1;i++) {
+    std::cout<<speeds.at(i)<<", ";
+  }
+  std::cout<<speeds.at(speeds.size()-1)<<"]";
 
-    std::cout<<"\nend_times: [";
-    for(unsigned int i=0;i<end_times.size()-1;i++) {
-      std::cout<<end_times.at(i)<<", ";
-    }
-    std::cout<<end_times.at(end_times.size()-1)<<"]";
+  std::cout<<"\nend_times: [";
+  for(unsigned int i=0;i<end_times.size()-1;i++) {
+    std::cout<<end_times.at(i)<<", ";
+  }
+  std::cout<<end_times.at(end_times.size()-1)<<"]";
 
-    std::cout<<"\nangular_speeds: [";
-    for(unsigned int i=0;i<angular_speeds.size()-1;i++) {
-      std::cout<<angular_speeds.at(i)<<", ";
-    }
-    std::cout<<angular_speeds.at(angular_speeds.size()-1)<<"]";
-    
-    
-    /*std::cout<<"\norientations_knotpoints: [";
-    for(unsigned int i=0;i<orientations_knotpoints.size()-1;i++) {
-      std::cout<<orientations_knotpoints.at(i)<<", ";
-    }
-    std::cout<<orientations_knotpoints.at(orientations_knotpoints.size()-1)<<"]";*/
+  std::cout<<"\nangular_speeds: [";
+  for(unsigned int i=0;i<angular_speeds.size()-1;i++) {
+    std::cout<<angular_speeds.at(i)<<", ";
+  }
+  std::cout<<angular_speeds.at(angular_speeds.size()-1)<<"]";
+
+
 }
 
 
@@ -303,20 +299,30 @@ void Corobot::moveOnTrajectory()
     // Set velocities
     twist.linear.x  = speeds.at(num_traveled);
     twist.angular.z = angular_speeds.at(num_traveled);
+    //printVectors();
     std::cout<<"\ntwist.linear: "<<twist.linear.x;
     std::cout<<"\ntwist.angular: "<<twist.angular.z;
-    std::cout<<"\nend_times.size():"<<end_times.size()<<"\n";
-    std::cout<<"\norientations_knotpoints.size():"<<orientations_knotpoints.size()<<"\n";
-
+    //std::cout<<"\nend_times.size():"<<end_times.size()<<"\n";
+    //std::cout<<"\norientations_knotpoints.size():"<<orientations_knotpoints.size()<<"\n";
 
     ros::Time g_time = end_times.at(num_traveled);
     while(ros::ok() && ros::Time::now() < g_time) {
     
-      twist.angular.z = -3 * ( configuration_.K.at(2) - orientations_knotpoints.at(num_traveled) );
+      // Adjust the angular speed to correct errors in turning
+      if(twist.linear.x > 0) {
+        twist.angular.z = -3.0f * ( configuration_.K.at(2) - orientations_knotpoints.at(num_traveled) );
+      }
+    
+      // Send the twist message to move the robot
       sendTwist();
+
+      // Spin to check for updates
       ros::spinOnce();
       
+      //Sleep
       r.sleep();
+
+      // Check if a new trajectory has been received
       if(restart) {
         break;
       }
