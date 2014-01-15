@@ -157,7 +157,7 @@ void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
   num = trajectory_.trajectory.points.size();
   calculateSpeedsAndTime();
 
-  std::cout<<"\nVectors now:";
+  //std::cout<<"\nVectors now:";
   //printVectors();
 }
 
@@ -285,7 +285,7 @@ void Corobot::moveOnTrajectory()
 {
   restart = false;
   
-  ros::Rate r(75);
+  ros::Rate r(50);
   
   ros::Duration delay = ros::Duration(0); //  Save the time it took to do all the turns
   ros::Time start;
@@ -309,9 +309,9 @@ void Corobot::moveOnTrajectory()
     while(ros::ok() && ros::Time::now() < g_time) {
     
       // Adjust the angular speed to correct errors in turning
-      if(twist.linear.x > 0) {
-        twist.angular.z = -3.0f * ( configuration_.K.at(2) - orientations_knotpoints.at(num_traveled) );
-      }
+      //if(twist.linear.x > 0.0f) {
+        //twist.angular.z = -1.5f * ( configuration_.K.at(2) - orientations_knotpoints.at(num_traveled) );
+      //}
     
       // Send the twist message to move the robot
       sendTwist();
