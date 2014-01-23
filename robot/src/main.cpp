@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   //Make a blank ramp_msgs::Trajectory
   ramp_msgs::Trajectory init;
   robot.trajectory_ = init;
-  
+
   while(ros::ok()) {
     robot.moveOnTrajectory();
     ros::spinOnce();
