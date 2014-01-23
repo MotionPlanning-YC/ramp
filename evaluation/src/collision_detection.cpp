@@ -45,98 +45,16 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const {
 const std::vector<float> CollisionDetection::getCenter(std::vector<float> p, float orientation) const {
   std::vector<float> result;
   
-
-  /*// Transform to odometry
-  float x_odometry = (cos(orientation) * p.at(0)) + (sin(orientation) * p.at(1)) + (-2*sin(orientation));
-  float y_odometry = (-sin(orientation) * p.at(0)) + (cos(orientation) * p.at(1)) + (-2*cos(orientation));
-
-  if(id == 1) {
-    //std::cout<<"\nBEFORE x_odometry: "<<x_odometry<<" y_odometry: "<<y_odometry;
-    x_odometry += (-2*sin(orientation));
-    y_odometry += (-2*cos(orientation));
-    //std::cout<<"\nAFTER x_odometry: "<<x_odometry<<" y_odometry: "<<y_odometry;
-  }
-  else {
-    x_odometry += ( (-1.5f*cos(orientation)) + (-1.75f*sin(orientation)) );
-    y_odometry += ( (1.5f*sin(orientation)) + (-1.75f*cos(orientation)) );
-  }
-
-
-  // Get the center in the odometry frame
-  x_odometry -= 0.1524f;
-  y_odometry -= 0.1524f;
-
-  // Get x,y in world frame
-  float x = (cos(orientation) * x_odometry) + (-sin(orientation) * y_odometry);
-  float y = (sin(orientation) * x_odometry) + (cos(orientation) * y_odometry);
-  //if(id == 1)
-  //std::cout<<"\nx: "<<x<<" y: "<<y;
-  
-  if(id == 1) {
-    x += 0;
-    y += 2;
-  }
-  else {
-    x += 1.5f;
-    y += 1.75f;
-  }*/
-
   // geometrical way
   float x = p.at(0);
   float y = p.at(1);
 
   float r = 0.2155261;
-  // First quadrant
-  /*if(orientation >= 0 && orientation < (PI/2)) {
-    x += r*cos( (-3*PI/4) - orientation);
-    y += r*sin( (-3*PI/4) - orientation);
-  }
-  
-  // First half of second quadrant
-  else if (orientation >= PI/2 && orientation <= (3*PI/4)) {
-    x += r*cos( (-3*PI/4) + orientation);
-    y += r*sin( (-3*PI/4) - orientation);
-  }
-
-  // Second half of second quadrant
-  else if(orientation > (3*PI/4) && orientation <= PI) {
-    x += r*cos( (-3*PI/4) + orientation);
-    y += r*sin( (-3*PI/4) + orientation);
-  }
-
-  // Second half of third quadrant
-  else if(orientation >= (-3*PI/4) && orientation > -PI) {
-    x += r*cos( (-3*PI/4) + orientation);
-    y += r*sin( (-3*PI/4) + orientation);
-  }
-  
-  // First half of third quadrant
-  else if(orientation >= (-3*PI/4) && orientation > -PI) {
-    x += r*cos( (-3*PI/4) - orientation);
-    y += r*sin( (-3*PI/4) + orientation);
-  }
-
-  // Second half of fourth quadrant
-  else if(orientation >= (-PI/2) && orientation < (-PI/4)) {
-    x += r*cos( (-3*PI/4) - orientation);
-    y += r*sin( (-3*PI/4) + orientation);
-  }
-  
-  // Second half of fourth quadrant
-  else if(orientation >= (-PI/4) && orientation < 0) {
-    x += r*cos( (-3*PI/4) - orientation);
-    y += r*sin( (-3*PI/4) - orientation);
-  }*/
-
   if(orientation > 0) {
-    //x += r*cos( (-3*PI/4) - orientation);
     x += r*cos( u.displaceAngle((-3*PI/4), orientation));
     y += r*sin( u.displaceAngle((-3*PI/4), orientation));
-    //y += r*sin( (-3*PI/4) - orientation);
   }
   else {
-    //x += r*cos( (-3*PI/4) + orientation);
-    //y += r*sin( (-3*PI/4) + orientation);
     x += r*cos( u.displaceAngle((-3*PI/4), -orientation));
     y += r*sin( u.displaceAngle((-3*PI/4), -orientation));
   }

@@ -1,6 +1,7 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 #include "range.h"
+#include "utility.h"
 #include "ramp_msgs/Configuration.h"
 #include "trajectory_msgs/JointTrajectoryPoint.h"
 
@@ -26,8 +27,10 @@ class Configuration {
     void  updatePosition(float x, float y, float theta);
 
 
-    void  transform(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta);
-    std::vector<float> getPosition(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w);
-    float getOrientation(const float theta);
+    void  transformBase(const tf::Transform T, float theta);
+  
+  private:
+    std::vector<float> transformBasePosition(const tf::Transform T);
+    float transformBaseOrientation(const float theta);
 };
 #endif

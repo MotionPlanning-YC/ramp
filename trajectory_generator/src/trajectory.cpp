@@ -45,8 +45,6 @@ void Trajectory::buildSegments() {
     
     // Push the segment onto the vector
     segments_.push_back(temp);
-
-    std::cout<<"\nSegment "<<i<<": "<<temp.toString();
   }
 }
 

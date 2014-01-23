@@ -53,14 +53,12 @@ Planner::~Planner() {
 //indices -  0: x, 1: y, 2: theta
 void Planner::setT_od_w(std::vector<float> od_info) {
   
-  Eigen::Translation<float,2> translation(od_info.at(0), od_info.at(1)); 
-  Eigen::Rotation2D<float> rotation(od_info.at(2));
-
-  T_od_w_ = translation * rotation;
-  //std::cout<<"\nT_od_w: "<<T_od_w_.matrix();
-
   // Can we find this from matrix?
   theta_od_w = od_info.at(2);
+
+  tf::Vector3 od(od_info.at(0), od_info.at(1), 0); 
+  T_od_w_.setOrigin(od);
+  T_od_w_.setRotation(tf::createQuaternionFromRPY(0, 0, od_info.at(2)));
 }
 
 
@@ -75,7 +73,9 @@ Configuration Planner::getStartConfiguration() {
   return start_;
 }
 
-/** Sets start_ */
+/** Sets start_ 
+ * Updates are relative to odometry frame
+ * */
 void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
   //std::cout<<"\nReceived update!\n";
   
@@ -84,13 +84,13 @@ void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
 
   mutex_start_ = false;
 
-  
+  // Create a Configuration from the update msg 
   Configuration c_od(msg->configuration);
 
-  // Transform robot config to world coordinates
-  c_od.transform(T_od_w_, theta_od_w);
+  // Transform configuration from odometry to world coordinates
+  c_od.transformBase(T_od_w_, theta_od_w);
 
-  // Necessary?
+  // if statement Necessary?
   if(c_od.K_.size() > 0) {
     start_ = c_od;
   }
