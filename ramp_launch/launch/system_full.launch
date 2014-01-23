@@ -36,7 +36,7 @@
 </group> 
 
 <group ns="$(arg robot2_name)"> 
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen"> 
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner"> 
     <param name="robot_update" type="str" value="/$(arg robot2_name)/update" /> 
   </node>
 </group> 
@@ -62,11 +62,15 @@
 <!-- Evaluation -->
 
 <group ns="$(arg robot1_name)">
-  <node name="evaluation" pkg="evaluation" type="evaluation" /> 
+  <node name="evaluation" pkg="evaluation" type="evaluation" output="screen">
+    <param name="robot_id" type="int" value="1" />
+  </node>
 </group> 
 
 <group ns="$(arg robot2_name)">
-  <node name="evaluation" pkg="evaluation" type="evaluation" /> 
+  <node name="evaluation" pkg="evaluation" type="evaluation" output="screen"> 
+    <param name="robot_id" type="int" value="2" />
+  </node>
 </group> 
 
 

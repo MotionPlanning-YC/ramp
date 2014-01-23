@@ -20,22 +20,22 @@ std::vector<Configuration> getStartGoal(bool robot1) {
   Configuration s, g;
   
   if(robot1) {
-    s.K_.push_back(3);
-    s.K_.push_back(1);
-    s.K_.push_back(3.14);
-    
-    g.K_.push_back(0);
-    g.K_.push_back(2);
-    g.K_.push_back(3.14);
-  }
-  else {
-    s.K_.push_back(1);
+    s.K_.push_back(0);
     s.K_.push_back(2);
     s.K_.push_back(0);
     
-    g.K_.push_back(3.5);
-    g.K_.push_back(1);
+    g.K_.push_back(3);
+    g.K_.push_back(2.f);
     g.K_.push_back(0);
+  }
+  else {
+    s.K_.push_back(3.f);
+    s.K_.push_back(1.75f);
+    s.K_.push_back(PI);
+    
+    g.K_.push_back(0.f);
+    g.K_.push_back(1.75f);
+    g.K_.push_back(PI);
   }
 
   result.push_back(s);
@@ -75,28 +75,63 @@ int main(int argc, char** argv) {
   g.ranges_ = my_planner.ranges_;
   
   // Set start and goal
-  my_planner.initial_ = s;
   my_planner.start_   = s;
   my_planner.goal_    = g;
-
   std::cout<<"\nStart:"<<s.toString();
   std::cout<<"\nGoal:"<<g.toString();
   
+  // Set transform matrix for odometry
+  my_planner.setT_od_w(s.K_);
+
 
   /** Initialize the Planner's handlers */ 
   my_planner.init(handle); 
   /** End building Planner */
 
+
+  // Don't start planner, just wait for updates
+  //while(ros::ok()) {ros::spinOnce();}
+  
+  /*Configuration p_origin;
+  p_origin.updatePosition(3.f, 0.f, 3.14159f);
+  my_planner.setT_od_w(p_origin.K_);
+
+  Configuration p_od;
+  p_od.updatePosition(2, 0, 0);
+  p_od.add(my_planner.T_od_w_, 3.14159f);
+  std::cout<<"\np_w: "<<p_od.toString();*/
+  
+
   
   
+  /*ros::Publisher pub = handle.advertise<ramp_msgs::Update>("update", 1000);
+
+  Configuration u;
+  u.K_.push_back(1.f);
+  u.K_.push_back(2.f);
+  u.K_.push_back(-PI/4);
+  u.ranges_ = my_planner.ranges_;
+  ramp_msgs::Update up;
+  up.configuration = u.buildConfigurationMsg();
+  std::cout<<"\nAbout to publish!\n";
+  pub.publish(up);
+  std::cout<<"\nnew config: "<<my_planner.start_.toString();*/
+
   /******* Start the planner *******/
   std::cout<<"\nPress Enter to start the planner\n";
   std::cin.get(); 
   
   my_planner.go();
 
-  
+  while(ros::ok()) {
+    my_planner.evaluatePopulation();
+    std::cout<<"\nPopulation size: "<<my_planner.population_.size();
+  }
 
+  
+  std::cout<<"\nPress Enter to exit!\n";
+  std::cin.get();
+  ros::spinOnce();
   std::cout<<"\nExiting Normally\n";
   return 0;
 }

@@ -24,7 +24,10 @@ class Configuration {
     const ramp_msgs::Configuration buildConfigurationMsg() const;
     const std::string toString() const;
     void  updatePosition(float x, float y, float theta);
-    void  subtract(const Configuration& c);
-    void  add(const Configuration& c);
+
+
+    void  transform(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta);
+    std::vector<float> getPosition(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w);
+    float getOrientation(const float theta);
 };
 #endif

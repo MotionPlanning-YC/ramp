@@ -1,3 +1,5 @@
+#include <type_traits>
+
 enum class MotionType {
   None                        = 0,
   Translation                 = 1,

@@ -90,6 +90,64 @@ const ramp_msgs::Configuration Configuration::buildConfigurationMsg() const {
   return result;
 }
 
+
+
+/** This method returns the new position vector of the Configuration given some transformation matrix */
+std::vector<float> Configuration::getPosition(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w) {
+
+  std::vector<float> result;
+  
+  Eigen::Vector3f p(K_.data());
+  p[2] = 1;
+
+  Eigen::Vector3f p2 = T_od_w * p;
+
+  result.push_back(p2[0]);
+  result.push_back(p2[1]);
+
+  return result;
+}
+
+//K.at(2) is odometry, need to add od's orientation wtr the world cs
+float Configuration::getOrientation(const float theta_od_w) {
+  float result=0.;
+  float sum = K_.at(2) + theta_od_w;
+
+  // If two angles are positive, but result should be negative
+  if(sum > PI) {
+    sum     = fmodf(sum, PI);
+    result  = sum - PI;
+  }
+
+  // If 2 angles are negative, but result should be positive
+  else if(sum < -PI) {
+    result  = sum + (2*PI);
+  }
+
+  else {
+    result  = sum;
+  }
+
+  return result;
+} //End getOrientation
+
+
+// K is odometry orientation, c is initial 
+// TODO: Make this better. Maybe getNewPosition, getNewOrientation methods
+// TODO: Get indices of orientation, x, y rather than hardcode
+void Configuration::transform(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta) {
+
+  // Get the new position
+  std::vector<float> p_w = getPosition(T_od_w);
+  K_.at(0) = p_w.at(0);
+  K_.at(1) = p_w.at(1);
+  
+  // Get the new orientation
+  K_.at(2) = getOrientation(theta);
+} //End add
+
+
+
 const std::string Configuration::toString() const {
   std::ostringstream result;
   
@@ -100,18 +158,6 @@ const std::string Configuration::toString() const {
   result<<")";
 
   return result.str(); 
-}
+} //End toString
 
 
-void Configuration::subtract(const Configuration& c) {
-  for(unsigned int i=0;i<c.K_.size();i++) {
-    K_.at(i) = K_.at(i) - c.K_.at(i);
-  }
-}
-
-
-void Configuration::add(const Configuration& c) {
-  for(unsigned int i=0;i<c.K_.size();i++) {
-    K_.at(i) = K_.at(i) + c.K_.at(i);
-  }
-}

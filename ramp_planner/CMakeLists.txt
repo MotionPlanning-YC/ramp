@@ -21,7 +21,7 @@ catkin_package(
 ## Build ##
 ###########
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} /usr/share/include/eigen3)
 
 ## Declare a cpp executable
 add_executable(${PROJECT_NAME} src/main.cpp src/planner.cpp src/configuration.cpp src/control_handler.cpp src/modification_request_handler.cpp src/modifier.cpp src/path.cpp src/population.cpp src/ramp_trajectory.cpp src/range.cpp src/trajectory_request_handler.cpp src/evaluation_request_handler.cpp src/utility.cpp)

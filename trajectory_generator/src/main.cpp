@@ -30,13 +30,13 @@ int main(int argc, char** argv) {
   // Build a Path
   ramp_msgs::Configuration c1;
   c1.K.push_back(3);
-  c1.K.push_back(1);
-  c1.K.push_back(3.14);
+  c1.K.push_back(0);
+  c1.K.push_back(PI/4);
 
   ramp_msgs::Configuration c2;
+  c2.K.push_back(3);
   c2.K.push_back(0);
-  c2.K.push_back(2);
-  c2.K.push_back(3.14);
+  c2.K.push_back(PI/4);
 
   /*ramp_msgs::Configuration c3;
   c3.K.push_back(3);
@@ -80,6 +80,13 @@ int main(int argc, char** argv) {
   tr.response.trajectory = traj.buildTrajectoryMsg();
   
   std::cout<<"\n"<<u.toString(tr.response.trajectory);
+
+  //ros::Publisher pub = handle.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000); 
+  //std::cout<<"\nPress Enter to publish\n";
+  //std::cin.get();
+  //pub.publish(tr.response.trajectory);
+  //
+  std::cout<<"\n"<<u.displaceAngle(PI/2, 3*PI/4);
   
   std::cout<<"\nSpinning...\n";  
   ros::spin();

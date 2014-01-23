@@ -8,8 +8,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <Eigen/Geometry>
 #include "ramp_msgs/Path.h"
 #include "ramp_msgs/Trajectory.h"
+
+#define PI 3.14159f
+
 
 class Range;
 

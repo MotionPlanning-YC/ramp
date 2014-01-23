@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(4), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
+Planner::Planner() : resolutionRate_(5), populationSize_(10), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
   controlCycle_ = ros::Duration(0.25);
 }
@@ -15,7 +15,7 @@ Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), popula
   controlCycle_ = ros::Duration(0.25);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(4), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(10), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
   init(h); 
   controlCycle_ = ros::Duration(0.25);
@@ -44,6 +44,26 @@ Planner::~Planner() {
 }
 
 
+
+/*****************************************************
+ ********************** Methods **********************
+ *****************************************************/
+
+//od_info is a vector:
+//indices -  0: x, 1: y, 2: theta
+void Planner::setT_od_w(std::vector<float> od_info) {
+  
+  Eigen::Translation<float,2> translation(od_info.at(0), od_info.at(1)); 
+  Eigen::Rotation2D<float> rotation(od_info.at(2));
+
+  T_od_w_ = translation * rotation;
+  //std::cout<<"\nT_od_w: "<<T_od_w_.matrix();
+
+  // Can we find this from matrix?
+  theta_od_w = od_info.at(2);
+}
+
+
 const unsigned int Planner::getIRT() {
   return i_rt++;
 }
@@ -57,7 +77,7 @@ Configuration Planner::getStartConfiguration() {
 
 /** Sets start_ */
 void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
-  // std::cout<<"\nReceived update!\n";
+  //std::cout<<"\nReceived update!\n";
   
   // Wait for mutex to be true
   while(!mutex_start_) {}
@@ -65,15 +85,17 @@ void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
   mutex_start_ = false;
 
   
-  Configuration temp(msg->configuration);
-  temp.add(initial_);
+  Configuration c_od(msg->configuration);
 
-  if(temp.K_.size() > 0) {
-    start_ = temp;
+  // Transform robot config to world coordinates
+  c_od.transform(T_od_w_, theta_od_w);
+
+  // Necessary?
+  if(c_od.K_.size() > 0) {
+    start_ = c_od;
   }
 
-  // start_.updatePosition(msg->pose.pose.position.x, msg->pose.pose.position.y, tf::getYaw(msg->pose.pose.orientation));
-  
+  //std::cout<<"\nNew starting configuration: "<<start_.toString();
 
   mutex_start_ = true;
 }
@@ -107,7 +129,7 @@ void Planner::init_population() {
 
     // Each trajectory will have a random number of knot points
     // Put a max of 10 knot points for practicality...
-    unsigned int num = rand() % 10;
+    unsigned int num = rand() % 7;
 
     // For each knot point to be created...
     for(unsigned int j=0;j<num;j++) {
@@ -297,11 +319,10 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
 
 /** Send the fittest feasible trajectory to the robot package */
 void Planner::sendBest() {
-  //std::cout<<"\nSending:"<<u.toString(bestTrajec_.msg_trajec_);
-  if(!bestTrajec_.feasible_) {
-    std::cout<<"\nSending infeasible trajectory\n";
-    std::cout<<u.toString(bestTrajec_.msg_trajec_);
-  }
+  //if(!bestTrajec_.feasible_) {
+    //std::cout<<"\n\n\n\nSending Infeasible Trajectory:"<<u.toString(bestTrajec_.msg_trajec_);
+    //std::cout<<"\n"<<population_.fitnessFeasibleToString();
+  //}
   h_control_->send(bestTrajec_.msg_trajec_);
 }
 
@@ -332,10 +353,12 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   bestTrajec_ = evaluateAndObtainBest();
   
 
-  // T_move = T
   // Send the best trajectory 
   // std::cout<<"\nSending new trajectory!\n";
-  sendBest(); 
+  //if(generation_ > 75) {
+    //std::cout<<"\nSending "<<u.toString(bestTrajec_.msg_trajec_);
+    sendBest(); 
+  //}
   
   // Send the whole population to the trajectory viewer
   //sendPopulation();
@@ -450,7 +473,7 @@ void Planner::modification() {
   }
   
   // Obtain and set best trajectory
-  bestTrajec_ = population_.findBest(generation_);
+  bestTrajec_ = population_.findBest();
 } // End modification
 
 
@@ -465,9 +488,9 @@ void Planner::evaluateTrajectory(RampTrajectory& trajec) {
     trajec.fitness_   = er.response.fitness;
     trajec.feasible_  = er.response.feasible;
 
-    if(!trajec.feasible_) {
-      std::cout<<"\nInfeasible trajectory: "<<u.toString(trajec.msg_trajec_);
-    }
+    //if(!trajec.feasible_) {
+      //std::cout<<"\nInfeasible trajectory: "<<u.toString(trajec.msg_trajec_);
+    //}
   }
   else {
     // some error handling
@@ -577,7 +600,7 @@ void Planner::updatePopulation(ros::Duration d) {
 /** This method calls evaluatePopulation and population_.getBest() */
 const RampTrajectory Planner::evaluateAndObtainBest() {
   evaluatePopulation();
-  return population_.findBest(generation_);
+  return population_.findBest();
 }
 
 
@@ -609,7 +632,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
 
   // Evaluate the population and get the trajectory to move on
   RampTrajectory T_move = evaluateAndObtainBest();
-  // std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
+   std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
   // std::cout<<"\nPress enter to start the loop!\n";
   // std::cin.get();
   
@@ -618,7 +641,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   // createSubpopulations();
   
   timer_.start();
-  while( (start_.compare(goal_) > 0.1) && ros::ok()) {
+  while( (start_.compare(goal_) > 0.5) && ros::ok()) {
     //std::cout<<"\ngeneration_: "<<generation_;
     
     // t=t+1

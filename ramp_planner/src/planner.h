@@ -61,7 +61,9 @@ class Planner {
 
     //Configuraton of initial starting position
     //We use this to translate each update 
-    Configuration initial_;
+    Eigen::Transform<float, 2, Eigen::Affine> T_od_w_;
+    float theta_od_w;
+    void setT_od_w(std::vector<float> od_info);
 
 
     

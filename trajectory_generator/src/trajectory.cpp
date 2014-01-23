@@ -36,13 +36,18 @@ void Trajectory::buildSegments() {
   for(unsigned int i=0;i<knot_points_.size()-1;i++) {
     Segment temp;
 
+    if(i == knot_points_.size()-2) {
+      temp.plan_post = true;
+    }
+
     // Build the segment
     temp.build(knot_points_.at(i), knot_points_.at(i+1), v_start_.at(i), v_end_.at(i), i);
     
     // Push the segment onto the vector
     segments_.push_back(temp);
-  }
 
+    std::cout<<"\nSegment "<<i<<": "<<temp.toString();
+  }
 }
 
 
@@ -92,14 +97,14 @@ const MotionState Trajectory::getMotionState(const unsigned int ind_segment, con
     // Push on the next value of theta
     // Need to translate t by the time for pre-rotating and driving straight
     else if(i == 2 && t > (segment.T_rotate_pre_ + segment.T_loc_)) {
-      result.p_.push_back(segment.angle_pre + segment.a1_.at(i+1) * (t - segment.T_loc_ - segment.T_rotate_pre_));
+      result.p_.push_back(segment.pre_angle + segment.a1_.at(i+1) * (t - segment.T_loc_ - segment.T_rotate_pre_));
       result.v_.push_back(segment.a1_.at(i+1));
     }
 
     // If k is theta and it is not time to post-rotate
     // Push on the initial value of theta
     else {
-      result.p_.push_back(segment.angle_pre);
+      result.p_.push_back(segment.pre_angle);
       result.v_.push_back(0);
     }
     
@@ -121,15 +126,10 @@ const std::vector<MotionState> Trajectory::generate() {
 
   // For each segment 
   for(unsigned int i=0;i<segments_.size();i++) { 
-    //std::cout<<"\nSegment "<<i<<"\n";
 
+    // Create the Segment object
     Segment segment = segments_.at(i);
-    /*std::cout<<"\nSegment "<<i<<":";
-    std::cout<<"\nangle_pre: "<<segment.angle_pre<<" (radians)";
-    std::cout<<", "<<segment.angle_pre * 180 / M_PI<<" (degrees)";
-    std::cout<<"\nT_rotate_pre_: "<<segment.T_rotate_pre_;
-    std::cout<<"\nT_loc: "<<segment.T_loc_;
-    std::cout<<"\nT_rotate_post_: "<<segment.T_rotate_post_;*/
+    //std::cout<<"\nsegment "<<i<<": "<<segment.toString();
 
     // The time of the segment in seconds
     unsigned int segment_duration = segments_.at(i).T_min_;

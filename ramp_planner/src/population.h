@@ -16,7 +16,7 @@ class Population {
     /* Methods */
     const unsigned int size() const;
     const unsigned int  add(const RampTrajectory rt);
-    const RampTrajectory findBest(int generation);
+    const RampTrajectory findBest();
     void clear();
     const bool replaceAll(const std::vector<RampTrajectory> new_pop);
     const std::string fitnessFeasibleToString() const;
@@ -27,7 +27,6 @@ class Population {
     std::vector<RampTrajectory> population_;
     
   private:
-    const int findBestFeasible(bool, int) const;
     const unsigned int max_size;
     int i_best;
 };
