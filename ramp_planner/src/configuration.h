@@ -27,10 +27,10 @@ class Configuration {
     void  updatePosition(float x, float y, float theta);
 
 
-    void  transformBase(const tf::Transform T, float theta);
+    void  transformBase(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta);
   
   private:
-    std::vector<float> transformBasePosition(const tf::Transform T);
+    std::vector<float> transformBasePosition(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w);
     float transformBaseOrientation(const float theta);
 };
 #endif

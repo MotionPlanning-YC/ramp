@@ -5,3 +5,4 @@ uint8[] i_segments
 
 float32 fitness
 bool feasible
+float32 time_until_collision

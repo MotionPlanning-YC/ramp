@@ -107,11 +107,11 @@ ramp_msgs::Population Population::populationMsg()
 {
     ramp_msgs::Population msg;
     
-    msg.population.push_back(population_.at(i_best).msg_trajec_);
     for( int i =0; i<population_.size(); i++)
     {
-        if (i != i_best)
-            msg.population.push_back(population_.at(i).msg_trajec_);
+      msg.population.push_back(population_.at(i).msg_trajec_);
     }
+
+    msg.best_id = i_best;
     return msg;
 }

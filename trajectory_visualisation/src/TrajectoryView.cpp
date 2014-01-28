@@ -74,6 +74,8 @@ void TrajectoryView::size_changed()
 
     width_ = this->parentWidget()->frameSize().width();
     height_ = this->parentWidget()->frameSize().height();
+    std::cout<<"\nwidth: "<<width_;
+    std::cout<<"\nheight: "<<height_<<"\n";
 
     this->resize(width_,height_);
     this->scene()->setSceneRect(0, 0, width_-10, height_-10);// We need to make the scene a little smaller than the frame
@@ -82,9 +84,23 @@ void TrajectoryView::size_changed()
 void TrajectoryView::population(const ramp_msgs::Population& msg)
 // Update the population and called the drawing function
 {
-    population_ = msg;
 
-    drawPopulation();
+  if(populations_.size() < 2) {
+    populations_.push_back(msg);
+  }
+
+  else if(populations_.size() == 2) {
+    if(msg.robot_id == 1) {
+      populations_.erase(populations_.begin());
+      populations_.insert(populations_.begin(), msg);
+    }
+    else if(msg.robot_id == 2) {
+      populations_.erase(populations_.begin()+1);
+      populations_.insert(populations_.begin()+1, msg);
+    }
+  }
+
+  drawPopulation();
 }
 
 void TrajectoryView::drawPopulation()
@@ -92,27 +108,30 @@ void TrajectoryView::drawPopulation()
 {
     this->scene()->clear();
 
-    QPen pen = QPen( QColor(0,0,0,150) ); // Black pen for the normal trajectories
-    for(int i = population_.population.size() -1 ; i >=0 ; i--)
-        //go through all the trajectories
-    {
-        std::vector<trajectory_msgs::JointTrajectoryPoint> points = population_.population.at(i).trajectory.points;
+    for(unsigned int p=0;p<populations_.size();p++) {
 
-        if (i==0)
-           pen = QPen( QColor(255,0,0,255) ); // red for the best trajectory
-        for(int j = 0 ; j < (points.size() -1 ) ; j++)
-            //go through all the waypoints of the trajectory
-            // We go through the first one at last to make sure it is displayed on top, to make sure we see the red color if some trajectories are the same
-        {
-            this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
-                           metersToPixels(points.at(j).positions.at(1), false),
-                           metersToPixels(points.at(j+1).positions.at(0), true),
-                           metersToPixels(points.at(j+1).positions.at(1), false),
-                           pen);
+      QPen pen = QPen( QColor(0,0,0,150) ); // Black pen for the normal trajectories
+      for(int i = populations_.at(p).population.size() -1 ; i >=0 ; i--)
+          //go through all the trajectories
+      {
+          std::vector<trajectory_msgs::JointTrajectoryPoint> points = populations_.at(p).population.at(i).trajectory.points;
 
-        }
+          if (i==populations_.at(p).best_id)
+             pen = QPen( QColor(255,0,0,255) ); // red for the best trajectory
+          for(int j = 0 ; j < (points.size() -1 ) ; j++)
+              //go through all the waypoints of the trajectory
+              // We go through the first one at last to make sure it is displayed on top, to make sure we see the red color if some trajectories are the same
+          {
+              this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
+                             metersToPixels(points.at(j).positions.at(1), false),
+                             metersToPixels(points.at(j+1).positions.at(0), true),
+                             metersToPixels(points.at(j+1).positions.at(1), false),
+                             pen);
 
-    }
+          }
+
+      } //end inner for
+    } //end outter for
 }
 
 int const TrajectoryView::metersToPixels(const float value, bool isWidth)

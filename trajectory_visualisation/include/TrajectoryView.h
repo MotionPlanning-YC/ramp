@@ -43,6 +43,7 @@
 
 #include <QtGui/QGraphicsView>
 #include "ramp_msgs/Population.h"
+#include <vector>
 
 
 class TrajectoryView : public QGraphicsView
@@ -64,7 +65,9 @@ class TrajectoryView : public QGraphicsView
  private:
      int height_; // the height of the scene
      int width_; // the width of the scene
-     ramp_msgs::Population population_; // the list of trajectories. The first one has to be the best and is displayed in red.
+     
+     std::vector<ramp_msgs::Population> populations_; // the list of trajectories. The first one has to be the best and is displayed in red.
+     
      float maxWidthMeters_; // The maximum x value amoung all the points in the trajectories
      float maxHeightMeters_; // The maximum y value amoung all the points in the trajectories
 

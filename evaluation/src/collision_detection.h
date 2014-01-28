@@ -15,7 +15,7 @@ class CollisionDetection {
   public:
   
     struct QueryResult {
-      QueryResult() : collision_(false), time_until_collision_(-1), 
+      QueryResult() : collision_(false), time_until_collision_(9999.0f), 
                       i_obstacle(-1) {}
 
       bool  collision_;

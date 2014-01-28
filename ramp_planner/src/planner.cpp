@@ -49,16 +49,15 @@ Planner::~Planner() {
  ********************** Methods **********************
  *****************************************************/
 
-//od_info is a vector:
-//indices -  0: x, 1: y, 2: theta
 void Planner::setT_od_w(std::vector<float> od_info) {
-  
-  // Can we find this from matrix?
-  theta_od_w = od_info.at(2);
+    
+  Eigen::Translation<float,2> translation(od_info.at(0), od_info.at(1));
+  Eigen::Rotation2D<float> rotation(od_info.at(2));
 
-  tf::Vector3 od(od_info.at(0), od_info.at(1), 0); 
-  T_od_w_.setOrigin(od);
-  T_od_w_.setRotation(tf::createQuaternionFromRPY(0, 0, od_info.at(2)));
+  T_od_w_ = translation * rotation;
+  std::cout<<"\nT_od_w: "<<T_od_w_.matrix();
+  
+  theta_od_w = od_info.at(2);
 }
 
 
@@ -128,8 +127,8 @@ void Planner::init_population() {
     Path temp_path(start_, goal_);
 
     // Each trajectory will have a random number of knot points
-    // Put a max of 10 knot points for practicality...
-    unsigned int num = rand() % 7;
+    // Put a max of 5 knot points for practicality...
+    unsigned int num = rand() % 5;
 
     // For each knot point to be created...
     for(unsigned int j=0;j<num;j++) {
@@ -319,15 +318,26 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
 
 /** Send the fittest feasible trajectory to the robot package */
 void Planner::sendBest() {
-  //if(!bestTrajec_.feasible_) {
-    //std::cout<<"\n\n\n\nSending Infeasible Trajectory:"<<u.toString(bestTrajec_.msg_trajec_);
-    //std::cout<<"\n"<<population_.fitnessFeasibleToString();
-  //}
-  h_control_->send(bestTrajec_.msg_trajec_);
+  
+  // If infeasible and too close to obstacle, 
+  // Stop the robot by sending a blank trajectory
+  if(!bestTrajec_.feasible_ && bestTrajec_.time_until_collision_ < 3.5f) {
+    std::cout<<"\nCollision within 1.5 seconds! Stopping robot!\n";
+    ramp_msgs::Trajectory blank;
+    h_control_->send(blank); 
+  }
+  else {
+    h_control_->send(bestTrajec_.msg_trajec_);
+  }
 }
 
 /** Send the whole population of trajectories to the trajectory viewer */
 void Planner::sendPopulation() {
+
+  // Need to set robot id
+  ramp_msgs::Population msg = population_.populationMsg();
+  msg.robot_id = id_;
+
   h_control_->sendPopulation(population_.populationMsg());
 }
 
@@ -361,7 +371,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   //}
   
   // Send the whole population to the trajectory viewer
-  //sendPopulation();
+  sendPopulation();
 }
 
 
@@ -487,13 +497,10 @@ void Planner::evaluateTrajectory(RampTrajectory& trajec) {
   if(requestEvaluation(er)) {
     trajec.fitness_   = er.response.fitness;
     trajec.feasible_  = er.response.feasible;
-
-    //if(!trajec.feasible_) {
-      //std::cout<<"\nInfeasible trajectory: "<<u.toString(trajec.msg_trajec_);
-    //}
+    trajec.time_until_collision_ = er.response.time_until_collision;
   }
   else {
-    // some error handling
+    // TODO: some error handling
   }
 } // End evaluateTrajectory
 
@@ -620,10 +627,10 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   // initialize population
   init_population();
   
-  std::cout<<"\nPopulation initialized!\n";
+  /*std::cout<<"\nPopulation initialized!\n";
   for(unsigned int i=0;i<paths_.size();i++) {
     std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
-  }
+  }*/
   // std::cout<<"\nPress enter to continue\n";
   // std::cin.get();
 
@@ -632,7 +639,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
 
   // Evaluate the population and get the trajectory to move on
   RampTrajectory T_move = evaluateAndObtainBest();
-   std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
+  //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
   // std::cout<<"\nPress enter to start the loop!\n";
   // std::cin.get();
   
@@ -641,7 +648,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   // createSubpopulations();
   
   timer_.start();
-  while( (start_.compare(goal_) > 0.5) && ros::ok()) {
+  while( (start_.compare(goal_) > 0.3) && ros::ok()) {
     //std::cout<<"\ngeneration_: "<<generation_;
     
     // t=t+1

@@ -44,12 +44,15 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const {
  * */
 const std::vector<float> CollisionDetection::getCenter(std::vector<float> p, float orientation) const {
   std::vector<float> result;
-  
-  // geometrical way
+ 
+  // Get world coordinates of reference point 
   float x = p.at(0);
   float y = p.at(1);
-
+  
+  // Radius
   float r = 0.2155261;
+
+  // Get world coodinates of center point
   if(orientation > 0) {
     x += r*cos( u.displaceAngle((-3*PI/4), orientation));
     y += r*sin( u.displaceAngle((-3*PI/4), orientation));
@@ -128,7 +131,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   
   //std::cout<<"\nobstacle trajectory: "<<u.toString(ob_trajectory);
   // For every 3 points, check circle detection
-  float radius = 0.25f;
+  float radius = 0.33f;
   for(unsigned int i=0;i<trajectory_.trajectory.points.size();i+=3) {
     
     // Get the point on the trajectory, p
@@ -171,18 +174,19 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // Get the distance between the centers
       float dist = sqrt( pow(p_center.at(0) - p_ob_center.at(0),2) + pow(p_center.at(1) - p_ob_center.at(1),2) );
       
-      if(id == 1)
+      /*if(id == 1)
         std::cout<<"\nRobot 1 as p_center: ";
       else
         std::cout<<"\nRobot 2 as p_center: ";
-      std::cout<<"Distance between ("<<p_center.at(0)<<", "<<p_center.at(1)<<") and ("<<p_ob_center.at(0)<<", "<<p_ob_center.at(1)<<"): "<<dist;
+      std::cout<<"Distance between ("<<p_center.at(0)<<", "<<p_center.at(1)<<") and ("<<p_ob_center.at(0)<<", "<<p_ob_center.at(1)<<"): "<<dist;*/
 
-      // If the distance between the two centers is less than the sum of the two radii, there is collision
+      // If the distance between the two centers is less than the sum of the two radii, 
+      // there is collision
       if( dist <= radius*2 ) {
         result.collision_ = true;
         result.time_until_collision_ = i*(3.f/5.f);
       }
-    }
+    } //end for
   } //end for
 
   return result;
@@ -320,7 +324,6 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
     if(h_traj_req_->request(tr)) {
       result = tr.response.trajectory;
     }
-
   } // end if translation
 
 
@@ -357,7 +360,7 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
     if(h_traj_req_->request(tr)) {
       result = tr.response.trajectory;
     }
-  }
+  } // end if self-rotation, none
 
 
   return result;

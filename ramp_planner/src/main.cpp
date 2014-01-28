@@ -24,7 +24,7 @@ std::vector<Configuration> getStartGoal(bool robot1) {
     s.K_.push_back(2);
     s.K_.push_back(0);
     
-    g.K_.push_back(3);
+    g.K_.push_back(3.f);
     g.K_.push_back(2.f);
     g.K_.push_back(0);
   }
@@ -44,22 +44,64 @@ std::vector<Configuration> getStartGoal(bool robot1) {
   return result;
 }
 
+
+
+void loadParameters(ros::NodeHandle handle) {
+  std::string key;
+  if(handle.searchParam("id", key)) {
+    int val;
+    handle.getParam(key, val);
+    std::cout<<"\nkey: "<<key<<" val: "<<val;
+  }
+
+
+  if(handle.searchParam("", key)) {
+    int val;
+    handle.getParam(key, val);
+    std::cout<<"\nkey: "<<key<<" val: "<<val;
+  }
+
+}
+
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "ramp_planner");
   ros::NodeHandle handle;
+  
+  ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
 
+  
+  /*std::string key;
+  if(handle.searchParam("id", key)) {
+    int val;
+    handle.getParam(key, val);
+    std::cout<<"\nkey: "<<key<<" val: "<<val;
+
+    std::string k_theta;
+    double theta;
+    handle.searchParam("start/theta", k_theta);
+    handle.getParam(k_theta, theta);
+    std::cout<<"\nk_theta: "<<k_theta<<" theta: "<<theta;
+  }
+  else {
+    std::cout<<"\nCould not find \"id\"";
+  }*/
+  
+  
   std::string update_topic;
   handle.getParam("ramp_planner/robot_update", update_topic);
-  // std::cout<<"\nupdate_topic:"<<update_topic;
+  std::cout<<"\nupdate_topic:"<<update_topic;
+
+
+
+
   
-  //ros::Subscriber sub_update_ = handle.subscribe(update_topic, 1000, &Planner::updateCallback, &my_planner);
-  ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
   
   // Make some Ranges 
   srand( time(0));
   Range range0(0, 3.5);
   Range range1(0, 3.5);
-  Range range2(-1, 1);
+  Range range2(-PI, PI);
 
   // Set my_planner's ranges
   my_planner.ranges_.push_back(range0);
@@ -86,36 +128,22 @@ int main(int argc, char** argv) {
 
   /** Initialize the Planner's handlers */ 
   my_planner.init(handle); 
+
+  /** Set Planner Robot ID */
+  if(update_topic == "/robot1/update") {
+    my_planner.id_ = 1;
+  }
+  else {
+    my_planner.id_ = 2;
+  }
   /** End building Planner */
 
 
   // Don't start planner, just wait for updates
   //while(ros::ok()) {ros::spinOnce();}
   
-  /*Configuration p_origin;
-  p_origin.updatePosition(3.f, 0.f, 3.14159f);
-  my_planner.setT_od_w(p_origin.K_);
-
-  Configuration p_od;
-  p_od.updatePosition(2, 0, 0);
-  p_od.add(my_planner.T_od_w_, 3.14159f);
-  std::cout<<"\np_w: "<<p_od.toString();*/
-  
-
   
   
-  /*ros::Publisher pub = handle.advertise<ramp_msgs::Update>("update", 1000);
-
-  Configuration u;
-  u.K_.push_back(1.f);
-  u.K_.push_back(2.f);
-  u.K_.push_back(-PI/4);
-  u.ranges_ = my_planner.ranges_;
-  ramp_msgs::Update up;
-  up.configuration = u.buildConfigurationMsg();
-  std::cout<<"\nAbout to publish!\n";
-  pub.publish(up);
-  std::cout<<"\nnew config: "<<my_planner.start_.toString();*/
 
   /******* Start the planner *******/
   std::cout<<"\nPress Enter to start the planner\n";

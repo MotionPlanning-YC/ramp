@@ -93,17 +93,15 @@ const ramp_msgs::Configuration Configuration::buildConfigurationMsg() const {
 
 
 /** This method returns the new position vector of the Configuration given some transformation matrix */
-std::vector<float> Configuration::transformBasePosition(const tf::Transform T) {
+std::vector<float> Configuration::transformBasePosition(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w) {
 
   std::vector<float> result;
-  
-  // Create a tf::Vector3 from this configuration
-  tf::Vector3 p(K_.at(0), K_.at(1), 1);
+    
+  Eigen::Vector3f p(K_.data());
+  p[2] = 1;
 
-  // Transform the point
-  tf::Vector3 p2 = T * p;
+  Eigen::Vector3f p2 = T_od_w * p;
 
-  // Push on result
   result.push_back(p2[0]);
   result.push_back(p2[1]);
 
@@ -139,10 +137,10 @@ float Configuration::transformBaseOrientation(const float theta) {
 /** This method will transform the configuration by the matrix T 
  *  The rotation of T is also passed in for ease 
  *  The most used source of this method is for updating the robot's configuration */
-void Configuration::transformBase(const tf::Transform T, float theta) {
+void Configuration::transformBase(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta) {
 
   // Get the new position
-  std::vector<float> p_w = transformBasePosition(T);
+  std::vector<float> p_w = transformBasePosition(T_od_w);
   K_.at(0) = p_w.at(0);
   K_.at(1) = p_w.at(1);
   

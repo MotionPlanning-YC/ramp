@@ -26,7 +26,8 @@ void Ros::subscribe()
     ros::NodeHandle n;
 
     //Subscribe to topics
-    popSub_= n.subscribe("population",1000, &Ros::populationCallback,this);
+    popSub_1= n.subscribe("robot1/population",1000, &Ros::populationCallback,this);
+    popSub_2= n.subscribe("robot2/population",1000, &Ros::populationCallback,this);
 
     initialized = true;
 }

@@ -22,6 +22,8 @@
 <node name="path_modification" pkg="path_modification" type="path_modification" />
 
 
+<!-- Trajectory Visualization -->
+<!-- <node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> -->
 
 
 

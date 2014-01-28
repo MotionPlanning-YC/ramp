@@ -1,5 +1,6 @@
 <launch>
 
+
 <!-- Trajectory Generator -->
 <node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" />
 
@@ -7,12 +8,15 @@
 <node name="path_modification" pkg="path_modification" type="path_modification" />
 
 <!-- Evaluation -->
-<node name="evaluation" pkg="evaluation" type="evaluation" output="screen" />
+<node name="evaluation" pkg="evaluation" type="evaluation" />
 
 <!-- Planner -->
-<node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" />
+<!-- <group ns="robot2"> -->
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" />
+<!--  <rosparam command="load" file="yaml/robot2.yaml" />
+</grup> -->
 
 <!-- Trajectory Visualization -->
-<!-- node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> -->
+<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> 
 
 </launch>

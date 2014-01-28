@@ -60,7 +60,7 @@ class Planner {
 
     // Configuraton of initial starting position
     // We use this to translate each update 
-    tf::Transform T_od_w_;
+    Eigen::Transform<float, 2, Eigen::Affine> T_od_w_;
     float theta_od_w;
     void setT_od_w(std::vector<float> od_info);
 
@@ -118,6 +118,8 @@ class Planner {
 
     void controlCycleCallback(const ros::TimerEvent& t);
     
+    // Robot ID
+    unsigned int id_;
     
   
   private:

@@ -21,6 +21,7 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   cd.trajectory_  = req.trajectory;
   CollisionDetection::QueryResult qr = cd.perform();
   res.feasible = !qr.collision_;
+  res.time_until_collision = qr.time_until_collision_;
 
   // Do fitness
   res.fitness = ev.performFitness(qr);
@@ -133,10 +134,10 @@ int main(int argc, char** argv) {
 
 
   std::vector<float> p;
+  p.push_back(3);
+  p.push_back(1.75f);
   p.push_back(0);
-  p.push_back(2.f);
-  p.push_back(0);
-  std::vector<float> c = cd.getCenter(p, 0);
+  std::vector<float> c = cd.getCenter(p, PI/6);
   std::cout<<"\ncenter: ["<<c.at(0)<<", "<<c.at(1)<<"]";
 
 
