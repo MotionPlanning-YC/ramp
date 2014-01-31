@@ -150,15 +150,8 @@ int main(int argc, char** argv) {
   std::cin.get(); 
   
   my_planner.go();
-
-  while(ros::ok()) {
-    my_planner.evaluatePopulation();
-    std::cout<<"\nPopulation size: "<<my_planner.population_.size();
-  }
-
   
-  std::cout<<"\nPress Enter to exit!\n";
-  std::cin.get();
+  
   ros::spinOnce();
   std::cout<<"\nExiting Normally\n";
   return 0;

@@ -1,7 +1,7 @@
 #include "population.h"
 
 
-Population::Population() : max_size(10), i_best(-1) {}
+Population::Population() : max_size(5), i_best(-1) {}
 
 Population::Population(const unsigned int size) : max_size(size), i_best(-1) {}
 
@@ -111,7 +111,7 @@ ramp_msgs::Population Population::populationMsg()
     {
       msg.population.push_back(population_.at(i).msg_trajec_);
     }
-
+    
     msg.best_id = i_best;
     return msg;
 }

@@ -30,7 +30,8 @@ const Path RampTrajectory::getPath() const {
 const std::string RampTrajectory::fitnessFeasibleToString() const {
   std::ostringstream result;
  
-  result<<"\nTrajectory "<<id_; 
+  result<<"\nTrajectory "<<id_;
+  result<<"\n Number of knot points: "<<msg_trajec_.index_knot_points.size(); 
   result<<"\n Fitness: "<<fitness_<<" Feasible: "<<feasible_<<" Collision Time: "<<time_until_collision_;
 
   return result.str();

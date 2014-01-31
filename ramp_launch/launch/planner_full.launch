@@ -8,15 +8,17 @@
 <node name="path_modification" pkg="path_modification" type="path_modification" />
 
 <!-- Evaluation -->
-<node name="evaluation" pkg="evaluation" type="evaluation" />
-
-<!-- Planner -->
-<!-- <group ns="robot2"> -->
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" />
-<!--  <rosparam command="load" file="yaml/robot2.yaml" />
-</grup> -->
+<node name="evaluation" pkg="evaluation" type="evaluation" output="screen" />
 
 <!-- Trajectory Visualization -->
 <node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> 
+
+
+<!-- Planner -->
+<!-- <group ns="robot2"> -->
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" />
+<!--  <rosparam command="load" file="yaml/robot2.yaml" />
+</grup> -->
+
 
 </launch>

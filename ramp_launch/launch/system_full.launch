@@ -23,7 +23,7 @@
 
 
 <!-- Trajectory Visualization -->
-<!-- <node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> -->
+<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> 
 
 
 

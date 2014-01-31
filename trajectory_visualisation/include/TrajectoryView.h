@@ -43,6 +43,7 @@
 
 #include <QtGui/QGraphicsView>
 #include "ramp_msgs/Population.h"
+#include "utility.h"
 #include <vector>
 
 
@@ -65,14 +66,17 @@ class TrajectoryView : public QGraphicsView
  private:
      int height_; // the height of the scene
      int width_; // the width of the scene
+
+     const std::vector<float> getCenter(std::vector<float> p, float orientation) const;
      
+     Utility u;
      std::vector<ramp_msgs::Population> populations_; // the list of trajectories. The first one has to be the best and is displayed in red.
      
      float maxWidthMeters_; // The maximum x value amoung all the points in the trajectories
      float maxHeightMeters_; // The maximum y value amoung all the points in the trajectories
 
      void drawPopulation(); // Draw the trajectories on the scene
-     int const metersToPixels(const float value, bool width); //Calculate the pixel value of a distance. If width is true, treat the value has a x position, if false treat it as a y position.
+     int const metersToPixels(float value, bool width); //Calculate the pixel value of a distance. If width is true, treat the value has a x position, if false treat it as a y position.
 
 
  };

@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(10), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
+Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
   controlCycle_ = ros::Duration(0.25);
 }
@@ -15,7 +15,7 @@ Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), popula
   controlCycle_ = ros::Duration(0.25);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(10), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
   init(h); 
   controlCycle_ = ros::Duration(0.25);
@@ -326,6 +326,10 @@ void Planner::sendBest() {
     ramp_msgs::Trajectory blank;
     h_control_->send(blank); 
   }
+  else if(!bestTrajec_.feasible_) {
+    std::cout<<"\nBest trajectory is not feasible! Time until collision: "<<bestTrajec_.time_until_collision_<<"\n";
+    h_control_->send(bestTrajec_.msg_trajec_);
+  }
   else {
     h_control_->send(bestTrajec_.msg_trajec_);
   }
@@ -338,7 +342,7 @@ void Planner::sendPopulation() {
   ramp_msgs::Population msg = population_.populationMsg();
   msg.robot_id = id_;
 
-  h_control_->sendPopulation(population_.populationMsg());
+  h_control_->sendPopulation(msg);
 }
 
 void Planner::controlCycleCallback(const ros::TimerEvent& t) {
@@ -639,7 +643,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
 
   // Evaluate the population and get the trajectory to move on
   RampTrajectory T_move = evaluateAndObtainBest();
-  //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
+  std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
   // std::cout<<"\nPress enter to start the loop!\n";
   // std::cin.get();
   
@@ -661,6 +665,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
     // Call modification
     modification();
     mutex_pop_ = true;
+    //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
     // std::cin.get();
     /*std::cout<<"\nmodification completed!\n";
     std::cout<<"\nPaths are now: ";

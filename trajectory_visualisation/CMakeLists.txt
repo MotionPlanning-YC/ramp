@@ -30,7 +30,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 # Binaries
 ##############################################################################
 
-add_executable(trajectory_visualisation ${QT_SOURCES} ${QT_RESOURCES_CPP} ${QT_FORMS_HPP} ${QT_MOC_HPP})
+add_executable(trajectory_visualisation ${QT_SOURCES} src/utility.cpp ${QT_RESOURCES_CPP} ${QT_FORMS_HPP} ${QT_MOC_HPP})
 target_link_libraries(trajectory_visualisation ${QT_LIBRARIES})
 target_link_libraries(trajectory_visualisation ${catkin_LIBRARIES})
 add_dependencies(trajectory_visualisation ramp_msgs_gencpp)

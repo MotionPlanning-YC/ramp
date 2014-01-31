@@ -105,7 +105,7 @@ void CollisionDetection::setT_od_w(int id) {
     std::vector<float> r2;
     r2.push_back(sin(0));
     r2.push_back(cos(0));
-    r2.push_back(2.f);
+    r2.push_back(0.f);
     
     std::vector<float> r3;
     r3.push_back(0);
@@ -128,6 +128,7 @@ void CollisionDetection::setT_od_w(int id) {
 const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::Trajectory ob_trajectory) const {
   //std::cout<<"\nQuery on "<<u.toString(trajectory_)<<" \n*******and*******\n"<<u.toString(ob_trajectory);
   CollisionDetection::QueryResult result;
+  //std::cout<<"\nresult.collision_: "<<result.collision_;
   
   //std::cout<<"\nobstacle trajectory: "<<u.toString(ob_trajectory);
   // For every 3 points, check circle detection
@@ -145,6 +146,8 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     // Get the center of the robot
     std::vector<float> p_center = getCenter(p_loc, p.positions.at(2));
     
+    //std::cout<<"\nob_trajectory.size(): "<<ob_trajectory.trajectory.points.size();
+    //std::cout<<"\n("<<ob_trajectory.trajectory.points.at(0).positions.at(0)<<", "<<ob_trajectory.trajectory.points.at(0).positions.at(1)<<")";
 
     // ***Test collision against the obstacle's trajectory***
     for(unsigned int j=0;j<ob_trajectory.trajectory.points.size();j+=3) {
@@ -184,7 +187,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // there is collision
       if( dist <= radius*2 ) {
         result.collision_ = true;
-        result.time_until_collision_ = i*(3.f/5.f);
+        result.time_until_collision_ = p.time_from_start.toSec();
       }
     } //end for
   } //end for

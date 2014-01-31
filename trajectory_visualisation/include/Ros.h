@@ -18,6 +18,7 @@ private:
     void subscribe();
 
     bool initialized; // tell if the ros thread has been initlized
+    ros::Subscriber popSub; // population topic subscriber
     ros::Subscriber popSub_1; // population topic subscriber
     ros::Subscriber popSub_2; // population topic subscriber
 

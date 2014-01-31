@@ -20,6 +20,9 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   // Do collision detection
   cd.trajectory_  = req.trajectory;
   CollisionDetection::QueryResult qr = cd.perform();
+  //std::cout<<"\nqr.collision_: "<<qr.collision_;
+  
+  // Set response
   res.feasible = !qr.collision_;
   res.time_until_collision = qr.time_until_collision_;
 
