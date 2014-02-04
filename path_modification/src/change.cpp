@@ -10,7 +10,7 @@ const ramp_msgs::Path Change::perform() {
 
     //Randomly choose a knot point to change
     unsigned int i_knotPoint = rand() % (path_.configurations.size()-2) + 1;
-    std::cout<<"\ni_knotPoint: "<<i_knotPoint;
+    //std::cout<<"\ni_knotPoint: "<<i_knotPoint;
 
     //Generate a new, random configuration
     ramp_msgs::Configuration c;

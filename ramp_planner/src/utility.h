@@ -10,6 +10,11 @@
 #include <time.h>
 #include "ramp_msgs/Path.h"
 #include "ramp_msgs/Trajectory.h"
+#include <tf/transform_datatypes.h>
+#include <Eigen/Geometry>
+
+#define PI 3.14159f
+
 
 class Range;
 

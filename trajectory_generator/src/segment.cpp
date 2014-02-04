@@ -1,17 +1,19 @@
 #include "segment.h"
 
 
-Segment::Segment() : k_dof_(3) {
+Segment::Segment() : k_dof_(3), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0), T_loc_(0), T_min_(0) {
   max_v_.push_back(0.33f);
   max_v_.push_back(0.33f);
-  max_v_.push_back(0.33f);
+
+  // Theta velocity is higher
+  max_v_.push_back(PI/4.0f);
 }
 
-Segment::Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind) : k_dof_(3) 
+Segment::Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind) : k_dof_(3), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0), T_loc_(0), T_min_(0)
 {
   max_v_.push_back(0.33f);
   max_v_.push_back(0.33f);
-  max_v_.push_back(0.33f);
+  max_v_.push_back(PI/4.0f);
   build(kp_start, kp_end, v_start, v_end, ind);
 }
 
@@ -30,7 +32,7 @@ void Segment::build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::P
   end_.p_.push_back(kp_end.y);
   end_.p_.push_back(kp_end.theta); 
   
-  index_     = ind;
+  index_    = ind;
   v_start_  = v_start;
   v_end_    = v_end;
 
@@ -62,34 +64,50 @@ void Segment::buildWork() {
     a0_.push_back(start_.p_.at(j));
   }
   
+
   // Calculate the minimum time required to perform this segment
   // This sets the T_ variable which we need to set a1
   calculateMinTime();
-  
+
   
   /** Calculate a1 (slope) for each DOF. a1 depends on the corresponding T_ */
-  
-  // Need to take angle_pre into account
-  
-
   // a1 for x
-  a1_.push_back( (end_.p_.at(0) - start_.p_.at(0)) / T_loc_ );
+  if(T_loc_ == 0) {
+    a1_.push_back(0);
+  }
+  else {
+    a1_.push_back( (end_.p_.at(0) - start_.p_.at(0)) / T_loc_ );
+  }
+
   // a1 for y
-  a1_.push_back( (end_.p_.at(1) - start_.p_.at(1)) / T_loc_ );
+  if(T_loc_ == 0) {
+    a1_.push_back(0);
+  }
+  else {
+    a1_.push_back( (end_.p_.at(1) - start_.p_.at(1)) / T_loc_ );
+  }
 
   // a1 for pre_rotation
-  if(T_rotate_pre_ > 0)
-    a1_.push_back( (angle_pre - start_.p_.at(2)) / T_rotate_pre_ );
-  else 
+  if(T_rotate_pre_ > 0) {
+    a1_.push_back( pre_angle_dist / T_rotate_pre_ );
+  }
+  else {
     a1_.push_back(0);
+  }
 
   // a1 for post_rotation
-  if(T_rotate_post_ > 0)
-    a1_.push_back( (end_.p_.at(2) - angle_pre) / T_rotate_post_ );
-  else
-    a1_.push_back(0);
-
+  if(plan_post) {
+    if(T_rotate_post_ > 0) {
+      a1_.push_back( post_angle_dist / T_rotate_post_ );
+    }
+    else {
+      a1_.push_back(0);
+    }
+  }
 } // End buildWork
+
+
+
 
 
 
@@ -98,44 +116,57 @@ void Segment::buildWork() {
   */
 const void Segment::calculateMinTime() {
   // std::cout<<"\nIn Segment::calculateMinTime\n";
+  // std::cout<<"\n\nend_.p_.at(0):"<<end_.p_.at(0)<<" start_.p_.at(0):"<<start_.p_.at(0);
+  // std::cout<<"\nend_.p_.at(1):"<<end_.p_.at(1)<<" start_.p_.at(1):"<<start_.p_.at(1);
 
-  //std::cout<<"\n\nend_.p_.at(0):"<<end_.p_.at(0)<<" start_.p_.at(0):"<<start_.p_.at(0);
-  //std::cout<<"\nend_.p_.at(1):"<<end_.p_.at(1)<<" start_.p_.at(1):"<<start_.p_.at(1);
 
-  // Find Euclidean distance between [x,y] of start and goal
-  float d_x = end_.p_.at(0) - start_.p_.at(0);
-  float d_y = end_.p_.at(1) - start_.p_.at(1);
-  float euc_dist = sqrt( pow(d_x,2) + pow(d_y,2) );
-  std::cout<<"\nd_x: "<<d_x<<" d_y:"<<d_y<<" euc_dist:"<<euc_dist;
+  //==============================================================================
+  // Find pre_angle - the angle we should have to drive towards the goal
+  pre_angle = u.findAngleFromAToB(start_.p_, end_.p_);
+  //std::cout<<"\npre_angle: "<<pre_angle;
+
+  // Find angle dist between pre_angle and starting orientation
+  pre_angle_dist = u.findDistanceBetweenAngles(pre_angle, start_.p_.at(k_dof_-1));
+  //std::cout<<"\npre_angle_dist: "<<pre_angle_dist;
 
   // Calculate time needed to rotate towards goal
-  angle_pre = asin(d_y / euc_dist);
-  std::cout<<"\nangle_pre: "<<angle_pre;
-  angle_pre = angle_pre * M_PI;
-  float angle_dist = angle_pre - start_.p_.at(k_dof_-1);
-  if( fabs(angle_dist) > 0.1) {
-    T_rotate_pre_ = ceil(fabs(angle_dist / max_v_.at(k_dof_-1)));
+  // if the difference is > 12 degrees
+  if( fabs(pre_angle_dist) > (PI/15)) {
+    T_rotate_pre_ = ceil(fabs( pre_angle_dist / max_v_.at(k_dof_-1)));
   } 
-  else
+  else {
     T_rotate_pre_ = 0;
-  std::cout<<"\nangle_pre:"<<angle_pre<<" angle_dist:"<<angle_dist;
+  }
+  //==============================================================================
 
-  // Then add to T_loc_ the time to go straight towards the goal
-  T_loc_ = ceil(euc_dist / max_v_.at(0));
 
-  // Now find the time required to rotate to desired goal orientation
-  angle_dist = end_.p_.at(k_dof_-1) - angle_pre;
-  if( fabs(angle_dist) > 0.15)
-    T_rotate_post_ = ceil(fabs( angle_dist / max_v_.at(k_dof_-1)));
-  else
-    T_rotate_post_ = 0;
-  //T_rotate_post_ = ceil(fabs( (end_.p_.at(k_dof_-1) - angle_pre) / max_v_.at(k_dof_-1)));
+
+  //==============================================================================
+  // Set T_loc_ - the time needed to go straight towards the goal
+  T_loc_ = ceil(u.euclideanDistance(start_.p_, end_.p_) / max_v_.at(0));
+  //==============================================================================
+
+
+
+  //==============================================================================
+  // Find angle dist between goal orientation and pre_angle 
+  if(plan_post) {
+    post_angle_dist = u.findDistanceBetweenAngles(end_.p_.at(k_dof_-1), pre_angle);
+    
+    // Calculate time needed to rotate to goal orientation 
+    // if the difference is > 12 degrees
+    if( fabs(post_angle_dist) > (PI/15))
+      T_rotate_post_ = ceil(fabs( post_angle_dist / max_v_.at(k_dof_-1)));
+    else {
+      T_rotate_post_ = 0;
+    }
+  }
+  //==============================================================================
+
+
 
   // Set min_T_
   T_min_ = T_loc_ + T_rotate_pre_ + T_rotate_post_;
-
-  //std::cout<<"\nT_rotate_pre_:"<<T_rotate_pre_<<" T_loc_:"<<T_loc_<<" T_rotate_post_:"<<T_rotate_post_;
-
 } //End calculateMinTime
 
 
@@ -144,16 +175,23 @@ const void Segment::calculateMinTime() {
 const std::string Segment::toString() const {
   std::ostringstream result;
 
-  
-  result<<"\nindex_: "<<index_; 
+  result<<"\n\n====================================";
+  result<<"\nSegment "<<index_<<":"; 
 
-  result<<"\nT_rotate_pre_:"<<T_rotate_pre_;
-  result<<"\nT_loc_:"<<T_loc_;
-  result<<"\nT_rotate_post_:"<<T_rotate_post_;
-  result<<"\nT_min_:"<<T_min_;
+  result<<"\nstarting orientation: "<<start_.p_.at(2);
+  result<<"\ngoal orientation: "<<end_.p_.at(2);
+  result<<"\npre_angle: "<<pre_angle;
+  result<<"\npre_angle_dist: "<<pre_angle_dist;
+  result<<"\npost_angle: "<<post_angle;
+  result<<"\npost_angle_dist: "<<post_angle_dist;
 
-  result<<"\n\nstart:"<<start_.toString();
-  result<<"\n\nend:"<<end_.toString();
+  result<<"\nT_rotate_pre_: "<<T_rotate_pre_;
+  result<<"\nT_loc_: "<<T_loc_;
+  result<<"\nT_rotate_post_: "<<T_rotate_post_;
+  result<<"\nT_min_: "<<T_min_;
+
+  result<<"\n\nstart: "<<start_.toString();
+  result<<"\n\nend: "<<end_.toString();
   
   result<<"\n\na1 coefficients: ("<<a1_.at(0);
   for(unsigned int i=1;i<a1_.size();i++) {
@@ -166,6 +204,7 @@ const std::string Segment::toString() const {
     result<<", "<<a0_.at(i);
   }
   result<<")";
+  result<<"\n====================================";
   
   return result.str();
 }

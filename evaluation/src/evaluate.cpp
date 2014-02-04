@@ -1,8 +1,9 @@
 #include "evaluate.h"
 
+Evaluate::Evaluate() : Q(10000.f) {}
 
 
-Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) {
+Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) : Q(10000.f) {
   setRequest(req);
 }
 
@@ -23,7 +24,7 @@ void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request& req) {
 
 /** This method computes the fitness of the trajectory_ member */
 //TODO: Automate the weights for each evaluation criteria
-const double Evaluate::performFitness() {
+const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) {
   double result=0;
 
   //Create the path to evaluate
@@ -34,26 +35,18 @@ const double Evaluate::performFitness() {
   //TODO: Be able to specify which segments are evaluated
   t_eval = trajectory_;
 
-  //Set values for euclidean distance and add to result
-  //Negate because for this criterion, shorter values are better
-  euc_dist_.trajectory_ = t_eval; 
-  result+=(1.5*euc_dist_.perform()) * -1;
-
-  //Set values for time and add to result
-  //Negate because for this criterion, shorter values are better
+  // Set values for time and add to result
+  // Negate because for this criterion, shorter values are better
   time_.trajectory_ = t_eval;
   result+=(time_.perform()) * -1;
 
   
+  // If the trajectory is infeasible
+  if(feasible.collision_) {
+
+    // Add the Penalty for being infeasible
+    result += (Q / feasible.time_until_collision_) * -1;
+  }
+  
   return result;
 } //End performFitness
-
-
-const bool Evaluate::performCollisionDetection() {
-
-  if(collision_.obstacleList_.obstacles.size() == 0) 
-    return false;
-
-  collision_.obstacleList_ = obstacleList_;
-  return collision_.perform();  
-}

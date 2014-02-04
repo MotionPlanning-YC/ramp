@@ -4,7 +4,7 @@
 Utility::Utility() {
   Range range0(0, 3.5);
   Range range1(0, 3.5);
-  Range range2(0, 0);
+  Range range2(-PI, PI);
   standardRanges.push_back(range0);
   standardRanges.push_back(range1);
   standardRanges.push_back(range2);

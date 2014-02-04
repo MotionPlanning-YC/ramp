@@ -5,17 +5,39 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 COLLISION_DETECTION	collision_detection.h	2;"	d
-CollisionDetection	collision_detection.h	/^    CollisionDetection() {}$/;"	f	class:CollisionDetection	access:public	signature:()
+CollisionDetection	collision_detection.cpp	/^CollisionDetection::CollisionDetection() : h_traj_req_(0) {}$/;"	f	class:CollisionDetection	signature:()
+CollisionDetection	collision_detection.h	/^    CollisionDetection(); $/;"	p	class:CollisionDetection	access:public	signature:()
 CollisionDetection	collision_detection.h	/^class CollisionDetection {$/;"	c
-CollisionDetection::CollisionDetection	collision_detection.h	/^    CollisionDetection() {}$/;"	f	class:CollisionDetection	access:public	signature:()
-CollisionDetection::findMotionType	collision_detection.cpp	/^const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob) {$/;"	f	class:CollisionDetection	signature:(const ramp_msgs::Obstacle ob)
-CollisionDetection::findMotionType	collision_detection.h	/^    const MotionType findMotionType(const ramp_msgs::Obstacle);$/;"	p	class:CollisionDetection	access:private	signature:(const ramp_msgs::Obstacle)
-CollisionDetection::getTrajectoryRequest	collision_detection.cpp	/^const ramp_msgs::Trajectory CollisionDetection::getTrajectoryRequest(const ramp_msgs::Obstacle ob, const ros::Duration d) {$/;"	f	class:CollisionDetection	signature:(const ramp_msgs::Obstacle ob, const ros::Duration d)
-CollisionDetection::getTrajectoryRequest	collision_detection.h	/^    const ramp_msgs::Trajectory getTrajectoryRequest(const ramp_msgs::Obstacle, const ros::Duration);$/;"	p	class:CollisionDetection	access:public	signature:(const ramp_msgs::Obstacle, const ros::Duration)
-CollisionDetection::obstacleList_	collision_detection.h	/^    ramp_msgs::ObstacleList obstacleList_;$/;"	m	class:CollisionDetection	access:public
-CollisionDetection::perform	collision_detection.cpp	/^const bool CollisionDetection::perform() const {$/;"	f	class:CollisionDetection	signature:() const
-CollisionDetection::perform	collision_detection.h	/^    const bool perform() const;$/;"	p	class:CollisionDetection	access:public	signature:() const
+CollisionDetection::CollisionDetection	collision_detection.cpp	/^CollisionDetection::CollisionDetection() : h_traj_req_(0) {}$/;"	f	class:CollisionDetection	signature:()
+CollisionDetection::CollisionDetection	collision_detection.h	/^    CollisionDetection(); $/;"	p	class:CollisionDetection	access:public	signature:()
+CollisionDetection::QueryResult	collision_detection.h	/^    struct QueryResult {$/;"	s	class:CollisionDetection	access:public
+CollisionDetection::QueryResult::QueryResult	collision_detection.h	/^      QueryResult() : collision_(false), time_until_collision_(-1), $/;"	f	struct:CollisionDetection::QueryResult	access:public	signature:()
+CollisionDetection::QueryResult::collision_	collision_detection.h	/^      bool  collision_;$/;"	m	struct:CollisionDetection::QueryResult	access:public
+CollisionDetection::QueryResult::i_obstacle	collision_detection.h	/^      int i_obstacle;$/;"	m	struct:CollisionDetection::QueryResult	access:public
+CollisionDetection::QueryResult::time_until_collision_	collision_detection.h	/^      float time_until_collision_;$/;"	m	struct:CollisionDetection::QueryResult	access:public
+CollisionDetection::T_od_w	collision_detection.h	/^    std::vector< std::vector<float> > T_od_w;$/;"	m	class:CollisionDetection	access:public
+CollisionDetection::findMotionType	collision_detection.cpp	/^const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob) const {$/;"	f	class:CollisionDetection	signature:(const ramp_msgs::Obstacle ob) const
+CollisionDetection::findMotionType	collision_detection.h	/^    const MotionType findMotionType(const ramp_msgs::Obstacle) const;$/;"	p	class:CollisionDetection	access:private	signature:(const ramp_msgs::Obstacle) const
+CollisionDetection::getCenter	collision_detection.cpp	/^const std::vector<float> CollisionDetection::getCenter(std::vector<float> p, float orientation) const {$/;"	f	class:CollisionDetection	signature:(std::vector<float> p, float orientation) const
+CollisionDetection::getCenter	collision_detection.h	/^    const std::vector<float> getCenter(std::vector<float> p, float orientation) const;$/;"	p	class:CollisionDetection	access:public	signature:(std::vector<float> p, float orientation) const
+CollisionDetection::getPredictedTrajectory	collision_detection.cpp	/^const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ramp_msgs::Obstacle ob, const ros::Duration d) const {$/;"	f	class:CollisionDetection	signature:(const ramp_msgs::Obstacle ob, const ros::Duration d) const
+CollisionDetection::getPredictedTrajectory	collision_detection.h	/^    const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle, const ros::Duration) const;$/;"	p	class:CollisionDetection	access:public	signature:(const ramp_msgs::Obstacle, const ros::Duration) const
+CollisionDetection::h_traj_req_	collision_detection.h	/^    TrajectoryRequestHandler* h_traj_req_;$/;"	m	class:CollisionDetection	access:public
+CollisionDetection::id	collision_detection.h	/^    int id;$/;"	m	class:CollisionDetection	access:public
+CollisionDetection::init	collision_detection.cpp	/^void CollisionDetection::init(const ros::NodeHandle& h, const int id) {$/;"	f	class:CollisionDetection	signature:(const ros::NodeHandle& h, const int id)
+CollisionDetection::init	collision_detection.h	/^    void init(const ros::NodeHandle& h, int id);$/;"	p	class:CollisionDetection	access:public	signature:(const ros::NodeHandle& h, int id)
+CollisionDetection::obstacle_	collision_detection.h	/^    ramp_msgs::Obstacle obstacle_;$/;"	m	class:CollisionDetection	access:public
+CollisionDetection::onSegment	collision_detection.h	/^    const bool onSegment(const tf::Point p_i, const tf::Point p_j, const tf::Point p_k) const;$/;"	p	class:CollisionDetection	access:private	signature:(const tf::Point p_i, const tf::Point p_j, const tf::Point p_k) const
+CollisionDetection::perform	collision_detection.cpp	/^const CollisionDetection::QueryResult CollisionDetection::perform() const {$/;"	f	class:CollisionDetection	signature:() const
+CollisionDetection::perform	collision_detection.h	/^    const QueryResult perform() const;$/;"	p	class:CollisionDetection	access:public	signature:() const
+CollisionDetection::query	collision_detection.cpp	/^const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::Trajectory ob_trajectory) const {$/;"	f	class:CollisionDetection	signature:(const ramp_msgs::Trajectory ob_trajectory) const
+CollisionDetection::query	collision_detection.h	/^    const QueryResult query(const ramp_msgs::Trajectory ob_trajectory) const;$/;"	p	class:CollisionDetection	access:public	signature:(const ramp_msgs::Trajectory ob_trajectory) const
+CollisionDetection::setT_od_w	collision_detection.cpp	/^void CollisionDetection::setT_od_w(int id) {$/;"	f	class:CollisionDetection	signature:(int id)
+CollisionDetection::setT_od_w	collision_detection.h	/^    void setT_od_w(int id);$/;"	p	class:CollisionDetection	access:public	signature:(int id)
 CollisionDetection::trajectory_	collision_detection.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:CollisionDetection	access:public
+CollisionDetection::u	collision_detection.h	/^    Utility u;$/;"	m	class:CollisionDetection	access:private
+CollisionDetection::~CollisionDetection	collision_detection.cpp	/^CollisionDetection::~CollisionDetection() {$/;"	f	class:CollisionDetection	signature:()
+CollisionDetection::~CollisionDetection	collision_detection.h	/^    ~CollisionDetection();$/;"	p	class:CollisionDetection	access:public	signature:()
 EUCLIDEAN_DISTANCE_H	euclidean_distance.h	2;"	d
 EVALUATE_H	evaluate.h	2;"	d
 EuclideanDistance	euclidean_distance.h	/^    EuclideanDistance() {}$/;"	f	class:EuclideanDistance	access:public	signature:()
@@ -24,22 +46,20 @@ EuclideanDistance::EuclideanDistance	euclidean_distance.h	/^    EuclideanDistanc
 EuclideanDistance::perform	euclidean_distance.cpp	/^const double EuclideanDistance::perform() {$/;"	f	class:EuclideanDistance	signature:()
 EuclideanDistance::perform	euclidean_distance.h	/^    const double perform();$/;"	p	class:EuclideanDistance	access:public	signature:()
 EuclideanDistance::trajectory_	euclidean_distance.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:EuclideanDistance	access:public
-Evaluate	evaluate.cpp	/^Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) {$/;"	f	class:Evaluate	signature:(const ramp_msgs::EvaluationRequest::Request& req)
-Evaluate	evaluate.h	/^    Evaluate() {}$/;"	f	class:Evaluate	access:public	signature:()
+Evaluate	evaluate.cpp	/^Evaluate::Evaluate() : Q(10000.f) {}$/;"	f	class:Evaluate	signature:()
+Evaluate	evaluate.cpp	/^Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) : Q(10000.f) {$/;"	f	class:Evaluate	signature:(const ramp_msgs::EvaluationRequest::Request& req)
+Evaluate	evaluate.h	/^    Evaluate();$/;"	p	class:Evaluate	access:public	signature:()
 Evaluate	evaluate.h	/^    Evaluate(const ramp_msgs::EvaluationRequest::Request& req);$/;"	p	class:Evaluate	access:public	signature:(const ramp_msgs::EvaluationRequest::Request& req)
 Evaluate	evaluate.h	/^class Evaluate {$/;"	c
-Evaluate::Evaluate	evaluate.cpp	/^Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) {$/;"	f	class:Evaluate	signature:(const ramp_msgs::EvaluationRequest::Request& req)
-Evaluate::Evaluate	evaluate.h	/^    Evaluate() {}$/;"	f	class:Evaluate	access:public	signature:()
+Evaluate::Evaluate	evaluate.cpp	/^Evaluate::Evaluate() : Q(10000.f) {}$/;"	f	class:Evaluate	signature:()
+Evaluate::Evaluate	evaluate.cpp	/^Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) : Q(10000.f) {$/;"	f	class:Evaluate	signature:(const ramp_msgs::EvaluationRequest::Request& req)
+Evaluate::Evaluate	evaluate.h	/^    Evaluate();$/;"	p	class:Evaluate	access:public	signature:()
 Evaluate::Evaluate	evaluate.h	/^    Evaluate(const ramp_msgs::EvaluationRequest::Request& req);$/;"	p	class:Evaluate	access:public	signature:(const ramp_msgs::EvaluationRequest::Request& req)
-Evaluate::collision_	evaluate.h	/^    CollisionDetection collision_;$/;"	m	class:Evaluate	access:public
+Evaluate::Q	evaluate.h	/^    float Q;$/;"	m	class:Evaluate	access:public
 Evaluate::euc_dist_	evaluate.h	/^    EuclideanDistance euc_dist_;$/;"	m	class:Evaluate	access:public
 Evaluate::i_segments_	evaluate.h	/^    std::vector<unsigned int> i_segments_;$/;"	m	class:Evaluate	access:public
-Evaluate::obstacleList_	evaluate.h	/^    ramp_msgs::ObstacleList obstacleList_;$/;"	m	class:Evaluate	access:public
-Evaluate::performCollisionDetection	evaluate.cpp	/^const bool Evaluate::performCollisionDetection() {$/;"	f	class:Evaluate	signature:()
-Evaluate::performCollisionDetection	evaluate.h	/^    const bool performCollisionDetection();$/;"	p	class:Evaluate	access:public	signature:()
-Evaluate::performCollisionDetection	evaluation_evaluate_performCollisionDetection.cpp	/^const bool Evaluate::performCollisionDetection() {$/;"	f	class:Evaluate	signature:()
-Evaluate::performFitness	evaluate.cpp	/^const double Evaluate::performFitness() {$/;"	f	class:Evaluate	signature:()
-Evaluate::performFitness	evaluate.h	/^    const double performFitness();$/;"	p	class:Evaluate	access:public	signature:()
+Evaluate::performFitness	evaluate.cpp	/^const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) {$/;"	f	class:Evaluate	signature:(CollisionDetection::QueryResult feasible)
+Evaluate::performFitness	evaluate.h	/^    const double performFitness(CollisionDetection::QueryResult feasible);$/;"	p	class:Evaluate	access:public	signature:(CollisionDetection::QueryResult feasible)
 Evaluate::setRequest	evaluate.cpp	/^void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request& req) {$/;"	f	class:Evaluate	signature:(const ramp_msgs::EvaluationRequest::Request& req)
 Evaluate::setRequest	evaluate.h	/^    void setRequest(const ramp_msgs::EvaluationRequest::Request& req);$/;"	p	class:Evaluate	access:public	signature:(const ramp_msgs::EvaluationRequest::Request& req)
 Evaluate::time_	evaluate.h	/^    Time time_;$/;"	m	class:Evaluate	access:public
@@ -52,60 +72,134 @@ MotionType::SelfRotation	motion_type.h	/^  SelfRotation                = 2,$/;"	
 MotionType::Translation	motion_type.h	/^  Translation                 = 1,$/;"	m	class:MotionType	access:private
 MotionType::TranslationAndSelfRotation	motion_type.h	/^  TranslationAndSelfRotation  = 3,$/;"	m	class:MotionType	access:private
 None	motion_type.h	/^  None                        = 0,$/;"	m	class:MotionType	access:private
+PI	utility.h	11;"	d
+Q	evaluate.h	/^    float Q;$/;"	m	class:Evaluate	access:public
+QueryResult	collision_detection.h	/^      QueryResult() : collision_(false), time_until_collision_(-1), $/;"	f	struct:CollisionDetection::QueryResult	access:public	signature:()
+QueryResult	collision_detection.h	/^    struct QueryResult {$/;"	s	class:CollisionDetection	access:public
 SelfRotation	motion_type.h	/^  SelfRotation                = 2,$/;"	m	class:MotionType	access:private
 TIME_H	time.h	2;"	d
+TRAJECTORY_REQUEST_HANDLER_H	trajectory_request_handler.h	2;"	d
+T_od_w	collision_detection.h	/^    std::vector< std::vector<float> > T_od_w;$/;"	m	class:CollisionDetection	access:public
 Time	time.h	/^    Time() {}$/;"	f	class:Time	access:public	signature:()
 Time	time.h	/^class Time {$/;"	c
 Time::Time	time.h	/^    Time() {}$/;"	f	class:Time	access:public	signature:()
 Time::perform	time.cpp	/^const double Time::perform() {$/;"	f	class:Time	signature:()
 Time::perform	time.h	/^    const double perform();$/;"	p	class:Time	access:public	signature:()
 Time::trajectory_	time.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:Time	access:public
+TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler(const ros::NodeHandle& h) : handle_(h) {$/;"	f	class:TrajectoryRequestHandler	signature:(const ros::NodeHandle& h)
+TrajectoryRequestHandler	trajectory_request_handler.h	/^    TrajectoryRequestHandler(const ros::NodeHandle& h);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(const ros::NodeHandle& h)
+TrajectoryRequestHandler	trajectory_request_handler.h	/^class TrajectoryRequestHandler {$/;"	c
+TrajectoryRequestHandler::TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler(const ros::NodeHandle& h) : handle_(h) {$/;"	f	class:TrajectoryRequestHandler	signature:(const ros::NodeHandle& h)
+TrajectoryRequestHandler::TrajectoryRequestHandler	trajectory_request_handler.h	/^    TrajectoryRequestHandler(const ros::NodeHandle& h);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(const ros::NodeHandle& h)
+TrajectoryRequestHandler::client_	trajectory_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:TrajectoryRequestHandler	access:private
+TrajectoryRequestHandler::handle_	trajectory_request_handler.h	/^    ros::NodeHandle  handle_; $/;"	m	class:TrajectoryRequestHandler	access:private
+TrajectoryRequestHandler::request	trajectory_request_handler.cpp	/^const bool TrajectoryRequestHandler::request(ramp_msgs::TrajectoryRequest& tr) {$/;"	f	class:TrajectoryRequestHandler	signature:(ramp_msgs::TrajectoryRequest& tr)
+TrajectoryRequestHandler::request	trajectory_request_handler.h	/^    const bool request(ramp_msgs::TrajectoryRequest& tr);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(ramp_msgs::TrajectoryRequest& tr)
 Translation	motion_type.h	/^  Translation                 = 1,$/;"	m	class:MotionType	access:private
 TranslationAndSelfRotation	motion_type.h	/^  TranslationAndSelfRotation  = 3,$/;"	m	class:MotionType	access:private
 UTILITY_H	utility.h	2;"	d
+Utility	utility.cpp	/^Utility::Utility() {$/;"	f	class:Utility	signature:()
+Utility	utility.h	/^    Utility();$/;"	p	class:Utility	access:public	signature:()
 Utility	utility.h	/^class Utility {$/;"	c
+Utility::Utility	utility.cpp	/^Utility::Utility() {$/;"	f	class:Utility	signature:()
+Utility::Utility	utility.h	/^    Utility();$/;"	p	class:Utility	access:public	signature:()
+Utility::displaceAngle	utility.cpp	/^const float Utility::displaceAngle(const float a1, float a2) const {$/;"	f	class:Utility	signature:(const float a1, float a2) const
+Utility::displaceAngle	utility.h	/^    const float displaceAngle(const float a1, float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, float a2) const
+Utility::euclideanDistance	utility.cpp	/^const float Utility::euclideanDistance(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::euclideanDistance	utility.h	/^    const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::findAngleFromAToB	utility.cpp	/^const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::findDistanceBetweenAngles	utility.cpp	/^const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {$/;"	f	class:Utility	signature:(const float a1, const float a2) const
+Utility::findDistanceBetweenAngles	utility.h	/^    const float findDistanceBetweenAngles(const float a1, const float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, const float a2) const
+Utility::getConfigurationFromPoint	utility.cpp	/^const ramp_msgs::Configuration Utility::getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const {$/;"	f	class:Utility	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
+Utility::getConfigurationFromPoint	utility.h	/^    const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;$/;"	p	class:Utility	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
+Utility::getPath	utility.cpp	/^const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::Configuration> configs) const {$/;"	f	class:Utility	signature:(const std::vector<ramp_msgs::Configuration> configs) const
+Utility::getPath	utility.h	/^    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::Configuration> configs) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<ramp_msgs::Configuration> configs) const
+Utility::ranges_	utility.h	/^    std::vector<ramp_msgs::Range> ranges_;$/;"	m	class:Utility	access:public
+Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Configuration c) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Configuration c) const
+Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
 Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
+Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Configuration c) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Configuration c) const
+Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Path p) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path p) const
 Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
-collision_	evaluate.h	/^    CollisionDetection collision_;$/;"	m	class:Evaluate	access:public
+Utility::~Utility	utility.cpp	/^Utility::~Utility() {}$/;"	f	class:Utility	signature:()
+Utility::~Utility	utility.h	/^    ~Utility();$/;"	p	class:Utility	access:public	signature:()
+cd	main.cpp	/^CollisionDetection cd;$/;"	v
+client_	trajectory_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:TrajectoryRequestHandler	access:private
+collision_	collision_detection.h	/^      bool  collision_;$/;"	m	struct:CollisionDetection::QueryResult	access:public
+displaceAngle	utility.cpp	/^const float Utility::displaceAngle(const float a1, float a2) const {$/;"	f	class:Utility	signature:(const float a1, float a2) const
+displaceAngle	utility.h	/^    const float displaceAngle(const float a1, float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, float a2) const
 euc_dist_	evaluate.h	/^    EuclideanDistance euc_dist_;$/;"	m	class:Evaluate	access:public
+euclideanDistance	utility.cpp	/^const float Utility::euclideanDistance(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+euclideanDistance	utility.h	/^    const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 ev	main.cpp	/^Evaluate ev;$/;"	v
-findMotionType	collision_detection.cpp	/^const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob) {$/;"	f	class:CollisionDetection	signature:(const ramp_msgs::Obstacle ob)
-findMotionType	collision_detection.h	/^    const MotionType findMotionType(const ramp_msgs::Obstacle);$/;"	p	class:CollisionDetection	access:private	signature:(const ramp_msgs::Obstacle)
-getTrajectoryRequest	collision_detection.cpp	/^const ramp_msgs::Trajectory CollisionDetection::getTrajectoryRequest(const ramp_msgs::Obstacle ob, const ros::Duration d) {$/;"	f	class:CollisionDetection	signature:(const ramp_msgs::Obstacle ob, const ros::Duration d)
-getTrajectoryRequest	collision_detection.h	/^    const ramp_msgs::Trajectory getTrajectoryRequest(const ramp_msgs::Obstacle, const ros::Duration);$/;"	p	class:CollisionDetection	access:public	signature:(const ramp_msgs::Obstacle, const ros::Duration)
+findAngleFromAToB	utility.cpp	/^const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
+findDistanceBetweenAngles	utility.cpp	/^const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {$/;"	f	class:Utility	signature:(const float a1, const float a2) const
+findDistanceBetweenAngles	utility.h	/^    const float findDistanceBetweenAngles(const float a1, const float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, const float a2) const
+findMotionType	collision_detection.cpp	/^const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob) const {$/;"	f	class:CollisionDetection	signature:(const ramp_msgs::Obstacle ob) const
+findMotionType	collision_detection.h	/^    const MotionType findMotionType(const ramp_msgs::Obstacle) const;$/;"	p	class:CollisionDetection	access:private	signature:(const ramp_msgs::Obstacle) const
+getCenter	collision_detection.cpp	/^const std::vector<float> CollisionDetection::getCenter(std::vector<float> p, float orientation) const {$/;"	f	class:CollisionDetection	signature:(std::vector<float> p, float orientation) const
+getCenter	collision_detection.h	/^    const std::vector<float> getCenter(std::vector<float> p, float orientation) const;$/;"	p	class:CollisionDetection	access:public	signature:(std::vector<float> p, float orientation) const
+getConfigurationFromPoint	utility.cpp	/^const ramp_msgs::Configuration Utility::getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const {$/;"	f	class:Utility	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
+getConfigurationFromPoint	utility.h	/^    const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;$/;"	p	class:Utility	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
+getPath	utility.cpp	/^const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::Configuration> configs) const {$/;"	f	class:Utility	signature:(const std::vector<ramp_msgs::Configuration> configs) const
+getPath	utility.h	/^    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::Configuration> configs) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<ramp_msgs::Configuration> configs) const
+getPredictedTrajectory	collision_detection.cpp	/^const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ramp_msgs::Obstacle ob, const ros::Duration d) const {$/;"	f	class:CollisionDetection	signature:(const ramp_msgs::Obstacle ob, const ros::Duration d) const
+getPredictedTrajectory	collision_detection.h	/^    const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle, const ros::Duration) const;$/;"	p	class:CollisionDetection	access:public	signature:(const ramp_msgs::Obstacle, const ros::Duration) const
+h_traj_req_	collision_detection.h	/^    TrajectoryRequestHandler* h_traj_req_;$/;"	m	class:CollisionDetection	access:public
 handleRequest	main.cpp	/^bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,$/;"	f	signature:(ramp_msgs::EvaluationRequest::Request& req, ramp_msgs::EvaluationRequest::Response& res)
+handle_	trajectory_request_handler.h	/^    ros::NodeHandle  handle_; $/;"	m	class:TrajectoryRequestHandler	access:private
+i_obstacle	collision_detection.h	/^      int i_obstacle;$/;"	m	struct:CollisionDetection::QueryResult	access:public
 i_segments_	evaluate.h	/^    std::vector<unsigned int> i_segments_;$/;"	m	class:Evaluate	access:public
+id	collision_detection.h	/^    int id;$/;"	m	class:CollisionDetection	access:public
+init	collision_detection.cpp	/^void CollisionDetection::init(const ros::NodeHandle& h, const int id) {$/;"	f	class:CollisionDetection	signature:(const ros::NodeHandle& h, const int id)
+init	collision_detection.h	/^    void init(const ros::NodeHandle& h, int id);$/;"	p	class:CollisionDetection	access:public	signature:(const ros::NodeHandle& h, int id)
 main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
-obstacleListCb	main.cpp	/^void obstacleListCb(const ramp_msgs::ObstacleList& ol) {$/;"	f	signature:(const ramp_msgs::ObstacleList& ol)
-obstacleList_	collision_detection.h	/^    ramp_msgs::ObstacleList obstacleList_;$/;"	m	class:CollisionDetection	access:public
-obstacleList_	evaluate.h	/^    ramp_msgs::ObstacleList obstacleList_;$/;"	m	class:Evaluate	access:public
+obstacleCb	main.cpp	/^void obstacleCb(const ramp_msgs::Obstacle& ol) {$/;"	f	signature:(const ramp_msgs::Obstacle& ol)
+obstacle_	collision_detection.h	/^    ramp_msgs::Obstacle obstacle_;$/;"	m	class:CollisionDetection	access:public
 obstacle_struct	utility.h	/^struct obstacle_struct \/\/ defines where an obstacle is$/;"	s
 obstacle_struct::x1	utility.h	/^  double x1;$/;"	m	struct:obstacle_struct	access:public
 obstacle_struct::x2	utility.h	/^  double x2;$/;"	m	struct:obstacle_struct	access:public
 obstacle_struct::y1	utility.h	/^  double y1;$/;"	m	struct:obstacle_struct	access:public
 obstacle_struct::y2	utility.h	/^  double y2;$/;"	m	struct:obstacle_struct	access:public
-perform	collision_detection.cpp	/^const bool CollisionDetection::perform() const {$/;"	f	class:CollisionDetection	signature:() const
-perform	collision_detection.h	/^    const bool perform() const;$/;"	p	class:CollisionDetection	access:public	signature:() const
+onSegment	collision_detection.h	/^    const bool onSegment(const tf::Point p_i, const tf::Point p_j, const tf::Point p_k) const;$/;"	p	class:CollisionDetection	access:private	signature:(const tf::Point p_i, const tf::Point p_j, const tf::Point p_k) const
+perform	collision_detection.cpp	/^const CollisionDetection::QueryResult CollisionDetection::perform() const {$/;"	f	class:CollisionDetection	signature:() const
+perform	collision_detection.h	/^    const QueryResult perform() const;$/;"	p	class:CollisionDetection	access:public	signature:() const
 perform	euclidean_distance.cpp	/^const double EuclideanDistance::perform() {$/;"	f	class:EuclideanDistance	signature:()
 perform	euclidean_distance.h	/^    const double perform();$/;"	p	class:EuclideanDistance	access:public	signature:()
 perform	time.cpp	/^const double Time::perform() {$/;"	f	class:Time	signature:()
 perform	time.h	/^    const double perform();$/;"	p	class:Time	access:public	signature:()
-performCollisionDetection	evaluate.cpp	/^const bool Evaluate::performCollisionDetection() {$/;"	f	class:Evaluate	signature:()
-performCollisionDetection	evaluate.h	/^    const bool performCollisionDetection();$/;"	p	class:Evaluate	access:public	signature:()
-performCollisionDetection	evaluation_evaluate_performCollisionDetection.cpp	/^const bool Evaluate::performCollisionDetection() {$/;"	f	class:Evaluate	signature:()
-performFitness	evaluate.cpp	/^const double Evaluate::performFitness() {$/;"	f	class:Evaluate	signature:()
-performFitness	evaluate.h	/^    const double performFitness();$/;"	p	class:Evaluate	access:public	signature:()
+performFitness	evaluate.cpp	/^const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) {$/;"	f	class:Evaluate	signature:(CollisionDetection::QueryResult feasible)
+performFitness	evaluate.h	/^    const double performFitness(CollisionDetection::QueryResult feasible);$/;"	p	class:Evaluate	access:public	signature:(CollisionDetection::QueryResult feasible)
+query	collision_detection.cpp	/^const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::Trajectory ob_trajectory) const {$/;"	f	class:CollisionDetection	signature:(const ramp_msgs::Trajectory ob_trajectory) const
+query	collision_detection.h	/^    const QueryResult query(const ramp_msgs::Trajectory ob_trajectory) const;$/;"	p	class:CollisionDetection	access:public	signature:(const ramp_msgs::Trajectory ob_trajectory) const
+ranges_	utility.h	/^    std::vector<ramp_msgs::Range> ranges_;$/;"	m	class:Utility	access:public
+request	trajectory_request_handler.cpp	/^const bool TrajectoryRequestHandler::request(ramp_msgs::TrajectoryRequest& tr) {$/;"	f	class:TrajectoryRequestHandler	signature:(ramp_msgs::TrajectoryRequest& tr)
+request	trajectory_request_handler.h	/^    const bool request(ramp_msgs::TrajectoryRequest& tr);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(ramp_msgs::TrajectoryRequest& tr)
 setRequest	evaluate.cpp	/^void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request& req) {$/;"	f	class:Evaluate	signature:(const ramp_msgs::EvaluationRequest::Request& req)
 setRequest	evaluate.h	/^    void setRequest(const ramp_msgs::EvaluationRequest::Request& req);$/;"	p	class:Evaluate	access:public	signature:(const ramp_msgs::EvaluationRequest::Request& req)
+setT_od_w	collision_detection.cpp	/^void CollisionDetection::setT_od_w(int id) {$/;"	f	class:CollisionDetection	signature:(int id)
+setT_od_w	collision_detection.h	/^    void setT_od_w(int id);$/;"	p	class:CollisionDetection	access:public	signature:(int id)
 time_	evaluate.h	/^    Time time_;$/;"	m	class:Evaluate	access:public
+time_until_collision_	collision_detection.h	/^      float time_until_collision_;$/;"	m	struct:CollisionDetection::QueryResult	access:public
+toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Configuration c) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Configuration c) const
+toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
 toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
+toString	utility.h	/^    const std::string toString(const ramp_msgs::Configuration c) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Configuration c) const
+toString	utility.h	/^    const std::string toString(const ramp_msgs::Path p) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path p) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
 trajectory_	collision_detection.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:CollisionDetection	access:public
 trajectory_	euclidean_distance.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:EuclideanDistance	access:public
 trajectory_	evaluate.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:Evaluate	access:public
 trajectory_	time.h	/^    ramp_msgs::Trajectory trajectory_;$/;"	m	class:Time	access:public
+u	collision_detection.h	/^    Utility u;$/;"	m	class:CollisionDetection	access:private
 u	main.cpp	/^Utility u;$/;"	v
 x1	utility.h	/^  double x1;$/;"	m	struct:obstacle_struct	access:public
 x2	utility.h	/^  double x2;$/;"	m	struct:obstacle_struct	access:public
 y1	utility.h	/^  double y1;$/;"	m	struct:obstacle_struct	access:public
 y2	utility.h	/^  double y2;$/;"	m	struct:obstacle_struct	access:public
+~CollisionDetection	collision_detection.cpp	/^CollisionDetection::~CollisionDetection() {$/;"	f	class:CollisionDetection	signature:()
+~CollisionDetection	collision_detection.h	/^    ~CollisionDetection();$/;"	p	class:CollisionDetection	access:public	signature:()
+~Utility	utility.cpp	/^Utility::~Utility() {}$/;"	f	class:Utility	signature:()
+~Utility	utility.h	/^    ~Utility();$/;"	p	class:Utility	access:public	signature:()

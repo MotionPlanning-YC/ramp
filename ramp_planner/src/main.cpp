@@ -20,22 +20,22 @@ std::vector<Configuration> getStartGoal(bool robot1) {
   Configuration s, g;
   
   if(robot1) {
-    s.K_.push_back(3);
-    s.K_.push_back(1);
-    s.K_.push_back(3.14);
-    
-    g.K_.push_back(0);
-    g.K_.push_back(2);
-    g.K_.push_back(3.14);
-  }
-  else {
-    s.K_.push_back(1);
+    s.K_.push_back(0);
     s.K_.push_back(2);
     s.K_.push_back(0);
     
-    g.K_.push_back(3.5);
-    g.K_.push_back(1);
+    g.K_.push_back(3.f);
+    g.K_.push_back(2.f);
     g.K_.push_back(0);
+  }
+  else {
+    s.K_.push_back(3.f);
+    s.K_.push_back(1.75f);
+    s.K_.push_back(PI);
+    
+    g.K_.push_back(0.f);
+    g.K_.push_back(1.75f);
+    g.K_.push_back(PI);
   }
 
   result.push_back(s);
@@ -44,22 +44,64 @@ std::vector<Configuration> getStartGoal(bool robot1) {
   return result;
 }
 
+
+
+void loadParameters(ros::NodeHandle handle) {
+  std::string key;
+  if(handle.searchParam("id", key)) {
+    int val;
+    handle.getParam(key, val);
+    std::cout<<"\nkey: "<<key<<" val: "<<val;
+  }
+
+
+  if(handle.searchParam("", key)) {
+    int val;
+    handle.getParam(key, val);
+    std::cout<<"\nkey: "<<key<<" val: "<<val;
+  }
+
+}
+
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "ramp_planner");
   ros::NodeHandle handle;
+  
+  ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
 
+  
+  /*std::string key;
+  if(handle.searchParam("id", key)) {
+    int val;
+    handle.getParam(key, val);
+    std::cout<<"\nkey: "<<key<<" val: "<<val;
+
+    std::string k_theta;
+    double theta;
+    handle.searchParam("start/theta", k_theta);
+    handle.getParam(k_theta, theta);
+    std::cout<<"\nk_theta: "<<k_theta<<" theta: "<<theta;
+  }
+  else {
+    std::cout<<"\nCould not find \"id\"";
+  }*/
+  
+  
   std::string update_topic;
   handle.getParam("ramp_planner/robot_update", update_topic);
-  // std::cout<<"\nupdate_topic:"<<update_topic;
+  std::cout<<"\nupdate_topic:"<<update_topic;
+
+
+
+
   
-  //ros::Subscriber sub_update_ = handle.subscribe(update_topic, 1000, &Planner::updateCallback, &my_planner);
-  ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
   
   // Make some Ranges 
   srand( time(0));
   Range range0(0, 3.5);
   Range range1(0, 3.5);
-  Range range2(-1, 1);
+  Range range2(-PI, PI);
 
   // Set my_planner's ranges
   my_planner.ranges_.push_back(range0);
@@ -75,28 +117,42 @@ int main(int argc, char** argv) {
   g.ranges_ = my_planner.ranges_;
   
   // Set start and goal
-  my_planner.initial_ = s;
   my_planner.start_   = s;
   my_planner.goal_    = g;
-
   std::cout<<"\nStart:"<<s.toString();
   std::cout<<"\nGoal:"<<g.toString();
   
+  // Set transform matrix for odometry
+  my_planner.setT_od_w(s.K_);
+
 
   /** Initialize the Planner's handlers */ 
   my_planner.init(handle); 
+
+  /** Set Planner Robot ID */
+  if(update_topic == "/robot1/update") {
+    my_planner.id_ = 1;
+  }
+  else {
+    my_planner.id_ = 2;
+  }
   /** End building Planner */
 
+
+  // Don't start planner, just wait for updates
+  //while(ros::ok()) {ros::spinOnce();}
   
   
+  
+
   /******* Start the planner *******/
   std::cout<<"\nPress Enter to start the planner\n";
   std::cin.get(); 
   
   my_planner.go();
-
   
-
+  
+  ros::spinOnce();
   std::cout<<"\nExiting Normally\n";
   return 0;
 }

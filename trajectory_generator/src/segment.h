@@ -42,13 +42,18 @@ class Segment {
     unsigned int T_loc_;
     int T_rotate_pre_;
     int T_rotate_post_;
-    float angle_pre;
+    float pre_angle;
+    float post_angle;
+    float pre_angle_dist;
+    float post_angle_dist;
      
     // The segment's index in whichever trajectory it is in
     int index_; 
     
 
+    bool plan_post;
   private:
+    Utility u;
     float k_dof_;
     std::vector<float> max_v_;
     const void calculateMinTime();

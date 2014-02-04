@@ -9,12 +9,12 @@ bool handleRequest(ramp_msgs::ModificationRequest::Request& req,
                    ramp_msgs::ModificationRequest::Response& res)
 {
 
-  std::cout<<"\nNumber of paths received: "<<req.paths.size();
+  /*std::cout<<"\nNumber of paths received: "<<req.paths.size();
   std::cout<<"\nPaths received:";
   for(unsigned int i=0;i<req.paths.size();i++) {
     std::cout<<"\n"<<u.toString(req.paths.at(i));
   }
-  std::cout<<"\noperator: "<<req.op<<"\n";
+  std::cout<<"\noperator: "<<req.op<<"\n";*/
 
   Modifier mod(req);
   res.mod_paths = mod.perform();
@@ -34,10 +34,10 @@ bool handleRequest(ramp_msgs::ModificationRequest::Request& req,
   //Crossover cross(req.paths.at(0), req.paths.at(1));
   //res.mod_paths = cross.perform();
   
-  std::cout<<"\nPath(s) after modification:";
+  /*std::cout<<"\nPath(s) after modification:";
   for(unsigned int i=0;i<res.mod_paths.size();i++) {
     std::cout<<"\n"<<u.toString(res.mod_paths.at(i));
-  }
+  }*/
 
   return true;
 }

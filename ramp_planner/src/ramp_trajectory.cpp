@@ -1,8 +1,8 @@
 #include "ramp_trajectory.h"
 
-RampTrajectory::RampTrajectory(unsigned int id) : id_(id), fitness_(-1.0), feasible_(true) {}
+RampTrajectory::RampTrajectory(unsigned int id) : id_(id), fitness_(-1.0), feasible_(true), time_until_collision_(9999.0f) {}
 
-RampTrajectory::RampTrajectory(const ramp_msgs::Trajectory msg) : fitness_(-1.0), feasible_(true), msg_trajec_(msg) {}
+RampTrajectory::RampTrajectory(const ramp_msgs::Trajectory msg) : fitness_(-1.0), feasible_(true), msg_trajec_(msg), time_until_collision_(9999.0f) {}
 
 const bool RampTrajectory::equal(const RampTrajectory& other) const {
   return id_ == other.id_;
@@ -30,8 +30,9 @@ const Path RampTrajectory::getPath() const {
 const std::string RampTrajectory::fitnessFeasibleToString() const {
   std::ostringstream result;
  
-  result<<"\nTrajectory "<<id_; 
-  result<<"\n Fitness: "<<fitness_<<" Feasible: "<<feasible_;
+  result<<"\nTrajectory "<<id_;
+  result<<"\n Number of knot points: "<<msg_trajec_.index_knot_points.size(); 
+  result<<"\n Fitness: "<<fitness_<<" Feasible: "<<feasible_<<" Collision Time: "<<time_until_collision_;
 
   return result.str();
 }

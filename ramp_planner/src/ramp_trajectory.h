@@ -13,9 +13,10 @@ class RampTrajectory {
     ~RampTrajectory() {}
     
     ramp_msgs::Trajectory msg_trajec_;
-    double fitness_;
+    float fitness_;
     bool feasible_;
     unsigned int id_;
+    float time_until_collision_;
 
     const bool equal(const RampTrajectory& other) const;
     const Path getPath() const;

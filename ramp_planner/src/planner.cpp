@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(4), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
+Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
   controlCycle_ = ros::Duration(0.25);
 }
@@ -15,7 +15,7 @@ Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), popula
   controlCycle_ = ros::Duration(0.25);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(4), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
   init(h); 
   controlCycle_ = ros::Duration(0.25);
@@ -44,6 +44,23 @@ Planner::~Planner() {
 }
 
 
+
+/*****************************************************
+ ********************** Methods **********************
+ *****************************************************/
+
+void Planner::setT_od_w(std::vector<float> od_info) {
+    
+  Eigen::Translation<float,2> translation(od_info.at(0), od_info.at(1));
+  Eigen::Rotation2D<float> rotation(od_info.at(2));
+
+  T_od_w_ = translation * rotation;
+  std::cout<<"\nT_od_w: "<<T_od_w_.matrix();
+  
+  theta_od_w = od_info.at(2);
+}
+
+
 const unsigned int Planner::getIRT() {
   return i_rt++;
 }
@@ -55,25 +72,29 @@ Configuration Planner::getStartConfiguration() {
   return start_;
 }
 
-/** Sets start_ */
+/** Sets start_ 
+ * Updates are relative to odometry frame
+ * */
 void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
-  // std::cout<<"\nReceived update!\n";
+  //std::cout<<"\nReceived update!\n";
   
   // Wait for mutex to be true
   while(!mutex_start_) {}
 
   mutex_start_ = false;
 
-  
-  Configuration temp(msg->configuration);
-  temp.add(initial_);
+  // Create a Configuration from the update msg 
+  Configuration c_od(msg->configuration);
 
-  if(temp.K_.size() > 0) {
-    start_ = temp;
+  // Transform configuration from odometry to world coordinates
+  c_od.transformBase(T_od_w_, theta_od_w);
+
+  // if statement Necessary?
+  if(c_od.K_.size() > 0) {
+    start_ = c_od;
   }
 
-  // start_.updatePosition(msg->pose.pose.position.x, msg->pose.pose.position.y, tf::getYaw(msg->pose.pose.orientation));
-  
+  //std::cout<<"\nNew starting configuration: "<<start_.toString();
 
   mutex_start_ = true;
 }
@@ -106,8 +127,8 @@ void Planner::init_population() {
     Path temp_path(start_, goal_);
 
     // Each trajectory will have a random number of knot points
-    // Put a max of 10 knot points for practicality...
-    unsigned int num = rand() % 10;
+    // Put a max of 5 knot points for practicality...
+    unsigned int num = rand() % 5;
 
     // For each knot point to be created...
     for(unsigned int j=0;j<num;j++) {
@@ -297,17 +318,31 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
 
 /** Send the fittest feasible trajectory to the robot package */
 void Planner::sendBest() {
-  //std::cout<<"\nSending:"<<u.toString(bestTrajec_.msg_trajec_);
-  if(!bestTrajec_.feasible_) {
-    std::cout<<"\nSending infeasible trajectory\n";
-    std::cout<<u.toString(bestTrajec_.msg_trajec_);
+  
+  // If infeasible and too close to obstacle, 
+  // Stop the robot by sending a blank trajectory
+  if(!bestTrajec_.feasible_ && bestTrajec_.time_until_collision_ < 3.5f) {
+    std::cout<<"\nCollision within 1.5 seconds! Stopping robot!\n";
+    ramp_msgs::Trajectory blank;
+    h_control_->send(blank); 
   }
-  h_control_->send(bestTrajec_.msg_trajec_);
+  else if(!bestTrajec_.feasible_) {
+    std::cout<<"\nBest trajectory is not feasible! Time until collision: "<<bestTrajec_.time_until_collision_<<"\n";
+    h_control_->send(bestTrajec_.msg_trajec_);
+  }
+  else {
+    h_control_->send(bestTrajec_.msg_trajec_);
+  }
 }
 
 /** Send the whole population of trajectories to the trajectory viewer */
 void Planner::sendPopulation() {
-  h_control_->sendPopulation(population_.populationMsg());
+
+  // Need to set robot id
+  ramp_msgs::Population msg = population_.populationMsg();
+  msg.robot_id = id_;
+
+  h_control_->sendPopulation(msg);
 }
 
 void Planner::controlCycleCallback(const ros::TimerEvent& t) {
@@ -332,13 +367,15 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   bestTrajec_ = evaluateAndObtainBest();
   
 
-  // T_move = T
   // Send the best trajectory 
   // std::cout<<"\nSending new trajectory!\n";
-  sendBest(); 
+  //if(generation_ > 75) {
+    //std::cout<<"\nSending "<<u.toString(bestTrajec_.msg_trajec_);
+    sendBest(); 
+  //}
   
   // Send the whole population to the trajectory viewer
-  //sendPopulation();
+  sendPopulation();
 }
 
 
@@ -450,7 +487,7 @@ void Planner::modification() {
   }
   
   // Obtain and set best trajectory
-  bestTrajec_ = population_.findBest(generation_);
+  bestTrajec_ = population_.findBest();
 } // End modification
 
 
@@ -464,13 +501,10 @@ void Planner::evaluateTrajectory(RampTrajectory& trajec) {
   if(requestEvaluation(er)) {
     trajec.fitness_   = er.response.fitness;
     trajec.feasible_  = er.response.feasible;
-
-    if(!trajec.feasible_) {
-      std::cout<<"\nInfeasible trajectory: "<<u.toString(trajec.msg_trajec_);
-    }
+    trajec.time_until_collision_ = er.response.time_until_collision;
   }
   else {
-    // some error handling
+    // TODO: some error handling
   }
 } // End evaluateTrajectory
 
@@ -577,7 +611,7 @@ void Planner::updatePopulation(ros::Duration d) {
 /** This method calls evaluatePopulation and population_.getBest() */
 const RampTrajectory Planner::evaluateAndObtainBest() {
   evaluatePopulation();
-  return population_.findBest(generation_);
+  return population_.findBest();
 }
 
 
@@ -597,10 +631,10 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   // initialize population
   init_population();
   
-  std::cout<<"\nPopulation initialized!\n";
+  /*std::cout<<"\nPopulation initialized!\n";
   for(unsigned int i=0;i<paths_.size();i++) {
     std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
-  }
+  }*/
   // std::cout<<"\nPress enter to continue\n";
   // std::cin.get();
 
@@ -609,7 +643,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
 
   // Evaluate the population and get the trajectory to move on
   RampTrajectory T_move = evaluateAndObtainBest();
-  // std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
+  std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
   // std::cout<<"\nPress enter to start the loop!\n";
   // std::cin.get();
   
@@ -618,7 +652,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   // createSubpopulations();
   
   timer_.start();
-  while( (start_.compare(goal_) > 0.1) && ros::ok()) {
+  while( (start_.compare(goal_) > 0.3) && ros::ok()) {
     //std::cout<<"\ngeneration_: "<<generation_;
     
     // t=t+1
@@ -631,6 +665,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
     // Call modification
     modification();
     mutex_pop_ = true;
+    //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
     // std::cin.get();
     /*std::cout<<"\nmodification completed!\n";
     std::cout<<"\nPaths are now: ";

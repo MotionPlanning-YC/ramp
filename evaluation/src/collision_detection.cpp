@@ -1,41 +1,122 @@
 #include "collision_detection.h"
 
-/** Returns true if trajectory_ is in collision with any of the objects */
-const bool CollisionDetection::perform() const {
-  
-  ros::Duration d(3);
-  // For each obstacle
-  // Compute its trajectory to query collision detection
-  for(unsigned int i=0;i<obstacleList_.obstacles.size();i++) {
-    ramp_msgs::Trajectory ob_trajectory = getPredictedTrajectory(obstacleList_.obstacles.at(i), d); 
-    //std::cout<<"\ntrajectory_: "<<u.toString(trajectory_);
-    //std::cout<<"\nob_trajectory: "<<u.toString(ob_trajectory);
-    if(query(ob_trajectory)) {
-      return true;
-    }
-  }
+CollisionDetection::CollisionDetection() : h_traj_req_(0) {}
 
-  return false;  
+CollisionDetection::~CollisionDetection() {
+  if(h_traj_req_ != 0) {
+    delete h_traj_req_;
+    h_traj_req_ = 0;
+  }
+}
+
+void CollisionDetection::init(const ros::NodeHandle& h, const int id) {
+  h_traj_req_ = new TrajectoryRequestHandler(h);
+  setT_od_w(id);
 }
 
 
-/** This method returns true if k lies on the segment, ij */
-const bool CollisionDetection::onSegment(const tf::Point p_i, const tf::Point p_j, const tf::Point p_k) const {
+
+
+/** Returns true if trajectory_ is in collision with any of the objects */
+const CollisionDetection::QueryResult CollisionDetection::perform() const {
+  CollisionDetection::QueryResult result;
+
+  // Duration for predicting the object trajectories
+  ros::Duration d(5);
   
-  float min_x_ij = (p_i.m_floats[0] < p_j.m_floats[0]) ? p_i.m_floats[0] : p_j.m_floats[0]; 
-  float max_x_ij = (p_i.m_floats[0] > p_j.m_floats[0]) ? p_i.m_floats[0] : p_j.m_floats[0]; 
+  // Predict the obstacle's trajectory
+  ramp_msgs::Trajectory ob_trajectory = getPredictedTrajectory(obstacle_, d); 
+  
+  // Query for collision
+  CollisionDetection::QueryResult q = query(ob_trajectory);
+  
+  // If collision, set result to q
+  if(q.collision_) {
+    result = q;
+  }
 
-  float min_y_ij = (p_i.m_floats[1] < p_j.m_floats[1]) ? p_i.m_floats[1] : p_j.m_floats[1]; 
-  float max_y_ij = (p_i.m_floats[1] > p_j.m_floats[1]) ? p_i.m_floats[1] : p_j.m_floats[1]; 
+  return result;  
+} //End perform
+
+
+/** 
+ * Assume a 45 degree angle is formed between the robot's center and the reference point (left wheel)
+ * */
+const std::vector<float> CollisionDetection::getCenter(std::vector<float> p, float orientation) const {
+  std::vector<float> result;
  
-  float x_k = p_k.m_floats[0];
-  float y_k = p_k.m_floats[1];
+  // Get world coordinates of reference point 
+  float x = p.at(0);
+  float y = p.at(1);
+  
+  // Radius
+  float r = 0.2155261;
 
-  if( (min_x_ij <= x_k && x_k <= max_x_ij) && (min_y_ij <= y_k && y_k <= max_y_ij) ) {
-    return true;
+  // Get world coodinates of center point
+  if(orientation > 0) {
+    x += r*cos( u.displaceAngle((-3*PI/4), orientation));
+    y += r*sin( u.displaceAngle((-3*PI/4), orientation));
+  }
+  else {
+    x += r*cos( u.displaceAngle((-3*PI/4), -orientation));
+    y += r*sin( u.displaceAngle((-3*PI/4), -orientation));
   }
   
-  return false;
+  result.push_back(x);
+  result.push_back(y);
+
+  return result;
+} //End getCenter
+
+
+
+/** Transformation matrix of obstacle robot */
+void CollisionDetection::setT_od_w(int id) {
+  if(id == 1) {
+  
+    std::vector<float> r1;
+    r1.push_back(cos(PI));
+    r1.push_back(-sin(PI));
+    r1.push_back(3.f);
+  
+    std::vector<float> r2;
+    r2.push_back(sin(PI));
+    r2.push_back(cos(PI));
+    r2.push_back(1.75f);
+    
+    std::vector<float> r3;
+    r3.push_back(0);
+    r3.push_back(0);
+    r3.push_back(1.f);
+
+    T_od_w.push_back(r1);
+    T_od_w.push_back(r2);
+    T_od_w.push_back(r3);
+
+  }
+
+  else {
+    
+    std::vector<float> r1;
+    r1.push_back(cos(0));
+    r1.push_back(-sin(0));
+    r1.push_back(0.f);
+  
+    std::vector<float> r2;
+    r2.push_back(sin(0));
+    r2.push_back(cos(0));
+    r2.push_back(0.f);
+    
+    std::vector<float> r3;
+    r3.push_back(0);
+    r3.push_back(0);
+    r3.push_back(1.f);
+  
+    T_od_w.push_back(r1);
+    T_od_w.push_back(r2);
+    T_od_w.push_back(r3);
+  
+  }
 }
 
 
@@ -44,27 +125,80 @@ const bool CollisionDetection::onSegment(const tf::Point p_i, const tf::Point p_
  * This method returns true if there is collision between trajectory_ and the ob_trajectory, false otherwise 
  * The robot and obstacles can be treated as circles for simple collision detection
  */
-const bool CollisionDetection::query(const ramp_msgs::Trajectory ob_trajectory) const {
+const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::Trajectory ob_trajectory) const {
+  //std::cout<<"\nQuery on "<<u.toString(trajectory_)<<" \n*******and*******\n"<<u.toString(ob_trajectory);
+  CollisionDetection::QueryResult result;
+  //std::cout<<"\nresult.collision_: "<<result.collision_;
   
-  // For every 2 points, check circle detection
-  float radius = 0.33;
-  for(unsigned int i=0;i<trajectory_.trajectory.points.size() && i<ob_trajectory.trajectory.points.size();i+=4) {
+  //std::cout<<"\nobstacle trajectory: "<<u.toString(ob_trajectory);
+  // For every 3 points, check circle detection
+  float radius = 0.33f;
+  for(unsigned int i=0;i<trajectory_.trajectory.points.size();i+=3) {
+    
+    // Get the point on the trajectory, p
+    trajectory_msgs::JointTrajectoryPoint p = trajectory_.trajectory.points.at(i);
+    
+    // Get the position vector for p
+    std::vector<float> p_loc;
+    p_loc.push_back(p.positions.at(0));
+    p_loc.push_back(p.positions.at(1));
 
-    // Get the points as the centers of the circles
-    trajectory_msgs::JointTrajectoryPoint r_center  = trajectory_.trajectory.points.at(i);
-    trajectory_msgs::JointTrajectoryPoint ob_center = ob_trajectory.trajectory.points.at(i);
+    // Get the center of the robot
+    std::vector<float> p_center = getCenter(p_loc, p.positions.at(2));
+    
+    //std::cout<<"\nob_trajectory.size(): "<<ob_trajectory.trajectory.points.size();
+    //std::cout<<"\n("<<ob_trajectory.trajectory.points.at(0).positions.at(0)<<", "<<ob_trajectory.trajectory.points.at(0).positions.at(1)<<")";
 
-    // Get the distance between the centers
-    float dist = sqrt( pow(r_center.positions.at(0) - ob_center.positions.at(0),2) + pow(r_center.positions.at(1) - ob_center.positions.at(1),2) );
+    // ***Test collision against the obstacle's trajectory***
+    for(unsigned int j=0;j<ob_trajectory.trajectory.points.size();j+=3) {
 
-    // If the distance between the two centers is greater than the sum of the radiuses
-    if( dist <= radius*2 ) {
-      return true;
-    }
+      // Get the points as the centers of the circles
+      trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
+
+      // Get the position vector for the obstacle p_ob
+      // Transform obstacle odometry coordinates to world CS
+      // Find the centers of the objects
+      //std::vector<float> p_ob_center  = getCenter(p_ob_loc, p.positions.at(2));
+      std::vector<float> p_ob_center;
+      
+      // Find the center in odometry CS - center is -6, -6 from reference point
+      float temp_x = p_ob.positions.at(0) - 0.1524f;
+      float temp_y = p_ob.positions.at(1) - 0.1524f;
+
+      // Transform center point in odometry to world CS
+      float x = (T_od_w.at(0).at(0) * temp_x) + (T_od_w.at(0).at(1) * temp_y) + T_od_w.at(0).at(2);
+      float y = (T_od_w.at(1).at(0) * temp_x) + (T_od_w.at(1).at(1) * temp_y) + T_od_w.at(1).at(2);
+     
+      // Push on the obstacle's center
+      p_ob_center.push_back(x);
+      p_ob_center.push_back(y);
+      
+      
+      // Get the distance between the centers
+      float dist = sqrt( pow(p_center.at(0) - p_ob_center.at(0),2) + pow(p_center.at(1) - p_ob_center.at(1),2) );
+      
+      /*if(id == 1)
+        std::cout<<"\nRobot 1 as p_center: ";
+      else
+        std::cout<<"\nRobot 2 as p_center: ";
+      std::cout<<"Distance between ("<<p_center.at(0)<<", "<<p_center.at(1)<<") and ("<<p_ob_center.at(0)<<", "<<p_ob_center.at(1)<<"): "<<dist;*/
+
+      // If the distance between the two centers is less than the sum of the two radii, 
+      // there is collision
+      if( dist <= radius*2 ) {
+        result.collision_ = true;
+        result.time_until_collision_ = p.time_from_start.toSec();
+      }
+    } //end for
   } //end for
 
-  return false;
+  return result;
 } //End query
+
+
+
+
+
 
 
 /** This method determines what type of motion an obstacle has */
@@ -84,17 +218,27 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
 
 
   // Translation only
-  if(mag_linear_t >= 0.1 && mag_angular_t < 0.1) {
+  if(mag_linear_t >= 0.001 && mag_angular_t < 0.001) {
+    /*if(id == 1)
+      std::cout<<"\nRobot 2 has ";
+    else
+      std::cout<<"\nRobot 1 has ";
+    std::cout<<"Motion Type == Translation";*/
     result = MotionType::Translation;
   }
 
   // Self-Rotation
-  else if(mag_linear_t < 0.1 && mag_angular_t >= 0.1) {
+  else if(mag_linear_t < 0.001 && mag_angular_t >= 0.001) {
+    /*if(id == 1)
+      std::cout<<"\nRobot 2 has ";
+    else
+      std::cout<<"\nRobot 1 has ";
+    std::cout<<"Motion Type == Self-Rotation";*/
     result = MotionType::SelfRotation;
   }
 
   // Either translation+self-rotation or global rotation
-  else if(mag_linear_t >= 0.1 && mag_angular_t >= 0.1) {
+  else if(mag_linear_t >= 0.01 && mag_angular_t >= 0.01) {
 
     // Find v(t-1)
     tf::Vector3 v_linear_prev;
@@ -104,7 +248,7 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
     double theta = tf::tfAngle(v_linear, v_linear_prev);
 
     // Check if v(t) and v(t-1) have similar directions
-    if(theta > 0.1) {
+    if(theta > 0.01) {
       result = MotionType::TranslationAndSelfRotation;
     }
     else {
@@ -114,94 +258,112 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
 
   // Else, there is no motion
   else {
+    /*if(id == 1)
+      std::cout<<"\nRobot 2 has ";
+    else
+      std::cout<<"\nRobot 1 has ";
+    std::cout<<"Motion Type == None";*/
     result = MotionType::None;
   }
-
 
   return result;
 } // End findMotionType
 
 
-/** This method returns the predicted trajectory for an obstacle for the future duration d */
+
+
+
+
+
+
+/** This method returns the predicted trajectory for an obstacle for the future duration d 
+ * TODO: Remove Duration parameter and make the predicted trajectory be computed until robot reaches bounds of environment */
 const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ramp_msgs::Obstacle ob, const ros::Duration d) const {
   ramp_msgs::Trajectory result;
 
   // First, identify which type of trajectory it is
   // translations only, self-rotation, translation and self-rotation, or global rotation
-  MotionType motion = findMotionType(ob);
+  MotionType motion_type = findMotionType(ob);
+  
   
   // The starting point 
-  trajectory_msgs::JointTrajectoryPoint start;
+  //trajectory_msgs::JointTrajectoryPoint start;
+  ramp_msgs::Configuration start;
+  start.ranges = u.ranges_; 
 
-  if(motion == MotionType::Translation) {
+  // If translation
+  if(motion_type == MotionType::Translation) {
+    //if(id == 1)
+      //std::cout<<"\nmotion_type == Translation\n";
 
     // Positions
-    start.positions.push_back(ob.odom_t.pose.pose.position.x);
-    start.positions.push_back(ob.odom_t.pose.pose.position.y);
-    start.positions.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
+    start.K.push_back(ob.odom_t.pose.pose.position.x);
+    start.K.push_back(ob.odom_t.pose.pose.position.y);
+    start.K.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
 
-    // Velocities
-    start.velocities.push_back(ob.odom_t.twist.twist.linear.x);
-    start.velocities.push_back(ob.odom_t.twist.twist.linear.y);
-    start.velocities.push_back(0);
+    // Get the Goal configuration
+    ramp_msgs::Configuration end;
+    end.ranges = u.ranges_;
+    end.K.push_back(start.K.at(0) + (ob.odom_t.twist.twist.linear.x * d.toSec()));
+    end.K.push_back(start.K.at(1) + (ob.odom_t.twist.twist.linear.y * d.toSec()));
+    end.K.push_back(start.K.at(2));
+    
 
-    // Accelerations
-    start.accelerations.push_back(0);
-    start.accelerations.push_back(0);
-    start.accelerations.push_back(0);
+    // Now we have starting and ending configurations
+    // Build a Path
+    std::vector<ramp_msgs::Configuration> cs;
+    cs.push_back(start);
+    cs.push_back(end);
+    ramp_msgs::Path p = u.getPath(cs);
+    
+    // Now build a Trajectory Request 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.request.path = p;
+    tr.request.v_start.push_back(0.33f);
+    tr.request.v_end.push_back(0.33f);
+    tr.request.resolutionRate = 5;
 
-
-    // Goal point
-    trajectory_msgs::JointTrajectoryPoint end;
-    for(unsigned int i=0;i<3;i++) {
-      end.positions.push_back(start.positions.at(i) + (start.velocities.at(i) * d.toSec()));
-      end.velocities.push_back(start.velocities.at(i));
-      end.accelerations.push_back(start.accelerations.at(i));
+    // Get trajectory
+    if(h_traj_req_->request(tr)) {
+      result = tr.response.trajectory;
     }
-    end.time_from_start = d;
-
-    // Push knot points onto result
-    result.index_knot_points.push_back(0);
-    result.index_knot_points.push_back(1);
-
-    result.trajectory.points.push_back(start);
-    result.trajectory.points.push_back(end);
-
   } // end if translation
 
 
-  else if(motion == MotionType::SelfRotation) {
+  else if(motion_type == MotionType::SelfRotation || motion_type == MotionType::None) {
+    //if(id == 1)
+      //std::cout<<"\nmotion_type == Self Rotation";
 
     // Positions
-    start.positions.push_back(ob.odom_t.pose.pose.position.x);
-    start.positions.push_back(ob.odom_t.pose.pose.position.y);
-    start.positions.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
-
-    // Velocities
-    start.velocities.push_back(0);
-    start.velocities.push_back(0);
-    start.velocities.push_back(ob.odom_t.twist.twist.angular.z);
-
-    // Accelerations
-    start.accelerations.push_back(0);
-    start.accelerations.push_back(0);
-    start.accelerations.push_back(0);
+    start.K.push_back(ob.odom_t.pose.pose.position.x);
+    start.K.push_back(ob.odom_t.pose.pose.position.y);
+    start.K.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
     
-    // Goal point
-    trajectory_msgs::JointTrajectoryPoint end;
-    for(unsigned int i=0;i<3;i++) {
-      end.positions.push_back(start.positions.at(i) + (start.velocities.at(i) * d.toSec()));
-      end.velocities.push_back(start.velocities.at(i));
-      end.accelerations.push_back(start.accelerations.at(i));
+    std::vector<ramp_msgs::Configuration> cs;
+    cs.push_back(start);
+    cs.push_back(start);
+    
+
+    // Now we have configurations
+    // Build a Path
+    ramp_msgs::Path p = u.getPath(cs);
+    
+    // Now build a Trajectory Request 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.request.path = p;
+
+    for(unsigned int i=0;i<p.configurations.size()-1;i++) {
+      tr.request.v_start.push_back(PI/4);
+      tr.request.v_end.push_back(PI/4);
     }
-    end.time_from_start = d;
 
-    result.index_knot_points.push_back(0);
-    result.index_knot_points.push_back(1);
+    tr.request.resolutionRate = 5;
 
-    result.trajectory.points.push_back(start);
-    result.trajectory.points.push_back(end);
-  }
+    // Get trajectory
+    if(h_traj_req_->request(tr)) {
+      result = tr.response.trajectory;
+    }
+  } // end if self-rotation, none
 
 
   return result;
