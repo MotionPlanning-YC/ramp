@@ -1,0 +1,150 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+CONFIGURATION_H	configuration.h	2;"	d
+Configuration	configuration.cpp	/^Configuration::Configuration() {}$/;"	f	class:Configuration	signature:()
+Configuration	configuration.cpp	/^Configuration::Configuration(const trajectory_msgs::JointTrajectoryPoint p, const std::vector<Range> r) {$/;"	f	class:Configuration	signature:(const trajectory_msgs::JointTrajectoryPoint p, const std::vector<Range> r)
+Configuration	configuration.cpp	/^Configuration::Configuration(ramp_msgs::Configuration c) {$/;"	f	class:Configuration	signature:(ramp_msgs::Configuration c)
+Configuration	configuration.h	/^    Configuration();$/;"	p	class:Configuration	access:public	signature:()
+Configuration	configuration.h	/^    Configuration(const trajectory_msgs::JointTrajectoryPoint p, const std::vector<Range> r);$/;"	p	class:Configuration	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint p, const std::vector<Range> r)
+Configuration	configuration.h	/^    Configuration(ramp_msgs::Configuration c);$/;"	p	class:Configuration	access:public	signature:(ramp_msgs::Configuration c)
+Configuration	configuration.h	/^class Configuration {$/;"	c
+Configuration::Configuration	configuration.cpp	/^Configuration::Configuration() {}$/;"	f	class:Configuration	signature:()
+Configuration::Configuration	configuration.cpp	/^Configuration::Configuration(const trajectory_msgs::JointTrajectoryPoint p, const std::vector<Range> r) {$/;"	f	class:Configuration	signature:(const trajectory_msgs::JointTrajectoryPoint p, const std::vector<Range> r)
+Configuration::Configuration	configuration.cpp	/^Configuration::Configuration(ramp_msgs::Configuration c) {$/;"	f	class:Configuration	signature:(ramp_msgs::Configuration c)
+Configuration::Configuration	configuration.h	/^    Configuration();$/;"	p	class:Configuration	access:public	signature:()
+Configuration::Configuration	configuration.h	/^    Configuration(const trajectory_msgs::JointTrajectoryPoint p, const std::vector<Range> r);$/;"	p	class:Configuration	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint p, const std::vector<Range> r)
+Configuration::Configuration	configuration.h	/^    Configuration(ramp_msgs::Configuration c);$/;"	p	class:Configuration	access:public	signature:(ramp_msgs::Configuration c)
+Configuration::K_	configuration.h	/^    std::vector<float> K_; $/;"	m	class:Configuration	access:public
+Configuration::buildConfigurationMsg	configuration.cpp	/^const ramp_msgs::Configuration Configuration::buildConfigurationMsg() const {$/;"	f	class:Configuration	signature:() const
+Configuration::buildConfigurationMsg	configuration.h	/^    const ramp_msgs::Configuration buildConfigurationMsg() const;$/;"	p	class:Configuration	access:public	signature:() const
+Configuration::compare	configuration.cpp	/^const double Configuration::compare(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
+Configuration::compare	configuration.h	/^    const double compare(const Configuration& c) const;$/;"	p	class:Configuration	access:public	signature:(const Configuration& c) const
+Configuration::equals	configuration.cpp	/^const bool Configuration::equals(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
+Configuration::equals	configuration.h	/^    const bool equals(const Configuration& c) const; $/;"	p	class:Configuration	access:public	signature:(const Configuration& c) const
+Configuration::random	configuration.cpp	/^void Configuration::random() {$/;"	f	class:Configuration	signature:()
+Configuration::random	configuration.h	/^    void  random();$/;"	p	class:Configuration	access:public	signature:()
+Configuration::ranges_	configuration.h	/^    std::vector<Range> ranges_;$/;"	m	class:Configuration	access:public
+Configuration::toString	configuration.cpp	/^const std::string Configuration::toString() const {$/;"	f	class:Configuration	signature:() const
+Configuration::toString	configuration.h	/^    const std::string toString() const;$/;"	p	class:Configuration	access:public	signature:() const
+Configuration::transformBase	configuration.cpp	/^void Configuration::transformBase(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta) {$/;"	f	class:Configuration	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta)
+Configuration::transformBase	configuration.h	/^    void  transformBase(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta);$/;"	p	class:Configuration	access:public	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta)
+Configuration::transformBaseOrientation	configuration.cpp	/^float Configuration::transformBaseOrientation(const float theta) {$/;"	f	class:Configuration	signature:(const float theta)
+Configuration::transformBaseOrientation	configuration.h	/^    float transformBaseOrientation(const float theta);$/;"	p	class:Configuration	access:private	signature:(const float theta)
+Configuration::transformBasePosition	configuration.cpp	/^std::vector<float> Configuration::transformBasePosition(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w) {$/;"	f	class:Configuration	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w)
+Configuration::transformBasePosition	configuration.h	/^    std::vector<float> transformBasePosition(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w);$/;"	p	class:Configuration	access:private	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w)
+Configuration::updatePosition	configuration.cpp	/^void Configuration::updatePosition(float x, float y, float theta)$/;"	f	class:Configuration	signature:(float x, float y, float theta)
+Configuration::updatePosition	configuration.h	/^    void  updatePosition(float x, float y, float theta);$/;"	p	class:Configuration	access:public	signature:(float x, float y, float theta)
+Configuration::~Configuration	configuration.cpp	/^Configuration::~Configuration() {}$/;"	f	class:Configuration	signature:()
+Configuration::~Configuration	configuration.h	/^    ~Configuration();$/;"	p	class:Configuration	access:public	signature:()
+K_	configuration.h	/^    std::vector<float> K_; $/;"	m	class:Configuration	access:public
+PI	utility.h	16;"	d
+POSE_COUNT_THRESHOLD	display_base_location.cpp	/^static const int POSE_COUNT_THRESHOLD = 1;$/;"	v	file:
+RANGE_H	range.h	2;"	d
+Range	range.cpp	/^Range::Range() {}$/;"	f	class:Range	signature:()
+Range	range.cpp	/^Range::Range(const float min, const float max) : min_(min), max_(max) {}$/;"	f	class:Range	signature:(const float min, const float max)
+Range	range.cpp	/^Range::Range(ramp_msgs::Range r) {$/;"	f	class:Range	signature:(ramp_msgs::Range r)
+Range	range.h	/^    Range();$/;"	p	class:Range	access:public	signature:()
+Range	range.h	/^    Range(const float min, const float max);$/;"	p	class:Range	access:public	signature:(const float min, const float max)
+Range	range.h	/^    Range(ramp_msgs::Range r);$/;"	p	class:Range	access:public	signature:(ramp_msgs::Range r)
+Range	range.h	/^class Range {$/;"	c
+Range::Range	range.cpp	/^Range::Range() {}$/;"	f	class:Range	signature:()
+Range::Range	range.cpp	/^Range::Range(const float min, const float max) : min_(min), max_(max) {}$/;"	f	class:Range	signature:(const float min, const float max)
+Range::Range	range.cpp	/^Range::Range(ramp_msgs::Range r) {$/;"	f	class:Range	signature:(ramp_msgs::Range r)
+Range::Range	range.h	/^    Range();$/;"	p	class:Range	access:public	signature:()
+Range::Range	range.h	/^    Range(const float min, const float max);$/;"	p	class:Range	access:public	signature:(const float min, const float max)
+Range::Range	range.h	/^    Range(ramp_msgs::Range r);$/;"	p	class:Range	access:public	signature:(ramp_msgs::Range r)
+Range::buildRangeMsg	range.cpp	/^const ramp_msgs::Range Range::buildRangeMsg() const {$/;"	f	class:Range	signature:() const
+Range::buildRangeMsg	range.h	/^    const ramp_msgs::Range buildRangeMsg() const;$/;"	p	class:Range	access:public	signature:() const
+Range::max_	range.h	/^    float max_;$/;"	m	class:Range	access:public
+Range::min_	range.h	/^    float min_;$/;"	m	class:Range	access:public
+Range::random	range.cpp	/^const float Range::random() {$/;"	f	class:Range	signature:()
+Range::random	range.h	/^    const float random();$/;"	p	class:Range	access:public	signature:()
+Range::~Range	range.cpp	/^Range::~Range() {}$/;"	f	class:Range	signature:()
+Range::~Range	range.h	/^    ~Range();$/;"	p	class:Range	access:public	signature:()
+T_od_w	display_base_location.cpp	/^Eigen::Transform<float, 2, Eigen::Affine> T_od_w;$/;"	v
+UTILITY_H	utility.h	2;"	d
+Utility	utility.cpp	/^Utility::Utility() {$/;"	f	class:Utility	signature:()
+Utility	utility.h	/^    Utility();$/;"	p	class:Utility	access:public	signature:()
+Utility	utility.h	/^class Utility {$/;"	c
+Utility::Utility	utility.cpp	/^Utility::Utility() {$/;"	f	class:Utility	signature:()
+Utility::Utility	utility.h	/^    Utility();$/;"	p	class:Utility	access:public	signature:()
+Utility::displaceAngle	utility.cpp	/^const float Utility::displaceAngle(const float a1, float a2) const {$/;"	f	class:Utility	signature:(const float a1, float a2) const
+Utility::displaceAngle	utility.h	/^    const float displaceAngle(const float a1, float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, float a2) const
+Utility::euclideanDistance	utility.cpp	/^const float Utility::euclideanDistance(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::euclideanDistance	utility.h	/^    const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::findAngleFromAToB	utility.cpp	/^const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::findDistanceBetweenAngles	utility.cpp	/^const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {$/;"	f	class:Utility	signature:(const float a1, const float a2) const
+Utility::findDistanceBetweenAngles	utility.h	/^    const float findDistanceBetweenAngles(const float a1, const float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, const float a2) const
+Utility::getCenter	utility.cpp	/^const std::vector<float> Utility::getCenter(std::vector<float> p, float orientation) const {$/;"	f	class:Utility	signature:(std::vector<float> p, float orientation) const
+Utility::getCenter	utility.h	/^    const std::vector<float> getCenter(std::vector<float> p, float orientation) const;$/;"	p	class:Utility	access:public	signature:(std::vector<float> p, float orientation) const
+Utility::getConfigurationFromPoint	utility.cpp	/^const ramp_msgs::Configuration Utility::getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const {$/;"	f	class:Utility	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
+Utility::getConfigurationFromPoint	utility.h	/^    const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;$/;"	p	class:Utility	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
+Utility::getPath	utility.cpp	/^const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::Configuration> configs) const {$/;"	f	class:Utility	signature:(const std::vector<ramp_msgs::Configuration> configs) const
+Utility::getPath	utility.h	/^    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::Configuration> configs) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<ramp_msgs::Configuration> configs) const
+Utility::standardRanges	utility.h	/^    std::vector<Range> standardRanges;$/;"	m	class:Utility	access:public
+Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
+Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
+Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Path path) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path path) const
+Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
+angle_at_start	display_base_location.cpp	/^float angle_at_start = 0.0f;$/;"	v
+buildConfigurationMsg	configuration.cpp	/^const ramp_msgs::Configuration Configuration::buildConfigurationMsg() const {$/;"	f	class:Configuration	signature:() const
+buildConfigurationMsg	configuration.h	/^    const ramp_msgs::Configuration buildConfigurationMsg() const;$/;"	p	class:Configuration	access:public	signature:() const
+buildRangeMsg	range.cpp	/^const ramp_msgs::Range Range::buildRangeMsg() const {$/;"	f	class:Range	signature:() const
+buildRangeMsg	range.h	/^    const ramp_msgs::Range buildRangeMsg() const;$/;"	p	class:Range	access:public	signature:() const
+compare	configuration.cpp	/^const double Configuration::compare(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
+compare	configuration.h	/^    const double compare(const Configuration& c) const;$/;"	p	class:Configuration	access:public	signature:(const Configuration& c) const
+displaceAngle	utility.cpp	/^const float Utility::displaceAngle(const float a1, float a2) const {$/;"	f	class:Utility	signature:(const float a1, float a2) const
+displaceAngle	utility.h	/^    const float displaceAngle(const float a1, float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, float a2) const
+displayConfiguration	display_base_location.cpp	/^void displayConfiguration() {$/;"	f	signature:()
+equals	configuration.cpp	/^const bool Configuration::equals(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
+equals	configuration.h	/^    const bool equals(const Configuration& c) const; $/;"	p	class:Configuration	access:public	signature:(const Configuration& c) const
+euclideanDistance	utility.cpp	/^const float Utility::euclideanDistance(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+euclideanDistance	utility.h	/^    const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
+findAngleFromAToB	utility.cpp	/^const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
+findDistanceBetweenAngles	utility.cpp	/^const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {$/;"	f	class:Utility	signature:(const float a1, const float a2) const
+findDistanceBetweenAngles	utility.h	/^    const float findDistanceBetweenAngles(const float a1, const float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, const float a2) const
+getCenter	utility.cpp	/^const std::vector<float> Utility::getCenter(std::vector<float> p, float orientation) const {$/;"	f	class:Utility	signature:(std::vector<float> p, float orientation) const
+getCenter	utility.h	/^    const std::vector<float> getCenter(std::vector<float> p, float orientation) const;$/;"	p	class:Utility	access:public	signature:(std::vector<float> p, float orientation) const
+getConfigurationFromPoint	utility.cpp	/^const ramp_msgs::Configuration Utility::getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const {$/;"	f	class:Utility	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
+getConfigurationFromPoint	utility.h	/^    const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;$/;"	p	class:Utility	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
+getPath	utility.cpp	/^const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::Configuration> configs) const {$/;"	f	class:Utility	signature:(const std::vector<ramp_msgs::Configuration> configs) const
+getPath	utility.h	/^    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::Configuration> configs) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<ramp_msgs::Configuration> configs) const
+main	display_base_location.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+max_	range.h	/^    float max_;$/;"	m	class:Range	access:public
+min_	range.h	/^    float min_;$/;"	m	class:Range	access:public
+odometryCallback	display_base_location.cpp	/^void odometryCallback(const nav_msgs::Odometry::ConstPtr& msg) {$/;"	f	signature:(const nav_msgs::Odometry::ConstPtr& msg)
+random	configuration.cpp	/^void Configuration::random() {$/;"	f	class:Configuration	signature:()
+random	configuration.h	/^    void  random();$/;"	p	class:Configuration	access:public	signature:()
+random	range.cpp	/^const float Range::random() {$/;"	f	class:Range	signature:()
+random	range.h	/^    const float random();$/;"	p	class:Range	access:public	signature:()
+ranges_	configuration.h	/^    std::vector<Range> ranges_;$/;"	m	class:Configuration	access:public
+setConfiguration	display_base_location.cpp	/^void setConfiguration(float x, float y, float theta) {$/;"	f	signature:(float x, float y, float theta)
+setT_od_w	display_base_location.cpp	/^void setT_od_w(float x, float y, float orientation) {$/;"	f	signature:(float x, float y, float orientation)
+standardRanges	utility.h	/^    std::vector<Range> standardRanges;$/;"	m	class:Utility	access:public
+theta	display_base_location.cpp	/^float theta;$/;"	v
+thetas_	display_base_location.cpp	/^std::vector<float> thetas_;$/;"	v
+toString	configuration.cpp	/^const std::string Configuration::toString() const {$/;"	f	class:Configuration	signature:() const
+toString	configuration.h	/^    const std::string toString() const;$/;"	p	class:Configuration	access:public	signature:() const
+toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
+toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
+toString	utility.h	/^    const std::string toString(const ramp_msgs::Path path) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path path) const
+toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
+transformBase	configuration.cpp	/^void Configuration::transformBase(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta) {$/;"	f	class:Configuration	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta)
+transformBase	configuration.h	/^    void  transformBase(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta);$/;"	p	class:Configuration	access:public	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta)
+transformBaseOrientation	configuration.cpp	/^float Configuration::transformBaseOrientation(const float theta) {$/;"	f	class:Configuration	signature:(const float theta)
+transformBaseOrientation	configuration.h	/^    float transformBaseOrientation(const float theta);$/;"	p	class:Configuration	access:private	signature:(const float theta)
+transformBasePosition	configuration.cpp	/^std::vector<float> Configuration::transformBasePosition(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w) {$/;"	f	class:Configuration	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w)
+transformBasePosition	configuration.h	/^    std::vector<float> transformBasePosition(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w);$/;"	p	class:Configuration	access:private	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w)
+u	display_base_location.cpp	/^Utility u;$/;"	v
+updatePosition	configuration.cpp	/^void Configuration::updatePosition(float x, float y, float theta)$/;"	f	class:Configuration	signature:(float x, float y, float theta)
+updatePosition	configuration.h	/^    void  updatePosition(float x, float y, float theta);$/;"	p	class:Configuration	access:public	signature:(float x, float y, float theta)
+~Configuration	configuration.cpp	/^Configuration::~Configuration() {}$/;"	f	class:Configuration	signature:()
+~Configuration	configuration.h	/^    ~Configuration();$/;"	p	class:Configuration	access:public	signature:()
+~Range	range.cpp	/^Range::~Range() {}$/;"	f	class:Range	signature:()
+~Range	range.h	/^    ~Range();$/;"	p	class:Range	access:public	signature:()

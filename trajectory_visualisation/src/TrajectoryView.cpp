@@ -86,6 +86,7 @@ void TrajectoryView::size_changed()
 void TrajectoryView::population(const ramp_msgs::Population& msg)
 // Update the population and called the drawing function
 {
+  std::cout<<"\nReceived Population!\n";
 
   populations_.clear();
   populations_.push_back(msg);
@@ -108,81 +109,87 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
   drawPopulation();
 }
 
-void TrajectoryView::drawPopulation()
-// Draw the trajectories on the scene
-{
-    this->scene()->clear();
+/** Draw the population of trajectories in the scene */
+void TrajectoryView::drawPopulation() {
 
+  // Clear the scene
+  this->scene()->clear();
 
-    QPen pen = QPen( QColor(0,0,255,150) ); // Black pen for the normal trajectories
+  // Initialize a QPen object 
+  QPen pen = QPen( QColor(0,0,255,150) ); 
+  
+  /* Draw some grid lines */
     this->scene()->addLine(0, metersToPixels(3.5, false), width_-20, metersToPixels(3.5, false), pen);
     this->scene()->addLine(metersToPixels(3.5, true), 0, metersToPixels(3.5, true), metersToPixels(3.5, false), pen);
     
-    pen = QPen( QColor(0,255,0,150) ); // Black pen for the normal trajectories
+    pen = QPen( QColor(0,255,0,150) );
     this->scene()->addLine(0, metersToPixels(3, false), width_-20, metersToPixels(3, false), pen);
     this->scene()->addLine(metersToPixels(3, true), 0, metersToPixels(3, true), metersToPixels(3.5, false), pen);
     
-    pen = QPen( QColor(255,0,0,150) ); // Black pen for the normal trajectories
+    pen = QPen( QColor(255,0,0,150) ); 
     this->scene()->addLine(0, metersToPixels(2, false), width_-20, metersToPixels(2, false), pen);
     this->scene()->addLine(metersToPixels(2, true), 0, metersToPixels(2, true), metersToPixels(3.5, false), pen);
     
-    pen = QPen( QColor(0,0,0,150) ); // Black pen for the normal trajectories
+    pen = QPen( QColor(0,0,0,150) ); 
     this->scene()->addLine(0, metersToPixels(1, false), width_-20, metersToPixels(1, false), pen);
     this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(3.5, false), pen);
-    pen = QPen( QColor(0,0,0,150) ); // Black pen for the normal trajectories
+    pen = QPen( QColor(0,0,0,150) ); 
+  
+
+  // For each trajectory in the population
+  for(unsigned int p=0;p<populations_.size();p++) {
+    std::cout<<"\np: "<<p<<"\n";
     
-    for(unsigned int p=0;p<populations_.size();p++) {
+    // Blue for robot 2
+    if(populations_.at(p).robot_id == 2) {
+      pen = QPen( QColor(0,0,255,150) );
+    }
 
-      // Blue for robot 2
-      if(populations_.at(p).robot_id == 2) {
-        pen = QPen( QColor(0,0,255,150) );
-      }
+    // Set i to the index of the best trajectory
+    int i = populations_.at(p).best_id;
+    std::cout<<"\ni: "<<i;
 
+    // Get the points for that trajectory
+    std::vector<trajectory_msgs::JointTrajectoryPoint> points = populations_.at(p).population.at(i).trajectory.points;
+    std::cout<<"\npoints.size(): "<<points.size()<<"\n";
 
+    // Draw robot 1's best trajectory in red
+    if (i==populations_.at(p).best_id && populations_.at(p).robot_id == 1) {
+       pen = QPen( QColor(255,0,0,255) ); 
+    }
+    // Draw robot 2's best trajectory in green
+    else if (i==populations_.at(p).best_id && populations_.at(p).robot_id == 2) {
+       pen = QPen( QColor(0,255,0,255) ); 
+    }
 
-      //go through all the trajectories
-      //We go through the first one at last to make sure it is displayed on top, to make sure we see the red color if some trajectories are the same
-      //for(int i = populations_.at(p).population.size() -1 ; i >=0 ; i--)
-      //{
-      int i = populations_.at(p).best_id;
-          std::vector<trajectory_msgs::JointTrajectoryPoint> points = populations_.at(p).population.at(i).trajectory.points;
+    // For each point in the trajectory
+    for(int j = 0 ; j < (points.size() -1 ) ; j++) {
 
-          if (i==populations_.at(p).best_id && populations_.at(p).robot_id == 1) {
-             pen = QPen( QColor(255,0,0,255) ); // red for the best trajectory
-          }
-          else if (i==populations_.at(p).best_id && populations_.at(p).robot_id == 2) {
-             pen = QPen( QColor(0,255,0,255) ); // green for the best trajectory
-          }
+      // Draw a line to the next point
+      this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
+                     metersToPixels(points.at(j).positions.at(1), false),
+                     metersToPixels(points.at(j+1).positions.at(0), true),
+                     metersToPixels(points.at(j+1).positions.at(1), false),
+                     pen);
 
+      // Draw a circle at the beginning to show the robot's circle location
+      if(j == 0) { 
+        
+        std::vector<float> p;
+        p.push_back(points.at(j).positions.at(0));
+        p.push_back(points.at(j).positions.at(1));
 
-          //go through all the waypoints of the trajectory
-          for(int j = 0 ; j < (points.size() -1 ) ; j++)
-          {
-              this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
-                             metersToPixels(points.at(j).positions.at(1), false),
-                             metersToPixels(points.at(j+1).positions.at(0), true),
-                             metersToPixels(points.at(j+1).positions.at(1), false),
-                             pen);
-              if(j == 0) { 
-                
-                std::vector<float> p;
-                p.push_back(points.at(j).positions.at(0));
-                p.push_back(points.at(j).positions.at(1));
+        std::vector<float> c = getCenter(p, points.at(j).positions.at(2));
+        //std::cout<<"\nc: ("<<c.at(0)<<", "<<c.at(1)<<")";
 
-                std::vector<float> c = getCenter(p, points.at(j).positions.at(2));
-                //std::cout<<"\nc: ("<<c.at(0)<<", "<<c.at(1)<<")";
-
-                this->scene()->addEllipse(metersToPixels(p.at(0), true),
-                                        metersToPixels(p.at(1), false),
-                                        metersToPixels(0.33f, true), metersToPixels(0.33f, false), pen);
-                
-              }
-
-        }
-
-        //} //end inner for
-    } //end outter for
-}
+        this->scene()->addEllipse(metersToPixels(p.at(0), true),
+                                metersToPixels(p.at(1), false),
+                                metersToPixels(0.33f, true), metersToPixels(0.33f, false), pen);
+          
+      } //end if
+    } //end for each point in the trajectory
+  } //end for each trajectory
+} //End drawPopulation
 
 /** 
  * Assume a 45 degree angle is formed between the robot's center and the reference point (left wheel)

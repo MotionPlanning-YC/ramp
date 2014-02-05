@@ -1,5 +1,11 @@
 id: 1
 
+DOF: {
+  x: {min: 0, max: 3.5},
+  y: {min: 0, max: 3.5},
+  theta: {min: -pi, max: pi}
+}
+
 start: {
   x: 0,
   y: 2,

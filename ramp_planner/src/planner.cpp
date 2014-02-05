@@ -8,17 +8,20 @@
 Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
   controlCycle_ = ros::Duration(0.25);
+  planningCycle_ = ros::Duration(0.1);
 }
 
 Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
   controlCycle_ = ros::Duration(0.25);
+  planningCycle_ = ros::Duration(0.1);
 }
 
 Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1)
 {
-  init(h); 
   controlCycle_ = ros::Duration(0.25);
+  planningCycle_ = ros::Duration(0.1);
+  init(h); 
 }
 
 Planner::~Planner() {
@@ -72,7 +75,8 @@ Configuration Planner::getStartConfiguration() {
   return start_;
 }
 
-/** Sets start_ 
+/** 
+ * Sets start_ 
  * Updates are relative to odometry frame
  * */
 void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
@@ -112,9 +116,63 @@ void Planner::init(const ros::NodeHandle& h) {
   h_eval_req_ = new EvaluationRequestHandler(h);
   modifier_   = new Modifier(h, paths_, velocities_);
 
-  timer_ = h.createTimer(ros::Duration(controlCycle_), &Planner::controlCycleCallback, this);
-  timer_.stop();
+  controlCycleTimer_ = h.createTimer(ros::Duration(controlCycle_), &Planner::controlCycleCallback, this);
+  controlCycleTimer_.stop();
+  
+  planningCycleTimer_ = h.createTimer(ros::Duration(planningCycle_), &Planner::planningCycleCallback, this);
+  planningCycleTimer_.stop();
 }
+
+void Planner::planningCycleCallback(const ros::TimerEvent& t) {
+  
+  // Wait until mutex can be obtained
+  while(!mutex_pop_) {}
+    
+  mutex_pop_ = false;
+  
+  // Call modification
+  modification();
+  
+  mutex_pop_ = true;
+  
+  // t=t+1
+  generation_++;
+} //End planningCycleCallback
+
+
+
+/** */
+void Planner::controlCycleCallback(const ros::TimerEvent& t) {
+
+  // std::cout<<"\nSpinning once\n";
+  ros::spinOnce(); 
+  
+  while(!mutex_pop_) {}
+  mutex_pop_ = false;
+  // std::cout<<"\nUpdating population\n";
+  updatePopulation(controlCycle_);
+  mutex_pop_ = true;
+  // std::cin.get();
+
+  /** TODO **/
+  // Create subpopulations in P(t)
+  
+
+  // Evaluate P(t) and obtain best T, T_move=T_best
+  // std::cout<<"\nEvaluating\n";
+  // RampTrajectory T_move = evaluateAndObtainBest();
+  bestTrajec_ = evaluateAndObtainBest();
+  
+
+  // Send the best trajectory 
+  // std::cout<<"\nSending new trajectory!\n";
+  sendBest(); 
+  
+  // Send the whole population to the trajectory viewer
+  sendPopulation();
+} //End controlCycleCallback
+
+
 
 
 /** This function generates the initial population of trajectories */
@@ -333,7 +391,10 @@ void Planner::sendBest() {
   else {
     h_control_->send(bestTrajec_.msg_trajec_);
   }
-}
+} //End sendBest
+
+
+
 
 /** Send the whole population of trajectories to the trajectory viewer */
 void Planner::sendPopulation() {
@@ -345,38 +406,6 @@ void Planner::sendPopulation() {
   h_control_->sendPopulation(msg);
 }
 
-void Planner::controlCycleCallback(const ros::TimerEvent& t) {
-
-  // std::cout<<"\nSpinning once\n";
-  ros::spinOnce(); 
-  
-  while(!mutex_pop_) {}
-  mutex_pop_ = false;
-  // std::cout<<"\nUpdating population\n";
-  updatePopulation(controlCycle_);
-  mutex_pop_ = true;
-  // std::cin.get();
-
-  /** TODO **/
-  // Create subpopulations in P(t)
-  
-
-  // Evaluate P(t) and obtain best T, T_move=T_best
-  // std::cout<<"\nEvaluating\n";
-  // RampTrajectory T_move = evaluateAndObtainBest();
-  bestTrajec_ = evaluateAndObtainBest();
-  
-
-  // Send the best trajectory 
-  // std::cout<<"\nSending new trajectory!\n";
-  //if(generation_ > 75) {
-    //std::cout<<"\nSending "<<u.toString(bestTrajec_.msg_trajec_);
-    sendBest(); 
-  //}
-  
-  // Send the whole population to the trajectory viewer
-  sendPopulation();
-}
 
 
 /** This method returns the new velocity vector(s) for the modified path(s) */
@@ -484,7 +513,7 @@ void Planner::modification() {
     
     // Update the path and velocities in the modifier 
     modifier_->update(paths_.at(index), index);
-  }
+  } // end for
   
   // Obtain and set best trajectory
   bestTrajec_ = population_.findBest();
@@ -542,7 +571,7 @@ void Planner::updatePaths(Configuration start, ros::Duration dur) {
       if( dur > point.time_from_start) {
         throwaway++;
       }
-    }
+    } //end for
 
     // If the whole path has been passed, adjust throwaway so that 
     //  we are left with a path that is: {new_start_, goal_}
@@ -638,10 +667,12 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   // std::cout<<"\nPress enter to continue\n";
   // std::cin.get();
 
+
   // Initialize the modifier
   modifier_->paths_ = paths_;
 
-  // Evaluate the population and get the trajectory to move on
+
+  // Evaluate the population and get the initial trajectory to move on
   RampTrajectory T_move = evaluateAndObtainBest();
   std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
   // std::cout<<"\nPress enter to start the loop!\n";
@@ -651,39 +682,21 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   /** TODO */
   // createSubpopulations();
   
-  timer_.start();
+  planningCycleTimer_.start();
+  controlCycleTimer_.start();
+  
+  // Do planning until robot has reached goal
   while( (start_.compare(goal_) > 0.3) && ros::ok()) {
-    //std::cout<<"\ngeneration_: "<<generation_;
-    
-    // t=t+1
-    generation_++;
-    
-    /*std::cout<<"\nPress Enter to start modification!\n";
-    std::cin.get();*/
-    while(!mutex_pop_) {}
-    mutex_pop_ = false;
-    // Call modification
-    modification();
-    mutex_pop_ = true;
-    //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
-    // std::cin.get();
-    /*std::cout<<"\nmodification completed!\n";
-    std::cout<<"\nPaths are now: ";
-    for(unsigned int i=0;i<paths_.size();i++) {
-      std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
-    }*/
-    
-    // spinOnce necessary here?
     ros::spinOnce(); 
-
-    // rate.sleep();
   } // end while
-  std::cout<<"\nPlanning complete!\n";
+  
+  // Stop timer
+  controlCycleTimer_.stop();
+  planningCycleTimer_.stop();
 
   // Send an empty trajectory
   ramp_msgs::Trajectory empty;
   h_control_->send(empty);
   
-  // Stop timer
-  timer_.stop();
+  std::cout<<"\nPlanning complete!\n";
 } // End go

@@ -10,11 +10,11 @@
 
 ros::Publisher pub_obj;
 //ramp_msgs::ObstacleList list;
-Obstacle otherRobot;
+Obstacle obstacle;
 
 /** Get the other robot's current odometry information and update the dynamicObject */
 void updateOtherRobotCb(const nav_msgs::Odometry& o) {
-  otherRobot.update(o);
+  obstacle.update(o);
 } //End updateOtherRobotCb
 
 
@@ -24,7 +24,7 @@ const ramp_msgs::ObstacleList prepareList() {
   ramp_msgs::ObstacleList list;
 
   //Other Robot
-  list.obstacles.push_back(otherRobot.buildObstacleMsg());
+  list.obstacles.push_back(obstacle.buildObstacleMsg());
 
   //Misc objects...
 
@@ -37,7 +37,7 @@ const ramp_msgs::ObstacleList prepareList() {
 /** Publish the list of objects */
 void publishList(const ros::TimerEvent& e) {
   //pub_obj.publish(prepareList());
-  pub_obj.publish(otherRobot.buildObstacleMsg());
+  pub_obj.publish(obstacle.buildObstacleMsg());
 } //End sendList
 
 
@@ -57,7 +57,6 @@ int main(int argc, char** argv) {
   ros::Subscriber sub_other_robot = handle.subscribe(other_robot_odom, 100, updateOtherRobotCb);
 
   //Publishers
-  //pub_obj = handle.advertise<ramp_msgs::ObstacleList>("object_list", 1000);
   pub_obj = handle.advertise<ramp_msgs::Obstacle>("object_list", 1000);
 
   //Timers

@@ -49,11 +49,18 @@ class Planner {
 
 
     // Timer for sending the best trajec
-    ros::Timer timer_;
+    // Control cycle - used for determining when to update P(t)
+    ros::Timer controlCycleTimer_;
+    ros::Duration controlCycle_;
+    void controlCycleCallback(const ros::TimerEvent& t);
+    
+    // Timer for doing a modification
+    // Planning cycle - used for determining when to update P(t)
+    ros::Timer planningCycleTimer_;
+    ros::Duration planningCycle_;
+    void planningCycleCallback(const ros::TimerEvent& t);
     
    
-    // Control cycle - used for determining when to update P(t)
-    ros::Duration controlCycle_;
     
     // Sensing cycle
     ros::Duration sensingCycle_;
@@ -116,7 +123,6 @@ class Planner {
     // This method changes the start_ member
     void updateCallback(const ramp_msgs::Update::ConstPtr& msg);
 
-    void controlCycleCallback(const ros::TimerEvent& t);
     
     // Robot ID
     unsigned int id_;

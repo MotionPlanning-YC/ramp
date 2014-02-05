@@ -53,14 +53,8 @@ const std::vector<float> CollisionDetection::getCenter(std::vector<float> p, flo
   float r = 0.2155261;
 
   // Get world coodinates of center point
-  if(orientation > 0) {
-    x += r*cos( u.displaceAngle((-3*PI/4), orientation));
-    y += r*sin( u.displaceAngle((-3*PI/4), orientation));
-  }
-  else {
-    x += r*cos( u.displaceAngle((-3*PI/4), -orientation));
-    y += r*sin( u.displaceAngle((-3*PI/4), -orientation));
-  }
+  x += r*cos( u.displaceAngle((-3*PI/4), orientation));
+  y += r*sin( u.displaceAngle((-3*PI/4), orientation));
   
   result.push_back(x);
   result.push_back(y);

@@ -11,14 +11,14 @@
 <node name="evaluation" pkg="evaluation" type="evaluation" output="screen" />
 
 <!-- Trajectory Visualization -->
-<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> 
+<!-- <node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> -->
 
 
 <!-- Planner -->
-<!-- <group ns="robot2"> -->
+<!-- <group ns="robot2"> --> 
   <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" />
-<!--  <rosparam command="load" file="yaml/robot2.yaml" />
-</grup> -->
+<rosparam command="load" file="yaml/robot2.yaml" />
+<!-- </group> -->
 
 
 </launch>

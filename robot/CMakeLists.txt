@@ -30,6 +30,10 @@ add_executable(demo src/demo.cpp)
 target_link_libraries(demo ${catkin_LIBRARIES})
 add_dependencies(demo ramp_msgs_generate_messages_cpp)
 
+add_executable(keyboard_teleop src/keyboard_teleop.cpp)
+target_link_libraries(keyboard_teleop ${catkin_LIBRARIES})
+add_dependencies(keyboard_teleop ramp_msgs_generate_messages_cpp)
+
 
 #add_executable(move src/main_move.cpp)
 #target_link_libraries(move ${catkin_LIBRARIES})

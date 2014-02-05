@@ -4,6 +4,11 @@
 #include "range.h"
 #include "ramp_msgs/ModificationRequest.h"
 #include "ramp_msgs/EvaluationRequest.h"
+#include "yaml-cpp/yaml.h"
+#include <XmlRpc.h>
+#include <fstream>
+#include <map>
+#include <iterator>
  
 
 
@@ -12,7 +17,7 @@ Planner my_planner;
 Utility u;
 
 
-std::vector<Configuration> getStartGoal(bool robot1) {
+const std::vector<Configuration> getStartGoal(bool robot1) {
   std::cout<<"\nIn getStartGoal";
   std::cout<<"\nrobot1: "<<robot1<<"\n";
   std::vector<Configuration> result;
@@ -45,15 +50,38 @@ std::vector<Configuration> getStartGoal(bool robot1) {
 }
 
 
+void handleConfig(YAML::Node node) {
+  std::cout<<"\nIn handleConfig: "<<node.Type()<<"\n";
+  std::cout<<"\nnode[\"id\"]: "<<node["id"];
+}
 
-void loadParameters(ros::NodeHandle handle) {
+
+void loadParameters(const ros::NodeHandle handle) {
   std::string key;
+  int id;
+  std::vector<float> ranges;
+  std::vector<float> start;
+  std::vector<float> goal;
+
+
+  // Get the id of the robot
   if(handle.searchParam("id", key)) {
-    int val;
-    handle.getParam(key, val);
-    std::cout<<"\nkey: "<<key<<" val: "<<val;
+    handle.getParam(key, id);
+    std::cout<<"\nkey: "<<key<<" val(id): "<<id;
   }
 
+ 
+  
+  std::vector<float> dof;
+  // Get the ranges for the degrees of freedom
+  if(handle.searchParam("DOF", key)) {
+    handle.getParam(key, dof);
+    for(unsigned int i=0;i<dof.size();i++) {
+      std::cout<<"\ndof["<<i<<"]: "<<dof.at(i);
+    }
+  }
+
+  
 
   if(handle.searchParam("", key)) {
     int val;
@@ -70,32 +98,14 @@ int main(int argc, char** argv) {
   
   ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
 
-  
-  /*std::string key;
-  if(handle.searchParam("id", key)) {
-    int val;
-    handle.getParam(key, val);
-    std::cout<<"\nkey: "<<key<<" val: "<<val;
 
-    std::string k_theta;
-    double theta;
-    handle.searchParam("start/theta", k_theta);
-    handle.getParam(k_theta, theta);
-    std::cout<<"\nk_theta: "<<k_theta<<" theta: "<<theta;
-  }
-  else {
-    std::cout<<"\nCould not find \"id\"";
-  }*/
+  //loadParameters(handle);
   
   
   std::string update_topic;
   handle.getParam("ramp_planner/robot_update", update_topic);
   std::cout<<"\nupdate_topic:"<<update_topic;
 
-
-
-
-  
   
   // Make some Ranges 
   srand( time(0));
