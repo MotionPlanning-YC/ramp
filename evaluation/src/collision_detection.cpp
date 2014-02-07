@@ -212,27 +212,17 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
 
 
   // Translation only
-  if(mag_linear_t >= 0.001 && mag_angular_t < 0.001) {
-    /*if(id == 1)
-      std::cout<<"\nRobot 2 has ";
-    else
-      std::cout<<"\nRobot 1 has ";
-    std::cout<<"Motion Type == Translation";*/
+  if(mag_linear_t >= 0.15 && mag_angular_t < 0.25) {
     result = MotionType::Translation;
   }
 
   // Self-Rotation
-  else if(mag_linear_t < 0.001 && mag_angular_t >= 0.001) {
-    /*if(id == 1)
-      std::cout<<"\nRobot 2 has ";
-    else
-      std::cout<<"\nRobot 1 has ";
-    std::cout<<"Motion Type == Self-Rotation";*/
+  else if(mag_linear_t < 0.15 && mag_angular_t >= 0.25) {
     result = MotionType::SelfRotation;
   }
 
   // Either translation+self-rotation or global rotation
-  else if(mag_linear_t >= 0.01 && mag_angular_t >= 0.01) {
+  else if(mag_linear_t >= 0.15 && mag_angular_t >= 0.25) {
 
     // Find v(t-1)
     tf::Vector3 v_linear_prev;
@@ -248,22 +238,15 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
     else {
       result = MotionType::GlobalRotation;
     }
-  }
+  } // end if t+sr or gr
 
   // Else, there is no motion
   else {
-    /*if(id == 1)
-      std::cout<<"\nRobot 2 has ";
-    else
-      std::cout<<"\nRobot 1 has ";
-    std::cout<<"Motion Type == None";*/
     result = MotionType::None;
   }
 
   return result;
 } // End findMotionType
-
-
 
 
 
@@ -287,8 +270,6 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
 
   // If translation
   if(motion_type == MotionType::Translation) {
-    //if(id == 1)
-      //std::cout<<"\nmotion_type == Translation\n";
 
     // Positions
     start.K.push_back(ob.odom_t.pose.pose.position.x);
@@ -325,8 +306,6 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
 
 
   else if(motion_type == MotionType::SelfRotation || motion_type == MotionType::None) {
-    //if(id == 1)
-      //std::cout<<"\nmotion_type == Self Rotation";
 
     // Positions
     start.K.push_back(ob.odom_t.pose.pose.position.x);

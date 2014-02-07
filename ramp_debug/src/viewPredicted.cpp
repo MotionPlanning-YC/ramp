@@ -13,15 +13,8 @@ Utility u;
 ramp_msgs::Obstacle obstacle;
 TrajectoryRequestHandler* h_traj_req_;
 
-// Track the maximum angular velocity in global rotation
-// because when we move straight, it gives us global rotation
-// but we want translation, so we must know the threshold to check the angular V
-float max_angular_gr = -9999.f;
-
-// Track the maximum linear velocity in translation + global rotation
-// because when we turn, it gives us translation + global rotation
-// but we want self-rotation, so we must know the threshold to check the linear V
-float max_linear_tgr = -9999.f;
+std::vector<float> gr_angulars;
+std::vector<float> tgr_linears;
 
 
 /** This method determines what type of motion an obstacle has */
@@ -40,35 +33,22 @@ const MotionType findMotionType(const ramp_msgs::Obstacle ob) {
   float mag_angular_t = sqrt( tf::tfDot(v_angular, v_angular) );
   std::cout<<"\nmag_linear_t: "<<mag_linear_t;
   std::cout<<"\nmag_angular_t: "<<mag_angular_t;
-  std::cout<<"\nmax_angular_gr: "<<max_angular_gr;
-  std::cout<<"\nmax_linear_tgr: "<<max_linear_tgr;
-
 
 
   // Translation only
   // normally 0.0066 when idle
-  if(mag_linear_t >= 0.001 && mag_angular_t < 0.001) {
-    /*if(id == 1)
-      std::cout<<"\nRobot 2 has ";
-    else
-      std::cout<<"\nRobot 1 has ";
-    std::cout<<"Motion Type == Translation";*/
+  if(mag_linear_t >= 0.15 && mag_angular_t < 0.25) {
     result = MotionType::Translation;
   }
 
   // Self-Rotation
   // normally 0.053 when idle
-  else if(mag_linear_t < 0.001 && mag_angular_t >= 0.001) {
-    /*if(id == 1)
-      std::cout<<"\nRobot 2 has ";
-    else
-      std::cout<<"\nRobot 1 has ";
-    std::cout<<"Motion Type == Self-Rotation";*/
+  else if(mag_linear_t < 0.15 && mag_angular_t >= 0.25) {
     result = MotionType::SelfRotation;
   }
 
   // Either translation+self-rotation or global rotation
-  else if(mag_linear_t >= 0.001 && mag_angular_t >= 0.001) {
+  else if(mag_linear_t >= 0.15 && mag_angular_t >= 0.25) {
 
     // Find v(t-1)
     tf::Vector3 v_linear_prev;
@@ -80,25 +60,16 @@ const MotionType findMotionType(const ramp_msgs::Obstacle ob) {
     // Check if v(t) and v(t-1) have similar directions
     if(theta > 0.01) {
       result = MotionType::TranslationAndSelfRotation;
-      if(mag_linear_t > max_linear_tgr) {
-        max_linear_tgr = mag_linear_t;
-      }
+      tgr_linears.push_back(mag_linear_t);
     } //end if
     else {
       result = MotionType::GlobalRotation;
-      if(mag_angular_t > max_angular_gr) {
-        max_angular_gr = mag_angular_t;
-      }
+      gr_angulars.push_back(mag_angular_t);
     } //end global rotation else
   } //end else if
 
   // Else, there is no motion
   else {
-    /*if(id == 1)
-      std::cout<<"\nRobot 2 has ";
-    else
-      std::cout<<"\nRobot 1 has ";
-    std::cout<<"Motion Type == None";*/
     result = MotionType::None;
   }
 
@@ -196,7 +167,6 @@ const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob,
   } // end if self-rotation, none
 
 
-  std::cout<<"\nResulting trajectory size: "<<result.trajectory.points.size();
   return result;
 } //End getPredictedTrajectory
 
@@ -251,14 +221,35 @@ int main(int argc, char** argv) {
   pub_population = handle.advertise<ramp_msgs::Population>("population", 1000);
   sub_odometry = handle.subscribe("odometry", 1000, odometryCallback);
   
-  ros::Duration d(0.25);
-  /*while(ros::ok()) {
-    getAndSendTrajectory();
-    d.sleep();
+  while(ros::ok()) {
     ros::spinOnce();
-  }*/
+  }
 
-  ros::spin();
+  float max_w = gr_angulars.at(0);
+  float w_sum = max_w;
+  for(unsigned int i=1;i<gr_angulars.size();i++) {
+    if(gr_angulars.at(i) > max_w) {
+      max_w = gr_angulars.at(i);
+    }
+    w_sum += gr_angulars.at(i);
+  }
+
+  float max_v = tgr_linears.at(0);
+  float v_sum = max_v;
+  for(unsigned int i=1;i<tgr_linears.size();i++) {
+    if(tgr_linears.at(i) > max_v) {
+      max_v = tgr_linears.at(i);
+    }
+    v_sum += tgr_linears.at(i);
+  }
+
+  float avg_w = w_sum / gr_angulars.size();
+  float avg_v = v_sum / tgr_linears.size();
+
+  std::cout<<"\nmax angular velocity when driving straight: "<<max_w;
+  std::cout<<"\naverage angular velocity when driving straight: "<<avg_w;
+  std::cout<<"\nmax linear velocity when self-rotating: "<<max_v;
+  std::cout<<"\naverage linear velocity when self-rotating: "<<avg_v;
   cout<<"\nExiting Normally\n";
   return 0;
 }
