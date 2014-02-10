@@ -31,8 +31,6 @@ const MotionType findMotionType(const ramp_msgs::Obstacle ob) {
   // Find magnitude of velocity vectors
   float mag_linear_t  = sqrt( tf::tfDot(v_linear, v_linear)   );
   float mag_angular_t = sqrt( tf::tfDot(v_angular, v_angular) );
-  std::cout<<"\nmag_linear_t: "<<mag_linear_t;
-  std::cout<<"\nmag_angular_t: "<<mag_angular_t;
 
 
   // Translation only
@@ -199,15 +197,15 @@ void odometryCallback(const nav_msgs::Odometry& msg) {
 
 
 void getAndSendTrajectory() {
-  ros::Duration d(5);
-  //ramp_msgs::Trajectory t = getPredictedTrajectory(obstacle, d);
+  ros::Duration d(10);
+  ramp_msgs::Trajectory t = getPredictedTrajectory(obstacle, d);
 
-  /*ramp_msgs::Population pop;
+  ramp_msgs::Population pop;
   pop.population.push_back(t);
   pop.best_id  = 0;
   pop.robot_id = 1;
 
-  pub_population.publish(pop);*/
+  pub_population.publish(pop);
 }
 
 
@@ -221,10 +219,18 @@ int main(int argc, char** argv) {
   pub_population = handle.advertise<ramp_msgs::Population>("population", 1000);
   sub_odometry = handle.subscribe("odometry", 1000, odometryCallback);
   
+
+
+  ros::Rate r(1);
   while(ros::ok()) {
     ros::spinOnce();
+    getAndSendTrajectory();
+    r.sleep();
   }
 
+
+
+  /* Show the max and average velocities */
   float max_w = gr_angulars.at(0);
   float w_sum = max_w;
   for(unsigned int i=1;i<gr_angulars.size();i++) {

@@ -111,7 +111,8 @@ void Segment::buildWork() {
 
 
 
-/** This method calculates the minimum time needed to compute the trajectory 
+/** 
+  * This method calculates the minimum time needed to compute the trajectory 
   * The members T_rotate_pre_, T_loc_, T_rotate_post_, and T_min_ are set
   */
 const void Segment::calculateMinTime() {

@@ -80,7 +80,7 @@ void TrajectoryView::size_changed()
     std::cout<<"\nheight: "<<height_<<"\n";
 
     this->resize(width_,height_);
-    this->scene()->setSceneRect(0, -height_, width_, height_);// We need to make the scene a little smaller than the frame
+    this->scene()->setSceneRect(0, -height_, width_-10, height_-10);// We need to make the scene a little smaller than the frame
 }
 
 void TrajectoryView::population(const ramp_msgs::Population& msg)
@@ -138,56 +138,72 @@ void TrajectoryView::drawPopulation() {
 
   // For each trajectory in the population
   for(unsigned int p=0;p<populations_.size();p++) {
-    std::cout<<"\np: "<<p<<"\n";
+    //std::cout<<"\np: "<<p<<"\n";
     
     // Blue for robot 2
-    if(populations_.at(p).robot_id == 2) {
-      pen = QPen( QColor(0,0,255,150) );
-    }
+    //if(populations_.at(p).robot_id == 2) {
+      //pen = QPen( QColor(0,0,255,150) );
+    //}
 
     // Set i to the index of the best trajectory
     int i = populations_.at(p).best_id;
-    std::cout<<"\ni: "<<i;
+    //std::cout<<"\ni: "<<i;
 
     // Get the points for that trajectory
     std::vector<trajectory_msgs::JointTrajectoryPoint> points = populations_.at(p).population.at(i).trajectory.points;
     std::cout<<"\npoints.size(): "<<points.size()<<"\n";
 
     // Draw robot 1's best trajectory in red
-    if (i==populations_.at(p).best_id && populations_.at(p).robot_id == 1) {
+    //if (i==populations_.at(p).best_id && populations_.at(p).robot_id == 1) {
        pen = QPen( QColor(255,0,0,255) ); 
-    }
+    //}
     // Draw robot 2's best trajectory in green
-    else if (i==populations_.at(p).best_id && populations_.at(p).robot_id == 2) {
-       pen = QPen( QColor(0,255,0,255) ); 
-    }
+    //else if (i==populations_.at(p).best_id && populations_.at(p).robot_id == 2) {
+       //pen = QPen( QColor(0,255,0,255) ); 
+    //}
 
-    // For each point in the trajectory
-    for(int j = 0 ; j < (points.size() -1 ) ; j++) {
+    if(points.size() == 1) {
+      std::vector<float> p;
+      p.push_back(points.at(0).positions.at(0));
+      p.push_back(points.at(0).positions.at(1));
 
-      // Draw a line to the next point
-      this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
-                     metersToPixels(points.at(j).positions.at(1), false),
-                     metersToPixels(points.at(j+1).positions.at(0), true),
-                     metersToPixels(points.at(j+1).positions.at(1), false),
-                     pen);
+      std::vector<float> c = getCenter(p, points.at(0).positions.at(2));
+      //std::cout<<"\nc: ("<<c.at(0)<<", "<<c.at(1)<<")";
+      this->scene()->addEllipse(metersToPixels(p.at(0), true),
+                                  metersToPixels(p.at(1), false),
+                                  metersToPixels(0.33f, true), metersToPixels(0.33f, false), pen);
+    } //end if 1 point
 
-      // Draw a circle at the beginning to show the robot's circle location
-      if(j == 0) { 
-        
-        std::vector<float> p;
-        p.push_back(points.at(j).positions.at(0));
-        p.push_back(points.at(j).positions.at(1));
+    else {
+      // For each point in the trajectory
+      for(int j = 0 ; j < (points.size() -1 ) ; j++) {
 
-        std::vector<float> c = getCenter(p, points.at(j).positions.at(2));
-        //std::cout<<"\nc: ("<<c.at(0)<<", "<<c.at(1)<<")";
+        std::cout<<"\npoint: ("<<points.at(j).positions.at(0)<<", "<<points.at(j).positions.at(1)<<")";
+        std::cout<<"\nmetersToPixels(point): ("<<metersToPixels(points.at(j).positions.at(0), true)<<", "<<metersToPixels(points.at(j).positions.at(1), false)<<")";
+        // Draw a line to the next point
+        this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
+                       metersToPixels(points.at(j).positions.at(1), false),
+                       metersToPixels(points.at(j+1).positions.at(0), true),
+                       metersToPixels(points.at(j+1).positions.at(1), false),
+                       pen);
 
-        this->scene()->addEllipse(metersToPixels(p.at(0), true),
-                                metersToPixels(p.at(1), false),
-                                metersToPixels(0.33f, true), metersToPixels(0.33f, false), pen);
+        // Draw a circle at the beginning to show the robot's circle location
+        if(j == 0) { 
           
-      } //end if
-    } //end for each point in the trajectory
+          std::vector<float> p;
+          p.push_back(points.at(j).positions.at(0));
+          p.push_back(points.at(j).positions.at(1));
+
+          std::vector<float> c = getCenter(p, points.at(j).positions.at(2));
+          //std::cout<<"\nc: ("<<c.at(0)<<", "<<c.at(1)<<")";
+
+          this->scene()->addEllipse(metersToPixels(p.at(0), true),
+                                  metersToPixels(p.at(1), false),
+                                  metersToPixels(0.33f, true), metersToPixels(0.33f, false), pen);
+            
+        } //end if
+      } //end for each point in the trajectory
+    } //end if many points
   } //end for each trajectory
 } //End drawPopulation
 
