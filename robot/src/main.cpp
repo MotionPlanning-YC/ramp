@@ -29,11 +29,14 @@ void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle) {
 }
 
 int main(int argc, char** argv) {
-   
+
   ros::init(argc, argv, "robot");
-  ros::NodeHandle handle;
+  ros::NodeHandle handle;  
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
   
+  handle.getParam("orientation", robot.initial_theta);
+  std::cout<<"\nrobot.orientation: "<<robot.orientation;
+
   init_advertisers_subscribers(robot, handle);
 
 

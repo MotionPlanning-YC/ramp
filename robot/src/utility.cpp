@@ -71,10 +71,7 @@ const float Utility::findAngleFromAToB(const std::vector<float> a, const std::ve
 /** This method returns distance between orientations a1 and a2. The distance is in the range [-PI, PI]. */
 const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {
   float result;
-  std::cout<<"\na1: "<<a1<<" a2: "<<a2;
-
   float difference = a1 - a2;
-  std::cout<<"\ndifference: "<<difference;
   
   
   // If difference > pi, the result should be in [-PI,0] range
