@@ -245,6 +245,7 @@ void Corobot::calculateSpeedsAndTime ()
     // Calculate the ending time for each waypoints
     end_times.push_back(start_time + next.time_from_start );
 
+    // Push on orientation at knot point
     orientations_knotpoints.push_back(current.positions.at(2));
 
   } 
@@ -309,8 +310,10 @@ void Corobot::moveOnTrajectory()
     while(ros::ok() && ros::Time::now() < g_time) {
     
       // Adjust the angular speed to correct errors in turning
+      // Commented out because it was producing erratic driving
+      // Should be fixed at some point
       //if(twist.linear.x > 0.0f) {
-        //twist.angular.z = -1.5f * ( configuration_.K.at(2) - orientations_knotpoints.at(num_traveled) );
+        //twist.angular.z = -1.5 * ( u.findDistanceBetweenAngles(configuration_.K.at(2), orientations_knotpoints.at(num_traveled)) );
       //}
     
       // Send the twist message to move the robot
