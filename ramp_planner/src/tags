@@ -267,12 +267,12 @@ Population::toString	population.h	/^    const std::string toString() const;$/;"	
 RAMP_TRAJECTORY_H	ramp_trajectory.h	2;"	d
 RANGE_H	range.h	2;"	d
 RampTrajectory	ramp_trajectory.cpp	/^RampTrajectory::RampTrajectory(const ramp_msgs::Trajectory msg) : fitness_(-1.0), feasible_(true), msg_trajec_(msg), time_until_collision_(9999.0f) {}$/;"	f	class:RampTrajectory	signature:(const ramp_msgs::Trajectory msg)
-RampTrajectory	ramp_trajectory.cpp	/^RampTrajectory::RampTrajectory(unsigned int id) : id_(id), fitness_(-1.0), feasible_(true), time_until_collision_(9999.0f) {}$/;"	f	class:RampTrajectory	signature:(unsigned int id)
+RampTrajectory	ramp_trajectory.cpp	/^RampTrajectory::RampTrajectory(unsigned int id) : id_(id), fitness_(-1.0), feasible_(true), time_until_collision_(9999.0f) {$/;"	f	class:RampTrajectory	signature:(unsigned int id)
 RampTrajectory	ramp_trajectory.h	/^    RampTrajectory(const ramp_msgs::Trajectory msg);$/;"	p	class:RampTrajectory	access:public	signature:(const ramp_msgs::Trajectory msg)
 RampTrajectory	ramp_trajectory.h	/^    RampTrajectory(unsigned int id=0);$/;"	p	class:RampTrajectory	access:public	signature:(unsigned int id=0)
 RampTrajectory	ramp_trajectory.h	/^class RampTrajectory {$/;"	c
 RampTrajectory::RampTrajectory	ramp_trajectory.cpp	/^RampTrajectory::RampTrajectory(const ramp_msgs::Trajectory msg) : fitness_(-1.0), feasible_(true), msg_trajec_(msg), time_until_collision_(9999.0f) {}$/;"	f	class:RampTrajectory	signature:(const ramp_msgs::Trajectory msg)
-RampTrajectory::RampTrajectory	ramp_trajectory.cpp	/^RampTrajectory::RampTrajectory(unsigned int id) : id_(id), fitness_(-1.0), feasible_(true), time_until_collision_(9999.0f) {}$/;"	f	class:RampTrajectory	signature:(unsigned int id)
+RampTrajectory::RampTrajectory	ramp_trajectory.cpp	/^RampTrajectory::RampTrajectory(unsigned int id) : id_(id), fitness_(-1.0), feasible_(true), time_until_collision_(9999.0f) {$/;"	f	class:RampTrajectory	signature:(unsigned int id)
 RampTrajectory::RampTrajectory	ramp_trajectory.h	/^    RampTrajectory(const ramp_msgs::Trajectory msg);$/;"	p	class:RampTrajectory	access:public	signature:(const ramp_msgs::Trajectory msg)
 RampTrajectory::RampTrajectory	ramp_trajectory.h	/^    RampTrajectory(unsigned int id=0);$/;"	p	class:RampTrajectory	access:public	signature:(unsigned int id=0)
 RampTrajectory::equal	ramp_trajectory.cpp	/^const bool RampTrajectory::equal(const RampTrajectory& other) const {$/;"	f	class:RampTrajectory	signature:(const RampTrajectory& other) const
@@ -330,6 +330,16 @@ Utility	utility.h	/^    Utility();$/;"	p	class:Utility	access:public	signature:(
 Utility	utility.h	/^class Utility {$/;"	c
 Utility::Utility	utility.cpp	/^Utility::Utility() {$/;"	f	class:Utility	signature:()
 Utility::Utility	utility.h	/^    Utility();$/;"	p	class:Utility	access:public	signature:()
+Utility::displaceAngle	utility.cpp	/^const float Utility::displaceAngle(const float a1, float a2) const {$/;"	f	class:Utility	signature:(const float a1, float a2) const
+Utility::displaceAngle	utility.h	/^    const float displaceAngle(const float a1, float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, float a2) const
+Utility::findAngleFromAToB	utility.cpp	/^const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::findDistanceBetweenAngles	utility.cpp	/^const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {$/;"	f	class:Utility	signature:(const float a1, const float a2) const
+Utility::findDistanceBetweenAngles	utility.h	/^    const float findDistanceBetweenAngles(const float a1, const float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, const float a2) const
+Utility::getEuclideanDist	utility.cpp	/^const float Utility::getEuclideanDist(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::getEuclideanDist	utility.h	/^    const float getEuclideanDist(const std::vector<float> a, std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, std::vector<float> b) const
+Utility::positionDistance	utility.cpp	/^const float Utility::positionDistance(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::positionDistance	utility.h	/^    const float positionDistance(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 Utility::standardRanges	utility.h	/^    std::vector<Range> standardRanges;$/;"	m	class:Utility	access:public
 Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
 Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
@@ -366,6 +376,8 @@ controlCycleCallback	planner.cpp	/^void Planner::controlCycleCallback(const ros:
 controlCycleCallback	planner.h	/^    void controlCycleCallback(const ros::TimerEvent& t);$/;"	p	class:Planner	access:public	signature:(const ros::TimerEvent& t)
 controlCycleTimer_	planner.h	/^    ros::Timer controlCycleTimer_;$/;"	m	class:Planner	access:public
 controlCycle_	planner.h	/^    ros::Duration controlCycle_;$/;"	m	class:Planner	access:public
+displaceAngle	utility.cpp	/^const float Utility::displaceAngle(const float a1, float a2) const {$/;"	f	class:Utility	signature:(const float a1, float a2) const
+displaceAngle	utility.h	/^    const float displaceAngle(const float a1, float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, float a2) const
 equal	ramp_trajectory.cpp	/^const bool RampTrajectory::equal(const RampTrajectory& other) const {$/;"	f	class:RampTrajectory	signature:(const RampTrajectory& other) const
 equal	ramp_trajectory.h	/^    const bool equal(const RampTrajectory& other) const;$/;"	p	class:RampTrajectory	access:public	signature:(const RampTrajectory& other) const
 equals	configuration.cpp	/^const bool Configuration::equals(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
@@ -377,14 +389,20 @@ evaluatePopulation	planner.h	/^    void evaluatePopulation();$/;"	p	class:Planne
 evaluateTrajectory	planner.cpp	/^void Planner::evaluateTrajectory(RampTrajectory& trajec) {$/;"	f	class:Planner	signature:(RampTrajectory& trajec)
 evaluateTrajectory	planner.h	/^    void evaluateTrajectory(RampTrajectory& trajec);$/;"	p	class:Planner	access:public	signature:(RampTrajectory& trajec)
 feasible_	ramp_trajectory.h	/^    bool feasible_;$/;"	m	class:RampTrajectory	access:public
+findAngleFromAToB	utility.cpp	/^const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 findBest	population.cpp	/^const RampTrajectory Population::findBest() {$/;"	f	class:Population	signature:()
 findBest	population.h	/^    const RampTrajectory findBest();$/;"	p	class:Population	access:public	signature:()
+findDistanceBetweenAngles	utility.cpp	/^const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {$/;"	f	class:Utility	signature:(const float a1, const float a2) const
+findDistanceBetweenAngles	utility.h	/^    const float findDistanceBetweenAngles(const float a1, const float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, const float a2) const
 fitnessFeasibleToString	population.cpp	/^const std::string Population::fitnessFeasibleToString() const {$/;"	f	class:Population	signature:() const
 fitnessFeasibleToString	population.h	/^    const std::string fitnessFeasibleToString() const;$/;"	p	class:Population	access:public	signature:() const
 fitnessFeasibleToString	ramp_trajectory.cpp	/^const std::string RampTrajectory::fitnessFeasibleToString() const {$/;"	f	class:RampTrajectory	signature:() const
 fitnessFeasibleToString	ramp_trajectory.h	/^    const std::string fitnessFeasibleToString() const;$/;"	p	class:RampTrajectory	access:public	signature:() const
 fitness_	ramp_trajectory.h	/^    float fitness_;$/;"	m	class:RampTrajectory	access:public
 generation_	planner.h	/^    unsigned int generation_;$/;"	m	class:Planner	access:private
+getEuclideanDist	utility.cpp	/^const float Utility::getEuclideanDist(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+getEuclideanDist	utility.h	/^    const float getEuclideanDist(const std::vector<float> a, std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, std::vector<float> b) const
 getIRT	planner.cpp	/^const unsigned int Planner::getIRT() {$/;"	f	class:Planner	signature:()
 getIRT	planner.h	/^    const unsigned int getIRT();$/;"	p	class:Planner	access:private	signature:()
 getNewVelocities	planner.cpp	/^const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Path> new_paths, std::vector<int> i_old) {$/;"	f	class:Planner	signature:(std::vector<Path> new_paths, std::vector<int> i_old)
@@ -402,6 +420,7 @@ h_control_	planner.h	/^    ControlHandler*             h_control_;$/;"	m	class:P
 h_eval_req_	planner.h	/^    EvaluationRequestHandler*   h_eval_req_;$/;"	m	class:Planner	access:private
 h_mod_req_	modifier.h	/^    ModificationRequestHandler* h_mod_req_;$/;"	m	class:Modifier	access:private
 h_traj_req_	planner.h	/^    TrajectoryRequestHandler*   h_traj_req_;$/;"	m	class:Planner	access:private
+handleConfig	main.cpp	/^void handleConfig(YAML::Node node) {$/;"	f	signature:(YAML::Node node)
 handle_	control_handler.h	/^    ros::NodeHandle handle_;$/;"	m	class:ControlHandler	access:private
 handle_	evaluation_request_handler.h	/^    ros::NodeHandle handle_;$/;"	m	class:EvaluationRequestHandler	access:private
 handle_	modification_request_handler.h	/^    ros::NodeHandle handle_;$/;"	m	class:ModificationRequestHandler	access:private
@@ -450,6 +469,8 @@ populationMsg	population.h	/^    ramp_msgs::Population populationMsg();$/;"	p	cl
 populationSize_	planner.h	/^    const int populationSize_;$/;"	m	class:Planner	access:private
 population_	planner.h	/^    Population population_;$/;"	m	class:Planner	access:public
 population_	population.h	/^    std::vector<RampTrajectory> population_;$/;"	m	class:Population	access:public
+positionDistance	utility.cpp	/^const float Utility::positionDistance(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+positionDistance	utility.h	/^    const float positionDistance(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 pub_bestTrajec_	control_handler.h	/^    ros::Publisher pub_bestTrajec_;$/;"	m	class:ControlHandler	access:private
 pub_population_	control_handler.h	/^    ros::Publisher pub_population_;$/;"	m	class:ControlHandler	access:private
 random	configuration.cpp	/^void Configuration::random() {$/;"	f	class:Configuration	signature:()

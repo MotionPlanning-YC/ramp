@@ -99,7 +99,7 @@ void CollisionDetection::setT_od_w(int id) {
     std::vector<float> r2;
     r2.push_back(sin(0));
     r2.push_back(cos(0));
-    r2.push_back(0.f);
+    r2.push_back(2.f);
     
     std::vector<float> r3;
     r3.push_back(0);

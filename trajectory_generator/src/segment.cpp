@@ -144,7 +144,7 @@ const void Segment::calculateMinTime() {
 
   //==============================================================================
   // Set T_loc_ - the time needed to go straight towards the goal
-  T_loc_ = ceil(u.euclideanDistance(start_.p_, end_.p_) / max_v_.at(0));
+  T_loc_ = ceil(u.positionDistance(start_.p_, end_.p_) / max_v_.at(0));
   //==============================================================================
 
 

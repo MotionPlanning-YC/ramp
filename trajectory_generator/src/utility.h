@@ -14,7 +14,7 @@
 
 class Utility {
   public:
-    const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;
+    const float positionDistance(const std::vector<float> a, const std::vector<float> b) const;
 
     const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;
     

@@ -1,6 +1,9 @@
 #include "ramp_trajectory.h"
 
-RampTrajectory::RampTrajectory(unsigned int id) : id_(id), fitness_(-1.0), feasible_(true), time_until_collision_(9999.0f) {}
+RampTrajectory::RampTrajectory(unsigned int id) : id_(id), fitness_(-1.0), feasible_(true), time_until_collision_(9999.0f) {
+  msg_trajec_.feasible = true;
+  msg_trajec_.fitness = -1;  
+}
 
 RampTrajectory::RampTrajectory(const ramp_msgs::Trajectory msg) : fitness_(-1.0), feasible_(true), msg_trajec_(msg), time_until_collision_(9999.0f) {}
 

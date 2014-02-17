@@ -141,31 +141,40 @@ void Planner::planningCycleCallback(const ros::TimerEvent& t) {
 
 
 
-/** */
+void Planner::gradualTrajectory(RampTrajectory& best, float theta) {
+  trajectory_msgs::JointTrajectoryPoint temp;
+}
+
+
+/** This method receives the latest configuraton of the robot, 
+ *  updates the population, re-evaluates the population,
+ *  and sends a new trajectory for the robot to move along */
 void Planner::controlCycleCallback(const ros::TimerEvent& t) {
 
   // std::cout<<"\nSpinning once\n";
   ros::spinOnce(); 
   
+  // Obtain mutex on population and update it
   while(!mutex_pop_) {}
   mutex_pop_ = false;
-  // std::cout<<"\nUpdating population\n";
   updatePopulation(controlCycle_);
   mutex_pop_ = true;
-  // std::cin.get();
 
   /** TODO **/
   // Create subpopulations in P(t)
-  
+
 
   // Evaluate P(t) and obtain best T, T_move=T_best
-  // std::cout<<"\nEvaluating\n";
-  // RampTrajectory T_move = evaluateAndObtainBest();
   bestTrajec_ = evaluateAndObtainBest();
-  
 
+
+  // Find orientation difference between old and new T_move
+  // old configuration is the new start_ configuration
+  // new orientation is the amount to rotate towards first knot point
+  float diff = u.findDistanceBetweenAngles(start_.K_.at(2), bestTrajec_.getPath().all_.at(1).K_.at(2));
+    
+  
   // Send the best trajectory 
-  // std::cout<<"\nSending new trajectory!\n";
   sendBest(); 
   
   // Send the whole population to the trajectory viewer

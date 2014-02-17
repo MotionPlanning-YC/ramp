@@ -213,7 +213,7 @@ float Corobot::getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPo
 void Corobot::calculateSpeedsAndTime ()
 {
   angular_speeds.clear();
-  orientations_knotpoints.clear();
+  orientations.clear();
   speeds.clear();
   end_times.clear();
   
@@ -246,7 +246,7 @@ void Corobot::calculateSpeedsAndTime ()
     end_times.push_back(start_time + next.time_from_start );
 
     // Push on orientation at knot point
-    orientations_knotpoints.push_back(current.positions.at(2));
+    orientations.push_back(current.positions.at(2));
 
   } 
 }
@@ -304,7 +304,7 @@ void Corobot::moveOnTrajectory()
     std::cout<<"\ntwist.linear: "<<twist.linear.x;
     std::cout<<"\ntwist.angular: "<<twist.angular.z;
     //std::cout<<"\nend_times.size():"<<end_times.size()<<"\n";
-    //std::cout<<"\norientations_knotpoints.size():"<<orientations_knotpoints.size()<<"\n";
+    //std::cout<<"\norientations.size():"<<orientations.size()<<"\n";
 
     ros::Time g_time = end_times.at(num_traveled);
     while(ros::ok() && ros::Time::now() < g_time) {
@@ -314,7 +314,7 @@ void Corobot::moveOnTrajectory()
       // Should be fixed at some point
       if(twist.linear.x > 0.0f) {
         float actual_theta = u.displaceAngle(initial_theta, configuration_.K.at(2));
-        float dist = u.findDistanceBetweenAngles(actual_theta, orientations_knotpoints.at(num_traveled));
+        float dist = u.findDistanceBetweenAngles(actual_theta, orientations.at(num_traveled));
         std::cout<<"\ndist: "<<dist;
         if(dist > 0.15)
           twist.angular.z = -1.5 * dist;

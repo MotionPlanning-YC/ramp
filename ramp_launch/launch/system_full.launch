@@ -84,19 +84,21 @@
 
 <group ns="$(arg robot1_name)" >
   <node name="robot" pkg="robot" type="robot" machine="robot1"/> 
+    <param name="orientation" type="float" value="0" />
 </group> 
 
 
 <group ns="$(arg robot2_name)"> 
   <node name="robot" pkg="robot" type="robot" machine="robot2" /> 
+    <param name="orientation" type="float" value="3.14159" />
 </group> 
 
 
 
-
-<include file="$(find ramp_launch)/launch/launch_include/general.launch" />
-<include file="$(find ramp_launch)/launch/launch_include/phidget_sensors.launch" /> 
-<include file="$(find ramp_launch)/launch/launch_include/motors.launch" />
+<!-- Launch the other files to start remote nodes -->
+<include file="$(find ramp_launch)/launch/launch_include/general_full.launch" />
+<include file="$(find ramp_launch)/launch/launch_include/phidget_sensors_full.launch" /> 
+<include file="$(find ramp_launch)/launch/launch_include/motors_full.launch" />
 
 
 

@@ -70,6 +70,10 @@ class Planner {
     Eigen::Transform<float, 2, Eigen::Affine> T_od_w_;
     float theta_od_w;
     void setT_od_w(std::vector<float> od_info);
+   
+    
+    // Robot ID
+    unsigned int id_;
 
 
     
@@ -123,9 +127,9 @@ class Planner {
     // This method changes the start_ member
     void updateCallback(const ramp_msgs::Update::ConstPtr& msg);
 
-    
-    // Robot ID
-    unsigned int id_;
+
+    void gradualTrajectory(RampTrajectory& best, float theta);
+
     
   
   private:

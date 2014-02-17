@@ -3,7 +3,7 @@
 
 
 /** This method returns the Euclidean distance between two position vectors */
-const float Utility::euclideanDistance(const std::vector<float> a, const std::vector<float> b) const {
+const float Utility::positionDistance(const std::vector<float> a, const std::vector<float> b) const {
 
   float d_x = b.at(0) - a.at(0);
   float d_y = b.at(1) - a.at(1);

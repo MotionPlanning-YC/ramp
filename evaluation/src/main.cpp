@@ -20,6 +20,7 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   // Do collision detection
   cd.trajectory_  = req.trajectory;
   CollisionDetection::QueryResult qr = cd.perform();
+  qr.collision_ = 0;
   //std::cout<<"\nqr.collision_: "<<qr.collision_;
   
   // Set response
@@ -28,9 +29,6 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
 
   // Do fitness
   res.fitness = ev.performFitness(qr);
-
-  //std::cout<<"\nfitness: "<<res.fitness<<"\n";
-  //std::cout<<"\nfeasible: "<<(res.feasible ? "true" : "false")<<"\n";
   
   return true;
 } //End handleRequest

@@ -35,8 +35,7 @@ int main(int argc, char** argv) {
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
   
   handle.getParam("orientation", robot.initial_theta);
-  std::cout<<"\nrobot.orientation: "<<robot.orientation;
-
+  std::cout<<"\nrobot.orientation: "<<robot.initial_theta;
   init_advertisers_subscribers(robot, handle);
 
 
