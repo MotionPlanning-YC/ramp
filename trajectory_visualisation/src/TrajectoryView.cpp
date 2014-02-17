@@ -86,12 +86,12 @@ void TrajectoryView::size_changed()
 void TrajectoryView::population(const ramp_msgs::Population& msg)
 // Update the population and called the drawing function
 {
-  std::cout<<"\nReceived Population!\n";
+  //std::cout<<"\nReceived Population!\n";
 
-  populations_.clear();
-  populations_.push_back(msg);
+  //populations_.clear();
+  //populations_.push_back(msg);
 
-  /*if(populations_.size() < 2) {
+  if(populations_.size() < 2) {
     populations_.push_back(msg);
   }
 
@@ -104,7 +104,7 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
       populations_.erase(populations_.begin()+1);
       populations_.insert(populations_.begin()+1, msg);
     }
-  }*/
+  }
 
   drawPopulation();
 }
@@ -116,34 +116,25 @@ void TrajectoryView::drawPopulation() {
   this->scene()->clear();
 
   // Initialize a QPen object 
-  QPen pen = QPen( QColor(0,0,255,150) ); 
+  QPen pen = QPen( QColor(0,0,0,150) ); 
   
   /* Draw some grid lines */
     this->scene()->addLine(0, metersToPixels(3.5, false), width_-20, metersToPixels(3.5, false), pen);
     this->scene()->addLine(metersToPixels(3.5, true), 0, metersToPixels(3.5, true), metersToPixels(3.5, false), pen);
     
-    pen = QPen( QColor(0,255,0,150) );
     this->scene()->addLine(0, metersToPixels(3, false), width_-20, metersToPixels(3, false), pen);
     this->scene()->addLine(metersToPixels(3, true), 0, metersToPixels(3, true), metersToPixels(3.5, false), pen);
     
-    pen = QPen( QColor(255,0,0,150) ); 
     this->scene()->addLine(0, metersToPixels(2, false), width_-20, metersToPixels(2, false), pen);
     this->scene()->addLine(metersToPixels(2, true), 0, metersToPixels(2, true), metersToPixels(3.5, false), pen);
     
-    pen = QPen( QColor(0,0,0,150) ); 
     this->scene()->addLine(0, metersToPixels(1, false), width_-20, metersToPixels(1, false), pen);
     this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(3.5, false), pen);
-    pen = QPen( QColor(0,0,0,150) ); 
   
 
   // For each trajectory in the population
   for(unsigned int p=0;p<populations_.size();p++) {
     //std::cout<<"\np: "<<p<<"\n";
-    
-    // Blue for robot 2
-    //if(populations_.at(p).robot_id == 2) {
-      //pen = QPen( QColor(0,0,255,150) );
-    //}
 
     // Set i to the index of the best trajectory
     int i = populations_.at(p).best_id;
@@ -151,16 +142,23 @@ void TrajectoryView::drawPopulation() {
 
     // Get the points for that trajectory
     std::vector<trajectory_msgs::JointTrajectoryPoint> points = populations_.at(p).population.at(i).trajectory.points;
-    std::cout<<"\npoints.size(): "<<points.size()<<"\n";
+    //std::cout<<"\npoints.size(): "<<points.size()<<"\n";
+    
 
-    // Draw robot 1's best trajectory in red
-    //if (i==populations_.at(p).best_id && populations_.at(p).robot_id == 1) {
-       pen = QPen( QColor(255,0,0,255) ); 
-    //}
-    // Draw robot 2's best trajectory in green
-    //else if (i==populations_.at(p).best_id && populations_.at(p).robot_id == 2) {
-       //pen = QPen( QColor(0,255,0,255) ); 
-    //}
+    // Green for robot 1 and feasible
+    if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(i).feasible) {
+      pen = QPen( QColor(0, 255, 0, 150) );
+    }
+    // Blue for robot 2 and feasible
+    else if(populations_.at(p).robot_id == 2 && populations_.at(p).population.at(i).feasible) {
+      pen = QPen( QColor(0,0,255,150) );
+    }
+    
+    // Else, if either are in collision, red
+    else {
+      pen = QPen( QColor(255,0,0,150) );
+    }
+
 
     if(points.size() == 1) {
       std::vector<float> p;
@@ -178,8 +176,6 @@ void TrajectoryView::drawPopulation() {
       // For each point in the trajectory
       for(int j = 0 ; j < (points.size() -1 ) ; j++) {
 
-        std::cout<<"\npoint: ("<<points.at(j).positions.at(0)<<", "<<points.at(j).positions.at(1)<<")";
-        std::cout<<"\nmetersToPixels(point): ("<<metersToPixels(points.at(j).positions.at(0), true)<<", "<<metersToPixels(points.at(j).positions.at(1), false)<<")";
         // Draw a line to the next point
         this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
                        metersToPixels(points.at(j).positions.at(1), false),
@@ -187,21 +183,6 @@ void TrajectoryView::drawPopulation() {
                        metersToPixels(points.at(j+1).positions.at(1), false),
                        pen);
 
-        // Draw a circle at the beginning to show the robot's circle location
-        if(j == 0) { 
-          
-          std::vector<float> p;
-          p.push_back(points.at(j).positions.at(0));
-          p.push_back(points.at(j).positions.at(1));
-
-          std::vector<float> c = getCenter(p, points.at(j).positions.at(2));
-          //std::cout<<"\nc: ("<<c.at(0)<<", "<<c.at(1)<<")";
-
-          this->scene()->addEllipse(metersToPixels(p.at(0), true),
-                                  metersToPixels(p.at(1), false),
-                                  metersToPixels(0.33f, true), metersToPixels(0.33f, false), pen);
-            
-        } //end if
       } //end for each point in the trajectory
     } //end if many points
   } //end for each trajectory

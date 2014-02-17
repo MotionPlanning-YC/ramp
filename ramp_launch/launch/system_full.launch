@@ -84,13 +84,13 @@
 
 <group ns="$(arg robot1_name)" >
   <node name="robot" pkg="robot" type="robot" machine="robot1"/> 
-    <param name="orientation" type="float" value="0" />
+    <param name="orientation" type="double" value="0" />
 </group> 
 
 
 <group ns="$(arg robot2_name)"> 
   <node name="robot" pkg="robot" type="robot" machine="robot2" /> 
-    <param name="orientation" type="float" value="3.14159" />
+    <param name="orientation" type="double" value="3.14159" />
 </group> 
 
 
