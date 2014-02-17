@@ -312,9 +312,13 @@ void Corobot::moveOnTrajectory()
       // Adjust the angular speed to correct errors in turning
       // Commented out because it was producing erratic driving
       // Should be fixed at some point
-      //if(twist.linear.x > 0.0f) {
-        //twist.angular.z = -1.5 * ( u.findDistanceBetweenAngles(configuration_.K.at(2), orientations_knotpoints.at(num_traveled)) );
-      //}
+      if(twist.linear.x > 0.0f) {
+        float actual_theta = u.displaceAngle(initial_theta, configuration_.K.at(2));
+        float dist = u.findDistanceBetweenAngles(actual_theta, orientations_knotpoints.at(num_traveled));
+        std::cout<<"\ndist: "<<dist;
+        if(dist > 0.15)
+          twist.angular.z = -1.5 * dist;
+      }
     
       // Send the twist message to move the robot
       sendTwist();

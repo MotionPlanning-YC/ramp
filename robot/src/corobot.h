@@ -50,6 +50,8 @@ class Corobot {
     ramp_msgs::Trajectory             trajectory_;
     ros::Timer                        timer_;
 
+    float initial_theta;
+
     
     // static const members
     static const std::string TOPIC_STR_PHIDGET_MOTOR;
