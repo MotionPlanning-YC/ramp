@@ -140,10 +140,29 @@ void Planner::planningCycleCallback(const ros::TimerEvent& t) {
 } //End planningCycleCallback
 
 
+/* This method returns a trajectory to gradually move into a new trajectory
+ * t is the trajectory to change, theta is the orientation we want to reach */
+void Planner::gradualTrajectory(RampTrajectory& t) {
 
-void Planner::gradualTrajectory(RampTrajectory& best, float theta) {
-  trajectory_msgs::JointTrajectoryPoint temp;
-}
+  // Find where linear velocity starts
+  int i=0;
+  while(t.msg_trajec_.trajectory.points.at(i).velocities.at(0) == 0 &&
+        t.msg_trajec_.trajectory.points.at(i).velocities.at(1) == 0 &&
+        i < t.msg_trajec_.trajectory.points.size()) {i++;}
+
+  // If i is in the trajectory 
+  if( i < t.msg_trajec_.trajectory.points.size()) {
+
+    // Get the point
+    trajectory_msgs::JointTrajectoryPoint p = t.msg_trajec_.trajectory.points.at(i);
+
+    // Set the linear velocities to be the same as p
+    for(unsigned int j=0;j<i;j++) {
+      t.msg_trajec_.trajectory.points.at(j).velocities.at(0) = p.velocities.at(0);
+      t.msg_trajec_.trajectory.points.at(j).velocities.at(1) = p.velocities.at(1);
+    } //end for
+  } //end if i in range
+} //End gradualTrajectory
 
 
 /** This method receives the latest configuraton of the robot, 
@@ -172,6 +191,9 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   // old configuration is the new start_ configuration
   // new orientation is the amount to rotate towards first knot point
   float diff = u.findDistanceBetweenAngles(start_.K_.at(2), bestTrajec_.getPath().all_.at(1).K_.at(2));
+  if(diff <= 0.25) {
+    gradualTrajectory(bestTrajec_);
+  }
     
   
   // Send the best trajectory 
@@ -385,11 +407,11 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
 
 /** Send the fittest feasible trajectory to the robot package */
 void Planner::sendBest() {
-  
+
   // If infeasible and too close to obstacle, 
   // Stop the robot by sending a blank trajectory
   if(!bestTrajec_.feasible_ && bestTrajec_.time_until_collision_ < 3.5f) {
-    std::cout<<"\nCollision within 1.5 seconds! Stopping robot!\n";
+    std::cout<<"\nCollision within 3.5 seconds! Stopping robot!\n";
     ramp_msgs::Trajectory blank;
     h_control_->send(blank); 
   }
@@ -462,7 +484,6 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
     // For each path,
     for(unsigned int i=0;i<new_paths.size();i++) {
     
-      
       // Get the original velocity values
       std::vector<float> v = velocities_.at(i_old.at(i));
       
@@ -691,11 +712,17 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   /** TODO */
   // createSubpopulations();
   
+  // Start the planning cycle timer
   planningCycleTimer_.start();
+
+  // Wait for 75 generations before starting control cycle
+  while(generation_ < 75) {ros::spinOnce();}
+
+  // Start the control cycle timer
   controlCycleTimer_.start();
   
   // Do planning until robot has reached goal
-  while( (start_.compare(goal_) > 0.3) && ros::ok()) {
+  while( (start_.compare(goal_) > 0.4) && ros::ok()) {
     ros::spinOnce(); 
   } // end while
   

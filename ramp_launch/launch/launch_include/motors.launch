@@ -1,7 +1,7 @@
 <launch>
 
 <!-- Define the machine -->
-<machine name="robot1" address="192.168.1.104" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> 
+<machine name="robot1" address="192.168.1.101" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" /> 
 <machine name="robot2" address="192.168.1.100" env-loader="/opt/ros/groovy/env.sh" user="corobotclassic" />
 
 

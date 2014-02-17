@@ -128,7 +128,7 @@ class Planner {
     void updateCallback(const ramp_msgs::Update::ConstPtr& msg);
 
 
-    void gradualTrajectory(RampTrajectory& best, float theta);
+    void gradualTrajectory(RampTrajectory& t);
 
     
   

@@ -66,7 +66,7 @@ const std::vector<float> CollisionDetection::getCenter(std::vector<float> p, flo
 
 /** Transformation matrix of obstacle robot */
 void CollisionDetection::setT_od_w(int id) {
-  if(id == 1) {
+  if(id == 2) {
   
     std::vector<float> r1;
     r1.push_back(cos(PI));
