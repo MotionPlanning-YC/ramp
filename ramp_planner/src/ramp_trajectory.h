@@ -32,10 +32,10 @@ class RampTrajectory {
 /** Create a struct to implement < comparison between two RampTrajectories */
 struct RampTrajectoryCompare {
 
-  //Returns true if rt1 < rt2, or less "fit" than rt2
+  // Returns true if rt1 < rt2, or less "fit" than rt2
   bool operator()(const RampTrajectory& rt1, const RampTrajectory& rt2) const {
     
-    //First check for feasible vs. infeasible
+    // First check for feasible vs. infeasible
     if(!rt1.feasible_ && rt2.feasible_) {
       return true;
     }
@@ -43,7 +43,7 @@ struct RampTrajectoryCompare {
       return false;
     }
 
-    //Return true if rt1 has a smaller fitness value than rt2
+    // Return true if rt1 has a smaller fitness value than rt2
     return rt1.fitness_ < rt2.fitness_;
   } 
 };

@@ -198,9 +198,6 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   
   // Send the best trajectory 
   sendBest(); 
-  
-  // Send the whole population to the trajectory viewer
-  sendPopulation();
 } //End controlCycleCallback
 
 
@@ -547,6 +544,9 @@ void Planner::modification() {
   
   // Obtain and set best trajectory
   bestTrajec_ = population_.findBest();
+  
+  // Send the whole population to the trajectory viewer
+  sendPopulation();
 } // End modification
 
 
@@ -560,6 +560,8 @@ void Planner::evaluateTrajectory(RampTrajectory& trajec) {
   if(requestEvaluation(er)) {
     trajec.fitness_   = er.response.fitness;
     trajec.feasible_  = er.response.feasible;
+    trajec.msg_trajec_.fitness = trajec.fitness_;
+    trajec.msg_trajec_.feasible = trajec.feasible_;
     trajec.time_until_collision_ = er.response.time_until_collision;
   }
   else {

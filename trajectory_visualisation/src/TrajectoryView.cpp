@@ -144,6 +144,8 @@ void TrajectoryView::drawPopulation() {
     std::vector<trajectory_msgs::JointTrajectoryPoint> points = populations_.at(p).population.at(i).trajectory.points;
     //std::cout<<"\npoints.size(): "<<points.size()<<"\n";
     
+    std::cout<<"\nrobot_id: "<<populations_.at(p).robot_id;
+    std::cout<<"\nfeasible: "<<populations_.at(p).population.at(i).feasible;
 
     // Green for robot 1 and feasible
     if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(i).feasible) {

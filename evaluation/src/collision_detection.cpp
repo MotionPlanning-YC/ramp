@@ -126,7 +126,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   
   //std::cout<<"\nobstacle trajectory: "<<u.toString(ob_trajectory);
   // For every 3 points, check circle detection
-  float radius = 0.33f;
+  float radius = 0.75f;
   for(unsigned int i=0;i<trajectory_.trajectory.points.size();i+=3) {
     
     // Get the point on the trajectory, p
