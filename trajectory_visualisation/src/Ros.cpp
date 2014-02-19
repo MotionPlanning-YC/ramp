@@ -27,8 +27,8 @@ void Ros::subscribe()
 
     //Subscribe to topics
     //popSub= n.subscribe("population",1000, &Ros::populationCallback,this);
-    popSub_1= n.subscribe("robot1/population",1000, &Ros::populationCallback,this);
-    popSub_2= n.subscribe("robot2/population",1000, &Ros::populationCallback,this);
+    popSub_1= n.subscribe("/robot1/population",1000, &Ros::populationCallback,this);
+    popSub_2= n.subscribe("/robot2/population",1000, &Ros::populationCallback,this);
 
     initialized = true;
 }

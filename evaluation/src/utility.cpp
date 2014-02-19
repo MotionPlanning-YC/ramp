@@ -182,6 +182,9 @@ const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
 
   }
 
+  result<<"\n Feasible: "<<traj.feasible;
+  result<<"\n Fitness:  "<<traj.fitness;
+
   return result.str();
 }
 

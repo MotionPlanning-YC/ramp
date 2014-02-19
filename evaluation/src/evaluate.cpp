@@ -45,7 +45,10 @@ const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) 
   if(feasible.collision_) {
 
     // Add the Penalty for being infeasible
-    result += (Q / feasible.time_until_collision_) * -1;
+    if (feasible.time_until_collision_ == 0) 
+      result += (Q*Q)*-1;
+    else    
+      result += (Q / feasible.time_until_collision_) * -1;
   }
   
   return result;

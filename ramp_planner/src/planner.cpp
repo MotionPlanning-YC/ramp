@@ -407,12 +407,12 @@ void Planner::sendBest() {
 
   // If infeasible and too close to obstacle, 
   // Stop the robot by sending a blank trajectory
-  if(!bestTrajec_.feasible_ && bestTrajec_.time_until_collision_ < 3.5f) {
-    std::cout<<"\nCollision within 3.5 seconds! Stopping robot!\n";
+  if(!bestTrajec_.feasible_ && bestTrajec_.time_until_collision_ < 4.f) {
+    std::cout<<"\nCollision within 4 second! Stopping robot!\n";
     ramp_msgs::Trajectory blank;
     h_control_->send(blank); 
   }
-  else if(!bestTrajec_.feasible_) {
+  if(!bestTrajec_.feasible_) {
     std::cout<<"\nBest trajectory is not feasible! Time until collision: "<<bestTrajec_.time_until_collision_<<"\n";
     h_control_->send(bestTrajec_.msg_trajec_);
   }
@@ -707,6 +707,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   // Evaluate the population and get the initial trajectory to move on
   RampTrajectory T_move = evaluateAndObtainBest();
   std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
+  sendPopulation();
   // std::cout<<"\nPress enter to start the loop!\n";
   // std::cin.get();
   
@@ -718,8 +719,9 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   planningCycleTimer_.start();
 
   // Wait for 75 generations before starting control cycle
-  while(generation_ < 75) {ros::spinOnce();}
+  while(generation_ < 50) {ros::spinOnce();}
 
+  std::cout<<"\n***************Starting Control Cycle*****************";
   // Start the control cycle timer
   controlCycleTimer_.start();
   

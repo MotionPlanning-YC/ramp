@@ -86,7 +86,7 @@ void TrajectoryView::size_changed()
 void TrajectoryView::population(const ramp_msgs::Population& msg)
 // Update the population and called the drawing function
 {
-  //std::cout<<"\nReceived Population!\n";
+  //std::cout<<"\n\nReceived Population!";
 
   //populations_.clear();
   //populations_.push_back(msg);
@@ -132,62 +132,73 @@ void TrajectoryView::drawPopulation() {
     this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(3.5, false), pen);
   
 
-  // For each trajectory in the population
+  // For each population
   for(unsigned int p=0;p<populations_.size();p++) {
     //std::cout<<"\np: "<<p<<"\n";
 
-    // Set i to the index of the best trajectory
-    int i = populations_.at(p).best_id;
-    //std::cout<<"\ni: "<<i;
+    // For each trajectory in the population
+    for(unsigned int t=0;t<populations_.at(p).population.size();t++) {
+      
 
-    // Get the points for that trajectory
-    std::vector<trajectory_msgs::JointTrajectoryPoint> points = populations_.at(p).population.at(i).trajectory.points;
-    //std::cout<<"\npoints.size(): "<<points.size()<<"\n";
-    
-    std::cout<<"\nrobot_id: "<<populations_.at(p).robot_id;
-    std::cout<<"\nfeasible: "<<populations_.at(p).population.at(i).feasible;
+      // Set i to the index of the best trajectory
+      //int i = populations_.at(p).best_id;
+      //std::cout<<"\ni: "<<i;
 
-    // Green for robot 1 and feasible
-    if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(i).feasible) {
-      pen = QPen( QColor(0, 255, 0, 150) );
-    }
-    // Blue for robot 2 and feasible
-    else if(populations_.at(p).robot_id == 2 && populations_.at(p).population.at(i).feasible) {
-      pen = QPen( QColor(0,0,255,150) );
-    }
-    
-    // Else, if either are in collision, red
-    else {
-      pen = QPen( QColor(255,0,0,150) );
-    }
+      // Get the points for that trajectory
+      std::vector<trajectory_msgs::JointTrajectoryPoint> points = populations_.at(p).population.at(t).trajectory.points;
+      /*std::cout<<"\npoints.size(): "<<points.size();
+      std::cout<<"\nrobot_id: "<<populations_.at(p).robot_id;
+      std::cout<<"\nfeasible: "<<(int)populations_.at(p).population.at(i).feasible;
+      std::cout<<"\npoints[0]: ("<<points.at(0).positions.at(0)<<", "<<points.at(0).positions.at(1)<<")";*/
+
+      // Green for robot 1 and feasible
+      if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible && t==populations_.at(p).best_id) {
+        pen = QPen( QColor(0, 255, 0, 150) );
+      }
+      else if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible) {
+        pen = QPen( QColor(0, 255, 0, 200) );
+      }
+      // Blue for robot 2 and feasible
+      else if(populations_.at(p).robot_id == 2 && populations_.at(p).population.at(t).feasible && t==populations_.at(p).best_id) {
+        pen = QPen( QColor(0,0,255,150) );
+      }
+      else if(populations_.at(p).robot_id == 2 && populations_.at(p).population.at(t).feasible) {
+        pen = QPen( QColor(0,0,255,200) );
+      }
+      
+      // Else, if either are in collision, red
+      else {
+        pen = QPen( QColor(255,0,0,150) );
+      }
 
 
-    if(points.size() == 1) {
-      std::vector<float> p;
-      p.push_back(points.at(0).positions.at(0));
-      p.push_back(points.at(0).positions.at(1));
+      if(points.size() == 1) {
+        std::vector<float> p;
+        p.push_back(points.at(0).positions.at(0));
+        p.push_back(points.at(0).positions.at(1));
 
-      std::vector<float> c = getCenter(p, points.at(0).positions.at(2));
-      //std::cout<<"\nc: ("<<c.at(0)<<", "<<c.at(1)<<")";
-      this->scene()->addEllipse(metersToPixels(p.at(0), true),
-                                  metersToPixels(p.at(1), false),
-                                  metersToPixels(0.33f, true), metersToPixels(0.33f, false), pen);
-    } //end if 1 point
+        std::vector<float> c = getCenter(p, points.at(0).positions.at(2));
+        //std::cout<<"\nc: ("<<c.at(0)<<", "<<c.at(1)<<")";
+        this->scene()->addEllipse(metersToPixels(p.at(0), true),
+                                    metersToPixels(p.at(1), false),
+                                    metersToPixels(0.33f, true), metersToPixels(0.33f, false), pen);
+      } //end if 1 point
 
-    else {
-      // For each point in the trajectory
-      for(int j = 0 ; j < (points.size() -1 ) ; j++) {
+      else {
+        // For each point in the trajectory
+        for(int j = 0 ; j < (points.size() -1 ) ; j++) {
 
-        // Draw a line to the next point
-        this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
-                       metersToPixels(points.at(j).positions.at(1), false),
-                       metersToPixels(points.at(j+1).positions.at(0), true),
-                       metersToPixels(points.at(j+1).positions.at(1), false),
-                       pen);
+          // Draw a line to the next point
+          this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
+                         metersToPixels(points.at(j).positions.at(1), false),
+                         metersToPixels(points.at(j+1).positions.at(0), true),
+                         metersToPixels(points.at(j+1).positions.at(1), false),
+                         pen);
 
-      } //end for each point in the trajectory
-    } //end if many points
-  } //end for each trajectory
+        } //end for each point in the trajectory
+      } //end if many points
+    } //end for each trajectory
+  } //end for each population 
 } //End drawPopulation
 
 /** 
