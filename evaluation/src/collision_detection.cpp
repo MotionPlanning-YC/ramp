@@ -188,11 +188,11 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     //std::cout<<"\n("<<ob_trajectory.trajectory.points.at(0).positions.at(0)<<", "<<ob_trajectory.trajectory.points.at(0).positions.at(1)<<")";
 
     // ***Test collision against the obstacle's trajectory***
-    //for(unsigned int j=0;j<ob_trajectory.trajectory.points.size();j+=3) {
+    for(unsigned int j=i-1;j<i+1 && j<ob_trajectory.trajectory.points.size();j++) {
 
       // Get the points as the centers of the circles
-      //trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
-      trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(i);
+      trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
+      //trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(i);
 
       // Get the position vector for the obstacle p_ob
       // Transform obstacle odometry coordinates to world CS
@@ -228,10 +228,10 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       if( dist <= radius*2 ) {
         result.collision_ = true;
         result.time_until_collision_ = p.time_from_start.toSec();
-        //j = ob_trajectory.trajectory.points.size();
+        j = ob_trajectory.trajectory.points.size();
         i = trajectory_.trajectory.points.size();
       }
-    //} //end for
+    } //end for
   } //end for
 
   return result;
