@@ -179,6 +179,7 @@ class Planner {
     // Modifier_ communicates with the path_modification package
     Modifier* modifier_;
 
+    float D_;
 };
 
 #endif

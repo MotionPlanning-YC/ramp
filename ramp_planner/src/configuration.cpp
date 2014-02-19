@@ -1,9 +1,9 @@
 #include "configuration.h"
 
 
-Configuration::Configuration() {}
+Configuration::Configuration() : mobile_base_k_(2) {}
 
-Configuration::Configuration(ramp_msgs::Configuration c) {
+Configuration::Configuration(ramp_msgs::Configuration c) : mobile_base_k_(2) {
   //std::cout<<"\nc.K.size(): "<<c.K.size();
   //std::cout<<"\nc.ranges.size(): "<<c.ranges.size()<<"\n";
   
@@ -60,17 +60,29 @@ const bool Configuration::equals(const Configuration& c) const {
   return true;
 }
 
-/** This method returns the euclidean distance between this configuration and c */
-const double Configuration::compare(const Configuration& c) const {
+/** 
+ * This method returns the euclidean distance between this configuration and c 
+ * if base_theta is true, we are considering the base orientation, otherwise do not
+ * add base orientation difference into the result
+ * */
+const double Configuration::compare(const Configuration& c, bool base_theta) const {
   //std::cout<<"\nComparing: "<<toString()<<" and "<<c.toString();
   double result = 0; 
 
-  //For each DOF, sum the (X2-X1)^2
+  // For each DOF, sum the (X2-X1)^2
   for(unsigned int i=0;i<ranges_.size();i++) {
-    result += pow(c.K_.at(i) - K_.at(i), 2);
+    // If we are not taking base theta into account, skip i
+    if(i == mobile_base_k_ && !base_theta) {}
+
+    // Else if we are considering base theta, use utility function
+    else if(i == mobile_base_k_) {
+      result += pow(u.displaceAngle(c.K_.at(i), K_.at(i)), 2);
+    }
+    else
+      result += pow(c.K_.at(i) - K_.at(i), 2);
   }
 
-  //Get square root to complete euclidean distance...
+  // Get square root to complete euclidean distance...
   result = sqrt(result);
 
   return result;
