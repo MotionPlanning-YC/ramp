@@ -5,19 +5,19 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), D_(0.4)
+Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
 }
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), D_(0.4)
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), D_(0.4)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
@@ -727,7 +727,8 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
-  while( (start_.compare(goal_, false) > D_) && ros::ok()) {
+  goalThreshold_ = 0.2;
+  while( (start_.compare(goal_, false) > goalThreshold_) && ros::ok()) {
     ros::spinOnce(); 
   } // end while
   
