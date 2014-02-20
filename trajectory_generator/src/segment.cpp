@@ -2,8 +2,8 @@
 
 
 Segment::Segment() : k_dof_(3), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0), T_loc_(0), T_min_(0) {
-  max_v_.push_back(0.33f);
-  max_v_.push_back(0.33f);
+  max_v_.push_back(0.25f);
+  max_v_.push_back(0.25f);
 
   // Theta velocity is higher
   max_v_.push_back(PI/4.0f);
@@ -11,8 +11,8 @@ Segment::Segment() : k_dof_(3), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0
 
 Segment::Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind) : k_dof_(3), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0), T_loc_(0), T_min_(0)
 {
-  max_v_.push_back(0.33f);
-  max_v_.push_back(0.33f);
+  max_v_.push_back(0.25f);
+  max_v_.push_back(0.25f);
   max_v_.push_back(PI/4.0f);
   build(kp_start, kp_end, v_start, v_end, ind);
 }

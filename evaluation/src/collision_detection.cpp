@@ -70,14 +70,14 @@ void CollisionDetection::setT_od_w(int id) {
   if(id == 2) {
     
     std::vector<float> r1;
-    r1.push_back(cos(PI));
-    r1.push_back(-sin(PI));
-    r1.push_back(3.f);
+    r1.push_back(cos(-PI/2.));
+    r1.push_back(-sin(-PI/2.));
+    r1.push_back(2.f);
   
     std::vector<float> r2;
-    r2.push_back(sin(PI));
-    r2.push_back(cos(PI));
-    r2.push_back(1.75f);
+    r2.push_back(sin(-PI/2.));
+    r2.push_back(cos(-PI/2.));
+    r2.push_back(3.5f);
     
     std::vector<float> r3;
     r3.push_back(0);
@@ -170,8 +170,8 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   
   //std::cout<<"\nobstacle trajectory: "<<u.toString(ob_trajectory);
   // For every 3 points, check circle detection
-  float radius = 0.4f;
-  for(unsigned int i=0;i<trajectory_.trajectory.points.size() && i<ob_trajectory.trajectory.points.size();i+=4) {
+  float radius = 0.75f;
+  for(unsigned int i=0;i<trajectory_.trajectory.points.size() && i<ob_trajectory.trajectory.points.size();i+=3) {
     
     // Get the point on the trajectory, p
     trajectory_msgs::JointTrajectoryPoint p = trajectory_.trajectory.points.at(i);
@@ -228,7 +228,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       if( dist <= radius*2 ) {
         result.collision_ = true;
         result.time_until_collision_ = p.time_from_start.toSec();
-        j = ob_trajectory.trajectory.points.size();
+        j = i+1;
         i = trajectory_.trajectory.points.size();
       }
     } //end for

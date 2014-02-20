@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4)
+Planner::Planner() : resolutionRate_(5), populationSize_(10), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
@@ -17,7 +17,7 @@ Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), popula
   planningCycle_ = ros::Duration(0.1);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(10), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
@@ -190,7 +190,8 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   // Find orientation difference between old and new T_move
   // old configuration is the new start_ configuration
   // new orientation is the amount to rotate towards first knot point
-  float diff = u.findDistanceBetweenAngles(start_.K_.at(2), bestTrajec_.getPath().all_.at(1).K_.at(2));
+  float b = u.findAngleFromAToB(start_.K_, bestTrajec_.getPath().all_.at(1).K_);
+  float diff = u.findDistanceBetweenAngles(start_.K_.at(2), b);
   if(diff <= 0.25) {
     gradualTrajectory(bestTrajec_);
   }
@@ -238,7 +239,7 @@ void Planner::init_population() {
 
     // Hardcode some velocities, 0.25m/s per segment
     for(unsigned int j=1;j<paths_.at(i).all_.size();j++) {
-      v.push_back(0.33f);
+      v.push_back(0.25f);
     }
     
     // Build a TrajectoryRequest 
@@ -407,13 +408,14 @@ void Planner::sendBest() {
 
   // If infeasible and too close to obstacle, 
   // Stop the robot by sending a blank trajectory
-  if(!bestTrajec_.feasible_ && bestTrajec_.time_until_collision_ < 4.f) {
-    std::cout<<"\nCollision within 4 second! Stopping robot!\n";
+  if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < 2.5f)) {
+    std::cout<<"\nCollision within 2.5 seconds! Stopping robot!\n";
     ramp_msgs::Trajectory blank;
     h_control_->send(blank); 
   }
-  if(!bestTrajec_.feasible_) {
-    std::cout<<"\nBest trajectory is not feasible! Time until collision: "<<bestTrajec_.time_until_collision_<<"\n";
+  else if(!bestTrajec_.feasible_) {
+    std::cout<<"\nBest trajectory is not feasible! Time until collision: "<<bestTrajec_.time_until_collision_;
+    std::cout<<"\nbestTrajec_.time_until_collision_ < 4.f: "<<(bestTrajec_.time_until_collision_ < 4.f);
     h_control_->send(bestTrajec_.msg_trajec_);
   }
   else {
@@ -727,7 +729,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
-  goalThreshold_ = 0.2;
+  goalThreshold_ = 0.1;
   while( (start_.compare(goal_, false) > goalThreshold_) && ros::ok()) {
     ros::spinOnce(); 
   } // end while

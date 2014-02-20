@@ -153,14 +153,14 @@ void TrajectoryView::drawPopulation() {
 
       // Green for robot 1 and feasible
       if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible && t==populations_.at(p).best_id) {
-        pen = QPen( QColor(0, 255, 0, 150) );
+        pen = QPen( QColor(0, 255, 0, 255) );
       }
       else if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible) {
         pen = QPen( QColor(0, 255, 0, 200) );
       }
       // Blue for robot 2 and feasible
       else if(populations_.at(p).robot_id == 2 && populations_.at(p).population.at(t).feasible && t==populations_.at(p).best_id) {
-        pen = QPen( QColor(0,0,255,150) );
+        pen = QPen( QColor(0,0,255,255) );
       }
       else if(populations_.at(p).robot_id == 2 && populations_.at(p).population.at(t).feasible) {
         pen = QPen( QColor(0,0,255,200) );
@@ -187,6 +187,15 @@ void TrajectoryView::drawPopulation() {
       else {
         // For each point in the trajectory
         for(int j = 0 ; j < (points.size() -1 ) ; j++) {
+
+          // If the first point
+          if(j == 0) {
+            // Draw a line to the next point
+            this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true),
+                                      metersToPixels(points.at(j).positions.at(1), false),
+                                      metersToPixels(0.15, true), metersToPixels(0.15, false));
+                                      
+          }
 
           // Draw a line to the next point
           this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
