@@ -70,13 +70,13 @@ void CollisionDetection::setT_od_w(int id) {
   if(id == 2) {
     
     std::vector<float> r1;
-    r1.push_back(cos(-PI/2.));
-    r1.push_back(-sin(-PI/2.));
+    r1.push_back(cos(-PI/2));
+    r1.push_back(-sin(-PI/2));
     r1.push_back(2.f);
   
     std::vector<float> r2;
-    r2.push_back(sin(-PI/2.));
-    r2.push_back(cos(-PI/2.));
+    r2.push_back(sin(-PI/2));
+    r2.push_back(cos(-PI/2));
     r2.push_back(3.5f);
     
     std::vector<float> r3;

@@ -408,8 +408,8 @@ void Planner::sendBest() {
 
   // If infeasible and too close to obstacle, 
   // Stop the robot by sending a blank trajectory
-  if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < 2.5f)) {
-    std::cout<<"\nCollision within 2.5 seconds! Stopping robot!\n";
+  if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < 3.f)) {
+    std::cout<<"\nCollision within 3 seconds! Stopping robot!\n";
     ramp_msgs::Trajectory blank;
     h_control_->send(blank); 
   }
