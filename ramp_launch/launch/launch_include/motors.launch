@@ -32,7 +32,7 @@
 
 
 
-  <rosparam param="ticks_meter">12500</rosparam>
+  <rosparam param="ticks_meter">9400</rosparam>
 
   <node pkg="differential-drive" type="pid_velocity.py" name="lpid_velocity" machine="robot1">
       <remap from="wheel" to="lwheel"/>

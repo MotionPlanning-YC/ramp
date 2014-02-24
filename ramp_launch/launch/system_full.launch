@@ -31,17 +31,18 @@
 
 
 <!-- We need 2 planners, one for the first robot and one for the second robot -->
+<group ns="$(arg robot1_name)">
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" >
+    <param name="robot_update" type="str" value="/$(arg robot1_name)/update" />
+  </node>
+</group> 
+
 <group ns="$(arg robot2_name)"> 
   <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner"> 
     <param name="robot_update" type="str" value="/$(arg robot2_name)/update" /> 
   </node>
 </group> 
 
-<group ns="$(arg robot1_name)">
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" >
-    <param name="robot_update" type="str" value="/$(arg robot1_name)/update" />
-  </node>
-</group> 
 
 
 <!-- Sensing nodes -->
@@ -83,7 +84,7 @@
 
 <group ns="$(arg robot1_name)" >
   <node name="robot" pkg="robot" type="robot" machine="robot1"/> 
-    <param name="orientation" type="double" value="-1.5708" />
+    <param name="orientation" type="double" value="3.14159" />
 </group> 
 
 

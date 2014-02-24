@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(10), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4)
+Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
@@ -17,7 +17,7 @@ Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), popula
   planningCycle_ = ros::Duration(0.1);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(10), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
@@ -192,7 +192,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   // new orientation is the amount to rotate towards first knot point
   float b = u.findAngleFromAToB(start_.K_, bestTrajec_.getPath().all_.at(1).K_);
   float diff = u.findDistanceBetweenAngles(start_.K_.at(2), b);
-  if(diff <= 0.25) {
+  if(fabs(diff) <= 0.3) {
     gradualTrajectory(bestTrajec_);
   }
     
@@ -239,7 +239,7 @@ void Planner::init_population() {
 
     // Hardcode some velocities, 0.25m/s per segment
     for(unsigned int j=1;j<paths_.at(i).all_.size();j++) {
-      v.push_back(0.25f);
+      v.push_back(0.3f);
     }
     
     // Build a TrajectoryRequest 
