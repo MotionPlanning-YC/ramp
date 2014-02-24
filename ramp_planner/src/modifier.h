@@ -7,8 +7,8 @@
 
 class Modifier {
   public:
-    Modifier(const ros::NodeHandle& h);
-    Modifier(const ros::NodeHandle& h, const std::vector<Path> ps, const std::vector< std::vector<float> > vs);    
+    Modifier(const ros::NodeHandle& h, const unsigned int n);
+    Modifier(const ros::NodeHandle& h, const std::vector<Path> ps, const std::vector< std::vector<float> > vs, const unsigned int n);    
     ~Modifier();
 
     //Methods

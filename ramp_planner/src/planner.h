@@ -130,7 +130,6 @@ class Planner {
 
     void gradualTrajectory(RampTrajectory& t);
 
-    
   
   private:
     /** These are (mostly) utility members that are only used by Planner and should not be used by other classes*/
@@ -180,6 +179,8 @@ class Planner {
     Modifier* modifier_;
 
     float goalThreshold_;
+
+    unsigned int num_ops_;
 };
 
 #endif

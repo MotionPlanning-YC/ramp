@@ -1,11 +1,11 @@
 #include "modifier.h"
 
 
-Modifier::Modifier(const ros::NodeHandle& h) : num_ops(5), i_changed1(-1), i_changed2(-1) {
+Modifier::Modifier(const ros::NodeHandle& h, const unsigned int n) : num_ops(n), i_changed1(-1), i_changed2(-1) {
   h_mod_req_ = new ModificationRequestHandler(h);
 }
 
-Modifier::Modifier(const ros::NodeHandle& h, const std::vector<Path> ps, const std::vector< std::vector<float> > vs) : num_ops(5), paths_(ps), velocities_(vs), i_changed1(-1), i_changed2(-1) {
+Modifier::Modifier(const ros::NodeHandle& h, const std::vector<Path> ps, const std::vector< std::vector<float> > vs, const unsigned int n) : num_ops(n), paths_(ps), velocities_(vs), i_changed1(-1), i_changed2(-1) {
   h_mod_req_ = new ModificationRequestHandler(h);
 }
 
