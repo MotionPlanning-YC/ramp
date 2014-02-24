@@ -71,13 +71,15 @@ Trajectory::buildTrajectoryMsg	trajectory.cpp	/^const ramp_msgs::Trajectory Traj
 Trajectory::buildTrajectoryMsg	trajectory.h	/^    const ramp_msgs::Trajectory buildTrajectoryMsg() const;$/;"	p	class:Trajectory	access:public	signature:() const
 Trajectory::generate	trajectory.cpp	/^const std::vector<MotionState> Trajectory::generate() {$/;"	f	class:Trajectory	signature:()
 Trajectory::generate	trajectory.h	/^    const std::vector<MotionState> generate();$/;"	p	class:Trajectory	access:public	signature:()
-Trajectory::getMotionState	trajectory.cpp	/^const MotionState Trajectory::getMotionState(const unsigned int ind_segment, const float t) {$/;"	f	class:Trajectory	signature:(const unsigned int ind_segment, const float t)
+Trajectory::getMotionState	trajectory.cpp	/^const MotionState Trajectory::getMotionState(const unsigned int i_segment, const float t) {$/;"	f	class:Trajectory	signature:(const unsigned int i_segment, const float t)
 Trajectory::getMotionState	trajectory.h	/^    const MotionState getMotionState(const unsigned int ind_segment, const float t);$/;"	p	class:Trajectory	access:private	signature:(const unsigned int ind_segment, const float t)
 Trajectory::k_dof_	trajectory.h	/^    const unsigned int k_dof_;$/;"	m	class:Trajectory	access:private
 Trajectory::knot_points_	trajectory.h	/^    std::vector<geometry_msgs::Pose2D>  knot_points_;$/;"	m	class:Trajectory	access:public
 Trajectory::points_	trajectory.h	/^    std::vector<MotionState>            points_;$/;"	m	class:Trajectory	access:public
-Trajectory::resolutionRate_	trajectory.h	/^    unsigned int                        resolutionRate_;  \/\/The resolution rate is specified in Hz$/;"	m	class:Trajectory	access:public
+Trajectory::resolutionRate_	trajectory.h	/^    unsigned int                        resolutionRate_;  \/\/ The resolution rate is specified in Hz$/;"	m	class:Trajectory	access:public
 Trajectory::segments_	trajectory.h	/^    std::vector<Segment>                segments_;$/;"	m	class:Trajectory	access:public
+Trajectory::stop_points_	trajectory.h	/^    std::vector<unsigned int>           stop_points_;$/;"	m	class:Trajectory	access:public
+Trajectory::stop_times_	trajectory.h	/^    std::vector<float>                  stop_times_;$/;"	m	class:Trajectory	access:public
 Trajectory::toString	trajectory.cpp	/^const std::string Trajectory::toString() const {$/;"	f	class:Trajectory	signature:() const
 Trajectory::toString	trajectory.h	/^    const std::string toString() const;$/;"	p	class:Trajectory	access:public	signature:() const
 Trajectory::u	trajectory.h	/^    Utility u;$/;"	m	class:Trajectory	access:private
@@ -89,14 +91,14 @@ UTILITY_H	utility.h	2;"	d
 Utility	utility.h	/^class Utility {$/;"	c
 Utility::displaceAngle	utility.cpp	/^const float Utility::displaceAngle(const float a1, float a2) const {$/;"	f	class:Utility	signature:(const float a1, float a2) const
 Utility::displaceAngle	utility.h	/^    const float displaceAngle(const float a1, float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, float a2) const
-Utility::euclideanDistance	utility.cpp	/^const float Utility::euclideanDistance(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
-Utility::euclideanDistance	utility.h	/^    const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 Utility::findAngleFromAToB	utility.cpp	/^const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
 Utility::findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 Utility::findDistanceBetweenAngles	utility.cpp	/^const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {$/;"	f	class:Utility	signature:(const float a1, const float a2) const
 Utility::findDistanceBetweenAngles	utility.h	/^    const float findDistanceBetweenAngles(const float a1, const float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, const float a2) const
 Utility::getEuclideanDist	utility.cpp	/^const float Utility::getEuclideanDist(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
 Utility::getEuclideanDist	utility.h	/^    const float getEuclideanDist(const std::vector<float> a, std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, std::vector<float> b) const
+Utility::positionDistance	utility.cpp	/^const float Utility::positionDistance(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::positionDistance	utility.h	/^    const float positionDistance(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 Utility::toString	utility.cpp	/^const std::string Utility::toString(const geometry_msgs::Pose2D p) const {$/;"	f	class:Utility	signature:(const geometry_msgs::Pose2D p) const
 Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
 Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
@@ -121,8 +123,6 @@ calculateMinTime	segment.h	/^    const void calculateMinTime();$/;"	p	class:Segm
 displaceAngle	utility.cpp	/^const float Utility::displaceAngle(const float a1, float a2) const {$/;"	f	class:Utility	signature:(const float a1, float a2) const
 displaceAngle	utility.h	/^    const float displaceAngle(const float a1, float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, float a2) const
 end_	segment.h	/^    MotionState end_;$/;"	m	class:Segment	access:public
-euclideanDistance	utility.cpp	/^const float Utility::euclideanDistance(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
-euclideanDistance	utility.h	/^    const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 findAngleFromAToB	utility.cpp	/^const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
 findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 findDistanceBetweenAngles	utility.cpp	/^const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {$/;"	f	class:Utility	signature:(const float a1, const float a2) const
@@ -131,7 +131,7 @@ generate	trajectory.cpp	/^const std::vector<MotionState> Trajectory::generate() 
 generate	trajectory.h	/^    const std::vector<MotionState> generate();$/;"	p	class:Trajectory	access:public	signature:()
 getEuclideanDist	utility.cpp	/^const float Utility::getEuclideanDist(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
 getEuclideanDist	utility.h	/^    const float getEuclideanDist(const std::vector<float> a, std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, std::vector<float> b) const
-getMotionState	trajectory.cpp	/^const MotionState Trajectory::getMotionState(const unsigned int ind_segment, const float t) {$/;"	f	class:Trajectory	signature:(const unsigned int ind_segment, const float t)
+getMotionState	trajectory.cpp	/^const MotionState Trajectory::getMotionState(const unsigned int i_segment, const float t) {$/;"	f	class:Trajectory	signature:(const unsigned int i_segment, const float t)
 getMotionState	trajectory.h	/^    const MotionState getMotionState(const unsigned int ind_segment, const float t);$/;"	p	class:Trajectory	access:private	signature:(const unsigned int ind_segment, const float t)
 handleRequest	main.cpp	/^bool handleRequest(ramp_msgs::TrajectoryRequest::Request& req, $/;"	f	signature:(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res)
 index_	segment.h	/^    int index_; $/;"	m	class:Segment	access:public
@@ -143,13 +143,17 @@ max_v_	segment.h	/^    std::vector<float> max_v_;$/;"	m	class:Segment	access:pri
 p_	motion_state.h	/^    std::vector<float> p_;$/;"	m	class:MotionState	access:public
 plan_post	segment.h	/^    bool plan_post;$/;"	m	class:Segment	access:public
 points_	trajectory.h	/^    std::vector<MotionState>            points_;$/;"	m	class:Trajectory	access:public
+positionDistance	utility.cpp	/^const float Utility::positionDistance(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+positionDistance	utility.h	/^    const float positionDistance(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 post_angle	segment.h	/^    float post_angle;$/;"	m	class:Segment	access:public
 post_angle_dist	segment.h	/^    float post_angle_dist;$/;"	m	class:Segment	access:public
 pre_angle	segment.h	/^    float pre_angle;$/;"	m	class:Segment	access:public
 pre_angle_dist	segment.h	/^    float pre_angle_dist;$/;"	m	class:Segment	access:public
-resolutionRate_	trajectory.h	/^    unsigned int                        resolutionRate_;  \/\/The resolution rate is specified in Hz$/;"	m	class:Trajectory	access:public
+resolutionRate_	trajectory.h	/^    unsigned int                        resolutionRate_;  \/\/ The resolution rate is specified in Hz$/;"	m	class:Trajectory	access:public
 segments_	trajectory.h	/^    std::vector<Segment>                segments_;$/;"	m	class:Trajectory	access:public
 start_	segment.h	/^    MotionState start_;$/;"	m	class:Segment	access:public
+stop_points_	trajectory.h	/^    std::vector<unsigned int>           stop_points_;$/;"	m	class:Trajectory	access:public
+stop_times_	trajectory.h	/^    std::vector<float>                  stop_times_;$/;"	m	class:Trajectory	access:public
 toString	motion_state.cpp	/^const std::string MotionState::toString() const {$/;"	f	class:MotionState	signature:() const
 toString	motion_state.h	/^    const std::string toString() const;$/;"	p	class:MotionState	access:public	signature:() const
 toString	segment.cpp	/^const std::string Segment::toString() const {$/;"	f	class:Segment	signature:() const

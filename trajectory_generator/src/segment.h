@@ -35,9 +35,8 @@ class Segment {
     float v_start_;
     float v_end_;
 
-    // Minimum time required to execute the segment
-    // This value may need to change to a float in the future
-    //std::vector<unsigned int> T_;
+    // Minimum times required to execute the segment
+    // These values may need to change to float in the future
     unsigned int T_min_;
     unsigned int T_loc_;
     int T_rotate_pre_;

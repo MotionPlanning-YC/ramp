@@ -13,15 +13,17 @@ class Trajectory {
     Trajectory(const ramp_msgs::TrajectoryRequest::Request trajec_req);
     ~Trajectory();
 
-    //Data Members
+    // Data Members
     std::vector<geometry_msgs::Pose2D>  knot_points_;
     std::vector<Segment>                segments_;
     std::vector<MotionState>            points_;
     std::vector<float>                  v_start_;
     std::vector<float>                  v_end_;
-    unsigned int                        resolutionRate_;  //The resolution rate is specified in Hz
+    std::vector<unsigned int>           stop_points_;
+    std::vector<unsigned int>           stop_times_;
+    unsigned int                        resolutionRate_;  // The resolution rate is specified in Hz
 
-    //Methods
+    // Methods
     const std::vector<MotionState> generate();
     const ramp_msgs::Trajectory buildTrajectoryMsg() const;
     const std::string toString() const;

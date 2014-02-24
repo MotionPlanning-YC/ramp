@@ -16,6 +16,8 @@ class Path {
     Configuration start_;
     Configuration goal_;
     std::vector<Configuration> all_;
+    std::vector<unsigned int> stop_points_;
+    std::vector<unsigned int> stop_times_;
     
     //Methods
     void Add(const Configuration c);

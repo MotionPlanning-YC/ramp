@@ -21,6 +21,9 @@ Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request trajec_req) :
     v_end_.push_back(trajec_req.v_end.at(i));
   }
 
+  stop_points_ = trajec_req.path.stop_points;
+  stop_times_ = trajec_req.path.stop_times;
+
   resolutionRate_ = trajec_req.resolutionRate;
 }
 
@@ -53,12 +56,12 @@ void Trajectory::buildSegments() {
   * This method returns a MotionState given a segment ID and a time 
   * The method is passed a vector of dof's to compute 
   */
-const MotionState Trajectory::getMotionState(const unsigned int ind_segment, const float t) {
+const MotionState Trajectory::getMotionState(const unsigned int i_segment, const float t) {
   //std::cout<<"\nin Trajectory::getMotionState\n";
   
   MotionState result;
 
-  Segment segment = segments_.at(ind_segment);
+  Segment segment = segments_.at(i_segment);
   
   for(unsigned int i=0;i<k_dof_;i++) {
 
@@ -111,7 +114,7 @@ const MotionState Trajectory::getMotionState(const unsigned int ind_segment, con
   }
 
   return result;  
-} //End generate
+} //End getMotionState
 
 
 
@@ -121,6 +124,9 @@ const std::vector<MotionState> Trajectory::generate() {
 
   // Build the segments
   buildSegments();
+
+  // Track the index of stop_points
+  unsigned int next_stop = 0;
 
   // For each segment 
   for(unsigned int i=0;i<segments_.size();i++) { 
@@ -149,12 +155,39 @@ const std::vector<MotionState> Trajectory::generate() {
       
       // Get the motion state
       points_.push_back(getMotionState(i, t));
+    } // end for each clock cycle of the segment
 
-    } // end for each clock
+    std::cout<<"\nstop_points.at("<<next_stop<<"): "<<stop_points_.at(next_stop);
+
+
+
+    // *************Check if we should stop*************
+    if(stop_points_.size() > 0 && i+1 == stop_points_.at(next_stop)) {
+      std::cout<<"\nStopping at i: "<<i<<" stop_points.at("<<next_stop<<"): "<<stop_points_.at(next_stop);
+
+      // Get the number of points that will be stopped
+      unsigned int stop_t = stop_times_.at(next_stop) / (1.0 / resolutionRate_);
+      
+      // For each clock cycle to stop, generate stopped motion state
+      for(unsigned int clock=0;clock<stop_t;clock++ ) {
+        MotionState temp;
+        
+        // Previous position, 0 velocity and acceleration
+        for(unsigned int k=0;k<points_.at(points_.size()-1).p_.size();k++) {
+          temp.p_.push_back(points_.at(points_.size()-1).p_.at(k));
+          temp.v_.push_back(0);
+          temp.a_.push_back(0);
+        }
+
+        points_.push_back(temp);
+      } // end for each stopped point
+
+      next_stop++;
+    } //************* end if we should stop *************
   } // end for each segment
 
   return points_;
-}
+} //End generate
 
 
 

@@ -29,6 +29,9 @@ Path::Path(ramp_msgs::Path p) {
     Configuration c(p.configurations.at(i));
     all_.push_back(c);
   }
+
+  stop_points_ = p.stop_points;
+  stop_times_  = p.stop_times;
 }
 
 Path::~Path() {}
@@ -53,6 +56,9 @@ const ramp_msgs::Path Path::buildPathMsg() const {
     //Push the msg onto K
     result.configurations.push_back(c);
   }
+  
+  result.stop_points = stop_points_;
+  result.stop_times  = stop_times_;
 
   return result;
 }

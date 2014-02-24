@@ -306,30 +306,29 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
   //std::cout<<"\nIn modifyTrajec\n";
   std::vector<ModifiedTrajectory> result;
   
-  // First, randomly select an operator
-  unsigned int op = rand() % num_ops_;
 
   // The modification operators deal with paths
   // So send the path to be modified
-  std::vector<Path> mp = modifyPath();
-  
+  std::vector<Path> target_paths = modifyPath();
+
   // Hold the ids of the path(s) modified
   std::vector<int> olds;
   olds.push_back(modifier_->i_changed1);
 
   // If a crossover was performed, push on the 2nd path 
-  if(mp.size()>1) {
+  if(target_paths.size()>1) {
     olds.push_back(modifier_->i_changed2);
   }
 
   // Hold the new velocity vector(s)
-  std::vector< std::vector<float> > vs = getNewVelocities(mp, olds); 
+  std::vector< std::vector<float> > vs = getNewVelocities(target_paths, olds); 
+
   
-  // For each modified path,
-  for(unsigned int i=0;i<mp.size();i++) {
+  // For each targeted path,
+  for(unsigned int i=0;i<target_paths.size();i++) {
     
     // Build a TrajectoryRequestMsg
-    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(mp.at(i), vs.at(i), vs.at(i));
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(target_paths.at(i), vs.at(i), vs.at(i));
     
     // Send the request and set the result to the returned trajectory 
     if(requestTrajectory(tr)) {
@@ -359,9 +358,9 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
 const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e ) const {
   ramp_msgs::TrajectoryRequest result;
 
-  result.request.path = path.buildPathMsg();
-  result.request.v_start    = v_s;
-  result.request.v_end      = v_e;
+  result.request.path           = path.buildPathMsg();
+  result.request.v_start        = v_s;
+  result.request.v_end          = v_e;
   result.request.resolutionRate = resolutionRate_;
 
   return result;
@@ -372,9 +371,9 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
 const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const {
   ramp_msgs::TrajectoryRequest result;
 
-  result.request.path = paths_.at(i_path).buildPathMsg();
-  result.request.v_start    = v_s;
-  result.request.v_end      = v_e;
+  result.request.path           = paths_.at(i_path).buildPathMsg();
+  result.request.v_start        = v_s;
+  result.request.v_end          = v_e;
   result.request.resolutionRate = resolutionRate_;
   
   return result; 

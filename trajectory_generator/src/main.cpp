@@ -31,12 +31,12 @@ int main(int argc, char** argv) {
   ramp_msgs::Configuration c1;
   c1.K.push_back(3);
   c1.K.push_back(0);
-  c1.K.push_back(PI/4);
+  c1.K.push_back(PI/2);
 
   ramp_msgs::Configuration c2;
   c2.K.push_back(3);
-  c2.K.push_back(0);
-  c2.K.push_back(PI/4);
+  c2.K.push_back(2);
+  c2.K.push_back(PI/2);
 
   /*ramp_msgs::Configuration c3;
   c3.K.push_back(3);
@@ -63,6 +63,8 @@ int main(int argc, char** argv) {
   p.configurations.push_back(c2);
   //p.configurations.push_back(c3);
   //p.configurations.push_back(c4);
+  p.stop_points.push_back(1);
+  p.stop_times.push_back(3);
   
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
@@ -75,11 +77,12 @@ int main(int argc, char** argv) {
   std::cout<<u.toString(tr.request);
   Trajectory traj(tr.request);
   std::cout<<"\nDone constructing\n";
+  std::cout<<"\ntraj.stop_points.size(): "<<traj.stop_points_.size();
   std::cout<<"\nGenerating Trajectory\n";
   traj.generate(); 
   tr.response.trajectory = traj.buildTrajectoryMsg();
   
-  std::cout<<"\n"<<u.toString(tr.response.trajectory);
+  std::cout<<"\nTrajectory: \n"<<u.toString(tr.response.trajectory);
 
   //ros::Publisher pub = handle.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000); 
   //std::cout<<"\nPress Enter to publish\n";

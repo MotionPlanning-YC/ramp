@@ -68,6 +68,11 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
     case 4:
       result.request.op = "crossover";
       break;
+
+    // Stop
+    case 5:
+      result.request.op = "stop";
+      break;
   }
 
   // Get random path(s) to modify
