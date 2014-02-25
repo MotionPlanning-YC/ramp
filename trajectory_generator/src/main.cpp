@@ -35,36 +35,38 @@ int main(int argc, char** argv) {
 
   ramp_msgs::Configuration c2;
   c2.K.push_back(3);
-  c2.K.push_back(2);
+  c2.K.push_back(1);
   c2.K.push_back(PI/2);
 
-  /*ramp_msgs::Configuration c3;
+  ramp_msgs::Configuration c3;
   c3.K.push_back(3);
-  c3.K.push_back(3);
-  c3.K.push_back(0);*/
+  c3.K.push_back(2);
+  c3.K.push_back(PI/2);
 
-  /*ramp_msgs::Configuration c4;
-  c4.K.push_back(5);
-  c4.K.push_back(0);
-  c4.K.push_back(-M_PI / 2);*/
+  ramp_msgs::Configuration c4;
+  c4.K.push_back(3);
+  c4.K.push_back(3);
+  c4.K.push_back(PI/2);
 
   std::vector<float> v_s;
   v_s.push_back(0.25);
-  //v_s.push_back(0.25);
-  //v_s.push_back(0.25);
+  v_s.push_back(0.25);
+  v_s.push_back(0.25);
 
   std::vector<float> v_g;
   v_g.push_back(0.25);
-  //v_g.push_back(0.25);
-  //v_g.push_back(0.25);
+  v_g.push_back(0.25);
+  v_g.push_back(0.25);
 
   ramp_msgs::Path p;
   p.configurations.push_back(c1);
   p.configurations.push_back(c2);
-  //p.configurations.push_back(c3);
-  //p.configurations.push_back(c4);
+  p.configurations.push_back(c3);
+  p.configurations.push_back(c4);
   p.stop_points.push_back(1);
-  p.stop_times.push_back(3);
+  p.stop_points.push_back(2);
+  p.stop_times.push_back(2);
+  p.stop_times.push_back(2);
   
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
@@ -84,12 +86,13 @@ int main(int argc, char** argv) {
   
   std::cout<<"\nTrajectory: \n"<<u.toString(tr.response.trajectory);
 
-  //ros::Publisher pub = handle.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000); 
-  //std::cout<<"\nPress Enter to publish\n";
-  //std::cin.get();
-  //pub.publish(tr.response.trajectory);
-  //
-  std::cout<<"\n"<<u.displaceAngle(PI/2, 3*PI/4);
+  ros::Publisher pub = handle.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000); 
+  std::cout<<"\nPress Enter to publish\n";
+  std::cin.get();
+  pub.publish(tr.response.trajectory);
+  
+
+  //std::cout<<"\n"<<u.displaceAngle(PI/2, 3*PI/4);
   
   std::cout<<"\nSpinning...\n";  
   ros::spin();

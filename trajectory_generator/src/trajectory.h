@@ -21,7 +21,7 @@ class Trajectory {
     std::vector<float>                  v_end_;
     std::vector<unsigned int>           stop_points_;
     std::vector<unsigned int>           stop_times_;
-    unsigned int                        resolutionRate_;  // The resolution rate is specified in Hz
+    unsigned int                        resolutionRate_;  // in Hz
 
     // Methods
     const std::vector<MotionState> generate();
@@ -33,6 +33,7 @@ class Trajectory {
     void  buildSegments();
     const MotionState getMotionState(const unsigned int ind_segment, const float t);
     Utility u;
+    const std::vector<MotionState> getStopStates(int i, unsigned int& next_stop);
     const unsigned int k_dof_;
 };
 

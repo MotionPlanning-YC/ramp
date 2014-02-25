@@ -153,7 +153,6 @@ int main(int argc, char** argv) {
   //while(ros::ok()) {ros::spinOnce();}
   
   
-  
 
   /******* Start the planner *******/
   std::cout<<"\nPress Enter to start the planner\n";

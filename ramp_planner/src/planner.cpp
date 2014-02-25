@@ -11,7 +11,7 @@ Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_t
   planningCycle_ = ros::Duration(0.1);
 }
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4)
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);

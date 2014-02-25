@@ -34,10 +34,11 @@ void Modifier::update(const Path p, const unsigned int i) {
   paths_.at(i) = p;
 }
 
-/** This method builds a ModificationRequest srv */
-const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
-  ramp_msgs::ModificationRequest result;
 
+/** This method returns a random operator */
+const std::string Modifier::getOperator() const {
+  std::string result;  
+  
   // First, randomly select an operator
   unsigned int op = rand() % num_ops;
 
@@ -46,69 +47,99 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
 
     // Insert
     case 0:
-      result.request.op = "insert";
+      result = "insert";
       break;
 
     // Delete
     case 1:
-      result.request.op = "delete";
+      result = "delete";
       break;
 
     // Change
     case 2:
-      result.request.op = "change";
+      result = "change";
       break;
 
     // Swap
     case 3:
-      result.request.op = "swap";
+      result = "swap";
       break;
 
     // Crossover
     case 4:
-      result.request.op = "crossover";
+      result = "crossover";
       break;
 
     // Stop
     case 5:
-      result.request.op = "stop";
+      result = "stop";
       break;
   }
+
+  return result;
+} // End getOperator
+
+
+/** This method generates the random paths to use for the modification operator passed in as op argument */
+const std::vector<int> Modifier::getTargets(const std::string op) {
+  std::vector<int> result;
 
   // Get random path(s) to modify
   unsigned int i_p1;
   i_p1 = rand() % paths_.size();
-  // std::cout<<"\ni_p1: "<<i_p1;
-
-  // Push the path to change onto the result
-  result.request.paths.push_back(paths_.at(i_p1).buildPathMsg());
 
   // Set i_changed1
   i_changed1 = i_p1;
+  
+  // Push on i_p1
+  result.push_back(i_p1);
 
   // If crossover, get a second path
-  if(op == 4) {
+  if(op == "crossover") {
     unsigned int i_p2;
     do { i_p2 = rand() % paths_.size(); } 
     while (i_p1 == i_p2);
 
-    // push the path to change onto the result
-    result.request.paths.push_back(paths_.at(i_p2).buildPathMsg());
-
     // Set i_changed2
     i_changed2 = i_p2;
+  
+    // Push on i_p1
+    result.push_back(i_p2);
+  } // end if crossover 
+  // Else, no second path  
+  else {i_changed2 = -1;}
 
-    // std::cout<<"\ni_p2: "<<i_p2;
-  }
-  else {
-    i_changed2 = -1;
+
+  return result;
+} // End getTargets
+
+
+/** 
+ * This method builds a ModificationRequest srv 
+ * For stop operator, the path can be retreived from srv
+ * */
+const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
+  ramp_msgs::ModificationRequest result;
+
+  result.request.op = getOperator();
+  std::cout<<"\nOperator: "<<result.request.op;
+
+  std::vector<int> targets = getTargets(result.request.op);
+  for(unsigned int i=0;i<targets.size();i++) {
+    std::cout<<"\nTarget id: "<<targets.at(i);
+    result.request.paths.push_back(paths_.at(targets.at(i)).buildPathMsg());
   }
 
   return result;
+} // End buildModificationRequest
+
+
+
+const Path Modifier::stop(Path p) {
+  int i = getTargets("stop").at(0);
+  // Maximum of 4 seconds to stop
+  int time = (rand() % 4) + 1;
 }
-
-
-
 
 
 
@@ -119,18 +150,27 @@ const std::vector<Path> Modifier::perform() {
   // Build a modification request srv 
   ramp_msgs::ModificationRequest mr = buildModificationRequest(); 
 
-  // If the request was successful
-  if(h_mod_req_->request(mr)) {
+  // Check if the operation changes the path
+  if(mr.request.op == "stop") {
+    //result.push_back(stop(mr.request.mod_paths.at(0)));
+  }
 
-    // Push on the modified paths
-    for(unsigned int i=0;i<mr.response.mod_paths.size();i++) {
-      Path temp(mr.response.mod_paths.at(i));
-      result.push_back(temp);
-    }
-  }
   else {
-    // some error handling
-  }
+
+    // If the request was successful
+    if(h_mod_req_->request(mr)) {
+
+      // Push on the modified paths
+      for(unsigned int i=0;i<mr.response.mod_paths.size();i++) {
+        Path temp(mr.response.mod_paths.at(i));
+        result.push_back(temp);
+      }
+    }
+    else {
+      // some error handling
+    }
+  } // end if operator != stop
+
 
   return result;
 }
