@@ -143,9 +143,11 @@ const Path Modifier::stop(Path p) {
   // Maximum of 4 seconds to stop
   int time = (rand() % 4) + 1;
 
+  p.all_.at(i_point).stop_time_ = time;
+
   // Push on the values to stop_points and stop_times
-  p.stop_points_.push_back(i_point);
-  p.stop_times_.push_back(time);
+  //p.stop_points_.push_back(i_point);
+  //p.stop_times_.push_back(time);
 
   return p;
 }

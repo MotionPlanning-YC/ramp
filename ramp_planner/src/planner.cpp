@@ -191,7 +191,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   // old configuration is the new start_ configuration
   // new orientation is the amount to rotate towards first knot point
   //float b = u.findAngleFromAToB(start_.K_, bestTrajec_.getPath().all_.at(1).K_);
-  float b = u.findAngleFromAToB(start_.K_, bestTrajec_.path_.all_.at(1).K_);
+  float b = u.findAngleFromAToB(start_.K_, bestTrajec_.path_.all_.at(1).configuration_.K_);
   float diff = u.findDistanceBetweenAngles(start_.K_.at(2), b);
   if(fabs(diff) <= 0.3) {
     gradualTrajectory(bestTrajec_);

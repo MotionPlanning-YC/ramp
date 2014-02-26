@@ -60,20 +60,22 @@ int main(int argc, char** argv) {
   r.min=0;
   r.max=10;
   for(unsigned int i=0;i<10;i++) {
-    ramp_msgs::Configuration c;
-    c.K.push_back(i);
-    c.ranges.push_back(r); 
-    p1.configurations.push_back(c);
+    ramp_msgs::KnotPoint kp;
+    kp.configuration.K.push_back(i);
+    kp.configuration.ranges.push_back(r); 
+
+    p1.points.push_back(kp);
   }
   
   std::cout<<"\nPath p1:"<<u.toString(p1);
 
   ramp_msgs::Path p2;
   for(unsigned int i=5;i>0;i--) {
-    ramp_msgs::Configuration c;
-    c.K.push_back(i);
-    c.ranges.push_back(r); 
-    p2.configurations.push_back(c);
+    ramp_msgs::KnotPoint kp;
+    kp.configuration.K.push_back(i);
+    kp.configuration.ranges.push_back(r); 
+
+    p2.points.push_back(kp);
   }
   
   std::cout<<"\nPath p2:"<<u.toString(p2);

@@ -22,7 +22,6 @@ class Modifier {
     // Data members
     std::vector<Path> paths_;
     std::vector< std::vector<float> > velocities_;
-    std::vector< std::vector<float> > new_velocities_;
     int i_changed1;
     int i_changed2;
 

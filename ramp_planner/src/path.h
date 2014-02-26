@@ -1,26 +1,25 @@
 #ifndef PATH_H
 #define PATH_H
-#include "configuration.h"
+#include "knot_point.h"
 #include "ramp_msgs/Path.h"
 
 class Path {
   public:
 
     Path();
-    Path(Configuration start, Configuration goal);
-    Path(std::vector<Configuration> all);
+    Path(KnotPoint start, KnotPoint goal);
+    Path(std::vector<KnotPoint> all);
     Path(ramp_msgs::Path p);
     ~Path();
     
     //Data members
-    Configuration start_;
-    Configuration goal_;
-    std::vector<Configuration> all_;
-    std::vector<unsigned int> stop_points_;
-    std::vector<unsigned int> stop_times_;
+    KnotPoint start_;
+    KnotPoint goal_;
+    std::vector<KnotPoint> all_;
     
     //Methods
     void Add(const Configuration c);
+    void Add(const KnotPoint kp);
     const unsigned int size() const;
     const ramp_msgs::Path buildPathMsg() const; 
     const std::string toString() const;

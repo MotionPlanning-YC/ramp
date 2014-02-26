@@ -9,8 +9,9 @@ const ramp_msgs::Path Insert::perform() {
   // Randomly choose the two adjacent knot points
   // One index is generated randomly and the second will be the next knot point,
   // unless the generated index is the last knot point index
-  unsigned int i_knotPoint1 = rand() % path_.configurations.size(); 
-  unsigned int i_knotPoint2 = (i_knotPoint1 == path_.configurations.size()-1) ? i_knotPoint1-1 : i_knotPoint1+1;
+  // New knot point will be between those two knot points
+  unsigned int i_knotPoint1 = rand() % path_.points.size(); 
+  unsigned int i_knotPoint2 = (i_knotPoint1 == path_.points.size()-1) ? i_knotPoint1-1 : i_knotPoint1+1;
 
   // If the last index was chosen, swap the values so i_knotPoint1 < i_knotPoint2
   // this just makes it simpler 
@@ -21,22 +22,22 @@ const ramp_msgs::Path Insert::perform() {
   }
 
   // Generate a new, random configuration
-  ramp_msgs::Configuration c;
-  for(unsigned int i=0;i<path_.configurations.at(0).K.size();i++) {
+  ramp_msgs::KnotPoint kp;
+  for(unsigned int i=0;i<path_.points.at(0).configuration.K.size();i++) {
     
     // Generate a random value for each K in the specified range
-    double min = path_.configurations.at(0).ranges.at(i).min;
-    double max = path_.configurations.at(0).ranges.at(i).max;
+    double min = path_.points.at(0).configuration.ranges.at(i).min;
+    double max = path_.points.at(0).configuration.ranges.at(i).max;
     
     float temp = (min == 0 && max == 0) ? 0 :      
            ( min + (float)rand() / ((float)RAND_MAX / (max - min)) );
 
-    c.K.push_back(temp);
-    c.ranges.push_back(path_.configurations.at(0).ranges.at(i));
+    kp.configuration.K.push_back(temp);
+    kp.configuration.ranges.push_back(path_.points.at(0).configuration.ranges.at(i));
   }
 
   // Insert the configuration 
-  path_.configurations.insert(path_.configurations.begin()+i_knotPoint2, c);
+  path_.points.insert(path_.points.begin()+i_knotPoint2, kp);
   
  return path_; 
 }

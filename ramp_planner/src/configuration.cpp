@@ -4,8 +4,6 @@
 Configuration::Configuration() : mobile_base_k_(2) {}
 
 Configuration::Configuration(ramp_msgs::Configuration c) : mobile_base_k_(2) {
-  //std::cout<<"\nc.K.size(): "<<c.K.size();
-  //std::cout<<"\nc.ranges.size(): "<<c.ranges.size()<<"\n";
   
   for(unsigned int i=0;i<c.K.size();i++) {
     K_.push_back(c.K.at(i));
