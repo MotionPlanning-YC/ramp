@@ -122,11 +122,10 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
   ramp_msgs::ModificationRequest result;
 
   result.request.op = getOperator();
-  std::cout<<"\nOperator: "<<result.request.op;
 
+  // Push the target paths onto the modification request
   std::vector<int> targets = getTargets(result.request.op);
   for(unsigned int i=0;i<targets.size();i++) {
-    std::cout<<"\nTarget id: "<<targets.at(i);
     result.request.paths.push_back(paths_.at(targets.at(i)).buildPathMsg());
   }
 
@@ -136,9 +135,19 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
 
 
 const Path Modifier::stop(Path p) {
-  int i = getTargets("stop").at(0);
+  // p was the random path chosen
+  
+  // Randomly choose a point in p
+  int i_point = rand() % (p.size()-1);
+
   // Maximum of 4 seconds to stop
   int time = (rand() % 4) + 1;
+
+  // Push on the values to stop_points and stop_times
+  p.stop_points_.push_back(i_point);
+  p.stop_times_.push_back(time);
+
+  return p;
 }
 
 
@@ -152,7 +161,9 @@ const std::vector<Path> Modifier::perform() {
 
   // Check if the operation changes the path
   if(mr.request.op == "stop") {
-    //result.push_back(stop(mr.request.mod_paths.at(0)));
+    // Call stop with the path chosen by buildModificationRequest
+    Path temp = stop(mr.request.paths.at(0));
+    result.push_back(temp);
   }
 
   else {
@@ -165,9 +176,6 @@ const std::vector<Path> Modifier::perform() {
         Path temp(mr.response.mod_paths.at(i));
         result.push_back(temp);
       }
-    }
-    else {
-      // some error handling
     }
   } // end if operator != stop
 

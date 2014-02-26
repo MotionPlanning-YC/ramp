@@ -23,6 +23,10 @@ Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request trajec_req) :
 
   stop_points_ = trajec_req.path.stop_points;
   stop_times_ = trajec_req.path.stop_times;
+  for(unsigned int i=0;i<stop_points_.size();i++) {
+    std::cout<<"\nstop_points["<<i<<"]: "<<stop_points_.at(i);
+    std::cout<<"\nstop_times["<<i<<"]: "<<stop_times_.at(i)<<"\n";
+  }
 
   resolutionRate_ = trajec_req.resolutionRate;
 }
@@ -119,10 +123,11 @@ const MotionState Trajectory::getMotionState(const unsigned int i_segment, const
 
 
 const std::vector<MotionState> Trajectory::getStopStates(int i, unsigned int& next_stop) {
+  //std::cout<<"\nIn getStopStates, i: "<<i<<" next_stop: "<<next_stop<<"\n";
   std::vector<MotionState> result;
   
   // If we should stop at knot point i
-  if(stop_points_.size() > 0 && i <= stop_points_.size() && i == stop_points_.at(next_stop)) {
+  if(next_stop < stop_points_.size() && i == stop_points_.at(next_stop)) {
 
     // Get the number of points that will be stopped
     unsigned int stop_t = stop_times_.at(next_stop) / (1.0 / resolutionRate_);
@@ -133,9 +138,7 @@ const std::vector<MotionState> Trajectory::getStopStates(int i, unsigned int& ne
       
       // Previous position, 0 velocity and acceleration
       for(unsigned int k=0;k<3;k++) {
-        std::cout<<"\nk: "<<k<<"\n";
         temp.p_.push_back(points_.at(points_.size()-1).p_.at(k));
-        std::cout<<"\nAfter temp.p_ push_back\n";
         temp.v_.push_back(0);
         temp.a_.push_back(0);
       }
@@ -163,7 +166,6 @@ const std::vector<MotionState> Trajectory::generate() {
 
   // For each segment 
   for(unsigned int i=0;i<segments_.size();i++) { 
-    std::cout<<"\ni: "<<i;
 
     // Create the Segment object
     Segment segment = segments_.at(i);
@@ -210,6 +212,9 @@ const std::vector<MotionState> Trajectory::generate() {
 
           // Push the first point back on after the stopped states
           points_.push_back(temp);
+
+          // Also, adjust T_min for the segment
+          segment.T_min_ += stop_times_.at(next_stop-1);
         } // end if stop
       } // end if first point
     } // end for each clock cycle of the segment

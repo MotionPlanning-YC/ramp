@@ -1,4 +1,4 @@
-Path path
+ramp_msgs/Path path
 float32[] v_start
 float32[] v_end
 uint8 resolutionRate

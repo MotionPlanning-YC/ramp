@@ -7,7 +7,7 @@ Utility u;
 bool handleRequest(ramp_msgs::TrajectoryRequest::Request& req, 
                    ramp_msgs::TrajectoryRequest::Response& res) 
 {
-  //std::cout<<"\nRequest received:"<<u.toString(req)<<"\n";
+  std::cout<<"\nRequest received:"<<u.toString(req)<<"\n";
   
   Trajectory traj(req);
   traj.generate(); 
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
   p.configurations.push_back(c2);
   p.configurations.push_back(c3);
   p.configurations.push_back(c4);
-  p.stop_points.push_back(1);
+  p.stop_points.push_back(0);
   p.stop_points.push_back(2);
   p.stop_times.push_back(2);
   p.stop_times.push_back(2);
@@ -86,10 +86,10 @@ int main(int argc, char** argv) {
   
   std::cout<<"\nTrajectory: \n"<<u.toString(tr.response.trajectory);
 
-  ros::Publisher pub = handle.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000); 
+  /*ros::Publisher pub = handle.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000); 
   std::cout<<"\nPress Enter to publish\n";
   std::cin.get();
-  pub.publish(tr.response.trajectory);
+  pub.publish(tr.response.trajectory);*/
   
 
   //std::cout<<"\n"<<u.displaceAngle(PI/2, 3*PI/4);

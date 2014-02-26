@@ -126,6 +126,11 @@ const std::string Utility::toString(const ramp_msgs::Path path) const {
 
   }
 
+  result<<"\n  Stop points: ";
+  for(unsigned int i=0;i<path.stop_points.size();i++) {
+    result<<path.stop_points.at(i)<<" ("<<path.stop_times.at(i)<<"s) ";
+  }
+
   return result.str();
 }
 

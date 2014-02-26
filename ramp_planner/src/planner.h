@@ -128,8 +128,18 @@ class Planner {
     void updateCallback(const ramp_msgs::Update::ConstPtr& msg);
 
 
+    // Adjust the trajectory so that the robot does not
+    // completely stop to change to it
     void gradualTrajectory(RampTrajectory& t);
 
+    
+    const std::string pathsToString() const;
+
+    // Modifier_ communicates with the path_modification package
+    Modifier* modifier_;
+
+    // Modification procedure
+    void modification();
   
   private:
     /** These are (mostly) utility members that are only used by Planner and should not be used by other classes*/
@@ -139,9 +149,6 @@ class Planner {
 
     // This gets the new velocities for path segments after a path has been updated
     const std::vector< std::vector<float> > getNewVelocities(std::vector<Path> new_path, std::vector<int> i_old);
-
-    // Modification procedure
-    void modification();
     
     // Updates the paths in P(t) so we can get new trajectories
     void updatePaths(Configuration start, ros::Duration dur);
@@ -174,9 +181,6 @@ class Planner {
     TrajectoryRequestHandler*   h_traj_req_;
     ControlHandler*             h_control_;
     EvaluationRequestHandler*   h_eval_req_;
-
-    // Modifier_ communicates with the path_modification package
-    Modifier* modifier_;
 
     float goalThreshold_;
 

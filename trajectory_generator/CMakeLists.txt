@@ -9,9 +9,6 @@ find_package(catkin REQUIRED COMPONENTS geometry_msgs message_generation ramp_ms
 #######################################
 
 
-# Generate srv files
-#generate_messages(DEPENDENCIES ramp_msgs)
-
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}

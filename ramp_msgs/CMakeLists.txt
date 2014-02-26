@@ -15,7 +15,7 @@ add_message_files(FILES Configuration.msg Path.msg Range.msg Trajectory.msg Upda
 add_service_files(FILES EvaluationRequest.srv ModificationRequest.srv TrajectoryRequest.srv)
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(DEPENDENCIES nav_msgs std_msgs trajectory_msgs)
+generate_messages(DEPENDENCIES nav_msgs std_msgs trajectory_msgs ramp_msgs)
 
 catkin_package(CATKIN_DEPENDS message_runtime nav_msgs std_msgs trajectory_msgs)
 

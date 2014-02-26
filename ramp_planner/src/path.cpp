@@ -41,6 +41,7 @@ void Path::Add(const Configuration c) {
   all_.insert(all_.end()-1, c); 
 }
 
+
 const unsigned int Path::size() const { return all_.size(); }
 
 
@@ -66,9 +67,13 @@ const ramp_msgs::Path Path::buildPathMsg() const {
 const std::string Path::toString() const {
   std::ostringstream result;
 
-  result<<"\nPath:";
+  result<<"Path:";
   for(unsigned int i=0;i<all_.size();i++) {
     result<<"\n  "<<i<<": "<<all_.at(i).toString();
+  }
+  result<<"\n  Stop points: ";
+  for(unsigned int i=0;i<stop_points_.size();i++) {
+    result<<stop_points_.at(i)<<" ("<<stop_times_.at(i)<<"s), ";
   }
   
   return result.str();

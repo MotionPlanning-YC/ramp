@@ -17,6 +17,7 @@ class RampTrajectory {
     bool feasible_;
     unsigned int id_;
     float time_until_collision_;
+    Path path_;
 
     const bool equal(const RampTrajectory& other) const;
     const Path getPath() const;

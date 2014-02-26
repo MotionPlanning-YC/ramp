@@ -5,19 +5,19 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6)
+Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(5)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
 }
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6)
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(5)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(5)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
@@ -190,7 +190,8 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   // Find orientation difference between old and new T_move
   // old configuration is the new start_ configuration
   // new orientation is the amount to rotate towards first knot point
-  float b = u.findAngleFromAToB(start_.K_, bestTrajec_.getPath().all_.at(1).K_);
+  //float b = u.findAngleFromAToB(start_.K_, bestTrajec_.getPath().all_.at(1).K_);
+  float b = u.findAngleFromAToB(start_.K_, bestTrajec_.path_.all_.at(1).K_);
   float diff = u.findDistanceBetweenAngles(start_.K_.at(2), b);
   if(fabs(diff) <= 0.3) {
     gradualTrajectory(bestTrajec_);
@@ -251,6 +252,9 @@ void Planner::init_population() {
       
       // Set the Trajectory msg
       temp.msg_trajec_ = msg_request.response.trajectory;
+
+      // Set trajectory path
+      temp.path_ = paths_.at(i);
       
       // Add the trajectory to the population
       population_.add(temp);
@@ -309,31 +313,32 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
 
   // The modification operators deal with paths
   // So send the path to be modified
-  std::vector<Path> target_paths = modifyPath();
+  std::vector<Path> modded_paths = modifyPath();
 
   // Hold the ids of the path(s) modified
   std::vector<int> olds;
   olds.push_back(modifier_->i_changed1);
 
   // If a crossover was performed, push on the 2nd path 
-  if(target_paths.size()>1) {
+  if(modded_paths.size()>1) {
     olds.push_back(modifier_->i_changed2);
   }
 
   // Hold the new velocity vector(s)
-  std::vector< std::vector<float> > vs = getNewVelocities(target_paths, olds); 
+  std::vector< std::vector<float> > vs = getNewVelocities(modded_paths, olds); 
 
   
   // For each targeted path,
-  for(unsigned int i=0;i<target_paths.size();i++) {
+  for(unsigned int i=0;i<modded_paths.size();i++) {
     
     // Build a TrajectoryRequestMsg
-    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(target_paths.at(i), vs.at(i), vs.at(i));
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(modded_paths.at(i), vs.at(i), vs.at(i));
     
     // Send the request and set the result to the returned trajectory 
     if(requestTrajectory(tr)) {
       RampTrajectory temp(getIRT());
       temp.msg_trajec_ = tr.response.trajectory;
+      temp.path_ = modded_paths.at(i);
 
       ModifiedTrajectory mt;
       mt.trajec_ = temp;
@@ -439,7 +444,10 @@ void Planner::sendPopulation() {
 
 
 
-/** This method returns the new velocity vector(s) for the modified path(s) */
+/** 
+ * This method returns the new velocity vector(s) for the modified path(s) 
+ * This is called at each control cycle to update the trajectories
+ * */
 const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Path> new_paths, std::vector<int> i_old) {
   //std::cout<<"\nIn getNewVelocities\n";
 
@@ -519,7 +527,7 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
 
 /** Modification procedure will modify 1-2 random trajectories,
  *  add the new trajectories, evaluate the new trajectories,
- *  and set tau to the new best, */
+ *  and set tau to the new best */
 void Planner::modification() {
   //std::cout<<"\nIn modification\n";
 
@@ -538,7 +546,7 @@ void Planner::modification() {
     int index = population_.add(mod_trajec.at(i).trajec_);
 
     // Update the path and velocities in the planner 
-    paths_.at(index)      = mod_trajec.at(i).trajec_.getPath();
+    paths_.at(index)      = mod_trajec.at(i).trajec_.path_;
     velocities_.at(index) = mod_trajec.at(i).velocities_;
     
     // Update the path and velocities in the modifier 
@@ -676,6 +684,19 @@ void Planner::updatePopulation(ros::Duration d) {
 const RampTrajectory Planner::evaluateAndObtainBest() {
   evaluatePopulation();
   return population_.findBest();
+}
+
+
+
+const std::string Planner::pathsToString() const {
+  std::ostringstream result;
+
+  result<<"\nPaths:";
+  for(unsigned int i=0;i<paths_.size();i++) {
+    result<<"\n  "<<paths_.at(i).toString();
+  }
+  result<<"\n";
+  return result.str();
 }
 
 

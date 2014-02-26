@@ -152,6 +152,17 @@ int main(int argc, char** argv) {
   // Don't start planner, just wait for updates
   //while(ros::ok()) {ros::spinOnce();}
   
+  /*my_planner.init_population();
+  my_planner.modifier_->paths_ = my_planner.paths_;
+  while(ros::ok()) {
+    std::cout<<"\n*****Before Modification*****";
+    std::cout<<"\n"<<my_planner.pathsToString();  
+    my_planner.modification();
+    std::cout<<"\n*****After Modification*****";
+    std::cout<<"\n"<<my_planner.pathsToString();  
+    std::cin.get();
+  }*/
+
   
 
   /******* Start the planner *******/
