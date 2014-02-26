@@ -1,0 +1,2 @@
+ramp_msgs/Configuration configuration
+uint32 stop_time
