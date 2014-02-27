@@ -67,7 +67,6 @@ const RampTrajectory Population::findBest() {
   // Set i_best
   i_best = i_max;
 
-  //std::cout<<"\ni_best: "<<i_best<<"\n";
   return population_.at(i_best); 
 } //End getBest 
 

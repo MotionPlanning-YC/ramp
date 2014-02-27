@@ -5,19 +5,19 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(5)
+Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
 }
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(5)
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(5)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
@@ -124,6 +124,7 @@ void Planner::init(const ros::NodeHandle& h) {
 }
 
 void Planner::planningCycleCallback(const ros::TimerEvent& t) {
+  //std::cout<<"\ngeneration: "<<generation_<<"\n";
   
   // Wait until mutex can be obtained
   while(!mutex_pop_) {}
@@ -190,7 +191,6 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   // Find orientation difference between old and new T_move
   // old configuration is the new start_ configuration
   // new orientation is the amount to rotate towards first knot point
-  //float b = u.findAngleFromAToB(start_.K_, bestTrajec_.getPath().all_.at(1).K_);
   float b = u.findAngleFromAToB(start_.K_, bestTrajec_.path_.all_.at(1).configuration_.K_);
   float diff = u.findDistanceBetweenAngles(start_.K_.at(2), b);
   if(fabs(diff) <= 0.3) {
@@ -348,7 +348,6 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
     }
   }
   
-  // std::cout<<"\nReturning result size:"<<result.size();
   return result;
 } // End modifyTrajectory
 
@@ -529,7 +528,6 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
  *  add the new trajectories, evaluate the new trajectories,
  *  and set tau to the new best */
 void Planner::modification() {
-  //std::cout<<"\nIn modification\n";
 
   // Modify 1 or more trajectories
   std::vector<ModifiedTrajectory> mod_trajec = modifyTrajec();
@@ -571,9 +569,9 @@ void Planner::evaluateTrajectory(RampTrajectory& trajec) {
   if(requestEvaluation(er)) {
     trajec.fitness_   = er.response.fitness;
     trajec.feasible_  = er.response.feasible;
-    trajec.msg_trajec_.fitness = trajec.fitness_;
-    trajec.msg_trajec_.feasible = trajec.feasible_;
-    trajec.time_until_collision_ = er.response.time_until_collision;
+    trajec.msg_trajec_.fitness    = trajec.fitness_;
+    trajec.msg_trajec_.feasible   = trajec.feasible_;
+    trajec.time_until_collision_  = er.response.time_until_collision;
   }
   else {
     // TODO: some error handling
@@ -665,8 +663,9 @@ void Planner::updatePopulation(ros::Duration d) {
     if(requestTrajectory(msg_request)) {
       RampTrajectory temp(population_.population_.at(i).id_);
       
-      // Set the Trajectory msg
-      temp.msg_trajec_ = msg_request.response.trajectory;
+      // Set the Trajectory msg and the path
+      temp.msg_trajec_  = msg_request.response.trajectory;
+      temp.path_        = paths_.at(i);
       
       // Push onto updatedTrajecs
       updatedTrajecs.push_back(temp);

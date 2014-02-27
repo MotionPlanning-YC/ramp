@@ -35,6 +35,7 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
  
   result<<"\nTrajectory "<<id_;
   result<<"\n Number of knot points: "<<msg_trajec_.index_knot_points.size(); 
+  result<<"\n Path: "<<path_.toString();
   result<<"\n Fitness: "<<fitness_<<" Feasible: "<<feasible_<<" Collision Time: "<<time_until_collision_;
 
   return result.str();
