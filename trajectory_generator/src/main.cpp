@@ -28,25 +28,27 @@ int main(int argc, char** argv) {
   /* *** Test generating a trajectory *** */
 
   // Build a Path
-  ramp_msgs::Configuration c1;
-  c1.K.push_back(3);
-  c1.K.push_back(0);
-  c1.K.push_back(PI/2);
+  ramp_msgs::KnotPoint c1;
+  c1.configuration.K.push_back(3);
+  c1.configuration.K.push_back(0);
+  c1.configuration.K.push_back(PI/2);
+  c1.stop_time = 2;
 
-  ramp_msgs::Configuration c2;
-  c2.K.push_back(3);
-  c2.K.push_back(1);
-  c2.K.push_back(PI/2);
+  ramp_msgs::KnotPoint c2;
+  c2.configuration.K.push_back(3);
+  c2.configuration.K.push_back(1);
+  c2.configuration.K.push_back(PI/2);
 
-  ramp_msgs::Configuration c3;
-  c3.K.push_back(3);
-  c3.K.push_back(2);
-  c3.K.push_back(PI/2);
+  ramp_msgs::KnotPoint c3;
+  c3.configuration.K.push_back(3);
+  c3.configuration.K.push_back(2);
+  c3.configuration.K.push_back(PI/2);
+  c3.stop_time = 2;
 
-  ramp_msgs::Configuration c4;
-  c4.K.push_back(3);
-  c4.K.push_back(3);
-  c4.K.push_back(PI/2);
+  ramp_msgs::KnotPoint c4;
+  c4.configuration.K.push_back(3);
+  c4.configuration.K.push_back(3);
+  c4.configuration.K.push_back(PI/2);
 
   std::vector<float> v_s;
   v_s.push_back(0.25);
@@ -59,14 +61,11 @@ int main(int argc, char** argv) {
   v_g.push_back(0.25);
 
   ramp_msgs::Path p;
-  p.configurations.push_back(c1);
-  p.configurations.push_back(c2);
-  p.configurations.push_back(c3);
-  p.configurations.push_back(c4);
-  p.stop_points.push_back(0);
-  p.stop_points.push_back(2);
-  p.stop_times.push_back(2);
-  p.stop_times.push_back(2);
+  p.points.push_back(c1);
+  p.points.push_back(c2);
+  p.points.push_back(c3);
+  p.points.push_back(c4);
+
   
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
@@ -79,7 +78,7 @@ int main(int argc, char** argv) {
   std::cout<<u.toString(tr.request);
   Trajectory traj(tr.request);
   std::cout<<"\nDone constructing\n";
-  std::cout<<"\ntraj.stop_points.size(): "<<traj.stop_points_.size();
+  //std::cout<<"\ntraj.stop_points.size(): "<<traj.stop_points_.size();
   std::cout<<"\nGenerating Trajectory\n";
   traj.generate(); 
   tr.response.trajectory = traj.buildTrajectoryMsg();

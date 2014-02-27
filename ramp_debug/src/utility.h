@@ -35,7 +35,7 @@ class Utility {
     const float displaceAngle(const float a1, float a2) const;
     
     const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;
-    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::Configuration> configs) const;
+    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint> configs) const;
     
     
     const std::vector<float> getCenter(std::vector<float> p, float orientation) const;

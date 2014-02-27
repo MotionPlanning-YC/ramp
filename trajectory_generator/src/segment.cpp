@@ -1,7 +1,7 @@
 #include "segment.h"
 
 
-Segment::Segment() : k_dof_(3), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0), T_loc_(0), T_min_(0) {
+Segment::Segment() : k_dof_(3), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0), T_loc_(0), T_stop_(0), T_min_(0) {
   max_v_.push_back(0.3f);
   max_v_.push_back(0.3f);
 
@@ -9,7 +9,7 @@ Segment::Segment() : k_dof_(3), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0
   max_v_.push_back(PI/4.0f);
 }
 
-Segment::Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind) : k_dof_(3), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0), T_loc_(0), T_min_(0)
+Segment::Segment(const ramp_msgs::KnotPoint kp_start, const ramp_msgs::KnotPoint kp_end, const float v_start, const float v_end, const unsigned int ind) : k_dof_(3), T_stop_(kp_start.stop_time), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0), T_loc_(0), T_min_(0)
 {
   max_v_.push_back(0.3f);
   max_v_.push_back(0.3f);
@@ -21,20 +21,22 @@ Segment::~Segment() {}
 
 
 /** This function assigns the Segment's members and calls buildWork() */
-void Segment::build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind) {
+void Segment::build(const ramp_msgs::KnotPoint kp_start, const ramp_msgs::KnotPoint kp_end, const float v_start, const float v_end, const unsigned int ind) {
   // std::cout<<"\nIn Segment::build\n";
 
-  start_.p_.push_back(kp_start.x);
-  start_.p_.push_back(kp_start.y);
-  start_.p_.push_back(kp_start.theta);
+  for(unsigned int k=0;k<kp_start.configuration.K.size();k++) {
+    start_.p_.push_back(kp_start.configuration.K.at(k));
+  }
 
-  end_.p_.push_back(kp_end.x);
-  end_.p_.push_back(kp_end.y);
-  end_.p_.push_back(kp_end.theta); 
+
+  for(unsigned int k=0;k<kp_end.configuration.K.size();k++) {
+    end_.p_.push_back(kp_end.configuration.K.at(k));
+  }
   
   index_    = ind;
   v_start_  = v_start;
   v_end_    = v_end;
+  T_stop_    = kp_start.stop_time;
 
   buildWork();
 } // End build
@@ -167,7 +169,7 @@ const void Segment::calculateMinTime() {
 
 
   // Set min_T_
-  T_min_ = T_loc_ + T_rotate_pre_ + T_rotate_post_;
+  T_min_ = T_loc_ + T_rotate_pre_ + T_rotate_post_ + T_stop_;
 } //End calculateMinTime
 
 
@@ -186,6 +188,7 @@ const std::string Segment::toString() const {
   result<<"\npost_angle: "<<post_angle;
   result<<"\npost_angle_dist: "<<post_angle_dist;
 
+  result<<"\nT_stop_: "<<T_stop_;
   result<<"\nT_rotate_pre_: "<<T_rotate_pre_;
   result<<"\nT_loc_: "<<T_loc_;
   result<<"\nT_rotate_post_: "<<T_rotate_post_;

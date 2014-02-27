@@ -90,29 +90,29 @@ const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob,
   
   // The starting point 
   //trajectory_msgs::JointTrajectoryPoint start;
-  ramp_msgs::Configuration start;
-  start.ranges = u.ranges_;
+  ramp_msgs::KnotPoint start;
+  start.configuration.ranges = u.ranges_;
 
   // If translation
   if(motion_type == MotionType::Translation) {
 
     // Positions
-    start.K.push_back(ob.odom_t.pose.pose.position.x);
-    start.K.push_back(ob.odom_t.pose.pose.position.y);
-    start.K.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
+    start.configuration.K.push_back(ob.odom_t.pose.pose.position.x);
+    start.configuration.K.push_back(ob.odom_t.pose.pose.position.y);
+    start.configuration.K.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
 
     // Get the Goal configuration
-    ramp_msgs::Configuration end;
-    end.ranges = u.ranges_;
+    ramp_msgs::KnotPoint end;
+    end.configuration.ranges = u.ranges_;
     
-    end.K.push_back(start.K.at(0) + (ob.odom_t.twist.twist.linear.x * d.toSec()));
-    end.K.push_back(start.K.at(1) + (ob.odom_t.twist.twist.linear.y * d.toSec()));
-    end.K.push_back(start.K.at(2));
+    end.configuration.K.push_back(start.configuration.K.at(0) + (ob.odom_t.twist.twist.linear.x * d.toSec()));
+    end.configuration.K.push_back(start.configuration.K.at(1) + (ob.odom_t.twist.twist.linear.y * d.toSec()));
+    end.configuration.K.push_back(start.configuration.K.at(2));
     
 
     // Now we have starting and ending configurations
     // Build a Path
-    std::vector<ramp_msgs::Configuration> cs;
+    std::vector<ramp_msgs::KnotPoint> cs;
     cs.push_back(start);
     cs.push_back(end);
     ramp_msgs::Path p = u.getPath(cs);
@@ -134,11 +134,11 @@ const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob,
   else if(motion_type == MotionType::SelfRotation || motion_type == MotionType::None) {
 
     // Positions
-    start.K.push_back(ob.odom_t.pose.pose.position.x);
-    start.K.push_back(ob.odom_t.pose.pose.position.y);
-    start.K.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
+    start.configuration.K.push_back(ob.odom_t.pose.pose.position.x);
+    start.configuration.K.push_back(ob.odom_t.pose.pose.position.y);
+    start.configuration.K.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
     
-    std::vector<ramp_msgs::Configuration> cs;
+    std::vector<ramp_msgs::KnotPoint> cs;
     cs.push_back(start);
     cs.push_back(start);
     
@@ -151,7 +151,7 @@ const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob,
     ramp_msgs::TrajectoryRequest tr;
     tr.request.path = p;
 
-    for(unsigned int i=0;i<p.configurations.size()-1;i++) {
+    for(unsigned int i=0;i<p.points.size()-1;i++) {
       tr.request.v_start.push_back(PI/4);
       tr.request.v_end.push_back(PI/4);
     }

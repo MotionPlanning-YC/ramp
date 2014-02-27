@@ -5,27 +5,13 @@ Trajectory::Trajectory() : k_dof_(3) {}
 
 
 Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request trajec_req) : k_dof_(3) {
-  
-  // Push all of the path configurations onto knot_points
-  for(unsigned int i=0;i<trajec_req.path.configurations.size();i++) {
-    geometry_msgs::Pose2D temp;
-    temp.x      = trajec_req.path.configurations.at(i).K.at(0);
-    temp.y      = trajec_req.path.configurations.at(i).K.at(1);
-    temp.theta  = trajec_req.path.configurations.at(i).K.at(2);
-    knot_points_.push_back( temp );
-  }
+
+  knot_points_ = trajec_req.path.points;
   
   //  Get all of the velocities
   for(unsigned int i=0;i<trajec_req.v_start.size();i++) {
     v_start_.push_back(trajec_req.v_start.at(i));
     v_end_.push_back(trajec_req.v_end.at(i));
-  }
-
-  stop_points_ = trajec_req.path.stop_points;
-  stop_times_ = trajec_req.path.stop_times;
-  for(unsigned int i=0;i<stop_points_.size();i++) {
-    std::cout<<"\nstop_points["<<i<<"]: "<<stop_points_.at(i);
-    std::cout<<"\nstop_times["<<i<<"]: "<<stop_times_.at(i)<<"\n";
   }
 
   resolutionRate_ = trajec_req.resolutionRate;
@@ -61,12 +47,12 @@ void Trajectory::buildSegments() {
   * The method is passed a vector of dof's to compute 
   */
 const MotionState Trajectory::getMotionState(const unsigned int i_segment, const float t) {
-  //std::cout<<"\nin Trajectory::getMotionState\n";
+  //std::cout<<"\nin Trajectory::getMotionState, i_segment: "<<i_segment<<" t: "<<t<<"\n";
   
   MotionState result;
 
   Segment segment = segments_.at(i_segment);
-  
+ 
   for(unsigned int i=0;i<k_dof_;i++) {
 
     // If k is x or y and it is still time to be pre-rotate (rotate towards segment goal)
@@ -122,32 +108,25 @@ const MotionState Trajectory::getMotionState(const unsigned int i_segment, const
 
 
 
-const std::vector<MotionState> Trajectory::getStopStates(int i, unsigned int& next_stop) {
-  //std::cout<<"\nIn getStopStates, i: "<<i<<" next_stop: "<<next_stop<<"\n";
+const std::vector<MotionState> Trajectory::getStopStates(int i) {
   std::vector<MotionState> result;
   
-  // If we should stop at knot point i
-  if(next_stop < stop_points_.size() && i == stop_points_.at(next_stop)) {
-
-    // Get the number of points that will be stopped
-    unsigned int stop_t = stop_times_.at(next_stop) / (1.0 / resolutionRate_);
+  // Get the number of points that will be stopped
+  unsigned int stop_t = segments_.at(i).T_stop_ / (1.0 / resolutionRate_);
+  
+  // For each clock cycle to stop, generate stopped motion state
+  for(unsigned int clock=0;clock<stop_t;clock++ ) {
+    MotionState temp;
     
-    // For each clock cycle to stop, generate stopped motion state
-    for(unsigned int clock=0;clock<stop_t;clock++ ) {
-      MotionState temp;
-      
-      // Previous position, 0 velocity and acceleration
-      for(unsigned int k=0;k<3;k++) {
-        temp.p_.push_back(points_.at(points_.size()-1).p_.at(k));
-        temp.v_.push_back(0);
-        temp.a_.push_back(0);
-      }
+    // Previous position, 0 velocity and acceleration
+    for(unsigned int k=0;k<3;k++) {
+      temp.p_.push_back(knot_points_.at(i).configuration.K.at(k));
+      temp.v_.push_back(0);
+      temp.a_.push_back(0);
+    }
 
-      result.push_back(temp);
-    } // end for each stopped point
-
-    next_stop++;
-  } // end if we should stop 
+    result.push_back(temp);
+  } // end for each stopped point
 
   return result;
 }
@@ -166,13 +145,14 @@ const std::vector<MotionState> Trajectory::generate() {
 
   // For each segment 
   for(unsigned int i=0;i<segments_.size();i++) { 
+    std::cout<<"\ni: "<<i<<"\n";
 
     // Create the Segment object
     Segment segment = segments_.at(i);
-    //std::cout<<"\nsegment "<<i<<": "<<segment.toString();
+    std::cout<<"\nsegment "<<i<<": "<<segment.toString();
 
-    // The time of the segment in seconds
-    unsigned int segment_duration = segments_.at(i).T_min_;
+    // The time of the segment in seconds (but only the driving part, subtract T_stop_)
+    unsigned int segment_duration = segments_.at(i).T_min_ - segments_.at(i).T_stop_;
     //std::cout<<"\nsegment_duration:"<<segment_duration;
     
     // The # of times the trajectory is calculated for the segment, determined by the resolution rate
@@ -182,41 +162,27 @@ const std::vector<MotionState> Trajectory::generate() {
     // If we are at the last segment, increase the total_t by 1
     // so that in the following loop, the very last state of motion is tacked on
     if (i == segments_.size()-1) total_t++;
+        
+    // Get the stopped states for the segment (based on starting knot point stop time)
+    std::vector<MotionState> stops = getStopStates(i);
 
     // For each clock cycle, find the state of motion
     for(unsigned int clock=0;clock<total_t;clock++) {
-      
+        
+      // If we're at the first point, tack on the stopped points
+      if( clock == 0) {
+        for(unsigned int s=0;s<stops.size();s++) {
+          std::cout<<"\ns: "<<s<<"\n";
+          points_.push_back(stops.at(s));
+        }
+      }
+
       // Get the time 
       float t = clock * (1.0/resolutionRate_);
       
       // Get the motion state
       points_.push_back(getMotionState(i, t));
 
-      // If we just pushed on start of segment, check if we should stop
-      // we check after pushing on the start to make getStopStates work
-      // if we stop at the first knot point
-      if(clock == 0) {
-        std::vector<MotionState> stops = getStopStates(i, next_stop);
-
-        // If we are stopping
-        if(stops.size() > 0) {
-
-          // Store the first point of the segment and erase it from points_
-          MotionState temp = points_.at(points_.size()-1);
-          points_.erase(points_.end()-1);
-          
-          // Push on stopped motion states
-          for(unsigned int s=0;s<stops.size();s++) {
-            points_.push_back(stops.at(s));
-          }
-
-          // Push the first point back on after the stopped states
-          points_.push_back(temp);
-
-          // Also, adjust T_min for the segment
-          segment.T_min_ += stop_times_.at(next_stop-1);
-        } // end if stop
-      } // end if first point
     } // end for each clock cycle of the segment
   } // end for each segment
 
@@ -283,7 +249,7 @@ const std::string Trajectory::toString() const {
 
   result<<"\nKnot Points:";
   for(unsigned int i=0;i<knot_points_.size();i++) {
-    result<<"\n"<<i<<": ("<<knot_points_.at(i).x<<", "<<knot_points_.at(i).y<<", "<<knot_points_.at(i).theta<<")";
+    result<<"\n"<<i<<": ("<<knot_points_.at(i).configuration.K.at(0)<<", "<<knot_points_.at(i).configuration.K.at(1)<<", "<<knot_points_.at(i).configuration.K.at(2)<<")";
   }
 
   result<<"\nSegments:";

@@ -2,7 +2,6 @@
 #define TRAJECTORY_H
 
 #include "ramp_msgs/TrajectoryRequest.h"
-#include "geometry_msgs/Pose2D.h"
 #include "utility.h"
 #include "segment.h"
 
@@ -14,13 +13,13 @@ class Trajectory {
     ~Trajectory();
 
     // Data Members
-    std::vector<geometry_msgs::Pose2D>  knot_points_;
+    std::vector<ramp_msgs::KnotPoint>   knot_points_;
     std::vector<Segment>                segments_;
     std::vector<MotionState>            points_;
     std::vector<float>                  v_start_;
     std::vector<float>                  v_end_;
-    std::vector<unsigned int>           stop_points_;
-    std::vector<unsigned int>           stop_times_;
+    //std::vector<unsigned int>           stop_points_;
+    //std::vector<unsigned int>           stop_times_;
     unsigned int                        resolutionRate_;  // in Hz
 
     // Methods
@@ -33,7 +32,7 @@ class Trajectory {
     void  buildSegments();
     const MotionState getMotionState(const unsigned int ind_segment, const float t);
     Utility u;
-    const std::vector<MotionState> getStopStates(int i, unsigned int& next_stop);
+    const std::vector<MotionState> getStopStates(int i);
     const unsigned int k_dof_;
 };
 

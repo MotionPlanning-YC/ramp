@@ -107,11 +107,11 @@ const ramp_msgs::Configuration Utility::getConfigurationFromPoint(const trajecto
 }
 
 
-const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::Configuration> configs) const {
+const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> configs) const {
   ramp_msgs::Path result;
 
   for(unsigned int i=0;i<configs.size();i++) {
-    result.configurations.push_back(configs.at(i));
+    result.points.push_back(configs.at(i));
   }
 
   return result;
@@ -161,12 +161,12 @@ const std::string Utility::toString(const ramp_msgs::Path path) const {
   std::ostringstream result;
 
   result<<"\nPath:";
-  for(unsigned int i=0;i<path.configurations.size();i++) {
+  for(unsigned int i=0;i<path.points.size();i++) {
     result<<"\n  "<<i<<": (";
 
-    result<<path.configurations.at(i).K.at(0);
-    for(unsigned int k=1;k<path.configurations.at(i).K.size();k++) {
-      result<<", "<<path.configurations.at(i).K.at(k);
+    result<<path.points.at(i).configuration.K.at(0);
+    for(unsigned int k=1;k<path.points.at(i).configuration.K.size();k++) {
+      result<<", "<<path.points.at(i).configuration.K.at(k);
     }
     result<<")";
 

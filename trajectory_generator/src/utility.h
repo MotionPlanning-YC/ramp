@@ -26,6 +26,8 @@ class Utility {
     
     const std::string toString(const ramp_msgs::TrajectoryRequest::Request tr) const;
     const std::string toString(const ramp_msgs::Path p) const;
+    const std::string toString(const ramp_msgs::KnotPoint kp) const;
+    const std::string toString(const ramp_msgs::Configuration c) const;
     const std::string toString(const geometry_msgs::Pose2D p) const;
     const std::string toString(const ramp_msgs::Trajectory traj) const;
 

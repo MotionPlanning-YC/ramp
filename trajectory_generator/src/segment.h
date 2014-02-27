@@ -10,11 +10,11 @@ class Segment {
     Segment();
     
     // TODO: Put all these parameters in a struct?
-    Segment(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind);
+    Segment(const ramp_msgs::KnotPoint kp_start, const ramp_msgs::KnotPoint kp_end, const float v_start, const float v_end, const unsigned int ind);
     ~Segment();
 
     /** Methods */
-    void build(const geometry_msgs::Pose2D kp_start, const geometry_msgs::Pose2D kp_end, const float v_start, const float v_end, const unsigned int ind);
+    void build(const ramp_msgs::KnotPoint kp_start, const ramp_msgs::KnotPoint kp_end, const float v_start, const float v_end, const unsigned int ind);
 
     const std::string toString() const;
     
@@ -37,10 +37,11 @@ class Segment {
 
     // Minimum times required to execute the segment
     // These values may need to change to float in the future
-    unsigned int T_min_;
-    unsigned int T_loc_;
+    int T_min_;
+    int T_loc_;
     int T_rotate_pre_;
     int T_rotate_post_;
+    int T_stop_;
     float pre_angle;
     float post_angle;
     float pre_angle_dist;

@@ -111,24 +111,34 @@ const std::string Utility::toString(const geometry_msgs::Pose2D p) const {
   return result.str();
 }
 
+
+
+const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
+  std::ostringstream result;
+
+  result<<"\nConfiguration: "<<toString(kp.configuration);
+  result<<", Stop time: "<<kp.stop_time;
+
+  return result.str();
+}
+
+const std::string Utility::toString(const ramp_msgs::Configuration c) const {
+  std::ostringstream result;
+  result<<"(";
+  for(unsigned int i=0;i<c.K.size()-1;i++) {
+    result<<c.K.at(i)<<", ";
+  }
+  result<<c.K.at(c.K.size()-1)<<")";
+  return result.str();
+}
+
+
 const std::string Utility::toString(const ramp_msgs::Path path) const {
   std::ostringstream result;
 
-  result<<"\nPath:";
-  for(unsigned int i=0;i<path.configurations.size();i++) {
-    result<<"\n  "<<i<<": (";
-
-    result<<path.configurations.at(i).K.at(0);
-    for(unsigned int k=1;k<path.configurations.at(i).K.size();k++) {
-      result<<", "<<path.configurations.at(i).K.at(k);
-    }
-    result<<")";
-
-  }
-
-  result<<"\n  Stop points: ";
-  for(unsigned int i=0;i<path.stop_points.size();i++) {
-    result<<path.stop_points.at(i)<<" ("<<path.stop_times.at(i)<<"s) ";
+  result<<"\nPath: ";
+  for(unsigned int i=0;i<path.points.size();i++) {
+    result<<"\n "<<i<<": "<<toString(path.points.at(i));
   }
 
   return result.str();

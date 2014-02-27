@@ -34,7 +34,8 @@ class Utility {
     
     const float getEuclideanDist(const std::vector<float> a, std::vector<float> b) const;
     
-    
+    const std::string toString(const ramp_msgs::KnotPoint kp) const;
+    const std::string toString(const ramp_msgs::Configuration c) const;
     const std::string toString(const ramp_msgs::Path path) const;
     const std::string toString(const ramp_msgs::Trajectory traj) const;
 };

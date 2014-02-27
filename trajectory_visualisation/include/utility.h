@@ -36,11 +36,12 @@ class Utility {
     const float displaceAngle(const float a1, float a2) const;
     
     const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;
-    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::Configuration> configs) const;
+    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint> configs) const;
 
 
     const std::string toString(const ramp_msgs::Trajectory traj) const;
     const std::string toString(const ramp_msgs::Path p) const;
+    const std::string toString(const ramp_msgs::KnotPoint kp) const;
     const std::string toString(const ramp_msgs::Configuration c) const;
 };
 
