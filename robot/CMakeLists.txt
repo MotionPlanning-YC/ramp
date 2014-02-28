@@ -34,7 +34,8 @@ add_executable(keyboard_teleop src/keyboard_teleop.cpp)
 target_link_libraries(keyboard_teleop ${catkin_LIBRARIES})
 add_dependencies(keyboard_teleop ramp_msgs_generate_messages_cpp)
 
+add_executable(waitForCommand src/wait_for_command.cpp)
+target_link_libraries(waitForCommand ${catkin_LIBRARIES})
+add_dependencies(waitForCommand ramp_msgs_generate_messages_cpp)
 
-#add_executable(move src/main_move.cpp)
-#target_link_libraries(move ${catkin_LIBRARIES})
-#add_dependencies(move ramp_msgs_generate_messages_cpp)
+
