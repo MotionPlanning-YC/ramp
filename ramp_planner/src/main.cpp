@@ -50,11 +50,6 @@ const std::vector<Configuration> getStartGoal(bool robot1) {
 }
 
 
-void handleConfig(YAML::Node node) {
-  std::cout<<"\nIn handleConfig: "<<node.Type()<<"\n";
-  std::cout<<"\nnode[\"id\"]: "<<node["id"];
-}
-
 
 void loadParameters(const ros::NodeHandle handle) {
   std::string key;

@@ -42,6 +42,7 @@ class Utility {
     const std::string toString(const ramp_msgs::Trajectory traj) const;
     const std::string toString(const ramp_msgs::Path p) const;
     const std::string toString(const ramp_msgs::Configuration c) const;
+    const std::string toString(const ramp_msgs::KnotPoint kp) const;
 };
 
 #endif

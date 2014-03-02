@@ -373,7 +373,7 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
     ramp_msgs::TrajectoryRequest tr;
     tr.request.path = p;
 
-    for(unsigned int i=0;i<p.configurations.size()-1;i++) {
+    for(unsigned int i=0;i<p.points.size()-1;i++) {
       tr.request.v_start.push_back(PI/4);
       tr.request.v_end.push_back(PI/4);
     }
