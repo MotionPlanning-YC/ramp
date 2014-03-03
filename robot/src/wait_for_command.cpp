@@ -15,10 +15,9 @@ void twistCallback(const geometry_msgs::Twist msg) {
 
   ros::Time end = ros::Time::now() + d;
   while(ros::Time::now() < end) {
-    //robot.twist
-    //r.sleep();
+    robot.sendTwist(msg);
+    r.sleep();
   }
-
 }
 
 
