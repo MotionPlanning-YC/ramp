@@ -35,8 +35,9 @@ class Corobot {
     void setConfiguration(float x, float y, float theta);
     
     void updatePublishTimer(const ros::TimerEvent&);
-    void sendTwist();
     void controlCycle(geometry_msgs::Twist twist, ros::Time end_time, ros::Rate r);
+    
+    void sendTwist(const geometry_msgs::Twist twist) const;
 
 
 
@@ -84,7 +85,7 @@ class Corobot {
     std::vector<float> angular_speeds; // Angular Speed needed over 3s to get the correct orientation after each knot point reached.
     std::vector<float> orientations; // The orientation needed to be at each knotpoint.
 
-    geometry_msgs::Twist twist;
+    geometry_msgs::Twist twist_;
     float angle_at_start; // the angle of the robot when the robot gets a trajectory. 
 
     int num;
@@ -97,6 +98,7 @@ class Corobot {
 
     void lockMutex();
     void releaseMutex();
+    void sendTwist() const;
 
     bool moving_;
 };

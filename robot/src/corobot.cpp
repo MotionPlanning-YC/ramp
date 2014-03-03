@@ -252,11 +252,14 @@ void Corobot::calculateSpeedsAndTime ()
 }
 
 
-void Corobot::sendTwist()
-{
-  pub_twist_.publish(twist); 
+void Corobot::sendTwist() const {
+  pub_twist_.publish(twist_); 
 }
 
+
+void Corobot::sendTwist(const geometry_msgs::Twist t) const {
+  pub_twist_.publish(t); 
+}
 
 void Corobot::printVectors() const {
     
@@ -298,11 +301,11 @@ void Corobot::moveOnTrajectory()
     restart = false;
     
     // Set velocities
-    twist.linear.x  = speeds.at(num_traveled);
-    twist.angular.z = angular_speeds.at(num_traveled);
+    twist_.linear.x  = speeds.at(num_traveled);
+    twist_.angular.z = angular_speeds.at(num_traveled);
     //printVectors();
-    std::cout<<"\ntwist.linear: "<<twist.linear.x;
-    std::cout<<"\ntwist.angular: "<<twist.angular.z;
+    std::cout<<"\ntwist_linear: "<<twist_.linear.x;
+    std::cout<<"\ntwist_angular: "<<twist_.angular.z;
     //std::cout<<"\nend_times.size():"<<end_times.size()<<"\n";
     //std::cout<<"\norientations.size():"<<orientations.size()<<"\n";
 
@@ -312,15 +315,15 @@ void Corobot::moveOnTrajectory()
       // Adjust the angular speed to correct errors in turning
       // Commented out because it was producing erratic driving
       // Should be fixed at some point
-      if(twist.linear.x > 0.0f) {
+      if(twist_.linear.x > 0.0f) {
         float actual_theta = u.displaceAngle(initial_theta, configuration_.K.at(2));
         float dist = u.findDistanceBetweenAngles(actual_theta, orientations.at(num_traveled));
         std::cout<<"\ndist: "<<dist;
         if(dist > 0.15)
-          twist.angular.z = -1.5 * dist;
+          twist_.angular.z = -1.5 * dist;
       }
     
-      // Send the twist message to move the robot
+      // Send the twist_message to move the robot
       sendTwist();
 
       // Spin to check for updates
@@ -348,8 +351,8 @@ void Corobot::moveOnTrajectory()
   } // end while
 
     // Stops the wheels
-    twist.linear.x = 0;
-    twist.angular.z = 0;
+    twist_.linear.x = 0;
+    twist_.angular.z = 0;
     sendTwist();
 
 } // End moveOnTrajectory
