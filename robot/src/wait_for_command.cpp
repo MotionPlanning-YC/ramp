@@ -10,7 +10,7 @@ void twistCallback(const geometry_msgs::Twist msg) {
   std::cout<<"\nGot twist message!\n";
 
   // If we got a twist msg, move that speed for 1 second
-  ros::Duration d(1); 
+  ros::Duration d(1.0f / msg.linear.x); 
   ros::Rate r(50);
 
   ros::Time end = ros::Time::now() + d;
@@ -37,10 +37,11 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "waitForCommand");
   ros::NodeHandle handle;
 
-  ros::Subscriber sub_twist = handle.subscribe("twist", 1000, twistCallback);
+  ros::Subscriber sub_twist = handle.subscribe("twist_single", 1000, twistCallback);
   ros::Subscriber sub_traj = handle.subscribe("trajectory", 1000, trajCallback);
+  robot.pub_twist_ = handle.advertise<geometry_msgs::Twist>(Corobot::TOPIC_STR_TWIST, 1000);
   
-
+  ros::spin();
   std::cout<<"\nExiting Normally\n";
   return 0;
 }
