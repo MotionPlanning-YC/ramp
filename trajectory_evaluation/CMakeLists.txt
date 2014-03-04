@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(evaluation)
+project(trajectory_evaluation)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS message_generation ramp_msgs roscpp corobot_msgs)

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>evaluation</name>
+  <name>trajectory_evaluation</name>
   <version>0.0.0</version>
-  <description>The evaluation package</description>
+  <description>The trajectory_evaluation package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
