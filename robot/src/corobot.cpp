@@ -235,7 +235,6 @@ void Corobot::calculateSpeedsAndTime ()
     // Find the norm of the velocity vector
     speed_loc = sqrt(pow(current.velocities.at(0),2) + pow(current.velocities.at(1), 2));
     speeds.push_back(speed_loc);
-    //speeds.push_back(current.velocities.at(0));
       
 
     // Push on the angular speed for the waypoint
