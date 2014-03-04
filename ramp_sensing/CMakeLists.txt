@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(sensing)
+project(ramp_sensing)
 
 find_package(catkin REQUIRED COMPONENTS corobot_msgs message_generation ramp_msgs roscpp tf)
 
