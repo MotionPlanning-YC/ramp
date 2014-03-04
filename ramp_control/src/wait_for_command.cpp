@@ -25,7 +25,7 @@ void trajCallback(const ramp_msgs::Trajectory& msg) {
   std::cout<<"\nGot traj message!\n";
 
   // If we got a trajectory, set the robot's trajectory 
-  robot.trajectory_ = msg;
+  robot.updateTrajectory(msg);
   
   // Make the robot move along the trajectory
   robot.moveOnTrajectory();
