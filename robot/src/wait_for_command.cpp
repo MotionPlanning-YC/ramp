@@ -41,11 +41,6 @@ int main(int argc, char** argv) {
   ros::Subscriber sub_traj = handle.subscribe("trajectory", 1000, trajCallback);
   robot.pub_twist_ = handle.advertise<geometry_msgs::Twist>(Corobot::TOPIC_STR_TWIST, 1000);
   
-  robot.pub_twist_ = handle.advertise<geometry_msgs::Twist>(Corobot::TOPIC_STR_TWIST, 1000);
-  
-  std::cout<<"\nSpinning\n";
-  ros::spin();
-
   ros::spin();
   std::cout<<"\nExiting Normally\n";
   return 0;
