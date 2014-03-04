@@ -20,14 +20,14 @@
 
   <run_depend>ramp_msgs</run_depend>
   <run_depend>ramp_planner</run_depend>
-  <run_depend>robot</run_depend>
-  <run_depend>trajectory_generator</run_depend>
-  <run_depend>path_modification</run_depend>
-  <run_depend>evaluation</run_depend>
+  <run_depend>ramp_control</run_depend>
   <run_depend>ramp_launch</run_depend>
-  <run_depend>sensing</run_depend>
+  <run_depend>ramp_sensing</run_depend>
+  <run_depend>trajectory_evaluation</run_depend>
+  <run_depend>trajectory_generator</run_depend>
   <run_depend>trajectory_visualization</run_depend>
   <run_depend>trajectory_debug</run_depend>
+  <run_depend>path_modification</run_depend>
   
 
 

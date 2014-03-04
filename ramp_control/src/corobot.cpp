@@ -296,15 +296,15 @@ void Corobot::moveOnTrajectory()
   while( (num_traveled+1) < num) {
 
     // std::cout<<"\nbeginning of outter while loop!";
-    std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
+    //std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
     restart = false;
     
     // Set velocities
     twist_.linear.x  = speeds.at(num_traveled);
     twist_.angular.z = angular_speeds.at(num_traveled);
     //printVectors();
-    std::cout<<"\ntwist_linear: "<<twist_.linear.x;
-    std::cout<<"\ntwist_angular: "<<twist_.angular.z;
+    //std::cout<<"\ntwist_linear: "<<twist_.linear.x;
+    //std::cout<<"\ntwist_angular: "<<twist_.angular.z;
     //std::cout<<"\nend_times.size():"<<end_times.size()<<"\n";
     //std::cout<<"\norientations.size():"<<orientations.size()<<"\n";
 
@@ -317,7 +317,6 @@ void Corobot::moveOnTrajectory()
       if(twist_.linear.x > 0.0f) {
         float actual_theta = u.displaceAngle(initial_theta, configuration_.K.at(2));
         float dist = u.findDistanceBetweenAngles(actual_theta, orientations.at(num_traveled));
-        std::cout<<"\ndist: "<<dist;
         if(dist > 0.15)
           twist_.angular.z = -1.5 * dist;
       }
