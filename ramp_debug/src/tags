@@ -40,8 +40,26 @@ Configuration::updatePosition	configuration.cpp	/^void Configuration::updatePosi
 Configuration::updatePosition	configuration.h	/^    void  updatePosition(float x, float y, float theta);$/;"	p	class:Configuration	access:public	signature:(float x, float y, float theta)
 Configuration::~Configuration	configuration.cpp	/^Configuration::~Configuration() {}$/;"	f	class:Configuration	signature:()
 Configuration::~Configuration	configuration.h	/^    ~Configuration();$/;"	p	class:Configuration	access:public	signature:()
+EVALUATION_REQUEST_HANDLER_H	evaluation_request_handler.h	2;"	d
+EvaluationRequestHandler	evaluation_request_handler.cpp	/^EvaluationRequestHandler::EvaluationRequestHandler(const ros::NodeHandle& h) : handle_(h) {$/;"	f	class:EvaluationRequestHandler	signature:(const ros::NodeHandle& h)
+EvaluationRequestHandler	evaluation_request_handler.h	/^    EvaluationRequestHandler(const ros::NodeHandle& h);$/;"	p	class:EvaluationRequestHandler	access:public	signature:(const ros::NodeHandle& h)
+EvaluationRequestHandler	evaluation_request_handler.h	/^class EvaluationRequestHandler {$/;"	c
+EvaluationRequestHandler::EvaluationRequestHandler	evaluation_request_handler.cpp	/^EvaluationRequestHandler::EvaluationRequestHandler(const ros::NodeHandle& h) : handle_(h) {$/;"	f	class:EvaluationRequestHandler	signature:(const ros::NodeHandle& h)
+EvaluationRequestHandler::EvaluationRequestHandler	evaluation_request_handler.h	/^    EvaluationRequestHandler(const ros::NodeHandle& h);$/;"	p	class:EvaluationRequestHandler	access:public	signature:(const ros::NodeHandle& h)
+EvaluationRequestHandler::client_	evaluation_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:EvaluationRequestHandler	access:private
+EvaluationRequestHandler::handle_	evaluation_request_handler.h	/^    ros::NodeHandle handle_;$/;"	m	class:EvaluationRequestHandler	access:private
+EvaluationRequestHandler::request	evaluation_request_handler.cpp	/^const bool EvaluationRequestHandler::request(ramp_msgs::EvaluationRequest& er) {$/;"	f	class:EvaluationRequestHandler	signature:(ramp_msgs::EvaluationRequest& er)
+EvaluationRequestHandler::request	evaluation_request_handler.h	/^    const bool request(ramp_msgs::EvaluationRequest& er);$/;"	p	class:EvaluationRequestHandler	access:public	signature:(ramp_msgs::EvaluationRequest& er)
+GlobalRotation	motion_type.h	/^  GlobalRotation              = 4$/;"	m	class:MotionType	access:private
 K_	configuration.h	/^    std::vector<float> K_; $/;"	m	class:Configuration	access:public
-PI	utility.h	16;"	d
+MotionType	motion_type.h	/^enum class MotionType {$/;"	c
+MotionType::GlobalRotation	motion_type.h	/^  GlobalRotation              = 4$/;"	m	class:MotionType	access:private
+MotionType::None	motion_type.h	/^  None                        = 0,$/;"	m	class:MotionType	access:private
+MotionType::SelfRotation	motion_type.h	/^  SelfRotation                = 2,$/;"	m	class:MotionType	access:private
+MotionType::Translation	motion_type.h	/^  Translation                 = 1,$/;"	m	class:MotionType	access:private
+MotionType::TranslationAndSelfRotation	motion_type.h	/^  TranslationAndSelfRotation  = 3,$/;"	m	class:MotionType	access:private
+None	motion_type.h	/^  None                        = 0,$/;"	m	class:MotionType	access:private
+PI	utility.h	19;"	d
 POSE_COUNT_THRESHOLD	display_base_location.cpp	/^static const int POSE_COUNT_THRESHOLD = 1;$/;"	v	file:
 RANGE_H	range.h	2;"	d
 Range	range.cpp	/^Range::Range() {}$/;"	f	class:Range	signature:()
@@ -65,7 +83,20 @@ Range::random	range.cpp	/^const float Range::random() {$/;"	f	class:Range	signat
 Range::random	range.h	/^    const float random();$/;"	p	class:Range	access:public	signature:()
 Range::~Range	range.cpp	/^Range::~Range() {}$/;"	f	class:Range	signature:()
 Range::~Range	range.h	/^    ~Range();$/;"	p	class:Range	access:public	signature:()
+SelfRotation	motion_type.h	/^  SelfRotation                = 2,$/;"	m	class:MotionType	access:private
+TRAJECTORY_REQUEST_HANDLER_H	trajectory_request_handler.h	2;"	d
 T_od_w	display_base_location.cpp	/^Eigen::Transform<float, 2, Eigen::Affine> T_od_w;$/;"	v
+TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler(const ros::NodeHandle& h) : handle_(h) {$/;"	f	class:TrajectoryRequestHandler	signature:(const ros::NodeHandle& h)
+TrajectoryRequestHandler	trajectory_request_handler.h	/^    TrajectoryRequestHandler(const ros::NodeHandle& h);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(const ros::NodeHandle& h)
+TrajectoryRequestHandler	trajectory_request_handler.h	/^class TrajectoryRequestHandler {$/;"	c
+TrajectoryRequestHandler::TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler(const ros::NodeHandle& h) : handle_(h) {$/;"	f	class:TrajectoryRequestHandler	signature:(const ros::NodeHandle& h)
+TrajectoryRequestHandler::TrajectoryRequestHandler	trajectory_request_handler.h	/^    TrajectoryRequestHandler(const ros::NodeHandle& h);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(const ros::NodeHandle& h)
+TrajectoryRequestHandler::client_	trajectory_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:TrajectoryRequestHandler	access:private
+TrajectoryRequestHandler::handle_	trajectory_request_handler.h	/^    ros::NodeHandle  handle_; $/;"	m	class:TrajectoryRequestHandler	access:private
+TrajectoryRequestHandler::request	trajectory_request_handler.cpp	/^const bool TrajectoryRequestHandler::request(ramp_msgs::TrajectoryRequest& tr) {$/;"	f	class:TrajectoryRequestHandler	signature:(ramp_msgs::TrajectoryRequest& tr)
+TrajectoryRequestHandler::request	trajectory_request_handler.h	/^    const bool request(ramp_msgs::TrajectoryRequest& tr);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(ramp_msgs::TrajectoryRequest& tr)
+Translation	motion_type.h	/^  Translation                 = 1,$/;"	m	class:MotionType	access:private
+TranslationAndSelfRotation	motion_type.h	/^  TranslationAndSelfRotation  = 3,$/;"	m	class:MotionType	access:private
 UTILITY_H	utility.h	2;"	d
 Utility	utility.cpp	/^Utility::Utility() {$/;"	f	class:Utility	signature:()
 Utility	utility.h	/^    Utility();$/;"	p	class:Utility	access:public	signature:()
@@ -84,66 +115,225 @@ Utility::getCenter	utility.cpp	/^const std::vector<float> Utility::getCenter(std
 Utility::getCenter	utility.h	/^    const std::vector<float> getCenter(std::vector<float> p, float orientation) const;$/;"	p	class:Utility	access:public	signature:(std::vector<float> p, float orientation) const
 Utility::getConfigurationFromPoint	utility.cpp	/^const ramp_msgs::Configuration Utility::getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const {$/;"	f	class:Utility	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
 Utility::getConfigurationFromPoint	utility.h	/^    const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;$/;"	p	class:Utility	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
-Utility::getPath	utility.cpp	/^const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::Configuration> configs) const {$/;"	f	class:Utility	signature:(const std::vector<ramp_msgs::Configuration> configs) const
-Utility::getPath	utility.h	/^    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::Configuration> configs) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<ramp_msgs::Configuration> configs) const
+Utility::getPath	utility.cpp	/^const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> configs) const {$/;"	f	class:Utility	signature:(const std::vector<ramp_msgs::KnotPoint> configs) const
+Utility::getPath	utility.h	/^    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint> configs) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<ramp_msgs::KnotPoint> configs) const
+Utility::ranges_	utility.h	/^    std::vector<ramp_msgs::Range> ranges_;$/;"	m	class:Utility	access:public
 Utility::standardRanges	utility.h	/^    std::vector<Range> standardRanges;$/;"	m	class:Utility	access:public
 Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
 Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
 Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Path path) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path path) const
 Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
 angle_at_start	display_base_location.cpp	/^float angle_at_start = 0.0f;$/;"	v
+at	configuration.cpp	/^    result<<", "<<K_.at(i);$/;"	p	file:	signature:(i)
+at	utility.cpp	/^      result<<", "<<p.accelerations.at(k);$/;"	p	file:	signature:(k)
+at	utility.cpp	/^      result<<", "<<p.positions.at(k);$/;"	p	file:	signature:(k)
+at	utility.cpp	/^      result<<", "<<p.velocities.at(k);$/;"	p	file:	signature:(k)
+at	utility.cpp	/^      result<<", "<<path.points.at(i).configuration.K.at(k);$/;"	p	file:	signature:(k)
+avg_theta	display_base_location.cpp	/^    double avg_theta = 0;$/;"	l
+avg_v	viewPredicted.cpp	/^  float avg_v = v_sum \/ tgr_linears.size();$/;"	l
+avg_v	viewPredicted.cpp	/^  std::cout<<"\\naverage linear velocity when self-rotating: "<<avg_v;$/;"	l
+avg_w	viewPredicted.cpp	/^  float avg_w = w_sum \/ gr_angulars.size();$/;"	l
+avg_w	viewPredicted.cpp	/^  std::cout<<"\\naverage angular velocity when driving straight: "<<avg_w;$/;"	l
 buildConfigurationMsg	configuration.cpp	/^const ramp_msgs::Configuration Configuration::buildConfigurationMsg() const {$/;"	f	class:Configuration	signature:() const
 buildConfigurationMsg	configuration.h	/^    const ramp_msgs::Configuration buildConfigurationMsg() const;$/;"	p	class:Configuration	access:public	signature:() const
 buildRangeMsg	range.cpp	/^const ramp_msgs::Range Range::buildRangeMsg() const {$/;"	f	class:Range	signature:() const
 buildRangeMsg	range.h	/^    const ramp_msgs::Range buildRangeMsg() const;$/;"	p	class:Range	access:public	signature:() const
+c	display_base_location.cpp	/^    Configuration c(configuration_);$/;"	p	file:	signature:(configuration_)
+center	display_base_location.cpp	/^    std::vector<float> center = u.getCenter(c.K_, c.K_.at(2));$/;"	l
+clear	configuration.cpp	/^  K_.clear();$/;"	p	file:	signature:()
+clear	display_base_location.cpp	/^    thetas_.clear();$/;"	p	file:	signature:()
+clear	display_base_location.cpp	/^  configuration_.K.clear();$/;"	p	file:	signature:()
+client_	evaluation_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:EvaluationRequestHandler	access:private
+client_	trajectory_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:TrajectoryRequestHandler	access:private
 compare	configuration.cpp	/^const double Configuration::compare(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
 compare	configuration.h	/^    const double compare(const Configuration& c) const;$/;"	p	class:Configuration	access:public	signature:(const Configuration& c) const
+cout	publish_twist_command.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
+cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Global Rotation";$/;"	m	class:std	file:
+cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == None";$/;"	m	class:std	file:
+cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Self-Rotation";$/;"	m	class:std	file:
+cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Translation + Self-Rotation";$/;"	m	class:std	file:
+cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Translation";$/;"	m	class:std	file:
+cs	viewPredicted.cpp	/^    std::vector<ramp_msgs::KnotPoint> cs;$/;"	l
+d_x	utility.cpp	/^  float d_x = b.at(0) - a.at(0);$/;"	l
+d_y	utility.cpp	/^  float d_y = b.at(1) - a.at(1);$/;"	l
+difference	utility.cpp	/^  float difference = a1 - a2;$/;"	l
 displaceAngle	utility.cpp	/^const float Utility::displaceAngle(const float a1, float a2) const {$/;"	f	class:Utility	signature:(const float a1, float a2) const
 displaceAngle	utility.h	/^    const float displaceAngle(const float a1, float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, float a2) const
 displayConfiguration	display_base_location.cpp	/^void displayConfiguration() {$/;"	f	signature:()
+end	viewPredicted.cpp	/^    ramp_msgs::KnotPoint end;$/;"	l
 equals	configuration.cpp	/^const bool Configuration::equals(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
 equals	configuration.h	/^    const bool equals(const Configuration& c) const; $/;"	p	class:Configuration	access:public	signature:(const Configuration& c) const
+euc_dist	utility.cpp	/^  float euc_dist = sqrt( pow(d_x,2) + pow(d_y,2) );$/;"	l
 euclideanDistance	utility.cpp	/^const float Utility::euclideanDistance(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
 euclideanDistance	utility.h	/^    const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 findAngleFromAToB	utility.cpp	/^const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
 findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 findDistanceBetweenAngles	utility.cpp	/^const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {$/;"	f	class:Utility	signature:(const float a1, const float a2) const
 findDistanceBetweenAngles	utility.h	/^    const float findDistanceBetweenAngles(const float a1, const float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, const float a2) const
+findMotionType	viewPredicted.cpp	/^const MotionType findMotionType(const ramp_msgs::Obstacle ob) { $/;"	f	signature:(const ramp_msgs::Obstacle ob)
+getAndSendTrajectory	viewPredicted.cpp	/^void getAndSendTrajectory() {$/;"	f	signature:()
 getCenter	utility.cpp	/^const std::vector<float> Utility::getCenter(std::vector<float> p, float orientation) const {$/;"	f	class:Utility	signature:(std::vector<float> p, float orientation) const
 getCenter	utility.h	/^    const std::vector<float> getCenter(std::vector<float> p, float orientation) const;$/;"	p	class:Utility	access:public	signature:(std::vector<float> p, float orientation) const
 getConfigurationFromPoint	utility.cpp	/^const ramp_msgs::Configuration Utility::getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const {$/;"	f	class:Utility	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
 getConfigurationFromPoint	utility.h	/^    const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;$/;"	p	class:Utility	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
-getPath	utility.cpp	/^const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::Configuration> configs) const {$/;"	f	class:Utility	signature:(const std::vector<ramp_msgs::Configuration> configs) const
-getPath	utility.h	/^    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::Configuration> configs) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<ramp_msgs::Configuration> configs) const
+getPath	utility.cpp	/^const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> configs) const {$/;"	f	class:Utility	signature:(const std::vector<ramp_msgs::KnotPoint> configs) const
+getPath	utility.h	/^    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint> configs) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<ramp_msgs::KnotPoint> configs) const
+getPredictedTrajectory	viewPredicted.cpp	/^const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob, const ros::Duration d) {$/;"	f	signature:(const ramp_msgs::Obstacle ob, const ros::Duration d)
+getYaw	viewPredicted.cpp	/^    start.configuration.K.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));$/;"	p	file:	signature:(ob.odom_t.pose.pose.orientation)
+gr_angulars	viewPredicted.cpp	/^std::vector<float> gr_angulars;$/;"	v
+h_traj_req_	viewPredicted.cpp	/^TrajectoryRequestHandler* h_traj_req_;$/;"	v
+handle	display_base_location.cpp	/^  ros::NodeHandle handle;$/;"	l
+handle	viewPredicted.cpp	/^  ros::NodeHandle handle;$/;"	l
+handle_	evaluation_request_handler.h	/^    ros::NodeHandle handle_;$/;"	m	class:EvaluationRequestHandler	access:private
+handle_	trajectory_request_handler.h	/^    ros::NodeHandle  handle_; $/;"	m	class:TrajectoryRequestHandler	access:private
+i	utility.cpp	/^    result<<"\\n   "<<i<<":";$/;"	l
+i	utility.cpp	/^    result<<"\\n  "<<i<<": (";$/;"	l
+i	utility.cpp	/^    result<<"\\n\\n   Point "<<i<<":";$/;"	l
+index	utility.cpp	/^    unsigned int index = traj.index_knot_points.at(i);$/;"	l
+init	display_base_location.cpp	/^  ros::init(argc, argv, "display_base_location");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+init	viewPredicted.cpp	/^  ros::init(argc, argv, "viewPredicted");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+mag_angular_t	viewPredicted.cpp	/^  float mag_angular_t = sqrt( tf::tfDot(v_angular, v_angular) );$/;"	l
+mag_linear_t	viewPredicted.cpp	/^  float mag_linear_t  = sqrt( tf::tfDot(v_linear, v_linear)   );$/;"	l
 main	display_base_location.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+main	publish_twist_command.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+main	viewPredicted.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+matrix	display_base_location.cpp	/^  cout<<"\\nT_od_w: "<<T_od_w.matrix()<<"\\n";$/;"	p	file:	signature:()
 max_	range.h	/^    float max_;$/;"	m	class:Range	access:public
+max_v	viewPredicted.cpp	/^  float max_v = tgr_linears.at(0);$/;"	l
+max_v	viewPredicted.cpp	/^  std::cout<<"\\nmax linear velocity when self-rotating: "<<max_v;$/;"	l
+max_w	viewPredicted.cpp	/^  float max_w = gr_angulars.at(0);$/;"	l
+max_w	viewPredicted.cpp	/^  std::cout<<"\\nmax angular velocity when driving straight: "<<max_w;$/;"	l
 min_	range.h	/^    float min_;$/;"	m	class:Range	access:public
+motion_type	viewPredicted.cpp	/^  MotionType motion_type = findMotionType(obstacle);$/;"	l
+obstacle	viewPredicted.cpp	/^ramp_msgs::Obstacle obstacle;$/;"	v
 odometryCallback	display_base_location.cpp	/^void odometryCallback(const nav_msgs::Odometry::ConstPtr& msg) {$/;"	f	signature:(const nav_msgs::Odometry::ConstPtr& msg)
+odometryCallback	viewPredicted.cpp	/^void odometryCallback(const nav_msgs::Odometry& msg) {$/;"	f	signature:(const nav_msgs::Odometry& msg)
+p	configuration.cpp	/^  Eigen::Vector3f p(K_.data());$/;"	p	file:	signature:(K_.data())
+p	utility.cpp	/^    trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);$/;"	l
+p	utility.cpp	/^    trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);$/;"	l
+p	viewPredicted.cpp	/^    ramp_msgs::Path p = u.getPath(cs);$/;"	l
+p2	configuration.cpp	/^  Eigen::Vector3f p2 = T_od_w * p;$/;"	l
+p_w	configuration.cpp	/^  std::vector<float> p_w = transformBasePosition(T_od_w);$/;"	l
+pop	viewPredicted.cpp	/^  ramp_msgs::Population pop;$/;"	l
+publish	viewPredicted.cpp	/^  pub_population.publish(pop);$/;"	p	file:	signature:(pop)
+push_back	configuration.cpp	/^    K_.push_back(c.K.at(i));$/;"	p	file:	signature:(c.K.at(i))
+push_back	configuration.cpp	/^    K_.push_back(p.positions.at(i));$/;"	p	file:	signature:(p.positions.at(i))
+push_back	configuration.cpp	/^    K_.push_back(ranges_.at(i).random());$/;"	p	file:	signature:(ranges_.at(i).random())
+push_back	configuration.cpp	/^    ranges_.push_back(c.ranges.at(i));$/;"	p	file:	signature:(c.ranges.at(i))
+push_back	configuration.cpp	/^    ranges_.push_back(r.at(i));$/;"	p	file:	signature:(r.at(i))
+push_back	configuration.cpp	/^    result.K.push_back(K_.at(i));$/;"	p	file:	signature:(K_.at(i))
+push_back	configuration.cpp	/^    result.ranges.push_back(ranges_.at(i).buildRangeMsg());$/;"	p	file:	signature:(ranges_.at(i).buildRangeMsg())
+push_back	configuration.cpp	/^  K_.push_back(theta);$/;"	p	file:	signature:(theta)
+push_back	configuration.cpp	/^  K_.push_back(x);$/;"	p	file:	signature:(x)
+push_back	configuration.cpp	/^  K_.push_back(y);$/;"	p	file:	signature:(y)
+push_back	configuration.cpp	/^  result.push_back(p2[0]);$/;"	p	file:	signature:(p2[0])
+push_back	configuration.cpp	/^  result.push_back(p2[1]);$/;"	p	file:	signature:(p2[1])
+push_back	display_base_location.cpp	/^    configuration_.ranges.push_back(u.standardRanges.at(i).buildRangeMsg());$/;"	p	file:	signature:(u.standardRanges.at(i).buildRangeMsg())
+push_back	display_base_location.cpp	/^  configuration_.K.push_back(x);$/;"	p	file:	signature:(x)
+push_back	display_base_location.cpp	/^  configuration_.K.push_back(y);$/;"	p	file:	signature:(y)
+push_back	utility.cpp	/^    ranges_.push_back(standardRanges.at(i).buildRangeMsg());$/;"	p	file:	signature:(standardRanges.at(i).buildRangeMsg())
+push_back	utility.cpp	/^    result.K.push_back(p.positions.at(i));$/;"	p	file:	signature:(p.positions.at(i))
+push_back	utility.cpp	/^    result.points.push_back(configs.at(i));$/;"	p	file:	signature:(configs.at(i))
+push_back	utility.cpp	/^    result.ranges.push_back(standardRanges.at(i).buildRangeMsg());$/;"	p	file:	signature:(standardRanges.at(i).buildRangeMsg())
+push_back	utility.cpp	/^  result.push_back(x);$/;"	p	file:	signature:(x)
+push_back	utility.cpp	/^  result.push_back(y);$/;"	p	file:	signature:(y)
+push_back	utility.cpp	/^  standardRanges.push_back(range0);$/;"	p	file:	signature:(range0)
+push_back	utility.cpp	/^  standardRanges.push_back(range1);$/;"	p	file:	signature:(range1)
+push_back	utility.cpp	/^  standardRanges.push_back(range2);$/;"	p	file:	signature:(range2)
+push_back	viewPredicted.cpp	/^      gr_angulars.push_back(mag_angular_t);$/;"	p	file:	signature:(mag_angular_t)
+push_back	viewPredicted.cpp	/^      tgr_linears.push_back(mag_linear_t);$/;"	p	file:	signature:(mag_linear_t)
+push_back	viewPredicted.cpp	/^    cs.push_back(end);$/;"	p	file:	signature:(end)
+push_back	viewPredicted.cpp	/^    cs.push_back(start);$/;"	p	file:	signature:(start)
+push_back	viewPredicted.cpp	/^    end.configuration.K.push_back(start.configuration.K.at(0) + (ob.odom_t.twist.twist.linear.x * d.toSec()));$/;"	p	file:	signature:(start.configuration.K.at(0) + (ob.odom_t.twist.twist.linear.x * d.toSec()))
+push_back	viewPredicted.cpp	/^    end.configuration.K.push_back(start.configuration.K.at(1) + (ob.odom_t.twist.twist.linear.y * d.toSec()));$/;"	p	file:	signature:(start.configuration.K.at(1) + (ob.odom_t.twist.twist.linear.y * d.toSec()))
+push_back	viewPredicted.cpp	/^    end.configuration.K.push_back(start.configuration.K.at(2));$/;"	p	file:	signature:(start.configuration.K.at(2))
+push_back	viewPredicted.cpp	/^    start.configuration.K.push_back(ob.odom_t.pose.pose.position.x);$/;"	p	file:	signature:(ob.odom_t.pose.pose.position.x)
+push_back	viewPredicted.cpp	/^    start.configuration.K.push_back(ob.odom_t.pose.pose.position.y);$/;"	p	file:	signature:(ob.odom_t.pose.pose.position.y)
+push_back	viewPredicted.cpp	/^  pop.population.push_back(t);$/;"	p	file:	signature:(t)
+r	utility.cpp	/^  float r = 0.2155261;$/;"	l
 random	configuration.cpp	/^void Configuration::random() {$/;"	f	class:Configuration	signature:()
 random	configuration.h	/^    void  random();$/;"	p	class:Configuration	access:public	signature:()
 random	range.cpp	/^const float Range::random() {$/;"	f	class:Range	signature:()
 random	range.h	/^    const float random();$/;"	p	class:Range	access:public	signature:()
 ranges_	configuration.h	/^    std::vector<Range> ranges_;$/;"	m	class:Configuration	access:public
+ranges_	utility.h	/^    std::vector<ramp_msgs::Range> ranges_;$/;"	m	class:Utility	access:public
+request	evaluation_request_handler.cpp	/^const bool EvaluationRequestHandler::request(ramp_msgs::EvaluationRequest& er) {$/;"	f	class:EvaluationRequestHandler	signature:(ramp_msgs::EvaluationRequest& er)
+request	evaluation_request_handler.h	/^    const bool request(ramp_msgs::EvaluationRequest& er);$/;"	p	class:EvaluationRequestHandler	access:public	signature:(ramp_msgs::EvaluationRequest& er)
+request	trajectory_request_handler.cpp	/^const bool TrajectoryRequestHandler::request(ramp_msgs::TrajectoryRequest& tr) {$/;"	f	class:TrajectoryRequestHandler	signature:(ramp_msgs::TrajectoryRequest& tr)
+request	trajectory_request_handler.h	/^    const bool request(ramp_msgs::TrajectoryRequest& tr);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(ramp_msgs::TrajectoryRequest& tr)
+result	configuration.cpp	/^  double result = 0; $/;"	l
+result	configuration.cpp	/^  float result=0.;$/;"	l
+result	configuration.cpp	/^  ramp_msgs::Configuration result;$/;"	l
+result	configuration.cpp	/^  std::ostringstream result;$/;"	l
+result	configuration.cpp	/^  std::vector<float> result;$/;"	l
+result	range.cpp	/^  ramp_msgs::Range result;$/;"	l
+result	utility.cpp	/^  float result;$/;"	l
+result	utility.cpp	/^  ramp_msgs::Configuration result; $/;"	l
+result	utility.cpp	/^  ramp_msgs::Path result;$/;"	l
+result	utility.cpp	/^  std::ostringstream result;$/;"	l
+result	utility.cpp	/^  std::vector<float> result;$/;"	l
+result	viewPredicted.cpp	/^  MotionType result;$/;"	l
+result	viewPredicted.cpp	/^  ramp_msgs::Trajectory result;$/;"	l
+ros::init	display_base_location.cpp	/^  ros::init(argc, argv, "display_base_location");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+ros::init	viewPredicted.cpp	/^  ros::init(argc, argv, "viewPredicted");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+ros::spinOnce	display_base_location.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
+ros::spinOnce	viewPredicted.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
+rotation	display_base_location.cpp	/^  Eigen::Rotation2D<float> rotation(orientation);$/;"	p	file:	signature:(orientation)
 setConfiguration	display_base_location.cpp	/^void setConfiguration(float x, float y, float theta) {$/;"	f	signature:(float x, float y, float theta)
 setT_od_w	display_base_location.cpp	/^void setT_od_w(float x, float y, float orientation) {$/;"	f	signature:(float x, float y, float orientation)
+sleep	display_base_location.cpp	/^    d.sleep();$/;"	p	file:	signature:()
+sleep	viewPredicted.cpp	/^    r.sleep();$/;"	p	file:	signature:()
+spinOnce	display_base_location.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
+spinOnce	viewPredicted.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
 standardRanges	utility.h	/^    std::vector<Range> standardRanges;$/;"	m	class:Utility	access:public
+start	viewPredicted.cpp	/^  ramp_msgs::KnotPoint start;$/;"	l
+std::cout	publish_twist_command.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
+std::cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Global Rotation";$/;"	m	class:std	file:
+std::cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == None";$/;"	m	class:std	file:
+std::cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Self-Rotation";$/;"	m	class:std	file:
+std::cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Translation + Self-Rotation";$/;"	m	class:std	file:
+std::cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Translation";$/;"	m	class:std	file:
+sub_odometry	display_base_location.cpp	/^  ros::Subscriber sub_odometry = handle.subscribe("odometry", 1000, odometryCallback);$/;"	l
+sub_odometry	viewPredicted.cpp	/^ros::Subscriber sub_odometry;$/;"	v
+sum	configuration.cpp	/^  float sum = K_.at(2) + theta;$/;"	l
+t	viewPredicted.cpp	/^  ramp_msgs::Trajectory t = getPredictedTrajectory(obstacle, d);$/;"	l
+tf::vector3MsgToTF	viewPredicted.cpp	/^    tf::vector3MsgToTF(ob.odom_t_prev.twist.twist.linear, v_linear_prev);$/;"	p	class:tf	file:	signature:(ob.odom_t_prev.twist.twist.linear, v_linear_prev)
+tf::vector3MsgToTF	viewPredicted.cpp	/^  tf::vector3MsgToTF(ob.odom_t.twist.twist.angular, v_angular);$/;"	p	class:tf	file:	signature:(ob.odom_t.twist.twist.angular, v_angular)
+tf::vector3MsgToTF	viewPredicted.cpp	/^  tf::vector3MsgToTF(ob.odom_t.twist.twist.linear, v_linear);$/;"	p	class:tf	file:	signature:(ob.odom_t.twist.twist.linear, v_linear)
+tgr_linears	viewPredicted.cpp	/^std::vector<float> tgr_linears;$/;"	v
 theta	display_base_location.cpp	/^float theta;$/;"	v
+theta	viewPredicted.cpp	/^    double theta = tf::tfAngle(v_linear, v_linear_prev);$/;"	l
 thetas_	display_base_location.cpp	/^std::vector<float> thetas_;$/;"	v
 toString	configuration.cpp	/^const std::string Configuration::toString() const {$/;"	f	class:Configuration	signature:() const
 toString	configuration.h	/^    const std::string toString() const;$/;"	p	class:Configuration	access:public	signature:() const
+toString	display_base_location.cpp	/^    cout<<"\\n\\nConfiguration: "<<c.toString();$/;"	p	file:	signature:()
 toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
 toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Path path) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path path) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
+tr	viewPredicted.cpp	/^    ramp_msgs::TrajectoryRequest tr;$/;"	l
 transformBase	configuration.cpp	/^void Configuration::transformBase(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta) {$/;"	f	class:Configuration	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta)
 transformBase	configuration.h	/^    void  transformBase(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta);$/;"	p	class:Configuration	access:public	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta)
+transformBase	display_base_location.cpp	/^    c.transformBase(T_od_w, theta);$/;"	p	file:	signature:(T_od_w, theta)
 transformBaseOrientation	configuration.cpp	/^float Configuration::transformBaseOrientation(const float theta) {$/;"	f	class:Configuration	signature:(const float theta)
 transformBaseOrientation	configuration.h	/^    float transformBaseOrientation(const float theta);$/;"	p	class:Configuration	access:private	signature:(const float theta)
 transformBasePosition	configuration.cpp	/^std::vector<float> Configuration::transformBasePosition(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w) {$/;"	f	class:Configuration	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w)
 transformBasePosition	configuration.h	/^    std::vector<float> transformBasePosition(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w);$/;"	p	class:Configuration	access:private	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w)
+translation	display_base_location.cpp	/^  Eigen::Translation<float,2> translation(x, y);$/;"	p	file:	signature:(x, y)
 u	display_base_location.cpp	/^Utility u;$/;"	v
+u	viewPredicted.cpp	/^Utility u;$/;"	v
 updatePosition	configuration.cpp	/^void Configuration::updatePosition(float x, float y, float theta)$/;"	f	class:Configuration	signature:(float x, float y, float theta)
 updatePosition	configuration.h	/^    void  updatePosition(float x, float y, float theta);$/;"	p	class:Configuration	access:public	signature:(float x, float y, float theta)
+v_angular	viewPredicted.cpp	/^  tf::Vector3 v_angular;$/;"	l
+v_linear	viewPredicted.cpp	/^  tf::Vector3 v_linear;$/;"	l
+v_linear_prev	viewPredicted.cpp	/^    tf::Vector3 v_linear_prev;$/;"	l
+v_sum	viewPredicted.cpp	/^  float v_sum = max_v;$/;"	l
+vector3MsgToTF	viewPredicted.cpp	/^    tf::vector3MsgToTF(ob.odom_t_prev.twist.twist.linear, v_linear_prev);$/;"	p	class:tf	file:	signature:(ob.odom_t_prev.twist.twist.linear, v_linear_prev)
+vector3MsgToTF	viewPredicted.cpp	/^  tf::vector3MsgToTF(ob.odom_t.twist.twist.angular, v_angular);$/;"	p	class:tf	file:	signature:(ob.odom_t.twist.twist.angular, v_angular)
+vector3MsgToTF	viewPredicted.cpp	/^  tf::vector3MsgToTF(ob.odom_t.twist.twist.linear, v_linear);$/;"	p	class:tf	file:	signature:(ob.odom_t.twist.twist.linear, v_linear)
+w_sum	viewPredicted.cpp	/^  float w_sum = max_w;$/;"	l
+x	utility.cpp	/^  float x = p.at(0);$/;"	l
+y	utility.cpp	/^  float y = p.at(1);$/;"	l
 ~Configuration	configuration.cpp	/^Configuration::~Configuration() {}$/;"	f	class:Configuration	signature:()
 ~Configuration	configuration.h	/^    ~Configuration();$/;"	p	class:Configuration	access:public	signature:()
 ~Range	range.cpp	/^Range::~Range() {}$/;"	f	class:Range	signature:()

@@ -14,7 +14,7 @@ catkin_package(
 ## Build ##
 ###########
 
-include_directories(include ${catkin_INCLUDE_DIRS} /usr/share/include/eigen3)
+include_directories(include ${catkin_INCLUDE_DIRS}) #/usr/share/include/eigen3)
 
 add_executable(display_base_location src/display_base_location.cpp src/configuration.cpp src/range.cpp src/utility.cpp)
 set_target_properties(display_base_location PROPERTIES COMPILE_FLAGS -std=c++0x)
@@ -26,3 +26,15 @@ add_executable(viewPredicted src/viewPredicted.cpp src/configuration.cpp src/ran
 set_target_properties(viewPredicted PROPERTIES COMPILE_FLAGS -std=c++0x)
 target_link_libraries(viewPredicted ${catkin_LIBRARIES})
 add_dependencies(viewPredicted ramp_msgs_generate_messages_cpp)
+
+
+add_executable(publishTwistCommand src/publish_twist_command.cpp)
+set_target_properties(publishTwistCommand PROPERTIES COMPILE_FLAGS -std=c++0x)
+target_link_libraries(publishTwistCommand ${catkin_LIBRARIES})
+add_dependencies(publishTwistCommand ramp_msgs_generate_messages_cpp)
+
+
+add_executable(publishTrajectoryCommand src/publish_trajectory_command.cpp)
+set_target_properties(publishTrajectoryCommand PROPERTIES COMPILE_FLAGS -std=c++0x)
+target_link_libraries(publishTrajectoryCommand ${catkin_LIBRARIES})
+add_dependencies(publishTrajectoryCommand ramp_msgs_generate_messages_cpp)
