@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(robot)
+project(ramp_control)
 
 find_package(catkin REQUIRED COMPONENTS genmsg geometry_msgs message_generation nav_msgs ramp_msgs roscpp)
 
@@ -37,5 +37,4 @@ add_dependencies(keyboard_teleop ramp_msgs_generate_messages_cpp)
 add_executable(waitForCommand src/wait_for_command.cpp src/corobot.cpp src/utility.cpp)
 target_link_libraries(waitForCommand ${catkin_LIBRARIES})
 add_dependencies(waitForCommand ramp_msgs_generate_messages_cpp)
-
 
