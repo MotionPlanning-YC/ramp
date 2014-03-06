@@ -182,7 +182,8 @@ const float Corobot::getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPo
   float mag_v = sqrt( pow(v[0],2) + pow(v[1],2) );
   float time = waypoint2.time_from_start.toSec() - waypoint1.time_from_start.toSec();
   float speed = mag_v / time;
-  std::cout<<"\nspeed: "<<speed;
+  //std::cout<<"\nspeed: "<<speed;
+  
   return speed;
 }
 
@@ -202,7 +203,7 @@ float Corobot::getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPo
     float y_dif = waypoint2.positions.at(1) - waypoint1.positions.at(1); //  difference in y between the waypoint 2 and 1
     float angle = asin((y_dif)/(sqrt(x_dif*x_dif + y_dif*y_dif))); //  Orientation of this trajectory in the X/Y axes
     if (x_dif < 0)
-	return M_PI - angle;
+	    return M_PI - angle;
     return angle;
 }
 
@@ -317,8 +318,12 @@ void Corobot::moveOnTrajectory()
       if(twist_.linear.x > 0.0f) {
         float actual_theta = u.displaceAngle(initial_theta, configuration_.K.at(2));
         float dist = u.findDistanceBetweenAngles(actual_theta, orientations.at(num_traveled));
-        if(dist > 0.15)
-          twist_.angular.z = -1.5 * dist;
+        //std::cout<<"\nactual theta: "<<actual_theta;
+        //std::cout<<"\norientations.at("<<num_traveled<<"): "<<orientations.at(num_traveled);
+        //std::cout<<"\ndist: "<<dist;
+        //if(dist > 0.1 || dist < -0.1) {
+          twist_.angular.z = -1*dist;
+        //}
       }
     
       // Send the twist_message to move the robot
