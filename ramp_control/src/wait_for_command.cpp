@@ -37,8 +37,12 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "waitForCommand");
   ros::NodeHandle handle;
 
+  // Subscribers
   ros::Subscriber sub_twist = handle.subscribe("twist_single", 1000, twistCallback);
   ros::Subscriber sub_traj = handle.subscribe("trajectory", 1000, trajCallback);
+  robot.sub_odometry_ = handle.subscribe(Corobot::TOPIC_STR_ODOMETRY, 1000, &Corobot::updateState, &robot);
+  
+  // Publishers
   robot.pub_twist_ = handle.advertise<geometry_msgs::Twist>(Corobot::TOPIC_STR_TWIST, 1000);
   
   ros::spin();

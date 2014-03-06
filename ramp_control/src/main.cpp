@@ -16,15 +16,15 @@ void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
 void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle) {
 
   
-  //Publishers
+  // Publishers
   robot.pub_phidget_motor_ = handle.advertise<corobot_msgs::MotorCommand>(Corobot::TOPIC_STR_PHIDGET_MOTOR, 1000);
   robot.pub_twist_ = handle.advertise<geometry_msgs::Twist>(Corobot::TOPIC_STR_TWIST, 1000);
   robot.pub_update_ = handle.advertise<ramp_msgs::Update>(Corobot::TOPIC_STR_UPDATE, 1000);
  
-  //Subscribers
+  // Subscribers
   robot.sub_odometry_ = handle.subscribe(Corobot::TOPIC_STR_ODOMETRY, 1000, &Corobot::updateState, &robot);
   
-  //Timers
+  // Timers
   robot.timer_ = handle.createTimer(ros::Duration(0.1), &Corobot::updatePublishTimer, &robot);
 }
 
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
   init_advertisers_subscribers(robot, handle);
 
 
-  //Make a blank ramp_msgs::Trajectory
+  // Make a blank ramp_msgs::Trajectory
   ramp_msgs::Trajectory init;
   robot.trajectory_ = init;
 
