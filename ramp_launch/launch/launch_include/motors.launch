@@ -7,8 +7,8 @@
 
 <!-- Robot attributes -->
 <arg name="TwoWheelDrive" value="1"/>
-<arg name="base_width" value="0.25"/> 
-<arg name="ticks_meter" value="9685"/> 
+<arg name="base_width" value="0.238125"/> 
+<arg name="ticks_meter" value="9435"/> 
 
 <arg name="PhidgetMotorController" value="1"/> <!-- 1 if you have the Phidget Motor Controller, 0 if you don't -->
 
@@ -23,7 +23,7 @@
   <node pkg="phidget_motor" name="phidget_motor" type="PhidgetMotor.py" args="" machine="robot1" />
 
   <node pkg="corobot_state_tf" name="corobot_state_tf" type="corobot_state_tf" machine="robot1">
-    <param name="ticks_meter" type="int" value="9400"/>
+    <param name="ticks_meter" type="int" value="9435"/>
     <param name="base_width" type="double" value="$(arg base_width)"/>
     <param name="TwoWheelDrive" type="bool" value="$(arg TwoWheelDrive)"/>
     <param name="publish_odom_tf" type="bool" value="1"/>
@@ -32,7 +32,7 @@
 
 
 
-  <rosparam param="ticks_meter">9685</rosparam>
+  <rosparam param="ticks_meter">9435</rosparam>
 
   <node pkg="differential-drive" type="pid_velocity.py" name="lpid_velocity" machine="robot1">
       <remap from="wheel" to="lwheel"/>
