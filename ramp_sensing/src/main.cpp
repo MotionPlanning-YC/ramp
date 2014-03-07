@@ -44,13 +44,13 @@ void publishList(const ros::TimerEvent& e) {
 
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "sensing");
+  ros::init(argc, argv, "ramp_sensing");
   ros::NodeHandle handle;
   
 
   //Get parameters
   std::string other_robot_odom;
-  handle.getParam("sensing/other_robot_odom", other_robot_odom);
+  handle.getParam("ramp_sensing/other_robot_odom", other_robot_odom);
   std::cout<<"\nother_robot_odom:"<<other_robot_odom;
   
   //Subscribers

@@ -132,11 +132,13 @@ const std::vector<float> Utility::getCenter(std::vector<float> p, float orientat
   float y = p.at(1);
   
   // Radius
-  float r = 0.2155261;
+  float r = 0.2155261f;
 
   // Get world coodinates of center point
-  x += r*cos( displaceAngle((-3*PI/4), orientation));
-  y += r*sin( displaceAngle((-3*PI/4), orientation));
+  //x += r*cos( displaceAngle((-3*PI/4), orientation));
+  //y += r*sin( displaceAngle((-3*PI/4), orientation));
+  x -= r*cos(orientation);
+  y -= r*sin(orientation);
   
   result.push_back(x);
   result.push_back(y);

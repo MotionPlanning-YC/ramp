@@ -18,11 +18,11 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   ev.setRequest(req);
   
   // Do collision detection
-  //cd.trajectory_  = req.trajectory;
-  //CollisionDetection::QueryResult qr = cd.perform();
+  cd.trajectory_  = req.trajectory;
+  CollisionDetection::QueryResult qr = cd.perform();
   //std::cout<<"\nqr.collision_: "<<qr.collision_;
-  CollisionDetection::QueryResult qr;
-  qr.collision_ = 0;
+  //CollisionDetection::QueryResult qr;
+  //qr.collision_ = 0;
   
   // Set response
   res.feasible = !qr.collision_;
@@ -44,11 +44,11 @@ void obstacleCb(const ramp_msgs::Obstacle& ol) {
 
 int main(int argc, char** argv) {
 
-  ros::init(argc, argv, "evaluation");
+  ros::init(argc, argv, "trajectory_evaluation");
   ros::NodeHandle handle;
 
   int id;
-  handle.getParam("evaluation/robot_id", id);
+  handle.getParam("trajectory_evaluation/robot_id", id);
   cd.id = id;
   std::cout<<"\nid: "<<cd.id;
   cd.init(handle);

@@ -17,10 +17,10 @@ int main(int argc, char** argv) {
   ramp_msgs::KnotPoint c1;
   c1.configuration.K.push_back(0);
   c1.configuration.K.push_back(0);
-  c1.configuration.K.push_back(0);
+  c1.configuration.K.push_back(PI/2);
 
   ramp_msgs::KnotPoint c2;
-  c2.configuration.K.push_back(1);
+  c2.configuration.K.push_back(1.f);
   c2.configuration.K.push_back(0);
   c2.configuration.K.push_back(0);
 

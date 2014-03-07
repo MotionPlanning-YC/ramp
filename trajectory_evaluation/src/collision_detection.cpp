@@ -51,11 +51,13 @@ const std::vector<float> CollisionDetection::getCenter(std::vector<float> p, flo
   float y = p.at(1);
   
   // Radius
-  float r = 0.2155261;
+  float r = 0.2155261f;
 
   // Get world coodinates of center point
-  x += r*cos( u.displaceAngle((-3*PI/4), orientation));
-  y += r*sin( u.displaceAngle((-3*PI/4), orientation));
+  //x += r*cos( u.displaceAngle((-3*PI/4), orientation));
+  //y += r*sin( u.displaceAngle((-3*PI/4), orientation));
+  x -= r*cos(orientation);
+  y -= r*sin(orientation);
   
   result.push_back(x);
   result.push_back(y);
@@ -152,25 +154,12 @@ ramp_msgs::Trajectory CollisionDetection::transformT(ramp_msgs::Trajectory ob_tr
  * The robot and obstacles can be treated as circles for simple collision detection
  */
 const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::Trajectory ob_trajectory) const {
-
-  /*if(id == 1) {
-    // Create population one member - ob_trajectory
-    ramp_msgs::Population p; 
-    ramp_msgs::Trajectory temp = transformT(ob_trajectory);
-    p.population.push_back(temp);
-    p.best_id = 0;
-    p.robot_id = 2;
-    pub_pop.publish(p);
-  }*/
-
-
   //std::cout<<"\nQuery on "<<u.toString(trajectory_)<<" \n*******and*******\n"<<u.toString(ob_trajectory);
   CollisionDetection::QueryResult result;
-  //std::cout<<"\nresult.collision_: "<<result.collision_;
   
   //std::cout<<"\nobstacle trajectory: "<<u.toString(ob_trajectory);
   // For every 3 points, check circle detection
-  float radius = 0.75f;
+  float radius = 0.35f;
   for(unsigned int i=0;i<trajectory_.trajectory.points.size() && i<ob_trajectory.trajectory.points.size();i+=3) {
     
     // Get the point on the trajectory, p
@@ -188,7 +177,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     //std::cout<<"\n("<<ob_trajectory.trajectory.points.at(0).positions.at(0)<<", "<<ob_trajectory.trajectory.points.at(0).positions.at(1)<<")";
 
     // ***Test collision against the obstacle's trajectory***
-    for(unsigned int j=i-1;j<i+1 && j<ob_trajectory.trajectory.points.size();j++) {
+    for(unsigned int j=i-3;j<i+3 && j<ob_trajectory.trajectory.points.size();j++) {
 
       // Get the points as the centers of the circles
       trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
@@ -200,9 +189,9 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       //std::vector<float> p_ob_center  = getCenter(p_ob_loc, p.positions.at(2));
       std::vector<float> p_ob_center;
       
-      // Find the center in odometry CS - center is -6, -6 from reference point
-      float temp_x = p_ob.positions.at(0) - 0.1524f;
-      float temp_y = p_ob.positions.at(1) - 0.1524f;
+      // Find the center in odometry CS - center is -r, 0 from reference point (center of wheels)
+      float temp_x = p_ob.positions.at(0) - 0.2155261f;
+      float temp_y = p_ob.positions.at(1);
 
       // Transform center point in odometry to world CS
       float x = (T_od_w.at(0).at(0) * temp_x) + (T_od_w.at(0).at(1) * temp_y) + T_od_w.at(0).at(2);
@@ -257,7 +246,6 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
   // Find magnitude of velocity vectors
   float mag_linear_t  = sqrt( tf::tfDot(v_linear, v_linear)   );
   float mag_angular_t = sqrt( tf::tfDot(v_angular, v_angular) );
-
 
   // Translation only
   if(mag_linear_t >= 0.15 && mag_angular_t < 0.25) {

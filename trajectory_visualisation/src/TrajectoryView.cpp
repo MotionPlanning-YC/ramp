@@ -178,7 +178,7 @@ void TrajectoryView::drawPopulation() {
         p.push_back(points.at(0).positions.at(1));
 
         std::vector<float> c = getCenter(p, points.at(0).positions.at(2));
-        //std::cout<<"\nc: ("<<c.at(0)<<", "<<c.at(1)<<")";
+        std::cout<<"\nc: ("<<c.at(0)<<", "<<c.at(1)<<")";
         this->scene()->addEllipse(metersToPixels(p.at(0), true),
                                     metersToPixels(p.at(1), false),
                                     metersToPixels(0.33f, true), metersToPixels(0.33f, false), pen);
@@ -193,7 +193,7 @@ void TrajectoryView::drawPopulation() {
             // Draw a line to the next point
             this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true),
                                       metersToPixels(points.at(j).positions.at(1), false),
-                                      metersToPixels(0.15, true), metersToPixels(0.15, false));
+                                      metersToPixels(0.35, true), metersToPixels(0.35, false));
                                       
           }
 
@@ -224,14 +224,8 @@ const std::vector<float> TrajectoryView::getCenter(std::vector<float> p, float o
   float r = 0.2155261;
 
   // Get world coodinates of center point
-  if(orientation > 0) {
-    x += r*cos( u.displaceAngle((-3*PI/4), orientation));
-    y += r*sin( u.displaceAngle((-3*PI/4), orientation));
-  }
-  else {
-    x += r*cos( u.displaceAngle((-3*PI/4), -orientation));
-    y += r*sin( u.displaceAngle((-3*PI/4), -orientation));
-  }
+  x -= r*cos(orientation);
+  y -= r*sin(orientation);
   
   //std::cout<<"\nx: "<<p.at(0)<<" y: "<<p.at(1)<<" orientation: "<<orientation<<" Returning ("<<x<<", "<<y<<")";
   result.push_back(x);

@@ -2,18 +2,18 @@
 
 
 Segment::Segment() : k_dof_(3), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0), T_loc_(0), T_stop_(0), T_min_(0) {
-  max_v_.push_back(0.3f);
-  max_v_.push_back(0.3f);
+  max_v_.push_back(0.35f);
+  max_v_.push_back(0.35f);
 
   // Theta velocity is higher
-  max_v_.push_back(PI/4.0f);
+  max_v_.push_back(PI/3.0f);
 }
 
 Segment::Segment(const ramp_msgs::KnotPoint kp_start, const ramp_msgs::KnotPoint kp_end, const float v_start, const float v_end, const unsigned int ind) : k_dof_(3), T_stop_(kp_start.stop_time), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0), T_loc_(0), T_min_(0)
 {
-  max_v_.push_back(0.3f);
-  max_v_.push_back(0.3f);
-  max_v_.push_back(PI/4.0f);
+  max_v_.push_back(0.35f);
+  max_v_.push_back(0.35f);
+  max_v_.push_back(PI/3.0f);
   build(kp_start, kp_end, v_start, v_end, ind);
 }
 

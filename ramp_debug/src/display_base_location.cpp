@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
 
   ros::Subscriber sub_odometry = handle.subscribe("odometry", 1000, odometryCallback);
 
-  setT_od_w(3, 1.75, PI);
+  setT_od_w(0, 0, 0);
   cout<<"\nT_od_w: "<<T_od_w.matrix()<<"\n";
 
   for(unsigned int i=0;i<u.standardRanges.size();i++) {

@@ -193,7 +193,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   // new orientation is the amount to rotate towards first knot point
   float b = u.findAngleFromAToB(start_.K_, bestTrajec_.path_.all_.at(1).configuration_.K_);
   float diff = u.findDistanceBetweenAngles(start_.K_.at(2), b);
-  if(fabs(diff) <= 0.3) {
+  if(fabs(diff) <= 0.35) {
     gradualTrajectory(bestTrajec_);
   }
     
@@ -240,7 +240,7 @@ void Planner::init_population() {
 
     // Hardcode some velocities, 0.25m/s per segment
     for(unsigned int j=1;j<paths_.at(i).all_.size();j++) {
-      v.push_back(0.3f);
+      v.push_back(0.35f);
     }
     
     // Build a TrajectoryRequest 
@@ -413,8 +413,8 @@ void Planner::sendBest() {
 
   // If infeasible and too close to obstacle, 
   // Stop the robot by sending a blank trajectory
-  if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < 3.f)) {
-    std::cout<<"\nCollision within 3 seconds! Stopping robot!\n";
+  if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < 2.f)) {
+    std::cout<<"\nCollision within 2 seconds! Stopping robot!\n";
     ramp_msgs::Trajectory blank;
     h_control_->send(blank); 
   }
