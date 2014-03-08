@@ -158,6 +158,21 @@ int main(int argc, char** argv) {
     std::cin.get();
   }*/
 
+
+  /** Check Configuration adding */
+  /*std::vector<float> a;
+  a.push_back(4.f);
+  a.push_back(2.f);
+  a.push_back(PI/2);
+  Configuration c;
+  c.K_ = a;
+  std::cout<<"\nConfiguation: "<<c.toString();
+
+  tf::Transform t(tf::createQuaternionFromYaw(-PI), tf::Vector3(a.at(0), a.at(1), 1));
+
+  c.transformBase(t);
+  std::cout<<"\nConfiguation: "<<c.toString();*/
+
   
 
   /******* Start the planner *******/

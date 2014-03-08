@@ -12,10 +12,10 @@ class RampTrajectory {
     RampTrajectory(const ramp_msgs::Trajectory msg);
     ~RampTrajectory() {}
     
+    unsigned int id_;
     ramp_msgs::Trajectory msg_trajec_;
     float fitness_;
     bool feasible_;
-    unsigned int id_;
     float time_until_collision_;
     Path path_;
 

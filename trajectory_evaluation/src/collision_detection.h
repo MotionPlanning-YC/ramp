@@ -40,14 +40,13 @@ class CollisionDetection {
     ramp_msgs::Obstacle obstacle_;
     
     int id;
-    std::vector< std::vector<float> > T_od_w;
+    tf::Transform T_od_w_;
     void setT_od_w(int id);
   
     TrajectoryRequestHandler* h_traj_req_;
-    ros::Publisher pub_pop;
   
-    ramp_msgs::Trajectory transformT(ramp_msgs::Trajectory ob_trajectory) const;
   private:
+    ros::Publisher pub_pop;
     const MotionType findMotionType(const ramp_msgs::Obstacle) const;
     const bool onSegment(const tf::Point p_i, const tf::Point p_j, const tf::Point p_k) const;
 
