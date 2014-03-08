@@ -49,6 +49,7 @@ const std::vector<float> CollisionDetection::getCenter(std::vector<float> p, flo
   // Get world coordinates of reference point 
   float x = p.at(0);
   float y = p.at(1);
+  //std::cout<<"p: ("<<x<<", "<<y<<")";
   
   // Radius
   float r = 0.2155261f;
@@ -83,13 +84,50 @@ void CollisionDetection::setT_od_w(int id) {
 }
 
 
+/** This method transforms the whole obstacle trajectory by T_od_w to get the world coordinates */
+ramp_msgs::Trajectory CollisionDetection::transformT_ob(ramp_msgs::Trajectory ob_trajectory) const {
+
+  ramp_msgs::Trajectory result;
+
+  // Go through each point
+  for(unsigned int j=0;j<ob_trajectory.trajectory.points.size();j++) {
+
+    // Get the points as the centers of the circles
+    trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
+
+    // Get the position vector for the obstacle p_ob
+    // Transform obstacle odometry coordinates to world CS
+    std::vector<float> p_ob_center;
+    
+    // Find the center in odometry CS - center is -6, -6 from reference point
+    float temp_x = p_ob.positions.at(0) - 0.1524f;
+    float temp_y = p_ob.positions.at(1) - 0.1524f;
+
+    // Transform center point in odometry to world CS
+    tf::Vector3 temp_pos(temp_x, temp_y, 0);
+    tf::Vector3 pos = T_od_w_ * temp_pos;
+
+    // Set positions
+    p_ob.positions.at(0) = pos.getX();
+    p_ob.positions.at(1) = pos.getY();
+
+    // Push on point
+    result.trajectory.points.push_back(p_ob);
+  } // end for
+
+  return result;
+}
+
 /** 
  * This method returns true if there is collision between trajectory_ and the ob_trajectory, false otherwise 
  * The robot and obstacles can be treated as circles for simple collision detection
  */
 const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::Trajectory ob_trajectory) const {
+<<<<<<< Temporary merge branch 1
+=======
 
 
+>>>>>>> Temporary merge branch 2
   //std::cout<<"\nQuery on "<<u.toString(trajectory_)<<" \n*******and*******\n"<<u.toString(ob_trajectory);
   CollisionDetection::QueryResult result;
   //std::cout<<"\nresult.collision_: "<<result.collision_;
@@ -109,21 +147,16 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
 
     // Get the center of the robot
     std::vector<float> p_center = getCenter(p_loc, p.positions.at(2));
-    
-    //std::cout<<"\nob_trajectory.size(): "<<ob_trajectory.trajectory.points.size();
-    //std::cout<<"\n("<<ob_trajectory.trajectory.points.at(0).positions.at(0)<<", "<<ob_trajectory.trajectory.points.at(0).positions.at(1)<<")";
 
     // ***Test collision against the obstacle's trajectory***
     for(unsigned int j=i-3;j<i+3 && j<ob_trajectory.trajectory.points.size();j++) {
 
       // Get the points as the centers of the circles
       trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
-      //trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(i);
 
       // Get the position vector for the obstacle p_ob
       // Transform obstacle odometry coordinates to world CS
       // Find the centers of the objects
-      //std::vector<float> p_ob_center  = getCenter(p_ob_loc, p.positions.at(2));
       std::vector<float> p_ob_center;
       
       // Find the center in odometry CS - center is -r, 0 from reference point (center of wheels)
@@ -183,7 +216,6 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
   // Find magnitude of velocity vectors
   float mag_linear_t  = sqrt( tf::tfDot(v_linear, v_linear)   );
   float mag_angular_t = sqrt( tf::tfDot(v_angular, v_angular) );
-
 
   // Translation only
   if(mag_linear_t >= 0.15 && mag_angular_t < 0.25) {
