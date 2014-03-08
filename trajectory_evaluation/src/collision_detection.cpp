@@ -84,50 +84,13 @@ void CollisionDetection::setT_od_w(int id) {
 }
 
 
-/** This method transforms the whole obstacle trajectory by T_od_w to get the world coordinates */
-ramp_msgs::Trajectory CollisionDetection::transformT_ob(ramp_msgs::Trajectory ob_trajectory) const {
-
-  ramp_msgs::Trajectory result;
-
-  // Go through each point
-  for(unsigned int j=0;j<ob_trajectory.trajectory.points.size();j++) {
-
-    // Get the points as the centers of the circles
-    trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
-
-    // Get the position vector for the obstacle p_ob
-    // Transform obstacle odometry coordinates to world CS
-    std::vector<float> p_ob_center;
-    
-    // Find the center in odometry CS - center is -6, -6 from reference point
-    float temp_x = p_ob.positions.at(0) - 0.1524f;
-    float temp_y = p_ob.positions.at(1) - 0.1524f;
-
-    // Transform center point in odometry to world CS
-    tf::Vector3 temp_pos(temp_x, temp_y, 0);
-    tf::Vector3 pos = T_od_w_ * temp_pos;
-
-    // Set positions
-    p_ob.positions.at(0) = pos.getX();
-    p_ob.positions.at(1) = pos.getY();
-
-    // Push on point
-    result.trajectory.points.push_back(p_ob);
-  } // end for
-
-  return result;
-}
-
 /** 
  * This method returns true if there is collision between trajectory_ and the ob_trajectory, false otherwise 
  * The robot and obstacles can be treated as circles for simple collision detection
  */
 const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::Trajectory ob_trajectory) const {
-<<<<<<< Temporary merge branch 1
-=======
 
 
->>>>>>> Temporary merge branch 2
   //std::cout<<"\nQuery on "<<u.toString(trajectory_)<<" \n*******and*******\n"<<u.toString(ob_trajectory);
   CollisionDetection::QueryResult result;
   //std::cout<<"\nresult.collision_: "<<result.collision_;
