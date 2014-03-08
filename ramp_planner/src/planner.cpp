@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6)
+Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), modifier_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6),  h_traj_req_(0), h_eval_req_(0), h_control_(0)
 {
   controlCycle_ = ros::Duration(0.25);
   planningCycle_ = ros::Duration(0.1);
@@ -52,32 +52,29 @@ Planner::~Planner() {
  ********************** Methods **********************
  *****************************************************/
 
+/** This method initializes the T_od_w_ transform object */
 void Planner::setT_od_w(std::vector<float> od_info) {
-    
-  Eigen::Translation<float,2> translation(od_info.at(0), od_info.at(1));
-  Eigen::Rotation2D<float> rotation(od_info.at(2));
-
-  T_od_w_ = translation * rotation;
-  std::cout<<"\nT_od_w: "<<T_od_w_.matrix();
-  
-  theta_od_w = od_info.at(2);
-}
+ 
+  T_od_w_.setRotation(tf::createQuaternionFromYaw(od_info.at(2)));
+  T_od_w_.setOrigin(tf::Vector3(od_info.at(0), od_info.at(1), 0));
+} // End setT_od_w
 
 
-const unsigned int Planner::getIRT() {
-  return i_rt++;
-}
+/** Returns an id for RampTrajectory objects */
+unsigned int Planner::getIRT() { return i_rt++; }
 
 
 /** Getter method for start_. It waits for mutex_start_ to be true before returning. */
 Configuration Planner::getStartConfiguration() {
   while(!mutex_start_) {}
   return start_;
-}
+} // End getStartConfiguration
+
 
 /** 
- * Sets start_ 
- * Updates are relative to odometry frame
+ * Sets start_ member by taking in the latest update 
+ * and transforming it by T_od_w because 
+ * updates are relative to odometry frame
  * */
 void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
   //std::cout<<"\nReceived update!\n";
@@ -91,7 +88,7 @@ void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
   Configuration c_od(msg->configuration);
 
   // Transform configuration from odometry to world coordinates
-  c_od.transformBase(T_od_w_, theta_od_w);
+  c_od.transformBase(T_od_w_);
 
   // if statement Necessary?
   if(c_od.K_.size() > 0) {
@@ -101,7 +98,7 @@ void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
   //std::cout<<"\nNew starting configuration: "<<start_.toString();
 
   mutex_start_ = true;
-}
+} // End updateCallback
 
 
 /****************************************************
@@ -111,19 +108,22 @@ void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
 
 /** Initialize the handlers and allocate them on the heap */
 void Planner::init(const ros::NodeHandle& h) {
+
+  // Initialize the handlers
   h_traj_req_ = new TrajectoryRequestHandler(h);
   h_control_  = new ControlHandler(h);
   h_eval_req_ = new EvaluationRequestHandler(h);
   modifier_   = new Modifier(h, paths_, velocities_, num_ops_);
 
+  // Initialize the timers, but don't start them yet
   controlCycleTimer_ = h.createTimer(ros::Duration(controlCycle_), &Planner::controlCycleCallback, this);
   controlCycleTimer_.stop();
-  
+
   planningCycleTimer_ = h.createTimer(ros::Duration(planningCycle_), &Planner::planningCycleCallback, this);
   planningCycleTimer_.stop();
-}
+} // End init
 
-void Planner::planningCycleCallback(const ros::TimerEvent& t) {
+void Planner::planningCycleCallback(const ros::TimerEvent&) {
   //std::cout<<"\ngeneration: "<<generation_<<"\n";
   
   // Wait until mutex can be obtained
@@ -138,11 +138,10 @@ void Planner::planningCycleCallback(const ros::TimerEvent& t) {
   
   // t=t+1
   generation_++;
-} //End planningCycleCallback
+} // End planningCycleCallback
 
 
-/* This method returns a trajectory to gradually move into a new trajectory
- * t is the trajectory to change, theta is the orientation we want to reach */
+/* This method returns a trajectory to gradually move into a new trajectory */
 void Planner::gradualTrajectory(RampTrajectory& t) {
 
   // Find where linear velocity starts
@@ -163,13 +162,13 @@ void Planner::gradualTrajectory(RampTrajectory& t) {
       t.msg_trajec_.trajectory.points.at(j).velocities.at(1) = p.velocities.at(1);
     } //end for
   } //end if i in range
-} //End gradualTrajectory
+} // End gradualTrajectory
 
 
-/** This method receives the latest configuraton of the robot, 
- *  updates the population, re-evaluates the population,
- *  and sends a new trajectory for the robot to move along */
-void Planner::controlCycleCallback(const ros::TimerEvent& t) {
+/** This method updates the population based on the latest 
+ *  configuration of the robot, re-evaluates the population,
+ *  and sends a new (and better) trajectory for the robot to move along */
+void Planner::controlCycleCallback(const ros::TimerEvent&) {
 
   // std::cout<<"\nSpinning once\n";
   ros::spinOnce(); 
@@ -188,19 +187,18 @@ void Planner::controlCycleCallback(const ros::TimerEvent& t) {
   bestTrajec_ = evaluateAndObtainBest();
 
 
-  // Find orientation difference between old and new T_move
-  // old configuration is the new start_ configuration
+  // Find orientation difference between the old and new trajectory 
+  // old configuration is the new start_ configuration (last point on old trajectory)
   // new orientation is the amount to rotate towards first knot point
   float b = u.findAngleFromAToB(start_.K_, bestTrajec_.path_.all_.at(1).configuration_.K_);
   float diff = u.findDistanceBetweenAngles(start_.K_.at(2), b);
   if(fabs(diff) <= 0.35) {
     gradualTrajectory(bestTrajec_);
   }
-    
   
   // Send the best trajectory 
   sendBest(); 
-} //End controlCycleCallback
+} // End controlCycleCallback
 
 
 
@@ -284,12 +282,12 @@ void Planner::init_population() {
  *****************************************************/
 
 /** Request a trajectory */
-const bool Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr) {
+bool Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr) {
   return h_traj_req_->request(tr); 
 }
 
 /** Request an evaluation */
-const bool Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er) {
+bool Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er) {
   return h_eval_req_->request(er);
 }
 
@@ -336,17 +334,19 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
     
     // Send the request and set the result to the returned trajectory 
     if(requestTrajectory(tr)) {
+      // Build RampTrajectory
       RampTrajectory temp(getIRT());
       temp.msg_trajec_ = tr.response.trajectory;
       temp.path_ = modded_paths.at(i);
 
+      // Build ModifiedTrajectory
       ModifiedTrajectory mt;
       mt.trajec_ = temp;
       mt.velocities_ = vs.at(i); 
 
       result.push_back(mt);
-    }
-  }
+    } // end if
+  } // end for
   
   return result;
 } // End modifyTrajectory
@@ -368,7 +368,7 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   result.request.resolutionRate = resolutionRate_;
 
   return result;
-}
+} // End buildTrajectoryRequest
 
 
 /** Build a TrajectoryRequest srv */
@@ -381,7 +381,7 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const unsigne
   result.request.resolutionRate = resolutionRate_;
   
   return result; 
-}
+} // End buildTrajectoryRequest
 
 
 /** Build an EvaluationRequest srv */
@@ -391,7 +391,7 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const unsigne
   result.request.trajectory = population_.population_.at(i_trajec).msg_trajec_;
 
   return result;
-}
+} // End buildEvaluationRequest
 
 /** Build an EvaluationRequest srv */
 const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTrajectory trajec) {
@@ -400,7 +400,7 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
   result.request.trajectory = trajec.msg_trajec_;
 
   return result;
-}
+} // End buildEvaluationRequest
 
 
 
@@ -426,7 +426,7 @@ void Planner::sendBest() {
   else {
     h_control_->send(bestTrajec_.msg_trajec_);
   }
-} //End sendBest
+} // End sendBest
 
 
 

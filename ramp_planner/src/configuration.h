@@ -20,18 +20,17 @@ class Configuration {
     std::vector<Range> ranges_;
     
     void  random();
-    const bool equals(const Configuration& c) const; 
-    const double compare(const Configuration& c, bool base_theta) const;
+    bool equals(const Configuration& c) const; 
+    double compare(const Configuration& c, bool base_theta) const;
     const ramp_msgs::Configuration buildConfigurationMsg() const;
     const std::string toString() const;
     void  updatePosition(float x, float y, float theta);
 
 
-    void  transformBase(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta);
+    void transformBase(const tf::Transform t);
   
   private:
-    std::vector<float> transformBasePosition(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w);
-    float transformBaseOrientation(const float theta);
+    tf::Vector3 transformBasePosition(const tf::Transform t);
     unsigned int mobile_base_k_;
 
     Utility u;

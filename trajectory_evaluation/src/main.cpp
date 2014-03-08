@@ -61,21 +61,27 @@ int main(int argc, char** argv) {
   /** ***Testing*** */
 
   // Make trajectory 1
-  /*ramp_msgs::Configuration c1;
+  ramp_msgs::KnotPoint kp1;
+  ramp_msgs::Configuration c1;
   c1.K.push_back(0);
   c1.K.push_back(2);
-  c1.K.push_back(0.3218f);
+  c1.K.push_back(0);
   c1.ranges = u.ranges_;
+  kp1.configuration = c1;
+  kp1.stop_time = 0;
   
+  ramp_msgs::KnotPoint kp2;
   ramp_msgs::Configuration c2;
-  c2.K.push_back(3);
-  c2.K.push_back(3);
-  c2.K.push_back(0.3218f);
+  c2.K.push_back(1);
+  c2.K.push_back(2);
+  c2.K.push_back(0);
   c2.ranges = u.ranges_;
+  kp2.configuration = c2;
+  kp2.stop_time = 0;
 
   ramp_msgs::Path p1;
-  p1.configurations.push_back(c1);
-  p1.configurations.push_back(c2);
+  p1.points.push_back(kp1);
+  p1.points.push_back(kp2);
 
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p1;
@@ -85,32 +91,42 @@ int main(int argc, char** argv) {
 
   cd.h_traj_req_->request(tr);
   ramp_msgs::Trajectory t1 = tr.response.trajectory;
+  
+  std::cout<<"\nt1: "<<u.toString(t1);
 
+  //ramp_msgs::Trajectory t1_ob = cd.transformT_ob(t1);
+  //std::cout<<"\nt1_ob: "<<u.toString(t1_ob);
+  
 
   // Make trajectory 2 - in odometry space
+  ramp_msgs::KnotPoint kp3;
   ramp_msgs::Configuration c3;
   c3.K.push_back(0);
   c3.K.push_back(0.f);
   c3.K.push_back(0);
   c3.ranges = u.ranges_;
+  kp3.configuration = c3;
+  kp3.stop_time = 0;
   
+  ramp_msgs::KnotPoint kp4;
   ramp_msgs::Configuration c4;
-  c4.K.push_back(-3);
-  c4.K.push_back(1);
-  c4.K.push_back(-0.3218);
+  c4.K.push_back(0.f);
+  c4.K.push_back(1.f);
+  c4.K.push_back(0.f);
   c4.ranges = u.ranges_;
+  kp4.configuration = c4;
+  kp4.stop_time = 0;
 
   ramp_msgs::Path p2;
-  p2.configurations.push_back(c3);
-  p2.configurations.push_back(c4);
+  p2.points.push_back(kp3);
+  p2.points.push_back(kp4);
 
   tr.request.path = p2;
 
   cd.h_traj_req_->request(tr);
   ramp_msgs::Trajectory t2 = tr.response.trajectory;
 
-  std::cout<<"\nt1: "<<u.toString(t1);
-  std::cout<<"\nt2: "<<u.toString(cd.transformT(t2));
+  //std::cout<<"\nt2: "<<u.toString(t2);
 
 
   // Do collision detection against two trajectories
@@ -120,7 +136,7 @@ int main(int argc, char** argv) {
   std::cout<<"\nqr.i_obstacle: "<<qr.i_obstacle;
   std::cout<<"\nqr.time_until_collision: "<<qr.time_until_collision_;
   t1.feasible = !qr.collision_;
-  //t1.feasible = 1;*/
+  //t1.feasible = 1;
   
 
 
