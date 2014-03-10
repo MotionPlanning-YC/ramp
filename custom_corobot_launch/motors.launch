@@ -20,7 +20,7 @@
 
 <!--***** PID CONTROL *****-->
 
-<arg name="twistCommand" value="0"/> <!-- 1 if you want to enable commanding the robot with twist messages, 0 if you don't. You can change the PID parameters bellow -->
+<arg name="twistCommand" value="1"/> <!-- 1 if you want to enable commanding the robot with twist messages, 0 if you don't. You can change the PID parameters bellow -->
 
 
 
@@ -46,7 +46,7 @@
 	<group if="$(arg twistCommand)">
 		<rosparam param="ticks_meter">$(arg ticks_meter)</rosparam>
 
-			<node pkg="differential_drive" type="pid_velocity.py" name="lpid_velocity">
+			<node pkg="differential-drive" type="pid_velocity.py" name="lpid_velocity">
 			    <remap from="wheel" to="lwheel"/>
 			    <remap from="motor_cmd" to="lmotor_cmd"/>
 			    <remap from="wheel_vtarget" to="lwheel_vtarget"/>
@@ -60,7 +60,7 @@
 			    <rosparam param="timeout_ticks">4</rosparam>
 			    <rosparam param="rolling_pts">8</rosparam>
 			</node>
-			<node pkg="differential_drive" type="pid_velocity.py" name="rpid_velocity">
+			<node pkg="differential-drive" type="pid_velocity.py" name="rpid_velocity">
 			    <remap from="wheel" to="rwheel"/>
 			    <remap from="motor_cmd" to="rmotor_cmd"/>
 			    <remap from="wheel_vtarget" to="rwheel_vtarget"/>
@@ -75,7 +75,7 @@
 			    <rosparam param="rolling_pts">8</rosparam>
 			</node>
 
-			<node pkg="differential_drive" type="twist_to_motors.py" name="twist_to_motors">
+			<node pkg="differential-drive" type="twist_to_motors.py" name="twist_to_motors">
 			  <rosparam param="base_width">$(arg base_width)</rosparam>
 			</node>
   </group>

@@ -124,7 +124,7 @@ void Planner::init(const ros::NodeHandle& h) {
 } // End init
 
 void Planner::planningCycleCallback(const ros::TimerEvent&) {
-  //std::cout<<"\ngeneration: "<<generation_<<"\n";
+  std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
   
   // Wait until mutex can be obtained
   while(!mutex_pop_) {}
