@@ -95,7 +95,7 @@
 
   <node pkg="corobot_state_tf" name="corobot_state_tf" type="corobot_state_tf" machine="robot2">
     <!-- <param name="ticks_meter" type="int" value="$(arg ticks_meter)"/> -->
-    <param name="ticks_meter" type="int" value="9750"/>
+    <param name="ticks_meter" type="int" value="9435"/>
     <param name="base_width" type="double" value="$(arg base_width)"/>
     <param name="TwoWheelDrive" type="bool" value="$(arg TwoWheelDrive)"/>
     <param name="publish_odom_tf" type="bool" value="1"/>
@@ -104,7 +104,7 @@
 
 
 
-  <rosparam param="ticks_meter">9400</rosparam>
+  <rosparam param="ticks_meter">9435</rosparam>
 
   <node pkg="differential-drive" type="pid_velocity.py" name="lpid_velocity" machine="robot2">
       <remap from="wheel" to="lwheel"/>

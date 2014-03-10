@@ -2,6 +2,7 @@
 #define OBSTACLE_H
 #include "nav_msgs/Odometry.h"
 #include "ramp_msgs/Obstacle.h"
+#include <tf/transform_datatypes.h>
 #include <vector>
 
 class Obstacle {

@@ -124,7 +124,7 @@ void Planner::init(const ros::NodeHandle& h) {
 } // End init
 
 void Planner::planningCycleCallback(const ros::TimerEvent&) {
-  std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
+  //std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
   
   // Wait until mutex can be obtained
   while(!mutex_pop_) {}
@@ -192,8 +192,12 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   // new orientation is the amount to rotate towards first knot point
   float b = u.findAngleFromAToB(start_.K_, bestTrajec_.path_.all_.at(1).configuration_.K_);
   float diff = u.findDistanceBetweenAngles(start_.K_.at(2), b);
-  if(fabs(diff) <= 0.35) {
+  if(fabs(diff) <= 0.5) {
     gradualTrajectory(bestTrajec_);
+  }
+  else {
+    std::cout<<"\nNo gradual: diff = "<<diff;
+    std::cout<<"\nstart_.K_[2]: "<<start_.K_.at(2)<<" b: "<<b<<"\n";
   }
   
   // Send the best trajectory 
@@ -729,8 +733,9 @@ const std::string Planner::pathsToString() const {
 
   // Evaluate the population and get the initial trajectory to move on
   RampTrajectory T_move = evaluateAndObtainBest();
-  std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n"; 
+  std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n\n"; 
   sendPopulation();
+  std::cout<<"\nAfter sendPopulation\n";
   // std::cout<<"\nPress enter to start the loop!\n";
   // std::cin.get();
   

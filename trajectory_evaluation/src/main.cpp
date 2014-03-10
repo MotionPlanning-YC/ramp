@@ -8,6 +8,7 @@
 Evaluate ev;
 CollisionDetection cd;
 Utility u;
+bool received_ob = false;
 
 
 /** Srv callback to evaluate a trajectory */
@@ -17,29 +18,38 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   //std::cout<<"\nIn handleRequest!\n";
   ev.setRequest(req);
   
-  // Do collision detection
-  cd.trajectory_  = req.trajectory;
-  CollisionDetection::QueryResult qr = cd.perform();
-  //std::cout<<"\nqr.collision_: "<<qr.collision_;
-  //CollisionDetection::QueryResult qr;
-  //qr.collision_ = 0;
-  
+  // Make a QueryResult object
+  CollisionDetection::QueryResult qr;
+
+  // If there are obstacles, do collision detection
+  if(received_ob) {
+    cd.trajectory_  = req.trajectory;
+    qr = cd.perform();
+  }
+  // Else, set collision to false
+  else {
+    qr.collision_ = 0;
+    qr.time_until_collision_ = 9999.0f; 
+  }
+
   // Set response
   res.feasible = !qr.collision_;
   res.time_until_collision = qr.time_until_collision_;
 
   // Do fitness
   res.fitness = ev.performFitness(qr);
+
+  //std::cout<<"\nSending back: Feasible = "<<res.fitness<<", Fitness = "<<res.fitness<<"\n";
   
   return true;
 } //End handleRequest
 
 
 /** Subscribe to the object_list topic to get the latest list information about objects, update the collision detection's obstacle list */
-//void obstacleListCb(const ramp_msgs::ObstacleList& ol) {
 void obstacleCb(const ramp_msgs::Obstacle& ol) {
   cd.obstacle_ = ol;
-} //End objectListCb
+  received_ob = true;
+} //End objectCb
 
 
 int main(int argc, char** argv) {
@@ -61,7 +71,7 @@ int main(int argc, char** argv) {
   /** ***Testing*** */
 
   // Make trajectory 1
-  ramp_msgs::KnotPoint kp1;
+  /*ramp_msgs::KnotPoint kp1;
   ramp_msgs::Configuration c1;
   c1.K.push_back(0);
   c1.K.push_back(2);
@@ -135,7 +145,7 @@ int main(int argc, char** argv) {
   std::cout<<"\nqr.collision: "<<qr.collision_;
   std::cout<<"\nqr.i_obstacle: "<<qr.i_obstacle;
   std::cout<<"\nqr.time_until_collision: "<<qr.time_until_collision_;
-  t1.feasible = !qr.collision_;
+  t1.feasible = !qr.collision_;*/
   //t1.feasible = 1;
   
 

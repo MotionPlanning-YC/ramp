@@ -11,7 +11,6 @@ CollisionDetection::~CollisionDetection() {
 
 void CollisionDetection::init(ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler((const ros::NodeHandle&)h);
-  //pub_pop = h.advertise<ramp_msgs::Population>("population", 1000);
   setT_od_w(id);
 }
 
@@ -55,8 +54,6 @@ const std::vector<float> CollisionDetection::getCenter(std::vector<float> p, flo
   float r = 0.2155261f;
 
   // Get world coodinates of center point
-  //x += r*cos( u.displaceAngle((-3*PI/4), orientation));
-  //y += r*sin( u.displaceAngle((-3*PI/4), orientation));
   x -= r*cos(orientation);
   y -= r*sin(orientation);
   
@@ -97,7 +94,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   
   //std::cout<<"\nobstacle trajectory: "<<u.toString(ob_trajectory);
   // For every 3 points, check circle detection
-  float radius = 0.35f;
+  float radius = 0.4f;
   for(unsigned int i=0;i<trajectory_.trajectory.points.size() && i<ob_trajectory.trajectory.points.size();i+=3) {
     
     // Get the point on the trajectory, p
