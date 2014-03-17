@@ -6,7 +6,7 @@
 float value;
 
 void odometryCallback(const nav_msgs::Odometry& msg) {
-  std::cout<<"\nYaw: "<<tf::getYaw(msg.pose.pose.orientation);
+  std::cout<<"\nYaw: "<<tf::getYaw(msg.pose.pose.orientation) * 180 / 3.14159f;
 }
 
 int main(int argc, char** argv) {

@@ -2,7 +2,6 @@
 #include <iostream>
 #include "nav_msgs/Odometry.h"
 #include "configuration.h"
-#include <Eigen/Geometry>
 #include <unistd.h>
 using namespace std;
 
@@ -22,7 +21,8 @@ float angle_at_start = 0.0f;
 Utility u;
 
 // Transformation from odometry to world
-Eigen::Transform<float, 2, Eigen::Affine> T_od_w;
+//Eigen::Transform<float, 2, Eigen::Affine> T_od_w;
+tf::StampedTransform T_od_w;
 
 // Rotation from odometry to world
 float theta;
@@ -31,10 +31,11 @@ float theta;
 
 /** Initialize the T_od_w */
 void setT_od_w(float x, float y, float orientation) {
-  Eigen::Translation<float,2> translation(x, y);
-  Eigen::Rotation2D<float> rotation(orientation);
 
-  T_od_w = translation * rotation;
+  tf::Vector3 pos(x, y, 0);
+  T_od_w.setOrigin(pos);
+  T_od_w.setRotation(tf::createQuaternionFromYaw(orientation));
+
   theta = orientation;
 }
 
@@ -81,7 +82,7 @@ void displayConfiguration() {
 
     // Get Configuration and transform it to world CS
     Configuration c(configuration_);
-    c.transformBase(T_od_w, theta);
+    c.transformBase(T_od_w);
     
     cout<<"\n\nConfiguration: "<<c.toString();
 
@@ -98,7 +99,6 @@ int main(int argc, char** argv) {
   ros::Subscriber sub_odometry = handle.subscribe("odometry", 1000, odometryCallback);
 
   setT_od_w(0, 0, 0);
-  cout<<"\nT_od_w: "<<T_od_w.matrix()<<"\n";
 
   for(unsigned int i=0;i<u.standardRanges.size();i++) {
     configuration_.ranges.push_back(u.standardRanges.at(i).buildRangeMsg());

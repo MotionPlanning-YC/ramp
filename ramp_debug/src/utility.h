@@ -13,7 +13,6 @@
 #include "nav_msgs/Odometry.h"
 #include "motion_type.h"
 #include <tf/transform_datatypes.h>
-#include <Eigen/Geometry>
 #include "range.h"
 
 #define PI 3.14159f

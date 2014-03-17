@@ -139,15 +139,19 @@ buildConfigurationMsg	configuration.h	/^    const ramp_msgs::Configuration build
 buildRangeMsg	range.cpp	/^const ramp_msgs::Range Range::buildRangeMsg() const {$/;"	f	class:Range	signature:() const
 buildRangeMsg	range.h	/^    const ramp_msgs::Range buildRangeMsg() const;$/;"	p	class:Range	access:public	signature:() const
 c	display_base_location.cpp	/^    Configuration c(configuration_);$/;"	p	file:	signature:(configuration_)
+c1	publish_trajectory_command.cpp	/^  ramp_msgs::KnotPoint c1;$/;"	l
+c2	publish_trajectory_command.cpp	/^  ramp_msgs::KnotPoint c2;$/;"	l
 center	display_base_location.cpp	/^    std::vector<float> center = u.getCenter(c.K_, c.K_.at(2));$/;"	l
 clear	configuration.cpp	/^  K_.clear();$/;"	p	file:	signature:()
 clear	display_base_location.cpp	/^    thetas_.clear();$/;"	p	file:	signature:()
 clear	display_base_location.cpp	/^  configuration_.K.clear();$/;"	p	file:	signature:()
 client_	evaluation_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:EvaluationRequestHandler	access:private
+client_	publish_trajectory_command.cpp	/^  ros::ServiceClient client_ = handle.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");$/;"	l
 client_	trajectory_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:TrajectoryRequestHandler	access:private
 compare	configuration.cpp	/^const double Configuration::compare(const Configuration& c) const {$/;"	f	class:Configuration	signature:(const Configuration& c) const
 compare	configuration.h	/^    const double compare(const Configuration& c) const;$/;"	p	class:Configuration	access:public	signature:(const Configuration& c) const
-cout	publish_twist_command.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
+cout	publish_trajectory_command.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
+cout	publish_trajectory_command.cpp	/^  std::cout<<"\\nPress Enter to request and send the trajectory\\n";$/;"	m	class:std	file:
 cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Global Rotation";$/;"	m	class:std	file:
 cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == None";$/;"	m	class:std	file:
 cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Self-Rotation";$/;"	m	class:std	file:
@@ -171,6 +175,7 @@ findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const std::vecto
 findDistanceBetweenAngles	utility.cpp	/^const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {$/;"	f	class:Utility	signature:(const float a1, const float a2) const
 findDistanceBetweenAngles	utility.h	/^    const float findDistanceBetweenAngles(const float a1, const float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, const float a2) const
 findMotionType	viewPredicted.cpp	/^const MotionType findMotionType(const ramp_msgs::Obstacle ob) { $/;"	f	signature:(const ramp_msgs::Obstacle ob)
+get	publish_trajectory_command.cpp	/^  std::cin.get();$/;"	p	file:	signature:()
 getAndSendTrajectory	viewPredicted.cpp	/^void getAndSendTrajectory() {$/;"	f	signature:()
 getCenter	utility.cpp	/^const std::vector<float> Utility::getCenter(std::vector<float> p, float orientation) const {$/;"	f	class:Utility	signature:(std::vector<float> p, float orientation) const
 getCenter	utility.h	/^    const std::vector<float> getCenter(std::vector<float> p, float orientation) const;$/;"	p	class:Utility	access:public	signature:(std::vector<float> p, float orientation) const
@@ -183,6 +188,8 @@ getYaw	viewPredicted.cpp	/^    start.configuration.K.push_back(tf::getYaw(ob.odo
 gr_angulars	viewPredicted.cpp	/^std::vector<float> gr_angulars;$/;"	v
 h_traj_req_	viewPredicted.cpp	/^TrajectoryRequestHandler* h_traj_req_;$/;"	v
 handle	display_base_location.cpp	/^  ros::NodeHandle handle;$/;"	l
+handle	getYaw.cpp	/^  ros::NodeHandle handle;$/;"	l
+handle	publish_trajectory_command.cpp	/^  ros::NodeHandle handle;$/;"	l
 handle	viewPredicted.cpp	/^  ros::NodeHandle handle;$/;"	l
 handle_	evaluation_request_handler.h	/^    ros::NodeHandle handle_;$/;"	m	class:EvaluationRequestHandler	access:private
 handle_	trajectory_request_handler.h	/^    ros::NodeHandle  handle_; $/;"	m	class:TrajectoryRequestHandler	access:private
@@ -191,11 +198,14 @@ i	utility.cpp	/^    result<<"\\n  "<<i<<": (";$/;"	l
 i	utility.cpp	/^    result<<"\\n\\n   Point "<<i<<":";$/;"	l
 index	utility.cpp	/^    unsigned int index = traj.index_knot_points.at(i);$/;"	l
 init	display_base_location.cpp	/^  ros::init(argc, argv, "display_base_location");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+init	getYaw.cpp	/^  ros::init(argc, argv, "getYaw");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+init	publish_trajectory_command.cpp	/^  ros::init(argc, argv, "publish_trajectory_command");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
 init	viewPredicted.cpp	/^  ros::init(argc, argv, "viewPredicted");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
 mag_angular_t	viewPredicted.cpp	/^  float mag_angular_t = sqrt( tf::tfDot(v_angular, v_angular) );$/;"	l
 mag_linear_t	viewPredicted.cpp	/^  float mag_linear_t  = sqrt( tf::tfDot(v_linear, v_linear)   );$/;"	l
 main	display_base_location.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
-main	publish_twist_command.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+main	getYaw.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+main	publish_trajectory_command.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
 main	viewPredicted.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
 matrix	display_base_location.cpp	/^  cout<<"\\nT_od_w: "<<T_od_w.matrix()<<"\\n";$/;"	p	file:	signature:()
 max_	range.h	/^    float max_;$/;"	m	class:Range	access:public
@@ -207,14 +217,19 @@ min_	range.h	/^    float min_;$/;"	m	class:Range	access:public
 motion_type	viewPredicted.cpp	/^  MotionType motion_type = findMotionType(obstacle);$/;"	l
 obstacle	viewPredicted.cpp	/^ramp_msgs::Obstacle obstacle;$/;"	v
 odometryCallback	display_base_location.cpp	/^void odometryCallback(const nav_msgs::Odometry::ConstPtr& msg) {$/;"	f	signature:(const nav_msgs::Odometry::ConstPtr& msg)
+odometryCallback	getYaw.cpp	/^void odometryCallback(const nav_msgs::Odometry& msg) {$/;"	f	signature:(const nav_msgs::Odometry& msg)
+odometryCallback	publish_twist_command.cpp	/^void odometryCallback(const nav_msgs::Odometry& msg) {$/;"	f	signature:(const nav_msgs::Odometry& msg)
 odometryCallback	viewPredicted.cpp	/^void odometryCallback(const nav_msgs::Odometry& msg) {$/;"	f	signature:(const nav_msgs::Odometry& msg)
 p	configuration.cpp	/^  Eigen::Vector3f p(K_.data());$/;"	p	file:	signature:(K_.data())
+p	publish_trajectory_command.cpp	/^  ramp_msgs::Path p;$/;"	l
 p	utility.cpp	/^    trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);$/;"	l
 p	utility.cpp	/^    trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);$/;"	l
 p	viewPredicted.cpp	/^    ramp_msgs::Path p = u.getPath(cs);$/;"	l
 p2	configuration.cpp	/^  Eigen::Vector3f p2 = T_od_w * p;$/;"	l
 p_w	configuration.cpp	/^  std::vector<float> p_w = transformBasePosition(T_od_w);$/;"	l
 pop	viewPredicted.cpp	/^  ramp_msgs::Population pop;$/;"	l
+pub_traj	publish_trajectory_command.cpp	/^  ros::Publisher pub_traj = handle.advertise<ramp_msgs::Trajectory>("trajectory", 1000);$/;"	l
+publish	publish_trajectory_command.cpp	/^    pub_traj.publish(tr.response.trajectory);$/;"	p	file:	signature:(tr.response.trajectory)
 publish	viewPredicted.cpp	/^  pub_population.publish(pop);$/;"	p	file:	signature:(pop)
 push_back	configuration.cpp	/^    K_.push_back(c.K.at(i));$/;"	p	file:	signature:(c.K.at(i))
 push_back	configuration.cpp	/^    K_.push_back(p.positions.at(i));$/;"	p	file:	signature:(p.positions.at(i))
@@ -231,6 +246,8 @@ push_back	configuration.cpp	/^  result.push_back(p2[1]);$/;"	p	file:	signature:(
 push_back	display_base_location.cpp	/^    configuration_.ranges.push_back(u.standardRanges.at(i).buildRangeMsg());$/;"	p	file:	signature:(u.standardRanges.at(i).buildRangeMsg())
 push_back	display_base_location.cpp	/^  configuration_.K.push_back(x);$/;"	p	file:	signature:(x)
 push_back	display_base_location.cpp	/^  configuration_.K.push_back(y);$/;"	p	file:	signature:(y)
+push_back	publish_trajectory_command.cpp	/^  p.points.push_back(c1);$/;"	p	file:	signature:(c1)
+push_back	publish_trajectory_command.cpp	/^  p.points.push_back(c2);$/;"	p	file:	signature:(c2)
 push_back	utility.cpp	/^    ranges_.push_back(standardRanges.at(i).buildRangeMsg());$/;"	p	file:	signature:(standardRanges.at(i).buildRangeMsg())
 push_back	utility.cpp	/^    result.K.push_back(p.positions.at(i));$/;"	p	file:	signature:(p.positions.at(i))
 push_back	utility.cpp	/^    result.points.push_back(configs.at(i));$/;"	p	file:	signature:(configs.at(i))
@@ -250,7 +267,7 @@ push_back	viewPredicted.cpp	/^    end.configuration.K.push_back(start.configurat
 push_back	viewPredicted.cpp	/^    start.configuration.K.push_back(ob.odom_t.pose.pose.position.x);$/;"	p	file:	signature:(ob.odom_t.pose.pose.position.x)
 push_back	viewPredicted.cpp	/^    start.configuration.K.push_back(ob.odom_t.pose.pose.position.y);$/;"	p	file:	signature:(ob.odom_t.pose.pose.position.y)
 push_back	viewPredicted.cpp	/^  pop.population.push_back(t);$/;"	p	file:	signature:(t)
-r	utility.cpp	/^  float r = 0.2155261;$/;"	l
+r	utility.cpp	/^  float r = 0.2155261f;$/;"	l
 random	configuration.cpp	/^void Configuration::random() {$/;"	f	class:Configuration	signature:()
 random	configuration.h	/^    void  random();$/;"	p	class:Configuration	access:public	signature:()
 random	range.cpp	/^const float Range::random() {$/;"	f	class:Range	signature:()
@@ -275,7 +292,10 @@ result	utility.cpp	/^  std::vector<float> result;$/;"	l
 result	viewPredicted.cpp	/^  MotionType result;$/;"	l
 result	viewPredicted.cpp	/^  ramp_msgs::Trajectory result;$/;"	l
 ros::init	display_base_location.cpp	/^  ros::init(argc, argv, "display_base_location");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+ros::init	getYaw.cpp	/^  ros::init(argc, argv, "getYaw");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+ros::init	publish_trajectory_command.cpp	/^  ros::init(argc, argv, "publish_trajectory_command");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
 ros::init	viewPredicted.cpp	/^  ros::init(argc, argv, "viewPredicted");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+ros::spin	getYaw.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
 ros::spinOnce	display_base_location.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
 ros::spinOnce	viewPredicted.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
 rotation	display_base_location.cpp	/^  Eigen::Rotation2D<float> rotation(orientation);$/;"	p	file:	signature:(orientation)
@@ -283,16 +303,19 @@ setConfiguration	display_base_location.cpp	/^void setConfiguration(float x, floa
 setT_od_w	display_base_location.cpp	/^void setT_od_w(float x, float y, float orientation) {$/;"	f	signature:(float x, float y, float orientation)
 sleep	display_base_location.cpp	/^    d.sleep();$/;"	p	file:	signature:()
 sleep	viewPredicted.cpp	/^    r.sleep();$/;"	p	file:	signature:()
+spin	getYaw.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
 spinOnce	display_base_location.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
 spinOnce	viewPredicted.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
 standardRanges	utility.h	/^    std::vector<Range> standardRanges;$/;"	m	class:Utility	access:public
 start	viewPredicted.cpp	/^  ramp_msgs::KnotPoint start;$/;"	l
-std::cout	publish_twist_command.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
+std::cout	publish_trajectory_command.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
+std::cout	publish_trajectory_command.cpp	/^  std::cout<<"\\nPress Enter to request and send the trajectory\\n";$/;"	m	class:std	file:
 std::cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Global Rotation";$/;"	m	class:std	file:
 std::cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == None";$/;"	m	class:std	file:
 std::cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Self-Rotation";$/;"	m	class:std	file:
 std::cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Translation + Self-Rotation";$/;"	m	class:std	file:
 std::cout	viewPredicted.cpp	/^    std::cout<<"\\nmotion_type == Translation";$/;"	m	class:std	file:
+sub	getYaw.cpp	/^  ros::Subscriber sub = handle.subscribe("odometry", 1000, odometryCallback);$/;"	l
 sub_odometry	display_base_location.cpp	/^  ros::Subscriber sub_odometry = handle.subscribe("odometry", 1000, odometryCallback);$/;"	l
 sub_odometry	viewPredicted.cpp	/^ros::Subscriber sub_odometry;$/;"	v
 sum	configuration.cpp	/^  float sum = K_.at(2) + theta;$/;"	l
@@ -302,6 +325,7 @@ tf::vector3MsgToTF	viewPredicted.cpp	/^  tf::vector3MsgToTF(ob.odom_t.twist.twis
 tf::vector3MsgToTF	viewPredicted.cpp	/^  tf::vector3MsgToTF(ob.odom_t.twist.twist.linear, v_linear);$/;"	p	class:tf	file:	signature:(ob.odom_t.twist.twist.linear, v_linear)
 tgr_linears	viewPredicted.cpp	/^std::vector<float> tgr_linears;$/;"	v
 theta	display_base_location.cpp	/^float theta;$/;"	v
+theta	publish_twist_command.cpp	/^float theta;$/;"	v
 theta	viewPredicted.cpp	/^    double theta = tf::tfAngle(v_linear, v_linear_prev);$/;"	l
 thetas_	display_base_location.cpp	/^std::vector<float> thetas_;$/;"	v
 toString	configuration.cpp	/^const std::string Configuration::toString() const {$/;"	f	class:Configuration	signature:() const
@@ -311,6 +335,7 @@ toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path
 toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Path path) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path path) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
+tr	publish_trajectory_command.cpp	/^  ramp_msgs::TrajectoryRequest tr;$/;"	l
 tr	viewPredicted.cpp	/^    ramp_msgs::TrajectoryRequest tr;$/;"	l
 transformBase	configuration.cpp	/^void Configuration::transformBase(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta) {$/;"	f	class:Configuration	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta)
 transformBase	configuration.h	/^    void  transformBase(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta);$/;"	p	class:Configuration	access:public	signature:(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta)
@@ -325,9 +350,12 @@ u	viewPredicted.cpp	/^Utility u;$/;"	v
 updatePosition	configuration.cpp	/^void Configuration::updatePosition(float x, float y, float theta)$/;"	f	class:Configuration	signature:(float x, float y, float theta)
 updatePosition	configuration.h	/^    void  updatePosition(float x, float y, float theta);$/;"	p	class:Configuration	access:public	signature:(float x, float y, float theta)
 v_angular	viewPredicted.cpp	/^  tf::Vector3 v_angular;$/;"	l
+v_g	publish_trajectory_command.cpp	/^  std::vector<float> v_g;$/;"	l
 v_linear	viewPredicted.cpp	/^  tf::Vector3 v_linear;$/;"	l
 v_linear_prev	viewPredicted.cpp	/^    tf::Vector3 v_linear_prev;$/;"	l
+v_s	publish_trajectory_command.cpp	/^  std::vector<float> v_s;$/;"	l
 v_sum	viewPredicted.cpp	/^  float v_sum = max_v;$/;"	l
+value	getYaw.cpp	/^float value;$/;"	v
 vector3MsgToTF	viewPredicted.cpp	/^    tf::vector3MsgToTF(ob.odom_t_prev.twist.twist.linear, v_linear_prev);$/;"	p	class:tf	file:	signature:(ob.odom_t_prev.twist.twist.linear, v_linear_prev)
 vector3MsgToTF	viewPredicted.cpp	/^  tf::vector3MsgToTF(ob.odom_t.twist.twist.angular, v_angular);$/;"	p	class:tf	file:	signature:(ob.odom_t.twist.twist.angular, v_angular)
 vector3MsgToTF	viewPredicted.cpp	/^  tf::vector3MsgToTF(ob.odom_t.twist.twist.linear, v_linear);$/;"	p	class:tf	file:	signature:(ob.odom_t.twist.twist.linear, v_linear)

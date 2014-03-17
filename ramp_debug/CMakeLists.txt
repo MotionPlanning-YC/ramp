@@ -14,7 +14,7 @@ catkin_package(
 ## Build ##
 ###########
 
-include_directories(include ${catkin_INCLUDE_DIRS}) #/usr/share/include/eigen3)
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(display_base_location src/display_base_location.cpp src/configuration.cpp src/range.cpp src/utility.cpp)
 set_target_properties(display_base_location PROPERTIES COMPILE_FLAGS -std=c++0x)

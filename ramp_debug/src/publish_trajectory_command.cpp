@@ -17,12 +17,12 @@ int main(int argc, char** argv) {
   ramp_msgs::KnotPoint c1;
   c1.configuration.K.push_back(0);
   c1.configuration.K.push_back(0);
-  c1.configuration.K.push_back(PI/2);
+  c1.configuration.K.push_back(0);
 
   ramp_msgs::KnotPoint c2;
-  c2.configuration.K.push_back(1.f);
   c2.configuration.K.push_back(0);
   c2.configuration.K.push_back(0);
+  c2.configuration.K.push_back(-3.f*PI/4.f);
 
   /*ramp_msgs::KnotPoint c3;
   c3.configuration.K.push_back(3);
@@ -36,12 +36,12 @@ int main(int argc, char** argv) {
   c4.configuration.K.push_back(PI/2);*/
 
   std::vector<float> v_s;
-  v_s.push_back(0.25);
+  v_s.push_back(0.35);
   //v_s.push_back(0.25);
   //v_s.push_back(0.25);
 
   std::vector<float> v_g;
-  v_g.push_back(0.25);
+  v_g.push_back(0.35);
   //v_g.push_back(0.25);
   //v_g.push_back(0.25);
 

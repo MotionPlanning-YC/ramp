@@ -119,8 +119,6 @@ const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> c
 
 
 
-
-
 /** 
  * Assume a 45 degree angle is formed between the robot's center and the reference point (left wheel)
  * */
@@ -130,13 +128,12 @@ const std::vector<float> Utility::getCenter(std::vector<float> p, float orientat
   // Get world coordinates of reference point 
   float x = p.at(0);
   float y = p.at(1);
+  //std::cout<<"p: ("<<x<<", "<<y<<")";
   
   // Radius
   float r = 0.2155261f;
 
   // Get world coodinates of center point
-  //x += r*cos( displaceAngle((-3*PI/4), orientation));
-  //y += r*sin( displaceAngle((-3*PI/4), orientation));
   x -= r*cos(orientation);
   y -= r*sin(orientation);
   
@@ -145,6 +142,10 @@ const std::vector<float> Utility::getCenter(std::vector<float> p, float orientat
 
   return result;
 } //End getCenter
+
+
+
+
 
 
 
