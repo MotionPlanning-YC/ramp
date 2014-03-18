@@ -11,12 +11,17 @@ const float timeNeededToTurn = 2.5;
 
 
 
-Corobot::Corobot() : k_dof_(3), num_traveled(0), restart(false), num(0), mutex_(true), moving_(false), i_knot_points(0) { 
+Corobot::Corobot() : k_dof_(3), restart(false), mutex_(false), moving_(false), num(0), num_traveled(0), i_knot_points(0) { 
   for(unsigned int i=0;i<k_dof_;i++) {
     configuration_.K.push_back(0);
     configuration_.ranges.push_back(u.standardRanges.at(i));
   }
   angle_at_start = 0;
+
+  // Push on 0's for the distance traveled
+  for(unsigned int i=0;i<k_dof_;i++) {
+    dists_.push_back(0.f);
+  }
 }
 
 
@@ -45,26 +50,77 @@ void Corobot::setConfiguration(float x, float y, float theta) {
 }
 
 
-void Corobot::updateState(const nav_msgs::Odometry::ConstPtr& msg) {
-  
-  // Push the latest theta
-  thetas_.push_back(tf::getYaw(msg->pose.pose.orientation));
-  // If we have enough thetas to average,
-  if(thetas_.size() == POSE_COUNT_THRESHOLD) {
-    
-    // Average theta    
-    double avg_theta = 0;
-    for(unsigned int i=0;i<POSE_COUNT_THRESHOLD;i++) {
-      avg_theta += thetas_.at(i) / POSE_COUNT_THRESHOLD;
-    }
-    
-    // Set configuration
-    setConfiguration(msg->pose.pose.position.x, msg->pose.pose.position.y, avg_theta);
-     
-    // Clear vector
-    thetas_.clear();
+
+void Corobot::accumulateDist(const nav_msgs::Odometry& msg) {
+
+  // X direction
+  if(msg.twist.twist.linear.x > 0.0001) {
+    dists_.at(0) += (msg.pose.pose.position.x - lastOdom.pose.pose.position.x);
+  }
+
+  // Y direction
+  if(msg.twist.twist.linear.y > 0.0001) {
+    dists_.at(1) += (msg.pose.pose.position.y - lastOdom.pose.pose.position.y);
+  }
+
+  // Rotation
+  if(msg.twist.twist.angular.z > 0.0001) {
+    dists_.at(2) = u.displaceAngle(dists_.at(2), tf::getYaw(msg.pose.pose.orientation) - tf::getYaw(lastOdom.pose.pose.orientation));
   }
 }
+
+
+
+ramp_msgs::Configuration Corobot::errorAdjustment() {
+  
+  // Adjust x
+  float x = -0.0205949485*dists_.at(0);// + 0.0089932463;
+  
+  // Adjust y
+  float y = -0.0205949485*dists_.at(1);// + 0.0089932463;
+  
+  // Adjust theta
+  float theta = -0.036206715*dists_.at(2);// - 1.0380328655;
+
+
+  ramp_msgs::Configuration result;
+  result.K.push_back(configuration_.K.at(0)+x);
+  result.K.push_back(configuration_.K.at(1)+y);
+  result.K.push_back(configuration_.K.at(2)+theta);;
+
+  return result;
+}
+
+
+
+/** This is a callback for receiving odometry from the robot and sets the configuration of the robot */
+void Corobot::updateState(const nav_msgs::Odometry& msg) {
+  accumulateDist(msg);
+  ramp_msgs::Configuration temp = errorAdjustment();
+  
+  // Set configuration
+  //setConfiguration(msg->pose.pose.position.x, msg->pose.pose.position.y, tf::getYaw(msg->pose.pose.orientation));
+  setConfiguration(temp.K.at(0), temp.K.at(1), temp.K.at(2));
+     
+  lastOdom = msg;
+} // End updateState
+
+
+
+
+/** This method is on a timer to publish the robot's latest configuration */
+void Corobot::updatePublishTimer(const ros::TimerEvent&) {
+    ramp_msgs::Update msg;
+    msg.configuration = configuration_;
+    
+    if (pub_update_) {
+        pub_update_.publish(msg);
+    }
+} // End updatePublishTimer
+
+
+
+
 
 /** Publishes the MotorCommand msg. The Corobot will drive based on the msg. */
 void Corobot::drive(const corobot_msgs::MotorCommand msg) const {
@@ -101,14 +157,6 @@ void Corobot::driveStraight(const unsigned int speed) const {
   drive(msg);
 }
 
-void Corobot::updatePublishTimer(const ros::TimerEvent&)
-{
-    ramp_msgs::Update msg;
-    msg.configuration = configuration_;
-    
-    if (pub_update_)
-        pub_update_.publish(msg);
-}
 
 void Corobot::turn(const unsigned int speed, const bool cwise) const {
 

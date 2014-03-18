@@ -21,13 +21,13 @@ class Corobot {
     Corobot();
     ~Corobot();
     
-    // Member functions 
+    /** Methods **/ 
     void drive(corobot_msgs::MotorCommand msg) const;
     void driveStraight(const unsigned int speed) const;
     void turn(const unsigned int speed, const bool cwise) const;
     void turn(const float speed, const float angle) const; 
     void stop() const;
-    void updateState(const nav_msgs::Odometry::ConstPtr& msg);
+    void updateState(const nav_msgs::Odometry& msg);
     
     void updateTrajectory(const ramp_msgs::Trajectory msg); 
     void moveOnTrajectory();
@@ -41,7 +41,7 @@ class Corobot {
 
 
 
-    // Data Members
+    /** Data Members **/
     ros::Publisher                    pub_phidget_motor_;
     ros::Publisher                    pub_twist_;
     ros::Publisher                    pub_update_;
@@ -63,44 +63,47 @@ class Corobot {
     static const int ACCELERATION_CONSTANT = 50;
 
   private:
+
+    /** Methods **/
+    const float getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const;
+    const float getAngularSpeed(const float direction1, const float direction2) const;
+    float getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const;
+    void calculateSpeedsAndTime ();
+    void printVectors() const;
+    ramp_msgs::Configuration errorAdjustment();
+    void accumulateDist(const nav_msgs::Odometry& msg);
+    
+    
+    /** Data Members **/
     Utility u;
     
     const unsigned int k_dof_;
-
-    const float getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const ;
-
-    const float getAngularSpeed(const float direction1, const float direction2) const;
-    
-    float getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const;
-    
-    void calculateSpeedsAndTime ();
-
-    void printVectors() const;
-    
-    // holds the last 5 thetas to average
-    std::vector<double> thetas_; 
     
     std::vector<ros::Time> end_times; // Save the ending time of each waypoint
     std::vector<float> speeds; //  Linear speed for each trajectory
     std::vector<float> angular_speeds; // Angular Speed needed over 3s to get the correct orientation after each knot point reached.
     std::vector<float> orientations; // The orientation needed to be at each knotpoint.
+    std::vector<float> dists_;
 
     geometry_msgs::Twist twist_;
     float angle_at_start; // the angle of the robot when the robot gets a trajectory. 
 
+    bool restart;
+    bool mutex_;
+    bool moving_;
+    bool trajec_updated_;
+    
     int num;
     int num_traveled;
     int i_knot_points;
-    bool restart;
-
-    bool mutex_;
-    bool trajec_updated_;
 
     void lockMutex();
     void releaseMutex();
     void sendTwist() const;
 
-    bool moving_;
+    //ros::Time lastUpdate;
+    nav_msgs::Odometry lastOdom;
+
 };
 
 #endif
