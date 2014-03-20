@@ -70,8 +70,6 @@ class Corobot {
     float getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const;
     void calculateSpeedsAndTime ();
     void printVectors() const;
-    ramp_msgs::Configuration errorAdjustment();
-    void accumulateDist(const nav_msgs::Odometry& msg);
     
     
     /** Data Members **/
@@ -83,7 +81,6 @@ class Corobot {
     std::vector<float> speeds; //  Linear speed for each trajectory
     std::vector<float> angular_speeds; // Angular Speed needed over 3s to get the correct orientation after each knot point reached.
     std::vector<float> orientations; // The orientation needed to be at each knotpoint.
-    std::vector<float> dists_;
 
     geometry_msgs::Twist twist_;
     float angle_at_start; // the angle of the robot when the robot gets a trajectory. 
@@ -100,10 +97,6 @@ class Corobot {
     void lockMutex();
     void releaseMutex();
     void sendTwist() const;
-
-    //ros::Time lastUpdate;
-    nav_msgs::Odometry lastOdom;
-
 };
 
 #endif

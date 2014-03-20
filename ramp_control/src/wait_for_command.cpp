@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 
   // Subscribers
   ros::Subscriber sub_twist = handle.subscribe("twist_single", 1000, twistCallback);
-  ros::Subscriber sub_traj = handle.subscribe("trajectory", 1000, trajCallback);
+  ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
   robot.sub_odometry_ = handle.subscribe(Corobot::TOPIC_STR_ODOMETRY, 1000, &Corobot::updateState, &robot);
   
   // Publishers
