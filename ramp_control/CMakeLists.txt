@@ -38,3 +38,6 @@ add_executable(waitForCommand src/wait_for_command.cpp src/corobot.cpp src/utili
 target_link_libraries(waitForCommand ${catkin_LIBRARIES})
 add_dependencies(waitForCommand ramp_msgs_generate_messages_cpp)
 
+add_executable(simulation src/simulation.cpp src/glgrid.cpp)
+target_link_libraries(simulation ${catkin_LIBRARIES} glut GL GLU)
+add_dependencies(simulation ramp_msgs_generate_messages_cpp)

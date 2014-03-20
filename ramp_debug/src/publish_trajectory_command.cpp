@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "publish_trajectory_command");
   ros::NodeHandle handle;
 
-  ros::Publisher pub_traj = handle.advertise<ramp_msgs::Trajectory>("trajectory", 1000);
+  ros::Publisher pub_traj = handle.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000);
   ros::ServiceClient client_ = handle.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");
 
   
@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
   ramp_msgs::KnotPoint c2;
   c2.configuration.K.push_back(0);
   c2.configuration.K.push_back(0);
-  c2.configuration.K.push_back(-3.f*PI/4.f);
+  c2.configuration.K.push_back(0);
 
   /*ramp_msgs::KnotPoint c3;
   c3.configuration.K.push_back(3);
