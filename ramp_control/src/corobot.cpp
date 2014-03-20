@@ -50,12 +50,9 @@ void Corobot::setConfiguration(float x, float y, float theta) {
 
 /** This is a callback for receiving odometry from the robot and sets the configuration of the robot */
 void Corobot::updateState(const nav_msgs::Odometry& msg) {
-  //accumulateDist(msg);
-  //ramp_msgs::Configuration temp = errorAdjustment();
   
   // Set configuration
   setConfiguration(msg.pose.pose.position.x, msg.pose.pose.position.y, tf::getYaw(msg.pose.pose.orientation));
-  //setConfiguration(temp.K.at(0), temp.K.at(1), temp.K.at(2));
 } // End updateState
 
 
@@ -251,7 +248,7 @@ void Corobot::calculateSpeedsAndTime ()
 
   } 
   
-  printVectors();
+  //printVectors();
 }
 
 
@@ -299,16 +296,13 @@ void Corobot::moveOnTrajectory()
     
 
   while( (num_traveled+1) < num) {
-
-    // std::cout<<"\nbeginning of outter while loop!";
-    std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
     restart = false;
     
     // Set velocities
     twist_.linear.x  = speeds.at(num_traveled);
     twist_.angular.z = angular_speeds.at(num_traveled);
-    std::cout<<"\ntwist_linear: "<<twist_.linear.x;
-    std::cout<<"\ntwist_angular: "<<twist_.angular.z;
+    //std::cout<<"\ntwist_linear: "<<twist_.linear.x;
+    //std::cout<<"\ntwist_angular: "<<twist_.angular.z;
     //std::cout<<"\nend_times.size():"<<end_times.size()<<"\n";
     //std::cout<<"\norientations.size():"<<orientations.size()<<"\n";
 
@@ -319,16 +313,14 @@ void Corobot::moveOnTrajectory()
       // Commented out because it was producing erratic driving
       // Should be fixed at some point
       if(twist_.linear.x > 0.0f) {
-        std::cout<<"\ninitial_theta: "<<initial_theta;
+        //std::cout<<"\ninitial_theta: "<<initial_theta;
         float actual_theta = u.displaceAngle(initial_theta, configuration_.K.at(2));
         
         float dist = u.findDistanceBetweenAngles(actual_theta, orientations.at(num_traveled));
-        std::cout<<"\nactual theta: "<<actual_theta;
-        std::cout<<"\norientations.at("<<num_traveled<<"): "<<orientations.at(num_traveled);
-        std::cout<<"\ndist: "<<dist;
-        //if(dist > 0.1 || dist < -0.1) {
-          twist_.angular.z = -1*dist;
-        //}
+        //std::cout<<"\nactual theta: "<<actual_theta;
+        //std::cout<<"\norientations.at("<<num_traveled<<"): "<<orientations.at(num_traveled);
+        //std::cout<<"\ndist: "<<dist;
+        twist_.angular.z = -1*dist;
       }
     
       // Send the twist_message to move the robot
