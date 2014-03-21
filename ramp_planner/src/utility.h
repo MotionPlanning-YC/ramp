@@ -8,14 +8,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include "range.h"
 #include "ramp_msgs/Path.h"
 #include "ramp_msgs/Trajectory.h"
 #include <tf/transform_datatypes.h>
 
 #define PI 3.14159f
 
-
-class Range;
 
 class Utility {
   public:

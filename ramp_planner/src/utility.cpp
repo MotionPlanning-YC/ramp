@@ -1,5 +1,4 @@
 #include "utility.h"
-#include "range.h"
 
 Utility::Utility() {
   Range range0(0, 3.5);

@@ -67,85 +67,20 @@ const std::vector<float> CollisionDetection::getCenter(std::vector<float> p, flo
 
 /** Transformation matrix of obstacle robot */
 void CollisionDetection::setT_od_w(int id) {
+
   if(id == 2) {
-    
-    std::vector<float> r1;
-    r1.push_back(cos(PI));
-    r1.push_back(-sin(PI));
-    r1.push_back(3.5f);
-  
-    std::vector<float> r2;
-    r2.push_back(sin(PI));
-    r2.push_back(cos(PI));
-    r2.push_back(1.75f);
-    
-    std::vector<float> r3;
-    r3.push_back(0);
-    r3.push_back(0);
-    r3.push_back(1.f);
-
-    T_od_w.push_back(r1);
-    T_od_w.push_back(r2);
-    T_od_w.push_back(r3);
-
+    tf::Vector3 pos(2.f, 3.5f, 0);
+    T_od_w_.setOrigin(pos);
+    T_od_w_.setRotation(tf::createQuaternionFromYaw(-PI/2));
   }
 
   else {
-    
-    std::vector<float> r1;
-    r1.push_back(cos(0));
-    r1.push_back(-sin(0));
-    r1.push_back(0.f);
-  
-    std::vector<float> r2;
-    r2.push_back(sin(0));
-    r2.push_back(cos(0));
-    r2.push_back(2.f);
-    
-    std::vector<float> r3;
-    r3.push_back(0);
-    r3.push_back(0);
-    r3.push_back(1.f);
-  
-    T_od_w.push_back(r1);
-    T_od_w.push_back(r2);
-    T_od_w.push_back(r3);
-  
+    tf::Vector3 pos(0.f, 2.f, 0.f);
+    T_od_w_.setRotation(tf::createQuaternionFromYaw(0));
+    T_od_w_.setOrigin(pos);
   }
 }
 
-ramp_msgs::Trajectory CollisionDetection::transformT(ramp_msgs::Trajectory ob_trajectory) const {
-
-  ramp_msgs::Trajectory result;
-
-    // ***Test collision against the obstacle's trajectory***
-    for(unsigned int j=0;j<ob_trajectory.trajectory.points.size();j+=3) {
-
-      // Get the points as the centers of the circles
-      trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
-
-      // Get the position vector for the obstacle p_ob
-      // Transform obstacle odometry coordinates to world CS
-      // Find the centers of the objects
-      //std::vector<float> p_ob_center  = getCenter(p_ob_loc, p.positions.at(2));
-      std::vector<float> p_ob_center;
-      
-      // Find the center in odometry CS - center is -6, -6 from reference point
-      float temp_x = p_ob.positions.at(0) - 0.1524f;
-      float temp_y = p_ob.positions.at(1) - 0.1524f;
-
-      // Transform center point in odometry to world CS
-      float x = (T_od_w.at(0).at(0) * temp_x) + (T_od_w.at(0).at(1) * temp_y) + T_od_w.at(0).at(2);
-      float y = (T_od_w.at(1).at(0) * temp_x) + (T_od_w.at(1).at(1) * temp_y) + T_od_w.at(1).at(2);
-
-      p_ob.positions.at(0) = x;
-      p_ob.positions.at(1) = y;
-
-      result.trajectory.points.push_back(p_ob);
-    }
-
-  return result;
-}
 
 /** 
  * This method returns true if there is collision between trajectory_ and the ob_trajectory, false otherwise 
@@ -204,13 +139,13 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       float temp_x = p_ob.positions.at(0) - 0.1524f;
       float temp_y = p_ob.positions.at(1) - 0.1524f;
 
-      // Transform center point in odometry to world CS
-      float x = (T_od_w.at(0).at(0) * temp_x) + (T_od_w.at(0).at(1) * temp_y) + T_od_w.at(0).at(2);
-      float y = (T_od_w.at(1).at(0) * temp_x) + (T_od_w.at(1).at(1) * temp_y) + T_od_w.at(1).at(2);
-     
+      // Transform the center
+      tf::Vector3 temp_pos(temp_x, temp_y, 0);
+      tf::Vector3 pos = T_od_w_ * temp_pos;
+ 
       // Push on the obstacle's center
-      p_ob_center.push_back(x);
-      p_ob_center.push_back(y);
+      p_ob_center.push_back(pos.getX());
+      p_ob_center.push_back(pos.getY());
       
       
       // Get the distance between the centers
@@ -373,7 +308,7 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
     ramp_msgs::TrajectoryRequest tr;
     tr.request.path = p;
 
-    for(unsigned int i=0;i<p.configurations.size()-1;i++) {
+    for(unsigned int i=0;i<p.points.size()-1;i++) {
       tr.request.v_start.push_back(PI/4);
       tr.request.v_end.push_back(PI/4);
     }

@@ -153,22 +153,27 @@ class Planner {
     // Updates the paths in P(t) so we can get new trajectories
     void updatePaths(Configuration start, ros::Duration dur);
 
-    // 
+    // Returns an id for a RampTrajectory 
     unsigned int getIRT();
+
 
     /** Data members */
 
     // Utility instance
     Utility u; 
 
-    // ID counter for trajectories
-    unsigned int i_rt;
-
     // Size of population
     const unsigned int populationSize_;
 
     // Generation counter
     unsigned int generation_;
+    
+    // Mutex for start_ and population
+    bool mutex_start_;
+    bool mutex_pop_;
+
+    // ID counter for trajectories
+    unsigned int i_rt;
 
     // Last time P(t) was updated
     ros::Time lastUpdate_;
@@ -178,10 +183,6 @@ class Planner {
 
     // Number of modification operators 
     unsigned int num_ops_;
-    
-    // Mutex for start_ member
-    bool mutex_start_;
-    bool mutex_pop_;
     
     // Handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
