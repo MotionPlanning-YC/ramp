@@ -30,7 +30,7 @@ class Corobot {
     void updateState(const nav_msgs::Odometry& msg);
     
     void updateTrajectory(const ramp_msgs::Trajectory msg); 
-    void moveOnTrajectory();
+    void moveOnTrajectory(bool simulation);
 
     void setConfiguration(float x, float y, float theta);
     
@@ -44,6 +44,7 @@ class Corobot {
     /** Data Members **/
     ros::Publisher                    pub_phidget_motor_;
     ros::Publisher                    pub_twist_;
+    ros::Publisher                    pub_cmd_vel_;
     ros::Publisher                    pub_update_;
     ros::Subscriber                   sub_odometry_;
     ramp_msgs::Configuration          configuration_; 

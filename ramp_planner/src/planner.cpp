@@ -5,22 +5,22 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6),  h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0)
+Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6),  h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0)
 {
-  controlCycle_ = ros::Duration(0.25);
-  planningCycle_ = ros::Duration(0.1);
+  controlCycle_ = ros::Duration(1.f / 30.f);
+  planningCycle_ = ros::Duration(1.f / 50.f);
 }
 
 Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0)
 {
-  controlCycle_ = ros::Duration(0.25);
-  planningCycle_ = ros::Duration(0.1);
+  controlCycle_ = ros::Duration(1.f / 30.f);
+  planningCycle_ = ros::Duration(1.f / 50.f);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(7), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6)
 {
-  controlCycle_ = ros::Duration(0.25);
-  planningCycle_ = ros::Duration(0.1);
+  controlCycle_ = ros::Duration(1.f / 30.f);
+  planningCycle_ = ros::Duration(1.f / 50.f);
   init(h); 
 }
 
@@ -195,10 +195,10 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   if(fabs(diff) <= 0.52356) {
     gradualTrajectory(bestTrajec_);
   }
-  else {
-    std::cout<<"\nNo gradual: diff = "<<diff;
-    std::cout<<"\nstart_.K_[2]: "<<start_.K_.at(2)<<" b: "<<b<<"\n";
-  }
+  //else {
+    //std::cout<<"\nNo gradual: diff = "<<diff;
+    //std::cout<<"\nstart_.K_[2]: "<<start_.K_.at(2)<<" b: "<<b<<"\n";
+  //}
   
   // Send the best trajectory 
   sendBest(); 

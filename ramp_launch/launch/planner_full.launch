@@ -8,7 +8,7 @@
 <node name="path_modification" pkg="path_modification" type="path_modification" />
 
 <!-- Evaluation -->
-<node name="evaluation" pkg="evaluation" type="evaluation" output="screen" />
+<node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen" />
 
 <!-- Trajectory Visualization -->
 <!-- <node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> -->
@@ -20,5 +20,7 @@
   <!-- <rosparam command="load" file="yaml/robot2.yaml" /> -->
 <!-- </group> -->
 
+<!-- Simulation -->
+<node name="simulation" pkg="ramp_control" type="simulation" />
 
 </launch>

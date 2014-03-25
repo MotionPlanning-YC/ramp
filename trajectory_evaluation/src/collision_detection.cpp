@@ -69,9 +69,9 @@ const std::vector<float> CollisionDetection::getCenter(std::vector<float> p, flo
 void CollisionDetection::setT_od_w(int id) {
 
   if(id == 2) {
-    tf::Vector3 pos(2.f, 3.5f, 0);
+    tf::Vector3 pos(3.5f, 2.f, 0);
     T_od_w_.setOrigin(pos);
-    T_od_w_.setRotation(tf::createQuaternionFromYaw(-PI/2));
+    T_od_w_.setRotation(tf::createQuaternionFromYaw(PI));
   }
 
   else {
@@ -105,7 +105,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   
   //std::cout<<"\nobstacle trajectory: "<<u.toString(ob_trajectory);
   // For every 3 points, check circle detection
-  float radius = 0.5f;
+  float radius = 0.55f;
   for(unsigned int i=0;i<trajectory_.trajectory.points.size() && i<ob_trajectory.trajectory.points.size();i+=3) {
     
     // Get the point on the trajectory, p

@@ -1,7 +1,7 @@
 #include "population.h"
 
 
-Population::Population() : max_size(7), i_best(-1) {}
+Population::Population() : max_size(5), i_best(-1) {}
 
 Population::Population(const unsigned int size) : max_size(size), i_best(-1) {}
 

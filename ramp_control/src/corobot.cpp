@@ -285,7 +285,7 @@ void Corobot::printVectors() const {
 }
 
 
-void Corobot::moveOnTrajectory() 
+void Corobot::moveOnTrajectory(bool simulation) 
 {
   restart = false;
   
@@ -325,6 +325,9 @@ void Corobot::moveOnTrajectory()
     
       // Send the twist_message to move the robot
       sendTwist();
+
+      // If we have the simulation up, publish to cmd_vel
+      if(simulation) pub_cmd_vel_.publish(twist_);
 
       // Spin to check for updates
       ros::spinOnce();

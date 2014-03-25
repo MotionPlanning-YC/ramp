@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
   robot.trajectory_ = init;
 
   while(ros::ok()) {
-    robot.moveOnTrajectory();
+    robot.moveOnTrajectory(false);
     ros::spinOnce();
   }
 

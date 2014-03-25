@@ -6,38 +6,42 @@
 
 #define PI 3.14159f
 
-float theta;
+float x, y, theta;
 
 void odometryCallback(const nav_msgs::Odometry& msg) {
   theta = tf::getYaw(msg.pose.pose.orientation);
   std::cout<<"\nTheta: "<<theta;
+  x = msg.pose.pose.position.x;
+
 }
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "publish_twist_command");
   ros::NodeHandle handle;
 
-  ros::Publisher pub_twist = handle.advertise<geometry_msgs::Twist>("twist", 1000);
-  ros::Subscriber sub_odom = handle.subscribe("odometry", 1000, odometryCallback); 
+  ros::Publisher pub_twist = handle.advertise<geometry_msgs::Twist>("cmd_vel", 1000);
+  ros::Subscriber sub_odom = handle.subscribe("odom", 1000, odometryCallback); 
 
   geometry_msgs::Twist t;
-  t.linear.x = 0.f;
+  t.linear.x = 0.5f;
   t.linear.y = 0.f;
   t.linear.z = 0.f;
   t.angular.x = 0.f;
   t.angular.y = 0.f;
-  t.angular.z = -PI/4;
+  t.angular.z = 0.f;
 
   
   std::cout<<"\nPress Enter to publish the twist message\n";
   std::cin.get();
 
+  x = 0.f;
   theta = 0.f;
   ros::Rate r(50);
-  while(ros::ok() && theta >= -PI/2) {
+  while(ros::ok() && x < 5) {
     pub_twist.publish(t);
     r.sleep();
     ros::spinOnce();
+    std::cout<<"\nx: "<<x;
   }
 
   std::cout<<"\nExiting Normally\n";
