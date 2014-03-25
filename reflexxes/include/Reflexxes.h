@@ -7,13 +7,14 @@
 #include "RMLPositionInputParameters.h"
 #include "RMLPositionOutputParameters.h"
 #include "nav_msgs/Odometry.h"
-#include "geometry_msgs/Twist.h"
+#include "ramp_msgs/Path.h"
+#include "ramp_msgs/TrajectoryRequest.h"
 #include "tf/transform_datatypes.h"
 #include "utility.h"
 
 // defines
-#define NUMBER_OF_DOFS 2
-#define CYCLE_TIME_IN_SECONDS 0.001
+#define NUMBER_OF_DOFS 3
+#define CYCLE_TIME_IN_SECONDS 0.10
 
 class Reflexxes
 {
@@ -25,24 +26,40 @@ class Reflexxes
     RMLPositionOutputParameters *outputParameters;
     RMLPositionFlags flags;
     Utility utility;
-    std::vector<float> odometry;
-    std::vector<float> target_position;
-
+    ramp_msgs::Path path;
+    nav_msgs::Odometry odometry;
+    ramp_msgs::Trajectory *trajectory;
+    ros::Duration time_from_start;
+    float current_orientation;
+   
+ // Compute the orientation needed to reach the target, given an initial position
     float computeOrientationNeededToGoal();
 
+// Execute one iteration of the Reflexxes control function
+    trajectory_msgs::JointTrajectoryPoint spinOnce();
+
+//Set the target of the Reflexxes library
+    void setTarget(float x, float y, float linear_velocity, float angular_velocity);
+
+// Returns true if the target has been reached
+    bool isFinalStateReached();
+
+// Initialize variables just after receiving a service request
+    void setInitialConditions();
+
+// Compute the orientation needed to reach the target, given an initial position
+    float computeTargetOrientation(float initial_x, float intial_y, float target_x, float target_y);
   public:
+ 
+// Service callback, the input is a path and the output a trajectory
+    bool trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res);
     
     Reflexxes();
 
     ~Reflexxes();
 
-    geometry_msgs::Twist spinOnce();
-
-    bool isFinalStateReached();
-
-    void updateStatus(const nav_msgs::Odometry& odometry);
-
-    void setTargetState(std::vector<float> target_position, float linear_velocity, float angular_velocity);
+// Odometry callback
+    void odometryCallback(const nav_msgs::Odometry& odometry);
 
 };
 

@@ -16,23 +16,12 @@ int main(int argc, char** argv)
 
   // Subscribes to the odometry that will give us the current position and velocity.
   // The callback is in the reflexxes object
-  ros::Subscriber odom_sub = n.subscribe("odometry",100, &Reflexxes::updateStatus, &reflexxes);
+  ros::Subscriber odom_sub = n.subscribe("odometry", 100, &Reflexxes::odometryCallback, &reflexxes);
 
-  // Publishes the twist message, that will command the robot's movement
-  ros::Publisher twist_pub = n.advertise<geometry_msgs::Twist>("motor_command",100);
+  // Declare the service that gives a path and returns a trajectory
+  ros::ServiceServer service = n.advertiseService("trajectory_generator", &Reflexxes::trajectoryRequest, &reflexxes);
 
-
-  // Starting the control loop
-  while(ros::ok())
-  { 
-    // We only want to calculate the new twist command if the robot hasn't reached the destination yet
-    if (!reflexxes.isFinalStateReached()) 
-    {   
-      twist = reflexxes.spinOnce();
-      twist_pub.publish(twist);
-    }
-    ros::spinOnce();
-  }
+  ros::spin();
 
   return 0; 
 }
