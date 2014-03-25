@@ -1,11 +1,9 @@
 #include "configuration.h"
 
 
-Configuration::Configuration() {}
+Configuration::Configuration() : mobile_base_k_(2) {}
 
-Configuration::Configuration(ramp_msgs::Configuration c) {
-  //std::cout<<"\nc.K.size(): "<<c.K.size();
-  //std::cout<<"\nc.ranges.size(): "<<c.ranges.size()<<"\n";
+Configuration::Configuration(ramp_msgs::Configuration c) : mobile_base_k_(2) {
   
   for(unsigned int i=0;i<c.K.size();i++) {
     K_.push_back(c.K.at(i));
@@ -45,7 +43,7 @@ void Configuration::random() {
 }
 
 
-const bool Configuration::equals(const Configuration& c) const {
+bool Configuration::equals(const Configuration& c) const {
   
   if(K_.size() != c.K_.size()) {
     return false;
@@ -60,17 +58,29 @@ const bool Configuration::equals(const Configuration& c) const {
   return true;
 }
 
-/** This method returns the euclidean distance between this configuration and c */
-const double Configuration::compare(const Configuration& c) const {
+/** 
+ * This method returns the euclidean distance between this configuration and c 
+ * if base_theta is true, we are considering the base orientation, otherwise do not
+ * add base orientation difference into the result
+ * */
+double Configuration::compare(const Configuration& c, bool base_theta) const {
   //std::cout<<"\nComparing: "<<toString()<<" and "<<c.toString();
   double result = 0; 
 
-  //For each DOF, sum the (X2-X1)^2
+  // For each DOF, sum the (X2-X1)^2
   for(unsigned int i=0;i<ranges_.size();i++) {
-    result += pow(c.K_.at(i) - K_.at(i), 2);
+    // If we are not taking base theta into account, skip i
+    if(i == mobile_base_k_ && !base_theta) {}
+
+    // Else if we are considering base theta, use utility function
+    else if(i == mobile_base_k_) {
+      result += pow(u.displaceAngle(c.K_.at(i), K_.at(i)), 2);
+    }
+    else
+      result += pow(c.K_.at(i) - K_.at(i), 2);
   }
 
-  //Get square root to complete euclidean distance...
+  // Get square root to complete euclidean distance...
   result = sqrt(result);
 
   return result;
@@ -91,67 +101,33 @@ const ramp_msgs::Configuration Configuration::buildConfigurationMsg() const {
   return result;
 }
 
-
-
 /** This method returns the new position vector of the Configuration given some transformation matrix */
-std::vector<float> Configuration::transformBasePosition(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w) {
+tf::Vector3 Configuration::transformBasePosition(const tf::Transform t) {
 
-  std::vector<float> result;
-    
-  Eigen::Vector3f p(K_.data());
-  p[2] = 1;
-
-  Eigen::Vector3f p2 = T_od_w * p;
-
-  result.push_back(p2[0]);
-  result.push_back(p2[1]);
+  tf::Vector3 p(K_.at(0), K_.at(1), 0);
+  tf::Vector3 result = t * p;
 
   return result;
-}
+} //End transformBasePosition
 
 
-
-/** This method returns the orientation of the mobile base rotated by theta */
-float Configuration::transformBaseOrientation(const float theta) {
-  float result=0.;
-  float sum = K_.at(2) + theta;
-
-  // If two angles are positive, but result should be negative
-  if(sum > PI) {
-    sum     = fmodf(sum, PI);
-    result  = sum - PI;
-  }
-
-  // If 2 angles are negative, but result should be positive
-  else if(sum < -PI) {
-    result  = sum + (2*PI);
-  }
-
-  else {
-    result  = sum;
-  }
-
-  return result;
-} //End getOrientation
-
-
-
-/** This method will transform the configuration by the matrix T 
- *  The rotation of T is also passed in for ease 
+/** This method will transform the configuration by the transformation T
+ *  It transforms the position and displaces the orientation by the rotation in T 
  *  The most used source of this method is for updating the robot's configuration */
-void Configuration::transformBase(const Eigen::Transform<float, 2, Eigen::Affine> T_od_w, float theta) {
+void Configuration::transformBase(const tf::Transform t) {
 
   // Get the new position
-  std::vector<float> p_w = transformBasePosition(T_od_w);
-  K_.at(0) = p_w.at(0);
-  K_.at(1) = p_w.at(1);
+  tf::Vector3 p = transformBasePosition(t);
+  K_.at(0) = p.getX();
+  K_.at(1) = p.getY();
   
   // Get the new orientation
-  K_.at(2) = transformBaseOrientation(theta);
-} //End add
+  K_.at(2) = u.displaceAngle(K_.at(2), tf::getYaw(t.getRotation()));
+} //End transformBase
 
 
 
+/** toString for Configurations */
 const std::string Configuration::toString() const {
   std::ostringstream result;
   
