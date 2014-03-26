@@ -88,10 +88,10 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
 {
   //std::cout<<"\n\nReceived Population!";
 
-  //populations_.clear();
-  //populations_.push_back(msg);
+  populations_.clear();
+  populations_.push_back(msg);
 
-  if(populations_.size() < 2) {
+  /*if(populations_.size() < 2) {
     populations_.push_back(msg);
   }
 
@@ -104,7 +104,7 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
       populations_.erase(populations_.begin()+1);
       populations_.insert(populations_.begin()+1, msg);
     }
-  }
+  }*/
 
   drawPopulation();
 }
@@ -177,8 +177,6 @@ void TrajectoryView::drawPopulation() {
         p.push_back(points.at(0).positions.at(0));
         p.push_back(points.at(0).positions.at(1));
 
-        std::vector<float> c = getCenter(p, points.at(0).positions.at(2));
-        std::cout<<"\nc: ("<<c.at(0)<<", "<<c.at(1)<<")";
         this->scene()->addEllipse(metersToPixels(p.at(0), true),
                                     metersToPixels(p.at(1), false),
                                     metersToPixels(0.33f, true), metersToPixels(0.33f, false), pen);
@@ -190,9 +188,10 @@ void TrajectoryView::drawPopulation() {
 
           // If the first point
           if(j == 0) {
+            int radius = metersToPixels(0.175, true);
             // Draw a line to the next point
-            this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true),
-                                      metersToPixels(points.at(j).positions.at(1), false),
+            this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true)-radius,
+                                      metersToPixels(points.at(j).positions.at(1), false)+radius,
                                       metersToPixels(0.35, true), metersToPixels(0.35, false));
                                       
           }
@@ -209,31 +208,6 @@ void TrajectoryView::drawPopulation() {
     } //end for each trajectory
   } //end for each population 
 } //End drawPopulation
-
-/** 
- * Assume a 45 degree angle is formed between the robot's center and the reference point (left wheel)
- * */
-const std::vector<float> TrajectoryView::getCenter(std::vector<float> p, float orientation) const {
-  std::vector<float> result;
- 
-  // Get world coordinates of reference point 
-  float x = p.at(0);
-  float y = p.at(1);
-
-  // Radius
-  float r = 0.2155261;
-
-  // Get world coodinates of center point
-  x -= r*cos(orientation);
-  y -= r*sin(orientation);
-  
-  //std::cout<<"\nx: "<<p.at(0)<<" y: "<<p.at(1)<<" orientation: "<<orientation<<" Returning ("<<x<<", "<<y<<")";
-  result.push_back(x);
-  result.push_back(y);
-
-  return result;
-} //End getCenter
-
 
 
 

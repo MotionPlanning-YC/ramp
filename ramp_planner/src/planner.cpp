@@ -150,7 +150,7 @@ void Planner::gradualTrajectory(RampTrajectory& t) {
         t.msg_trajec_.trajectory.points.at(i).velocities.at(1) == 0 &&
         i < t.msg_trajec_.trajectory.points.size()) {i++;}
 
-  // If i is in the trajectory 
+  // If i is in the trajectory (it won't be if rotation-only) 
   if( i < t.msg_trajec_.trajectory.points.size()) {
 
     // Get the point
@@ -747,7 +747,7 @@ const std::string Planner::pathsToString() const {
   planningCycleTimer_.start();
 
   // Wait for 75 generations before starting control cycle
-  while(generation_ < 50) {ros::spinOnce();}
+  while(generation_ < 100) {ros::spinOnce();}
 
   std::cout<<"\n***************Starting Control Cycle*****************";
   // Start the control cycle timer

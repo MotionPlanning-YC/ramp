@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
   t.linear.z = 0.f;
   t.angular.x = 0.f;
   t.angular.y = 0.f;
-  t.angular.z = 0.f;
+  t.angular.z = 0.7854f;
 
   
   std::cout<<"\nPress Enter to publish the twist message\n";

@@ -21,6 +21,6 @@
 <!-- </group> -->
 
 <!-- Simulation -->
-<node name="simulation" pkg="ramp_control" type="simulation" />
+<node name="simulation" pkg="ramp_control" type="simulation" output="screen"/>
 
 </launch>
