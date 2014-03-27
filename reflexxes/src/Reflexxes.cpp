@@ -3,30 +3,17 @@
 // Execute one iteration of the Reflexxes control function
 trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
 {
- // ROS_ERROR("previous orientation: %f", current_orientation);
   // Calling the Reflexxes OTG algorithm 
   resultValue = rml->RMLPosition(*inputParameters, outputParameters, flags);                                              
  
-  // Calculate the new orientation input, as since the robot moved the orientation to reach the target also got modified
-  //Calculate the new robot orientation.
-//  current_orientation += outputParameters->NewPositionVector->VecData[2] - inputParameters->CurrentPositionVector->VecData[2]; 
-//ROS_ERROR("difference: %f", outputParameters->NewPositionVector->VecData[2] - inputParameters->CurrentPositionVector->VecData[2]);
- // ROS_ERROR("new input orientation: %f", inputParameters->CurrentPositionVector->VecData[2]);
-
-  // Update the current position to be the output of the reflexxes library.
-  
+  // Calculate the linear velocity, being the norm of the vector (Vx, Vy) 
     float linear_velocity = sqrt(pow(outputParameters->NewVelocityVector->VecData[0], 2) + pow(outputParameters->NewVelocityVector->VecData[1], 2) );
-//   ROS_ERROR("%f, %f, %f", linear_velocity, cos(inputParameters->CurrentPositionVector->VecData[2]),sin(inputParameters->CurrentPositionVector->VecData[2])); 
- // inputParameters->CurrentPositionVector->VecData[0] += linear_velocity * cos(inputParameters->CurrentPositionVector->VecData[2]);
- // inputParameters->CurrentPositionVector->VecData[1] += linear_velocity * sin(inputParameters->CurrentPositionVector->VecData[2]);
+
   *inputParameters->CurrentPositionVector = *outputParameters->NewPositionVector;
   *inputParameters->CurrentVelocityVector = *outputParameters->NewVelocityVector;
   *inputParameters->CurrentAccelerationVector = *outputParameters->NewAccelerationVector;
 
-  // The new current orientation input is the difference of angle between the current orientation and the orientation needed to reach the target
-//  ROS_ERROR("new orientation: %f", current_orientation);
-
- // inputParameters->CurrentPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],inputParameters->CurrentPositionVector->VecData[1],inputParameters->TargetPositionVector->VecData[0],inputParameters->TargetPositionVector->VecData[1]) + current_orientation;
+  // Change the target orientation
   inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],inputParameters->CurrentPositionVector->VecData[1],inputParameters->TargetPositionVector->VecData[0],inputParameters->TargetPositionVector->VecData[1]);
    
   // Build the JointTrajectoryPoint object, that will be used to build the trajectory
@@ -35,11 +22,9 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
   {
     point.positions.push_back(outputParameters->NewPositionVector->VecData[i]);
   }
-  
-
-  //TODO: Rework this 
   float velocity_angle = computeTargetOrientation(0,0,outputParameters->NewVelocityVector->VecData[0],outputParameters->NewVelocityVector->VecData[1]);
   float difference_angle = velocity_angle - inputParameters->CurrentPositionVector->VecData[2];
+
   point.velocities.push_back(linear_velocity * cos(difference_angle));
   point.velocities.push_back(0);
   point.velocities.push_back(outputParameters->NewVelocityVector->VecData[2] + sin(difference_angle) * linear_velocity);
@@ -64,16 +49,8 @@ void Reflexxes::setTarget(float x, float y, float linear_velocity, float angular
   inputParameters->TargetPositionVector->VecData[0] = x;
   inputParameters->TargetPositionVector->VecData[1] = y;
 
-  // The new current orientation is the difference of angle between the current orientation and the orientation needed to reach the target
-  ROS_ERROR("target orientation: %f", computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],inputParameters->CurrentPositionVector->VecData[1],x,y));
-  ROS_ERROR("current orientation: %f", current_orientation);
-//  inputParameters->CurrentPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],inputParameters->CurrentPositionVector->VecData[1],x,y) - current_orientation;
+  // The new target orientation is the orientation needed to reach the target
     inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],inputParameters->CurrentPositionVector->VecData[1],x,y);
-
-  ROS_ERROR("A-B: %f", inputParameters->CurrentPositionVector->VecData[2]);
-
-  // Therefore we always need to reach an orientation of 0
-  inputParameters->TargetPositionVector->VecData[2] = 0;
 
   // Set the target velocity, which is set in the reference frame coordinates
   inputParameters->TargetVelocityVector->VecData[0] = linear_velocity * cos(inputParameters->TargetPositionVector->VecData[2]) ;
@@ -86,6 +63,8 @@ void Reflexxes::setTarget(float x, float y, float linear_velocity, float angular
 // Service callback, the input is a path and the output a trajectory
 bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res)
 {
+  ROS_ERROR("velocity: %f", req.v_start.at(0));
+
   ROS_ERROR("request received");
   // Saves the path
   this->path = req.path;
@@ -100,7 +79,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
     resultValue = 0;
     // Set the new knotpoint as the target
     if (i< (path.points.size()-1))
-      setTarget(path.points[i].configuration.K.at(0), path.points[i].configuration.K.at(1), 0.3, 0);
+      setTarget(path.points[i].configuration.K.at(0), path.points[i].configuration.K.at(1), 0.0, 0);
     else
       setTarget(path.points[i].configuration.K.at(0), path.points[i].configuration.K.at(1),0,0);
     // We go to the next knotpoint only once we reach this one
@@ -194,7 +173,7 @@ Reflexxes::Reflexxes()
   rml = new ReflexxesAPI( NUMBER_OF_DOFS, CYCLE_TIME_IN_SECONDS );                                                           
   inputParameters = new RMLPositionInputParameters( NUMBER_OF_DOFS );                                                                     
   outputParameters = new RMLPositionOutputParameters( NUMBER_OF_DOFS );
-  flags.SynchronizationBehavior= RMLPositionFlags::ONLY_TIME_SYNCHRONIZATION;
+  flags.SynchronizationBehavior= RMLPositionFlags::PHASE_SYNCHRONIZATION_IF_POSSIBLE;
   // Set up the input parameters
   // Set the position, velocity and acceleration to be 0
   inputParameters->CurrentPositionVector->VecData[0] = 0.0;
@@ -212,19 +191,19 @@ Reflexxes::Reflexxes()
   // Here set up the max velocity, acceleration and jerk
   
   // Maximum velocity beeing 0.5m/s and 1 radian/s (around 60 degrees/s ) 
-  inputParameters->MaxVelocityVector->VecData[0] = .5;
-  inputParameters->MaxVelocityVector->VecData[1] = .5;
-  inputParameters->MaxVelocityVector->VecData[2] = 1; 
+  inputParameters->MaxVelocityVector->VecData[0] = .3;
+  inputParameters->MaxVelocityVector->VecData[1] = .3;
+  inputParameters->MaxVelocityVector->VecData[2] = .6; 
 
   // Maximum acceleration is 1m/s^2 and 2radian/s^2
-  inputParameters->MaxAccelerationVector->VecData[0] = 2;
-  inputParameters->MaxAccelerationVector->VecData[1] = 2;
-  inputParameters->MaxAccelerationVector->VecData[2] = 4; 
+  inputParameters->MaxAccelerationVector->VecData[0] = 1;
+  inputParameters->MaxAccelerationVector->VecData[1] = 1;
+  inputParameters->MaxAccelerationVector->VecData[2] = 2; 
 
   // As the maximum jerk values are not known, this is just to try
-  inputParameters->MaxJerkVector->VecData[0] = 2.0;
+  inputParameters->MaxJerkVector->VecData[0] = 1.0;
   inputParameters->MaxJerkVector->VecData[1] = 2.0;
-  inputParameters->MaxJerkVector->VecData[2] = 4.0;
+  inputParameters->MaxJerkVector->VecData[2] = 2.0;
 
   // Set the Target Position and Velocity vector
   inputParameters->TargetPositionVector->VecData[0] = 0.0;
