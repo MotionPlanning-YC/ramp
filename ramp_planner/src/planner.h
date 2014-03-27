@@ -48,6 +48,8 @@ class Planner {
     RampTrajectory bestTrajec_;
 
 
+    /* Members for cycles */
+
     // Timer for sending the best trajec
     // Control cycle - used for determining when to update P(t)
     ros::Timer    controlCycleTimer_;
@@ -60,6 +62,11 @@ class Planner {
     
     // Sensing cycle
     ros::Duration sensingCycle_;
+
+    /**/
+
+    // Timer to check imminent collision
+    ros::Timer imminentCollisionTimer_;
 
 
     // Transformation of the initial pose of the robot 
@@ -130,10 +137,11 @@ class Planner {
     // Modification procedure
     void modification();
 
-    // Callback methods for timers
+    // Callback methods for ros::Timers
     void controlCycleCallback(const ros::TimerEvent& t);
     void planningCycleCallback(const ros::TimerEvent& t);
     void updateCallback(const ramp_msgs::Update::ConstPtr& msg);
+    void imminentCollisionCallback(const ros::TimerEvent& t);
 
     // Set the transformation from odometry to world CS
     void setT_od_w(std::vector<float> od_info);
@@ -183,12 +191,18 @@ class Planner {
 
     // Number of modification operators 
     unsigned int num_ops_;
+
+    // Distance threshold for imminent collision
+    float D_;
     
     // Handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
     EvaluationRequestHandler*   h_eval_req_;
     ControlHandler*             h_control_;
     Modifier*                   modifier_;
+
+    // Flag to stop the robot's from driving
+    bool move_;
 };
 
 #endif

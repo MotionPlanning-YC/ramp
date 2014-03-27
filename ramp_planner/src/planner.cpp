@@ -5,19 +5,19 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6),  h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0)
+Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), move_(false)
 {
   controlCycle_ = ros::Duration(1.f / 30.f);
   planningCycle_ = ros::Duration(1.f / 50.f);
 }
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0)
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), move_(false)
 {
   controlCycle_ = ros::Duration(1.f / 30.f);
   planningCycle_ = ros::Duration(1.f / 50.f);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), move_(false)
 {
   controlCycle_ = ros::Duration(1.f / 30.f);
   planningCycle_ = ros::Duration(1.f / 50.f);
@@ -69,6 +69,15 @@ Configuration Planner::getStartConfiguration() {
   while(!mutex_start_) {}
   return start_;
 } // End getStartConfiguration
+
+
+/** Check if there is imminent collision in the best trajectory */
+void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
+  if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < D_)) {
+  } 
+}
+
+
 
 
 /** 
@@ -192,13 +201,10 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   // new orientation is the amount to rotate towards first knot point
   float b = u.findAngleFromAToB(start_.K_, bestTrajec_.path_.all_.at(1).configuration_.K_);
   float diff = u.findDistanceBetweenAngles(start_.K_.at(2), b);
-  if(fabs(diff) <= 0.52356) {
+  if(fabs(diff) <= 0.52356f) {
     gradualTrajectory(bestTrajec_);
   }
-  //else {
-    //std::cout<<"\nNo gradual: diff = "<<diff;
-    //std::cout<<"\nstart_.K_[2]: "<<start_.K_.at(2)<<" b: "<<b<<"\n";
-  //}
+
   
   // Send the best trajectory 
   sendBest(); 
@@ -424,7 +430,6 @@ void Planner::sendBest() {
   }
   else if(!bestTrajec_.feasible_) {
     std::cout<<"\nBest trajectory is not feasible! Time until collision: "<<bestTrajec_.time_until_collision_;
-    std::cout<<"\nbestTrajec_.time_until_collision_ < 2.f: "<<(bestTrajec_.time_until_collision_ < 4.f);
     h_control_->send(bestTrajec_.msg_trajec_);
   }
   else {
