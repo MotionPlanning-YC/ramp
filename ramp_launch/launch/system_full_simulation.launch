@@ -1,0 +1,93 @@
+<launch>
+
+
+
+<arg name="robot0_name" value="robot_0" />
+<arg name="robot1_name" value="robot_1" />
+
+
+
+
+<!-- Trajectory Generator -->
+<node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" />
+
+<!-- Path Modification -->
+<node name="path_modification" pkg="path_modification" type="path_modification" />
+
+
+<!-- Trajectory Visualization -->
+<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> 
+
+
+
+<!-- Planners -->
+
+
+<!-- We need 2 planners, one for the first robot and one for the second robot -->
+<group ns="$(arg robot0_name)">
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" >
+    <param name="robot_update" type="str" value="/$(arg robot0_name)/update" />
+  </node>
+</group> 
+
+<group ns="$(arg robot1_name)"> 
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen"> 
+    <param name="robot_update" type="str" value="/$(arg robot1_name)/update" /> 
+  </node>
+</group> 
+
+
+
+<!-- Sensing nodes -->
+
+<group ns="$(arg robot0_name)"> 
+  <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="screen"> 
+    <param name="other_robot_odom" type="str" value="/$(arg robot1_name)/odom" />  
+  </node> 
+</group> 
+
+<group ns="$(arg robot1_name)"> 
+   <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="screen">  
+     <param name="other_robot_odom" type="str" value="/$(arg robot0_name)/odom" /> 
+   </node> 
+</group> 
+
+
+
+<!-- Evaluation -->
+
+<group ns="$(arg robot0_name)">
+  <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen">
+    <param name="robot_id" type="int" value="0" />
+  </node>
+</group> 
+
+<group ns="$(arg robot1_name)">
+  <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen"> 
+    <param name="robot_id" type="int" value="1" />
+  </node>
+</group> 
+
+
+
+
+
+
+<!-- Start the ramp_control simulation nodes (locally, not on remote machines) -->
+
+<group ns="$(arg robot0_name)" >
+  <node name="simulation" pkg="ramp_control" type="simulation" /> 
+    <param name="orientation" type="double" value="3.14159" />
+</group> 
+
+
+<group ns="$(arg robot1_name)"> 
+  <node name="simulation" pkg="ramp_control" type="simulation" /> 
+    <param name="orientation" type="double" value="0" />
+</group> 
+
+
+<!-- Simulation -->
+<node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/catkin_workspace/src/ramp/ramp_launch/launch/world/test1.world" />
+
+</launch>

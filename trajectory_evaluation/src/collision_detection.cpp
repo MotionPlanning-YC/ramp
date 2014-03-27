@@ -11,6 +11,7 @@ CollisionDetection::~CollisionDetection() {
 
 void CollisionDetection::init(ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler((const ros::NodeHandle&)h);
+  //pub_pop = h.advertise<ramp_msgs::Population>("population", 1000);
   setT_od_w(id);
 }
 
@@ -105,7 +106,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   //std::cout<<"\nobstacle trajectory: "<<u.toString(ob_trajectory);
   // For every 3 points, check circle detection
   float radius = 0.55f;
-  for(unsigned int i=0;i<trajectory_.trajectory.points.size() && i<ob_trajectory.trajectory.points.size();i++) {
+  for(unsigned int i=0;i<trajectory_.trajectory.points.size() && i<ob_trajectory.trajectory.points.size();i+=3) {
     
     // Get the point on the trajectory, p
     trajectory_msgs::JointTrajectoryPoint p = trajectory_.trajectory.points.at(i);
