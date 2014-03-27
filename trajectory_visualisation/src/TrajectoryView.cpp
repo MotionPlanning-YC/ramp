@@ -88,23 +88,23 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
 {
   //std::cout<<"\n\nReceived Population!";
 
-  populations_.clear();
-  populations_.push_back(msg);
+  //populations_.clear();
+  //populations_.push_back(msg);
 
-  /*if(populations_.size() < 2) {
+  if(populations_.size() < 2) {
     populations_.push_back(msg);
   }
 
   else if(populations_.size() == 2) {
-    if((unsigned int)msg.robot_id == 1) {
+    if((unsigned int)msg.robot_id == 0) {
       populations_.erase(populations_.begin());
       populations_.insert(populations_.begin(), msg);
     }
-    else if((unsigned int)msg.robot_id == 2) {
+    else if((unsigned int)msg.robot_id == 1) {
       populations_.erase(populations_.begin()+1);
       populations_.insert(populations_.begin()+1, msg);
     }
-  }*/
+  }
 
   drawPopulation();
 }
@@ -152,17 +152,17 @@ void TrajectoryView::drawPopulation() {
       std::cout<<"\npoints[0]: ("<<points.at(0).positions.at(0)<<", "<<points.at(0).positions.at(1)<<")";*/
 
       // Green for robot 1 and feasible
-      if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible && t==populations_.at(p).best_id) {
+      if(populations_.at(p).robot_id == 0 && populations_.at(p).population.at(t).feasible && t==populations_.at(p).best_id) {
         pen = QPen( QColor(0, 255, 0, 255) );
       }
-      else if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible) {
+      else if(populations_.at(p).robot_id == 0 && populations_.at(p).population.at(t).feasible) {
         pen = QPen( QColor(0, 255, 0, 200) );
       }
       // Blue for robot 2 and feasible
-      else if(populations_.at(p).robot_id == 2 && populations_.at(p).population.at(t).feasible && t==populations_.at(p).best_id) {
+      else if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible && t==populations_.at(p).best_id) {
         pen = QPen( QColor(0,0,255,255) );
       }
-      else if(populations_.at(p).robot_id == 2 && populations_.at(p).population.at(t).feasible) {
+      else if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible) {
         pen = QPen( QColor(0,0,255,200) );
       }
       
@@ -188,11 +188,11 @@ void TrajectoryView::drawPopulation() {
 
           // If the first point
           if(j == 0) {
-            int radius = metersToPixels(0.175, true);
+            int radius = metersToPixels(0.275, true);
             // Draw a line to the next point
             this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true)-radius,
                                       metersToPixels(points.at(j).positions.at(1), false)+radius,
-                                      metersToPixels(0.35, true), metersToPixels(0.35, false));
+                                      metersToPixels(0.55, true), metersToPixels(0.55, false));
                                       
           }
 

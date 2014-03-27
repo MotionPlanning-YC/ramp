@@ -17,14 +17,14 @@ Planner my_planner;
 Utility u;
 
 
-const std::vector<Configuration> getStartGoal(bool robot1) {
+const std::vector<Configuration> getStartGoal(bool robot0) {
   std::cout<<"\nIn getStartGoal";
-  std::cout<<"\nrobot1: "<<robot1<<"\n";
+  std::cout<<"\nrobot0: "<<robot0<<"\n";
   std::vector<Configuration> result;
 
   Configuration s, g;
   
-  if(!robot1) {
+  if(!robot0) {
     s.K_.push_back(0.f);
     s.K_.push_back(2.f);
     s.K_.push_back(0);
@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
   my_planner.ranges_.push_back(range2);
   
   // Make Configurations
-  std::vector<Configuration> s_g = getStartGoal(update_topic == "/robot1/update");
+  std::vector<Configuration> s_g = getStartGoal(update_topic == "/robot_0/update");
   Configuration s = s_g.at(0);
   Configuration g = s_g.at(1);
 
@@ -139,11 +139,11 @@ int main(int argc, char** argv) {
   my_planner.init(handle); 
 
   /** Set Planner Robot ID */
-  if(update_topic == "/robot1/update") {
-    my_planner.id_ = 1;
+  if(update_topic == "/robot_0/update") {
+    my_planner.id_ = 0;
   }
   else {
-    my_planner.id_ = 2;
+    my_planner.id_ = 1;
   }
   /** End building Planner */
 

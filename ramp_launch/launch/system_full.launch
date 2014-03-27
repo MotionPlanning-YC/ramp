@@ -2,15 +2,15 @@
 
 
 
+<arg name="robot0_name" value="robot0" />
 <arg name="robot1_name" value="robot1" />
-<arg name="robot2_name" value="robot2" />
 
 
 
 <!-- Define the machines -->
 
-<machine name="robot1" address="192.168.1.101" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> 
-<machine name="robot2" address="192.168.1.102" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" />
+<machine name="robot0" address="192.168.1.101" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> 
+<machine name="robot1" address="192.168.1.102" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" />
 
 
 
@@ -65,13 +65,13 @@
 
 <group ns="$(arg robot1_name)">
   <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen">
-    <param name="robot_id" type="int" value="1" />
+    <param name="robot_id" type="int" value="0" />
   </node>
 </group> 
 
 <group ns="$(arg robot2_name)">
   <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen"> 
-    <param name="robot_id" type="int" value="2" />
+    <param name="robot_id" type="int" value="1" />
   </node>
 </group> 
 
