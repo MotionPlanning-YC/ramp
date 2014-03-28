@@ -248,7 +248,7 @@ void Planner::init_population() {
 
     // Hardcode some velocities, 0.25m/s per segment
     for(unsigned int j=1;j<paths_.at(i).all_.size();j++) {
-      v.push_back(0.35f);
+      v.push_back(0.0f);
     }
     
     // Build a TrajectoryRequest 
@@ -377,6 +377,25 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   result.request.v_end          = v_e;
   result.request.resolutionRate = resolutionRate_;
 
+  result.request.v_start.clear();
+  if (bestTrajec_.msg_trajec_.trajectory.points.size() > 0)
+  {
+    ROS_ERROR("velocities size : %d", bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.size());
+    ROS_ERROR("vstart size: %d", result.request.v_start.size());
+    result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(0));
+
+    result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(1));
+
+    result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(2));
+  }
+/*  else if (result.request.v_start.size () == 0)
+  {
+    result.request.v_start.push_back(0);
+    result.request.v_start.push_back(0);
+    result.request.v_start.push_back(0);
+
+  }*/
+  ROS_ERROR("check if out");
   return result;
 } // End buildTrajectoryRequest
 
@@ -760,7 +779,7 @@ const std::string Planner::pathsToString() const {
   
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
-  goalThreshold_ = 0.1;
+  goalThreshold_ = 0.05;
   while( (start_.compare(goal_, false) > goalThreshold_) && ros::ok()) {
     ros::spinOnce(); 
   } // end while

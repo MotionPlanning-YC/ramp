@@ -20,9 +20,14 @@ int main(int argc, char** argv) {
   c1.configuration.K.push_back(0);
 
   ramp_msgs::KnotPoint c2;
+<<<<<<< HEAD
   c2.configuration.K.push_back(0);
   c2.configuration.K.push_back(0);
+=======
+  c2.configuration.K.push_back(0.f);
+>>>>>>> 7da1e7f4117a1203d05c2baf16e14e02a955d338
   c2.configuration.K.push_back(0);
+  c2.configuration.K.push_back(-PI/1.5);
 
   /*ramp_msgs::KnotPoint c3;
   c3.configuration.K.push_back(3);

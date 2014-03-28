@@ -11,15 +11,9 @@
 #include "ramp_msgs/Path.h"
 #include "ramp_msgs/Trajectory.h"
 #include <tf/transform_datatypes.h>
-<<<<<<< HEAD
 #include "range.h"
-=======
->>>>>>> 7da1e7f4117a1203d05c2baf16e14e02a955d338
-
 #define PI 3.14159f
 
-
-class Range;
 
 class Utility {
   public:

@@ -121,46 +121,6 @@ const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
   return result.str();
 }
 
-<<<<<<< HEAD
-
-
-/** 
- * Assume a 45 degree angle is formed between the robot's center and the reference point (left wheel)
- * */
-const std::vector<float> Utility::getCenter(std::vector<float> p, float orientation) const {
-  std::vector<float> result;
- 
-  // Get world coordinates of reference point 
-  float x = p.at(0);
-  float y = p.at(1);
-  //std::cout<<"p: ("<<x<<", "<<y<<")";
-  
-  // Radius
-  float r = 0.2155261f;
-
-  // Get world coodinates of center point
-  x -= r*cos(orientation);
-  y -= r*sin(orientation);
-  
-  result.push_back(x);
-  result.push_back(y);
-
-  return result;
-} //End getCenter
-
-
-
-
-
-
-
-
-
-
-
-
-
-=======
 const std::string Utility::toString(const ramp_msgs::Configuration c) const {
   std::ostringstream result;
   result<<"(";
@@ -170,11 +130,6 @@ const std::string Utility::toString(const ramp_msgs::Configuration c) const {
   result<<c.K.at(c.K.size()-1)<<")";
   return result.str();
 }
->>>>>>> 7da1e7f4117a1203d05c2baf16e14e02a955d338
-
-
-
-
 
 const std::string Utility::toString(const ramp_msgs::Path path) const {
   std::ostringstream result;

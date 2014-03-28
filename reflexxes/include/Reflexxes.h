@@ -1,0 +1,66 @@
+#ifndef REFLEXXES_H
+#define REFLEXXES_H
+
+
+#include "ReflexxesAPI.h"
+#include "RMLPositionFlags.h"
+#include "RMLPositionInputParameters.h"
+#include "RMLPositionOutputParameters.h"
+#include "nav_msgs/Odometry.h"
+#include "ramp_msgs/Path.h"
+#include "ramp_msgs/TrajectoryRequest.h"
+#include "tf/transform_datatypes.h"
+#include "utility.h"
+
+// defines
+#define NUMBER_OF_DOFS 3
+#define CYCLE_TIME_IN_SECONDS 0.200
+
+class Reflexxes
+{
+
+  private:
+    int resultValue;
+    ReflexxesAPI *rml;
+    RMLPositionInputParameters *inputParameters;          
+    RMLPositionOutputParameters *outputParameters;
+    RMLPositionFlags flags;
+    Utility utility;
+    ramp_msgs::Path path;
+    nav_msgs::Odometry odometry;
+    ramp_msgs::Trajectory *trajectory;
+    ros::Duration time_from_start;
+    float current_orientation;
+   
+ // Compute the orientation needed to reach the target, given an initial position
+    float computeOrientationNeededToGoal();
+
+// Execute one iteration of the Reflexxes control function
+    trajectory_msgs::JointTrajectoryPoint spinOnce();
+
+//Set the target of the Reflexxes library
+    void setTarget(float x, float y, float linear_velocity, float angular_velocity);
+
+// Returns true if the target has been reached
+    bool isFinalStateReached();
+
+// Initialize variables just after receiving a service request
+    void setInitialConditions();
+
+// Compute the orientation needed to reach the target, given an initial position
+    float computeTargetOrientation(float initial_x, float intial_y, float target_x, float target_y);
+  public:
+ 
+// Service callback, the input is a path and the output a trajectory
+    bool trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res);
+    
+    Reflexxes();
+
+    ~Reflexxes();
+
+// Odometry callback
+    void odometryCallback(const nav_msgs::Odometry& odometry);
+
+};
+
+#endif //REFLEXXES_H
