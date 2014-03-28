@@ -36,7 +36,7 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
   point.velocities.push_back(linear_velocity * cos(difference_angle));
   point.velocities.push_back(0);
   point.velocities.push_back(outputParameters->NewVelocityVector->VecData[2] + sin(difference_angle) * linear_velocity);
- 
+
   //Same with the acceleration
   float linear_acceleration = sqrt(pow(outputParameters->NewAccelerationVector->VecData[0], 2) + pow(outputParameters->NewAccelerationVector->VecData[1], 2) );
   point.accelerations.push_back(linear_acceleration);
@@ -72,6 +72,11 @@ void Reflexxes::setTarget(float x, float y, float linear_velocity, float angular
 // Service callback, the input is a path and the output a trajectory
 bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res)
 {
+
+  for (int i=0; i<req.v_start.size(); i++)
+    ROS_ERROR("vstart(%d): %f", i, req.v_start.at(i));
+  ROS_ERROR("%s", utility.toString(req.path).c_str());
+
   // Saves the path
   this->path = req.path;
     res.trajectory.index_knot_points.push_back(0);
@@ -195,12 +200,12 @@ Reflexxes::Reflexxes()
   // Maximum acceleration is 1m/s^2 and 2radian/s^2
   inputParameters->MaxAccelerationVector->VecData[0] = 1;
   inputParameters->MaxAccelerationVector->VecData[1] = 1;
-  inputParameters->MaxAccelerationVector->VecData[2] = 2; 
+  inputParameters->MaxAccelerationVector->VecData[2] = 3; 
 
   // As the maximum jerk values are not known, this is just to try
   inputParameters->MaxJerkVector->VecData[0] = 1.0;
-  inputParameters->MaxJerkVector->VecData[1] = 2.0;
-  inputParameters->MaxJerkVector->VecData[2] = 2.0;
+  inputParameters->MaxJerkVector->VecData[1] = 1.0;
+  inputParameters->MaxJerkVector->VecData[2] = 3.0;
 
   // Set the Target Position and Velocity vector
   inputParameters->TargetPositionVector->VecData[0] = 0.0;
