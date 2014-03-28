@@ -28,18 +28,13 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
   float velocity_angle = computeTargetOrientation(0,0,outputParameters->NewVelocityVector->VecData[0],outputParameters->NewVelocityVector->VecData[1]);
   float difference_angle = velocity_angle - inputParameters->CurrentPositionVector->VecData[2];
 
-<<<<<<< HEAD
-  // cos for more velocity 
-=======
   // Calculate the linear velocity, being the norm of the vector (Vx, Vy) 
     float linear_velocity = sqrt(pow(outputParameters->NewVelocityVector->VecData[0], 2) + pow(outputParameters->NewVelocityVector->VecData[1], 2) );
   
   // Now create the velocity vector for the trajectory
   // We need to transform the velocity in x, y and theta in the reference frame to a linear and angular velocity
->>>>>>> dbb3f53bc6e001a73a484be940cb5ea30095d634
   point.velocities.push_back(linear_velocity * cos(difference_angle));
   point.velocities.push_back(0);
-  // sin to give it more angular velocity
   point.velocities.push_back(outputParameters->NewVelocityVector->VecData[2] + sin(difference_angle) * linear_velocity);
 
   //Same with the acceleration
