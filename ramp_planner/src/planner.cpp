@@ -377,25 +377,27 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   result.request.v_end          = v_e;
   result.request.resolutionRate = resolutionRate_;
 
-  result.request.v_start.clear();
+  // We Need reflexxes to have the current velocity of the robot, so we send it with the trajectory request
+  // v_start is used to hold the velocity information and is a vector of size 3
+  
   if (bestTrajec_.msg_trajec_.trajectory.points.size() > 0)
   {
-    ROS_ERROR("velocities size : %d", bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.size());
-    ROS_ERROR("vstart size: %d", result.request.v_start.size());
+    result.request.v_start.clear();
     result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(0));
 
     result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(1));
 
     result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(2));
-  }
-/*  else if (result.request.v_start.size () == 0)
-  {
-    result.request.v_start.push_back(0);
-    result.request.v_start.push_back(0);
-    result.request.v_start.push_back(0);
 
-  }*/
-  ROS_ERROR("check if out");
+  }
+  else
+  {
+    result.request.v_start.clear();
+    result.request.v_start.push_back(0);
+    result.request.v_start.push_back(0);
+    result.request.v_start.push_back(0);
+  }
+
   return result;
 } // End buildTrajectoryRequest
 
@@ -408,7 +410,29 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const unsigne
   result.request.v_start        = v_s;
   result.request.v_end          = v_e;
   result.request.resolutionRate = resolutionRate_;
-  
+ 
+
+  // We Need reflexxes to have the current velocity of the robot, so we send it with the trajectory request
+  // v_start is used to hold the velocity information and is a vector of size 3
+  if (bestTrajec_.msg_trajec_.trajectory.points.size() > 0)
+  {
+    result.request.v_start.clear();
+
+    result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(0));
+
+    result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(1));
+
+    result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(2));
+  }
+  else
+  {
+    result.request.v_start.clear();
+    result.request.v_start.push_back(0);
+    result.request.v_start.push_back(0);
+    result.request.v_start.push_back(0);
+  }
+
+
   return result; 
 } // End buildTrajectoryRequest
 

@@ -24,24 +24,34 @@ const std::vector<Configuration> getStartGoal(bool robot0) {
 
   Configuration s, g;
   
+<<<<<<< HEAD
   if(!robot0) {
     s.K_.push_back(0.f);
     s.K_.push_back(2.f);
+=======
+ /* if(!robot1) {
+    s.K_.push_back(0);
+    s.K_.push_back(2);
+>>>>>>> dbb3f53bc6e001a73a484be940cb5ea30095d634
     s.K_.push_back(0);
     
     g.K_.push_back(3.5f);
     g.K_.push_back(3.5f);
     g.K_.push_back(0);
   }
-  else {
+  else {*/
     s.K_.push_back(3.5f);
+<<<<<<< HEAD
     s.K_.push_back(2.f);
+=======
+    s.K_.push_back(2.0f);
+>>>>>>> dbb3f53bc6e001a73a484be940cb5ea30095d634
     s.K_.push_back(PI);
     
     g.K_.push_back(0.f);
     g.K_.push_back(3.5f);
     g.K_.push_back(PI);
-  }
+ // }
 
   result.push_back(s);
   result.push_back(g);
