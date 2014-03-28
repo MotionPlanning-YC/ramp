@@ -260,7 +260,13 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
     // Now build a Trajectory Request 
     ramp_msgs::TrajectoryRequest tr;
     tr.request.path = p;
-    tr.request.v_start.push_back(0.33f);
+   
+    // WE need reflexxes to have the current velocity of the robot and we use v_start for that
+    // v_start is a velocity vector of size 3 
+    tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
+    tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.y);
+    tr.request.v_start.push_back(ob.odom_t.twist.twist.angular.z);
+
     tr.request.v_end.push_back(0.33f);
     tr.request.resolutionRate = 5;
 

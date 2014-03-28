@@ -27,7 +27,6 @@ class Reflexxes
     RMLPositionFlags flags;
     Utility utility;
     ramp_msgs::Path path;
-    nav_msgs::Odometry odometry;
     ramp_msgs::Trajectory *trajectory;
     ros::Duration time_from_start;
     float current_orientation;
@@ -45,7 +44,7 @@ class Reflexxes
     bool isFinalStateReached();
 
 // Initialize variables just after receiving a service request
-    void setInitialConditions();
+    void setInitialConditions(std::vector<float> velocity);
 
 // Compute the orientation needed to reach the target, given an initial position
     float computeTargetOrientation(float initial_x, float intial_y, float target_x, float target_y);
@@ -58,8 +57,6 @@ class Reflexxes
 
     ~Reflexxes();
 
-// Odometry callback
-    void odometryCallback(const nav_msgs::Odometry& odometry);
 
 };
 

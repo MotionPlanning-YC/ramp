@@ -5,30 +5,39 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
 {
   // Calling the Reflexxes OTG algorithm 
   resultValue = rml->RMLPosition(*inputParameters, outputParameters, flags);                                              
- 
-  // Calculate the linear velocity, being the norm of the vector (Vx, Vy) 
-    float linear_velocity = sqrt(pow(outputParameters->NewVelocityVector->VecData[0], 2) + pow(outputParameters->NewVelocityVector->VecData[1], 2) );
 
+  // the input of the next iteration is the output of this one
   *inputParameters->CurrentPositionVector = *outputParameters->NewPositionVector;
   *inputParameters->CurrentVelocityVector = *outputParameters->NewVelocityVector;
   *inputParameters->CurrentAccelerationVector = *outputParameters->NewAccelerationVector;
 
-  // Change the target orientation
+  // Change the target orientation, as the target is the orientation needed to reach the goal
   inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],inputParameters->CurrentPositionVector->VecData[1],inputParameters->TargetPositionVector->VecData[0],inputParameters->TargetPositionVector->VecData[1]);
    
-  // Build the JointTrajectoryPoint object, that will be used to build the trajectory
+
+  // Starting here, we build the JointTrajectoryPoint object, that will be used to build the trajectory
+  
+  // Lets first put the new position to the trajectory point, we get it from the output of reflexxes 
   trajectory_msgs::JointTrajectoryPoint point;
   for (int i=0; i<3; i++)
   {
     point.positions.push_back(outputParameters->NewPositionVector->VecData[i]);
   }
+
+  // WE need the angle of the velocity vector and the difference between that angle and the robot orientation
   float velocity_angle = computeTargetOrientation(0,0,outputParameters->NewVelocityVector->VecData[0],outputParameters->NewVelocityVector->VecData[1]);
   float difference_angle = velocity_angle - inputParameters->CurrentPositionVector->VecData[2];
 
+  // Calculate the linear velocity, being the norm of the vector (Vx, Vy) 
+    float linear_velocity = sqrt(pow(outputParameters->NewVelocityVector->VecData[0], 2) + pow(outputParameters->NewVelocityVector->VecData[1], 2) );
+  
+  // Now create the velocity vector for the trajectory
+  // We need to transform the velocity in x, y and theta in the reference frame to a linear and angular velocity
   point.velocities.push_back(linear_velocity * cos(difference_angle));
   point.velocities.push_back(0);
   point.velocities.push_back(outputParameters->NewVelocityVector->VecData[2] + sin(difference_angle) * linear_velocity);
-    
+ 
+  //Same with the acceleration
   float linear_acceleration = sqrt(pow(outputParameters->NewAccelerationVector->VecData[0], 2) + pow(outputParameters->NewAccelerationVector->VecData[1], 2) );
   point.accelerations.push_back(linear_acceleration);
   point.accelerations.push_back(0);
@@ -63,15 +72,12 @@ void Reflexxes::setTarget(float x, float y, float linear_velocity, float angular
 // Service callback, the input is a path and the output a trajectory
 bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res)
 {
-  ROS_ERROR("velocity: %f", req.v_start.at(0));
-
-  ROS_ERROR("request received");
   // Saves the path
   this->path = req.path;
     res.trajectory.index_knot_points.push_back(0);
   
   //set the initial conditions of the reflexxes library
-  setInitialConditions();
+  setInitialConditions(req.v_start);
 
   // Go through every knotpoint in the path
   for (int i = 1; i<path.points.size() ; i++)
@@ -90,15 +96,13 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
     }
     // Once we reached the target, we don't forgot to mention that this point in the trajectory is a knotpoint
     res.trajectory.index_knot_points.push_back(res.trajectory.trajectory.points.size() - 1);
-    ROS_ERROR("traj size %d", res.trajectory.trajectory.points.size());
-
 
   }
   return true;
 }
 
 // Initialize variables just after receiving a service request
-void Reflexxes::setInitialConditions()
+void Reflexxes::setInitialConditions(std::vector<float> velocity)
 {
   // Set-up the input parameters
   // The firt degree of freedom is x position
@@ -121,20 +125,14 @@ void Reflexxes::setInitialConditions()
   inputParameters->CurrentPositionVector->VecData[2] = orientation;
 
   // Set the current velocities, in the reference frame, as Reflexxes input
-  // This is the latest velocity value got from the odometry
-  inputParameters->CurrentVelocityVector->VecData[0] = odometry.twist.twist.linear.x * cos(orientation);
-  inputParameters->CurrentVelocityVector->VecData[1] = odometry.twist.twist.linear.x * sin(orientation);
-  inputParameters->CurrentVelocityVector->VecData[2] = odometry.twist.twist.angular.z;
+  // This is the latest velocity value got from the path
+  inputParameters->CurrentVelocityVector->VecData[0] = velocity.at(0) * cos(orientation);
+  inputParameters->CurrentVelocityVector->VecData[1] = velocity.at(0) * sin(orientation);
+  inputParameters->CurrentVelocityVector->VecData[2] = velocity.at(2);
 
   inputParameters->CurrentAccelerationVector->VecData[0] = 0.0;
   inputParameters->CurrentAccelerationVector->VecData[1] = 0.0;
   inputParameters->CurrentAccelerationVector->VecData[2] = 0.0;
-}
-
-// Odometry callback
-void Reflexxes::odometryCallback(const nav_msgs::Odometry& odom)
-{
-  this->odometry = odom;
 }
 
 // Compute the orientation needed to reach the target, given an initial position
@@ -152,7 +150,6 @@ float Reflexxes::computeTargetOrientation(float initial_x, float initial_y, floa
 
   float angle = utility.findAngleFromAToB(current_position, target_position);
 
- // ROS_ERROR("x= %f, y= %f, x=%f, y=%f, angle=%f", initial_x, initial_y, target_x, target_y, angle);
   return angle;
 
 }
