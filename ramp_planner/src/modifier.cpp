@@ -122,13 +122,13 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
   ramp_msgs::ModificationRequest result;
 
   result.request.op = getOperator();
-  std::cout<<"\nOperator: "<<result.request.op<<"\n";
+  //std::cout<<"\nOperator: "<<result.request.op<<"\n";
 
   // Push the target paths onto the modification request
   std::vector<int> targets = getTargets(result.request.op);
   for(unsigned int i=0;i<targets.size();i++) {
-    std::cout<<"\nTarget path "<<i<<" index: "<<targets.at(i);
-    std::cout<<"\nPath "<<targets.at(i)<<" size: "<<paths_.at(targets.at(i)).size()<<"\n";
+    //std::cout<<"\nTarget path "<<i<<" index: "<<targets.at(i);
+    //std::cout<<"\nPath "<<targets.at(i)<<" size: "<<paths_.at(targets.at(i)).size()<<"\n";
     result.request.paths.push_back(paths_.at(targets.at(i)).buildPathMsg());
   }
 

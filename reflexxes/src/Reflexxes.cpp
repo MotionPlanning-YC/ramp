@@ -73,17 +73,20 @@ void Reflexxes::setTarget(float x, float y, float linear_velocity, float angular
 bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res)
 {
 
-  for (int i=0; i<req.v_start.size(); i++)
-    ROS_ERROR("vstart(%d): %f", i, req.v_start.at(i));
-  ROS_ERROR("%s", utility.toString(req.path).c_str());
+  //for (int i=0; i<req.v_start.size(); i++)
+    //ROS_ERROR("vstart(%d): %f", i, req.v_start.at(i));
+  //ROS_ERROR("%s", utility.toString(req.path).c_str());
 
   // Saves the path
   this->path = req.path;
-    res.trajectory.index_knot_points.push_back(0);
   
   //set the initial conditions of the reflexxes library
   setInitialConditions(req.v_start);
-    
+
+  // Push on 0
+  res.trajectory.index_knot_points.push_back(0);
+ 
+  //time_from_start = ros::Duration(CYCLE_TIME_IN_SECONDS);
   time_from_start = ros::Duration(0);
 
   // Go through every knotpoint in the path
@@ -91,10 +94,10 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
   {
     resultValue = 0;
     // Set the new knotpoint as the target
-    if (i< (path.points.size()-1))
+    if (i < (path.points.size()-1))
       setTarget(path.points[i].configuration.K.at(0), path.points[i].configuration.K.at(1), 0.0, 0);
     else
-      setTarget(path.points[i].configuration.K.at(0), path.points[i].configuration.K.at(1),0,0);
+      setTarget(path.points[i].configuration.K.at(0), path.points[i].configuration.K.at(1), 0.0, 0);
     // We go to the next knotpoint only once we reach this one
     while (!isFinalStateReached())
     {
@@ -105,6 +108,8 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
     res.trajectory.index_knot_points.push_back(res.trajectory.trajectory.points.size() - 1);
 
   }
+
+  //std::cout<<"\nSending back: "<<utility.toString(res.trajectory);
   return true;
 }
 
@@ -112,7 +117,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
 void Reflexxes::setInitialConditions(std::vector<float> velocity)
 {
   // Set-up the input parameters
-  // The firt degree of freedom is x position
+  // The first degree of freedom is x position
   // The second degree of freedom is y position
   // The third degree of freedom is the orientation
   // The target for the third dof is the orientation needed to be able to reach the goal position
