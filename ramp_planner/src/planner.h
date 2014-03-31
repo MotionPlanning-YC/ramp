@@ -140,7 +140,7 @@ class Planner {
     // Callback methods for ros::Timers
     void controlCycleCallback(const ros::TimerEvent& t);
     void planningCycleCallback(const ros::TimerEvent& t);
-    void updateCallback(const ramp_msgs::Update::ConstPtr& msg);
+    void updateCallback(const ramp_msgs::Update& msg);
     void imminentCollisionCallback(const ros::TimerEvent& t);
 
     // Set the transformation from odometry to world CS

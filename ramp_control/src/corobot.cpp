@@ -313,7 +313,7 @@ void Corobot::moveOnTrajectory(bool simulation)
       // Adjust the angular speed to correct errors in turning
       // Commented out because it was producing erratic driving
       // Should be fixed at some point
-      if(twist_.linear.x > 0.0f && twist_.angular.z < 0.1) {
+      if(twist_.linear.x > 0.0f && twist_.angular.z < 0.15) {
         //std::cout<<"\ninitial_theta: "<<initial_theta;
         float actual_theta = u.displaceAngle(initial_theta, configuration_.K.at(2));
         

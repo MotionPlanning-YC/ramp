@@ -20,6 +20,7 @@ class Modifier {
 
 
     // Data members
+    unsigned int num_ops;
     std::vector<Path> paths_;
     std::vector< std::vector<float> > velocities_;
     int i_changed1;
@@ -30,7 +31,6 @@ class Modifier {
     const std::vector<int> getTargets(const std::string op);
 
     ModificationRequestHandler* h_mod_req_;
-    unsigned int num_ops;
     Utility u;
 };
 

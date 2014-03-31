@@ -85,8 +85,8 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
  * and transforming it by T_od_w because 
  * updates are relative to odometry frame
  * */
-void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
-  //std::cout<<"\nReceived update!\n";
+void Planner::updateCallback(const ramp_msgs::Update& msg) {
+  std::cout<<"\nReceived update!\n";
   
   // Wait for mutex to be true
   while(!mutex_start_) {}
@@ -94,7 +94,7 @@ void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
   mutex_start_ = false;
 
   // Create a Configuration from the update msg 
-  Configuration c_od(msg->configuration);
+  Configuration c_od(msg.configuration);
 
   // Transform configuration from odometry to world coordinates
   c_od.transformBase(T_od_w_);
@@ -104,7 +104,7 @@ void Planner::updateCallback(const ramp_msgs::Update::ConstPtr& msg) {
     start_ = c_od;
   }
 
-  //std::cout<<"\nNew starting configuration: "<<start_.toString();
+  std::cout<<"\nNew starting configuration: "<<start_.toString()<<"\n";
 
   mutex_start_ = true;
 } // End updateCallback
@@ -133,7 +133,7 @@ void Planner::init(const ros::NodeHandle& h) {
 } // End init
 
 void Planner::planningCycleCallback(const ros::TimerEvent&) {
-  //std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
+  std::cout<<"\nPlanning cycle occurring, generation = "<<generation_;
   
   // Wait until mutex can be obtained
   while(!mutex_pop_) {}
@@ -147,6 +147,8 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
   
   // t=t+1
   generation_++;
+
+  std::cout<<"\nPlanning cycle "<<generation_<<" complete\n";
 } // End planningCycleCallback
 
 
@@ -178,6 +180,7 @@ void Planner::gradualTrajectory(RampTrajectory& t) {
  *  configuration of the robot, re-evaluates the population,
  *  and sends a new (and better) trajectory for the robot to move along */
 void Planner::controlCycleCallback(const ros::TimerEvent&) {
+  std::cout<<"\nControl cycle occurring\n";
 
   // std::cout<<"\nSpinning once\n";
   ros::spinOnce(); 
@@ -208,6 +211,8 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   
   // Send the best trajectory 
   sendBest(); 
+
+  std::cout<<"\nControl cycle complete\n";
 } // End controlCycleCallback
 
 
@@ -322,7 +327,10 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
   // The modification operators deal with paths
   // So send the path to be modified
   std::vector<Path> modded_paths = modifyPath();
+  std::cout<<"\nNumber of modified paths returned: "<<modded_paths.size()<<"\n";
 
+  std::cout<<"\nmodifier->i_changed1: "<<modifier_->i_changed1;
+  std::cout<<"\nmodifier->i_changed2: "<<modifier_->i_changed2;
   // Hold the ids of the path(s) modified
   std::vector<int> olds;
   olds.push_back(modifier_->i_changed1);
@@ -333,14 +341,23 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
   }
 
   // Hold the new velocity vector(s)
-  std::vector< std::vector<float> > vs = getNewVelocities(modded_paths, olds); 
+  /*std::vector< std::vector<float> > vs = getNewVelocities(modded_paths, olds); 
+  std::cout<<"\nNumber of new velocity vectors: "<<vs.size();
+  for(int i=0;i<vs.size();i++) {
+    std::cout<<"\nvs.at("<<i<<"): (";
+    for(int j=0;j<vs.at(i).size();j++) {
+      std::cout<<vs.at(i).at(j)<<" ";
+    }
+    std::cout<<"\n";
+  }*/
 
   
   // For each targeted path,
   for(unsigned int i=0;i<modded_paths.size();i++) {
     
     // Build a TrajectoryRequestMsg
-    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(modded_paths.at(i), vs.at(i), vs.at(i));
+    //ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(modded_paths.at(i), vs.at(i), vs.at(i));
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(modded_paths.at(i), velocities_.at(i), velocities_.at(i));
     
     // Send the request and set the result to the returned trajectory 
     if(requestTrajectory(tr)) {
@@ -352,7 +369,7 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
       // Build ModifiedTrajectory
       ModifiedTrajectory mt;
       mt.trajec_ = temp;
-      mt.velocities_ = vs.at(i); 
+      mt.velocities_ = velocities_.at(i); 
 
       result.push_back(mt);
     } // end if
@@ -500,17 +517,21 @@ void Planner::sendPopulation() {
  * This is called at each control cycle to update the trajectories
  * */
 const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Path> new_paths, std::vector<int> i_old) {
-  //std::cout<<"\nIn getNewVelocities\n";
+  std::cout<<"\nIn getNewVelocities\n";
+  for(int i=0;i<new_paths.size();i++) {
+    std::cout<<"\nPath "<<i<<":"<<new_paths.at(i).toString();
+  }
 
   std::vector< std::vector<float> > result; 
 
   // If the modification only changed one path, i.e., not a crossover 
   if(new_paths.size() == 1) {
-    // std::cout<<"\nOnly changed one path!\n";
-    // std::cout<<"\ni_old.at(0):"<<i_old.at(0);
+    std::cout<<"\nOnly changed one path!\n";
+    std::cout<<"\ni_old.at(0):"<<i_old.at(0);
 
     // Get the original velocity values
     std::vector<float> v = velocities_.at(i_old.at(0));
+    std::cout<<"\nv size: "<<v.size();
 
     // Get the old and new paths
     Path old = paths_.at(i_old.at(0));
@@ -520,7 +541,7 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
 
     // Check the difference in path sizes
     int diff = new_path.all_.size() - old.all_.size();
-    // std::cout<<"\ndiff:"<<diff<<"\n";
+    std::cout<<"\ndiff:"<<diff<<"\n";
 
     // Insertion
     if(diff == 1) {
@@ -539,12 +560,14 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
 
   // Crossover
   else {
+    std::cout<<"\nIn crossover\n";
     
     // For each path,
     for(unsigned int i=0;i<new_paths.size();i++) {
     
       // Get the original velocity values
       std::vector<float> v = velocities_.at(i_old.at(i));
+      std::cout<<"Path "<<i<<" v size: "<<v.size();
       
       // Get the old and new paths
       Path old = paths_.at(i_old.at(i)); 
@@ -553,6 +576,7 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
       // std::cout<<"\nnew path "<<i<<":"<<new_path.toString();
 
       int diff = new_path.all_.size() - old.all_.size();
+      std::cout<<"\ndiff: "<<diff<<"\n";
       
       if(diff > 0) {
         for(unsigned int d=0;d<diff;d++) {
@@ -643,8 +667,8 @@ void Planner::evaluatePopulation() {
 
 /** This method updates all the paths with the current configuration */
 void Planner::updatePaths(Configuration start, ros::Duration dur) {
-  // std::cout<<"\nUpdating start to: "<<start.toString();
-  // std::cout<<"\ndur: "<<dur<<"\n";
+  std::cout<<"\nUpdating start to: "<<start.toString();
+  std::cout<<"\ndur: "<<dur<<"\n";
 
 
   // For each trajectory
@@ -658,13 +682,15 @@ void Planner::updatePaths(Configuration start, ros::Duration dur) {
      
       // Get the point 
       trajectory_msgs::JointTrajectoryPoint point = population_.population_.at(i).msg_trajec_.trajectory.points.at( population_.population_.at(i).msg_trajec_.index_knot_points.at(i_kp));
-      // std::cout<<"\npoint["<<i<<"].time_from_start:"<<point.time_from_start;
+      std::cout<<"\npoint["<<i<<"].time_from_start:"<<point.time_from_start;
 
       // Compare the durations
       if( dur > point.time_from_start) {
         throwaway++;
       }
     } //end for
+
+    std::cout<<"\nthrowaway: "<<throwaway;
 
     // If the whole path has been passed, adjust throwaway so that 
     //  we are left with a path that is: {new_start_, goal_}
@@ -699,8 +725,16 @@ void Planner::updatePopulation(ros::Duration d) {
   // First, get the updated current configuration
   start_ = getStartConfiguration();
   
+  std::cout<<"\nPaths before updating:";
+  for(int i=0;i<paths_.size();i++) {
+    std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
+  }
   // Update the paths with the new starting configuration 
   updatePaths(getStartConfiguration(), d);
+  std::cout<<"\nPaths after updating:";
+  for(int i=0;i<paths_.size();i++) {
+    std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
+  }
 
   // Create the vector to hold updated trajectories
   std::vector<RampTrajectory> updatedTrajecs;
@@ -795,7 +829,7 @@ const std::string Planner::pathsToString() const {
   planningCycleTimer_.start();
 
   // Wait for 75 generations before starting control cycle
-  while(generation_ < 100) {ros::spinOnce();}
+  while(generation_ < 200) {ros::spinOnce();}
 
   std::cout<<"\n***************Starting Control Cycle*****************";
   // Start the control cycle timer
@@ -817,4 +851,9 @@ const std::string Planner::pathsToString() const {
   h_control_->send(empty);
   
   std::cout<<"\nPlanning complete!\n";
+
+  std::cout<<"\nFinal population: ";
+  for(int i=0;i<paths_.size();i++) {
+    std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
+  }
 } // End go

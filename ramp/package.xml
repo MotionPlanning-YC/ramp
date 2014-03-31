@@ -28,6 +28,7 @@
   <run_depend>trajectory_visualization</run_depend>
   <run_depend>trajectory_debug</run_depend>
   <run_depend>path_modification</run_depend>
+  <run_depend>reflexxes</run_depend>
   
 
 
