@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "Reflexxes.h"
+#include "reflexxes.h"
 #include "ros/ros.h"
 
 // Main function

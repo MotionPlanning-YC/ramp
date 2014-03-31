@@ -1,4 +1,4 @@
-#include "Reflexxes.h"
+#include "reflexxes.h"
 
 // Execute one iteration of the Reflexxes control function
 trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
