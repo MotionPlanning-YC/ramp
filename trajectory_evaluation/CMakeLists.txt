@@ -8,8 +8,6 @@ find_package(catkin REQUIRED COMPONENTS message_generation ramp_msgs roscpp coro
 ## Declare ROS messages and services ##
 #######################################
 
-## Generate added messages and services with any dependencies listed here
-#generate_messages(DEPENDENCIES ramp_msgs)
 
 catkin_package(
   INCLUDE_DIRS include
@@ -24,6 +22,8 @@ catkin_package(
 
 include_directories(${catkin_INCLUDE_DIRS})
 
+## Debugging flag for using gdb
+set (CMAKE_CXX_FLAGS "-g")
 
 ## Declare a cpp executable
 add_executable(${PROJECT_NAME} src/main.cpp src/collision_detection.cpp src/euclidean_distance.cpp src/evaluate.cpp src/time.cpp src/trajectory_request_handler.cpp src/utility.cpp)

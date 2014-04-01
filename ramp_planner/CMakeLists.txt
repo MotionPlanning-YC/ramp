@@ -24,6 +24,7 @@ catkin_package(
 # Specify include directories
 include_directories(include ${catkin_INCLUDE_DIRS})
 
+## Debugging flag for using gdb
 set (CMAKE_CXX_FLAGS "-g")
 
 ## Declare a cpp executable

@@ -15,6 +15,10 @@ catkin_package(
 ###########
 
 include_directories(include ${catkin_INCLUDE_DIRS} /usr/include/Reflexxes)
+
+## Debugging flag for using gdb
+set (CMAKE_CXX_FLAGS "-g")
+
 add_executable(${PROJECT_NAME} src/main.cpp src/reflexxes.cpp src/utility.cpp src/range.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} TypeIIRML ReflexxesTypeIV)
 

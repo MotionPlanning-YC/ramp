@@ -24,6 +24,8 @@ catkin_package(
 ## Specify additional locations of header files
 include_directories(include ${catkin_INCLUDE_DIRS})
 
+## Debugging flag for using gdb
+set (CMAKE_CXX_FLAGS "-g")
 
 ## Declare a cpp executable
 add_executable(${PROJECT_NAME} src/main.cpp src/trajectory.cpp src/motion_state.cpp src/segment.cpp src/utility.cpp)

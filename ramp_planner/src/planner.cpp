@@ -830,7 +830,7 @@ const std::string Planner::pathsToString() const {
   controlCycleTimer_.start();
   
   // Do planning until robot has reached goal
-  goalThreshold_ = 0.05;
+  goalThreshold_ = 0.1;
   while( (start_.compare(goal_, false) > goalThreshold_) && ros::ok()) {
     ros::spinOnce(); 
   } // end while
