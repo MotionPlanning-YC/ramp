@@ -1,11 +1,12 @@
 <launch>
 
 
-<node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" />
+<node name="reflexxes" pkg="reflexxes" type="reflexxes" />
+<!-- <node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" /> -->
 
-<node name="evaluation" pkg="evaluation" type="evaluation" />
+<node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" />
 
-<node name="sensing" pkg="sensing" type="sensing" />
+<node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" />
 
 <node name="viewPredicted" pkg="ramp_debug" type="viewPredicted" output="screen"/>
 

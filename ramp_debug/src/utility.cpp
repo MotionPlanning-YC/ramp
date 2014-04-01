@@ -1,17 +1,30 @@
 #include "utility.h"
 
+
 Utility::Utility() {
-  Range range0(0, 3.5);
-  Range range1(0, 3.5);
-  Range range2(-PI, PI);
-  standardRanges.push_back(range0);
-  standardRanges.push_back(range1);
-  standardRanges.push_back(range2);
+  float loc_min = 0;
+  float loc_max = 3.5;
+
+  ramp_msgs::Range r1;
+  r1.min = loc_min;
+  r1.max = loc_max;
+  ramp_msgs::Range r2;
+  r2.min = loc_min;
+  r2.max = loc_max;
+  ramp_msgs::Range r3;
+  r3.min = -PI;
+  r3.max = PI;
+
+  ranges_.push_back(r1); 
+  ranges_.push_back(r2); 
+  ranges_.push_back(r3); 
 }
 
 
+Utility::~Utility() {}
+
 /** This method returns the Euclidean distance between two position vectors */
-const float Utility::positionDistance(const std::vector<float> a, const std::vector<float> b) const {
+const float Utility::euclideanDistance(const std::vector<float> a, const std::vector<float> b) const {
 
   float d_x = b.at(0) - a.at(0);
   float d_y = b.at(1) - a.at(1);
@@ -27,17 +40,9 @@ const float Utility::findAngleFromAToB(const std::vector<float> a, const std::ve
   float d_y = b.at(1) - a.at(1);
   float euc_dist = sqrt( pow(d_x,2) + pow(d_y,2) );
   
-  // If the positions are the same,
-  // Set the result to the starting orientation if one is provided
-  // Or to 0 if no starting orientation is provided
-  // TODO: Make the comparison proportionate to size of space
-  if(euc_dist <= 0.01) {
-    if(a.size() > 2) {
-      result = a.at(2);
-    }
-    else {
-      result = 0;
-    }
+  // If the positions are the same, set the result to starting angle
+  if(euc_dist == 0) {
+    result = 0;
   }
 
   // If b is in the 1st or 2nd quadrants
@@ -62,12 +67,13 @@ const float Utility::findAngleFromAToB(const std::vector<float> a, const std::ve
 /** This method returns distance between orientations a1 and a2. The distance is in the range [-PI, PI]. */
 const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {
   float result;
+
   float difference = a1 - a2;
   
   // If difference > pi, the result should be in [-PI,0] range
   if(difference > PI) {
     difference = fmodf(difference, PI);
-    result = difference - PI;
+    result = (difference == 0) ? 0 : difference - PI;
   }
 
   // If difference < -pi, the result should be in [0,PI] range
@@ -81,8 +87,7 @@ const float Utility::findDistanceBetweenAngles(const float a1, const float a2) c
   }
 
   return result;
-} //End findDistanceBetweenAngles
-
+} //End findDistanceBetweenAngles 
 
 
 const float Utility::displaceAngle(const float a1, float a2) const {
@@ -98,92 +103,40 @@ const float Utility::displaceAngle(const float a1, float a2) const {
 
 
 
-/** a and b must be the same size */
-const float Utility::getEuclideanDist(const std::vector<float> a, const std::vector<float> b) const {
-  float result=0;
+const ramp_msgs::Configuration Utility::getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const {
+  ramp_msgs::Configuration result; 
 
-  for(unsigned int i=0;i<a.size();i++) {
-    result += pow(a.at(i) - b.at(i), 2);
+  result.ranges = ranges_;
+
+  for(unsigned int i=0;i<3;i++) {
+    result.K.push_back(p.positions.at(i));
   }
-  
-  result = sqrt(result);
+
   return result;
 }
 
 
-const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
-  std::ostringstream result;
+const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::Configuration> configs) const {
+  ramp_msgs::Path result;
 
-  result<<"\nConfiguration: "<<toString(kp.configuration);
-  result<<", Stop time: "<<kp.stop_time;
-
-  return result.str();
-}
-
-<<<<<<< HEAD
-
-
-/** 
- * Assume a 45 degree angle is formed between the robot's center and the reference point (left wheel)
- * */
-const std::vector<float> Utility::getCenter(std::vector<float> p, float orientation) const {
-  std::vector<float> result;
- 
-  // Get world coordinates of reference point 
-  float x = p.at(0);
-  float y = p.at(1);
-  //std::cout<<"p: ("<<x<<", "<<y<<")";
-  
-  // Radius
-  float r = 0.2155261f;
-
-  // Get world coodinates of center point
-  x -= r*cos(orientation);
-  y -= r*sin(orientation);
-  
-  result.push_back(x);
-  result.push_back(y);
+  for(unsigned int i=0;i<configs.size();i++) {
+    ramp_msgs::KnotPoint kp;
+    kp.configuration = configs.at(i);
+    kp.stop_time = 0;
+    result.points.push_back(kp);
+  }
 
   return result;
-} //End getCenter
-
-
-
-
-
-
-
-
-
-
-
-
-
-=======
-const std::string Utility::toString(const ramp_msgs::Configuration c) const {
-  std::ostringstream result;
-  result<<"(";
-  for(unsigned int i=0;i<c.K.size()-1;i++) {
-    result<<c.K.at(i)<<", ";
-  }
-  result<<c.K.at(c.K.size()-1)<<")";
-  return result.str();
 }
->>>>>>> 7da1e7f4117a1203d05c2baf16e14e02a955d338
 
+const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> kps) const {
+  ramp_msgs::Path result;
 
-
-
-
-const std::string Utility::toString(const ramp_msgs::Path path) const {
-  std::ostringstream result;
-
-  result<<"\nPath: ";
-  for(unsigned int i=0;i<path.points.size();i++) {
-    result<<"\n "<<i<<": "<<toString(path.points.at(i));
+  for(unsigned int i=0;i<kps.size();i++) {
+    result.points.push_back(kps.at(i));
   }
 
-  return result.str();
+  return result;
 }
 
 
@@ -239,6 +192,42 @@ const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
     
     result<<"\n Time From Start: "<<p.time_from_start;
 
+  }
+
+  result<<"\n Feasible: "<<traj.feasible;
+  result<<"\n Fitness:  "<<traj.fitness;
+
+  return result.str();
+}
+
+
+
+const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
+  std::ostringstream result;
+
+  result<<"\nConfiguration: "<<toString(kp.configuration);
+  result<<", Stop time: "<<kp.stop_time;
+
+  return result.str();
+}
+
+const std::string Utility::toString(const ramp_msgs::Configuration c) const {
+  std::ostringstream result;
+  result<<"(";
+  for(unsigned int i=0;i<c.K.size()-1;i++) {
+    result<<c.K.at(i)<<", ";
+  }
+  result<<c.K.at(c.K.size()-1)<<")";
+  return result.str();
+}
+
+
+const std::string Utility::toString(const ramp_msgs::Path path) const {
+  std::ostringstream result;
+
+  result<<"\nPath: ";
+  for(unsigned int i=0;i<path.points.size();i++) {
+    result<<"\n "<<i<<": "<<toString(path.points.at(i));
   }
 
   return result.str();

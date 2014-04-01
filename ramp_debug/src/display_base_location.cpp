@@ -76,6 +76,7 @@ void odometryCallback(const nav_msgs::Odometry::ConstPtr& msg) {
 
 
 
+/*************** Needs to be fixed! getCenter no longer exists! *****************/
 void displayConfiguration() {
 
   if(configuration_.K.size() > 0) {
@@ -86,8 +87,8 @@ void displayConfiguration() {
     
     cout<<"\n\nConfiguration: "<<c.toString();
 
-    std::vector<float> center = u.getCenter(c.K_, c.K_.at(2));
-    cout<<"\nCenter: ("<<center.at(0)<<", "<<center.at(1)<<")";
+    //std::vector<float> center = u.getCenter(c.K_, c.K_.at(2));
+    //cout<<"\nCenter: ("<<center.at(0)<<", "<<center.at(1)<<")";
   }
 }
 

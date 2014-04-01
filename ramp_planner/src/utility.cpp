@@ -111,6 +111,18 @@ const float Utility::getEuclideanDist(const std::vector<float> a, const std::vec
 }
 
 
+
+const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> kps) const {
+  ramp_msgs::Path result;
+
+  for(unsigned int i=0;i<kps.size();i++) {
+    result.points.push_back(kps.at(i));
+  }
+
+  return result;
+}
+
+
 const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
   std::ostringstream result;
 

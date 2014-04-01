@@ -301,9 +301,9 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
   }
 
 
+  /* Commentted out because our robot's are just planar circles so we only
+   * need to compare a trajectory against one point 
   else if(motion_type == MotionType::SelfRotation || motion_type == MotionType::None) {
-    /* Commentted out because our robot's are just planar circles so we only
-     * need to compare a trajectory against one point 
     // Positions
     start.K.push_back(ob.odom_t.pose.pose.position.x);
     start.K.push_back(ob.odom_t.pose.pose.position.y);

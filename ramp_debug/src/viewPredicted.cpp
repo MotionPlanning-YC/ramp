@@ -4,6 +4,7 @@
 #include "ramp_msgs/Obstacle.h"
 #include "ramp_msgs/Population.h"
 #include "trajectory_request_handler.h"
+#include "motion_type.h"
 using namespace std;
 
 ros::Publisher  pub_population;
@@ -15,6 +16,8 @@ TrajectoryRequestHandler* h_traj_req_;
 
 std::vector<float> gr_angulars;
 std::vector<float> tgr_linears;
+
+bool odom_recv = false;
 
 
 /** This method determines what type of motion an obstacle has */
@@ -86,7 +89,7 @@ const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob,
   // First, identify which type of trajectory it is
   // translations only, self-rotation, translation and self-rotation, or global rotation
   MotionType motion_type = findMotionType(obstacle);
-  
+
   
   // The starting point 
   //trajectory_msgs::JointTrajectoryPoint start;
@@ -120,8 +123,9 @@ const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob,
     // Now build a Trajectory Request 
     ramp_msgs::TrajectoryRequest tr;
     tr.request.path = p;
-    tr.request.v_start.push_back(0.33f);
-    tr.request.v_end.push_back(0.33f);
+    tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
+    tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
+    tr.request.v_start.push_back(ob.odom_t.twist.twist.angular.z);
     tr.request.resolutionRate = 5;
 
     // Get trajectory
@@ -150,12 +154,9 @@ const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob,
     // Now build a Trajectory Request 
     ramp_msgs::TrajectoryRequest tr;
     tr.request.path = p;
-
-    for(unsigned int i=0;i<p.points.size()-1;i++) {
-      tr.request.v_start.push_back(PI/4);
-      tr.request.v_end.push_back(PI/4);
-    }
-
+    tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
+    tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
+    tr.request.v_start.push_back(ob.odom_t.twist.twist.angular.z);
     tr.request.resolutionRate = 5;
 
     // Get trajectory
@@ -174,6 +175,8 @@ const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob,
 void odometryCallback(const nav_msgs::Odometry& msg) {
   obstacle.odom_t_prev = obstacle.odom_t;
   obstacle.odom_t = msg;
+
+  odom_recv = true;
   
   MotionType motion_type = findMotionType(obstacle);
   if(motion_type == MotionType::Translation) {
@@ -197,15 +200,18 @@ void odometryCallback(const nav_msgs::Odometry& msg) {
 
 
 void getAndSendTrajectory() {
-  ros::Duration d(10);
-  ramp_msgs::Trajectory t = getPredictedTrajectory(obstacle, d);
 
-  ramp_msgs::Population pop;
-  pop.population.push_back(t);
-  pop.best_id  = 0;
-  pop.robot_id = 1;
+  if(odom_recv) {
+    ros::Duration d(10);
+    ramp_msgs::Trajectory t = getPredictedTrajectory(obstacle, d);
 
-  pub_population.publish(pop);
+    ramp_msgs::Population pop;
+    pop.population.push_back(t);
+    pop.best_id  = 0;
+    pop.robot_id = 1;
+
+    pub_population.publish(pop);
+  }
 }
 
 
@@ -222,6 +228,7 @@ int main(int argc, char** argv) {
 
 
   ros::Rate r(1);
+  std::cout<<"\nWaiting for obstacle's odometry to be published..\n";
   while(ros::ok()) {
     ros::spinOnce();
     getAndSendTrajectory();

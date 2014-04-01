@@ -31,6 +31,8 @@ class Utility {
     const float displaceAngle(const float a1, float a2) const;
     
     const float getEuclideanDist(const std::vector<float> a, std::vector<float> b) const;
+
+    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint> kps) const;
     
     const std::string toString(const ramp_msgs::KnotPoint kp) const;
     const std::string toString(const ramp_msgs::Configuration c) const;

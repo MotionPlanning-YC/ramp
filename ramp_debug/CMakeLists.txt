@@ -22,10 +22,10 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 #add_dependencies(display_base_location ramp_msgs_generate_messages_cpp)
 
 
-#add_executable(viewPredicted src/viewPredicted.cpp src/configuration.cpp src/range.cpp src/utility.cpp src/trajectory_request_handler.cpp)
-#set_target_properties(viewPredicted PROPERTIES COMPILE_FLAGS -std=c++0x)
-#target_link_libraries(viewPredicted ${catkin_LIBRARIES})
-#add_dependencies(viewPredicted ramp_msgs_generate_messages_cpp)
+add_executable(viewPredicted src/viewPredicted.cpp src/configuration.cpp src/range.cpp src/utility.cpp src/trajectory_request_handler.cpp)
+set_target_properties(viewPredicted PROPERTIES COMPILE_FLAGS -std=c++0x)
+target_link_libraries(viewPredicted ${catkin_LIBRARIES})
+add_dependencies(viewPredicted ramp_msgs_generate_messages_cpp)
 
 
 add_executable(publishTwistCommand src/publish_twist_command.cpp)
