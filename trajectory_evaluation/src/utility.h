@@ -6,6 +6,7 @@
 #include "ramp_msgs/TrajectoryRequest.h"
 #include "ramp_msgs/Trajectory.h"
 #include "ramp_msgs/Path.h"
+#include <tf/transform_datatypes.h>
 
 
 #define PI 3.14159f
@@ -30,6 +31,7 @@ class Utility {
     const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;
 
     const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;
+    const float findAngleFromAToB(const tf::Vector3 a, const tf::Vector3 b) const;
     
     const float findDistanceBetweenAngles(const float a1, const float a2) const;
     

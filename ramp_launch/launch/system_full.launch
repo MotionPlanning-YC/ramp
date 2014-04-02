@@ -2,15 +2,15 @@
 
 
 
-<arg name="robot1_name" value="robot1" />
-<arg name="robot2_name" value="robot2" />
+<arg name="robot_0_name" value="robot_0" />
+<arg name="robot_1_name" value="robot_1" />
 
 
 
 <!-- Define the machines -->
 
-<machine name="robot1" address="192.168.1.106" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> 
-<machine name="robot2" address="192.168.1.102" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" />
+<machine name="robot_0" address="192.168.1.106" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> 
+<machine name="robot_1" address="192.168.1.102" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" />
 
 
 
@@ -32,15 +32,15 @@
 
 
 <!-- We need 2 planners, one for the first robot and one for the second robot -->
-<group ns="$(arg robot1_name)">
+<group ns="$(arg robot_0_name)">
   <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" >
-    <param name="robot_update" type="str" value="/$(arg robot1_name)/update" />
+    <param name="robot_update" type="str" value="/$(arg robot_0_name)/update" />
   </node>
 </group> 
 
-<group ns="$(arg robot2_name)"> 
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner"> 
-    <param name="robot_update" type="str" value="/$(arg robot2_name)/update" /> 
+<group ns="$(arg robot_1_name)"> 
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen"> 
+    <param name="robot_update" type="str" value="/$(arg robot_1_name)/update" /> 
   </node>
 </group> 
 
@@ -48,15 +48,15 @@
 
 <!-- Sensing nodes -->
 
-<group ns="$(arg robot1_name)"> 
+<group ns="$(arg robot_0_name)"> 
   <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="screen"> 
-    <param name="other_robot_odom" type="str" value="/$(arg robot2_name)/odometry" />  
+    <param name="other_robot_odom" type="str" value="/$(arg robot_1_name)/odometry" />  
   </node> 
 </group> 
 
-<group ns="$(arg robot2_name)"> 
+<group ns="$(arg robot_1_name)"> 
    <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="screen">  
-     <param name="other_robot_odom" type="str" value="/$(arg robot1_name)/odometry" /> 
+     <param name="other_robot_odom" type="str" value="/$(arg robot_0_name)/odometry" /> 
    </node> 
 </group> 
 
@@ -64,15 +64,15 @@
 
 <!-- Evaluation -->
 
-<group ns="$(arg robot1_name)">
+<group ns="$(arg robot_0_name)">
   <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen">
-    <param name="robot_id" type="int" value="1" />
+    <param name="robot_id" type="int" value="0" />
   </node>
 </group> 
 
-<group ns="$(arg robot2_name)">
+<group ns="$(arg robot_1_name)">
   <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen"> 
-    <param name="robot_id" type="int" value="2" />
+    <param name="robot_id" type="int" value="1" />
   </node>
 </group> 
 
@@ -83,14 +83,14 @@
 
 <!-- Start the robot nodes -->
 
-<group ns="$(arg robot1_name)" >
-  <node name="ramp_control" pkg="ramp_control" type="ramp_control" machine="robot1"/> 
+<group ns="$(arg robot_0_name)" >
+  <node name="ramp_control" pkg="ramp_control" type="ramp_control" machine="robot_0"/> 
     <param name="orientation" type="double" value="3.14159" />
 </group> 
 
 
-<group ns="$(arg robot2_name)"> 
-  <node name="ramp_control" pkg="ramp_control" type="ramp_control" machine="robot2" /> 
+<group ns="$(arg robot_1_name)"> 
+  <node name="ramp_control" pkg="ramp_control" type="ramp_control" machine="robot_1" /> 
     <param name="orientation" type="double" value="0" />
 </group> 
 

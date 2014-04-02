@@ -86,7 +86,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
  * updates are relative to odometry frame
  * */
 void Planner::updateCallback(const ramp_msgs::Update& msg) {
-  std::cout<<"\nReceived update!\n";
+  //std::cout<<"\nReceived update!\n";
   
   // Wait for mutex to be true
   while(!mutex_start_) {}
@@ -104,7 +104,7 @@ void Planner::updateCallback(const ramp_msgs::Update& msg) {
     start_ = c_od;
   }
 
-  std::cout<<"\nNew starting configuration: "<<start_.toString()<<"\n";
+  //std::cout<<"\nNew starting configuration: "<<start_.toString()<<"\n";
 
   mutex_start_ = true;
 } // End updateCallback
@@ -811,10 +811,6 @@ const std::string Planner::pathsToString() const {
   RampTrajectory T_move = evaluateAndObtainBest();
   std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n\n"; 
   sendPopulation();
-  std::cout<<"\nAfter sendPopulation\n";
-  // std::cout<<"\nPress enter to start the loop!\n";
-  // std::cin.get();
-  
 
   /** TODO */
   // createSubpopulations();

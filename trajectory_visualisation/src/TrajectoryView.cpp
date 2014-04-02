@@ -86,19 +86,12 @@ void TrajectoryView::size_changed()
 void TrajectoryView::population(const ramp_msgs::Population& msg)
 // Update the population and called the drawing function
 {
-  std::cout<<"\n\nReceived Population!";
+  //std::cout<<"\n\nReceived Population!";
 
-  populations_.clear();
-  populations_.push_back(msg);
+  //populations_.clear();
+  //populations_.push_back(msg);
 
-  std::cout<<"\npopulations_.size(): "<<populations_.size();
-  for(int i=0;i<populations_.size();i++) {
-    std::cout<<"\npopulations.at("<<i<<").size(): "<<populations_.at(i).population.size();
-    for(int j=0;j<populations_.at(i).population.size();j++)
-      std::cout<<"\nTrajectory "<<j<<" size: "<<populations_.at(i).population.at(j).trajectory.points.size();
-
-  }
-/*  if(populations_.size() < 2) {
+  if(populations_.size() < 2) {
     populations_.push_back(msg);
   }
 
@@ -112,7 +105,7 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
       populations_.insert(populations_.begin()+1, msg);
     }
   }
-*/
+
   drawPopulation();
 }
 
@@ -141,20 +134,18 @@ void TrajectoryView::drawPopulation() {
 
   // For each population
   for(unsigned int p=0;p<populations_.size();p++) {
-    std::cout<<"\np: "<<p<<"\n";
 
     // For each trajectory in the population
     for(unsigned int t=0;t<populations_.at(p).population.size();t++) {
 
       // Set i to the index of the best trajectory
       int i = populations_.at(p).best_id;
-      std::cout<<"\ni: "<<i<<"\n";
 
       // Get the points for that trajectory
       std::vector<trajectory_msgs::JointTrajectoryPoint> points = populations_.at(p).population.at(t).trajectory.points;
-      std::cout<<"\npoints.size(): "<<points.size();
-      std::cout<<"\nrobot_id: "<<populations_.at(p).robot_id;
-      std::cout<<"\nfeasible: "<<(int)populations_.at(p).population.at(i).feasible;
+      //std::cout<<"\npoints.size(): "<<points.size();
+      //std::cout<<"\nrobot_id: "<<populations_.at(p).robot_id;
+      //std::cout<<"\nfeasible: "<<(int)populations_.at(p).population.at(i).feasible;
       //std::cout<<"\npoints[0]: ("<<points.at(0).positions.at(0)<<", "<<points.at(0).positions.at(1)<<")\n";
 
       // Green for robot 1 and feasible

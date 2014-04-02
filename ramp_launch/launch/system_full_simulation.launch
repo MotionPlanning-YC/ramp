@@ -2,14 +2,15 @@
 
 
 
-<arg name="robot0_name" value="robot_0" />
-<arg name="robot1_name" value="robot_1" />
+<arg name="robot_0_name" value="robot_0" />
+<arg name="robot_1_name" value="robot_1" />
 
 
 
 
 <!-- Trajectory Generator -->
-<node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" />
+<!-- <node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" /> -->
+<node name="reflexxes" pkg="reflexxes" type="reflexxes" />
 
 <!-- Path Modification -->
 <node name="path_modification" pkg="path_modification" type="path_modification" />
@@ -24,15 +25,15 @@
 
 
 <!-- We need 2 planners, one for the first robot and one for the second robot -->
-<group ns="$(arg robot0_name)">
+<group ns="$(arg robot_0_name)">
   <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" >
-    <param name="robot_update" type="str" value="/$(arg robot0_name)/update" />
+    <param name="robot_update" type="str" value="/$(arg robot_0_name)/update" />
   </node>
 </group> 
 
-<group ns="$(arg robot1_name)"> 
+<group ns="$(arg robot_1_name)"> 
   <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen"> 
-    <param name="robot_update" type="str" value="/$(arg robot1_name)/update" /> 
+    <param name="robot_update" type="str" value="/$(arg robot_1_name)/update" /> 
   </node>
 </group> 
 
@@ -40,15 +41,15 @@
 
 <!-- Sensing nodes -->
 
-<group ns="$(arg robot0_name)"> 
+<group ns="$(arg robot_0_name)"> 
   <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="screen"> 
-    <param name="other_robot_odom" type="str" value="/$(arg robot1_name)/odom" />  
+    <param name="other_robot_odom" type="str" value="/$(arg robot_1_name)/odom" />  
   </node> 
 </group> 
 
-<group ns="$(arg robot1_name)"> 
+<group ns="$(arg robot_1_name)"> 
    <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="screen">  
-     <param name="other_robot_odom" type="str" value="/$(arg robot0_name)/odom" /> 
+     <param name="other_robot_odom" type="str" value="/$(arg robot_0_name)/odom" /> 
    </node> 
 </group> 
 
@@ -56,13 +57,13 @@
 
 <!-- Evaluation -->
 
-<group ns="$(arg robot0_name)">
+<group ns="$(arg robot_0_name)">
   <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen">
     <param name="robot_id" type="int" value="0" />
   </node>
 </group> 
 
-<group ns="$(arg robot1_name)">
+<group ns="$(arg robot_1_name)">
   <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen"> 
     <param name="robot_id" type="int" value="1" />
   </node>
@@ -75,13 +76,13 @@
 
 <!-- Start the ramp_control simulation nodes (locally, not on remote machines) -->
 
-<group ns="$(arg robot0_name)" >
+<group ns="$(arg robot_0_name)" >
   <node name="simulation" pkg="ramp_control" type="simulation" /> 
     <param name="orientation" type="double" value="3.14159" />
 </group> 
 
 
-<group ns="$(arg robot1_name)"> 
+<group ns="$(arg robot_1_name)"> 
   <node name="simulation" pkg="ramp_control" type="simulation" /> 
     <param name="orientation" type="double" value="0" />
 </group> 

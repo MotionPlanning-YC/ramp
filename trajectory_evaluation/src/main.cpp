@@ -60,12 +60,12 @@ int main(int argc, char** argv) {
   int id;
   handle.getParam("trajectory_evaluation/robot_id", id);
   cd.id = id;
-  std::cout<<"\nid: "<<cd.id;
+  std::cout<<"\nTrajectory Evaluation id: "<<cd.id;
   cd.init(handle);
 
   std::cout<<"\nAfter init\n";
   
-  ros::ServiceServer service    = handle.advertiseService("evaluation", handleRequest);
+  ros::ServiceServer service    = handle.advertiseService("trajectory_evaluation", handleRequest);
   ros::Subscriber sub_obj_list  = handle.subscribe("object_list", 1000, obstacleCb);
 
   /** ***Testing*** */

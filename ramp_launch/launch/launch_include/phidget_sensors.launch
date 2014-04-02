@@ -3,13 +3,8 @@
 
 <!-- Define the machine -->
 
-<<<<<<< HEAD
-<machine name="robot0" address="192.168.1.101" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> 
-<machine name="robot1" address="192.168.1.102" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> 
-=======
-<machine name="robot1" address="192.168.1.106" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> 
-<machine name="robot2" address="192.168.1.102" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> 
->>>>>>> dbb3f53bc6e001a73a484be940cb5ea30095d634
+<machine name="robot_0" address="192.168.1.106" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> 
+<machine name="robot_1" address="192.168.1.102" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> 
 
 
 <!-- Set arguments -->
@@ -20,15 +15,15 @@
 
 
 <!-- Run nodes -->
-<group ns="robot0">
-  <node pkg="corobot_phidget_ik" name="phidget_interface_kit" type="corobot_phidget" machine="robot1">
+<group ns="robot_0">
+  <node pkg="corobot_phidget_ik" name="phidget_interface_kit" type="corobot_phidget" machine="robot_0">
     <param name="irFront" type="int" value="$(arg irFront)"/>
   </node>
 </group> 
 
 
-<group ns="robot1">
-  <node pkg="corobot_phidget_ik" name="phidget_interface_kit" type="corobot_phidget" machine="robot2">
+<group ns="robot_1">
+  <node pkg="corobot_phidget_ik" name="phidget_interface_kit" type="corobot_phidget" machine="robot_1">
     <param name="irFront" type="int" value="$(arg irFront)"/>
   </node>
 </group> 

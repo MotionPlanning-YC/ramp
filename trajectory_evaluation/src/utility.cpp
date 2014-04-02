@@ -31,6 +31,20 @@ const float Utility::euclideanDistance(const std::vector<float> a, const std::ve
   return sqrt( pow(d_x,2) + pow(d_y,2) );
 } //End euclideanDistance
 
+
+const float Utility::findAngleFromAToB(const tf::Vector3 a, const tf::Vector3 b) const {
+  std::vector<float> a_vec;
+  a_vec.push_back(a.getX());
+  a_vec.push_back(a.getY());
+  
+  std::vector<float> b_vec;
+  b_vec.push_back(b.getX());
+  b_vec.push_back(b.getY());
+
+  return findAngleFromAToB(a_vec, b_vec);
+}
+
+
 /** This method returns the angle that will form a straight line from position a to position b. a and b are [x, y] vectors. */
 const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {
   float result;
