@@ -28,24 +28,26 @@ class Utility {
 
     std::vector<ramp_msgs::Range> ranges_;
     
-    const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;
-
-    const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;
-    const float findAngleFromAToB(const tf::Vector3 a, const tf::Vector3 b) const;
+    /** Geometrics function */
+     const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;
+     const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;
+     const float findAngleFromAToB(const tf::Vector3 a, const tf::Vector3 b) const;
+     const float findDistanceBetweenAngles(const float a1, const float a2) const;
+     const float displaceAngle(const float a1, float a2) const;
     
-    const float findDistanceBetweenAngles(const float a1, const float a2) const;
-    
-    const float displaceAngle(const float a1, float a2) const;
-    
-    const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;
-    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::Configuration> configs) const;
-    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint> kps) const;
+    /** Misc functions */
+     const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;
+     const ramp_msgs::Path getPath(const std::vector<ramp_msgs::Configuration> configs) const;
+     const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint> kps) const;
 
+    /** Msg building */
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const ramp_msgs::Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
 
-    const std::string toString(const ramp_msgs::Trajectory traj) const;
-    const std::string toString(const ramp_msgs::Path p) const;
-    const std::string toString(const ramp_msgs::Configuration c) const;
-    const std::string toString(const ramp_msgs::KnotPoint kp) const;
+    /** toString functions */
+     const std::string toString(const ramp_msgs::Trajectory traj) const;
+     const std::string toString(const ramp_msgs::Path p) const;
+     const std::string toString(const ramp_msgs::Configuration c) const;
+     const std::string toString(const ramp_msgs::KnotPoint kp) const;
 };
 
 #endif

@@ -1,6 +1,7 @@
 #include "collision_detection.h"
 
-CollisionDetection::CollisionDetection() : h_traj_req_(0) {}
+
+CollisionDetection::CollisionDetection() : h_traj_req_(0), predictionTime_(ros::Duration(5)) {}
 
 CollisionDetection::~CollisionDetection() {
   if(h_traj_req_ != 0) {
@@ -11,7 +12,6 @@ CollisionDetection::~CollisionDetection() {
 
 void CollisionDetection::init(ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler((const ros::NodeHandle&)h);
-  //pub_pop = h.advertise<ramp_msgs::Population>("population", 1000);
   setOb_T_w_b(id);
 }
 
@@ -26,7 +26,7 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const {
   ros::Duration d(5);
   
   // Predict the obstacle's trajectory
-  ramp_msgs::Trajectory ob_trajectory = getPredictedTrajectory(obstacle_, d); 
+  ramp_msgs::Trajectory ob_trajectory = getPredictedTrajectory(obstacle_); 
   
   // Query for collision
   CollisionDetection::QueryResult q = query(ob_trajectory);
@@ -64,7 +64,7 @@ void CollisionDetection::setOb_T_w_b(int id) {
  * The robots are treated as circles for simple collision detection
  */
 const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::Trajectory ob_trajectory) const {
-  //std::cout<<"\nQuery on "<<u.toString(trajectory_)<<" \n*******and*******\n"<<u.toString(ob_trajectory);
+  //std::cout<<"\nQuery on "<<utility.toString(trajectory_)<<" \n*******and*******\n"<<utility.toString(ob_trajectory);
   CollisionDetection::QueryResult result;
   
   // For every 3 points, check circle detection
@@ -148,23 +148,50 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
 
 
 
-
-
 /** This method returns the predicted trajectory for an obstacle for the future duration d 
  * TODO: Remove Duration parameter and make the predicted trajectory be computed until robot reaches bounds of environment */
-const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ramp_msgs::Obstacle ob, const ros::Duration d) const {
+const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ramp_msgs::Obstacle ob) const {
   ramp_msgs::Trajectory result;
 
   // First, identify which type of trajectory it is
   // translations only, self-rotation, translation and self-rotation, or global rotation
-  MotionType motion_type = findMotionType(ob);
+  //MotionType motion_type = findMotionType(ob);
+  
 
-  // Create the path  
+  // Now build a Trajectory Request 
+  ramp_msgs::TrajectoryRequest tr;
+  tr.request.path = getObstaclePath(ob, findMotionType(ob));
+  tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
+  tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
+  tr.request.v_start.push_back(ob.odom_t.twist.twist.angular.z);
+  tr.request.resolutionRate = 5;
+
+  // Get trajectory
+  if(h_traj_req_->request(tr)) {
+    result = tr.response.trajectory;
+  }
+
+  return result;
+} // End getPredictedTrajectory
+
+
+
+
+
+
+/** 
+ *  This method returns a prediction for the obstacle's path. 
+ *  The path is based on 1) the type of motion the obstacle currently has
+ *  2) the duration that we should predict the motion for 
+ */
+const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obstacle ob, const MotionType mt) const {
+  ramp_msgs::Path result;
+
   std::vector<ramp_msgs::KnotPoint> path;
 
   // Create and initialize the first point in the path
   ramp_msgs::KnotPoint start;
-  start.configuration.ranges = u.ranges_;
+  start.configuration.ranges = utility.ranges_;
   start.configuration.K.push_back(ob.odom_t.pose.pose.position.x);
   start.configuration.K.push_back(ob.odom_t.pose.pose.position.y);
   start.configuration.K.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
@@ -174,15 +201,15 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
 
   /** Find the ending configuration for the predicted trajectory based on motion type */
   // If translation
-  if(motion_type == MotionType::Translation) {
+  if(mt == MotionType::Translation) {
 
     // Create the Goal Knotpoint
     ramp_msgs::KnotPoint goal;
-    goal.configuration.ranges = u.ranges_;
+    goal.configuration.ranges = utility.ranges_;
 
     // Get the goal position in the base frame
-    tf::Vector3 ob_goal_b(start.configuration.K.at(0) + (ob.odom_t.twist.twist.linear.x * d.toSec()), 
-                          start.configuration.K.at(1) + (ob.odom_t.twist.twist.linear.y * d.toSec()),
+    tf::Vector3 ob_goal_b(start.configuration.K.at(0) + (ob.odom_t.twist.twist.linear.x * predictionTime_.toSec()), 
+                          start.configuration.K.at(1) + (ob.odom_t.twist.twist.linear.y * predictionTime_.toSec()),
                           0);
 
     // Convert the goal position to world coordinates
@@ -197,10 +224,8 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
     path.push_back(goal);
   } // end if translation
 
-
-
   // If translation and rotation
-  else if(motion_type == MotionType::TranslationAndRotation) {
+  else if(mt == MotionType::TranslationAndRotation) {
 
     // Find the linear and angular velocity vectors
     tf::Vector3 v_linear;
@@ -217,7 +242,7 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
     // Find the angle from base origin to robot position for polar coordinates
     tf::Vector3 a(0, 0, 0);
     tf::Vector3 b(ob.odom_t.pose.pose.position.x, ob.odom_t.pose.pose.position.y, 0);
-    float polar_theta_r = u.findAngleFromAToB(a, b);
+    float polar_theta_r = utility.findAngleFromAToB(a, b);
 
     // Find the radius from base origin to robot position for polar coordinates
     float polar_r_r = sqrt(pow(start.configuration.K.at(0),2) + pow(start.configuration.K.at(1), 2));
@@ -226,19 +251,19 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
     //std::cout<<"\npolar_r_r: "<<polar_r_r;
 
     // Generate intermediate points for circlular motion
-    for(float i=0.25f;i<d.toSec();i+=0.25f) {
+    for(float i=0.25f;i<predictionTime_.toSec();i+=0.25f) {
 
       // Create new knot point for the path
       ramp_msgs::KnotPoint temp;
-      temp.configuration.ranges = u.ranges_;
+      temp.configuration.ranges = utility.ranges_;
 
       // Get the polar coordinates theta value in base frame 
-      float theta_prime_r = u.displaceAngle(polar_theta_r, w*i);
+      float theta_prime_r = utility.displaceAngle(polar_theta_r, w*i);
 
       // Convert from polar to cartesian in base frame
       float x_prime_r = polar_r_r * cos(theta_prime_r);
       float y_prime_r = polar_r_r * sin(theta_prime_r);
-      float theta_r = u.displaceAngle(start.configuration.K.at(2), w*i);
+      float theta_r = utility.displaceAngle(start.configuration.K.at(2), w*i);
       //std::cout<<"\nx_prime_r: "<<x_prime_r<<" y_prime_r: "<<y_prime_r<<" theta_r: "<<theta_r;
 
       // Now convert position in base frame to world coordinates
@@ -248,7 +273,7 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
       // Push the values onto temp
       temp.configuration.K.push_back(p_w.getX());
       temp.configuration.K.push_back(p_w.getY());
-      temp.configuration.K.push_back(u.displaceAngle(theta_r, tf::getYaw(ob_T_w_b_.getRotation())));
+      temp.configuration.K.push_back(utility.displaceAngle(theta_r, tf::getYaw(ob_T_w_b_.getRotation())));
       
       // Push temp onto path
       path.push_back(temp);
@@ -260,11 +285,11 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
 
   // If rotation
   // Since our robot models are circles, rotation is the same as no movement
-  else if(motion_type == MotionType::Rotation || motion_type == MotionType::None) {
+  else if(mt == MotionType::Rotation || mt == MotionType::None) {
     
     // Create the Goal Knotpoint
     ramp_msgs::KnotPoint goal;
-    goal.configuration.ranges = u.ranges_;
+    goal.configuration.ranges = utility.ranges_;
     tf::Vector3 ob_goal(start.configuration.K.at(0), start.configuration.K.at(1), 0);
     tf::Vector3 goal_w = ob_T_w_b_ * ob_goal;
 
@@ -282,22 +307,12 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
   start_w = ob_T_w_b_ * start_w;
   path.at(0).configuration.K.at(0) = start_w.getX();
   path.at(0).configuration.K.at(1) = start_w.getY();
-  path.at(0).configuration.K.at(2) = u.displaceAngle(start.configuration.K.at(2), tf::getYaw(ob_T_w_b_.getRotation()));
+  path.at(0).configuration.K.at(2) = utility.displaceAngle(start.configuration.K.at(2), tf::getYaw(ob_T_w_b_.getRotation()));
 
 
-  // Now build a Trajectory Request 
-  ramp_msgs::TrajectoryRequest tr;
-  ramp_msgs::Path p = u.getPath(path);
-  tr.request.path = p;
-  tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
-  tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
-  tr.request.v_start.push_back(ob.odom_t.twist.twist.angular.z);
-  tr.request.resolutionRate = 5;
-
-  // Get trajectory
-  if(h_traj_req_->request(tr)) {
-    result = tr.response.trajectory;
-  }
-
-  return result;
+  result = utility.getPath(path);
+  return result; 
 }
+
+
+

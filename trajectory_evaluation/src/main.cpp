@@ -58,8 +58,7 @@ int main(int argc, char** argv) {
   ros::NodeHandle handle;
 
   int id;
-  handle.getParam("trajectory_evaluation/robot_id", id);
-  cd.id = id;
+  handle.getParam("trajectory_evaluation/robot_id", cd.id);
   std::cout<<"\nTrajectory Evaluation id: "<<cd.id;
   cd.init(handle);
 

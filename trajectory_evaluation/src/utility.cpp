@@ -154,6 +154,13 @@ const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> k
 }
 
 
+
+const ramp_msgs::TrajectoryRequest Utility::buildTrajectoryRequest(const ramp_msgs::Path path, const std::vector<float> v_s, const std::vector<float> v_e) const {
+
+}
+
+
+
 const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
   std::ostringstream result;
 

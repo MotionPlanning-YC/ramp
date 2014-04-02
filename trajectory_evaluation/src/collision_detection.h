@@ -15,41 +15,46 @@
 class CollisionDetection {
   public:
   
+    /** Struct to hold information about a query */
     struct QueryResult {
       QueryResult() : collision_(false), time_until_collision_(9999.0f), 
                       i_obstacle(-1) {}
-
       bool  collision_;
       float time_until_collision_;
-      int i_obstacle;
-    };
+      int   i_obstacle;
+    };  // End QueryResult
 
 
     CollisionDetection(); 
     ~CollisionDetection();
 
-    void init(ros::NodeHandle& h);
+    /***** Methods *****/ 
+    void                        init(ros::NodeHandle& h);
+    const QueryResult           perform() const;
+    const QueryResult           query(const ramp_msgs::Trajectory ob_trajectory) const;
+    const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle) const;
 
-    const QueryResult perform() const;
-    const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle, const ros::Duration) const;
-    const QueryResult query(const ramp_msgs::Trajectory ob_trajectory) const;
 
+    /***** Data Members ****/
+    int                   id;
+    tf::Transform         ob_T_w_b_;
+    ramp_msgs::Obstacle   obstacle_;
     ramp_msgs::Trajectory trajectory_;
-    //ramp_msgs::ObstacleList obstacleList_;
-    ramp_msgs::Obstacle obstacle_;
-    
-    int id;
-    tf::Transform ob_T_w_b_;
-    void setOb_T_w_b(int id);
+    ros::Duration         predictionTime_;
   
-    TrajectoryRequestHandler* h_traj_req_;
-  
-  private:
-    ros::Publisher pub_pop;
-    const MotionType findMotionType(const ramp_msgs::Obstacle) const;
-    const bool onSegment(const tf::Point p_i, const tf::Point p_j, const tf::Point p_k) const;
 
-    Utility u;
+
+  private:
+
+    /***** Methods *****/
+    void                  setOb_T_w_b(int id);
+    const MotionType      findMotionType(const ramp_msgs::Obstacle) const;
+    const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const MotionType mt) const;
+
+    /***** Data Members *****/
+    ros::Publisher pub_pop;
+    TrajectoryRequestHandler* h_traj_req_;
+    Utility utility;
 };
 
 #endif
