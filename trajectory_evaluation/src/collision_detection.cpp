@@ -12,7 +12,7 @@ CollisionDetection::~CollisionDetection() {
 void CollisionDetection::init(ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler((const ros::NodeHandle&)h);
   //pub_pop = h.advertise<ramp_msgs::Population>("population", 1000);
-  setT_od_w(id);
+  setOb_T_w_b(id);
 }
 
 
@@ -39,44 +39,24 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const {
   return result;  
 } //End perform
 
-const std::vector<float> CollisionDetection::getCenter(std::vector<float> p, float orientation) const {
-std::vector<float> result;
 
-  // Get world coordinates of reference point
-  float x = p.at(0);
-  float y = p.at(1);
 
-  // Radius
-  float r = 0.2155261;
-      
-  float temp_x = x - 0.1524f;
-  float temp_y = y - 0.1524f;
-
-  // Get world coodinates of center point
-  x += r*cos( u.displaceAngle((-3*PI/4), orientation));
-  y += r*sin( u.displaceAngle((-3*PI/4), orientation));
-
-  result.push_back(x);
-  result.push_back(y);
-
-  return result;
-} //End getCenter
-
-/** Transformation matrix of obstacle robot */
-void CollisionDetection::setT_od_w(int id) {
+/** Transformation matrix of obstacle robot from base frame to world frame*/
+void CollisionDetection::setOb_T_w_b(int id) {
 
   if(id == 1) {
     tf::Vector3 pos(3.5f, 2.f, 0);
-    T_w_r_.setOrigin(pos);
-    T_w_r_.setRotation(tf::createQuaternionFromYaw(PI));
+    ob_T_w_b_.setOrigin(pos);
+    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(PI));
   }
 
   else {
     tf::Vector3 pos(0.f, 2.f, 0.f);
-    T_w_r_.setRotation(tf::createQuaternionFromYaw(0));
-    T_w_r_.setOrigin(pos);
+    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(0));
+    ob_T_w_b_.setOrigin(pos);
   }
-}
+} // End setOb_T_w_b
+
 
 
 /** 
@@ -84,18 +64,6 @@ void CollisionDetection::setT_od_w(int id) {
  * The robot and obstacles can be treated as circles for simple collision detection
  */
 const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::Trajectory ob_trajectory) const {
-
-  /*if(id == 1) {
-    // Create population one member - ob_trajectory
-    ramp_msgs::Population p; 
-    ramp_msgs::Trajectory temp = transformT(ob_trajectory);
-    p.population.push_back(temp);
-    p.best_id = 0;
-    p.robot_id = 2;
-    pub_pop.publish(p);
-  }*/
-
-
   //std::cout<<"\nQuery on "<<u.toString(trajectory_)<<" \n*******and*******\n"<<u.toString(ob_trajectory);
   CollisionDetection::QueryResult result;
   //std::cout<<"\nresult.collision_: "<<result.collision_;
@@ -105,48 +73,24 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   float radius = 0.55f;
   for(unsigned int i=0;i<trajectory_.trajectory.points.size() && i<ob_trajectory.trajectory.points.size();i+=3) {
     
-    // Get the point on the trajectory, p
-    trajectory_msgs::JointTrajectoryPoint p = trajectory_.trajectory.points.at(i);
-    
-    // Get the position vector for p
-    std::vector<float> p_loc;
-    p_loc.push_back(p.positions.at(0));
-    p_loc.push_back(p.positions.at(1));
-
-    // Get the center of the robot
-    std::vector<float> p_center = getCenter(p_loc, p.positions.at(2));
+    // Get the ith point on the trajectory
+    trajectory_msgs::JointTrajectoryPoint p_i = trajectory_.trajectory.points.at(i);
     
     //std::cout<<"\nob_trajectory.size(): "<<ob_trajectory.trajectory.points.size();
     //std::cout<<"\n("<<ob_trajectory.trajectory.points.at(0).positions.at(0)<<", "<<ob_trajectory.trajectory.points.at(0).positions.at(1)<<")";
 
-    // ***Test collision against the obstacle's trajectory***
+    // ***Test position i for collision against some points on obstacle's trajectory***
     for(unsigned int j=i-1;j<i+1 && j<ob_trajectory.trajectory.points.size();j++) {
 
-      // Get the points as the centers of the circles
+      // Get the jth point of the obstacle's trajectory
       trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
-      //trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(i);
 
-      // Get the position vector for the obstacle p_ob
-      // Transform obstacle odometry coordinates to world CS
-      // Find the centers of the objects
-      //std::vector<float> p_ob_center  = getCenter(p_ob_loc, p.positions.at(2));
-      std::vector<float> p_ob_center;
-      
-      // Find the center in odometry CS - center is -6, -6 from reference point
-      float temp_x = p_ob.positions.at(0) - 0.1524f;
-      float temp_y = p_ob.positions.at(1) - 0.1524f;
-
-      // Transform the center
-      tf::Vector3 temp_pos(temp_x, temp_y, 0);
-      tf::Vector3 pos = T_w_r_ * temp_pos;
+      // Transform the point to world coordinates 
+      tf::Vector3 ob_pos_b(p_ob.positions.at(0), p_ob.positions.at(1), 0);
+      tf::Vector3 ob_pos_w = ob_T_w_b_ * ob_pos_b;
  
-      // Push on the obstacle's center
-      p_ob_center.push_back(pos.getX());
-      p_ob_center.push_back(pos.getY());
-      
-      
       // Get the distance between the centers
-      float dist = sqrt( pow(p_center.at(0) - p_ob_center.at(0),2) + pow(p_center.at(1) - p_ob_center.at(1),2) );
+      float dist = sqrt( pow(p_i.positions.at(0) - ob_pos_w.getX(),2) + pow(p_i.positions.at(1) - ob_pos_w.getY(),2) );
         
       /*if(id == 1) 
         std::cout<<"\nRobot 1 as p_center: ";
@@ -159,7 +103,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // there is collision
       if( dist <= radius*2 ) {
         result.collision_ = true;
-        result.time_until_collision_ = p.time_from_start.toSec();
+        result.time_until_collision_ = p_i.time_from_start.toSec();
         j = i+1;
         i = trajectory_.trajectory.points.size();
       }
@@ -327,12 +271,12 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
 
       // Now convert to world coordinates
       tf::Vector3 p_r(x_prime_r, y_prime_r, 0);
-      tf::Vector3 p_w = T_w_r_ * p_r;
+      tf::Vector3 p_w = ob_T_w_b_ * p_r;
 
       // Push the values onto temp
       temp.configuration.K.push_back(p_w.getX());
       temp.configuration.K.push_back(p_w.getY());
-      temp.configuration.K.push_back(u.displaceAngle(theta_r, tf::getYaw(T_w_r_.getRotation())));
+      temp.configuration.K.push_back(u.displaceAngle(theta_r, tf::getYaw(ob_T_w_b_.getRotation())));
       
       //temp.configuration.K.push_back(x);
       //temp.configuration.K.push_back(y);
@@ -359,10 +303,10 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
 
 
   tf::Vector3 start_w(start.configuration.K.at(0), start.configuration.K.at(1), 0);
-  start_w = T_w_r_ * start_w;
+  start_w = ob_T_w_b_ * start_w;
   cs.at(0).configuration.K.at(0) = start_w.getX();
   cs.at(0).configuration.K.at(1) = start_w.getY();
-  cs.at(0).configuration.K.at(2) = u.displaceAngle(start.configuration.K.at(2), tf::getYaw(T_w_r_.getRotation()));
+  cs.at(0).configuration.K.at(2) = u.displaceAngle(start.configuration.K.at(2), tf::getYaw(ob_T_w_b_.getRotation()));
 
 
   // Now build a Trajectory Request 
