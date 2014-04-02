@@ -20,7 +20,7 @@ std::vector<float> tgr_linears;
 bool odom_recv = false;
 
 
-tf::Transform T_r_w;
+tf::Transform T_w_r;
 
 
 /** This method determines what type of motion an obstacle has */
@@ -191,12 +191,12 @@ const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob,
 
       // Now convert to world coordinates
       tf::Vector3 p_r(x_prime_r, y_prime_r, 0);
-      tf::Vector3 p_w = T_r_w * p_r;
+      tf::Vector3 p_w = T_w_r * p_r;
 
       // Push the values onto temp
       temp.configuration.K.push_back(p_w.getX());
       temp.configuration.K.push_back(p_w.getY());
-      temp.configuration.K.push_back(u.displaceAngle(theta_r, tf::getYaw(T_r_w.getRotation())));
+      temp.configuration.K.push_back(u.displaceAngle(theta_r, tf::getYaw(T_w_r.getRotation())));
       
       //temp.configuration.K.push_back(x);
       //temp.configuration.K.push_back(y);
@@ -223,10 +223,10 @@ const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob,
 
 
   tf::Vector3 start_w(start.configuration.K.at(0), start.configuration.K.at(1), 0);
-  start_w = T_r_w * start_w;
+  start_w = T_w_r * start_w;
   cs.at(0).configuration.K.at(0) = start_w.getX();
   cs.at(0).configuration.K.at(1) = start_w.getY();
-  cs.at(0).configuration.K.at(2) = u.displaceAngle(start.configuration.K.at(2), tf::getYaw(T_r_w.getRotation()));
+  cs.at(0).configuration.K.at(2) = u.displaceAngle(start.configuration.K.at(2), tf::getYaw(T_w_r.getRotation()));
 
 
   // Now build a Trajectory Request 
@@ -310,8 +310,8 @@ int main(int argc, char** argv) {
   sub_odometry = handle.subscribe("odometry", 1000, odometryCallback);
   
 
-  T_r_w.setOrigin(tf::Vector3(0, 0, 0));
-  T_r_w.setRotation(tf::createQuaternionFromYaw(0));
+  T_w_r.setOrigin(tf::Vector3(0, 0, 0));
+  T_w_r.setRotation(tf::createQuaternionFromYaw(0));
 
   ros::Rate r(1);
   std::cout<<"\nWaiting for obstacle's odometry to be published..\n";

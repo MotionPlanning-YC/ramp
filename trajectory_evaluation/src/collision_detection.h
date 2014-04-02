@@ -40,7 +40,7 @@ class CollisionDetection {
     ramp_msgs::Obstacle obstacle_;
     
     int id;
-    tf::Transform T_od_w_;
+    tf::Transform T_w_r_;
     void setT_od_w(int id);
   
     TrajectoryRequestHandler* h_traj_req_;

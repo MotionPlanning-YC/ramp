@@ -37,6 +37,7 @@ class Utility {
     
     const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;
     const ramp_msgs::Path getPath(const std::vector<ramp_msgs::Configuration> configs) const;
+    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint> kps) const;
 
 
     const std::string toString(const ramp_msgs::Trajectory traj) const;
