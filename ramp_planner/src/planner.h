@@ -23,6 +23,7 @@ class Planner {
     Planner(const unsigned int r, const int p);
     ~Planner();
 
+
     /*******************************************
      ************** Data Members ***************
      *******************************************/
@@ -44,7 +45,7 @@ class Planner {
     std::vector<Range> ranges_;
     
     
-    // The best trajectory
+    // The most fit trajectory in the population
     RampTrajectory bestTrajec_;
 
 
@@ -100,9 +101,9 @@ class Planner {
     void sendPopulation();
 
     // Evaluate the population 
-    void evaluateTrajectory(RampTrajectory& trajec);
-    void evaluatePopulation();
-    const RampTrajectory evaluateAndObtainBest();
+    void                  evaluateTrajectory(RampTrajectory& trajec);
+    void                  evaluatePopulation();
+    const RampTrajectory  evaluateAndObtainBest();
     
     // Modify trajectory or path
     const std::vector<Path> modifyPath();
@@ -113,35 +114,14 @@ class Planner {
     bool requestTrajectory(ramp_msgs::TrajectoryRequest& tr);
     bool requestEvaluation(ramp_msgs::EvaluationRequest& er);
 
-    // Msg building methods
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
-    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const unsigned int i_path);
-    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const RampTrajectory trajec);
-
     // Get the starting configuration
     Configuration getStartConfiguration();
 
     // Update the population 
     void updatePopulation(ros::Duration d);
 
-
-    // Adjust the trajectory so that the robot does not
-    // completely stop to change to it
-    void gradualTrajectory(RampTrajectory& t);
-
-    
     // Display all of the paths
     const std::string pathsToString() const;
-
-    // Modification procedure
-    void modification();
-
-    // Callback methods for ros::Timers
-    void controlCycleCallback(const ros::TimerEvent& t);
-    void planningCycleCallback(const ros::TimerEvent& t);
-    void updateCallback(const ramp_msgs::Update& msg);
-    void imminentCollisionCallback(const ros::TimerEvent& t);
 
     // Set the transformation from odometry to world CS
     void setT_od_w(std::vector<float> od_info);
@@ -153,7 +133,7 @@ class Planner {
     /** These are (mostly) utility members that are only used by Planner and should not be used by other classes*/
 
 
-    /** Methods */
+    /***** Methods *****/
 
     // This gets the new velocities for path segments after a path has been updated
     const std::vector< std::vector<float> > getNewVelocities(std::vector<Path> new_path, std::vector<int> i_old);
@@ -164,8 +144,28 @@ class Planner {
     // Returns an id for a RampTrajectory 
     unsigned int getIRT();
 
+    // Adjust the trajectory so that the robot does not
+    // completely stop to change to it
+    void gradualTrajectory(RampTrajectory& t);
 
-    /** Data members */
+    // Modification procedure
+    void modification();
+
+    // Callback methods for ros::Timers
+    void controlCycleCallback(const ros::TimerEvent& t);
+    void planningCycleCallback(const ros::TimerEvent& t);
+    void updateCallback(const ramp_msgs::Update& msg);
+    void imminentCollisionCallback(const ros::TimerEvent& t);
+
+    // Msg building methods
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
+    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const unsigned int i_path);
+    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const RampTrajectory trajec);
+
+
+
+    /***** Data members *****/
 
     // Utility instance
     Utility u; 
