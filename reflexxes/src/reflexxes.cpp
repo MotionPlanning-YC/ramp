@@ -109,7 +109,6 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
 
   }
 
-  //std::cout<<"\nSending back: "<<utility.toString(res.trajectory);
   return true;
 }
 
@@ -200,9 +199,9 @@ Reflexxes::Reflexxes()
   // Here set up the max velocity, acceleration and jerk
   
   // Maximum velocity beeing 0.5m/s and 1 radian/s (around 60 degrees/s )
-  inputParameters->MaxVelocityVector->VecData[0] = .3;
-  inputParameters->MaxVelocityVector->VecData[1] = .3;
-  inputParameters->MaxVelocityVector->VecData[2] = .6;
+  inputParameters->MaxVelocityVector->VecData[0] = .35;
+  inputParameters->MaxVelocityVector->VecData[1] = .35;
+  inputParameters->MaxVelocityVector->VecData[2] = 1;
 
   // Maximum acceleration is 1m/s^2 and 2radian/s^2
   inputParameters->MaxAccelerationVector->VecData[0] = 1;

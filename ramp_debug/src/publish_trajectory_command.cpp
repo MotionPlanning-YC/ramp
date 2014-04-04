@@ -5,6 +5,8 @@
 #include "utility.h"
 #include "ramp_msgs/TrajectoryRequest.h"
 
+Utility u;
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "publish_trajectory_command");
   ros::NodeHandle handle;
@@ -20,9 +22,9 @@ int main(int argc, char** argv) {
   c1.configuration.K.push_back(0);
 
   ramp_msgs::KnotPoint c2;
-  c2.configuration.K.push_back(0.12829f);
-  c2.configuration.K.push_back(-0.48f);
-  c2.configuration.K.push_back(-0.75f);
+  c2.configuration.K.push_back(0);
+  c2.configuration.K.push_back(0);
+  c2.configuration.K.push_back(0);
 
   /*ramp_msgs::KnotPoint c3;
   c3.configuration.K.push_back(3);
@@ -66,6 +68,8 @@ int main(int argc, char** argv) {
     // Publish trajectory
     pub_traj.publish(tr.response.trajectory);
   }
+
+  std::cout<<"\nSending Trajectory "<<u.toString(tr.response.trajectory);
 
 
   std::cout<<"\nExiting Normally\n";

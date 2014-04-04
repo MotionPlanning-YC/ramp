@@ -66,10 +66,17 @@ void CollisionDetection::setOb_T_w_b(int id) {
 const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::Trajectory ob_trajectory) const {
   //std::cout<<"\nQuery on "<<utility.toString(trajectory_)<<" \n*******and*******\n"<<utility.toString(ob_trajectory);
   CollisionDetection::QueryResult result;
+
+  if(ob_trajectory.trajectory.points.size() == 0) {
+    if(id == 0)
+      std::cout<<"\nObstacle 1 has no trajectory!\n";
+    else  
+      std::cout<<"\nObstacle 0 has no trajectory!\n";
+  }
   
   // For every 3 points, check circle detection
-  float radius = 0.55f;
-  for(unsigned int i=1;i<trajectory_.trajectory.points.size();i+=3) {
+  float radius = 0.45f;
+  for(unsigned int i=0;i<trajectory_.trajectory.points.size();i+=3) {
     
     // Get the ith point on the trajectory
     trajectory_msgs::JointTrajectoryPoint p_i = trajectory_.trajectory.points.at(i);
@@ -155,20 +162,30 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
 
   // First, identify which type of trajectory it is
   // translations only, self-rotation, translation and self-rotation, or global rotation
-  //MotionType motion_type = findMotionType(ob);
+  MotionType motion_type = findMotionType(ob);
   
 
   // Now build a Trajectory Request 
   ramp_msgs::TrajectoryRequest tr;
-  tr.request.path = getObstaclePath(ob, findMotionType(ob));
-  tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
-  tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
-  tr.request.v_start.push_back(ob.odom_t.twist.twist.angular.z);
-  tr.request.resolutionRate = 5;
+    tr.request.path = getObstaclePath(ob, motion_type);
+    tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
+    tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
+    tr.request.v_start.push_back(ob.odom_t.twist.twist.angular.z);
+    tr.request.resolutionRate = 5;
 
   // Get trajectory
   if(h_traj_req_->request(tr)) {
     result = tr.response.trajectory;
+  }
+
+  if(tr.response.trajectory.trajectory.points.size() == 0) {
+    std::cout<<"\nObstacle motion type: ";
+    if(motion_type == MotionType::None)
+      std::cout<<"None";
+    else if(motion_type == MotionType::Rotation)
+      std::cout<<"Rotation";
+
+    std::cout<<"\nObstacle path: "<<utility.toString(tr.request.path);
   }
 
   return result;
@@ -299,6 +316,7 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
     goal.configuration.K.push_back(goal_w.getY());
     goal.configuration.K.push_back(start.configuration.K.at(2));
 
+    path.push_back(goal);
   } // end if self-rotation, none
 
 

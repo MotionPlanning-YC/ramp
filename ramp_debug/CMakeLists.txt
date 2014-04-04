@@ -34,7 +34,7 @@ target_link_libraries(publishTwistCommand ${catkin_LIBRARIES})
 add_dependencies(publishTwistCommand ramp_msgs_generate_messages_cpp)
 
 
-add_executable(publishTrajectoryCommand src/publish_trajectory_command.cpp)
+add_executable(publishTrajectoryCommand src/publish_trajectory_command.cpp src/utility.cpp)
 set_target_properties(publishTrajectoryCommand PROPERTIES COMPILE_FLAGS -std=c++0x)
 target_link_libraries(publishTrajectoryCommand ${catkin_LIBRARIES})
 add_dependencies(publishTrajectoryCommand ramp_msgs_generate_messages_cpp)
