@@ -79,6 +79,9 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
   if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < D_)) {
     p_handler_.setImminentCollision(true); 
   } 
+  else {
+    p_handler_.setImminentCollision(false);
+  }
 }
 
 
