@@ -285,6 +285,14 @@ void Corobot::printVectors() const {
 }
 
 
+/** Returns true if there is imminent collision */
+const bool Corobot::checkImminentCollision() const {
+  bool result;
+  ros::param::get("imminent_collision", result);
+  return result;
+}
+
+
 void Corobot::moveOnTrajectory(bool simulation) 
 {
   restart = false;
@@ -294,8 +302,9 @@ void Corobot::moveOnTrajectory(bool simulation)
   ros::Duration delay = ros::Duration(0); //  Save the time it took to do all the turns
   ros::Time start;
     
-
+  // Execute the trajectory
   while( (num_traveled+1) < num) {
+    
     //std::cout<<"\nnum_traveled: "<<num_traveled;
     restart = false;
     
@@ -307,8 +316,17 @@ void Corobot::moveOnTrajectory(bool simulation)
     //std::cout<<"\nend_times.size():"<<end_times.size()<<"\n";
     //std::cout<<"\norientations.size():"<<orientations.size()<<"\n";
 
+    // Move to the next point
     ros::Time g_time = end_times.at(num_traveled);
-    while(ros::ok() && ros::Time::now() < g_time) {
+    while(ros::ok() && ros::Time::now() < g_time && !checkImminentCollision()) {
+
+      // Spin to check for updates
+      ros::spinOnce();
+
+      // Check if a new trajectory has been received before we reach next point
+      if(restart) {
+        break;
+      }
     
       // Adjust the angular speed to correct errors in turning
       // Commented out because it was producing erratic driving
@@ -323,24 +341,16 @@ void Corobot::moveOnTrajectory(bool simulation)
         //std::cout<<"\ndist: "<<dist;
         twist_.angular.z = -1*dist;
       }
-    
+
       // Send the twist_message to move the robot
       sendTwist();
 
       // If we have the simulation up, publish to cmd_vel
       if(simulation) pub_cmd_vel_.publish(twist_);
-
-      // Spin to check for updates
-      ros::spinOnce();
       
       //Sleep
       r.sleep();
-
-      // Check if a new trajectory has been received
-      if(restart) {
-        break;
-      }
-    }
+    } // end while (move to the next point
     
     if(restart) {
       delay = ros::Duration(0);
