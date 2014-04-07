@@ -43,3 +43,8 @@ add_executable(getYaw src/getYaw.cpp)
 set_target_properties(getYaw PROPERTIES COMPILE_FLAGS -std=c++0x)
 target_link_libraries(getYaw ${catkin_LIBRARIES})
 add_dependencies(getYaw ramp_msgs_generate_messages_cpp)
+
+add_executable(imminent_collision src/imminent_collision.cpp)
+set_target_properties(imminent_collision PROPERTIES COMPILE_FLAGS -std=c++0x)
+target_link_libraries(imminent_collision ${catkin_LIBRARIES})
+add_dependencies(imminent_collision ramp_msgs_generate_messages_cpp)

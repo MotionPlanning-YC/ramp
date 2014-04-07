@@ -248,7 +248,7 @@ void Corobot::calculateSpeedsAndTime ()
 
   } 
   
-  printVectors();
+  //printVectors();
 }
 
 
@@ -304,6 +304,12 @@ void Corobot::moveOnTrajectory(bool simulation)
     
   // Execute the trajectory
   while( (num_traveled+1) < num) {
+    std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
+
+    // Force a stop until there is no imminent collision
+    while(checkImminentCollision()) {
+      ros::spinOnce();
+    }
     
     //std::cout<<"\nnum_traveled: "<<num_traveled;
     restart = false;
@@ -318,15 +324,8 @@ void Corobot::moveOnTrajectory(bool simulation)
 
     // Move to the next point
     ros::Time g_time = end_times.at(num_traveled);
-    while(ros::ok() && ros::Time::now() < g_time && !checkImminentCollision()) {
+    while(ros::ok() && ros::Time::now() < g_time) {
 
-      // Spin to check for updates
-      ros::spinOnce();
-
-      // Check if a new trajectory has been received before we reach next point
-      if(restart) {
-        break;
-      }
     
       // Adjust the angular speed to correct errors in turning
       // Commented out because it was producing erratic driving
@@ -350,6 +349,14 @@ void Corobot::moveOnTrajectory(bool simulation)
       
       //Sleep
       r.sleep();
+      
+      // Spin to check for updates
+      ros::spinOnce();
+
+      // Check if a new trajectory has been received before we reach next point
+      if(restart) {
+        break;
+      }
     } // end while (move to the next point
     
     if(restart) {
@@ -357,7 +364,8 @@ void Corobot::moveOnTrajectory(bool simulation)
       restart=false;
       continue;
     }
-  
+
+    // Increment num_traveled
     num_traveled++;
 
     // Spin once to check for updates in the trajectory

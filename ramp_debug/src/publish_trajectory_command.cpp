@@ -22,9 +22,9 @@ int main(int argc, char** argv) {
   c1.configuration.K.push_back(0);
 
   ramp_msgs::KnotPoint c2;
-  c2.configuration.K.push_back(0);
-  c2.configuration.K.push_back(0);
-  c2.configuration.K.push_back(0);
+  c2.configuration.K.push_back(3);
+  c2.configuration.K.push_back(3);
+  c2.configuration.K.push_back(PI/4);
 
   /*ramp_msgs::KnotPoint c3;
   c3.configuration.K.push_back(3);
