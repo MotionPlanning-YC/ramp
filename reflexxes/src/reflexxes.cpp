@@ -12,8 +12,13 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
   *inputParameters->CurrentAccelerationVector = *outputParameters->NewAccelerationVector;
 
   // Change the target orientation, as the target is the orientation needed to reach the goal
-  inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],inputParameters->CurrentPositionVector->VecData[1],inputParameters->TargetPositionVector->VecData[0],inputParameters->TargetPositionVector->VecData[1]);
-   
+  inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(
+                                                        inputParameters->CurrentPositionVector->VecData[0],
+                                                        inputParameters->CurrentPositionVector->VecData[1],
+                                                        inputParameters->TargetPositionVector->VecData[0],
+                                                        inputParameters->TargetPositionVector->VecData[1]
+                                                      );
+         
 
   // Starting here, we build the JointTrajectoryPoint object, that will be used to build the trajectory
   
@@ -25,11 +30,13 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
   }
 
   // WE need the angle of the velocity vector and the difference between that angle and the robot orientation
-  float velocity_angle = computeTargetOrientation(0,0,outputParameters->NewVelocityVector->VecData[0],outputParameters->NewVelocityVector->VecData[1]);
+  float velocity_angle = computeTargetOrientation(0,0,outputParameters->NewVelocityVector->VecData[0],
+                                                      outputParameters->NewVelocityVector->VecData[1]);
   float difference_angle = velocity_angle - inputParameters->CurrentPositionVector->VecData[2];
 
   // Calculate the linear velocity, being the norm of the vector (Vx, Vy)
-    float linear_velocity = sqrt(pow(outputParameters->NewVelocityVector->VecData[0], 2) + pow(outputParameters->NewVelocityVector->VecData[1], 2) );
+  float linear_velocity = sqrt( pow(outputParameters->NewVelocityVector->VecData[0], 2) + 
+                                pow(outputParameters->NewVelocityVector->VecData[1], 2)   );
   
   // Now create the velocity vector for the trajectory
   // We need to transform the velocity in x, y and theta in the reference frame to a linear and angular velocity
@@ -38,7 +45,8 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
   point.velocities.push_back(outputParameters->NewVelocityVector->VecData[2] + sin(difference_angle) * linear_velocity);
 
   //Same with the acceleration
-  float linear_acceleration = sqrt(pow(outputParameters->NewAccelerationVector->VecData[0], 2) + pow(outputParameters->NewAccelerationVector->VecData[1], 2) );
+  float linear_acceleration = sqrt( pow(outputParameters->NewAccelerationVector->VecData[0], 2) + 
+                                    pow(outputParameters->NewAccelerationVector->VecData[1], 2)   );
   point.accelerations.push_back(linear_acceleration);
   point.accelerations.push_back(0);
   point.accelerations.push_back(outputParameters->NewAccelerationVector->VecData[2]);
@@ -59,7 +67,11 @@ void Reflexxes::setTarget(float x, float y, float linear_velocity, float angular
   inputParameters->TargetPositionVector->VecData[1] = y;
 
   // The new target orientation is the orientation needed to reach the target
-    inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],inputParameters->CurrentPositionVector->VecData[1],x,y);
+  inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(
+                                                        inputParameters->CurrentPositionVector->VecData[0],
+                                                        inputParameters->CurrentPositionVector->VecData[1],
+                                                        x,y
+                                                      );
 
   // Set the target velocity, which is set in the reference frame coordinates
   inputParameters->TargetVelocityVector->VecData[0] = linear_velocity * cos(inputParameters->TargetPositionVector->VecData[2]) ;
@@ -93,6 +105,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
   for (int i = 1; i<path.points.size() ; i++)
   {
     resultValue = 0;
+  
     // Set the new knotpoint as the target
     if (i < (path.points.size()-1))
       setTarget(path.points[i].configuration.K.at(0), path.points[i].configuration.K.at(1), 0.0, 0);

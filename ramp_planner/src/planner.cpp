@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
+Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(0.25f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
 {
   controlCycle_ = ros::Duration(1.f / 30.f);
   planningCycle_ = ros::Duration(1.f / 50.f);

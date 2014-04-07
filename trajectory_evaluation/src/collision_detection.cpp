@@ -1,7 +1,7 @@
 #include "collision_detection.h"
 
 
-CollisionDetection::CollisionDetection() : h_traj_req_(0), predictionTime_(ros::Duration(5)) {}
+CollisionDetection::CollisionDetection() : predictionTime_(ros::Duration(5)), h_traj_req_(0) {}
 
 CollisionDetection::~CollisionDetection() {
   if(h_traj_req_ != 0) {
@@ -67,15 +67,15 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   //std::cout<<"\nQuery on "<<utility.toString(trajectory_)<<" \n*******and*******\n"<<utility.toString(ob_trajectory);
   CollisionDetection::QueryResult result;
 
-  if(ob_trajectory.trajectory.points.size() == 0) {
+  /*if(ob_trajectory.trajectory.points.size() == 0) {
     if(id == 0)
       std::cout<<"\nObstacle 1 has no trajectory!\n";
     else  
       std::cout<<"\nObstacle 0 has no trajectory!\n";
-  }
+  }*/
   
   // For every 3 points, check circle detection
-  float radius = 0.45f;
+  float radius = 0.4f;
   for(unsigned int i=0;i<trajectory_.trajectory.points.size();i+=3) {
     
     // Get the ith point on the trajectory
