@@ -1,3 +1,8 @@
 #include "parameter_handler.h"
 
-ParameterHandler::ParameterHandler(const ros::NodeHandle& h) : handle_(h) {}
+ParameterHandler::ParameterHandler() {}
+
+
+void ParameterHandler::setImminentCollision(bool ic) { 
+  ros::param::set("imminent_collsion", ic);
+}

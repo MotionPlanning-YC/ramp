@@ -5,22 +5,25 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), move_(false)
+Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
 {
   controlCycle_ = ros::Duration(1.f / 30.f);
   planningCycle_ = ros::Duration(1.f / 50.f);
+  imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
 }
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), move_(false)
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0)
 {
   controlCycle_ = ros::Duration(1.f / 30.f);
   planningCycle_ = ros::Duration(1.f / 50.f);
+  imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), move_(false)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f)
 {
   controlCycle_ = ros::Duration(1.f / 30.f);
   planningCycle_ = ros::Duration(1.f / 50.f);
+  imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
   init(h); 
 }
 
@@ -74,6 +77,7 @@ Configuration Planner::getStartConfiguration() {
 /** Check if there is imminent collision in the best trajectory */
 void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
   if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < D_)) {
+    p_handler_.setImminentCollision(true); 
   } 
 }
 
@@ -130,6 +134,9 @@ void Planner::init(const ros::NodeHandle& h) {
 
   planningCycleTimer_ = h.createTimer(ros::Duration(planningCycle_), &Planner::planningCycleCallback, this);
   planningCycleTimer_.stop();
+
+  imminentCollisionTimer_ = h.createTimer(ros::Duration(imminentCollisionCycle_), &Planner::imminentCollisionCallback, this);
+  imminentCollisionTimer_.stop();
 } // End init
 
 void Planner::planningCycleCallback(const ros::TimerEvent&) {
@@ -751,15 +758,15 @@ const std::string Planner::pathsToString() const {
   // Start the planning cycle timer
   planningCycleTimer_.start();
 
-  // Wait for 75 generations before starting control cycle
+  // Wait for 100 generations before starting control cycle
   while(generation_ < 100) {ros::spinOnce();}
 
-  std::cout<<"\n***************Starting Control Cycle*****************";
   // Start the control cycle timer
+  std::cout<<"\n***************Starting Control Cycle*****************";
   controlCycleTimer_.start();
+  imminentCollisionTimer_.start();
   
   // Do planning until robot has reached goal
-  // D = 0.4 if considering mobile base, 0.2 otherwise
   goalThreshold_ = 0.1;
   while( (start_.compare(goal_, false) > goalThreshold_) && ros::ok()) {
     ros::spinOnce(); 
