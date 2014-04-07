@@ -5,12 +5,11 @@
 
 class ParameterHandler {
   public:
-    ParameterHandler(const ros::NodeHandle& h);
+    ParameterHandler(); 
 
-    bool set(const std::string name, 
+    void setImminentCollision(bool ic); 
 
   private:
-    ros::NodeHandle  handle_;
 };
 
 #endif

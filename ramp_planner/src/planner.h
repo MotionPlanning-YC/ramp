@@ -10,6 +10,7 @@
 #include "modifier.h"
 #include "population.h"
 #include "control_handler.h"
+#include "parameter_handler.h"
 
 struct ModifiedTrajectory {
   RampTrajectory trajec_;
@@ -64,10 +65,11 @@ class Planner {
     // Sensing cycle
     ros::Duration sensingCycle_;
 
-    /**/
-
-    // Timer to check imminent collision
+    // Cycle to check imminent collision
     ros::Timer imminentCollisionTimer_;
+    ros::Duration imminentCollisionCycle_;
+
+    /**/
 
 
     // Transformation of the initial pose of the robot 
@@ -202,8 +204,8 @@ class Planner {
     ControlHandler*             h_control_;
     Modifier*                   modifier_;
 
-    // Flag to stop the robot's from driving
-    bool move_;
+    // Parameter handler
+    ParameterHandler p_handler_;
 };
 
 #endif

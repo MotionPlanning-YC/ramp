@@ -84,7 +84,7 @@ class Corobot {
     std::vector<float> orientations; // The orientation needed to be at each knotpoint.
 
     geometry_msgs::Twist twist_;
-    float angle_at_start; // the angle of the robot when the robot gets a trajectory. 
+    float angle_at_start; // the angle of the robot when the robot gets a trajectory.
 
     bool restart;
     bool mutex_;
@@ -98,6 +98,7 @@ class Corobot {
     void lockMutex();
     void releaseMutex();
     void sendTwist() const;
+    const bool checkImminentCollision() const;
 };
 
 #endif

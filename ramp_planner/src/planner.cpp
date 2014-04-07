@@ -5,22 +5,25 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), move_(false)
+Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
 {
   controlCycle_ = ros::Duration(1.f / 30.f);
   planningCycle_ = ros::Duration(1.f / 50.f);
+  imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
 }
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), move_(false)
+Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0)
 {
   controlCycle_ = ros::Duration(1.f / 30.f);
   planningCycle_ = ros::Duration(1.f / 50.f);
+  imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), move_(false)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f)
 {
   controlCycle_ = ros::Duration(1.f / 30.f);
   planningCycle_ = ros::Duration(1.f / 50.f);
+  imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
   init(h); 
 }
 
@@ -74,7 +77,11 @@ Configuration Planner::getStartConfiguration() {
 /** Check if there is imminent collision in the best trajectory */
 void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
   if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < D_)) {
+    p_handler_.setImminentCollision(true); 
   } 
+  else {
+    p_handler_.setImminentCollision(false);
+  }
 }
 
 
@@ -104,7 +111,7 @@ void Planner::updateCallback(const ramp_msgs::Update& msg) {
     start_ = c_od;
   }
 
-  //std::cout<<"\nNew starting configuration: "<<start_.toString()<<"\n";
+  //std::cout<<"\nNew starting configuration: "<<start_.toString();
 
   mutex_start_ = true;
 } // End updateCallback
@@ -130,10 +137,13 @@ void Planner::init(const ros::NodeHandle& h) {
 
   planningCycleTimer_ = h.createTimer(ros::Duration(planningCycle_), &Planner::planningCycleCallback, this);
   planningCycleTimer_.stop();
+
+  imminentCollisionTimer_ = h.createTimer(ros::Duration(imminentCollisionCycle_), &Planner::imminentCollisionCallback, this);
+  imminentCollisionTimer_.stop();
 } // End init
 
 void Planner::planningCycleCallback(const ros::TimerEvent&) {
-  //std::cout<<"\nPlanning cycle occurring, generation = "<<generation_;
+  //std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
   
   // Wait until mutex can be obtained
   while(!mutex_pop_) {}
@@ -535,7 +545,7 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
 
     // Check the difference in path sizes
     int diff = new_path.all_.size() - old.all_.size();
-    //std::cout<<"\ndiff:"<<diff<<"\n";
+    // std::cout<<"\ndiff:"<<diff<<"\n";
 
     // Insertion
     if(diff == 1) {
@@ -661,8 +671,8 @@ void Planner::evaluatePopulation() {
 
 /** This method updates all the paths with the current configuration */
 void Planner::updatePaths(Configuration start, ros::Duration dur) {
-  //std::cout<<"\nUpdating start to: "<<start.toString();
-  //std::cout<<"\ndur: "<<dur<<"\n";
+  // std::cout<<"\nUpdating start to: "<<start.toString();
+  // std::cout<<"\ndur: "<<dur<<"\n";
 
 
   // For each trajectory
@@ -676,7 +686,7 @@ void Planner::updatePaths(Configuration start, ros::Duration dur) {
      
       // Get the point 
       trajectory_msgs::JointTrajectoryPoint point = population_.population_.at(i).msg_trajec_.trajectory.points.at( population_.population_.at(i).msg_trajec_.index_knot_points.at(i_kp));
-      //std::cout<<"\npoint["<<i<<"].time_from_start:"<<point.time_from_start;
+      // std::cout<<"\npoint["<<i<<"].time_from_start:"<<point.time_from_start;
 
       // Compare the durations
       if( dur > point.time_from_start) {
@@ -811,6 +821,10 @@ const std::string Planner::pathsToString() const {
   RampTrajectory T_move = evaluateAndObtainBest();
   std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n\n"; 
   sendPopulation();
+  std::cout<<"\nAfter sendPopulation\n";
+  // std::cout<<"\nPress enter to start the loop!\n";
+  // std::cin.get();
+  
 
   /** TODO */
   // createSubpopulations();
@@ -819,13 +833,15 @@ const std::string Planner::pathsToString() const {
   planningCycleTimer_.start();
 
   // Wait for 75 generations before starting control cycle
-  while(generation_ < 200) {ros::spinOnce();}
+  while(generation_ < 100) {ros::spinOnce();}
 
   std::cout<<"\n***************Starting Control Cycle*****************";
   // Start the control cycle timer
   controlCycleTimer_.start();
+  imminentCollisionTimer_.start();
   
   // Do planning until robot has reached goal
+  // D = 0.4 if considering mobile base, 0.2 otherwise
   goalThreshold_ = 0.1;
   while( (start_.compare(goal_, false) > goalThreshold_) && ros::ok()) {
     ros::spinOnce(); 
