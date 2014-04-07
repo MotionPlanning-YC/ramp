@@ -178,16 +178,6 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
     result = tr.response.trajectory;
   }
 
-  if(tr.response.trajectory.trajectory.points.size() == 0) {
-    std::cout<<"\nObstacle motion type: ";
-    if(motion_type == MotionType::None)
-      std::cout<<"None";
-    else if(motion_type == MotionType::Rotation)
-      std::cout<<"Rotation";
-
-    std::cout<<"\nObstacle path: "<<utility.toString(tr.request.path);
-  }
-
   return result;
 } // End getPredictedTrajectory
 
@@ -320,7 +310,7 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
   } // end if self-rotation, none
 
 
-  // Convert the starting point in path to world coordinates
+  // Convert the starting point to world coordinates
   tf::Vector3 start_w(start.configuration.K.at(0), start.configuration.K.at(1), 0);
   start_w = ob_T_w_b_ * start_w;
   path.at(0).configuration.K.at(0) = start_w.getX();
