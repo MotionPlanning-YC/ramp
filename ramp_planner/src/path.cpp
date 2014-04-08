@@ -3,13 +3,20 @@
 Path::Path() {}
 
 
-Path::Path(MotionState start, MotionState goal) : start_(start), goal_(goal) {
+Path::Path(KnotPoint start, KnotPoint goal) : start_(start), goal_(goal) {
   all_.push_back(start);
   all_.push_back(goal); 
 }
 
+Path::Path(MotionState start, MotionState goal) : start_(start), goal_(goal) {
+  KnotPoint kp_s(start);
+  KnotPoint kp_g(goal);
+  all_.push_back(kp_s);
+  all_.push_back(kp_g); 
+}
 
-Path::Path(std::vector<MotionState> all) {
+
+Path::Path(std::vector<KnotPoint> all) {
   start_ = all.at(0);
   goal_ = all.at(all.size()-1);
   
@@ -21,29 +28,30 @@ Path::Path(std::vector<MotionState> all) {
 
 Path::Path(ramp_msgs::Path p) {
 
-  MotionState s(p.points.at(0));
+  KnotPoint s(p.points.at(0));
   start_ = s;
 
-  MotionState g(p.points.at(p.points.size()-1));
+  KnotPoint g(p.points.at(p.points.size()-1));
   goal_ = g;
 
   for(unsigned int i=0;i<p.points.size();i++) {
-    MotionState mp(p.points.at(i));
-    all_.push_back(mp);
+    KnotPoint kp(p.points.at(i));
+    all_.push_back(kp);
   }
 }
 
 Path::~Path() {}
 
 
-void Path::Add(const MotionState mp) {
-  all_.insert(all_.end()-1, mp);
+void Path::Add(const KnotPoint kp) {
+  all_.insert(all_.end()-1, kp);
 }
 
-/** This method inserts the configuration c into the path at location path_size-1 */
-void Path::Add(const Configuration c) {
-  MotionState mp(c);
-  Add(mp);
+
+/** This method inserts the motion state ms into the path at location path_size-1 */
+void Path::Add(const MotionState ms) {
+  KnotPoint kp(ms);
+  Add(kp);
 }
 
 const unsigned int Path::size() const { return all_.size(); }
@@ -56,7 +64,7 @@ const ramp_msgs::Path Path::buildPathMsg() const {
   for(unsigned int i=0;i<all_.size();i++) {
 
     //Build the motion state msg
-    ramp_msgs::MotionState mp = all_.at(i).buildMotionStateMsg();
+    ramp_msgs::KnotPoint mp = all_.at(i).buildKnotPointMsg();
     
     //Push the msg onto K
     result.points.push_back(mp);

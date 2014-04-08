@@ -1,1 +1,1 @@
-ramp_msgs/MotionState[] points
+ramp_msgs/KnotPoint[] points

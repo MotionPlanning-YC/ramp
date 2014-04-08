@@ -68,7 +68,7 @@ unsigned int Planner::getIRT() { return i_rt++; }
 
 
 /** Getter method for start_. It waits for mutex_start_ to be true before returning. */
-Configuration Planner::getStartConfiguration() {
+MotionState Planner::getStartConfiguration() {
   while(!mutex_start_) {}
   return start_;
 } // End getStartConfiguration
@@ -108,7 +108,8 @@ void Planner::updateCallback(const ramp_msgs::Update& msg) {
 
   // if statement Necessary?
   if(c_od.K_.size() > 0) {
-    start_ = c_od;
+    MotionState temp(c_od);
+    start_ = temp;
   }
 
   //std::cout<<"\nNew starting configuration: "<<start_.toString();
@@ -141,6 +142,8 @@ void Planner::init(const ros::NodeHandle& h) {
   imminentCollisionTimer_ = h.createTimer(ros::Duration(imminentCollisionCycle_), &Planner::imminentCollisionCallback, this);
   imminentCollisionTimer_.stop();
 } // End init
+
+
 
 void Planner::planningCycleCallback(const ros::TimerEvent&) {
   //std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
@@ -212,8 +215,8 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   // Find orientation difference between the old and new trajectory 
   // old configuration is the new start_ configuration (last point on old trajectory)
   // new orientation is the amount to rotate towards first knot point
-  float b = utility.findAngleFromAToB(start_.K_, bestTrajec_.path_.all_.at(1).positions_);
-  float diff = utility.findDistanceBetweenAngles(start_.K_.at(2), b);
+  float b = utility.findAngleFromAToB(start_.positions_, bestTrajec_.path_.all_.at(1).motionState_.positions_);
+  float diff = utility.findDistanceBetweenAngles(start_.positions_.at(2), b);
   if(fabs(diff) <= 0.52356f) {
     gradualTrajectory(bestTrajec_);
   }
@@ -629,7 +632,7 @@ void Planner::evaluatePopulation() {
 
 
 /** This method updates all the paths with the current configuration */
-void Planner::updatePaths(Configuration start, ros::Duration dur) {
+void Planner::updatePaths(MotionState start, ros::Duration dur) {
   // std::cout<<"\nUpdating start to: "<<start.toString();
   // std::cout<<"\ndur: "<<dur<<"\n";
 
@@ -668,7 +671,8 @@ void Planner::updatePaths(Configuration start, ros::Duration dur) {
     paths_.at(i).all_.insert( paths_.at(i).all_.begin(), start_);
 
     // Set start_ to be the new starting configuration of the path
-    paths_.at(i).start_ = start;
+    MotionState start_ms(start);
+    paths_.at(i).start_ = start_ms;
   } // end for
 
   // Update the modifier's paths
@@ -799,7 +803,7 @@ const std::string Planner::pathsToString() const {
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
   goalThreshold_ = 0.1;
-  while( (start_.compare(goal_, false) > goalThreshold_) && ros::ok()) {
+  while( (start_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) {
     ros::spinOnce(); 
   } // end while
   

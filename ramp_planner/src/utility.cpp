@@ -116,12 +116,26 @@ const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::MotionState>
   ramp_msgs::Path result;
 
   for(unsigned int i=0;i<mps.size();i++) {
-    result.points.push_back(mps.at(i));
+    ramp_msgs::KnotPoint kp;
+    kp.motionState = mps.at(i);
+    kp.stopTime = 0;
+    result.points.push_back(kp);
   }
 
   return result;
 }
 
+
+
+const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> kps) const {
+  ramp_msgs::Path result;
+
+  for(unsigned int i=0;i<kps.size();i++) {
+    result.points.push_back(kps.at(i));
+  }
+
+  return result;
+}
 
 const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
   std::ostringstream result;
@@ -156,8 +170,8 @@ const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
 const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
   std::ostringstream result;
 
-  result<<"\nConfiguration: "<<toString(kp.configuration);
-  result<<", Stop time: "<<kp.stop_time;
+  result<<"\nMotion State: "<<toString(kp.motionState);
+  result<<", Stop time: "<<kp.stopTime;
 
   return result.str();
 }

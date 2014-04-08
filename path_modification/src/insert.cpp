@@ -21,23 +21,28 @@ const ramp_msgs::Path Insert::perform() {
     i_knotPoint2 = swap;
   }
 
-  // Generate a new, random configuration
-  ramp_msgs::KnotPoint kp;
-  for(unsigned int i=0;i<path_.points.at(0).configuration.K.size();i++) {
+  // Generate a new, random configuration (gets stored in motion state position)
+  ramp_msgs::MotionState c;
+  for(unsigned int i=0;i<path_.points.at(0).positions.size();i++) {
     
     // Generate a random value for each K in the specified range
-    double min = path_.points.at(0).configuration.ranges.at(i).min;
-    double max = path_.points.at(0).configuration.ranges.at(i).max;
-    
-    float temp = (min == 0 && max == 0) ? 0 :      
+    double  min = utility.standardRanges_.at(i).min;
+    double  max = utility.standardRanges_.at(i).max;
+    float   temp = (min == 0 && max == 0) ? 0 :      
            ( min + (float)rand() / ((float)RAND_MAX / (max - min)) );
 
-    kp.configuration.K.push_back(temp);
-    kp.configuration.ranges.push_back(path_.points.at(0).configuration.ranges.at(i));
+    // Set the position
+    c.positions.push_back(temp);
+
+    // Set the velocity
+    if(i_knotPoint1 == 0)
+      c.velocities.push_back(path_.points.at(i_knotPoint2).velocities.at(i));
+    else
+      c.velocities.push_back(path_.points.at(i_knotPoint1).velocities.at(i));
   }
 
   // Insert the configuration 
-  path_.points.insert(path_.points.begin()+i_knotPoint2, kp);
+  path_.points.insert(path_.points.begin()+i_knotPoint2, c);
   
  return path_; 
 }

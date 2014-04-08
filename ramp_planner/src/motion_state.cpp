@@ -1,6 +1,21 @@
 #include "motion_state.h"
 
-MotionState::MotionState() {}
+MotionState::MotionState() : mobile_base_k_(2) {}
+
+
+MotionState::MotionState(const trajectory_msgs::JointTrajectoryPoint p) : mobile_base_k_(2) {
+  for(unsigned int i=0;i<p.positions.size();i++) {
+    positions_.push_back(p.positions.at(i));
+  }
+  
+  for(unsigned int i=0;i<p.velocities.size();i++) {
+    velocities_.push_back(p.velocities.at(i));
+  }
+  
+  for(unsigned int i=0;i<p.accelerations.size();i++) {
+    accelerations_.push_back(p.accelerations.at(i));
+  }
+}
 
 MotionState::MotionState(const ramp_msgs::MotionState ms) {
   for(unsigned int i=0;i<ms.positions.size();i++) {
@@ -23,10 +38,40 @@ MotionState::MotionState(const ramp_msgs::MotionState ms) {
 }
 
 
-MotionState::MotionState(const Configuration c) {
+MotionState::MotionState(const Configuration c) : mobile_base_k_(2) {
   for(unsigned int i=0;i<c.K_.size();i++) {
     positions_.push_back(c.K_.at(i));
   }
+}
+
+
+
+/** 
+ * This method returns the euclidean distance between this configuration and c 
+ * if base_theta is true, we are considering the base orientation, otherwise do not
+ * add base orientation difference into the result
+ * */
+double MotionState::comparePosition(const MotionState& c, bool base_theta) const {
+  //std::cout<<"\nComparing: "<<toString()<<" and "<<c.toString();
+  double result = 0; 
+
+  // For each DOF, sum the (X2-X1)^2
+  for(unsigned int i=0;i<positions_.size();i++) {
+    // If we are not taking base theta into account, skip i
+    if(i == mobile_base_k_ && !base_theta) {}
+
+    // Else if we are considering base theta, use utility function
+    else if(i == mobile_base_k_) {
+      result += pow(utility.displaceAngle(c.positions_.at(i), positions_.at(i)), 2);
+    }
+    else
+      result += pow(positions_.at(i) - positions_.at(i), 2);
+  }
+
+  // Get square root to complete euclidean distance...
+  result = sqrt(result);
+
+  return result;
 }
 
 

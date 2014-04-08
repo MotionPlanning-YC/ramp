@@ -5,7 +5,7 @@ RampTrajectory::RampTrajectory(unsigned int id) : id_(id), fitness_(-1.0), feasi
   msg_trajec_.fitness = -1;  
 }
 
-RampTrajectory::RampTrajectory(const ramp_msgs::Trajectory msg) : fitness_(msg.fitness), feasible_(msg.feasible), msg_trajec_(msg), time_until_collision_(9999.0f) {}
+RampTrajectory::RampTrajectory(const ramp_msgs::Trajectory msg) : msg_trajec_(msg), fitness_(msg.fitness), feasible_(msg.feasible), time_until_collision_(9999.0f) {}
 
 
 const bool RampTrajectory::equal(const RampTrajectory& other) const {
@@ -18,9 +18,9 @@ const Path RampTrajectory::getPath() const {
 
   for(unsigned int i=0;i<msg_trajec_.index_knot_points.size();i++) {
 
-    Configuration c(msg_trajec_.trajectory.points.at( msg_trajec_.index_knot_points.at(i)), u.standardRanges );
+    MotionState ms(msg_trajec_.trajectory.points.at( msg_trajec_.index_knot_points.at(i)));
   
-    result.all_.push_back(c);
+    result.all_.push_back(ms);
   }
 
   result.start_ = result.all_.at(0);

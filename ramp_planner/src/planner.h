@@ -39,8 +39,8 @@ class Planner {
     
     // Hold the start and goal configurations
     // and the ranges for each DOF
-    Configuration start_;
-    Configuration goal_;
+    MotionState start_;
+    MotionState goal_;
     std::vector<Range> ranges_;
     
     
@@ -115,7 +115,7 @@ class Planner {
     bool requestEvaluation(ramp_msgs::EvaluationRequest& er);
 
     // Get the starting configuration
-    Configuration getStartConfiguration();
+    MotionState getStartConfiguration();
 
     // Update the population 
     void updatePopulation(ros::Duration d);
@@ -141,7 +141,7 @@ class Planner {
     const std::vector< std::vector<float> > getNewVelocities(std::vector<Path> new_path, std::vector<int> i_old);
     
     // Updates the paths in P(t) so we can get new trajectories
-    void updatePaths(Configuration start, ros::Duration dur);
+    void updatePaths(MotionState start, ros::Duration dur);
 
     // Returns an id for a RampTrajectory 
     unsigned int getIRT();

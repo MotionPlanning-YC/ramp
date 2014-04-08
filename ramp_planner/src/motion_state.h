@@ -10,7 +10,9 @@ class MotionState {
     MotionState();
     MotionState(const ramp_msgs::MotionState ms);
     MotionState(const Configuration c);
+    MotionState(const trajectory_msgs::JointTrajectoryPoint p);
 
+    /***** Data Members *****/
     // Motion vectors
     std::vector<float> positions_;
     std::vector<float> velocities_;
@@ -20,10 +22,15 @@ class MotionState {
     // Time
     double time_;
 
+    /***** Methods *****/
+    double comparePosition(const MotionState& ms, bool base_theta) const;
+    
     const ramp_msgs::MotionState buildMotionStateMsg() const;
     const std::string toString() const;
 
   private:
+    Utility utility;
+    unsigned int mobile_base_k_;
 };
 
 #endif
