@@ -28,7 +28,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 set (CMAKE_CXX_FLAGS "-g")
 
 ## Declare a cpp executable
-add_executable(${PROJECT_NAME} src/main.cpp src/planner.cpp src/configuration.cpp src/control_handler.cpp src/knot_point.cpp src/modification_request_handler.cpp src/modifier.cpp src/parameter_handler.cpp src/path.cpp src/population.cpp src/ramp_trajectory.cpp src/range.cpp src/trajectory_request_handler.cpp src/evaluation_request_handler.cpp src/utility.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/planner.cpp src/configuration.cpp src/control_handler.cpp src/knot_point.cpp src/modification_request_handler.cpp src/modifier.cpp src/motion_state.cpp src/parameter_handler.cpp src/path.cpp src/population.cpp src/ramp_trajectory.cpp src/range.cpp src/trajectory_request_handler.cpp src/evaluation_request_handler.cpp src/utility.cpp)
 
 
 ## Specify libraries to link a library or executable target against
