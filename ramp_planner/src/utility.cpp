@@ -112,16 +112,46 @@ const float Utility::getEuclideanDist(const std::vector<float> a, const std::vec
 
 
 
-const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> kps) const {
+const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::MotionState> mps) const {
   ramp_msgs::Path result;
 
-  for(unsigned int i=0;i<kps.size();i++) {
-    result.points.push_back(kps.at(i));
+  for(unsigned int i=0;i<mps.size();i++) {
+    result.points.push_back(mps.at(i));
   }
 
   return result;
 }
 
+
+const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
+  std::ostringstream result;
+
+  result<<"\np: [ ";
+  for(unsigned int i=0;i<mp.positions.size();i++) {
+    result<<mp.positions.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\nv: [ ";
+  for(unsigned int i=0;i<mp.velocities.size();i++) {
+    result<<mp.velocities.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\na: [ ";
+  for(unsigned int i=0;i<mp.accelerations.size();i++) {
+    result<<mp.accelerations.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\nj: [ ";
+  for(unsigned int i=0;i<mp.jerks.size();i++) {
+    result<<mp.jerks.at(i)<<" ";
+  }
+  result<<"]";
+
+  return result.str();
+}
 
 const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
   std::ostringstream result;

@@ -129,7 +129,7 @@ void Planner::init(const ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler(h);
   h_control_  = new ControlHandler(h);
   h_eval_req_ = new EvaluationRequestHandler(h);
-  modifier_   = new Modifier(h, paths_, velocities_, num_ops_);
+  modifier_   = new Modifier(h, paths_, num_ops_);
 
   // Initialize the timers, but don't start them yet
   controlCycleTimer_ = h.createTimer(ros::Duration(controlCycle_), &Planner::controlCycleCallback, this);
@@ -212,8 +212,8 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   // Find orientation difference between the old and new trajectory 
   // old configuration is the new start_ configuration (last point on old trajectory)
   // new orientation is the amount to rotate towards first knot point
-  float b = u.findAngleFromAToB(start_.K_, bestTrajec_.path_.all_.at(1).configuration_.K_);
-  float diff = u.findDistanceBetweenAngles(start_.K_.at(2), b);
+  float b = utility.findAngleFromAToB(start_.K_, bestTrajec_.path_.all_.at(1).positions_);
+  float diff = utility.findDistanceBetweenAngles(start_.K_.at(2), b);
   if(fabs(diff) <= 0.52356f) {
     gradualTrajectory(bestTrajec_);
   }
@@ -240,34 +240,42 @@ void Planner::init_population() {
     // Each trajectory will have a random number of knot points
     // Put a max of 5 knot points for practicality...
     unsigned int num = rand() % 5;
+  
+    std::vector<float> v;
 
     // For each knot point to be created...
     for(unsigned int j=0;j<num;j++) {
 
       // Create a random configuration
       Configuration temp_config;
-      temp_config.ranges_ = ranges_;
+      temp_config.ranges_ = utility.standardRanges;
       temp_config.random();
+
+      // Create a MotionState from the configuration
+      MotionState temp_ms(temp_config);
+      
+      // Push on velocity values (for target v when getting trajectory)
+      // 0 for the beginning and end of a path, max v otherwise
+      for(unsigned int i=0;i<temp_ms.positions_.size();i++) {
+        if(j==0 || j==num-1)
+          v.push_back(0);
+        else
+          v.push_back(0.35f);
+      }
       
       // Add the random configuration to the path
-      temp_path.Add(temp_config); 
+      temp_path.Add(temp_ms); 
     }
 
     // Add the path to the list of paths
     paths_.push_back(temp_path);
-  }
+  } // end for create n paths
   
-  std::vector<float> v;
   // For each path
   for(unsigned int i=0;i<paths_.size();i++) {
 
-    // Hardcode some velocities, 0.25m/s per segment
-    for(unsigned int j=1;j<paths_.at(i).all_.size();j++) {
-      v.push_back(0.0f);
-    }
-    
     // Build a TrajectoryRequest 
-    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(i,v,v);
+    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(i);
     
     // Send the request and push the returned Trajectory onto population_
     if(requestTrajectory(msg_request)) {
@@ -285,17 +293,11 @@ void Planner::init_population() {
     else {
       // some error handling
     }
-
-    // Push the times vector onto velocities_
-    velocities_.push_back(v);
-
-    // Clear times vector
-    v.clear();
   } // end for
 
 
   // Update the modifier
-  modifier_->updateAll(paths_, velocities_);
+  modifier_->updateAll(paths_);
 } // End init_population
 
 
@@ -367,7 +369,7 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
     
     // Build a TrajectoryRequestMsg
     //ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(modded_paths.at(i), vs.at(i), vs.at(i));
-    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(modded_paths.at(i), velocities_.at(i), velocities_.at(i));
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(modded_paths.at(i));
     
     // Send the request and set the result to the returned trajectory 
     if(requestTrajectory(tr)) {
@@ -379,7 +381,6 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
       // Build ModifiedTrajectory
       ModifiedTrajectory mt;
       mt.trajec_ = temp;
-      mt.velocities_ = velocities_.at(i); 
 
       result.push_back(mt);
     } // end if
@@ -396,63 +397,22 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
 
 
 /** Build a TrajectoryRequest srv */
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e ) const {
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path) const {
   ramp_msgs::TrajectoryRequest result;
 
   result.request.path           = path.buildPathMsg();
-  result.request.v_start        = v_s;
-  result.request.v_end          = v_e;
   result.request.resolutionRate = resolutionRate_;
-
-  // We Need reflexxes to have the current velocity of the robot, so we send it with the trajectory request
-  // v_start is used to hold the velocity information and is a vector of size 3
-  
-  if (bestTrajec_.msg_trajec_.trajectory.points.size() > 0)
-  {
-    result.request.v_start.clear();
-    result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(0));
-    result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(1));
-    result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(2));
-  }
-  else
-  {
-    result.request.v_start.clear();
-    result.request.v_start.push_back(0);
-    result.request.v_start.push_back(0);
-    result.request.v_start.push_back(0);
-  }
 
   return result;
 } // End buildTrajectoryRequest
 
 
 /** Build a TrajectoryRequest srv */
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const {
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const unsigned int i_path) const {
   ramp_msgs::TrajectoryRequest result;
 
   result.request.path           = paths_.at(i_path).buildPathMsg();
-  result.request.v_start        = v_s;
-  result.request.v_end          = v_e;
   result.request.resolutionRate = resolutionRate_;
- 
-
-  // We Need reflexxes to have the current velocity of the robot, so we send it with the trajectory request
-  // v_start is used to hold the velocity information and is a vector of size 3
-  if (bestTrajec_.msg_trajec_.trajectory.points.size() > 0)
-  {
-    result.request.v_start.clear();
-    result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(0));
-    result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(1));
-    result.request.v_start.push_back(bestTrajec_.msg_trajec_.trajectory.points.at(0).velocities.at(2));
-  }
-  else
-  {
-    result.request.v_start.clear();
-    result.request.v_start.push_back(0);
-    result.request.v_start.push_back(0);
-    result.request.v_start.push_back(0);
-  }
-
 
   return result; 
 } // End buildTrajectoryRequest
@@ -520,7 +480,7 @@ void Planner::sendPopulation() {
  * This method returns the new velocity vector(s) for the modified path(s) 
  * This is called at each control cycle to update the trajectories
  * */
-const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Path> new_paths, std::vector<int> i_old) {
+/*const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Path> new_paths, std::vector<int> i_old) {
   //std::cout<<"\nIn getNewVelocities\n";
   //for(int i=0;i<new_paths.size();i++) {
     //std::cout<<"\nPath "<<i<<":"<<new_paths.at(i).toString();
@@ -600,7 +560,7 @@ const std::vector< std::vector<float> > Planner::getNewVelocities(std::vector<Pa
   // Swap and Change do not change the size
 
   return result;
-} // End getNewVelocities
+} // End getNewVelocities*/
 
 
 
@@ -625,7 +585,6 @@ void Planner::modification() {
 
     // Update the path and velocities in the planner 
     paths_.at(index)      = mod_trajec.at(i).trajec_.path_;
-    velocities_.at(index) = mod_trajec.at(i).velocities_;
     
     // Update the path and velocities in the modifier 
     modifier_->update(paths_.at(index), index);
@@ -684,7 +643,7 @@ void Planner::updatePaths(Configuration start, ros::Duration dur) {
     // For each knot point,
     for(unsigned int i_kp=0;i_kp<population_.population_.at(i).msg_trajec_.index_knot_points.size();i_kp++) {
      
-      // Get the point 
+      // Get the knot point 
       trajectory_msgs::JointTrajectoryPoint point = population_.population_.at(i).msg_trajec_.trajectory.points.at( population_.population_.at(i).msg_trajec_.index_knot_points.at(i_kp));
       // std::cout<<"\npoint["<<i<<"].time_from_start:"<<point.time_from_start;
 
@@ -710,16 +669,14 @@ void Planner::updatePaths(Configuration start, ros::Duration dur) {
 
     // Set start_ to be the new starting configuration of the path
     paths_.at(i).start_ = start;
-
-    // Update the modifier
-    modifier_->update(paths_.at(i), i);
-
-    // Also erase velocities, throwaway-1
-    if(throwaway > 0) {
-      velocities_.at(i).erase( velocities_.at(i).begin(), velocities_.at(i).begin()+throwaway-1);
-    }
   } // end for
+
+  // Update the modifier's paths
+  modifier_->updateAll(paths_);
 } // End updatePaths
+
+
+
 
 
 /** This method updates the population with the current configuration 
@@ -747,7 +704,7 @@ void Planner::updatePopulation(ros::Duration d) {
   for(unsigned int i=0;i<paths_.size();i++) {
 
     // Build a TrajectoryRequest 
-    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(i, velocities_.at(i), velocities_.at(i));
+    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(i);
     
     // Send the request 
     if(requestTrajectory(msg_request)) {
@@ -774,7 +731,6 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   evaluatePopulation();
   return population_.findBest();
 }
-
 
 
 const std::string Planner::pathsToString() const {

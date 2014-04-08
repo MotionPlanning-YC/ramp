@@ -14,7 +14,6 @@
 
 struct ModifiedTrajectory {
   RampTrajectory trajec_;
-  std::vector<float> velocities_;
 };
 
 class Planner {
@@ -36,7 +35,6 @@ class Planner {
     // and the resolution rate for the trajectories
     Population                          population_;
     std::vector<Path>                   paths_;
-    std::vector<std::vector<float> >    velocities_;
     const unsigned int                  resolutionRate_;
     
     // Hold the start and goal configurations
@@ -161,8 +159,12 @@ class Planner {
     void imminentCollisionCallback(const ros::TimerEvent& t);
 
     // Msg building methods
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
+    //const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;
+    //const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
+              const unsigned int i_path ) const;
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
+              const Path path ) const;
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(const unsigned int i_path);
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(const RampTrajectory trajec);
 
@@ -171,7 +173,7 @@ class Planner {
     /***** Data members *****/
 
     // Utility instance
-    Utility u; 
+    Utility utility; 
 
     // Size of population
     const unsigned int populationSize_;

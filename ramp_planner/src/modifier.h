@@ -8,12 +8,12 @@
 class Modifier {
   public:
     Modifier(const ros::NodeHandle& h, const unsigned int n);
-    Modifier(const ros::NodeHandle& h, const std::vector<Path> ps, const std::vector< std::vector<float> > vs, const unsigned int n);    
+    Modifier(const ros::NodeHandle& h, const std::vector<Path> ps, const unsigned int n);    
     ~Modifier();
 
     // Methods
     const std::vector<Path> perform();
-    void updateAll(const std::vector<Path> ps, std::vector< std::vector<float> > vs);
+    void updateAll(const std::vector<Path> ps);
     void update(const Path p, const unsigned int i);
     const ramp_msgs::ModificationRequest buildModificationRequest();
     const Path stop(Path p);
@@ -22,7 +22,6 @@ class Modifier {
     // Data members
     unsigned int num_ops;
     std::vector<Path> paths_;
-    std::vector< std::vector<float> > velocities_;
     int i_changed1;
     int i_changed2;
 
