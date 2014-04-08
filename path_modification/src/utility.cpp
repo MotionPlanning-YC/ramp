@@ -17,9 +17,9 @@ const std::string Utility::toString(const ramp_msgs::Path path) const {
   for(unsigned int i=0;i<path.points.size();i++) {
     result<<"\n  "<<i<<": (";
 
-    result<<path.points.at(i).positions.at(0);
-    for(unsigned int k=1;k<path.points.at(i).positions.size();k++) {
-      result<<", "<<path.points.at(i).positions.at(k);
+    result<<path.points.at(i).motionState.positions.at(0);
+    for(unsigned int k=1;k<path.points.at(i).motionState.positions.size();k++) {
+      result<<", "<<path.points.at(i).motionState.positions.at(k);
     }
     result<<")";
   }

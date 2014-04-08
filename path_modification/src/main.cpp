@@ -53,23 +53,28 @@ int main(int argc, char** argv) {
 
   ros::ServiceServer service = handle.advertiseService("path_modification", handleRequest); 
 
-  Utility u;
+  /*Utility u;
 
   ramp_msgs::Path p1;
-  ramp_msgs::Range r;
-  r.min=0;
-  r.max=10;
   for(unsigned int i=0;i<10;i++) {
     ramp_msgs::KnotPoint kp;
-    kp.configuration.K.push_back(i);
-    kp.configuration.ranges.push_back(r); 
+    kp.motionState.positions.push_back(i);
+    kp.motionState.positions.push_back(i+1);
+    kp.motionState.positions.push_back(i+2);
 
     p1.points.push_back(kp);
   }
   
   std::cout<<"\nPath p1:"<<u.toString(p1);
 
-  ramp_msgs::Path p2;
+  // Test change
+  //Change change(p1);
+  //change.perform();
+  Swap swap(p1);
+  swap.perform();
+  std::cout<<"\nPath after change: "<<u.toString(swap.path_);*/
+
+/*  ramp_msgs::Path p2;
   for(unsigned int i=5;i>0;i--) {
     ramp_msgs::KnotPoint kp;
     kp.configuration.K.push_back(i);
@@ -91,7 +96,7 @@ int main(int argc, char** argv) {
   //ramp_msgs::Path a = swap.perform();
   std::vector<ramp_msgs::Path> as = cross.perform();
   std::cout<<"\nnew path1:"<<u.toString(as.at(0));
-  std::cout<<"\nnew path2:"<<u.toString(as.at(1));
+  std::cout<<"\nnew path2:"<<u.toString(as.at(1));*/
 
 
   std::cout<<"\nSpinning...\n";
