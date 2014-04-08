@@ -127,7 +127,7 @@ class Planner {
     void setT_od_w(std::vector<float> od_info);
 
     // Callback for receiving updates from the ramp_control
-    void updateCallback(const ramp_msgs::Update& msg);
+    void updateCallback(const ramp_msgs::MotionState& msg);
 
 
   

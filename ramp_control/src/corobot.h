@@ -12,7 +12,7 @@
 #include "ramp_msgs/Configuration.h"
 #include "ramp_msgs/Trajectory.h"
 #include "tf/transform_datatypes.h"
-#include "ramp_msgs/Update.h"
+#include "ramp_msgs/MotionState.h"
 #include <math.h>
 
 class Corobot {
@@ -32,7 +32,6 @@ class Corobot {
     void updateTrajectory(const ramp_msgs::Trajectory msg); 
     void moveOnTrajectory(bool simulation);
 
-    void setConfiguration(float x, float y, float theta);
     
     void updatePublishTimer(const ros::TimerEvent&);
     void controlCycle(geometry_msgs::Twist twist, ros::Time end_time, ros::Rate r);
@@ -47,7 +46,7 @@ class Corobot {
     ros::Publisher                    pub_cmd_vel_;
     ros::Publisher                    pub_update_;
     ros::Subscriber                   sub_odometry_;
-    ramp_msgs::Configuration          configuration_; 
+    ramp_msgs::MotionState            configuration_; 
     geometry_msgs::Twist              velocity_;
     ramp_msgs::Trajectory             trajectory_;
     ros::Timer                        timer_;

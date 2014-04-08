@@ -76,6 +76,32 @@ double MotionState::comparePosition(const MotionState& c, bool base_theta) const
 
 
 
+/** This method returns the new position vector of the Configuration given some transformation matrix */
+tf::Vector3 MotionState::transformBasePosition(const tf::Transform t) {
+
+  tf::Vector3 p(positions_.at(0), positions_.at(1), 0);
+  tf::Vector3 result = t * p;
+
+  return result;
+} //End transformBasePosition
+
+
+
+/** This method will transform the configuration by the transformation T
+ *  It transforms the position and displaces the orientation by the rotation in T 
+ *  The most used source of this method is for updating the robot's configuration */
+void MotionState::transformBase(const tf::Transform t) {
+
+  // Get the new position
+  tf::Vector3 p = transformBasePosition(t);
+  positions_.at(0) = p.getX();
+  positions_.at(1) = p.getY();
+  
+  // Get the new orientation
+  positions_.at(2) = utility.displaceAngle(positions_.at(2), tf::getYaw(t.getRotation()));
+} //End transformBase
+
+
 
 const ramp_msgs::MotionState MotionState::buildMotionStateMsg() const {
   ramp_msgs::MotionState result;

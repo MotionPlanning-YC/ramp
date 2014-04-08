@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 #include "corobot.h"
-#include "ramp_msgs/Update.h"
+#include "ramp_msgs/MotionState.h"
 
 Corobot robot;
 
@@ -19,7 +19,7 @@ void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle) {
   // Publishers
   robot.pub_phidget_motor_ = handle.advertise<corobot_msgs::MotorCommand>(Corobot::TOPIC_STR_PHIDGET_MOTOR, 1000);
   robot.pub_twist_ = handle.advertise<geometry_msgs::Twist>(Corobot::TOPIC_STR_TWIST, 1000);
-  robot.pub_update_ = handle.advertise<ramp_msgs::Update>(Corobot::TOPIC_STR_UPDATE, 1000);
+  robot.pub_update_ = handle.advertise<ramp_msgs::MotionState>(Corobot::TOPIC_STR_UPDATE, 1000);
  
   // Subscribers
   robot.sub_odometry_ = handle.subscribe(Corobot::TOPIC_STR_ODOMETRY, 1000, &Corobot::updateState, &robot);

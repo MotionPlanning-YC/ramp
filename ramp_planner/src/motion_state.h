@@ -24,13 +24,17 @@ class MotionState {
 
     /***** Methods *****/
     double comparePosition(const MotionState& ms, bool base_theta) const;
+    void transformBase(const tf::Transform t);
     
     const ramp_msgs::MotionState buildMotionStateMsg() const;
     const std::string toString() const;
 
   private:
+    
     Utility utility;
     unsigned int mobile_base_k_;
+    
+    tf::Vector3 transformBasePosition(const tf::Transform t);
 };
 
 #endif

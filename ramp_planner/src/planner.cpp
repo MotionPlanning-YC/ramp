@@ -92,7 +92,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
  * and transforming it by T_od_w because 
  * updates are relative to odometry frame
  * */
-void Planner::updateCallback(const ramp_msgs::Update& msg) {
+void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
   //std::cout<<"\nReceived update!\n";
   
   // Wait for mutex to be true
@@ -100,17 +100,16 @@ void Planner::updateCallback(const ramp_msgs::Update& msg) {
 
   mutex_start_ = false;
 
-  // Create a Configuration from the update msg 
-  Configuration c_od(msg.configuration);
+  start_ = msg;
 
   // Transform configuration from odometry to world coordinates
-  c_od.transformBase(T_od_w_);
+  start_.transformBase(T_od_w_);
 
   // if statement Necessary?
-  if(c_od.K_.size() > 0) {
-    MotionState temp(c_od);
-    start_ = temp;
-  }
+  //if(c_od.K_.size() > 0) {
+    //MotionState temp(c_od);
+    //start_ = temp;
+  //}
 
   //std::cout<<"\nNew starting configuration: "<<start_.toString();
 
