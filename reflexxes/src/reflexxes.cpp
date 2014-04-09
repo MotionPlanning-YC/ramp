@@ -81,7 +81,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
   this->path = req.path;
   
   //set the initial conditions of the reflexxes library
-  setInitialConditions(req.v_start);
+  setInitialConditions();
 
   // Push on 0
   res.trajectory.index_knot_points.push_back(0);
@@ -95,9 +95,11 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
     resultValue = 0;
     // Set the new knotpoint as the target
     if (i < (path.points.size()-1))
-      setTarget(path.points[i].configuration.K.at(0), path.points[i].configuration.K.at(1), 0.0, 0);
+      setTarget(path.points[i].motionState.positions.at(0), path.points[i].motionState.positions.at(1), 
+                path.points[i].motionState.velocities.at(0), path.points[i].motionState.velocities.at(1));
     else
-      setTarget(path.points[i].configuration.K.at(0), path.points[i].configuration.K.at(1), 0.0, 0);
+      setTarget(path.points[i].motionState.positions.at(0), path.points[i].motionState.positions.at(1), 
+                path.points[i].motionState.velocities.at(0), path.points[i].motionState.velocities.at(1));
     // We go to the next knotpoint only once we reach this one
     while (!isFinalStateReached())
     {
@@ -113,7 +115,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
 }
 
 // Initialize variables just after receiving a service request
-void Reflexxes::setInitialConditions(std::vector<float> velocity)
+void Reflexxes::setInitialConditions()
 {
   // Set-up the input parameters
   // The first degree of freedom is x position
@@ -126,25 +128,29 @@ void Reflexxes::setInitialConditions(std::vector<float> velocity)
   
 
   // Get the current orientation of the robot
-  float orientation = path.points[0].configuration.K.at(2);
+  float orientation = path.points[0].motionState.positions.at(2);
 
-  // set the position and orientation of the robot as Reflexxes input
-  inputParameters->CurrentPositionVector->VecData[0] = path.points[0].configuration.K.at(0);
-  inputParameters->CurrentPositionVector->VecData[1] = path.points[0].configuration.K.at(1);
+  // Set the position and orientation of the robot as Reflexxes input
+  inputParameters->CurrentPositionVector->VecData[0] = path.points[0].motionState.positions.at(0);
+  inputParameters->CurrentPositionVector->VecData[1] = path.points[0].motionState.positions.at(1);
 
   current_orientation = orientation;
   inputParameters->CurrentPositionVector->VecData[2] = orientation;
 
   // Set the current velocities, in the reference frame, as Reflexxes input
   // This is the latest velocity value got from the path
-  inputParameters->CurrentVelocityVector->VecData[0] = velocity.at(0) * cos(orientation);
-  inputParameters->CurrentVelocityVector->VecData[1] = velocity.at(0) * sin(orientation);
-  inputParameters->CurrentVelocityVector->VecData[2] = velocity.at(2);
+  inputParameters->CurrentVelocityVector->VecData[0] = path.points.at(0).motionState.velocities.at(0) * cos(orientation);
+  inputParameters->CurrentVelocityVector->VecData[1] = path.points.at(0).motionState.velocities.at(0) * sin(orientation);
+  inputParameters->CurrentVelocityVector->VecData[2] = path.points.at(0).motionState.velocities.at(2);
 
-  inputParameters->CurrentAccelerationVector->VecData[0] = 0.0;
-  inputParameters->CurrentAccelerationVector->VecData[1] = 0.0;
-  inputParameters->CurrentAccelerationVector->VecData[2] = 0.0;
-}
+  inputParameters->CurrentAccelerationVector->VecData[0] = path.points.at(0).motionState.accelerations.at(0);
+  inputParameters->CurrentAccelerationVector->VecData[1] = path.points.at(0).motionState.accelerations.at(1);
+  inputParameters->CurrentAccelerationVector->VecData[2] = path.points.at(0).motionState.accelerations.at(2);
+} // End setInitialConditions
+
+
+
+
 
 // Compute the orientation needed to reach the target, given an initial position
 float Reflexxes::computeTargetOrientation(float initial_x, float initial_y, float target_x, float target_y)
@@ -171,6 +177,8 @@ bool Reflexxes::isFinalStateReached()
 {
   return (resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
 }
+
+
 
 
 Reflexxes::Reflexxes()

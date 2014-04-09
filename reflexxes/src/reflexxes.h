@@ -44,7 +44,7 @@ class Reflexxes
     bool isFinalStateReached();
 
 // Initialize variables just after receiving a service request
-    void setInitialConditions(std::vector<float> velocity);
+    void setInitialConditions();
 
 // Compute the orientation needed to reach the target, given an initial position
     float computeTargetOrientation(float initial_x, float intial_y, float target_x, float target_y);
