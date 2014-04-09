@@ -23,25 +23,35 @@ int main(int argc, char** argv) {
   
 
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(3);
-  c2.motionState.positions.push_back(3);
+  //c2.motionState.positions.push_back(2.98f);
+  //c2.motionState.positions.push_back(3.456);
+  c2.motionState.positions.push_back(3.5f);
+  c2.motionState.positions.push_back(3.5);
   c2.motionState.positions.push_back(PI/4);
 
 
+
+  ramp_msgs::KnotPoint c3;
+  c3.motionState.positions.push_back(3.5f);
+  c3.motionState.positions.push_back(3.5f);
+  c3.motionState.positions.push_back(0);
+
   // Push on velocities
   for(unsigned int i=0;i<c1.motionState.positions.size();i++) {
-    c1.motionState.velocities.push_back(0);
-    c2.motionState.velocities.push_back(0);
+    if(i<2) {
+      c1.motionState.velocities.push_back(0);
+      c2.motionState.velocities.push_back(0);
+      c3.motionState.velocities.push_back(0);
+    }
+    else {
+      c1.motionState.velocities.push_back(0);
+      c2.motionState.velocities.push_back(0);
+      c3.motionState.velocities.push_back(0);
+    }
   }
 
 
-  /*ramp_msgs::KnotPoint c3;
-  c3.motionState.positions.push_back(3);
-  c3.motionState.positions.push_back(2);
-  c3.motionState.positions.push_back(PI/2);
-  c3.stop_time = 2;
-
-  ramp_msgs::KnotPoint c4;
+  /*ramp_msgs::KnotPoint c4;
   c4.motionState.positions.push_back(3);
   c4.motionState.positions.push_back(3);
   c4.motionState.positions.push_back(PI/2);*/
@@ -55,7 +65,7 @@ int main(int argc, char** argv) {
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
   
-  tr.request.resolutionRate = 5;
+  tr.request.resolutionRate = 10;
 
 
   std::cout<<"\nPress Enter to request and send the trajectory\n";

@@ -140,6 +140,13 @@ void Planner::init(const ros::NodeHandle& h) {
 
   imminentCollisionTimer_ = h.createTimer(ros::Duration(imminentCollisionCycle_), &Planner::imminentCollisionCallback, this);
   imminentCollisionTimer_.stop();
+
+
+  // Set start and goal velocities
+  for(unsigned int i=0;i<start_.positions_.size();i++) {
+    start_.velocities_.push_back(0);
+    goal_.velocities_.push_back(0);
+  }
 } // End init
 
 
@@ -243,9 +250,8 @@ void Planner::init_population() {
     // Put a max of 5 knot points for practicality...
     unsigned int num = rand() % 5;
   
-    std::vector<float> v;
 
-    // For each knot point to be created...
+    // For each knot point to be created
     for(unsigned int j=0;j<num;j++) {
 
       // Create a random configuration
@@ -259,10 +265,10 @@ void Planner::init_population() {
       // Push on velocity values (for target v when getting trajectory)
       // 0 for the beginning and end of a path, max v otherwise
       for(unsigned int i=0;i<temp_ms.positions_.size();i++) {
-        if(j==0 || j==num-1)
-          v.push_back(0);
-        else
-          v.push_back(0.35f);
+        //if(j==0 || j==num-1)
+          //temp_ms.velocities_.push_back(0);
+        //else
+          temp_ms.velocities_.push_back(0.35f);
       }
       
       // Add the random configuration to the path
@@ -295,6 +301,9 @@ void Planner::init_population() {
     else {
       // some error handling
     }
+
+    std::cout<<"\nPress enter initialize next path\n";
+    std::cin.get();
   } // end for
 
 

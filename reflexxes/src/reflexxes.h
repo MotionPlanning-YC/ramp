@@ -14,7 +14,7 @@
 
 // defines
 #define NUMBER_OF_DOFS 3
-#define CYCLE_TIME_IN_SECONDS 0.200
+#define CYCLE_TIME_IN_SECONDS 0.100
 
 class Reflexxes
 {
