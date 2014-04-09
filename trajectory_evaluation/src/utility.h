@@ -6,6 +6,7 @@
 #include "ramp_msgs/TrajectoryRequest.h"
 #include "ramp_msgs/Trajectory.h"
 #include "ramp_msgs/Path.h"
+#include "ramp_msgs/Configuration.h"
 #include <tf/transform_datatypes.h>
 
 
@@ -37,7 +38,7 @@ class Utility {
     
     /** Misc functions */
      const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;
-     const ramp_msgs::Path getPath(const std::vector<ramp_msgs::Configuration> configs) const;
+    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::MotionState> mps) const;
      const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint> kps) const;
 
     /** Msg building */
@@ -47,6 +48,7 @@ class Utility {
      const std::string toString(const ramp_msgs::Trajectory traj) const;
      const std::string toString(const ramp_msgs::Path p) const;
      const std::string toString(const ramp_msgs::Configuration c) const;
+     const std::string toString(const ramp_msgs::MotionState c) const;
      const std::string toString(const ramp_msgs::KnotPoint kp) const;
 };
 

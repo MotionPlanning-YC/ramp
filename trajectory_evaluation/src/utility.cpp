@@ -129,14 +129,13 @@ const ramp_msgs::Configuration Utility::getConfigurationFromPoint(const trajecto
   return result;
 }
 
-
-const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::Configuration> configs) const {
+const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::MotionState> mps) const {
   ramp_msgs::Path result;
 
-  for(unsigned int i=0;i<configs.size();i++) {
+  for(unsigned int i=0;i<mps.size();i++) {
     ramp_msgs::KnotPoint kp;
-    kp.configuration = configs.at(i);
-    kp.stop_time = 0;
+    kp.motionState = mps.at(i);
+    kp.stopTime = 0;
     result.points.push_back(kp);
   }
 
@@ -155,10 +154,35 @@ const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> k
 
 
 
-const ramp_msgs::TrajectoryRequest Utility::buildTrajectoryRequest(const ramp_msgs::Path path, const std::vector<float> v_s, const std::vector<float> v_e) const {
+const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
+  std::ostringstream result;
 
+  result<<"\np: [ ";
+  for(unsigned int i=0;i<mp.positions.size();i++) {
+    result<<mp.positions.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\nv: [ ";
+  for(unsigned int i=0;i<mp.velocities.size();i++) {
+    result<<mp.velocities.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\na: [ ";
+  for(unsigned int i=0;i<mp.accelerations.size();i++) {
+    result<<mp.accelerations.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\nj: [ ";
+  for(unsigned int i=0;i<mp.jerks.size();i++) {
+    result<<mp.jerks.at(i)<<" ";
+  }
+  result<<"]";
+
+  return result.str();
 }
-
 
 
 const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
@@ -226,8 +250,8 @@ const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
 const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
   std::ostringstream result;
 
-  result<<"\nConfiguration: "<<toString(kp.configuration);
-  result<<", Stop time: "<<kp.stop_time;
+  result<<"\nConfiguration: "<<toString(kp.motionState);
+  result<<", Stop time: "<<kp.stopTime;
 
   return result.str();
 }

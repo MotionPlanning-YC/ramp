@@ -6,6 +6,7 @@
 #include "ramp_msgs/TrajectoryRequest.h"
 #include "ramp_msgs/Trajectory.h"
 #include "ramp_msgs/Path.h"
+#include "ramp_msgs/Configuration.h"
 
 
 #define PI 3.14159f
@@ -43,6 +44,7 @@ class Utility {
     const std::string toString(const ramp_msgs::Path p) const;
     const std::string toString(const ramp_msgs::KnotPoint kp) const;
     const std::string toString(const ramp_msgs::Configuration c) const;
+    const std::string toString(const ramp_msgs::MotionState mp) const;
 };
 
 #endif

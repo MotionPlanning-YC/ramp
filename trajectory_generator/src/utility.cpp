@@ -112,12 +112,42 @@ const std::string Utility::toString(const geometry_msgs::Pose2D p) const {
 }
 
 
+const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
+  std::ostringstream result;
+
+  result<<"\np: [ ";
+  for(unsigned int i=0;i<mp.positions.size();i++) {
+    result<<mp.positions.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\nv: [ ";
+  for(unsigned int i=0;i<mp.velocities.size();i++) {
+    result<<mp.velocities.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\na: [ ";
+  for(unsigned int i=0;i<mp.accelerations.size();i++) {
+    result<<mp.accelerations.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\nj: [ ";
+  for(unsigned int i=0;i<mp.jerks.size();i++) {
+    result<<mp.jerks.at(i)<<" ";
+  }
+  result<<"]";
+
+  return result.str();
+}
+
 
 const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
   std::ostringstream result;
 
-  result<<"\nConfiguration: "<<toString(kp.configuration);
-  result<<", Stop time: "<<kp.stop_time;
+  result<<"\nConfiguration: "<<toString(kp.motionState);
+  result<<", Stop time: "<<kp.stopTime;
 
   return result.str();
 }
@@ -148,20 +178,6 @@ const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request 
   std::ostringstream result;
   result<<"\nTrajectory Request:";
   result<<"\nPath:"<<toString(tr.path);
-
-
-  result<<"\nv_start: ("<<tr.v_start.at(0);
-  for(unsigned int i=0;i<tr.v_start.size();i++) {
-    result<<", "<<tr.v_start.at(i);
-  }
-  result<<")";
-
-  result<<"\nv_end: ("<<tr.v_end.at(0);
-  for(unsigned int i=0;i<tr.v_end.size();i++) {
-    result<<", "<<tr.v_end.at(i);
-  }
-  result<<")";
-  
   result<<"\nresolutionRate: "<<tr.resolutionRate;
 
   return result.str();

@@ -1,7 +1,7 @@
 #include "collision_detection.h"
 
 
-CollisionDetection::CollisionDetection() : h_traj_req_(0), predictionTime_(ros::Duration(5)) {}
+CollisionDetection::CollisionDetection() : predictionTime_(ros::Duration(5)), h_traj_req_(0) {}
 
 CollisionDetection::~CollisionDetection() {
   if(h_traj_req_ != 0) {
@@ -168,9 +168,6 @@ const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ram
   // Now build a Trajectory Request 
   ramp_msgs::TrajectoryRequest tr;
     tr.request.path = getObstaclePath(ob, motion_type);
-    tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
-    tr.request.v_start.push_back(ob.odom_t.twist.twist.linear.x);
-    tr.request.v_start.push_back(ob.odom_t.twist.twist.angular.z);
     tr.request.resolutionRate = 5;
 
   // Get trajectory
@@ -198,10 +195,9 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
 
   // Create and initialize the first point in the path
   ramp_msgs::KnotPoint start;
-  start.configuration.ranges = utility.ranges_;
-  start.configuration.K.push_back(ob.odom_t.pose.pose.position.x);
-  start.configuration.K.push_back(ob.odom_t.pose.pose.position.y);
-  start.configuration.K.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
+  start.motionState.positions.push_back(ob.odom_t.pose.pose.position.x);
+  start.motionState.positions.push_back(ob.odom_t.pose.pose.position.y);
+  start.motionState.positions.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
 
   // Push the first point onto the path
   path.push_back(start);
@@ -212,20 +208,19 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
 
     // Create the Goal Knotpoint
     ramp_msgs::KnotPoint goal;
-    goal.configuration.ranges = utility.ranges_;
 
     // Get the goal position in the base frame
-    tf::Vector3 ob_goal_b(start.configuration.K.at(0) + (ob.odom_t.twist.twist.linear.x * predictionTime_.toSec()), 
-                          start.configuration.K.at(1) + (ob.odom_t.twist.twist.linear.y * predictionTime_.toSec()),
+    tf::Vector3 ob_goal_b(start.motionState.positions.at(0) + (ob.odom_t.twist.twist.linear.x * predictionTime_.toSec()), 
+                          start.motionState.positions.at(1) + (ob.odom_t.twist.twist.linear.y * predictionTime_.toSec()),
                           0);
 
     // Convert the goal position to world coordinates
     tf::Vector3 goal_w = ob_T_w_b_ * ob_goal_b;
     
     // Push on the world coordinates
-    goal.configuration.K.push_back(goal_w.getX());
-    goal.configuration.K.push_back(goal_w.getY());
-    goal.configuration.K.push_back(start.configuration.K.at(2));
+    goal.motionState.positions.push_back(goal_w.getX());
+    goal.motionState.positions.push_back(goal_w.getY());
+    goal.motionState.positions.push_back(start.motionState.positions.at(2));
     
     // Push goal onto the path
     path.push_back(goal);
@@ -252,7 +247,7 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
     float polar_theta_r = utility.findAngleFromAToB(a, b);
 
     // Find the radius from base origin to robot position for polar coordinates
-    float polar_r_r = sqrt(pow(start.configuration.K.at(0),2) + pow(start.configuration.K.at(1), 2));
+    float polar_r_r = sqrt(pow(start.motionState.positions.at(0),2) + pow(start.motionState.positions.at(1), 2));
     
     //std::cout<<"\npolar_theta_r: "<<polar_theta_r;
     //std::cout<<"\npolar_r_r: "<<polar_r_r;
@@ -262,7 +257,6 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
 
       // Create new knot point for the path
       ramp_msgs::KnotPoint temp;
-      temp.configuration.ranges = utility.ranges_;
 
       // Get the polar coordinates theta value in base frame 
       float theta_prime_r = utility.displaceAngle(polar_theta_r, w*i);
@@ -270,7 +264,7 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
       // Convert from polar to cartesian in base frame
       float x_prime_r = polar_r_r * cos(theta_prime_r);
       float y_prime_r = polar_r_r * sin(theta_prime_r);
-      float theta_r = utility.displaceAngle(start.configuration.K.at(2), w*i);
+      float theta_r = utility.displaceAngle(start.motionState.positions.at(2), w*i);
       //std::cout<<"\nx_prime_r: "<<x_prime_r<<" y_prime_r: "<<y_prime_r<<" theta_r: "<<theta_r;
 
       // Now convert position in base frame to world coordinates
@@ -278,9 +272,9 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
       tf::Vector3 p_w = ob_T_w_b_ * p_r;
 
       // Push the values onto temp
-      temp.configuration.K.push_back(p_w.getX());
-      temp.configuration.K.push_back(p_w.getY());
-      temp.configuration.K.push_back(utility.displaceAngle(theta_r, tf::getYaw(ob_T_w_b_.getRotation())));
+      temp.motionState.positions.push_back(p_w.getX());
+      temp.motionState.positions.push_back(p_w.getY());
+      temp.motionState.positions.push_back(utility.displaceAngle(theta_r, tf::getYaw(ob_T_w_b_.getRotation())));
       
       // Push temp onto path
       path.push_back(temp);
@@ -296,26 +290,25 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
     
     // Create the Goal Knotpoint
     ramp_msgs::KnotPoint goal;
-    goal.configuration.ranges = utility.ranges_;
-    tf::Vector3 ob_goal(start.configuration.K.at(0), start.configuration.K.at(1), 0);
+    tf::Vector3 ob_goal(start.motionState.positions.at(0), start.motionState.positions.at(1), 0);
     tf::Vector3 goal_w = ob_T_w_b_ * ob_goal;
 
     
     // Push on the world coordinates
-    goal.configuration.K.push_back(goal_w.getX());
-    goal.configuration.K.push_back(goal_w.getY());
-    goal.configuration.K.push_back(start.configuration.K.at(2));
+    goal.motionState.positions.push_back(goal_w.getX());
+    goal.motionState.positions.push_back(goal_w.getY());
+    goal.motionState.positions.push_back(start.motionState.positions.at(2));
 
     path.push_back(goal);
   } // end if self-rotation, none
 
 
   // Convert the starting point to world coordinates
-  tf::Vector3 start_w(start.configuration.K.at(0), start.configuration.K.at(1), 0);
+  tf::Vector3 start_w(start.motionState.positions.at(0), start.motionState.positions.at(1), 0);
   start_w = ob_T_w_b_ * start_w;
-  path.at(0).configuration.K.at(0) = start_w.getX();
-  path.at(0).configuration.K.at(1) = start_w.getY();
-  path.at(0).configuration.K.at(2) = utility.displaceAngle(start.configuration.K.at(2), tf::getYaw(ob_T_w_b_.getRotation()));
+  path.at(0).motionState.positions.at(0) = start_w.getX();
+  path.at(0).motionState.positions.at(1) = start_w.getY();
+  path.at(0).motionState.positions.at(2) = utility.displaceAngle(start.motionState.positions.at(2), tf::getYaw(ob_T_w_b_.getRotation()));
 
 
   result = utility.getPath(path);

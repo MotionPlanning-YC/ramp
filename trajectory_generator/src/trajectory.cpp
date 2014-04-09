@@ -7,13 +7,6 @@ Trajectory::Trajectory() : k_dof_(3) {}
 Trajectory::Trajectory(const ramp_msgs::TrajectoryRequest::Request trajec_req) : k_dof_(3) {
 
   knot_points_ = trajec_req.path.points;
-  
-  //  Get all of the velocities
-  for(unsigned int i=0;i<trajec_req.v_start.size();i++) {
-    v_start_.push_back(trajec_req.v_start.at(i));
-    v_end_.push_back(trajec_req.v_end.at(i));
-  }
-
   resolutionRate_ = trajec_req.resolutionRate;
 }
 
@@ -34,7 +27,7 @@ void Trajectory::buildSegments() {
     }
 
     // Build the segment
-    temp.build(knot_points_.at(i), knot_points_.at(i+1), v_start_.at(i), v_end_.at(i), i);
+    temp.build(knot_points_.at(i), knot_points_.at(i+1), knot_points_.at(i).motionState.velocities.at(0), knot_points_.at(i).motionState.velocities.at(0), i);
     
     // Push the segment onto the vector
     segments_.push_back(temp);
@@ -120,7 +113,7 @@ const std::vector<MotionState> Trajectory::getStopStates(int i) {
     
     // Previous position, 0 velocity and acceleration
     for(unsigned int k=0;k<3;k++) {
-      temp.p_.push_back(knot_points_.at(i).configuration.K.at(k));
+      temp.p_.push_back(knot_points_.at(i).motionState.positions.at(k));
       temp.v_.push_back(0);
       temp.a_.push_back(0);
     }
@@ -249,7 +242,7 @@ const std::string Trajectory::toString() const {
 
   result<<"\nKnot Points:";
   for(unsigned int i=0;i<knot_points_.size();i++) {
-    result<<"\n"<<i<<": ("<<knot_points_.at(i).configuration.K.at(0)<<", "<<knot_points_.at(i).configuration.K.at(1)<<", "<<knot_points_.at(i).configuration.K.at(2)<<")";
+    result<<"\n"<<i<<": ("<<knot_points_.at(i).motionState.positions.at(0)<<", "<<knot_points_.at(i).motionState.positions.at(1)<<", "<<knot_points_.at(i).motionState.positions.at(2)<<")";
   }
 
   result<<"\nSegments:";
