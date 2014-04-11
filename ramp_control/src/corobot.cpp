@@ -217,7 +217,7 @@ void Corobot::calculateSpeedsAndTime ()
   int num = trajectory_.trajectory.points.size(); 
 
   // Get the starting time
-  ros::Time start_time = ros::Time::now() + ros::Duration(0.0);
+  ros::Time start_time = ros::Time::now();
 
   float speed_loc;
   // We go through all the waypoints
@@ -290,26 +290,25 @@ const bool Corobot::checkImminentCollision() const {
 }
 
 
-void Corobot::moveOnTrajectory(bool simulation) 
-{
+void Corobot::moveOnTrajectory(bool simulation) {
   restart = false;
-  
   ros::Rate r(50);
-  
-  ros::Duration delay = ros::Duration(0); //  Save the time it took to do all the turns
-  ros::Time start;
     
+
+
   // Execute the trajectory
-  while( (num_traveled+1) < num) {
-    std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
+  while( (num_traveled+1) < num) { 
+    //std::cout<<"\nnum_traveled: "<<num_traveled;
+    restart = false;
+   
+    if(num_traveled % 10 == 0) {
+      std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
+    }
 
     // Force a stop until there is no imminent collision
     while(checkImminentCollision()) {
       ros::spinOnce();
     }
-    
-    //std::cout<<"\nnum_traveled: "<<num_traveled;
-    restart = false;
     
     // Set velocities
     twist_.linear.x  = speeds.at(num_traveled);
@@ -356,9 +355,8 @@ void Corobot::moveOnTrajectory(bool simulation)
       }
     } // end while (move to the next point
     
+    // If a new trajectory was received, restart the outer while 
     if(restart) {
-      delay = ros::Duration(0);
-      restart=false;
       continue;
     }
 
