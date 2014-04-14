@@ -12,7 +12,7 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
   *inputParameters->CurrentAccelerationVector = *outputParameters->NewAccelerationVector;
 
   // Change the target orientation, as the target is the orientation needed to reach the goal
-  //inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],inputParameters->CurrentPositionVector->VecData[1],inputParameters->TargetPositionVector->VecData[0],inputParameters->TargetPositionVector->VecData[1]);
+  //inputParameters->TargetPositionVector->VecData[2] =   computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],inputParameters->CurrentPositionVector->VecData[1],inputParameters->TargetPositionVector->VecData[0],inputParameters->TargetPositionVector->VecData[1]);
    
 
   // Starting here, we build the JointTrajectoryPoint object, that will be used to build the trajectory
@@ -31,19 +31,22 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
   float difference_angle = velocity_angle - inputParameters->CurrentPositionVector->VecData[2];
 
   // Calculate the linear velocity, being the norm of the vector (Vx, Vy)
-  float linear_velocity = sqrt(pow(outputParameters->NewVelocityVector->VecData[0], 2) + pow(outputParameters->NewVelocityVector->VecData[1], 2) );
   
   // Now create the velocity vector for the trajectory
   // We need to transform the velocity in x, y and theta in the reference frame to a linear and angular velocity
   point.velocities.push_back(outputParameters->NewVelocityVector->VecData[0]);
   point.velocities.push_back(outputParameters->NewVelocityVector->VecData[1]);
   point.velocities.push_back(outputParameters->NewVelocityVector->VecData[2]);
+  //float linear_velocity = sqrt(pow(outputParameters->NewVelocityVector->VecData[0], 2) + pow(outputParameters->NewVelocityVector->VecData[1], 2) );
   //point.velocities.push_back(linear_velocity * cos(difference_angle));
   //point.velocities.push_back(0);
   //point.velocities.push_back(outputParameters->NewVelocityVector->VecData[2] + sin(difference_angle) * linear_velocity);
 
   //Same with the acceleration
-  float linear_acceleration = sqrt(pow(outputParameters->NewAccelerationVector->VecData[0], 2) + pow(outputParameters->NewAccelerationVector->VecData[1], 2) );
+  point.accelerations.push_back(outputParameters->NewAccelerationVector->VecData[0]);
+  point.accelerations.push_back(outputParameters->NewAccelerationVector->VecData[1]);
+  point.accelerations.push_back(outputParameters->NewAccelerationVector->VecData[2]);
+  //float linear_acceleration = sqrt(pow(outputParameters->NewAccelerationVector->VecData[0], 2) + pow(outputParameters->NewAccelerationVector->VecData[1], 2) );
   //point.accelerations.push_back(linear_acceleration);
   //point.accelerations.push_back(0);
   //point.accelerations.push_back(outputParameters->NewAccelerationVector->VecData[2]);
@@ -61,15 +64,21 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
 
 
 //Set the target of the Reflexxes library
-void Reflexxes::setTarget(float x, float y, float linear_velocity, float angular_velocity) {
+void Reflexxes::setTarget(float x, float y, float theta, float linear_velocity, float angular_velocity, bool mobile_base) {
   
   // Set the Target Position and Velocity vector
   inputParameters->TargetPositionVector->VecData[0] = x;
   inputParameters->TargetPositionVector->VecData[1] = y;
 
-  // The new target orientation is the orientation needed to reach the target
-  inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0], inputParameters->CurrentPositionVector->VecData[1],x,y);
-      
+  if(mobile_base) {
+    inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0], inputParameters->CurrentPositionVector->VecData[1],x,y);
+  }
+  else {
+    // The new target orientation is the orientation needed to reach the target
+    inputParameters->TargetPositionVector->VecData[2] = theta;
+  }
+
+
   std::cout<<"\nTarget Position: ";
   std::cout<<"\n"<<inputParameters->TargetPositionVector->VecData[0];
   std::cout<<", "<<inputParameters->TargetPositionVector->VecData[1];
@@ -111,14 +120,16 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
 
   // Go through every knotpoint in the path
   for (int i = 1; i<path.points.size() ; i++) {
-    std::cout<<"\ni: "<<i<<"\n";
+    //std::cout<<"\ni: "<<i<<"\n";
     resultValue = 0;
     
     // Set the new knotpoint as the target
     setTarget(path.points[i].motionState.positions.at(0), 
               path.points[i].motionState.positions.at(1), 
+              path.points[i].motionState.positions.at(2), 
               path.points[i].motionState.velocities.at(0), 
-              path.points[i].motionState.velocities.at(2));
+              path.points[i].motionState.velocities.at(2), 
+              true);
 
     // We go to the next knotpoint only once we reach this one
     while (!isFinalStateReached()) {
@@ -126,10 +137,32 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
       res.trajectory.trajectory.points.push_back(spinOnce());
     }
 
+
     // Once we reached the target, we set that the latest point is a knotpoint
     res.trajectory.index_knot_points.push_back(res.trajectory.trajectory.points.size() - 1);
-
   } // end for
+
+
+
+  // Now make sure final orientation is satisfied
+  setTarget(path.points[path.points.size()-1].motionState.positions.at(0),
+            path.points[path.points.size()-1].motionState.positions.at(1),
+            path.points[path.points.size()-1].motionState.positions.at(2),
+            path.points[path.points.size()-1].motionState.velocities.at(0),
+            path.points[path.points.size()-1].motionState.velocities.at(2),
+            false);
+
+  // We go to the next knotpoint only once we reach this one
+  while (!isFinalStateReached()) {
+    // Compute the motion state at t+1 and save it in the trajectory
+    res.trajectory.trajectory.points.push_back(spinOnce());
+  }
+
+  resultValue = 0;
+
+  // Once we reached the target, we set that the latest point is a knotpoint
+  res.trajectory.index_knot_points.push_back(res.trajectory.trajectory.points.size() - 1);
+
 
   return true;
 } // End trajectoryRequest callback

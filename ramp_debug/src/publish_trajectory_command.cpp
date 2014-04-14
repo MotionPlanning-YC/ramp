@@ -23,11 +23,11 @@ int main(int argc, char** argv) {
   
 
   ramp_msgs::KnotPoint c2;
-  //c2.motionState.positions.push_back(2.98f);
-  //c2.motionState.positions.push_back(3.456);
-  c2.motionState.positions.push_back(2.f);
-  c2.motionState.positions.push_back(2.f);
-  c2.motionState.positions.push_back(PI/4);
+  //c2.motionState.positions.push_back(2.f);
+  //c2.motionState.positions.push_back(2.f);
+  c2.motionState.positions.push_back(2.98f);
+  c2.motionState.positions.push_back(3.456);
+  c2.motionState.positions.push_back(PI/2);
 
 
 
@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
   ramp_msgs::Path p;
   p.points.push_back(c1);
   p.points.push_back(c2);
-  //p.points.push_back(c3);
+  p.points.push_back(c3);
   //p.points.push_back(c4);
 
   ramp_msgs::TrajectoryRequest tr;
