@@ -7,7 +7,7 @@
 
 <!-- Robot attributes -->
 <arg name="TwoWheelDrive" value="1"/>
-<arg name="base_width" value="0.238125"/> 
+<arg name="base_width" value="0.238125"/> <!-- Distance between wheels --> 
 <arg name="ticks_meter" value="9435"/> 
 
 <arg name="PhidgetMotorController" value="1"/> <!-- 1 if you have the Phidget Motor Controller, 0 if you don't -->

@@ -238,7 +238,6 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
     // Find magnitudes of velocity vectors and radius r
     float v = sqrt( tf::tfDot(v_linear, v_linear)   );
     float w = sqrt( tf::tfDot(v_angular, v_angular) );
-    float r = v / w;
     //std::cout<<"\nv: "<<v<<" w: "<<w<<" r: "<<r;
 
     // Find the angle from base origin to robot position for polar coordinates

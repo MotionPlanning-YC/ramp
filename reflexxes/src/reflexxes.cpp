@@ -6,21 +6,21 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
   // Calling the Reflexxes OTG algorithm
   resultValue = rml->RMLPosition(*inputParameters, outputParameters, flags);
 
+  float r_x = outputParameters->NewPositionVector->VecData[0] - inputParameters->CurrentPositionVector->VecData[0];
+  float r_y = outputParameters->NewPositionVector->VecData[1] - inputParameters->CurrentPositionVector->VecData[1];
+
   // the input of the next iteration is the output of this one
-  *inputParameters->CurrentPositionVector = *outputParameters->NewPositionVector;
-  *inputParameters->CurrentVelocityVector = *outputParameters->NewVelocityVector;
+  *inputParameters->CurrentPositionVector     = *outputParameters->NewPositionVector;
+  *inputParameters->CurrentVelocityVector     = *outputParameters->NewVelocityVector;
   *inputParameters->CurrentAccelerationVector = *outputParameters->NewAccelerationVector;
 
-  // Change the target orientation, as the target is the orientation needed to reach the goal
-  //inputParameters->TargetPositionVector->VecData[2] =   computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],inputParameters->CurrentPositionVector->VecData[1],inputParameters->TargetPositionVector->VecData[0],inputParameters->TargetPositionVector->VecData[1]);
-   
 
-  // Starting here, we build the JointTrajectoryPoint object, that will be used to build the trajectory
+
+  /** Build the JointTrajectoryPoint object that will be used to build the trajectory */
   
   // Lets first put the new position to the trajectory point, we get it from the output of reflexxes
   trajectory_msgs::JointTrajectoryPoint point;
-  for (int i=0; i<3; i++)
-  {
+  for (int i=0; i<3; i++) {
     point.positions.push_back(outputParameters->NewPositionVector->VecData[i]);
   }
 
@@ -36,7 +36,19 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
   // We need to transform the velocity in x, y and theta in the reference frame to a linear and angular velocity
   point.velocities.push_back(outputParameters->NewVelocityVector->VecData[0]);
   point.velocities.push_back(outputParameters->NewVelocityVector->VecData[1]);
-  point.velocities.push_back(outputParameters->NewVelocityVector->VecData[2]);
+
+  float v = sqrt( pow(outputParameters->NewVelocityVector->VecData[0],2) 
+            + pow(outputParameters->NewVelocityVector->VecData[1], 2) );
+
+  float r = sqrt( pow(r_x,2) + pow(r_y,2) ); 
+  //float r = sqrt( pow(outputParameters->NewPositionVector->VecData[0],2) 
+            //+ pow(outputParameters->NewPositionVector->VecData[1], 2) );
+
+  float w = (v/5) / r;
+  //std::cout<<"\nv: "<<v<<" r: "<<r;
+  point.velocities.push_back(w);
+  //point.velocities.push_back(outputParameters->NewVelocityVector->VecData[2]);
+  
   //float linear_velocity = sqrt(pow(outputParameters->NewVelocityVector->VecData[0], 2) + pow(outputParameters->NewVelocityVector->VecData[1], 2) );
   //point.velocities.push_back(linear_velocity * cos(difference_angle));
   //point.velocities.push_back(0);
@@ -70,11 +82,12 @@ void Reflexxes::setTarget(float x, float y, float theta, float linear_velocity, 
   inputParameters->TargetPositionVector->VecData[0] = x;
   inputParameters->TargetPositionVector->VecData[1] = y;
 
+  // If a mobile base, the new target orientation 
+  // is the orientation needed to reach the target
   if(mobile_base) {
     inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0], inputParameters->CurrentPositionVector->VecData[1],x,y);
   }
   else {
-    // The new target orientation is the orientation needed to reach the target
     inputParameters->TargetPositionVector->VecData[2] = theta;
   }
 
@@ -145,7 +158,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
 
 
   // Now make sure final orientation is satisfied
-  setTarget(path.points[path.points.size()-1].motionState.positions.at(0),
+  /*setTarget(path.points[path.points.size()-1].motionState.positions.at(0),
             path.points[path.points.size()-1].motionState.positions.at(1),
             path.points[path.points.size()-1].motionState.positions.at(2),
             path.points[path.points.size()-1].motionState.velocities.at(0),
@@ -156,7 +169,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
   while (!isFinalStateReached()) {
     // Compute the motion state at t+1 and save it in the trajectory
     res.trajectory.trajectory.points.push_back(spinOnce());
-  }
+  }*/
 
   resultValue = 0;
 
@@ -256,6 +269,7 @@ Reflexxes::Reflexxes()
   outputParameters = new RMLPositionOutputParameters( NUMBER_OF_DOFS );
   
   flags.SynchronizationBehavior= RMLPositionFlags::NO_SYNCHRONIZATION;
+  //flags.SynchronizationBehavior = RMLPositionFlags::ONLY_TIME_SYNCHRONIZATION;
   //flags.SynchronizationBehavior= RMLPositionFlags::PHASE_SYNCHRONIZATION_IF_POSSIBLE;
   //flags.BehaviorAfterFinalStateOfMotionIsReached = RMLPositionFlags::RECOMPUTE_TRAJECTORY;
   
