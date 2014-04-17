@@ -1,13 +1,10 @@
 #include "reflexxes.h"
 
 // Execute one iteration of the Reflexxes control function
-trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
-{
+trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce() {
+
   // Calling the Reflexxes OTG algorithm
   resultValue = rml->RMLPosition(*inputParameters, outputParameters, flags);
-
-  float r_x = outputParameters->NewPositionVector->VecData[0] - inputParameters->CurrentPositionVector->VecData[0];
-  float r_y = outputParameters->NewPositionVector->VecData[1] - inputParameters->CurrentPositionVector->VecData[1];
 
   // the input of the next iteration is the output of this one
   *inputParameters->CurrentPositionVector     = *outputParameters->NewPositionVector;
@@ -20,55 +17,33 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce()
   
   // Lets first put the new position to the trajectory point, we get it from the output of reflexxes
   trajectory_msgs::JointTrajectoryPoint point;
-  for (int i=0; i<3; i++) {
-    point.positions.push_back(outputParameters->NewPositionVector->VecData[i]);
-  }
 
-  // We need the angle of the velocity vector and the difference between that angle and the robot orientation
-  float velocity_angle = computeTargetOrientation(0,0,
-                          outputParameters->NewVelocityVector->VecData[0],
-                          outputParameters->NewVelocityVector->VecData[1]);
-  float difference_angle = velocity_angle - inputParameters->CurrentPositionVector->VecData[2];
+  // Push on the positions
+  point.positions.push_back(outputParameters->NewPositionVector->VecData[0]);
+  point.positions.push_back(outputParameters->NewPositionVector->VecData[1]);
+  point.positions.push_back(outputParameters->NewPositionVector->VecData[2]);
 
-  // Calculate the linear velocity, being the norm of the vector (Vx, Vy)
-  
-  // Now create the velocity vector for the trajectory
-  // We need to transform the velocity in x, y and theta in the reference frame to a linear and angular velocity
+
+
+  // Push on the velocities
   point.velocities.push_back(outputParameters->NewVelocityVector->VecData[0]);
   point.velocities.push_back(outputParameters->NewVelocityVector->VecData[1]);
-
-  float v = sqrt( pow(outputParameters->NewVelocityVector->VecData[0],2) 
-            + pow(outputParameters->NewVelocityVector->VecData[1], 2) );
-
-  float r = sqrt( pow(r_x,2) + pow(r_y,2) ); 
-  //float r = sqrt( pow(outputParameters->NewPositionVector->VecData[0],2) 
-            //+ pow(outputParameters->NewPositionVector->VecData[1], 2) );
-
-  float w = (v/5) / r;
-  //std::cout<<"\nv: "<<v<<" r: "<<r;
-  point.velocities.push_back(w);
-  //point.velocities.push_back(outputParameters->NewVelocityVector->VecData[2]);
+  point.velocities.push_back(outputParameters->NewVelocityVector->VecData[2]);
   
-  //float linear_velocity = sqrt(pow(outputParameters->NewVelocityVector->VecData[0], 2) + pow(outputParameters->NewVelocityVector->VecData[1], 2) );
-  //point.velocities.push_back(linear_velocity * cos(difference_angle));
-  //point.velocities.push_back(0);
-  //point.velocities.push_back(outputParameters->NewVelocityVector->VecData[2] + sin(difference_angle) * linear_velocity);
 
-  //Same with the acceleration
+
+  // Push on the accelerations
   point.accelerations.push_back(outputParameters->NewAccelerationVector->VecData[0]);
   point.accelerations.push_back(outputParameters->NewAccelerationVector->VecData[1]);
   point.accelerations.push_back(outputParameters->NewAccelerationVector->VecData[2]);
-  //float linear_acceleration = sqrt(pow(outputParameters->NewAccelerationVector->VecData[0], 2) + pow(outputParameters->NewAccelerationVector->VecData[1], 2) );
-  //point.accelerations.push_back(linear_acceleration);
-  //point.accelerations.push_back(0);
-  //point.accelerations.push_back(outputParameters->NewAccelerationVector->VecData[2]);
+
+
 
   // The time_from_start is the time of the previous point plus the cycle period
   point.time_from_start = time_from_start;
   time_from_start += ros::Duration(CYCLE_TIME_IN_SECONDS);
 
   return point;
-
 } // End spinOnce
 
 
@@ -85,10 +60,10 @@ void Reflexxes::setTarget(float x, float y, float theta, float linear_velocity, 
   // If a mobile base, the new target orientation 
   // is the orientation needed to reach the target
   if(mobile_base) {
-    inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0], inputParameters->CurrentPositionVector->VecData[1],x,y);
+    inputParameters->TargetPositionVector->VecData[1] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0], inputParameters->CurrentPositionVector->VecData[1],x,y);
   }
   else {
-    inputParameters->TargetPositionVector->VecData[2] = theta;
+    inputParameters->TargetPositionVector->VecData[1] = theta;
   }
 
 
@@ -100,7 +75,7 @@ void Reflexxes::setTarget(float x, float y, float theta, float linear_velocity, 
   // Set the target velocity, which is set in the reference frame coordinates
   inputParameters->TargetVelocityVector->VecData[0] = linear_velocity * cos(inputParameters->TargetPositionVector->VecData[2]) ;
   inputParameters->TargetVelocityVector->VecData[1] = linear_velocity * sin(inputParameters->TargetPositionVector->VecData[2] );
-  inputParameters->TargetVelocityVector->VecData[2] = angular_velocity;
+  inputParameters->TargetVelocityVector->VecData[1] = angular_velocity;
       
   std::cout<<"\nTarget Velocity: ";
   std::cout<<"\n"<<inputParameters->TargetVelocityVector->VecData[0];
@@ -130,6 +105,10 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
  
   //time_from_start = ros::Duration(CYCLE_TIME_IN_SECONDS);
   time_from_start = ros::Duration(0);
+
+  initial_x = path.points[0].motionState.positions.at(0);
+  initial_y = path.points[0].motionState.positions.at(1);
+  initial_theta = path.points[0].motionState.positions.at(2);
 
   // Go through every knotpoint in the path
   for (int i = 1; i<path.points.size() ; i++) {
@@ -204,16 +183,13 @@ void Reflexxes::setInitialConditions() {
   // Set the position and orientation of the robot as Reflexxes input
   inputParameters->CurrentPositionVector->VecData[0] = path.points[0].motionState.positions.at(0);
   inputParameters->CurrentPositionVector->VecData[1] = path.points[0].motionState.positions.at(1);
-
-  current_orientation = orientation;
-  inputParameters->CurrentPositionVector->VecData[2] = orientation;
-  std::cout<<"\nSet position data\n";
+  inputParameters->CurrentPositionVector->VecData[1] = path.points[0].motionState.positions.at(2);
 
   // Set the current velocities, in the reference frame, as Reflexxes input
   // This is the latest velocity value got from the path
   if(path.points.at(0).motionState.velocities.size() > 0) {
-    inputParameters->CurrentVelocityVector->VecData[0] = path.points.at(0).motionState.velocities.at(0) * cos(orientation);
-    inputParameters->CurrentVelocityVector->VecData[1] = path.points.at(0).motionState.velocities.at(0) * sin(orientation);
+    inputParameters->CurrentVelocityVector->VecData[0] = path.points.at(0).motionState.velocities.at(0);
+    inputParameters->CurrentVelocityVector->VecData[1] = path.points.at(0).motionState.velocities.at(1);
     inputParameters->CurrentVelocityVector->VecData[2] = path.points.at(0).motionState.velocities.at(2);
   }
   else {//log some error
@@ -316,7 +292,7 @@ Reflexxes::Reflexxes()
   // Select both DOF to be used
   inputParameters->SelectionVector->VecData[0] = true;
   inputParameters->SelectionVector->VecData[1] = true;
-  inputParameters->SelectionVector->VecData[2] = true;
+  inputParameters->SelectionVector->VecData[2] = false;
 
 }
 

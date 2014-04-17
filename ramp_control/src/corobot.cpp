@@ -301,9 +301,9 @@ void Corobot::moveOnTrajectory(bool simulation) {
     //std::cout<<"\nnum_traveled: "<<num_traveled;
     restart = false;
    
-    if(num_traveled % 10 == 0) {
-      std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
-    }
+    //if(num_traveled % 10 == 0) {
+      //std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
+    //}
 
     // Force a stop until there is no imminent collision
     while(checkImminentCollision()) {

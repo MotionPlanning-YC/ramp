@@ -57,7 +57,15 @@ class Reflexxes
 
     ~Reflexxes();
 
+    float x_prev;
+    float x_dot_prev;
 
+    float y_prev;
+    float y_dot_prev;
+
+    float initial_x;
+    float initial_y;
+    float initial_theta;
 };
 
 #endif //REFLEXXES_H
