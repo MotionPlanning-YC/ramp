@@ -11,19 +11,12 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce() {
   *inputParameters->CurrentVelocityVector = *outputParameters->NewVelocityVector;
   *inputParameters->CurrentAccelerationVector = *outputParameters->NewAccelerationVector;
 
-  // Change the target orientation, as the target is the orientation needed to reach the goal
-  inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],inputParameters->CurrentPositionVector->VecData[1],inputParameters->TargetPositionVector->VecData[0],inputParameters->TargetPositionVector->VecData[1]);
-   
 
 
   /** Build the JointTrajectoryPoint object that will be used to build the trajectory */
   
   // Lets first put the new position to the trajectory point, we get it from the output of reflexxes
   trajectory_msgs::JointTrajectoryPoint point = buildTrajectoryPoint(*outputParameters);
-
-  // WE need the angle of the velocity vector and the difference between that angle and the robot orientation
-  float velocity_angle = computeTargetOrientation(0,0,outputParameters->NewVelocityVector->VecData[0],outputParameters->NewVelocityVector->VecData[1]);
-  float difference_angle = velocity_angle - inputParameters->CurrentPositionVector->VecData[2];
 
   return point;
 } // End spinOnce
@@ -39,11 +32,6 @@ const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(cons
     point.accelerations.push_back(outputParameters.NewAccelerationVector->VecData[i]);
   }
 
-  //Same with the acceleration
-  float linear_acceleration = sqrt(pow(outputParameters->NewAccelerationVector->VecData[0], 2) + pow(outputParameters->NewAccelerationVector->VecData[1], 2) );
-  point.accelerations.push_back(linear_acceleration);
-  point.accelerations.push_back(0);
-  point.accelerations.push_back(outputParameters->NewAccelerationVector->VecData[2]);
 
   // The time_from_start is the time of the previous point plus the cycle period
   point.time_from_start = time_from_start;
@@ -224,7 +212,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
     res.trajectory.index_knot_points.push_back(res.trajectory.trajectory.points.size() - 1);
   } // end for
 
-  }
+  
 
   return true;
 } // End trajectoryRequest callback
