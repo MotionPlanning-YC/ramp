@@ -38,7 +38,7 @@ class Reflexxes
     trajectory_msgs::JointTrajectoryPoint spinOnce();
 
 //Set the target of the Reflexxes library
-    void setTarget(float x, float y, float theta, float linear_velocity, float angular_velocity, bool mobile_base);
+    void setTarget(float x, float y, float theta, float linear_velocity, float angular_velocity);
 
 // Returns true if the target has been reached
     bool isFinalStateReached();

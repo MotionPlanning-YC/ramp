@@ -22,8 +22,11 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce() {
 } // End spinOnce
 
 
+
+/** This method will return a JointTrajectoryPoint given some output parameters from Reflexxes */
 const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(const RMLPositionOutputParameters outputParameters) {
   trajectory_msgs::JointTrajectoryPoint point;
+
   
   // Push on the p, v, and a vectors
   for(unsigned int i=0;i<NUMBER_OF_DOFS;i++) {
@@ -37,16 +40,16 @@ const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(cons
   point.time_from_start = time_from_start;
   time_from_start += ros::Duration(CYCLE_TIME_IN_SECONDS);
 
-  return point;
 
-}
+  return point;
+} // End buildTrajectoryPoint
 
 
 
 
 
 //Set the target of the Reflexxes library
-void Reflexxes::setTarget(float x, float y, float theta, float linear_velocity, float angular_velocity, bool mobile_base) {
+void Reflexxes::setTarget(float x, float y, float theta, float linear_velocity, float angular_velocity) {
   
   // Set the Target Position and Velocity vector
   inputParameters->TargetPositionVector->VecData[0] = x;
@@ -54,28 +57,23 @@ void Reflexxes::setTarget(float x, float y, float theta, float linear_velocity, 
 
   // If a mobile base, the new target orientation 
   // is the orientation needed to reach the target
-  if(mobile_base) {
-    inputParameters->TargetPositionVector->VecData[2] = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0], inputParameters->CurrentPositionVector->VecData[1],x,y);
-  }
-  else {
-    inputParameters->TargetPositionVector->VecData[2] = theta;
-  }
+  inputParameters->TargetPositionVector->VecData[2] = theta;
 
 
-  std::cout<<"\nTarget Position: ";
+  /*std::cout<<"\nTarget Position: ";
   std::cout<<"\n"<<inputParameters->TargetPositionVector->VecData[0];
   std::cout<<", "<<inputParameters->TargetPositionVector->VecData[1];
-  std::cout<<", "<<inputParameters->TargetPositionVector->VecData[2];
+  std::cout<<", "<<inputParameters->TargetPositionVector->VecData[2];*/
 
   // Set the target velocity, which is set in the reference frame coordinates
   inputParameters->TargetVelocityVector->VecData[0] = linear_velocity * cos(inputParameters->TargetPositionVector->VecData[2]) ;
   inputParameters->TargetVelocityVector->VecData[1] = linear_velocity * sin(inputParameters->TargetPositionVector->VecData[2] );
   inputParameters->TargetVelocityVector->VecData[2] = angular_velocity;
       
-  std::cout<<"\nTarget Velocity: ";
+/*  std::cout<<"\nTarget Velocity: ";
   std::cout<<"\n"<<inputParameters->TargetVelocityVector->VecData[0];
   std::cout<<", "<<inputParameters->TargetVelocityVector->VecData[1];
-  std::cout<<", "<<inputParameters->TargetVelocityVector->VecData[2];
+  std::cout<<", "<<inputParameters->TargetVelocityVector->VecData[2];*/
 } // End setTarget
 
 
@@ -93,13 +91,13 @@ const ramp_msgs::Path Reflexxes::modifyPath(const ramp_msgs::Path p) {
   for(int kp=0;kp<p.points.size()-1;kp++) {
 
 
-    float t = computeTargetOrientation( p.points.at(kp).motionState.positions.at(0),
+    float trgt_theta = computeTargetOrientation( p.points.at(kp).motionState.positions.at(0),
                                         p.points.at(kp).motionState.positions.at(1),
                                         p.points.at(kp+1).motionState.positions.at(0),
                                         p.points.at(kp+1).motionState.positions.at(1));
 
     // The first part should be only rotation
-    if(p.points.at(kp).motionState.positions.at(2) != t) {
+    if(p.points.at(kp).motionState.positions.at(2) != trgt_theta) {
       ramp_msgs::KnotPoint temp;
       
       // Positions
@@ -135,7 +133,7 @@ const ramp_msgs::Path Reflexxes::modifyPath(const ramp_msgs::Path p) {
       // The x,y of next knot point, but relative orientation 
       temp.motionState.positions.push_back(p.points.at(kp+1).motionState.positions.at(0));
       temp.motionState.positions.push_back(p.points.at(kp+1).motionState.positions.at(1));
-      temp.motionState.positions.push_back(t);
+      temp.motionState.positions.push_back(trgt_theta);
 
 
       // Velocities
@@ -167,31 +165,20 @@ const ramp_msgs::Path Reflexxes::modifyPath(const ramp_msgs::Path p) {
 // Service callback, the input is a path and the output a trajectory
 bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res) {
 
-  //for (int i=0; i<req.v_start.size(); i++)
-    //ROS_ERROR("vstart(%d): %f", i, req.v_start.at(i));
-  //ROS_ERROR("%s", utility.toString(req.path).c_str());
-
   // Saves the path
   this->path = req.path;
   
-  //set the initial conditions of the reflexxes library
+  // Set the initial conditions of the reflexxes library
   setInitialConditions();
 
-  // Push on 0
+  // Modify the path if needed
+  path = modifyPath(req.path);
+
+  // Push 0 onto knot point indices
   res.trajectory.index_knot_points.push_back(0);
- 
-  //time_from_start = ros::Duration(CYCLE_TIME_IN_SECONDS);
-  time_from_start = ros::Duration(0);
-
-  ramp_msgs::Path p = modifyPath(req.path);
-
-  path = p;
-
-  std::cout<<"\nPath is now: "<<utility.toString(path);
 
   // Go through every knotpoint in the path
   for (int i = 1; i<path.points.size() ; i++) {
-    std::cout<<"\ni: "<<i<<"\n";
     resultValue = 0;
     
     // Set the new knotpoint as the target
@@ -199,11 +186,11 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
               path.points[i].motionState.positions.at(1), 
               path.points[i].motionState.positions.at(2), 
               path.points[i].motionState.velocities.at(0), 
-              path.points[i].motionState.velocities.at(2), 
-              false);
+              path.points[i].motionState.velocities.at(2));
 
     // We go to the next knotpoint only once we reach this one
     while (!isFinalStateReached()) {
+
       // Compute the motion state at t+1 and save it in the trajectory
       res.trajectory.trajectory.points.push_back(spinOnce());
     }
@@ -235,24 +222,28 @@ void Reflexxes::setInitialConditions() {
   
 
   // Set the position and orientation of the robot as Reflexxes input
-  inputParameters->CurrentPositionVector->VecData[0] = path.points[0].motionState.positions.at(0);
-  inputParameters->CurrentPositionVector->VecData[1] = path.points[0].motionState.positions.at(1);
-  inputParameters->CurrentPositionVector->VecData[1] = path.points[0].motionState.positions.at(2);
+  for(unsigned int i=0;i<NUMBER_OF_DOFS;i++) {
+    inputParameters->CurrentPositionVector->VecData[i] = path.points[0].motionState.positions.at(i);
+  }
 
   // Set the current velocities, in the reference frame, as Reflexxes input
   // This is the latest velocity value got from the path
   if(path.points.at(0).motionState.velocities.size() > 0) {
-    inputParameters->CurrentVelocityVector->VecData[0] = path.points.at(0).motionState.velocities.at(0);
-    inputParameters->CurrentVelocityVector->VecData[1] = path.points.at(0).motionState.velocities.at(1);
-    inputParameters->CurrentVelocityVector->VecData[2] = path.points.at(0).motionState.velocities.at(2);
+    for(unsigned int i=0;i<NUMBER_OF_DOFS;i++) {
+      inputParameters->CurrentVelocityVector->VecData[i] = path.points.at(0).motionState.velocities.at(i);
+    }
   }
   else {//log some error
   }
 
+  // Set the current accelerations, in the reference frame, as Reflexxes input
+  // This is the latest acceleration value got from the path
   if(path.points.at(0).motionState.accelerations.size() > 0) {
-    inputParameters->CurrentAccelerationVector->VecData[0] = path.points.at(0).motionState.accelerations.at(0);
-    inputParameters->CurrentAccelerationVector->VecData[1] = path.points.at(0).motionState.accelerations.at(1);
-    inputParameters->CurrentAccelerationVector->VecData[2] = path.points.at(0).motionState.accelerations.at(2);
+    for(unsigned int i=0;i<NUMBER_OF_DOFS;i++) {
+      inputParameters->CurrentAccelerationVector->VecData[i] = path.points.at(0).motionState.accelerations.at(i);
+    }
+  }
+  else {//log some error
   }
 } // End setInitialConditions
 
@@ -261,8 +252,7 @@ void Reflexxes::setInitialConditions() {
 
 
 // Compute the orientation needed to reach the target, given an initial position
-float Reflexxes::computeTargetOrientation(float initial_x, float initial_y, float target_x, float target_y)
-{
+float Reflexxes::computeTargetOrientation(float initial_x, float initial_y, float target_x, float target_y) {
   //We need to recalculate the target orientation
   // For that we first need to create a vector for the current position and the target position
   std::vector<float> current_position;
@@ -276,21 +266,19 @@ float Reflexxes::computeTargetOrientation(float initial_x, float initial_y, floa
   float angle = utility.findAngleFromAToB(current_position, target_position);
 
   return angle;
-
 }
 
 
 // Returns true if the target has been reached
-bool Reflexxes::isFinalStateReached()
-{
+bool Reflexxes::isFinalStateReached() {
   return (resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
 }
 
 
 
 
-Reflexxes::Reflexxes()
-{
+Reflexxes::Reflexxes() {
+
   trajectory = NULL;
   resultValue = 0;
   // Creating all relevant objects of the Type II Reflexxes Motion Library
@@ -347,8 +335,7 @@ Reflexxes::Reflexxes()
 
 }
 
-Reflexxes::~Reflexxes()
-{
+Reflexxes::~Reflexxes() {
   delete rml;
   delete inputParameters;
   delete outputParameters;
