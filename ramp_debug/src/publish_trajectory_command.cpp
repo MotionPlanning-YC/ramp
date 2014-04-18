@@ -22,9 +22,9 @@ int main(int argc, char** argv) {
   c1.motionState.positions.push_back(0);
   
   ramp_msgs::KnotPoint c2;
-  //c2.motionState.positions.push_back(0.5f);
-  //c2.motionState.positions.push_back(0.25f);
-  //c2.motionState.positions.push_back(PI/6);
+  c2.motionState.positions.push_back(1.f);
+  c2.motionState.positions.push_back(1.f);
+  c2.motionState.positions.push_back(0);
 
 
   ramp_msgs::KnotPoint c3;
@@ -35,9 +35,9 @@ int main(int argc, char** argv) {
 
 
   ramp_msgs::KnotPoint c4;
-  c4.motionState.positions.push_back(1.f);
-  c4.motionState.positions.push_back(1.f);
-  c4.motionState.positions.push_back(PI/4);
+  c4.motionState.positions.push_back(2.5f);
+  c4.motionState.positions.push_back(2.f);
+  c4.motionState.positions.push_back(0);
 
   // Push on velocities
   for(unsigned int i=0;i<c1.motionState.positions.size();i++) {
@@ -54,12 +54,6 @@ int main(int argc, char** argv) {
       c4.motionState.velocities.push_back(0);
     }
   }
-
-
-  /*ramp_msgs::KnotPoint c4;
-  c4.motionState.positions.push_back(3);
-  c4.motionState.positions.push_back(3);
-  c4.motionState.positions.push_back(PI/2);*/
 
   ramp_msgs::Path p;
   p.points.push_back(c1);

@@ -48,6 +48,12 @@ class Reflexxes
 
 // Compute the orientation needed to reach the target, given an initial position
     float computeTargetOrientation(float initial_x, float intial_y, float target_x, float target_y);
+    
+    const ramp_msgs::Path modifyPath(const ramp_msgs::Path p);
+
+
+    const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionOutputParameters inputParameters);
+
   public:
  
 // Service callback, the input is a path and the output a trajectory
