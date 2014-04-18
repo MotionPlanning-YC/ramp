@@ -5,7 +5,7 @@ Modifier::Modifier(const ros::NodeHandle& h, const unsigned int n) : num_ops(n),
   h_mod_req_ = new ModificationRequestHandler(h);
 }
 
-Modifier::Modifier(const ros::NodeHandle& h, const std::vector<Path> ps, const std::vector< std::vector<float> > vs, const unsigned int n) : num_ops(n), paths_(ps), velocities_(vs), i_changed1(-1), i_changed2(-1) {
+Modifier::Modifier(const ros::NodeHandle& h, const std::vector<Path> ps, const unsigned int n) : num_ops(n), paths_(ps), i_changed1(-1), i_changed2(-1) {
   h_mod_req_ = new ModificationRequestHandler(h);
 }
 
@@ -17,13 +17,11 @@ Modifier::~Modifier() {
 }
 
 
-void Modifier::updateAll(std::vector<Path> ps, std::vector< std::vector<float> > vs) {
+void Modifier::updateAll(std::vector<Path> ps) {
   paths_.clear();
-  velocities_.clear();
   
   for(unsigned int i=0;i<ps.size()-1;i++) {
     paths_.push_back(ps.at(i));
-    velocities_.push_back(vs.at(i));
   }
 
   paths_.push_back(ps.at(ps.size()-1));
@@ -146,7 +144,7 @@ const Path Modifier::stop(Path p) {
   // Maximum of 4 seconds to stop
   int time = (rand() % 4) + 1;
 
-  p.all_.at(i_point).stop_time_ = time;
+  //p.all_.at(i_point).stop_time_ = time;
 
   // Push on the values to stop_points and stop_times
   //p.stop_points_.push_back(i_point);
@@ -167,8 +165,8 @@ const std::vector<Path> Modifier::perform() {
   // Check if the operation changes the path
   if(mr.request.op == "stop") {
     // Call stop with the path chosen by buildModificationRequest
-    Path temp = stop(mr.request.paths.at(0));
-    result.push_back(temp);
+    //Path temp = stop(mr.request.paths.at(0));
+    //result.push_back(temp);
   }
 
   else {
@@ -183,7 +181,6 @@ const std::vector<Path> Modifier::perform() {
       }
     }
   } // end if operator != stop
-
 
   return result;
 }

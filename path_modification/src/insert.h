@@ -1,5 +1,6 @@
 #ifndef INSERT_H
 #define INSERT_H
+#include "utility.h"
 #include "ramp_msgs/Path.h"
 
 class Insert {
@@ -11,7 +12,7 @@ class Insert {
 
     ramp_msgs::Path path_;
   private:
-
+    Utility utility;
 };
 
 #endif

@@ -13,8 +13,10 @@ const float timeNeededToTurn = 2.5;
 
 Corobot::Corobot() : k_dof_(3), restart(false), mutex_(false), moving_(false), num(0), num_traveled(0), i_knot_points(0) { 
   for(unsigned int i=0;i<k_dof_;i++) {
-    configuration_.K.push_back(0);
-    configuration_.ranges.push_back(u.standardRanges.at(i));
+    configuration_.positions.push_back(0);
+    configuration_.velocities.push_back(0);
+    configuration_.accelerations.push_back(0);
+    configuration_.jerks.push_back(0);
   }
 }
 
@@ -33,26 +35,23 @@ void Corobot::lockMutex() {
 }
 
 
-void Corobot::setConfiguration(float x, float y, float theta) {
-  configuration_.K.clear();
-  
-  configuration_.K.push_back(x);
-  configuration_.K.push_back(y);
-
-  // *** This was (theta - angle_at_start) before - why?
-  configuration_.K.push_back(theta);
-}
-
-
-
-
-
 
 /** This is a callback for receiving odometry from the robot and sets the configuration of the robot */
 void Corobot::updateState(const nav_msgs::Odometry& msg) {
   
-  // Set configuration
-  setConfiguration(msg.pose.pose.position.x, msg.pose.pose.position.y, tf::getYaw(msg.pose.pose.orientation));
+  // Clear position and velocity vectors
+  configuration_.positions.clear();
+  configuration_.velocities.clear();
+  
+  // Set latest positions
+  configuration_.positions.push_back(msg.pose.pose.position.x);
+  configuration_.positions.push_back(msg.pose.pose.position.y);
+  configuration_.positions.push_back(tf::getYaw(msg.pose.pose.orientation));
+
+  // Set latest velocities
+  configuration_.velocities.push_back(msg.twist.twist.linear.x);
+  configuration_.velocities.push_back(msg.twist.twist.linear.y);
+  configuration_.velocities.push_back(msg.twist.twist.angular.z);
 } // End updateState
 
 
@@ -60,12 +59,10 @@ void Corobot::updateState(const nav_msgs::Odometry& msg) {
 
 /** This method is on a timer to publish the robot's latest configuration */
 void Corobot::updatePublishTimer(const ros::TimerEvent&) {
-    ramp_msgs::Update msg;
-    msg.configuration = configuration_;
     
-    if (pub_update_) {
-        pub_update_.publish(msg);
-    }
+  if (pub_update_) {
+      pub_update_.publish(configuration_);
+  }
 } // End updatePublishTimer
 
 
@@ -220,7 +217,7 @@ void Corobot::calculateSpeedsAndTime ()
   int num = trajectory_.trajectory.points.size(); 
 
   // Get the starting time
-  ros::Time start_time = ros::Time::now() + ros::Duration(0.0);
+  ros::Time start_time = ros::Time::now();
 
   float speed_loc;
   // We go through all the waypoints
@@ -293,26 +290,25 @@ const bool Corobot::checkImminentCollision() const {
 }
 
 
-void Corobot::moveOnTrajectory(bool simulation) 
-{
+void Corobot::moveOnTrajectory(bool simulation) {
   restart = false;
-  
   ros::Rate r(50);
-  
-  ros::Duration delay = ros::Duration(0); //  Save the time it took to do all the turns
-  ros::Time start;
     
+
+
   // Execute the trajectory
-  while( (num_traveled+1) < num) {
-    std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
+  while( (num_traveled+1) < num) { 
+    //std::cout<<"\nnum_traveled: "<<num_traveled;
+    restart = false;
+   
+    //if(num_traveled % 10 == 0) {
+      //std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
+    //}
 
     // Force a stop until there is no imminent collision
     while(checkImminentCollision()) {
       ros::spinOnce();
     }
-    
-    //std::cout<<"\nnum_traveled: "<<num_traveled;
-    restart = false;
     
     // Set velocities
     twist_.linear.x  = speeds.at(num_traveled);
@@ -332,7 +328,7 @@ void Corobot::moveOnTrajectory(bool simulation)
       // Should be fixed at some point
       if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.15) {
         //std::cout<<"\ninitial_theta: "<<initial_theta;
-        float actual_theta = u.displaceAngle(initial_theta, configuration_.K.at(2));
+        float actual_theta = u.displaceAngle(initial_theta, configuration_.positions.at(2));
         
         float dist = u.findDistanceBetweenAngles(actual_theta, orientations.at(num_traveled));
         //std::cout<<"\nactual theta: "<<actual_theta;
@@ -359,9 +355,8 @@ void Corobot::moveOnTrajectory(bool simulation)
       }
     } // end while (move to the next point
     
+    // If a new trajectory was received, restart the outer while 
     if(restart) {
-      delay = ros::Duration(0);
-      restart=false;
       continue;
     }
 

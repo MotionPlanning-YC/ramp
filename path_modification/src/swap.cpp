@@ -4,6 +4,7 @@
 Swap::Swap(const ramp_msgs::Path p) : path_(p) {}
 
 
+/** Swap does NOT swap the velocity values! Only the positions! */
 const ramp_msgs::Path Swap::perform() {
 
   if(path_.points.size() > 3) {
@@ -16,10 +17,11 @@ const ramp_msgs::Path Swap::perform() {
     } while(i_knotPoint1 == i_knotPoint2);
 
     //std::cout<<"\ni_knotPoint1: "<<i_knotPoint1<<" i_knotPoint2: "<<i_knotPoint2;
-    // Swap the knot points
-    ramp_msgs::KnotPoint temp = path_.points.at(i_knotPoint1);
-    path_.points.at(i_knotPoint1) = path_.points.at(i_knotPoint2);
-    path_.points.at(i_knotPoint2) = temp;
+    
+    // Swap the knot points' positions
+    std::vector<double> temp = path_.points.at(i_knotPoint1).motionState.positions;
+    path_.points.at(i_knotPoint1).motionState.positions = path_.points.at(i_knotPoint2).motionState.positions;
+    path_.points.at(i_knotPoint2).motionState.positions = temp;
 
   }
 

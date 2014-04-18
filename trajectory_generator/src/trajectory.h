@@ -16,10 +16,6 @@ class Trajectory {
     std::vector<ramp_msgs::KnotPoint>   knot_points_;
     std::vector<Segment>                segments_;
     std::vector<MotionState>            points_;
-    std::vector<float>                  v_start_;
-    std::vector<float>                  v_end_;
-    //std::vector<unsigned int>           stop_points_;
-    //std::vector<unsigned int>           stop_times_;
     unsigned int                        resolutionRate_;  // in Hz
 
     // Methods

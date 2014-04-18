@@ -13,7 +13,7 @@ class Change {
     ramp_msgs::Path path_;
 
   private:
-
+    Utility utility;
 };
 
 #endif

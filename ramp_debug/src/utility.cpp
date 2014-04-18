@@ -31,6 +31,19 @@ const float Utility::euclideanDistance(const std::vector<float> a, const std::ve
   return sqrt( pow(d_x,2) + pow(d_y,2) );
 } //End euclideanDistance
 
+
+const float Utility::findAngleFromAToB(const tf::Vector3 a, const tf::Vector3 b) const {
+  std::vector<float> a_vec;
+  a_vec.push_back(a.getX());
+  a_vec.push_back(a.getY());
+  
+  std::vector<float> b_vec;
+  b_vec.push_back(b.getX());
+  b_vec.push_back(b.getY());
+
+  return findAngleFromAToB(a_vec, b_vec);
+}
+
 /** This method returns the angle that will form a straight line from position a to position b. a and b are [x, y] vectors. */
 const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {
   float result;
@@ -115,14 +128,13 @@ const ramp_msgs::Configuration Utility::getConfigurationFromPoint(const trajecto
   return result;
 }
 
-
-const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::Configuration> configs) const {
+const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::MotionState> mps) const {
   ramp_msgs::Path result;
 
-  for(unsigned int i=0;i<configs.size();i++) {
+  for(unsigned int i=0;i<mps.size();i++) {
     ramp_msgs::KnotPoint kp;
-    kp.configuration = configs.at(i);
-    kp.stop_time = 0;
+    kp.motionState = mps.at(i);
+    kp.stopTime = 0;
     result.points.push_back(kp);
   }
 
@@ -184,11 +196,13 @@ const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
     result<<")";
     
     //Accelerations
-    result<<"\n       Accelerations: ("<<p.accelerations.at(0);
-    for(unsigned int k=1;k<p.accelerations.size();k++) {
-      result<<", "<<p.accelerations.at(k);
+    if(p.accelerations.size() > 0) {
+      result<<"\n       Accelerations: ("<<p.accelerations.at(0);
+      for(unsigned int k=1;k<p.accelerations.size();k++) {
+        result<<", "<<p.accelerations.at(k);
+      }
+      result<<")";
     }
-    result<<")";
     
     result<<"\n Time From Start: "<<p.time_from_start;
 
@@ -201,12 +215,42 @@ const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
 }
 
 
+const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
+  std::ostringstream result;
+
+  result<<"\np: [ ";
+  for(unsigned int i=0;i<mp.positions.size();i++) {
+    result<<mp.positions.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\nv: [ ";
+  for(unsigned int i=0;i<mp.velocities.size();i++) {
+    result<<mp.velocities.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\na: [ ";
+  for(unsigned int i=0;i<mp.accelerations.size();i++) {
+    result<<mp.accelerations.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\nj: [ ";
+  for(unsigned int i=0;i<mp.jerks.size();i++) {
+    result<<mp.jerks.at(i)<<" ";
+  }
+  result<<"]";
+
+  return result.str();
+}
+
 
 const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
   std::ostringstream result;
 
-  result<<"\nConfiguration: "<<toString(kp.configuration);
-  result<<", Stop time: "<<kp.stop_time;
+  result<<"\nConfiguration: "<<toString(kp.motionState);
+  result<<", Stop time: "<<kp.stopTime;
 
   return result.str();
 }

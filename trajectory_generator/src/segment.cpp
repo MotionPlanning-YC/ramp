@@ -9,7 +9,7 @@ Segment::Segment() : k_dof_(3), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0
   max_v_.push_back(PI/3.0f);
 }
 
-Segment::Segment(const ramp_msgs::KnotPoint kp_start, const ramp_msgs::KnotPoint kp_end, const float v_start, const float v_end, const unsigned int ind) : k_dof_(3), T_stop_(kp_start.stop_time), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0), T_loc_(0), T_min_(0)
+Segment::Segment(const ramp_msgs::KnotPoint kp_start, const ramp_msgs::KnotPoint kp_end, const float v_start, const float v_end, const unsigned int ind) : k_dof_(3), T_stop_(kp_start.stopTime), plan_post(0), T_rotate_pre_(0), T_rotate_post_(0), T_loc_(0), T_min_(0)
 {
   max_v_.push_back(0.35f);
   max_v_.push_back(0.35f);
@@ -24,19 +24,19 @@ Segment::~Segment() {}
 void Segment::build(const ramp_msgs::KnotPoint kp_start, const ramp_msgs::KnotPoint kp_end, const float v_start, const float v_end, const unsigned int ind) {
   // std::cout<<"\nIn Segment::build\n";
 
-  for(unsigned int k=0;k<kp_start.configuration.K.size();k++) {
-    start_.p_.push_back(kp_start.configuration.K.at(k));
+  for(unsigned int k=0;k<kp_start.motionState.positions.size();k++) {
+    start_.p_.push_back(kp_start.motionState.positions.at(k));
   }
 
 
-  for(unsigned int k=0;k<kp_end.configuration.K.size();k++) {
-    end_.p_.push_back(kp_end.configuration.K.at(k));
+  for(unsigned int k=0;k<kp_end.motionState.positions.size();k++) {
+    end_.p_.push_back(kp_end.motionState.positions.at(k));
   }
   
   index_    = ind;
   v_start_  = v_start;
   v_end_    = v_end;
-  T_stop_    = kp_start.stop_time;
+  T_stop_    = kp_start.stopTime;
 
   buildWork();
 } // End build

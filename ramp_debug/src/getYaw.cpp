@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "getYaw");
   ros::NodeHandle handle;
 
-  ros::Subscriber sub = handle.subscribe("odometry", 1000, odometryCallback);
+  ros::Subscriber sub = handle.subscribe("odom", 1000, odometryCallback);
 
   ros::spin();
 }

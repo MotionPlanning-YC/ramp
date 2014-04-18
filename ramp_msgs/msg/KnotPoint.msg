@@ -1,2 +1,2 @@
-ramp_msgs/Configuration configuration
-uint32 stop_time
+ramp_msgs/MotionState motionState
+uint32 stopTime
