@@ -2,10 +2,10 @@
 #define REFLEXXES_H
 
 
-#include <Reflexxes/ReflexxesAPI.h>
-#include <Reflexxes/RMLPositionFlags.h>
-#include <Reflexxes/RMLPositionInputParameters.h>
-#include <Reflexxes/RMLPositionOutputParameters.h>
+#include <Reflexxes/TypeII/ReflexxesAPI.h>
+#include <Reflexxes/TypeII/RMLPositionFlags.h>
+#include <Reflexxes/TypeII/RMLPositionInputParameters.h>
+#include <Reflexxes/TypeII/RMLPositionOutputParameters.h>
 #include "nav_msgs/Odometry.h"
 #include "ramp_msgs/Path.h"
 #include "ramp_msgs/TrajectoryRequest.h"
