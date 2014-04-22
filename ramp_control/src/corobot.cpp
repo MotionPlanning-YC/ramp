@@ -298,7 +298,7 @@ void Corobot::moveOnTrajectory(bool simulation) {
 
   // Execute the trajectory
   while( (num_traveled+1) < num) { 
-    //std::cout<<"\nnum_traveled: "<<num_traveled;
+    std::cout<<"\nnum_traveled: "<<num_traveled;
     restart = false;
    
     //if(num_traveled % 10 == 0) {

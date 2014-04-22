@@ -65,12 +65,13 @@ double MotionState::comparePosition(const MotionState& c, bool base_theta) const
       result += pow(utility.displaceAngle(c.positions_.at(i), positions_.at(i)), 2);
     }
     else
-      result += pow(positions_.at(i) - positions_.at(i), 2);
+      result += pow(c.positions_.at(i) - positions_.at(i), 2);
   }
 
-  // Get square root to complete euclidean distance...
+  // Get square root to complete euclidean distance
   result = sqrt(result);
 
+  //std::cout<<"\nReturning: "<<result;
   return result;
 }
 
@@ -147,18 +148,22 @@ const std::string MotionState::toString() const {
   result<<"]";
 
   //Accelerations
-  result<<"\na: ["<<accelerations_.at(0);
-  for(unsigned int i=1;i<accelerations_.size();i++) {
-    result<<", "<<accelerations_.at(i);
+  if(accelerations_.size() > 0) {
+    result<<"\na: ["<<accelerations_.at(0);
+    for(unsigned int i=1;i<accelerations_.size();i++) {
+      result<<", "<<accelerations_.at(i);
+    }
+    result<<"]";
   }
-  result<<"]";
 
   // Jerks
-  result<<"\nj: ["<<jerks_.at(0);
-  for(unsigned int i=1;i<jerks_.size();i++) {
-    result<<", "<<jerks_.at(i);
+  if(jerks_.size() > 0) {
+    result<<"\nj: ["<<jerks_.at(0);
+    for(unsigned int i=1;i<jerks_.size();i++) {
+      result<<", "<<jerks_.at(i);
+    }
+    result<<"]";
   }
-  result<<"]";
 
 
   return result.str();

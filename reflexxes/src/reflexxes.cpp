@@ -70,7 +70,7 @@ void Reflexxes::setTarget(float x, float y, float theta, float linear_velocity, 
   inputParameters->TargetVelocityVector->VecData[1] = linear_velocity * sin(inputParameters->TargetPositionVector->VecData[2] );
   inputParameters->TargetVelocityVector->VecData[2] = angular_velocity;
       
-/*  std::cout<<"\nTarget Velocity: ";
+  /*std::cout<<"\nTarget Velocity: ";
   std::cout<<"\n"<<inputParameters->TargetVelocityVector->VecData[0];
   std::cout<<", "<<inputParameters->TargetVelocityVector->VecData[1];
   std::cout<<", "<<inputParameters->TargetVelocityVector->VecData[2];*/
@@ -85,6 +85,7 @@ void Reflexxes::setTarget(float x, float y, float theta, float linear_velocity, 
 /** This method will modify a path by inserting knot points so that
  *  the path conforms to a rotate-drive-rotate style of motion */
 const ramp_msgs::Path Reflexxes::modifyPath(const ramp_msgs::Path p) {
+  //std::cout<<"\nIn modifyPath\n";
   ramp_msgs::Path result;
 
   result.points.push_back(p.points.at(0));
@@ -95,17 +96,18 @@ const ramp_msgs::Path Reflexxes::modifyPath(const ramp_msgs::Path p) {
                                         p.points.at(kp).motionState.positions.at(1),
                                         p.points.at(kp+1).motionState.positions.at(0),
                                         p.points.at(kp+1).motionState.positions.at(1));
+    std::cout<<"\nkp: "<<kp<<" trgt_theta: "<<trgt_theta;
 
     // The first part should be only rotation
-    if(p.points.at(kp).motionState.positions.at(2) != trgt_theta) {
+    if(p.points.at(kp).motionState.positions.at(2) != trgt_theta && trgt_theta != 0) {
       ramp_msgs::KnotPoint temp;
+      std::cout<<"\np.points.at(kp).motionState.positions.at(2): "<<p.points.at(kp).motionState.positions.at(2);
       
       // Positions
       // Push on the same x,y values, but the target orientation
       temp.motionState.positions.push_back(p.points.at(kp).motionState.positions.at(0));
       temp.motionState.positions.push_back(p.points.at(kp).motionState.positions.at(1));
-      temp.motionState.positions.push_back(computeTargetOrientation(p.points.at(kp).motionState.positions.at(0),   p.points.at(kp).motionState.positions.at(1),
-                                                                    p.points.at(kp+1).motionState.positions.at(0), p.points.at(kp+1).motionState.positions.at(1)));
+      temp.motionState.positions.push_back(trgt_theta);
 
       // Velocities
       temp.motionState.velocities.push_back(0);
@@ -124,7 +126,7 @@ const ramp_msgs::Path Reflexxes::modifyPath(const ramp_msgs::Path p) {
 
     // The second part should be only translation
     // and it should be covered - no need to insert a new knot point for this
-    if( (p.points.at(kp).motionState.positions.at(0) != p.points.at(kp+1).motionState.positions.at(0)) &&
+    if( (p.points.at(kp).motionState.positions.at(0) != p.points.at(kp+1).motionState.positions.at(0)) ||
         (p.points.at(kp).motionState.positions.at(1) != p.points.at(kp+1).motionState.positions.at(1))) 
     {
       ramp_msgs::KnotPoint temp;

@@ -10,14 +10,14 @@
 
 <!-- Trajectory Generator -->
 <!-- <node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" /> -->
-<node name="reflexxes" pkg="reflexxes" type="reflexxes" />
+<node name="reflexxes" pkg="reflexxes" type="reflexxes" output="screen" />
 
 <!-- Path Modification -->
 <node name="path_modification" pkg="path_modification" type="path_modification" />
 
 
 <!-- Trajectory Visualization -->
-<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> 
+<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> 
 
 
 
@@ -32,7 +32,7 @@
 </group> 
 
 <group ns="$(arg robot_1_name)"> 
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen"> 
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" > 
     <param name="robot_update" type="str" value="/$(arg robot_1_name)/update" /> 
   </node>
 </group> 
@@ -77,7 +77,7 @@
 <!-- Start the ramp_control simulation nodes (locally, not on remote machines) -->
 
 <group ns="$(arg robot_0_name)" >
-  <node name="simulation" pkg="ramp_control" type="simulation" /> 
+  <node name="simulation" pkg="ramp_control" type="simulation" output="screen" /> 
     <param name="orientation" type="double" value="3.14159" />
 </group> 
 
@@ -89,6 +89,6 @@
 
 
 <!-- Simulation -->
-<node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/catkin_workspace/src/ramp/ramp_launch/launch/world/test1.world" />
+<node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/world/test1.world" />
 
 </launch>

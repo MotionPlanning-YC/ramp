@@ -25,7 +25,6 @@ void Modifier::updateAll(std::vector<Path> ps) {
   }
 
   paths_.push_back(ps.at(ps.size()-1));
-
 }
 
 void Modifier::update(const Path p, const unsigned int i) {
@@ -104,6 +103,7 @@ const std::vector<int> Modifier::getTargets(const std::string op) {
     // Push on i_p1
     result.push_back(i_p2);
   } // end if crossover 
+
   // Else, no second path  
   else {i_changed2 = -1;}
 
@@ -162,6 +162,7 @@ const std::vector<Path> Modifier::perform() {
   // Build a modification request srv 
   ramp_msgs::ModificationRequest mr = buildModificationRequest(); 
 
+
   // Check if the operation changes the path
   if(mr.request.op == "stop") {
     // Call stop with the path chosen by buildModificationRequest
@@ -179,8 +180,9 @@ const std::vector<Path> Modifier::perform() {
         Path temp(mr.response.mod_paths.at(i));
         result.push_back(temp);
       }
-    }
+    } // end inner if 
   } // end if operator != stop
+
 
   return result;
 }

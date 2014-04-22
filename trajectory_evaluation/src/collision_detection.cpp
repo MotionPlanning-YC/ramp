@@ -129,7 +129,7 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
 
   // Translation only
   // normally 0.0066 when idle
-  if(mag_linear_t >= 0.15 && mag_angular_t < 0.1) {
+  if(mag_linear_t >= 0.1 && mag_angular_t < 0.15) {
     result = MotionType::Translation;
   }
 
@@ -140,9 +140,9 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
   }
 
   // Either translation+self-rotation or global rotation
-  else if(mag_linear_t >= 0.15 && mag_angular_t >= 0.1) {
-    result = MotionType::TranslationAndRotation;
-  } //end else if
+  //else if(mag_linear_t >= 0.15 && mag_angular_t >= 0.1) {
+    //result = MotionType::TranslationAndRotation;
+  //} //end else if
 
   // Else, there is no motion
   else {
@@ -221,13 +221,20 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
     goal.motionState.positions.push_back(goal_w.getX());
     goal.motionState.positions.push_back(goal_w.getY());
     goal.motionState.positions.push_back(start.motionState.positions.at(2));
+
+    goal.motionState.velocities.push_back(0);
+    goal.motionState.velocities.push_back(0);
+    goal.motionState.velocities.push_back(0);
     
     // Push goal onto the path
     path.push_back(goal);
   } // end if translation
 
+
+  /********* This block is not in use currently *********/
+  /********* Will use for future non-robot obstacles *********/
   // If translation and rotation
-  else if(mt == MotionType::TranslationAndRotation) {
+  /*else if(mt == MotionType::TranslationAndRotation) {
 
     // Find the linear and angular velocity vectors
     tf::Vector3 v_linear;
@@ -278,7 +285,7 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
       // Push temp onto path
       path.push_back(temp);
     } // end for
-  } // end else if
+  } // end else if*/
   
 
 
@@ -297,6 +304,10 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
     goal.motionState.positions.push_back(goal_w.getX());
     goal.motionState.positions.push_back(goal_w.getY());
     goal.motionState.positions.push_back(start.motionState.positions.at(2));
+
+    goal.motionState.velocities.push_back(0);
+    goal.motionState.velocities.push_back(0);
+    goal.motionState.velocities.push_back(0);
 
     path.push_back(goal);
   } // end if self-rotation, none
