@@ -45,11 +45,33 @@ const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(cons
 } // End buildTrajectoryPoint
 
 
+/** This method will return a JointTrajectoryPoint given some input parameters from Reflexxes 
+ *  This is used to generate the first point on a trajectory
+ * */
+const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(const RMLPositionInputParameters inputParameters) {
+  trajectory_msgs::JointTrajectoryPoint point;
+
+  
+  // Push on the p, v, and a vectors
+  for(unsigned int i=0;i<NUMBER_OF_DOFS;i++) {
+    point.positions.push_back(inputParameters.CurrentPositionVector->VecData[i]);
+    point.velocities.push_back(inputParameters.CurrentVelocityVector->VecData[i]);
+    point.accelerations.push_back(inputParameters.CurrentAccelerationVector->VecData[i]);
+  }
+
+
+  // The time_from_start is the time of the previous point plus the cycle period
+  point.time_from_start = time_from_start;
+  time_from_start += ros::Duration(CYCLE_TIME_IN_SECONDS);
+
+
+  return point;
+} // End buildTrajectoryPoint
 
 
 
 //Set the target of the Reflexxes library
-void Reflexxes::setTarget(float x, float y, float theta, float linear_velocity, float angular_velocity) {
+void Reflexxes::setTarget(float x, float y, float theta, float x_dot, float y_dot, float angular_velocity) {
   
   // Set the Target Position and Velocity vector
   inputParameters->TargetPositionVector->VecData[0] = x;
@@ -66,8 +88,8 @@ void Reflexxes::setTarget(float x, float y, float theta, float linear_velocity, 
   std::cout<<", "<<inputParameters->TargetPositionVector->VecData[2];*/
 
   // Set the target velocity, which is set in the reference frame coordinates
-  inputParameters->TargetVelocityVector->VecData[0] = linear_velocity * cos(inputParameters->TargetPositionVector->VecData[2]) ;
-  inputParameters->TargetVelocityVector->VecData[1] = linear_velocity * sin(inputParameters->TargetPositionVector->VecData[2] );
+  inputParameters->TargetVelocityVector->VecData[0] = x_dot;
+  inputParameters->TargetVelocityVector->VecData[1] = y_dot;
   inputParameters->TargetVelocityVector->VecData[2] = angular_velocity;
       
   /*std::cout<<"\nTarget Velocity: ";
@@ -96,12 +118,13 @@ const ramp_msgs::Path Reflexxes::modifyPath(const ramp_msgs::Path p) {
                                         p.points.at(kp).motionState.positions.at(1),
                                         p.points.at(kp+1).motionState.positions.at(0),
                                         p.points.at(kp+1).motionState.positions.at(1));
-    std::cout<<"\nkp: "<<kp<<" trgt_theta: "<<trgt_theta;
+    //std::cout<<"\nkp: "<<kp<<" trgt_theta: "<<trgt_theta;
 
     // The first part should be only rotation
-    if(p.points.at(kp).motionState.positions.at(2) != trgt_theta && trgt_theta != 0) {
+    float diff = fabs(utility.findDistanceBetweenAngles(p.points.at(kp).motionState.positions.at(2), trgt_theta));
+    if(diff > PI/15 && trgt_theta != 0) {
       ramp_msgs::KnotPoint temp;
-      std::cout<<"\np.points.at(kp).motionState.positions.at(2): "<<p.points.at(kp).motionState.positions.at(2);
+      //std::cout<<"\np.points.at(kp).motionState.positions.at(2): "<<p.points.at(kp).motionState.positions.at(2);
       
       // Positions
       // Push on the same x,y values, but the target orientation
@@ -158,7 +181,10 @@ const ramp_msgs::Path Reflexxes::modifyPath(const ramp_msgs::Path p) {
   // Push on last knot point 
   result.points.push_back(p.points.at(p.points.size()-1));
 
-
+  /*if(p.points.size() < 3) {
+    std::cout<<"\n\nModifying path "<<utility.toString(p);
+    std::cout<<"\n\nResult: "<<utility.toString(result);
+  }*/
   return result;
 } // End modifyPath
 
@@ -166,6 +192,8 @@ const ramp_msgs::Path Reflexxes::modifyPath(const ramp_msgs::Path p) {
 
 // Service callback, the input is a path and the output a trajectory
 bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res) {
+  //std::cout<<"\nReceived request: "<<utility.toString(req)<<"\n";
+  //std::cin.get();
 
   // Saves the path
   this->path = req.path;
@@ -188,7 +216,12 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
               path.points[i].motionState.positions.at(1), 
               path.points[i].motionState.positions.at(2), 
               path.points[i].motionState.velocities.at(0), 
+              path.points[i].motionState.velocities.at(1), 
               path.points[i].motionState.velocities.at(2));
+    
+    // Push the initial state onto trajectory
+    if(i==1)
+      res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(*inputParameters));
 
     // We go to the next knotpoint only once we reach this one
     while (!isFinalStateReached()) {
@@ -202,7 +235,8 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
   } // end for
 
   
-
+  //std::cout<<"\nReturning: "<<utility.toString(res.trajectory)<<"\n";
+  //std::cin.get();
   return true;
 } // End trajectoryRequest callback
 
@@ -283,12 +317,15 @@ Reflexxes::Reflexxes() {
 
   trajectory = NULL;
   resultValue = 0;
+  
   // Creating all relevant objects of the Type II Reflexxes Motion Library
   rml = new ReflexxesAPI( NUMBER_OF_DOFS, CYCLE_TIME_IN_SECONDS );
   inputParameters = new RMLPositionInputParameters( NUMBER_OF_DOFS );
   outputParameters = new RMLPositionOutputParameters( NUMBER_OF_DOFS );
   
-  flags.SynchronizationBehavior= RMLPositionFlags::NO_SYNCHRONIZATION;
+  // Use time synchronization so the robot drives in a straight line towards goal 
+  //flags.SynchronizationBehavior= RMLPositionFlags::NO_SYNCHRONIZATION;
+  flags.SynchronizationBehavior= RMLPositionFlags::ONLY_TIME_SYNCHRONIZATION;
   
   // Set up the input parameters
   // Set the position, velocity and acceleration to be 0
@@ -307,19 +344,19 @@ Reflexxes::Reflexxes() {
   // Here set up the max velocity, acceleration and jerk
   
   // Maximum velocity beeing 0.5m/s and 1 radian/s (around 60 degrees/s )
-  inputParameters->MaxVelocityVector->VecData[0] = .4;
-  inputParameters->MaxVelocityVector->VecData[1] = .4;
-  inputParameters->MaxVelocityVector->VecData[2] = 1;
+  inputParameters->MaxVelocityVector->VecData[0] = .5;
+  inputParameters->MaxVelocityVector->VecData[1] = .5;
+  inputParameters->MaxVelocityVector->VecData[2] =  1;
 
   // Maximum acceleration is 1m/s^2 and 2radian/s^2
-  inputParameters->MaxAccelerationVector->VecData[0] = 1;
-  inputParameters->MaxAccelerationVector->VecData[1] = 1;
-  inputParameters->MaxAccelerationVector->VecData[2] = 3;
+  inputParameters->MaxAccelerationVector->VecData[0] = 0.5;
+  inputParameters->MaxAccelerationVector->VecData[1] = 0.5;
+  inputParameters->MaxAccelerationVector->VecData[2] = PI;
 
   // As the maximum jerk values are not known, this is just to try
   inputParameters->MaxJerkVector->VecData[0] = 1.0;
   inputParameters->MaxJerkVector->VecData[1] = 1.0;
-  inputParameters->MaxJerkVector->VecData[2] = 3.0;
+  inputParameters->MaxJerkVector->VecData[2] = PI/6;
 
   // Set the Target Position and Velocity vector
   inputParameters->TargetPositionVector->VecData[0] = 0.0;

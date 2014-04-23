@@ -109,6 +109,11 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
   // Transform configuration from odometry to world coordinates
   start_.transformBase(T_od_w_);
   //std::cout<<"\nNew starting configuration: "<<start_.toString();
+  
+
+  // Set proper velocity values
+  start_.velocities_.at(0) = msg.velocities.at(0) * cos(msg.positions.at(2));
+  start_.velocities_.at(1) = msg.velocities.at(0) * sin(msg.positions.at(2));
 
   mutex_start_ = true;
 } // End updateCallback
@@ -149,7 +154,7 @@ void Planner::init(const ros::NodeHandle& h) {
 
 
 void Planner::planningCycleCallback(const ros::TimerEvent&) {
-  //std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
+  std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
   
   // Wait until mutex can be obtained
   while(!mutex_pop_) {}
@@ -161,10 +166,13 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
   
   mutex_pop_ = true;
   
+  //std::cout<<"\nAfter generation "<<generation_<<", population: "<<population_.fitnessFeasibleToString();
+  //std::cout<<"\nBest: "<<bestTrajec_.toString();
+  
   // t=t+1
   generation_++;
 
-  //std::cout<<"\nPlanning cycle "<<generation_<<" complete\n";
+  std::cout<<"\nPlanning cycle "<<generation_<<" complete\n";
 } // End planningCycleCallback
 
 
@@ -180,7 +188,6 @@ void Planner::gradualTrajectory(RampTrajectory& t) {
   while(t.msg_trajec_.trajectory.points.at(i).velocities.at(0) == 0 &&
         t.msg_trajec_.trajectory.points.at(i).velocities.at(1) == 0 &&
         i < t.msg_trajec_.trajectory.points.size()) {i++;}
-  std::cout<<"\nlinear v starts at "<<i;
 
   // If i is in the trajectory (it won't be if rotation-only) 
   if( i < t.msg_trajec_.trajectory.points.size()) {
@@ -227,13 +234,13 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   // Find orientation difference between the old and new trajectory 
   // old configuration is the new start_ configuration (last point on old trajectory)
   // new orientation is the amount to rotate towards first knot point
-  /*float b = utility.findAngleFromAToB(start_.positions_, bestTrajec_.path_.all_.at(1).motionState_.positions_);
+  float b = utility.findAngleFromAToB(start_.positions_, bestTrajec_.path_.all_.at(1).motionState_.positions_);
   float diff = utility.findDistanceBetweenAngles(start_.positions_.at(2), b);
-  std::cout<<"\nb: "<<b<<" start_.positions_.at(2): "<<start_.positions_.at(2);
-  std::cout<<"\ndiff: "<<diff;
-  if(fabs(diff) <= 0.1745f) {
+  //std::cout<<"\nb: "<<b<<" start_.positions_.at(2): "<<start_.positions_.at(2);
+  //std::cout<<"\ndiff: "<<diff;
+  if(fabs(diff) <= 0.52356f) {
     gradualTrajectory(bestTrajec_);
-  }*/
+  }
 
   
   // Send the best trajectory 
@@ -459,7 +466,7 @@ void Planner::sendBest() {
     h_control_->send(bestTrajec_.msg_trajec_);
   }
   else {
-    std::cout<<"\nSending Trajectory: \n"<<bestTrajec_.toString();
+    //std::cout<<"\nSending Trajectory: \n"<<bestTrajec_.toString();
     h_control_->send(bestTrajec_.msg_trajec_);
   }
 } // End sendBest

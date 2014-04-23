@@ -143,7 +143,7 @@ void Corobot::turn(const float speed, const float angle) const {
 /** This method updates the Corobot's trajectory
  *   It calls calculateSpeedsAndTimes to update the robot's vectors needed to move */
 void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
-  std::cout<<"\nIn updateTrajectory!\n";
+  ////std::cout<<"\nIn updateTrajectory!\n";
   
   restart = true;
   num_traveled = 0;
@@ -298,7 +298,7 @@ void Corobot::moveOnTrajectory(bool simulation) {
 
   // Execute the trajectory
   while( (num_traveled+1) < num) { 
-    std::cout<<"\nnum_traveled: "<<num_traveled;
+    //std::cout<<"\nnum_traveled: "<<num_traveled;
     restart = false;
    
     //if(num_traveled % 10 == 0) {

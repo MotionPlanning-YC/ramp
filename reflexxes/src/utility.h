@@ -11,6 +11,7 @@
 #include "ramp_msgs/Path.h"
 #include "ramp_msgs/Trajectory.h"
 #include "ramp_msgs/Configuration.h"
+#include "ramp_msgs/TrajectoryRequest.h"
 #include <tf/transform_datatypes.h>
 #include "range.h"
 #define PI 3.14159f
@@ -19,8 +20,6 @@
 class Utility {
   public:
     Utility();
-
-    std::vector<Range> standardRanges;
     
     const float positionDistance(const std::vector<float> a, const std::vector<float> b) const;
 
@@ -37,6 +36,7 @@ class Utility {
     const std::string toString(const ramp_msgs::Configuration c) const;
     const std::string toString(const ramp_msgs::Path path) const;
     const std::string toString(const ramp_msgs::Trajectory traj) const;
+    const std::string toString(const ramp_msgs::TrajectoryRequest::Request tr) const;
 };
 
 #endif 

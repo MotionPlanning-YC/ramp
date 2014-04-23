@@ -88,10 +88,10 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
 {
   //std::cout<<"\n\nReceived Population!";
 
-  //populations_.clear();
-  //populations_.push_back(msg);
+  populations_.clear();
+  populations_.push_back(msg);
 
-  if(populations_.size() < 2) {
+  /*if(populations_.size() < 2) {
     populations_.push_back(msg);
   }
 
@@ -104,7 +104,7 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
       populations_.erase(populations_.begin()+1);
       populations_.insert(populations_.begin()+1, msg);
     }
-  }
+  }*/
 
   drawPopulation();
 }
@@ -135,11 +135,11 @@ void TrajectoryView::drawPopulation() {
   // For each population
   for(unsigned int p=0;p<populations_.size();p++) {
 
+    // Set i to the index of the best trajectory
+    int i = populations_.at(p).best_id;
+
     // For each trajectory in the population
     for(unsigned int t=0;t<populations_.at(p).population.size();t++) {
-
-      // Set i to the index of the best trajectory
-      int i = populations_.at(p).best_id;
 
       // Get the points for that trajectory
       std::vector<trajectory_msgs::JointTrajectoryPoint> points = populations_.at(p).population.at(t).trajectory.points;
@@ -165,6 +165,12 @@ void TrajectoryView::drawPopulation() {
       
       // Else, if either are in collision, red
       else {
+        pen = QPen( QColor(255,0,0,150) );
+      }
+
+      // If the best trajectory, set to red
+      // Used for single robot traj viewing
+      if(t == i) {
         pen = QPen( QColor(255,0,0,150) );
       }
 

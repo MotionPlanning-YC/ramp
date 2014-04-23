@@ -2,7 +2,7 @@
 
 
 <!-- Trajectory Generator -->
-<node name="reflexxes" pkg="reflexxes" type="reflexxes" />
+<node name="reflexxes" pkg="reflexxes" type="reflexxes" output="screen" />
 
 <!-- Path Modification -->
 <node name="path_modification" pkg="path_modification" type="path_modification" />
@@ -11,7 +11,7 @@
 <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" />
 
 <!-- Trajectory Visualization -->
-<!-- <node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> -->
+<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> 
 
 
 <!-- Planner -->

@@ -1,14 +1,7 @@
 #include "utility.h"
 #include "range.h"
 
-Utility::Utility() {
-  Range range0(0, 3.5);
-  Range range1(0, 3.5);
-  Range range2(-PI, PI);
-  standardRanges.push_back(range0);
-  standardRanges.push_back(range1);
-  standardRanges.push_back(range2);
-}
+Utility::Utility() {}
 
 
 /** This method returns the Euclidean distance between two position vectors */
@@ -230,3 +223,15 @@ const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
 
   return result.str();
 }
+
+
+const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request tr) const {
+  std::ostringstream result;
+  result<<"\nTrajectory Request:";
+  result<<"\nPath:"<<toString(tr.path);
+  result<<"\nresolutionRate: "<<tr.resolutionRate;
+
+  return result.str();
+}
+
+

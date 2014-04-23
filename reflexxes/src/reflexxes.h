@@ -38,7 +38,7 @@ class Reflexxes
     trajectory_msgs::JointTrajectoryPoint spinOnce();
 
 //Set the target of the Reflexxes library
-    void setTarget(float x, float y, float theta, float linear_velocity, float angular_velocity);
+    void setTarget(float x, float y, float theta, float x_dot, float y_dot, float angular_velocity);
 
 // Returns true if the target has been reached
     bool isFinalStateReached();
@@ -52,7 +52,8 @@ class Reflexxes
     const ramp_msgs::Path modifyPath(const ramp_msgs::Path p);
 
 
-    const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionOutputParameters inputParameters);
+    const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionOutputParameters outputParameters);
+    const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionInputParameters inputParameters);
 
   public:
  
