@@ -5,24 +5,24 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(0.25f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
+Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
 {
-  controlCycle_ = ros::Duration(1.f / 30.f);
-  planningCycle_ = ros::Duration(1.f / 50.f);
+  controlCycle_ = ros::Duration(1.f / 2.f);
+  planningCycle_ = ros::Duration(1.f / 25.f);
   imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
 }
 
 Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0)
 {
-  controlCycle_ = ros::Duration(1.f / 30.f);
-  planningCycle_ = ros::Duration(1.f / 50.f);
+  controlCycle_ = ros::Duration(1.f / 5.f);
+  planningCycle_ = ros::Duration(1.f / 25.f);
   imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
 }
 
 Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f)
 {
-  controlCycle_ = ros::Duration(1.f / 30.f);
-  planningCycle_ = ros::Duration(1.f / 50.f);
+  controlCycle_ = ros::Duration(1.f / 5.f);
+  planningCycle_ = ros::Duration(1.f / 25.f);
   imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
   init(h); 
 }
@@ -234,13 +234,13 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   // Find orientation difference between the old and new trajectory 
   // old configuration is the new start_ configuration (last point on old trajectory)
   // new orientation is the amount to rotate towards first knot point
-  float b = utility.findAngleFromAToB(start_.positions_, bestTrajec_.path_.all_.at(1).motionState_.positions_);
+  /*float b = utility.findAngleFromAToB(start_.positions_, bestTrajec_.path_.all_.at(1).motionState_.positions_);
   float diff = utility.findDistanceBetweenAngles(start_.positions_.at(2), b);
   //std::cout<<"\nb: "<<b<<" start_.positions_.at(2): "<<start_.positions_.at(2);
   //std::cout<<"\ndiff: "<<diff;
   if(fabs(diff) <= 0.52356f) {
     gradualTrajectory(bestTrajec_);
-  }
+  }*/
 
   
   // Send the best trajectory 
@@ -731,7 +731,7 @@ const std::string Planner::pathsToString() const {
   
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
-  goalThreshold_ = 0.2;
+  goalThreshold_ = 0.25;
   while( (start_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) {
     ros::spinOnce(); 
   } // end while

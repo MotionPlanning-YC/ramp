@@ -122,7 +122,7 @@ const ramp_msgs::Path Reflexxes::modifyPath(const ramp_msgs::Path p) {
 
     // The first part should be only rotation
     float diff = fabs(utility.findDistanceBetweenAngles(p.points.at(kp).motionState.positions.at(2), trgt_theta));
-    if(diff > PI/15 && trgt_theta != 0) {
+    if(diff > PI/18 && trgt_theta != 0) {
       ramp_msgs::KnotPoint temp;
       //std::cout<<"\np.points.at(kp).motionState.positions.at(2): "<<p.points.at(kp).motionState.positions.at(2);
       
@@ -148,7 +148,6 @@ const ramp_msgs::Path Reflexxes::modifyPath(const ramp_msgs::Path p) {
     } 
 
     // The second part should be only translation
-    // and it should be covered - no need to insert a new knot point for this
     if( (p.points.at(kp).motionState.positions.at(0) != p.points.at(kp+1).motionState.positions.at(0)) ||
         (p.points.at(kp).motionState.positions.at(1) != p.points.at(kp+1).motionState.positions.at(1))) 
     {
@@ -180,11 +179,7 @@ const ramp_msgs::Path Reflexxes::modifyPath(const ramp_msgs::Path p) {
 
   // Push on last knot point 
   result.points.push_back(p.points.at(p.points.size()-1));
-
-  /*if(p.points.size() < 3) {
-    std::cout<<"\n\nModifying path "<<utility.toString(p);
-    std::cout<<"\n\nResult: "<<utility.toString(result);
-  }*/
+  
   return result;
 } // End modifyPath
 
@@ -220,8 +215,8 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
               path.points[i].motionState.velocities.at(2));
     
     // Push the initial state onto trajectory
-    if(i==1)
-      res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(*inputParameters));
+    //if(i==1)
+      //res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(*inputParameters));
 
     // We go to the next knotpoint only once we reach this one
     while (!isFinalStateReached()) {
@@ -349,14 +344,14 @@ Reflexxes::Reflexxes() {
   inputParameters->MaxVelocityVector->VecData[2] =  1;
 
   // Maximum acceleration is 1m/s^2 and 2radian/s^2
-  inputParameters->MaxAccelerationVector->VecData[0] = 0.5;
-  inputParameters->MaxAccelerationVector->VecData[1] = 0.5;
+  inputParameters->MaxAccelerationVector->VecData[0] = 1;
+  inputParameters->MaxAccelerationVector->VecData[1] = 1;
   inputParameters->MaxAccelerationVector->VecData[2] = PI;
 
   // As the maximum jerk values are not known, this is just to try
   inputParameters->MaxJerkVector->VecData[0] = 1.0;
   inputParameters->MaxJerkVector->VecData[1] = 1.0;
-  inputParameters->MaxJerkVector->VecData[2] = PI/6;
+  inputParameters->MaxJerkVector->VecData[2] = PI;
 
   // Set the Target Position and Velocity vector
   inputParameters->TargetPositionVector->VecData[0] = 0.0;
