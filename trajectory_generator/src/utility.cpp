@@ -1,5 +1,6 @@
 #include "utility.h"
 
+Utility::Utility() {}
 
 
 /** This method returns the Euclidean distance between two position vectors */
@@ -54,17 +55,15 @@ const float Utility::findAngleFromAToB(const std::vector<float> a, const std::ve
 /** This method returns distance between orientations a1 and a2. The distance is in the range [-PI, PI]. */
 const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {
   float result;
-
-  // Find the difference
   float difference = a1 - a2;
   
-  // If difference > pi, the result should be in the third or fourth quadrants, [-PI,0] range
+  // If difference > pi, the result should be in [-PI,0] range
   if(difference > PI) {
     difference = fmodf(difference, PI);
     result = difference - PI;
   }
 
-  // If difference < -pi, the result should be in first or second quadrants, [0,PI] range
+  // If difference < -pi, the result should be in [0,PI] range
   else if(difference < -PI) {
     result = difference + (2*PI);
   }
@@ -105,9 +104,12 @@ const float Utility::getEuclideanDist(const std::vector<float> a, const std::vec
 }
 
 
-const std::string Utility::toString(const geometry_msgs::Pose2D p) const {
+const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
   std::ostringstream result;
-  result<<"\nPose2D: ("<<p.x<<", "<<p.y<<", "<<p.theta<<")";
+
+  result<<"\nConfiguration: "<<toString(kp.motionState);
+  result<<", Stop time: "<<kp.stopTime;
+
   return result.str();
 }
 
@@ -142,16 +144,6 @@ const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
   return result.str();
 }
 
-
-const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
-  std::ostringstream result;
-
-  result<<"\nConfiguration: "<<toString(kp.motionState);
-  result<<", Stop time: "<<kp.stopTime;
-
-  return result.str();
-}
-
 const std::string Utility::toString(const ramp_msgs::Configuration c) const {
   std::ostringstream result;
   result<<"(";
@@ -162,7 +154,6 @@ const std::string Utility::toString(const ramp_msgs::Configuration c) const {
   return result.str();
 }
 
-
 const std::string Utility::toString(const ramp_msgs::Path path) const {
   std::ostringstream result;
 
@@ -170,15 +161,6 @@ const std::string Utility::toString(const ramp_msgs::Path path) const {
   for(unsigned int i=0;i<path.points.size();i++) {
     result<<"\n "<<i<<": "<<toString(path.points.at(i));
   }
-
-  return result.str();
-}
-
-const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request tr) const {
-  std::ostringstream result;
-  result<<"\nTrajectory Request:";
-  result<<"\nPath:"<<toString(tr.path);
-  result<<"\nresolutionRate: "<<tr.resolutionRate;
 
   return result.str();
 }
@@ -193,8 +175,11 @@ const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
     
     result<<"\n   "<<i<<":";
     unsigned int index = traj.index_knot_points.at(i);
+
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);
     
+
+
     result<<"\n       Positions: ("<<p.positions.at(0);
     for(unsigned int k=1;k<p.positions.size();k++) {
       result<<", "<<p.positions.at(k);
@@ -230,11 +215,22 @@ const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
       result<<", "<<p.accelerations.at(k);
     }
     result<<")";
-
-    result<<"\n       Time From Start: "<<p.time_from_start;
-    result<<")";
+    
+    result<<"\n Time From Start: "<<p.time_from_start;
 
   }
 
   return result.str();
 }
+
+
+const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request tr) const {
+  std::ostringstream result;
+  result<<"\nTrajectory Request:";
+  result<<"\nPath:"<<toString(tr.path);
+  result<<"\nresolutionRate: "<<tr.resolutionRate;
+
+  return result.str();
+}
+
+

@@ -28,7 +28,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 set (CMAKE_CXX_FLAGS "-g")
 
 ## Declare a cpp executable
-add_executable(${PROJECT_NAME} src/main.cpp src/trajectory.cpp src/motion_state.cpp src/segment.cpp src/reflexxes.cpp src/utility.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/reflexxes.cpp src/utility.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ReflexxesTypeII)
 add_dependencies(${PROJECT_NAME} ramp_msgs_generate_messages_cpp)
 

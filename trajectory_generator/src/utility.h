@@ -1,20 +1,25 @@
 #ifndef UTILITY_H
 #define UTILITY_H
-
 #include <iostream>
 #include <vector>
-#include <string>
+#include <queue>
 #include <sstream>
 #include <math.h>
-#include "geometry_msgs/Pose2D.h"
-#include "ramp_msgs/TrajectoryRequest.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 #include "ramp_msgs/Path.h"
+#include "ramp_msgs/Trajectory.h"
 #include "ramp_msgs/Configuration.h"
-
+#include "ramp_msgs/TrajectoryRequest.h"
+#include <tf/transform_datatypes.h>
 #define PI 3.14159f
+
 
 class Utility {
   public:
+    Utility();
+    
     const float positionDistance(const std::vector<float> a, const std::vector<float> b) const;
 
     const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;
@@ -25,13 +30,12 @@ class Utility {
     
     const float getEuclideanDist(const std::vector<float> a, std::vector<float> b) const;
     
-    const std::string toString(const ramp_msgs::TrajectoryRequest::Request tr) const;
-    const std::string toString(const ramp_msgs::Path p) const;
     const std::string toString(const ramp_msgs::KnotPoint kp) const;
+    const std::string toString(const ramp_msgs::MotionState mp) const;
     const std::string toString(const ramp_msgs::Configuration c) const;
-    const std::string toString(const ramp_msgs::MotionState c) const;
-    const std::string toString(const geometry_msgs::Pose2D p) const;
+    const std::string toString(const ramp_msgs::Path path) const;
     const std::string toString(const ramp_msgs::Trajectory traj) const;
-
+    const std::string toString(const ramp_msgs::TrajectoryRequest::Request tr) const;
 };
-#endif
+
+#endif 
