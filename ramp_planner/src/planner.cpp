@@ -7,7 +7,7 @@
 
 Planner::Planner() : resolutionRate_(5), populationSize_(1), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
 {
-  controlCycle_ = ros::Duration(1.f / 2.f);
+  controlCycle_ = ros::Duration(1.f / 50.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
   imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
 }
@@ -704,8 +704,8 @@ const std::string Planner::pathsToString() const {
   kp1.motionState_.positions_.push_back(0);
   kp1.motionState_.positions_.push_back(2);
   kp1.motionState_.positions_.push_back(0);
-  kp2.motionState_.positions_.push_back(3.5);
-  kp2.motionState_.positions_.push_back(3.5);
+  kp2.motionState_.positions_.push_back(0);
+  kp2.motionState_.positions_.push_back(3);
   kp2.motionState_.positions_.push_back(0);
   
   kp1.motionState_.velocities_.push_back(0);
@@ -726,6 +726,8 @@ const std::string Planner::pathsToString() const {
 
   population_.clear();
   population_.add(traj);
+
+  std::cout<<"\nOriginal trajectory: "<<traj.toString();
  
   
 

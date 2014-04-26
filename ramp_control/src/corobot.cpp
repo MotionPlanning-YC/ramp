@@ -320,6 +320,7 @@ void Corobot::moveOnTrajectory(bool simulation) {
 
     // Move to the next point
     ros::Time g_time = end_times.at(num_traveled);
+    //std::cout<<"\nnum_traveled: "<<num_traveled<<" g_time: "<<ros::Time::now() - end_times.at(num_traveled);
     while(ros::ok() && ros::Time::now() < g_time) {
 
     
