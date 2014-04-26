@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
+Planner::Planner() : resolutionRate_(5), populationSize_(1), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
 {
   controlCycle_ = ros::Duration(1.f / 2.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
@@ -216,6 +216,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
 
   // std::cout<<"\nSpinning once\n";
   ros::spinOnce(); 
+  std::cout<<"\nControl cycle, robot pose: "<<start_.toString();
   
   // Obtain mutex on population and update it
   while(!mutex_pop_) {}
@@ -454,6 +455,7 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
 /** Send the fittest feasible trajectory to the robot package */
 void Planner::sendBest() {
 
+
   // If infeasible and too close to obstacle, 
   // Stop the robot by sending a blank trajectory
   if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < 2.f)) {
@@ -579,6 +581,9 @@ void Planner::updatePaths(MotionState start, ros::Duration dur) {
       if( dur > point.time_from_start) {
         throwaway++;
       }
+      else {
+        break;
+      }
     } //end for
 
     //std::cout<<"\nthrowaway: "<<throwaway;
@@ -693,6 +698,38 @@ const std::string Planner::pathsToString() const {
   // initialize population
   init_population();
   
+  KnotPoint kp1;
+  KnotPoint kp2;
+  
+  kp1.motionState_.positions_.push_back(0);
+  kp1.motionState_.positions_.push_back(2);
+  kp1.motionState_.positions_.push_back(0);
+  kp2.motionState_.positions_.push_back(3.5);
+  kp2.motionState_.positions_.push_back(3.5);
+  kp2.motionState_.positions_.push_back(0);
+  
+  kp1.motionState_.velocities_.push_back(0);
+  kp1.motionState_.velocities_.push_back(0);
+  kp1.motionState_.velocities_.push_back(0);
+  kp2.motionState_.velocities_.push_back(0);
+  kp2.motionState_.velocities_.push_back(0);
+  kp2.motionState_.velocities_.push_back(0);
+
+  Path p(kp1, kp2);
+  
+  ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
+  requestTrajectory(tr);
+  
+  RampTrajectory traj(0);
+  traj.msg_trajec_ = tr.response.trajectory;
+  traj.path_ = p;
+
+  population_.clear();
+  population_.add(traj);
+ 
+  
+
+
   /*std::cout<<"\nPopulation initialized!\n";
   std::cout<<"\npaths_.size(): "<<paths_.size()<<"\n";
   for(unsigned int i=0;i<paths_.size();i++) {
@@ -704,6 +741,7 @@ const std::string Planner::pathsToString() const {
 
 
   // Initialize the modifier
+  // *****! Not doing modifications *****!
   modifier_->paths_ = paths_;
 
 
@@ -719,10 +757,12 @@ const std::string Planner::pathsToString() const {
   // createSubpopulations();
   
   // Start the planning cycle timer
-  planningCycleTimer_.start();
+  // ******! Do not do modifications *****!
+  //planningCycleTimer_.start();
 
   // Wait for 75 generations before starting 
-  while(generation_ < 100) {ros::spinOnce();}
+  // *****! Not waiting *****!
+  //while(generation_ < 100) {ros::spinOnce();}
 
   std::cout<<"\n***************Starting Control Cycle*****************";
   // Start the control cycle timer
@@ -745,7 +785,8 @@ const std::string Planner::pathsToString() const {
   h_control_->send(empty);
   
   std::cout<<"\nPlanning complete!\n";
+  std::cout<<"\nLatest pose: "<<start_.toString();
 
-  std::cout<<"\nFinal population: ";
-  std::cout<<"\n"<<pathsToString(); 
+  //std::cout<<"\nFinal population: ";
+  //std::cout<<"\n"<<pathsToString(); 
 } // End go

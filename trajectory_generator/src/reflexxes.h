@@ -14,7 +14,7 @@
 
 // defines
 #define NUMBER_OF_DOFS 3
-#define CYCLE_TIME_IN_SECONDS 0.075
+#define CYCLE_TIME_IN_SECONDS 0.02
 
 class Reflexxes
 {
@@ -38,7 +38,7 @@ class Reflexxes
     trajectory_msgs::JointTrajectoryPoint spinOnce();
 
 //Set the target of the Reflexxes library
-    void setTarget(float x, float y, float theta, float x_dot, float y_dot, float angular_velocity);
+    void setTarget(float x, float y, float theta, float x_dot, float y_dot, float angular_velocity, bool print);
 
 // Returns true if the target has been reached
     bool isFinalStateReached();

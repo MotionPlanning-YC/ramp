@@ -71,7 +71,7 @@ const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(cons
 
 
 //Set the target of the Reflexxes library
-void Reflexxes::setTarget(float x, float y, float theta, float x_dot, float y_dot, float angular_velocity) {
+void Reflexxes::setTarget(float x, float y, float theta, float x_dot, float y_dot, float angular_velocity, bool print) {
   
   // Set the Target Position and Velocity vector
   inputParameters->TargetPositionVector->VecData[0] = x;
@@ -81,21 +81,22 @@ void Reflexxes::setTarget(float x, float y, float theta, float x_dot, float y_do
   // is the orientation needed to reach the target
   inputParameters->TargetPositionVector->VecData[2] = theta;
 
-
-  /*std::cout<<"\nTarget Position: ";
-  std::cout<<"\n"<<inputParameters->TargetPositionVector->VecData[0];
-  std::cout<<", "<<inputParameters->TargetPositionVector->VecData[1];
-  std::cout<<", "<<inputParameters->TargetPositionVector->VecData[2];*/
-
   // Set the target velocity, which is set in the reference frame coordinates
   inputParameters->TargetVelocityVector->VecData[0] = x_dot;
   inputParameters->TargetVelocityVector->VecData[1] = y_dot;
   inputParameters->TargetVelocityVector->VecData[2] = angular_velocity;
       
-  /*std::cout<<"\nTarget Velocity: ";
-  std::cout<<"\n"<<inputParameters->TargetVelocityVector->VecData[0];
-  std::cout<<", "<<inputParameters->TargetVelocityVector->VecData[1];
-  std::cout<<", "<<inputParameters->TargetVelocityVector->VecData[2];*/
+  if(print) {
+    std::cout<<"\nTarget Position: ";
+    std::cout<<"\n"<<inputParameters->TargetPositionVector->VecData[0];
+    std::cout<<", "<<inputParameters->TargetPositionVector->VecData[1];
+    std::cout<<", "<<inputParameters->TargetPositionVector->VecData[2];
+
+    std::cout<<"\nTarget Velocity: ";
+    std::cout<<"\n"<<inputParameters->TargetVelocityVector->VecData[0];
+    std::cout<<", "<<inputParameters->TargetVelocityVector->VecData[1];
+    std::cout<<", "<<inputParameters->TargetVelocityVector->VecData[2];
+  }
 } // End setTarget
 
 
@@ -203,7 +204,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
   res.trajectory.index_knot_points.push_back(0);
 
   // Go through every knotpoint in the path
-  for (int i = 1; i<path.points.size() ; i++) {
+  for (int i = 1; i<path.points.size(); i++) {
     resultValue = 0;
     
     // Set the new knotpoint as the target
@@ -212,7 +213,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ram
               path.points[i].motionState.positions.at(2), 
               path.points[i].motionState.velocities.at(0), 
               path.points[i].motionState.velocities.at(1), 
-              path.points[i].motionState.velocities.at(2));
+              path.points[i].motionState.velocities.at(2), false);
     
     // Push the initial state onto trajectory
     //if(i==1)
@@ -341,17 +342,17 @@ Reflexxes::Reflexxes() {
   // Maximum velocity beeing 0.5m/s and 1 radian/s (around 60 degrees/s )
   inputParameters->MaxVelocityVector->VecData[0] = .5;
   inputParameters->MaxVelocityVector->VecData[1] = .5;
-  inputParameters->MaxVelocityVector->VecData[2] =  1;
+  inputParameters->MaxVelocityVector->VecData[2] =  PI/4;
 
   // Maximum acceleration is 1m/s^2 and 2radian/s^2
   inputParameters->MaxAccelerationVector->VecData[0] = 1;
   inputParameters->MaxAccelerationVector->VecData[1] = 1;
-  inputParameters->MaxAccelerationVector->VecData[2] = PI;
+  inputParameters->MaxAccelerationVector->VecData[2] = PI/3;
 
   // As the maximum jerk values are not known, this is just to try
   inputParameters->MaxJerkVector->VecData[0] = 1.0;
   inputParameters->MaxJerkVector->VecData[1] = 1.0;
-  inputParameters->MaxJerkVector->VecData[2] = PI;
+  inputParameters->MaxJerkVector->VecData[2] = 2;
 
   // Set the Target Position and Velocity vector
   inputParameters->TargetPositionVector->VecData[0] = 0.0;
