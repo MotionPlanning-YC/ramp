@@ -300,11 +300,7 @@ void Corobot::moveOnTrajectory(bool simulation) {
   while( (num_traveled+1) < num) { 
     //std::cout<<"\nnum_traveled: "<<num_traveled;
     restart = false;
-   
-    //if(num_traveled % 10 == 0) {
-      //std::cout<<"\nnum_traveled: "<<num_traveled<<"\n";
-    //}
-
+    
     // Force a stop until there is no imminent collision
     while(checkImminentCollision()) {
       ros::spinOnce();
@@ -320,7 +316,7 @@ void Corobot::moveOnTrajectory(bool simulation) {
 
     // Move to the next point
     ros::Time g_time = end_times.at(num_traveled);
-    //std::cout<<"\nnum_traveled: "<<num_traveled<<" g_time: "<<ros::Time::now() - end_times.at(num_traveled);
+    //std::cout<<"\nnum_traveled: "<<num_traveled<<" time spent moving: "<<end_times.at(num_traveled) - ros::Time::now();
     while(ros::ok() && ros::Time::now() < g_time) {
 
     

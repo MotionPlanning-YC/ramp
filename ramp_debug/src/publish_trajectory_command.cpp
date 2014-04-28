@@ -18,13 +18,13 @@ int main(int argc, char** argv) {
   // Build a Path
   ramp_msgs::KnotPoint c1;
   c1.motionState.positions.push_back(0);
-  c1.motionState.positions.push_back(2);
+  c1.motionState.positions.push_back(0);
   c1.motionState.positions.push_back(0);
   
   ramp_msgs::KnotPoint c2;
   c2.motionState.positions.push_back(0);
-  c2.motionState.positions.push_back(2);
-  c2.motionState.positions.push_back(0.45);
+  c2.motionState.positions.push_back(0);
+  c2.motionState.positions.push_back(PI/2);
 
 
   ramp_msgs::KnotPoint c3;

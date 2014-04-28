@@ -119,13 +119,13 @@ const ramp_msgs::Path Reflexxes::modifyPath(const ramp_msgs::Path p) {
                                         p.points.at(kp).motionState.positions.at(1),
                                         p.points.at(kp+1).motionState.positions.at(0),
                                         p.points.at(kp+1).motionState.positions.at(1));
-    //std::cout<<"\nkp: "<<kp<<" trgt_theta: "<<trgt_theta;
+    std::cout<<"\nkp: "<<kp<<" trgt_theta: "<<trgt_theta;
 
     // The first part should be only rotation
     float diff = fabs(utility.findDistanceBetweenAngles(p.points.at(kp).motionState.positions.at(2), trgt_theta));
     if(diff > PI/18 && trgt_theta != 0) {
       ramp_msgs::KnotPoint temp;
-      //std::cout<<"\np.points.at(kp).motionState.positions.at(2): "<<p.points.at(kp).motionState.positions.at(2);
+      std::cout<<"\np.points.at(kp).motionState.positions.at(2): "<<p.points.at(kp).motionState.positions.at(2);
       
       // Positions
       // Push on the same x,y values, but the target orientation
@@ -340,14 +340,14 @@ Reflexxes::Reflexxes() {
   // Here set up the max velocity, acceleration and jerk
   
   // Maximum velocity beeing 0.5m/s and 1 radian/s (around 60 degrees/s )
-  inputParameters->MaxVelocityVector->VecData[0] = .5;
-  inputParameters->MaxVelocityVector->VecData[1] = .5;
-  inputParameters->MaxVelocityVector->VecData[2] =  PI/4;
+  inputParameters->MaxVelocityVector->VecData[0] = .33;
+  inputParameters->MaxVelocityVector->VecData[1] = .33;
+  inputParameters->MaxVelocityVector->VecData[2] =  PI/2;
 
   // Maximum acceleration is 1m/s^2 and 2radian/s^2
-  inputParameters->MaxAccelerationVector->VecData[0] = 1;
-  inputParameters->MaxAccelerationVector->VecData[1] = 1;
-  inputParameters->MaxAccelerationVector->VecData[2] = PI/3;
+  inputParameters->MaxAccelerationVector->VecData[0] = 0.75;
+  inputParameters->MaxAccelerationVector->VecData[1] = 0.75;
+  inputParameters->MaxAccelerationVector->VecData[2] = 3*PI/4;
 
   // As the maximum jerk values are not known, this is just to try
   inputParameters->MaxJerkVector->VecData[0] = 1.0;

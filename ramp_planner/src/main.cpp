@@ -26,12 +26,12 @@ const std::vector<Configuration> getStartGoal(bool robot0) {
   
   if(!robot0) {
     s.K_.push_back(0);
-    s.K_.push_back(2);
+    s.K_.push_back(0);
     s.K_.push_back(0);
     
     g.K_.push_back(0);
-    g.K_.push_back(3);
     g.K_.push_back(0);
+    g.K_.push_back(PI/2);
   }
   else {
     s.K_.push_back(3.5f);
