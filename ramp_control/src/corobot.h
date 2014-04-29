@@ -4,8 +4,6 @@
 
 #include "ros/ros.h"
 #include "utility.h"
-
-/** ROS msgs and srvs */
 #include "nav_msgs/Odometry.h"
 #include "corobot_msgs/MotorCommand.h"
 #include "geometry_msgs/Twist.h"
@@ -13,6 +11,7 @@
 #include "ramp_msgs/Trajectory.h"
 #include "tf/transform_datatypes.h"
 #include "ramp_msgs/MotionState.h"
+#include "trajectory_request_handler.h"
 #include <math.h>
 
 class Corobot {
@@ -59,45 +58,32 @@ class Corobot {
     static const std::string TOPIC_STR_ODOMETRY;
     static const std::string TOPIC_STR_UPDATE;
     static const std::string TOPIC_STR_TWIST;
-    static const int POSE_COUNT_THRESHOLD = 1;
     static const int ACCELERATION_CONSTANT = 50;
 
   private:
 
     /** Methods **/
-    const float getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const;
-    const float getAngularSpeed(const float direction1, const float direction2) const;
-    float getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const;
-    void calculateSpeedsAndTime ();
-    void printVectors() const;
+
+    void                        sendTwist() const;
+    void                        calculateSpeedsAndTime();
+    void                        printVectors() const;
+    const bool                  checkImminentCollision() const;
+    const bool                  checkOrientation(const int i) const;
+    const ramp_msgs::Trajectory getRotationTrajectory() const;
     
     
     /** Data Members **/
-    Utility u;
-    
-    const unsigned int k_dof_;
-    
-    std::vector<ros::Time> end_times; // Save the ending time of each waypoint
-    std::vector<float> speeds; //  Linear speed for each trajectory
-    std::vector<float> angular_speeds; // Angular Speed needed over 3s to get the correct orientation after each knot point reached.
-    std::vector<float> orientations; // The orientation needed to be at each knotpoint.
 
-    geometry_msgs::Twist twist_;
-    float angle_at_start; // the angle of the robot when the robot gets a trajectory.
-
-    bool restart;
-    bool mutex_;
-    bool moving_;
-    bool trajec_updated_;
-    
-    int num;
-    int num_traveled;
-    int i_knot_points;
-
-    void lockMutex();
-    void releaseMutex();
-    void sendTwist() const;
-    const bool checkImminentCollision() const;
+    Utility                 utility_;
+    bool                    restart_;
+    int                     num;
+    int                     num_traveled;
+    const unsigned int      k_dof_;
+    std::vector<ros::Time>  end_times; 
+    std::vector<float>      speeds; 
+    std::vector<float>      angular_speeds;
+    std::vector<float>      orientations_;
+    geometry_msgs::Twist    twist_;
 };
 
 #endif

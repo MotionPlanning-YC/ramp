@@ -104,6 +104,19 @@ const float Utility::getEuclideanDist(const std::vector<float> a, const std::vec
 }
 
 
+const float Utility::getEuclideanDist(const ramp_msgs::KnotPoint a, const ramp_msgs::KnotPoint b) const {
+  std::vector<float> v_a;
+  v_a.push_back(a.motionState.positions.at(0));
+  v_a.push_back(a.motionState.positions.at(1));
+  
+  std::vector<float> v_b;
+  v_b.push_back(b.motionState.positions.at(0));
+  v_b.push_back(b.motionState.positions.at(1));
+
+  return getEuclideanDist(v_a, v_b);
+}
+
+
 const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
   std::ostringstream result;
 

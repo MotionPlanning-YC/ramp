@@ -25,6 +25,7 @@ class CollisionDetection {
     };  // End QueryResult
 
 
+    /***** Constructor and Destructor *****/
     CollisionDetection(); 
     ~CollisionDetection();
 
@@ -52,9 +53,8 @@ class CollisionDetection {
     const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const MotionType mt) const;
 
     /***** Data Members *****/
-    ros::Publisher pub_pop;
     TrajectoryRequestHandler* h_traj_req_;
-    Utility utility;
+    Utility                   utility;
 };
 
 #endif

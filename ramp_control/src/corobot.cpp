@@ -11,7 +11,7 @@ const float timeNeededToTurn = 2.5;
 
 
 
-Corobot::Corobot() : k_dof_(3), restart(false), mutex_(false), moving_(false), num(0), num_traveled(0), i_knot_points(0) { 
+Corobot::Corobot() : restart_(false), num(0), num_traveled(0), k_dof_(3) { 
   for(unsigned int i=0;i<k_dof_;i++) {
     configuration_.positions.push_back(0);
     configuration_.velocities.push_back(0);
@@ -22,51 +22,6 @@ Corobot::Corobot() : k_dof_(3), restart(false), mutex_(false), moving_(false), n
 
 
 Corobot::~Corobot() {}
-
-
-void Corobot::releaseMutex() {
-  mutex_ = true;
-}
-
-/** Returns true if the mutex was initially locked */
-void Corobot::lockMutex() {
-  while(!mutex_) {}
-  mutex_ = false;
-}
-
-
-
-/** This is a callback for receiving odometry from the robot and sets the configuration of the robot */
-void Corobot::updateState(const nav_msgs::Odometry& msg) {
-  
-  // Clear position and velocity vectors
-  configuration_.positions.clear();
-  configuration_.velocities.clear();
-  
-  // Set latest positions
-  configuration_.positions.push_back(msg.pose.pose.position.x);
-  configuration_.positions.push_back(msg.pose.pose.position.y);
-  configuration_.positions.push_back(tf::getYaw(msg.pose.pose.orientation));
-
-  // Set latest velocities
-  configuration_.velocities.push_back(msg.twist.twist.linear.x);
-  configuration_.velocities.push_back(msg.twist.twist.linear.y);
-  configuration_.velocities.push_back(msg.twist.twist.angular.z);
-} // End updateState
-
-
-
-
-/** This method is on a timer to publish the robot's latest configuration */
-void Corobot::updatePublishTimer(const ros::TimerEvent&) {
-    
-  if (pub_update_) {
-      pub_update_.publish(configuration_);
-  }
-} // End updatePublishTimer
-
-
-
 
 
 /** Publishes the MotorCommand msg. The Corobot will drive based on the msg. */
@@ -140,76 +95,64 @@ void Corobot::turn(const float speed, const float angle) const {
  pub_twist_.publish(v);
 }
 
+
+
+/** This is a callback for receiving odometry from the robot and sets the configuration of the robot */
+void Corobot::updateState(const nav_msgs::Odometry& msg) {
+  
+  // Clear position and velocity vectors
+  configuration_.positions.clear();
+  configuration_.velocities.clear();
+  
+  // Set latest positions
+  configuration_.positions.push_back(msg.pose.pose.position.x);
+  configuration_.positions.push_back(msg.pose.pose.position.y);
+  configuration_.positions.push_back(tf::getYaw(msg.pose.pose.orientation));
+
+  // Set latest velocities
+  configuration_.velocities.push_back(msg.twist.twist.linear.x);
+  configuration_.velocities.push_back(msg.twist.twist.linear.y);
+  configuration_.velocities.push_back(msg.twist.twist.angular.z);
+} // End updateState
+
+
+
+
+/** This method is on a timer to publish the robot's latest configuration */
+void Corobot::updatePublishTimer(const ros::TimerEvent&) {
+    
+  if (pub_update_) {
+      pub_update_.publish(configuration_);
+  }
+} // End updatePublishTimer
+
+
+
 /** This method updates the Corobot's trajectory
  *   It calls calculateSpeedsAndTimes to update the robot's vectors needed to move */
 void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
-  ////std::cout<<"\nIn updateTrajectory!\n";
+  //std::cout<<"\nIn updateTrajectory!\n";
   
-  restart = true;
-  num_traveled = 0;
-  i_knot_points = 0;
-  trajectory_ = msg;
-  num = trajectory_.trajectory.points.size();
+  // Update data members
+  restart_      = true;
+  num_traveled  = 0;
+  trajectory_   = msg;
+  num           = trajectory_.trajectory.points.size();
+
+  // Update vectors for speeds and times
   calculateSpeedsAndTime();
-
-  //std::cout<<"\nVectors now:";
-  //printVectors();
-}
+} // End updateTrajectory
 
 
-
-const float Corobot::getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const {
-
-/*  
-  for(unsigned int i=0;i<3;i++) {
-    std::cout<<waypoint1.positions.at(i)<<", ";
-  }
-  
-  for(unsigned int i=0;i<3;i++) {
-    std::cout<<waypoint2.positions.at(i)<<", ";
-  }
-*/
-  // Get the velocity vector, index 0 is x component, index 1 is y component
-  float v[2];
-  v[0] = waypoint2.positions.at(0) - waypoint1.positions.at(0);
-  v[1] = waypoint2.positions.at(1) - waypoint1.positions.at(1);
-
-  float mag_v = sqrt( pow(v[0],2) + pow(v[1],2) );
-  float time = waypoint2.time_from_start.toSec() - waypoint1.time_from_start.toSec();
-  float speed = mag_v / time;
-  //std::cout<<"\nspeed: "<<speed;
-  
-  return speed;
-}
-
-const float Corobot::getAngularSpeed(const float direction1, const float direction2) const {
-
-  float delta_angle = direction2 - direction1;
-
-  return delta_angle / timeNeededToTurn;
-}
-
-/**
- * Get the angle orientation of a trajectory
- */ 
-float Corobot::getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const
-{
-    float x_dif = waypoint2.positions.at(0) - waypoint1.positions.at(0); //  difference in x between the waypoint 2 and 1
-    float y_dif = waypoint2.positions.at(1) - waypoint1.positions.at(1); //  difference in y between the waypoint 2 and 1
-    float angle = asin((y_dif)/(sqrt(x_dif*x_dif + y_dif*y_dif))); //  Orientation of this trajectory in the X/Y axes
-    if (x_dif < 0)
-	    return M_PI - angle;
-    return angle;
-}
 
 /** 
- * Calculate all the necessary values to move the robot: the linear and angular velocities as well as ending times
+ * Calculate all the necessary values to move the robot: 
+ * the linear and angular velocities as well as ending times
  * This method sets the vectors speeds, angular_speeds, and end_times
- */
-void Corobot::calculateSpeedsAndTime ()
-{
+ **/
+void Corobot::calculateSpeedsAndTime () {
   angular_speeds.clear();
-  orientations.clear();
+  orientations_.clear();
   speeds.clear();
   end_times.clear();
   
@@ -219,7 +162,6 @@ void Corobot::calculateSpeedsAndTime ()
   // Get the starting time
   ros::Time start_time = ros::Time::now();
 
-  float speed_loc;
   // We go through all the waypoints
   for(int i=0;i<num-1;i++) {
 
@@ -229,8 +171,13 @@ void Corobot::calculateSpeedsAndTime ()
 
     // Push on the linear speed for the waypoint
     // Find the norm of the velocity vector
-    speed_loc = sqrt(pow(current.velocities.at(0),2) + pow(current.velocities.at(1), 2));
-    speeds.push_back(speed_loc);
+    speeds.push_back( sqrt(pow(current.velocities.at(0),2)
+                           + pow(current.velocities.at(1),2) ));
+
+
+    // Push on the orientation needed to move 
+    // from point i to point i+1
+    orientations_.push_back(utility_.findAngleFromAToB(current, next));
       
 
     // Push on the angular speed for the waypoint
@@ -239,10 +186,6 @@ void Corobot::calculateSpeedsAndTime ()
     
     // Calculate the ending time for each waypoints
     end_times.push_back(start_time + next.time_from_start );
-
-    // Push on orientation at knot point
-    orientations.push_back(current.positions.at(2));
-
   } 
   
   //printVectors();
@@ -258,6 +201,8 @@ void Corobot::sendTwist(const geometry_msgs::Twist t) const {
   pub_twist_.publish(t); 
 }
 
+
+/** This method prints out the information vectors */
 void Corobot::printVectors() const {
     
   std::cout<<"\nspeeds: [";
@@ -277,9 +222,8 @@ void Corobot::printVectors() const {
     std::cout<<angular_speeds.at(i)<<", ";
   }
   std::cout<<angular_speeds.at(angular_speeds.size()-1)<<"]";
+} // End printVectors
 
-
-}
 
 
 /** Returns true if there is imminent collision */
@@ -290,8 +234,40 @@ const bool Corobot::checkImminentCollision() const {
 }
 
 
+/** 
+ * Returns true if the robot has orientation to move 
+ * from point i to point i+1
+ **/
+const bool Corobot::checkOrientation(const int i) const {
+  
+  float diff = utility_.findDistanceBetweenAngles(configuration_.positions.at(2), orientations_.at(i));
+
+  if(diff > PI/18) {
+    return false;
+  }
+
+  return true;
+}
+
+const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
+  ramp_msgs::Trajectory result;
+
+  ramp_msgs::TrajectoryRequest tr; 
+  ramp_msgs::KnotPoint temp1;
+  ramp_msgs::KnotPoint temp2;
+  temp1.motionState = configuration_;
+  temp2.motionState = configuration_;
+  temp2.motionState.positions.at(2) = orientations_.at(num_traveled);
+      
+
+   
+
+  return result;
+}
+
+/** This method moves the robot along trajectory_ */
 void Corobot::moveOnTrajectory(bool simulation) {
-  restart = false;
+  restart_ = false;
   ros::Rate r(50);
     
 
@@ -299,11 +275,17 @@ void Corobot::moveOnTrajectory(bool simulation) {
   // Execute the trajectory
   while( (num_traveled+1) < num) { 
     //std::cout<<"\nnum_traveled: "<<num_traveled;
-    restart = false;
+    restart_ = false;
     
     // Force a stop until there is no imminent collision
     while(checkImminentCollision()) {
       ros::spinOnce();
+    }
+
+    // Check that we are at the correct orientation
+    // If not, rotate
+    while(!checkOrientation(num_traveled)) {
+
     }
     
     // Set velocities
@@ -312,24 +294,23 @@ void Corobot::moveOnTrajectory(bool simulation) {
     //std::cout<<"\ntwist_linear: "<<twist_.linear.x;
     //std::cout<<"\ntwist_angular: "<<twist_.angular.z<<"\n";
     //std::cout<<"\nend_times.size():"<<end_times.size()<<"\n";
-    //std::cout<<"\norientations.size():"<<orientations.size()<<"\n";
+    //std::cout<<"\norientations_.size():"<<orientations_.size()<<"\n";
 
     // Move to the next point
     ros::Time g_time = end_times.at(num_traveled);
     //std::cout<<"\nnum_traveled: "<<num_traveled<<" time spent moving: "<<end_times.at(num_traveled) - ros::Time::now();
     while(ros::ok() && ros::Time::now() < g_time) {
-
     
       // Adjust the angular speed to correct errors in turning
       // Commented out because it was producing erratic driving
       // Should be fixed at some point
       if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.15) {
         //std::cout<<"\ninitial_theta: "<<initial_theta;
-        float actual_theta = u.displaceAngle(initial_theta, configuration_.positions.at(2));
+        float actual_theta = utility_.displaceAngle(initial_theta, configuration_.positions.at(2));
         
-        float dist = u.findDistanceBetweenAngles(actual_theta, orientations.at(num_traveled));
+        float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled));
         //std::cout<<"\nactual theta: "<<actual_theta;
-        //std::cout<<"\norientations.at("<<num_traveled<<"): "<<orientations.at(num_traveled);
+        //std::cout<<"\norientations_.at("<<num_traveled<<"): "<<orientations_.at(num_traveled);
         //std::cout<<"\ndist: "<<dist;
         twist_.angular.z = -1*dist;
       }
@@ -340,20 +321,20 @@ void Corobot::moveOnTrajectory(bool simulation) {
       // If we have the simulation up, publish to cmd_vel
       if(simulation) pub_cmd_vel_.publish(twist_);
       
-      //Sleep
+      // Sleep
       r.sleep();
       
       // Spin to check for updates
       ros::spinOnce();
 
       // Check if a new trajectory has been received before we reach next point
-      if(restart) {
+      if(restart_) {
         break;
       }
     } // end while (move to the next point
     
     // If a new trajectory was received, restart the outer while 
-    if(restart) {
+    if(restart_) {
       continue;
     }
 

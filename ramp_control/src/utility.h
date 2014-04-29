@@ -6,7 +6,9 @@
 #include <string>
 #include <sstream>
 #include <math.h>
+#include "ramp_msgs/TrajectoryRequest.h"
 #include "ramp_msgs/Range.h"
+
 
 #define PI 3.14159f
 
@@ -21,6 +23,7 @@ class Utility {
     const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;
 
     const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;
+    const float findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;
     
     const float findDistanceBetweenAngles(const float a1, const float a2) const;
     

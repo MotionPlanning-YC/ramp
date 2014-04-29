@@ -699,53 +699,19 @@ const std::string Planner::pathsToString() const {
   // initialize population
   init_population();
   
-  KnotPoint kp1;
-  KnotPoint kp2;
-  
-  kp1.motionState_.positions_.push_back(0);
-  kp1.motionState_.positions_.push_back(0);
-  kp1.motionState_.positions_.push_back(0);
-  kp2.motionState_.positions_.push_back(0);
-  kp2.motionState_.positions_.push_back(0);
-  kp2.motionState_.positions_.push_back(PI/2);
-  
-  kp1.motionState_.velocities_.push_back(0);
-  kp1.motionState_.velocities_.push_back(0);
-  kp1.motionState_.velocities_.push_back(0);
-  kp2.motionState_.velocities_.push_back(0);
-  kp2.motionState_.velocities_.push_back(0);
-  kp2.motionState_.velocities_.push_back(0);
 
-  Path p(kp1, kp2);
-  
-  ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
-  requestTrajectory(tr);
-  
-  RampTrajectory traj(0);
-  traj.msg_trajec_ = tr.response.trajectory;
-  traj.path_ = p;
-
-  population_.clear();
-  population_.add(traj);
-
-  std::cout<<"\nOriginal trajectory: "<<traj.toString();
- 
-  
-
-
-  /*std::cout<<"\nPopulation initialized!\n";
+  std::cout<<"\nPopulation initialized!\n";
   std::cout<<"\npaths_.size(): "<<paths_.size()<<"\n";
   for(unsigned int i=0;i<paths_.size();i++) {
     std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
   }
-  std::cout<<"\n";*/
+  std::cout<<"\n";
   // std::cout<<"\nPress enter to continue\n";
   // std::cin.get();
 
 
   // Initialize the modifier
-  // *****! Not doing modifications *****!
-  //modifier_->paths_ = paths_;
+  modifier_->paths_ = paths_;
 
 
   // Evaluate the population and get the initial trajectory to move on
@@ -760,12 +726,10 @@ const std::string Planner::pathsToString() const {
   // createSubpopulations();
   
   // Start the planning cycle timer
-  // ******! Do not do modifications *****!
-  //planningCycleTimer_.start();
+  planningCycleTimer_.start();
 
-  // Wait for 75 generations before starting 
-  // *****! Not waiting *****!
-  //while(generation_ < 100) {ros::spinOnce();}
+  // Wait for 100 generations before starting 
+  while(generation_ < 100) {ros::spinOnce();}
 
   std::cout<<"\n***************Starting Control Cycle*****************\n";
   // Start the control cycle timer

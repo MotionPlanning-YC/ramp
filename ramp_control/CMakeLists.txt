@@ -25,7 +25,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 ## Debugging flag for using gdb
 set (CMAKE_CXX_FLAGS "-g")
 
-add_executable(${PROJECT_NAME} src/main.cpp src/corobot.cpp src/utility.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/corobot.cpp src/trajectory_request_handler.cpp src/utility.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ramp_msgs_generate_messages_cpp)
 
