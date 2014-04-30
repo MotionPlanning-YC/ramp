@@ -4,109 +4,106 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-ACCELERATION_CONSTANT	corobot.h	/^    static const int ACCELERATION_CONSTANT = 50;$/;"	m	class:Corobot	access:public
+ACCELERATION_CONSTANT	corobot.h	/^    static const int          ACCELERATION_CONSTANT = 50;$/;"	m	class:Corobot	access:public
 BASE_WIDTH	corobot.cpp	/^const float BASE_WIDTH=0.2413;$/;"	v
 COROBOT_H	corobot.h	3;"	d
-Corobot	corobot.cpp	/^Corobot::Corobot() : k_dof_(3), restart(false), mutex_(false), moving_(false), num(0), num_traveled(0), i_knot_points(0) { $/;"	f	class:Corobot	signature:()
+Corobot	corobot.cpp	/^Corobot::Corobot() : restart_(false), num(0), num_traveled(0), k_dof_(3), h_traj_req_(0) { $/;"	f	class:Corobot	signature:()
 Corobot	corobot.h	/^    Corobot();$/;"	p	class:Corobot	access:public	signature:()
 Corobot	corobot.h	/^class Corobot {$/;"	c
-Corobot::ACCELERATION_CONSTANT	corobot.h	/^    static const int ACCELERATION_CONSTANT = 50;$/;"	m	class:Corobot	access:public
-Corobot::Corobot	corobot.cpp	/^Corobot::Corobot() : k_dof_(3), restart(false), mutex_(false), moving_(false), num(0), num_traveled(0), i_knot_points(0) { $/;"	f	class:Corobot	signature:()
+Corobot::ACCELERATION_CONSTANT	corobot.h	/^    static const int          ACCELERATION_CONSTANT = 50;$/;"	m	class:Corobot	access:public
+Corobot::Corobot	corobot.cpp	/^Corobot::Corobot() : restart_(false), num(0), num_traveled(0), k_dof_(3), h_traj_req_(0) { $/;"	f	class:Corobot	signature:()
 Corobot::Corobot	corobot.h	/^    Corobot();$/;"	p	class:Corobot	access:public	signature:()
-Corobot::POSE_COUNT_THRESHOLD	corobot.h	/^    static const int POSE_COUNT_THRESHOLD = 1;$/;"	m	class:Corobot	access:public
 Corobot::TOPIC_STR_ODOMETRY	corobot.cpp	/^const std::string Corobot::TOPIC_STR_ODOMETRY="odometry";$/;"	m	class:Corobot	file:
-Corobot::TOPIC_STR_ODOMETRY	corobot.h	/^    static const std::string TOPIC_STR_ODOMETRY;$/;"	m	class:Corobot	access:public
+Corobot::TOPIC_STR_ODOMETRY	corobot.h	/^    static const std::string  TOPIC_STR_ODOMETRY;$/;"	m	class:Corobot	access:public
 Corobot::TOPIC_STR_PHIDGET_MOTOR	corobot.cpp	/^const std::string Corobot::TOPIC_STR_PHIDGET_MOTOR="PhidgetMotor";$/;"	m	class:Corobot	file:
-Corobot::TOPIC_STR_PHIDGET_MOTOR	corobot.h	/^    static const std::string TOPIC_STR_PHIDGET_MOTOR;$/;"	m	class:Corobot	access:public
+Corobot::TOPIC_STR_PHIDGET_MOTOR	corobot.h	/^    static const std::string  TOPIC_STR_PHIDGET_MOTOR;$/;"	m	class:Corobot	access:public
 Corobot::TOPIC_STR_TWIST	corobot.cpp	/^const std::string Corobot::TOPIC_STR_TWIST="twist";$/;"	m	class:Corobot	file:
-Corobot::TOPIC_STR_TWIST	corobot.h	/^    static const std::string TOPIC_STR_TWIST;$/;"	m	class:Corobot	access:public
+Corobot::TOPIC_STR_TWIST	corobot.h	/^    static const std::string  TOPIC_STR_TWIST;$/;"	m	class:Corobot	access:public
 Corobot::TOPIC_STR_UPDATE	corobot.cpp	/^const std::string Corobot::TOPIC_STR_UPDATE="update";$/;"	m	class:Corobot	file:
-Corobot::TOPIC_STR_UPDATE	corobot.h	/^    static const std::string TOPIC_STR_UPDATE;$/;"	m	class:Corobot	access:public
-Corobot::accumulateDist	corobot.h	/^    void accumulateDist();$/;"	p	class:Corobot	access:private	signature:()
-Corobot::angle_at_start	corobot.h	/^    float angle_at_start; \/\/ the angle of the robot when the robot gets a trajectory. $/;"	m	class:Corobot	access:private
-Corobot::angular_speeds	corobot.h	/^    std::vector<float> angular_speeds; \/\/ Angular Speed needed over 3s to get the correct orientation after each knot point reached.$/;"	m	class:Corobot	access:private
-Corobot::calculateSpeedsAndTime	corobot.cpp	/^void Corobot::calculateSpeedsAndTime ()$/;"	f	class:Corobot	signature:()
-Corobot::calculateSpeedsAndTime	corobot.h	/^    void calculateSpeedsAndTime ();$/;"	p	class:Corobot	access:private	signature:()
-Corobot::configuration_	corobot.h	/^    ramp_msgs::Configuration          configuration_; $/;"	m	class:Corobot	access:public
+Corobot::TOPIC_STR_UPDATE	corobot.h	/^    static const std::string  TOPIC_STR_UPDATE;$/;"	m	class:Corobot	access:public
+Corobot::angular_speeds	corobot.h	/^    std::vector<float>        angular_speeds;$/;"	m	class:Corobot	access:private
+Corobot::calculateSpeedsAndTime	corobot.cpp	/^void Corobot::calculateSpeedsAndTime () {$/;"	f	class:Corobot	signature:()
+Corobot::calculateSpeedsAndTime	corobot.h	/^    void                        calculateSpeedsAndTime();$/;"	p	class:Corobot	access:private	signature:()
+Corobot::checkImminentCollision	corobot.cpp	/^const bool Corobot::checkImminentCollision() const {$/;"	f	class:Corobot	signature:() const
+Corobot::checkImminentCollision	corobot.h	/^    const bool                  checkImminentCollision() const;$/;"	p	class:Corobot	access:private	signature:() const
+Corobot::checkOrientation	corobot.cpp	/^const bool Corobot::checkOrientation(const int i) const {$/;"	f	class:Corobot	signature:(const int i) const
+Corobot::checkOrientation	corobot.h	/^    const bool                  checkOrientation(const int i) const;$/;"	p	class:Corobot	access:private	signature:(const int i) const
+Corobot::configuration_	corobot.h	/^    ramp_msgs::MotionState            configuration_; $/;"	m	class:Corobot	access:public
 Corobot::controlCycle	corobot.h	/^    void controlCycle(geometry_msgs::Twist twist, ros::Time end_time, ros::Rate r);$/;"	p	class:Corobot	access:public	signature:(geometry_msgs::Twist twist, ros::Time end_time, ros::Rate r)
-Corobot::dists_	corobot.h	/^    std::vector<float> dists_;$/;"	m	class:Corobot	access:private
 Corobot::drive	corobot.cpp	/^void Corobot::drive(const corobot_msgs::MotorCommand msg) const {$/;"	f	class:Corobot	signature:(const corobot_msgs::MotorCommand msg) const
 Corobot::drive	corobot.h	/^    void drive(corobot_msgs::MotorCommand msg) const;$/;"	p	class:Corobot	access:public	signature:(corobot_msgs::MotorCommand msg) const
 Corobot::driveStraight	corobot.cpp	/^void Corobot::driveStraight(const unsigned int speed) const {$/;"	f	class:Corobot	signature:(const unsigned int speed) const
 Corobot::driveStraight	corobot.h	/^    void driveStraight(const unsigned int speed) const;$/;"	p	class:Corobot	access:public	signature:(const unsigned int speed) const
-Corobot::end_times	corobot.h	/^    std::vector<ros::Time> end_times; \/\/ Save the ending time of each waypoint$/;"	m	class:Corobot	access:private
-Corobot::errorAdjustment	corobot.cpp	/^void Corobot::errorAdjustment() {$/;"	f	class:Corobot	signature:()
-Corobot::errorAdjustment	corobot.h	/^    void errorAdjustment();$/;"	p	class:Corobot	access:private	signature:()
-Corobot::getAngularSpeed	corobot.cpp	/^const float Corobot::getAngularSpeed(const float direction1, const float direction2) const {$/;"	f	class:Corobot	signature:(const float direction1, const float direction2) const
-Corobot::getAngularSpeed	corobot.h	/^    const float getAngularSpeed(const float direction1, const float direction2) const;$/;"	p	class:Corobot	access:private	signature:(const float direction1, const float direction2) const
-Corobot::getSpeedToWaypoint	corobot.cpp	/^const float Corobot::getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const {$/;"	f	class:Corobot	signature:(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const
-Corobot::getSpeedToWaypoint	corobot.h	/^    const float getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const;$/;"	p	class:Corobot	access:private	signature:(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const
-Corobot::getTrajectoryOrientation	corobot.cpp	/^float Corobot::getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const$/;"	f	class:Corobot	signature:(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const
-Corobot::getTrajectoryOrientation	corobot.h	/^    float getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const;$/;"	p	class:Corobot	access:private	signature:(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const
-Corobot::i_knot_points	corobot.h	/^    int i_knot_points;$/;"	m	class:Corobot	access:private
-Corobot::initial_theta	corobot.h	/^    double initial_theta;$/;"	m	class:Corobot	access:public
-Corobot::k_dof_	corobot.h	/^    const unsigned int k_dof_;$/;"	m	class:Corobot	access:private
-Corobot::lockMutex	corobot.cpp	/^void Corobot::lockMutex() {$/;"	f	class:Corobot	signature:()
-Corobot::lockMutex	corobot.h	/^    void lockMutex();$/;"	p	class:Corobot	access:private	signature:()
-Corobot::moveOnTrajectory	corobot.cpp	/^void Corobot::moveOnTrajectory() $/;"	f	class:Corobot	signature:()
-Corobot::moveOnTrajectory	corobot.h	/^    void moveOnTrajectory();$/;"	p	class:Corobot	access:public	signature:()
-Corobot::moving_	corobot.h	/^    bool moving_;$/;"	m	class:Corobot	access:private
-Corobot::mutex_	corobot.h	/^    bool mutex_;$/;"	m	class:Corobot	access:private
-Corobot::num	corobot.h	/^    int num;$/;"	m	class:Corobot	access:private
-Corobot::num_traveled	corobot.h	/^    int num_traveled;$/;"	m	class:Corobot	access:private
-Corobot::orientations	corobot.h	/^    std::vector<float> orientations; \/\/ The orientation needed to be at each knotpoint.$/;"	m	class:Corobot	access:private
+Corobot::end_times	corobot.h	/^    std::vector<ros::Time>    end_times; $/;"	m	class:Corobot	access:private
+Corobot::getRotationTrajectory	corobot.cpp	/^const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {$/;"	f	class:Corobot	signature:() const
+Corobot::getRotationTrajectory	corobot.h	/^    const ramp_msgs::Trajectory getRotationTrajectory() const;$/;"	p	class:Corobot	access:private	signature:() const
+Corobot::h_traj_req_	corobot.h	/^    TrajectoryRequestHandler* h_traj_req_;$/;"	m	class:Corobot	access:private
+Corobot::init	corobot.cpp	/^void Corobot::init(ros::NodeHandle& h) {$/;"	f	class:Corobot	signature:(ros::NodeHandle& h)
+Corobot::init	corobot.h	/^    void init(ros::NodeHandle& h);$/;"	p	class:Corobot	access:public	signature:(ros::NodeHandle& h)
+Corobot::initial_theta_	corobot.h	/^    double                            initial_theta_;$/;"	m	class:Corobot	access:public
+Corobot::k_dof_	corobot.h	/^    const unsigned int        k_dof_;$/;"	m	class:Corobot	access:private
+Corobot::moveOnTrajectory	corobot.cpp	/^void Corobot::moveOnTrajectory(bool simulation) {$/;"	f	class:Corobot	signature:(bool simulation)
+Corobot::moveOnTrajectory	corobot.h	/^    void moveOnTrajectory(bool simulation);$/;"	p	class:Corobot	access:public	signature:(bool simulation)
+Corobot::num	corobot.h	/^    int                       num;$/;"	m	class:Corobot	access:private
+Corobot::num_traveled	corobot.h	/^    int                       num_traveled;$/;"	m	class:Corobot	access:private
+Corobot::orientations_	corobot.h	/^    std::vector<float>        orientations_;$/;"	m	class:Corobot	access:private
 Corobot::printVectors	corobot.cpp	/^void Corobot::printVectors() const {$/;"	f	class:Corobot	signature:() const
-Corobot::printVectors	corobot.h	/^    void printVectors() const;$/;"	p	class:Corobot	access:private	signature:() const
+Corobot::printVectors	corobot.h	/^    void                        printVectors() const;$/;"	p	class:Corobot	access:private	signature:() const
+Corobot::pub_cmd_vel_	corobot.h	/^    ros::Publisher                    pub_cmd_vel_;$/;"	m	class:Corobot	access:public
 Corobot::pub_phidget_motor_	corobot.h	/^    ros::Publisher                    pub_phidget_motor_;$/;"	m	class:Corobot	access:public
 Corobot::pub_twist_	corobot.h	/^    ros::Publisher                    pub_twist_;$/;"	m	class:Corobot	access:public
 Corobot::pub_update_	corobot.h	/^    ros::Publisher                    pub_update_;$/;"	m	class:Corobot	access:public
-Corobot::releaseMutex	corobot.cpp	/^void Corobot::releaseMutex() {$/;"	f	class:Corobot	signature:()
-Corobot::releaseMutex	corobot.h	/^    void releaseMutex();$/;"	p	class:Corobot	access:private	signature:()
-Corobot::restart	corobot.h	/^    bool restart;$/;"	m	class:Corobot	access:private
+Corobot::restart_	corobot.h	/^    bool                      restart_;$/;"	m	class:Corobot	access:private
 Corobot::sendTwist	corobot.cpp	/^void Corobot::sendTwist() const {$/;"	f	class:Corobot	signature:() const
 Corobot::sendTwist	corobot.cpp	/^void Corobot::sendTwist(const geometry_msgs::Twist t) const {$/;"	f	class:Corobot	signature:(const geometry_msgs::Twist t) const
-Corobot::sendTwist	corobot.h	/^    void sendTwist() const;$/;"	p	class:Corobot	access:private	signature:() const
+Corobot::sendTwist	corobot.h	/^    void                        sendTwist() const;$/;"	p	class:Corobot	access:private	signature:() const
 Corobot::sendTwist	corobot.h	/^    void sendTwist(const geometry_msgs::Twist twist) const;$/;"	p	class:Corobot	access:public	signature:(const geometry_msgs::Twist twist) const
-Corobot::setConfiguration	corobot.cpp	/^void Corobot::setConfiguration(float x, float y, float theta) {$/;"	f	class:Corobot	signature:(float x, float y, float theta)
-Corobot::setConfiguration	corobot.h	/^    void setConfiguration(float x, float y, float theta);$/;"	p	class:Corobot	access:public	signature:(float x, float y, float theta)
-Corobot::speeds	corobot.h	/^    std::vector<float> speeds; \/\/  Linear speed for each trajectory$/;"	m	class:Corobot	access:private
+Corobot::speeds	corobot.h	/^    std::vector<float>        speeds; $/;"	m	class:Corobot	access:private
 Corobot::stop	corobot.cpp	/^void Corobot::stop() const {$/;"	f	class:Corobot	signature:() const
 Corobot::stop	corobot.h	/^    void stop() const;$/;"	p	class:Corobot	access:public	signature:() const
 Corobot::sub_odometry_	corobot.h	/^    ros::Subscriber                   sub_odometry_;$/;"	m	class:Corobot	access:public
-Corobot::thetas_	corobot.h	/^    std::vector<double> thetas_; $/;"	m	class:Corobot	access:private
 Corobot::timer_	corobot.h	/^    ros::Timer                        timer_;$/;"	m	class:Corobot	access:public
-Corobot::trajec_updated_	corobot.h	/^    bool trajec_updated_;$/;"	m	class:Corobot	access:private
 Corobot::trajectory_	corobot.h	/^    ramp_msgs::Trajectory             trajectory_;$/;"	m	class:Corobot	access:public
 Corobot::turn	corobot.cpp	/^void Corobot::turn(const float speed, const float angle) const {$/;"	f	class:Corobot	signature:(const float speed, const float angle) const
 Corobot::turn	corobot.cpp	/^void Corobot::turn(const unsigned int speed, const bool cwise) const {$/;"	f	class:Corobot	signature:(const unsigned int speed, const bool cwise) const
 Corobot::turn	corobot.h	/^    void turn(const float speed, const float angle) const; $/;"	p	class:Corobot	access:public	signature:(const float speed, const float angle) const
 Corobot::turn	corobot.h	/^    void turn(const unsigned int speed, const bool cwise) const;$/;"	p	class:Corobot	access:public	signature:(const unsigned int speed, const bool cwise) const
-Corobot::twist_	corobot.h	/^    geometry_msgs::Twist twist_;$/;"	m	class:Corobot	access:private
-Corobot::u	corobot.h	/^    Utility u;$/;"	m	class:Corobot	access:private
+Corobot::twist_	corobot.h	/^    geometry_msgs::Twist      twist_;$/;"	m	class:Corobot	access:private
 Corobot::updatePublishTimer	corobot.cpp	/^void Corobot::updatePublishTimer(const ros::TimerEvent&) {$/;"	f	class:Corobot	signature:(const ros::TimerEvent&)
 Corobot::updatePublishTimer	corobot.h	/^    void updatePublishTimer(const ros::TimerEvent&);$/;"	p	class:Corobot	access:public	signature:(const ros::TimerEvent&)
-Corobot::updateState	corobot.cpp	/^void Corobot::updateState(const nav_msgs::Odometry::ConstPtr& msg) {$/;"	f	class:Corobot	signature:(const nav_msgs::Odometry::ConstPtr& msg)
-Corobot::updateState	corobot.h	/^    void updateState(const nav_msgs::Odometry::ConstPtr& msg);$/;"	p	class:Corobot	access:public	signature:(const nav_msgs::Odometry::ConstPtr& msg)
+Corobot::updateState	corobot.cpp	/^void Corobot::updateState(const nav_msgs::Odometry& msg) {$/;"	f	class:Corobot	signature:(const nav_msgs::Odometry& msg)
+Corobot::updateState	corobot.h	/^    void updateState(const nav_msgs::Odometry& msg);$/;"	p	class:Corobot	access:public	signature:(const nav_msgs::Odometry& msg)
 Corobot::updateTrajectory	corobot.cpp	/^void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {$/;"	f	class:Corobot	signature:(const ramp_msgs::Trajectory msg)
 Corobot::updateTrajectory	corobot.h	/^    void updateTrajectory(const ramp_msgs::Trajectory msg); $/;"	p	class:Corobot	access:public	signature:(const ramp_msgs::Trajectory msg)
+Corobot::utility_	corobot.h	/^    Utility                   utility_;$/;"	m	class:Corobot	access:private
 Corobot::velocity_	corobot.h	/^    geometry_msgs::Twist              velocity_;$/;"	m	class:Corobot	access:public
-Corobot::~Corobot	corobot.cpp	/^Corobot::~Corobot() {}$/;"	f	class:Corobot	signature:()
+Corobot::~Corobot	corobot.cpp	/^Corobot::~Corobot() {$/;"	f	class:Corobot	signature:()
 Corobot::~Corobot	corobot.h	/^    ~Corobot();$/;"	p	class:Corobot	access:public	signature:()
 KEYCODE_D	keyboard_teleop.cpp	12;"	d	file:
 KEYCODE_L	keyboard_teleop.cpp	10;"	d	file:
 KEYCODE_Q	keyboard_teleop.cpp	13;"	d	file:
 KEYCODE_R	keyboard_teleop.cpp	9;"	d	file:
 KEYCODE_U	keyboard_teleop.cpp	11;"	d	file:
-PI	utility.h	11;"	d
-POSE_COUNT_THRESHOLD	corobot.h	/^    static const int POSE_COUNT_THRESHOLD = 1;$/;"	m	class:Corobot	access:public
+PI	simulation.cpp	6;"	d	file:
+PI	utility.h	13;"	d
 TOPIC_STR_ODOMETRY	corobot.cpp	/^const std::string Corobot::TOPIC_STR_ODOMETRY="odometry";$/;"	m	class:Corobot	file:
-TOPIC_STR_ODOMETRY	corobot.h	/^    static const std::string TOPIC_STR_ODOMETRY;$/;"	m	class:Corobot	access:public
+TOPIC_STR_ODOMETRY	corobot.h	/^    static const std::string  TOPIC_STR_ODOMETRY;$/;"	m	class:Corobot	access:public
 TOPIC_STR_PHIDGET_MOTOR	corobot.cpp	/^const std::string Corobot::TOPIC_STR_PHIDGET_MOTOR="PhidgetMotor";$/;"	m	class:Corobot	file:
-TOPIC_STR_PHIDGET_MOTOR	corobot.h	/^    static const std::string TOPIC_STR_PHIDGET_MOTOR;$/;"	m	class:Corobot	access:public
+TOPIC_STR_PHIDGET_MOTOR	corobot.h	/^    static const std::string  TOPIC_STR_PHIDGET_MOTOR;$/;"	m	class:Corobot	access:public
 TOPIC_STR_TWIST	corobot.cpp	/^const std::string Corobot::TOPIC_STR_TWIST="twist";$/;"	m	class:Corobot	file:
-TOPIC_STR_TWIST	corobot.h	/^    static const std::string TOPIC_STR_TWIST;$/;"	m	class:Corobot	access:public
+TOPIC_STR_TWIST	corobot.h	/^    static const std::string  TOPIC_STR_TWIST;$/;"	m	class:Corobot	access:public
 TOPIC_STR_UPDATE	corobot.cpp	/^const std::string Corobot::TOPIC_STR_UPDATE="update";$/;"	m	class:Corobot	file:
-TOPIC_STR_UPDATE	corobot.h	/^    static const std::string TOPIC_STR_UPDATE;$/;"	m	class:Corobot	access:public
+TOPIC_STR_UPDATE	corobot.h	/^    static const std::string  TOPIC_STR_UPDATE;$/;"	m	class:Corobot	access:public
+TRAJECTORY_REQUEST_HANDLER_H	trajectory_request_handler.h	2;"	d
+TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler(const ros::NodeHandle& h) : handle_(h) {$/;"	f	class:TrajectoryRequestHandler	signature:(const ros::NodeHandle& h)
+TrajectoryRequestHandler	trajectory_request_handler.h	/^    TrajectoryRequestHandler(const ros::NodeHandle& h);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(const ros::NodeHandle& h)
+TrajectoryRequestHandler	trajectory_request_handler.h	/^class TrajectoryRequestHandler {$/;"	c
+TrajectoryRequestHandler::TrajectoryRequestHandler	trajectory_request_handler.cpp	/^TrajectoryRequestHandler::TrajectoryRequestHandler(const ros::NodeHandle& h) : handle_(h) {$/;"	f	class:TrajectoryRequestHandler	signature:(const ros::NodeHandle& h)
+TrajectoryRequestHandler::TrajectoryRequestHandler	trajectory_request_handler.h	/^    TrajectoryRequestHandler(const ros::NodeHandle& h);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(const ros::NodeHandle& h)
+TrajectoryRequestHandler::client_	trajectory_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:TrajectoryRequestHandler	access:private
+TrajectoryRequestHandler::handle_	trajectory_request_handler.h	/^    ros::NodeHandle  handle_; $/;"	m	class:TrajectoryRequestHandler	access:private
+TrajectoryRequestHandler::request	trajectory_request_handler.cpp	/^const bool TrajectoryRequestHandler::request(ramp_msgs::TrajectoryRequest& tr) {$/;"	f	class:TrajectoryRequestHandler	signature:(ramp_msgs::TrajectoryRequest& tr)
+TrajectoryRequestHandler::request	trajectory_request_handler.h	/^    const bool request(ramp_msgs::TrajectoryRequest& tr);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(ramp_msgs::TrajectoryRequest& tr)
 UTILITY_H	utility.h	2;"	d
 Utility	utility.cpp	/^Utility::Utility() {$/;"	f	class:Utility	signature:()
 Utility	utility.h	/^    Utility();$/;"	p	class:Utility	access:public	signature:()
@@ -118,129 +115,158 @@ Utility::displaceAngle	utility.h	/^    const float displaceAngle(const float a1,
 Utility::euclideanDistance	utility.cpp	/^const float Utility::euclideanDistance(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
 Utility::euclideanDistance	utility.h	/^    const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 Utility::findAngleFromAToB	utility.cpp	/^const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::findAngleFromAToB	utility.cpp	/^const float Utility::findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const {$/;"	f	class:Utility	signature:(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const
 Utility::findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
+Utility::findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;$/;"	p	class:Utility	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const
 Utility::findDistanceBetweenAngles	utility.cpp	/^const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {$/;"	f	class:Utility	signature:(const float a1, const float a2) const
 Utility::findDistanceBetweenAngles	utility.h	/^    const float findDistanceBetweenAngles(const float a1, const float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, const float a2) const
 Utility::getEuclideanDist	utility.cpp	/^const float Utility::getEuclideanDist(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
 Utility::getEuclideanDist	utility.h	/^    const float getEuclideanDist(const std::vector<float> a, std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, std::vector<float> b) const
 Utility::standardRanges	utility.h	/^    std::vector<ramp_msgs::Range> standardRanges;$/;"	m	class:Utility	access:public
+Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Configuration c) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Configuration c) const
+Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {$/;"	f	class:Utility	signature:(const ramp_msgs::KnotPoint kp) const
+Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::MotionState mp) const {$/;"	f	class:Utility	signature:(const ramp_msgs::MotionState mp) const
+Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
+Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
+Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Configuration c) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Configuration c) const
+Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::KnotPoint kp) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::KnotPoint kp) const
+Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::MotionState c) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::MotionState c) const
+Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Path p) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path p) const
+Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
 Utility::~Utility	utility.h	/^    ~Utility() {}$/;"	f	class:Utility	access:public	signature:()
-accumulateDist	corobot.h	/^    void accumulateDist();$/;"	p	class:Corobot	access:private	signature:()
-actual_theta	corobot.cpp	/^        float actual_theta = u.displaceAngle(initial_theta, configuration_.K.at(2));$/;"	l
-angle	corobot.cpp	/^    float angle = asin((y_dif)\/(sqrt(x_dif*x_dif + y_dif*y_dif))); \/\/  Orientation of this trajectory in the X\/Y axes$/;"	l
-angle_at_start	corobot.h	/^    float angle_at_start; \/\/ the angle of the robot when the robot gets a trajectory. $/;"	m	class:Corobot	access:private
-angular_speeds	corobot.h	/^    std::vector<float> angular_speeds; \/\/ Angular Speed needed over 3s to get the correct orientation after each knot point reached.$/;"	m	class:Corobot	access:private
+actual_theta	corobot.cpp	/^        float actual_theta = utility_.displaceAngle(initial_theta_, configuration_.positions.at(2));$/;"	l
+angular_speeds	corobot.h	/^    std::vector<float>        angular_speeds;$/;"	m	class:Corobot	access:private
 at	corobot.cpp	/^    std::cout<<angular_speeds.at(i)<<", ";$/;"	p	file:	signature:(i)
 at	corobot.cpp	/^    std::cout<<end_times.at(i)<<", ";$/;"	p	file:	signature:(i)
 at	corobot.cpp	/^    std::cout<<speeds.at(i)<<", ";$/;"	p	file:	signature:(i)
 at	corobot.cpp	/^  std::cout<<angular_speeds.at(angular_speeds.size()-1)<<"]";$/;"	p	file:	signature:(angular_speeds.size()-1)
 at	corobot.cpp	/^  std::cout<<end_times.at(end_times.size()-1)<<"]";$/;"	p	file:	signature:(end_times.size()-1)
 at	corobot.cpp	/^  std::cout<<speeds.at(speeds.size()-1)<<"]";$/;"	p	file:	signature:(speeds.size()-1)
-avg_theta	corobot.cpp	/^    double avg_theta = 0;$/;"	l
+at	utility.cpp	/^      result<<", "<<p.accelerations.at(k);$/;"	p	file:	signature:(k)
+at	utility.cpp	/^      result<<", "<<p.positions.at(k);$/;"	p	file:	signature:(k)
+at	utility.cpp	/^      result<<", "<<p.velocities.at(k);$/;"	p	file:	signature:(k)
+at	utility.cpp	/^    result<<c.K.at(i)<<", ";$/;"	p	file:	signature:(i)
+at	utility.cpp	/^    result<<mp.accelerations.at(i)<<" ";$/;"	p	file:	signature:(i)
+at	utility.cpp	/^    result<<mp.jerks.at(i)<<" ";$/;"	p	file:	signature:(i)
+at	utility.cpp	/^    result<<mp.positions.at(i)<<" ";$/;"	p	file:	signature:(i)
+at	utility.cpp	/^    result<<mp.velocities.at(i)<<" ";$/;"	p	file:	signature:(i)
+at	utility.cpp	/^  result<<c.K.at(c.K.size()-1)<<")";$/;"	p	file:	signature:(c.K.size()-1)
+bestTrajecCallback	simulation.cpp	/^void bestTrajecCallback(const ramp_msgs::Trajectory& msg) {$/;"	f	signature:(const ramp_msgs::Trajectory& msg)
 c	keyboard_teleop.cpp	/^  char c;$/;"	l
-calculateSpeedsAndTime	corobot.cpp	/^void Corobot::calculateSpeedsAndTime ()$/;"	f	class:Corobot	signature:()
-calculateSpeedsAndTime	corobot.h	/^    void calculateSpeedsAndTime ();$/;"	p	class:Corobot	access:private	signature:()
-clear	corobot.cpp	/^    thetas_.clear();$/;"	p	file:	signature:()
+c	utility.cpp	/^  std::vector<float> c;$/;"	l
+calculateSpeedsAndTime	corobot.cpp	/^void Corobot::calculateSpeedsAndTime () {$/;"	f	class:Corobot	signature:()
+calculateSpeedsAndTime	corobot.h	/^    void                        calculateSpeedsAndTime();$/;"	p	class:Corobot	access:private	signature:()
+checkImminentCollision	corobot.cpp	/^const bool Corobot::checkImminentCollision() const {$/;"	f	class:Corobot	signature:() const
+checkImminentCollision	corobot.h	/^    const bool                  checkImminentCollision() const;$/;"	p	class:Corobot	access:private	signature:() const
+checkOrientation	corobot.cpp	/^const bool Corobot::checkOrientation(const int i) const {$/;"	f	class:Corobot	signature:(const int i) const
+checkOrientation	corobot.h	/^    const bool                  checkOrientation(const int i) const;$/;"	p	class:Corobot	access:private	signature:(const int i) const
 clear	corobot.cpp	/^  angular_speeds.clear();$/;"	p	file:	signature:()
-clear	corobot.cpp	/^  configuration_.K.clear();$/;"	p	file:	signature:()
+clear	corobot.cpp	/^  configuration_.positions.clear();$/;"	p	file:	signature:()
+clear	corobot.cpp	/^  configuration_.velocities.clear();$/;"	p	file:	signature:()
 clear	corobot.cpp	/^  end_times.clear();$/;"	p	file:	signature:()
-clear	corobot.cpp	/^  orientations.clear();$/;"	p	file:	signature:()
+clear	corobot.cpp	/^  orientations_.clear();$/;"	p	file:	signature:()
 clear	corobot.cpp	/^  speeds.clear();$/;"	p	file:	signature:()
-configuration_	corobot.h	/^    ramp_msgs::Configuration          configuration_; $/;"	m	class:Corobot	access:public
+client_	trajectory_request_handler.h	/^    ros::ServiceClient client_;$/;"	m	class:TrajectoryRequestHandler	access:private
+configuration_	corobot.h	/^    ramp_msgs::MotionState            configuration_; $/;"	m	class:Corobot	access:public
 controlCycle	corobot.h	/^    void controlCycle(geometry_msgs::Twist twist, ros::Time end_time, ros::Rate r);$/;"	p	class:Corobot	access:public	signature:(geometry_msgs::Twist twist, ros::Time end_time, ros::Rate r)
 cooked	keyboard_teleop.cpp	/^struct termios cooked, raw;$/;"	v	typeref:struct:termios
-cout	corobot.cpp	/^  std::cout<<"\\nIn updateTrajectory!\\n";$/;"	m	class:std	file:
 cout	corobot.cpp	/^  std::cout<<"\\nangular_speeds: [";$/;"	m	class:std	file:
 cout	corobot.cpp	/^  std::cout<<"\\nend_times: [";$/;"	m	class:std	file:
 cout	corobot.cpp	/^  std::cout<<"\\nspeeds: [";$/;"	m	class:std	file:
 cout	keyboard_teleop.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
 cout	main.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
 cout	main.cpp	/^  std::cout<<"\\nGot the message!\\n";$/;"	m	class:std	file:
+cout	simulation.cpp	/^  std::cout<<"\\nExiting normally\\n";$/;"	m	class:std	file:
 cout	wait_for_command.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
-cout	wait_for_command.cpp	/^  std::cout<<"\\nGot traj message!\\n";$/;"	m	class:std	file:
+cout	wait_for_command.cpp	/^  std::cout<<"\\nGot trajectory message!\\n";$/;"	m	class:std	file:
 cout	wait_for_command.cpp	/^  std::cout<<"\\nGot twist message!\\n";$/;"	m	class:std	file:
 current	corobot.cpp	/^    trajectory_msgs::JointTrajectoryPoint current = trajectory_.trajectory.points.at(i);$/;"	l
+d	utility.cpp	/^  std::vector<float> d;$/;"	l
 d_x	utility.cpp	/^  float d_x = b.at(0) - a.at(0);$/;"	l
 d_y	utility.cpp	/^  float d_y = b.at(1) - a.at(1);$/;"	l
-delay	corobot.cpp	/^  ros::Duration delay = ros::Duration(0); \/\/  Save the time it took to do all the turns$/;"	l
-delta_angle	corobot.cpp	/^  float delta_angle = direction2 - direction1;$/;"	l
+diff	corobot.cpp	/^  float diff = utility_.findDistanceBetweenAngles(configuration_.positions.at(2), orientations_.at(i));$/;"	l
 difference	utility.cpp	/^  float difference = a1 - a2;$/;"	l
 displaceAngle	utility.cpp	/^const float Utility::displaceAngle(const float a1, float a2) const {$/;"	f	class:Utility	signature:(const float a1, float a2) const
 displaceAngle	utility.h	/^    const float displaceAngle(const float a1, float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, float a2) const
-dist	corobot.cpp	/^        float dist = u.findDistanceBetweenAngles(actual_theta, orientations.at(num_traveled));$/;"	l
-dists_	corobot.h	/^    std::vector<float> dists_;$/;"	m	class:Corobot	access:private
+dist	corobot.cpp	/^        float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled));$/;"	l
 drive	corobot.cpp	/^void Corobot::drive(const corobot_msgs::MotorCommand msg) const {$/;"	f	class:Corobot	signature:(const corobot_msgs::MotorCommand msg) const
 drive	corobot.h	/^    void drive(corobot_msgs::MotorCommand msg) const;$/;"	p	class:Corobot	access:public	signature:(corobot_msgs::MotorCommand msg) const
 driveStraight	corobot.cpp	/^void Corobot::driveStraight(const unsigned int speed) const {$/;"	f	class:Corobot	signature:(const unsigned int speed) const
 driveStraight	corobot.h	/^    void driveStraight(const unsigned int speed) const;$/;"	p	class:Corobot	access:public	signature:(const unsigned int speed) const
 end	wait_for_command.cpp	/^  ros::Time end = ros::Time::now() + d;$/;"	l
-end_times	corobot.h	/^    std::vector<ros::Time> end_times; \/\/ Save the ending time of each waypoint$/;"	m	class:Corobot	access:private
+end_times	corobot.h	/^    std::vector<ros::Time>    end_times; $/;"	m	class:Corobot	access:private
 erase	demo.cpp	/^  msg.index_knot_points.erase(msg.index_knot_points.begin()+3);$/;"	p	file:	signature:(msg.index_knot_points.begin()+3)
 erase	demo.cpp	/^  msg.trajectory.points.erase(msg.trajectory.points.begin());$/;"	p	file:	signature:(msg.trajectory.points.begin())
-errorAdjustment	corobot.cpp	/^void Corobot::errorAdjustment() {$/;"	f	class:Corobot	signature:()
-errorAdjustment	corobot.h	/^    void errorAdjustment();$/;"	p	class:Corobot	access:private	signature:()
 euc_dist	utility.cpp	/^  float euc_dist = sqrt( pow(d_x,2) + pow(d_y,2) );$/;"	l
 euclideanDistance	utility.cpp	/^const float Utility::euclideanDistance(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
 euclideanDistance	utility.h	/^    const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
 findAngleFromAToB	utility.cpp	/^const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
+findAngleFromAToB	utility.cpp	/^const float Utility::findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const {$/;"	f	class:Utility	signature:(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const
 findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, const std::vector<float> b) const
+findAngleFromAToB	utility.h	/^    const float findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;$/;"	p	class:Utility	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const
 findDistanceBetweenAngles	utility.cpp	/^const float Utility::findDistanceBetweenAngles(const float a1, const float a2) const {$/;"	f	class:Utility	signature:(const float a1, const float a2) const
 findDistanceBetweenAngles	utility.h	/^    const float findDistanceBetweenAngles(const float a1, const float a2) const;$/;"	p	class:Utility	access:public	signature:(const float a1, const float a2) const
 g_time	corobot.cpp	/^    ros::Time g_time = end_times.at(num_traveled);$/;"	l
-getAngularSpeed	corobot.cpp	/^const float Corobot::getAngularSpeed(const float direction1, const float direction2) const {$/;"	f	class:Corobot	signature:(const float direction1, const float direction2) const
-getAngularSpeed	corobot.h	/^    const float getAngularSpeed(const float direction1, const float direction2) const;$/;"	p	class:Corobot	access:private	signature:(const float direction1, const float direction2) const
 getEuclideanDist	utility.cpp	/^const float Utility::getEuclideanDist(const std::vector<float> a, const std::vector<float> b) const {$/;"	f	class:Utility	signature:(const std::vector<float> a, const std::vector<float> b) const
 getEuclideanDist	utility.h	/^    const float getEuclideanDist(const std::vector<float> a, std::vector<float> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<float> a, std::vector<float> b) const
-getSpeedToWaypoint	corobot.cpp	/^const float Corobot::getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const {$/;"	f	class:Corobot	signature:(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const
-getSpeedToWaypoint	corobot.h	/^    const float getSpeedToWaypoint(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const;$/;"	p	class:Corobot	access:private	signature:(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const
-getTrajectoryOrientation	corobot.cpp	/^float Corobot::getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const$/;"	f	class:Corobot	signature:(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const
-getTrajectoryOrientation	corobot.h	/^    float getTrajectoryOrientation(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const;$/;"	p	class:Corobot	access:private	signature:(const trajectory_msgs::JointTrajectoryPoint waypoint1, const trajectory_msgs::JointTrajectoryPoint waypoint2) const
+getRotationTrajectory	corobot.cpp	/^const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {$/;"	f	class:Corobot	signature:() const
+getRotationTrajectory	corobot.h	/^    const ramp_msgs::Trajectory getRotationTrajectory() const;$/;"	p	class:Corobot	access:private	signature:() const
+getYaw	corobot.cpp	/^  configuration_.positions.push_back(tf::getYaw(msg.pose.pose.orientation));$/;"	p	file:	signature:(msg.pose.pose.orientation)
+h_traj_req_	corobot.h	/^    TrajectoryRequestHandler* h_traj_req_;$/;"	m	class:Corobot	access:private
 handle	demo.cpp	/^  ros::NodeHandle handle;$/;"	l
 handle	keyboard_teleop.cpp	/^  ros::NodeHandle handle;$/;"	l
 handle	main.cpp	/^  ros::NodeHandle handle;  $/;"	l
+handle	simulation.cpp	/^  ros::NodeHandle handle;$/;"	l
 handle	wait_for_command.cpp	/^  ros::NodeHandle handle;$/;"	l
-i_knot_points	corobot.h	/^    int i_knot_points;$/;"	m	class:Corobot	access:private
+handle_	trajectory_request_handler.h	/^    ros::NodeHandle  handle_; $/;"	m	class:TrajectoryRequestHandler	access:private
+i	utility.cpp	/^    result<<"\\n   "<<i<<":";$/;"	l
+i	utility.cpp	/^    result<<"\\n\\n   Point "<<i<<":";$/;"	l
+index	utility.cpp	/^    unsigned int index = traj.index_knot_points.at(i);$/;"	l
+init	corobot.cpp	/^void Corobot::init(ros::NodeHandle& h) {$/;"	f	class:Corobot	signature:(ros::NodeHandle& h)
+init	corobot.h	/^    void init(ros::NodeHandle& h);$/;"	p	class:Corobot	access:public	signature:(ros::NodeHandle& h)
 init	demo.cpp	/^  ros::init(argc, argv, "robotDemo");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
 init	keyboard_teleop.cpp	/^  ros::init(argc, argv, "keyboard_teleop");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
 init	main.cpp	/^  ramp_msgs::Trajectory init;$/;"	l
-init	main.cpp	/^  ros::init(argc, argv, "robot");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+init	main.cpp	/^  ros::init(argc, argv, "ramp_control");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+init	simulation.cpp	/^  ramp_msgs::Trajectory init;$/;"	l
+init	simulation.cpp	/^  ros::init(argc, argv, "simulation");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
 init	wait_for_command.cpp	/^  ros::init(argc, argv, "waitForCommand");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
 init_advertisers_subscribers	main.cpp	/^void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle) {$/;"	f	signature:(Corobot& robot, ros::NodeHandle& handle)
-initial_theta	corobot.h	/^    double initial_theta;$/;"	m	class:Corobot	access:public
-k_dof_	corobot.h	/^    const unsigned int k_dof_;$/;"	m	class:Corobot	access:private
+initial_theta_	corobot.h	/^    double                            initial_theta_;$/;"	m	class:Corobot	access:public
+k_dof_	corobot.h	/^    const unsigned int        k_dof_;$/;"	m	class:Corobot	access:private
 kfd	keyboard_teleop.cpp	/^int kfd = 0;$/;"	v
 l_wheel	keyboard_teleop.cpp	/^int l_wheel = 0, r_wheel = 0;$/;"	v
-lockMutex	corobot.cpp	/^void Corobot::lockMutex() {$/;"	f	class:Corobot	signature:()
-lockMutex	corobot.h	/^    void lockMutex();$/;"	p	class:Corobot	access:private	signature:()
-mag_v	corobot.cpp	/^  float mag_v = sqrt( pow(v[0],2) + pow(v[1],2) );$/;"	l
 main	demo.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
 main	keyboard_teleop.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
 main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+main	simulation.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
 main	wait_for_command.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
 motorCommand	keyboard_teleop.cpp	/^corobot_msgs::MotorCommand motorCommand;$/;"	v
-moveOnTrajectory	corobot.cpp	/^void Corobot::moveOnTrajectory() $/;"	f	class:Corobot	signature:()
-moveOnTrajectory	corobot.h	/^    void moveOnTrajectory();$/;"	p	class:Corobot	access:public	signature:()
-moveOnTrajectory	main.cpp	/^    robot.moveOnTrajectory();$/;"	p	file:	signature:()
-moveOnTrajectory	wait_for_command.cpp	/^  robot.moveOnTrajectory();$/;"	p	file:	signature:()
-moving_	corobot.h	/^    bool moving_;$/;"	m	class:Corobot	access:private
-msg	corobot.cpp	/^    ramp_msgs::Update msg;$/;"	l
+moveOnTrajectory	corobot.cpp	/^void Corobot::moveOnTrajectory(bool simulation) {$/;"	f	class:Corobot	signature:(bool simulation)
+moveOnTrajectory	corobot.h	/^    void moveOnTrajectory(bool simulation);$/;"	p	class:Corobot	access:public	signature:(bool simulation)
+moveOnTrajectory	main.cpp	/^    robot.moveOnTrajectory(false);$/;"	p	file:	signature:(false)
+moveOnTrajectory	simulation.cpp	/^    robot.moveOnTrajectory(true);$/;"	p	file:	signature:(true)
+moveOnTrajectory	wait_for_command.cpp	/^  robot.moveOnTrajectory(false);$/;"	p	file:	signature:(false)
 msg	corobot.cpp	/^  corobot_msgs::MotorCommand msg;$/;"	l
 msg	demo.cpp	/^  ramp_msgs::Trajectory msg;$/;"	l
-mutex_	corobot.h	/^    bool mutex_;$/;"	m	class:Corobot	access:private
 next	corobot.cpp	/^    trajectory_msgs::JointTrajectoryPoint next    = trajectory_.trajectory.points.at(i+1);$/;"	l
 num	corobot.cpp	/^  int num = trajectory_.trajectory.points.size(); $/;"	l
-num	corobot.h	/^    int num;$/;"	m	class:Corobot	access:private
-num_traveled	corobot.h	/^    int num_traveled;$/;"	m	class:Corobot	access:private
-orientations	corobot.h	/^    std::vector<float> orientations; \/\/ The orientation needed to be at each knotpoint.$/;"	m	class:Corobot	access:private
+num	corobot.h	/^    int                       num;$/;"	m	class:Corobot	access:private
+num_traveled	corobot.h	/^    int                       num_traveled;$/;"	m	class:Corobot	access:private
+orientations_	corobot.h	/^    std::vector<float>        orientations_;$/;"	m	class:Corobot	access:private
+p	utility.cpp	/^    trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);$/;"	l
+p	utility.cpp	/^    trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);$/;"	l
 point	demo.cpp	/^  trajectory_msgs::JointTrajectoryPoint point;$/;"	l
 printVectors	corobot.cpp	/^void Corobot::printVectors() const {$/;"	f	class:Corobot	signature:() const
-printVectors	corobot.h	/^    void printVectors() const;$/;"	p	class:Corobot	access:private	signature:() const
+printVectors	corobot.h	/^    void                        printVectors() const;$/;"	p	class:Corobot	access:private	signature:() const
+pub_cmd_vel_	corobot.h	/^    ros::Publisher                    pub_cmd_vel_;$/;"	m	class:Corobot	access:public
 pub_motors	keyboard_teleop.cpp	/^  ros::Publisher pub_motors = handle.advertise<corobot_msgs::MotorCommand>("PhidgetMotor", 1000);$/;"	l
 pub_phidget_motor_	corobot.h	/^    ros::Publisher                    pub_phidget_motor_;$/;"	m	class:Corobot	access:public
 pub_twist_	corobot.h	/^    ros::Publisher                    pub_twist_;$/;"	m	class:Corobot	access:public
 pub_update	keyboard_teleop.cpp	/^  ros::Publisher pub_update = handle.advertise<corobot_msgs::MotorCommand>("update", 1000);$/;"	l
 pub_update_	corobot.h	/^    ros::Publisher                    pub_update_;$/;"	m	class:Corobot	access:public
-publish	corobot.cpp	/^        pub_update_.publish(msg);$/;"	p	file:	signature:(msg)
+publish	corobot.cpp	/^      if(simulation) pub_cmd_vel_.publish(twist_);$/;"	p	file:	signature:(twist_)
+publish	corobot.cpp	/^      pub_update_.publish(configuration_);$/;"	p	file:	signature:(configuration_)
 publish	corobot.cpp	/^  pub_phidget_motor_.publish(msg);$/;"	p	file:	signature:(msg)
 publish	corobot.cpp	/^  pub_twist_.publish(t); $/;"	p	file:	signature:(t)
 publish	corobot.cpp	/^  pub_twist_.publish(twist_); $/;"	p	file:	signature:(twist_)
@@ -248,12 +274,17 @@ publish	corobot.cpp	/^ pub_twist_.publish(v);$/;"	p	file:	signature:(v)
 publish	demo.cpp	/^  traj_pub.publish(msg);$/;"	p	file:	signature:(msg)
 publish	keyboard_teleop.cpp	/^    pub_motors.publish(motorCommand);$/;"	p	file:	signature:(motorCommand)
 push_back	corobot.cpp	/^    angular_speeds.push_back(current.velocities.at(2));$/;"	p	file:	signature:(current.velocities.at(2))
-push_back	corobot.cpp	/^    configuration_.ranges.push_back(u.standardRanges.at(i));$/;"	p	file:	signature:(u.standardRanges.at(i))
-push_back	corobot.cpp	/^    orientations.push_back(current.positions.at(2));$/;"	p	file:	signature:(current.positions.at(2))
-push_back	corobot.cpp	/^    speeds.push_back(speed_loc);$/;"	p	file:	signature:(speed_loc)
-push_back	corobot.cpp	/^  configuration_.K.push_back(x);$/;"	p	file:	signature:(x)
-push_back	corobot.cpp	/^  configuration_.K.push_back(y);$/;"	p	file:	signature:(y)
+push_back	corobot.cpp	/^    orientations_.push_back(utility_.findAngleFromAToB(current, next));$/;"	p	file:	signature:(utility_.findAngleFromAToB(current, next))
+push_back	corobot.cpp	/^  configuration_.positions.push_back(msg.pose.pose.position.x);$/;"	p	file:	signature:(msg.pose.pose.position.x)
+push_back	corobot.cpp	/^  configuration_.positions.push_back(msg.pose.pose.position.y);$/;"	p	file:	signature:(msg.pose.pose.position.y)
+push_back	corobot.cpp	/^  configuration_.velocities.push_back(msg.twist.twist.angular.z);$/;"	p	file:	signature:(msg.twist.twist.angular.z)
+push_back	corobot.cpp	/^  configuration_.velocities.push_back(msg.twist.twist.linear.x);$/;"	p	file:	signature:(msg.twist.twist.linear.x)
+push_back	corobot.cpp	/^  configuration_.velocities.push_back(msg.twist.twist.linear.y);$/;"	p	file:	signature:(msg.twist.twist.linear.y)
 push_back	demo.cpp	/^  msg.trajectory.points.push_back(point);$/;"	p	file:	signature:(point)
+push_back	utility.cpp	/^  c.push_back(a.positions.at(0));$/;"	p	file:	signature:(a.positions.at(0))
+push_back	utility.cpp	/^  c.push_back(a.positions.at(1));$/;"	p	file:	signature:(a.positions.at(1))
+push_back	utility.cpp	/^  d.push_back(b.positions.at(0));$/;"	p	file:	signature:(b.positions.at(0))
+push_back	utility.cpp	/^  d.push_back(b.positions.at(1));$/;"	p	file:	signature:(b.positions.at(1))
 push_back	utility.cpp	/^  standardRanges.push_back(range0);$/;"	p	file:	signature:(range0)
 push_back	utility.cpp	/^  standardRanges.push_back(range1);$/;"	p	file:	signature:(range1)
 push_back	utility.cpp	/^  standardRanges.push_back(range2);$/;"	p	file:	signature:(range2)
@@ -262,16 +293,21 @@ range0	utility.cpp	/^  ramp_msgs::Range range0; $/;"	l
 range1	utility.cpp	/^  ramp_msgs::Range range1; $/;"	l
 range2	utility.cpp	/^  ramp_msgs::Range range2; $/;"	l
 raw	keyboard_teleop.cpp	/^struct termios cooked, raw;$/;"	v	typeref:struct:
-releaseMutex	corobot.cpp	/^void Corobot::releaseMutex() {$/;"	f	class:Corobot	signature:()
-releaseMutex	corobot.h	/^    void releaseMutex();$/;"	p	class:Corobot	access:private	signature:()
-restart	corobot.h	/^    bool restart;$/;"	m	class:Corobot	access:private
+request	trajectory_request_handler.cpp	/^const bool TrajectoryRequestHandler::request(ramp_msgs::TrajectoryRequest& tr) {$/;"	f	class:TrajectoryRequestHandler	signature:(ramp_msgs::TrajectoryRequest& tr)
+request	trajectory_request_handler.h	/^    const bool request(ramp_msgs::TrajectoryRequest& tr);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(ramp_msgs::TrajectoryRequest& tr)
+restart_	corobot.h	/^    bool                      restart_;$/;"	m	class:Corobot	access:private
+result	corobot.cpp	/^  bool result;$/;"	l
+result	corobot.cpp	/^  ramp_msgs::Trajectory result;$/;"	l
 result	utility.cpp	/^  float result;$/;"	l
 result	utility.cpp	/^  float result=0;$/;"	l
+result	utility.cpp	/^  std::ostringstream result;$/;"	l
 robot	main.cpp	/^Corobot robot;$/;"	v
+robot	simulation.cpp	/^Corobot robot;$/;"	v
 robot	wait_for_command.cpp	/^Corobot robot;$/;"	v
 ros::init	demo.cpp	/^  ros::init(argc, argv, "robotDemo");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
 ros::init	keyboard_teleop.cpp	/^  ros::init(argc, argv, "keyboard_teleop");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
-ros::init	main.cpp	/^  ros::init(argc, argv, "robot");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+ros::init	main.cpp	/^  ros::init(argc, argv, "ramp_control");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+ros::init	simulation.cpp	/^  ros::init(argc, argv, "simulation");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
 ros::init	wait_for_command.cpp	/^  ros::init(argc, argv, "waitForCommand");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
 ros::spin	demo.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
 ros::spin	wait_for_command.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
@@ -279,75 +315,80 @@ ros::spinOnce	corobot.cpp	/^      ros::spinOnce();$/;"	p	class:ros	file:	signatu
 ros::spinOnce	corobot.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
 ros::spinOnce	demo.cpp	/^  ros::spinOnce();$/;"	p	class:ros	file:	signature:()
 ros::spinOnce	main.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
+ros::spinOnce	simulation.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
 sendTwist	corobot.cpp	/^void Corobot::sendTwist() const {$/;"	f	class:Corobot	signature:() const
 sendTwist	corobot.cpp	/^void Corobot::sendTwist(const geometry_msgs::Twist t) const {$/;"	f	class:Corobot	signature:(const geometry_msgs::Twist t) const
-sendTwist	corobot.h	/^    void sendTwist() const;$/;"	p	class:Corobot	access:private	signature:() const
+sendTwist	corobot.h	/^    void                        sendTwist() const;$/;"	p	class:Corobot	access:private	signature:() const
 sendTwist	corobot.h	/^    void sendTwist(const geometry_msgs::Twist twist) const;$/;"	p	class:Corobot	access:public	signature:(const geometry_msgs::Twist twist) const
 sendTwist	wait_for_command.cpp	/^    robot.sendTwist(msg);$/;"	p	file:	signature:(msg)
-setConfiguration	corobot.cpp	/^void Corobot::setConfiguration(float x, float y, float theta) {$/;"	f	class:Corobot	signature:(float x, float y, float theta)
-setConfiguration	corobot.h	/^    void setConfiguration(float x, float y, float theta);$/;"	p	class:Corobot	access:public	signature:(float x, float y, float theta)
 sleep	corobot.cpp	/^      r.sleep();$/;"	p	file:	signature:()
 sleep	wait_for_command.cpp	/^    r.sleep();$/;"	p	file:	signature:()
-speed	corobot.cpp	/^  float speed = mag_v \/ time;$/;"	l
-speed_loc	corobot.cpp	/^  float speed_loc;$/;"	l
-speeds	corobot.h	/^    std::vector<float> speeds; \/\/  Linear speed for each trajectory$/;"	m	class:Corobot	access:private
+speeds	corobot.h	/^    std::vector<float>        speeds; $/;"	m	class:Corobot	access:private
 spin	demo.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
 spin	wait_for_command.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
 spinOnce	corobot.cpp	/^      ros::spinOnce();$/;"	p	class:ros	file:	signature:()
 spinOnce	corobot.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
 spinOnce	demo.cpp	/^  ros::spinOnce();$/;"	p	class:ros	file:	signature:()
 spinOnce	main.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
+spinOnce	simulation.cpp	/^    ros::spinOnce();$/;"	p	class:ros	file:	signature:()
 standardRanges	utility.h	/^    std::vector<ramp_msgs::Range> standardRanges;$/;"	m	class:Utility	access:public
-start	corobot.cpp	/^  ros::Time start;$/;"	l
-start_time	corobot.cpp	/^  ros::Time start_time = ros::Time::now() + ros::Duration(0.0);$/;"	l
-std::cout	corobot.cpp	/^  std::cout<<"\\nIn updateTrajectory!\\n";$/;"	m	class:std	file:
+start_time	corobot.cpp	/^  ros::Time start_time = ros::Time::now();$/;"	l
 std::cout	corobot.cpp	/^  std::cout<<"\\nangular_speeds: [";$/;"	m	class:std	file:
 std::cout	corobot.cpp	/^  std::cout<<"\\nend_times: [";$/;"	m	class:std	file:
 std::cout	corobot.cpp	/^  std::cout<<"\\nspeeds: [";$/;"	m	class:std	file:
 std::cout	keyboard_teleop.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
 std::cout	main.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
 std::cout	main.cpp	/^  std::cout<<"\\nGot the message!\\n";$/;"	m	class:std	file:
+std::cout	simulation.cpp	/^  std::cout<<"\\nExiting normally\\n";$/;"	m	class:std	file:
 std::cout	wait_for_command.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
-std::cout	wait_for_command.cpp	/^  std::cout<<"\\nGot traj message!\\n";$/;"	m	class:std	file:
+std::cout	wait_for_command.cpp	/^  std::cout<<"\\nGot trajectory message!\\n";$/;"	m	class:std	file:
 std::cout	wait_for_command.cpp	/^  std::cout<<"\\nGot twist message!\\n";$/;"	m	class:std	file:
 stop	corobot.cpp	/^void Corobot::stop() const {$/;"	f	class:Corobot	signature:() const
 stop	corobot.h	/^    void stop() const;$/;"	p	class:Corobot	access:public	signature:() const
 sub_odometry_	corobot.h	/^    ros::Subscriber                   sub_odometry_;$/;"	m	class:Corobot	access:public
 sub_traj	main.cpp	/^  ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);$/;"	l
-sub_traj	wait_for_command.cpp	/^  ros::Subscriber sub_traj = handle.subscribe("trajectory", 1000, trajCallback);$/;"	l
+sub_traj	wait_for_command.cpp	/^  ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);$/;"	l
+sub_trajec	simulation.cpp	/^  ros::Subscriber sub_trajec = handle.subscribe("bestTrajec", 1000, &bestTrajecCallback);$/;"	l
 sub_twist	wait_for_command.cpp	/^  ros::Subscriber sub_twist = handle.subscribe("twist_single", 1000, twistCallback);$/;"	l
 temp	demo.cpp	/^  char temp;$/;"	l
-theta	corobot.cpp	/^  float theta = -0.036206715*configuration_.K.at(2) - 1.0380328655;$/;"	l
-thetas_	corobot.h	/^    std::vector<double> thetas_; $/;"	m	class:Corobot	access:private
-time	corobot.cpp	/^  float time = waypoint2.time_from_start.toSec() - waypoint1.time_from_start.toSec();$/;"	l
+temp1	corobot.cpp	/^  ramp_msgs::KnotPoint temp1;$/;"	l
+temp2	corobot.cpp	/^  ramp_msgs::KnotPoint temp2;$/;"	l
 timeNeededToTurn	corobot.cpp	/^const float timeNeededToTurn = 2.5; $/;"	v
 timer_	corobot.h	/^    ros::Timer                        timer_;$/;"	m	class:Corobot	access:public
+toString	utility.cpp	/^    result<<"\\n "<<i<<": "<<toString(path.points.at(i));$/;"	p	file:	signature:(path.points.at(i))
+toString	utility.cpp	/^  result<<"\\nConfiguration: "<<toString(kp.motionState);$/;"	p	file:	signature:(kp.motionState)
+toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Configuration c) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Configuration c) const
+toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {$/;"	f	class:Utility	signature:(const ramp_msgs::KnotPoint kp) const
+toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::MotionState mp) const {$/;"	f	class:Utility	signature:(const ramp_msgs::MotionState mp) const
+toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
+toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Trajectory traj) const
+toString	utility.h	/^    const std::string toString(const ramp_msgs::Configuration c) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Configuration c) const
+toString	utility.h	/^    const std::string toString(const ramp_msgs::KnotPoint kp) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::KnotPoint kp) const
+toString	utility.h	/^    const std::string toString(const ramp_msgs::MotionState c) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::MotionState c) const
+toString	utility.h	/^    const std::string toString(const ramp_msgs::Path p) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path p) const
+toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
+tr	corobot.cpp	/^  ramp_msgs::TrajectoryRequest tr; $/;"	l
 trajCallback	main.cpp	/^void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {$/;"	f	signature:(const ramp_msgs::Trajectory::ConstPtr& msg)
 trajCallback	wait_for_command.cpp	/^void trajCallback(const ramp_msgs::Trajectory& msg) {$/;"	f	signature:(const ramp_msgs::Trajectory& msg)
 traj_pub	demo.cpp	/^  ros::Publisher traj_pub = handle.advertise<ramp_msgs::Trajectory>("bestTrajec", 100);$/;"	l
-trajec_updated_	corobot.h	/^    bool trajec_updated_;$/;"	m	class:Corobot	access:private
 trajectory_	corobot.h	/^    ramp_msgs::Trajectory             trajectory_;$/;"	m	class:Corobot	access:public
 turn	corobot.cpp	/^void Corobot::turn(const float speed, const float angle) const {$/;"	f	class:Corobot	signature:(const float speed, const float angle) const
 turn	corobot.cpp	/^void Corobot::turn(const unsigned int speed, const bool cwise) const {$/;"	f	class:Corobot	signature:(const unsigned int speed, const bool cwise) const
 turn	corobot.h	/^    void turn(const float speed, const float angle) const; $/;"	p	class:Corobot	access:public	signature:(const float speed, const float angle) const
 turn	corobot.h	/^    void turn(const unsigned int speed, const bool cwise) const;$/;"	p	class:Corobot	access:public	signature:(const unsigned int speed, const bool cwise) const
 twistCallback	wait_for_command.cpp	/^void twistCallback(const geometry_msgs::Twist msg) {$/;"	f	signature:(const geometry_msgs::Twist msg)
-twist_	corobot.h	/^    geometry_msgs::Twist twist_;$/;"	m	class:Corobot	access:private
-u	corobot.h	/^    Utility u;$/;"	m	class:Corobot	access:private
+twist_	corobot.h	/^    geometry_msgs::Twist      twist_;$/;"	m	class:Corobot	access:private
 updatePublishTimer	corobot.cpp	/^void Corobot::updatePublishTimer(const ros::TimerEvent&) {$/;"	f	class:Corobot	signature:(const ros::TimerEvent&)
 updatePublishTimer	corobot.h	/^    void updatePublishTimer(const ros::TimerEvent&);$/;"	p	class:Corobot	access:public	signature:(const ros::TimerEvent&)
-updateState	corobot.cpp	/^void Corobot::updateState(const nav_msgs::Odometry::ConstPtr& msg) {$/;"	f	class:Corobot	signature:(const nav_msgs::Odometry::ConstPtr& msg)
-updateState	corobot.h	/^    void updateState(const nav_msgs::Odometry::ConstPtr& msg);$/;"	p	class:Corobot	access:public	signature:(const nav_msgs::Odometry::ConstPtr& msg)
+updateState	corobot.cpp	/^void Corobot::updateState(const nav_msgs::Odometry& msg) {$/;"	f	class:Corobot	signature:(const nav_msgs::Odometry& msg)
+updateState	corobot.h	/^    void updateState(const nav_msgs::Odometry& msg);$/;"	p	class:Corobot	access:public	signature:(const nav_msgs::Odometry& msg)
 updateTrajectory	corobot.cpp	/^void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {$/;"	f	class:Corobot	signature:(const ramp_msgs::Trajectory msg)
 updateTrajectory	corobot.h	/^    void updateTrajectory(const ramp_msgs::Trajectory msg); $/;"	p	class:Corobot	access:public	signature:(const ramp_msgs::Trajectory msg)
+updateTrajectory	simulation.cpp	/^  robot.updateTrajectory(msg);$/;"	p	file:	signature:(msg)
 updateTrajectory	wait_for_command.cpp	/^  robot.updateTrajectory(msg);$/;"	p	file:	signature:(msg)
-v	corobot.cpp	/^  float v[2];$/;"	l
+utility_	corobot.h	/^    Utility                   utility_;$/;"	m	class:Corobot	access:private
 v	corobot.cpp	/^ geometry_msgs::Twist v;$/;"	l
 velocity_	corobot.h	/^    geometry_msgs::Twist              velocity_;$/;"	m	class:Corobot	access:public
-x	corobot.cpp	/^  float x = 0.0205949485*configuration_.K.at(0) + 0.0089932463;$/;"	l
-x_dif	corobot.cpp	/^    float x_dif = waypoint2.positions.at(0) - waypoint1.positions.at(0); \/\/  difference in x between the waypoint 2 and 1$/;"	l
-y	corobot.cpp	/^  float y = 0.0205949485*configuration_.K.at(1) + 0.0089932463;$/;"	l
-y_dif	corobot.cpp	/^    float y_dif = waypoint2.positions.at(1) - waypoint1.positions.at(1); \/\/  difference in y between the waypoint 2 and 1$/;"	l
-~Corobot	corobot.cpp	/^Corobot::~Corobot() {}$/;"	f	class:Corobot	signature:()
+~Corobot	corobot.cpp	/^Corobot::~Corobot() {$/;"	f	class:Corobot	signature:()
 ~Corobot	corobot.h	/^    ~Corobot();$/;"	p	class:Corobot	access:public	signature:()
 ~Utility	utility.h	/^    ~Utility() {}$/;"	f	class:Utility	access:public	signature:()

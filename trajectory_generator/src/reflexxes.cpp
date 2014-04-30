@@ -1,7 +1,6 @@
 #include "reflexxes.h"
 
 
-
 /** Constructor */
 Reflexxes::Reflexxes() {
   
@@ -71,6 +70,11 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce() {
 
 
 
+
+
+
+
+
 /** This method will return a JointTrajectoryPoint given some output parameters from Reflexxes */
 const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(const RMLPositionOutputParameters outputParameters) {
   trajectory_msgs::JointTrajectoryPoint point;
@@ -120,6 +124,10 @@ const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(cons
 
 
 
+
+
+
+
 /** This method sets the new target of Reflexxes */
 void Reflexxes::setTarget(const ramp_msgs::KnotPoint kp) {
   
@@ -129,6 +137,10 @@ void Reflexxes::setTarget(const ramp_msgs::KnotPoint kp) {
     inputParameters->TargetVelocityVector->VecData[i] = kp.motionState.velocities.at(i);
   }  
 } // End setTarget
+
+
+
+
 
 
 
@@ -152,9 +164,13 @@ void Reflexxes::setSelectionVector(const ramp_msgs::Path p) {
 }
 
 
+
+
+
+
 // Service callback, the input is a path and the output a trajectory
 bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) {
-  //std::cout<<"\nReceived request: "<<utility.toString(req)<<"\n";
+  std::cout<<"\nReceived request: "<<utility.toString(req)<<"\n";
   //std::cin.get();
 
 
@@ -195,7 +211,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ra
   } // end for
 
   
-  //std::cout<<"\nReturning: "<<utility.toString(res.trajectory)<<"\n";
+  std::cout<<"\nReturning: "<<utility.toString(res.trajectory)<<"\n";
   //std::cin.get();
   return true;
 } // End trajectoryRequest callback

@@ -137,3 +137,115 @@ const float Utility::getEuclideanDist(const std::vector<float> a, const std::vec
 }
 
 
+const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
+  std::ostringstream result;
+
+  result<<"\np: [ ";
+  for(unsigned int i=0;i<mp.positions.size();i++) {
+    result<<mp.positions.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\nv: [ ";
+  for(unsigned int i=0;i<mp.velocities.size();i++) {
+    result<<mp.velocities.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\na: [ ";
+  for(unsigned int i=0;i<mp.accelerations.size();i++) {
+    result<<mp.accelerations.at(i)<<" ";
+  }
+  result<<"]";
+
+  result<<"\nj: [ ";
+  for(unsigned int i=0;i<mp.jerks.size();i++) {
+    result<<mp.jerks.at(i)<<" ";
+  }
+  result<<"]";
+
+  return result.str();
+}
+
+
+const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
+  std::ostringstream result;
+
+  result<<"\n Knot Points:";
+
+  for(unsigned int i=0;i<traj.index_knot_points.size();i++) {
+    
+    result<<"\n   "<<i<<":";
+    unsigned int index = traj.index_knot_points.at(i);
+
+    trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);
+    
+
+
+    result<<"\n       Positions: ("<<p.positions.at(0);
+    for(unsigned int k=1;k<p.positions.size();k++) {
+      result<<", "<<p.positions.at(k);
+    }
+    result<<")";
+
+  }
+
+
+  result<<"\n Points:";
+  for(unsigned int i=0;i<traj.trajectory.points.size();i++) {
+    result<<"\n\n   Point "<<i<<":";
+    
+    trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);
+  
+    //Positions
+    result<<"\n       Positions: ("<<p.positions.at(0);
+    for(unsigned int k=1;k<p.positions.size();k++) {
+      result<<", "<<p.positions.at(k);
+    }
+    result<<")";
+  
+    //Velocities
+    result<<"\n       Velocities: ("<<p.velocities.at(0);
+    for(unsigned int k=1;k<p.velocities.size();k++) {
+      result<<", "<<p.velocities.at(k);
+    }
+    result<<")";
+    
+    //Accelerations
+    result<<"\n       Accelerations: ("<<p.accelerations.at(0);
+    for(unsigned int k=1;k<p.accelerations.size();k++) {
+      result<<", "<<p.accelerations.at(k);
+    }
+    result<<")";
+    
+    result<<"\n Time From Start: "<<p.time_from_start;
+
+  }
+
+  result<<"\n Feasible: "<<traj.feasible;
+  result<<"\n Fitness:  "<<traj.fitness;
+
+  return result.str();
+}
+
+
+
+const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
+  std::ostringstream result;
+
+  result<<"\nConfiguration: "<<toString(kp.motionState);
+  result<<", Stop time: "<<kp.stopTime;
+
+  return result.str();
+}
+
+const std::string Utility::toString(const ramp_msgs::Path path) const {
+  std::ostringstream result;
+
+  result<<"\nPath: ";
+  for(unsigned int i=0;i<path.points.size();i++) {
+    result<<"\n "<<i<<": "<<toString(path.points.at(i));
+  }
+
+  return result.str();
+}

@@ -11,7 +11,7 @@ const float timeNeededToTurn = 2.5;
 
 
 
-Corobot::Corobot() : restart_(false), num(0), num_traveled(0), k_dof_(3) { 
+Corobot::Corobot() : restart_(false), num(0), num_traveled(0), k_dof_(3), h_traj_req_(0) { 
   for(unsigned int i=0;i<k_dof_;i++) {
     configuration_.positions.push_back(0);
     configuration_.velocities.push_back(0);
@@ -21,7 +21,19 @@ Corobot::Corobot() : restart_(false), num(0), num_traveled(0), k_dof_(3) {
 }
 
 
-Corobot::~Corobot() {}
+Corobot::~Corobot() {
+  if(h_traj_req_ != 0) {
+    delete h_traj_req_;
+    h_traj_req_ = 0;
+  }
+}
+
+
+void Corobot::init(ros::NodeHandle& h) {
+  h_traj_req_ = new TrajectoryRequestHandler((const ros::NodeHandle&)h);
+}
+
+
 
 
 /** Publishes the MotorCommand msg. The Corobot will drive based on the msg. */
@@ -241,15 +253,19 @@ const bool Corobot::checkImminentCollision() const {
 const bool Corobot::checkOrientation(const int i) const {
   
   float diff = utility_.findDistanceBetweenAngles(configuration_.positions.at(2), orientations_.at(i));
+  std::cout<<"\ndiff: "<<diff;
 
-  if(diff > PI/18) {
+  if(fabs(diff) > PI/18) {
     return false;
   }
 
   return true;
 }
 
+
+/** This method returns a rotation trajectory for the robot */
 const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
+  std::cout<<"\nIn getRotationTrajectory\n";
   ramp_msgs::Trajectory result;
 
   ramp_msgs::TrajectoryRequest tr; 
@@ -258,10 +274,18 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
   temp1.motionState = configuration_;
   temp2.motionState = configuration_;
   temp2.motionState.positions.at(2) = orientations_.at(num_traveled);
+
+  tr.request.path.points.push_back(temp1);
+  tr.request.path.points.push_back(temp2);
+
+  tr.request.resolutionRate = 10;
       
+  if(h_traj_req_->request(tr)) {
+    result = tr.response.trajectory;  
+  }
 
-   
-
+  std::cout<<"\n*****\n";
+  std::cout<<"\nRotation trajectory: "<<utility_.toString(result);
   return result;
 }
 
@@ -274,7 +298,7 @@ void Corobot::moveOnTrajectory(bool simulation) {
 
   // Execute the trajectory
   while( (num_traveled+1) < num) { 
-    //std::cout<<"\nnum_traveled: "<<num_traveled;
+    std::cout<<"\nnum_traveled: "<<num_traveled;
     restart_ = false;
     
     // Force a stop until there is no imminent collision
@@ -284,8 +308,12 @@ void Corobot::moveOnTrajectory(bool simulation) {
 
     // Check that we are at the correct orientation
     // If not, rotate
+    std::cout<<"\norientations_.at("<<num_traveled<<"): "<<orientations_.at(num_traveled);
+    std::cout<<"\nconfiguration_.positions.at(2): "<<configuration_.positions.at(2)<<"\n";
     while(!checkOrientation(num_traveled)) {
-
+      updateTrajectory(getRotationTrajectory());
+      std::cout<<"\nJust got rotation trajectory! Press Enter to continue.\n";
+      std::cin.get();
     }
     
     // Set velocities
@@ -305,8 +333,8 @@ void Corobot::moveOnTrajectory(bool simulation) {
       // Commented out because it was producing erratic driving
       // Should be fixed at some point
       if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.15) {
-        //std::cout<<"\ninitial_theta: "<<initial_theta;
-        float actual_theta = utility_.displaceAngle(initial_theta, configuration_.positions.at(2));
+        //std::cout<<"\ninitial_theta_: "<<initial_theta_;
+        float actual_theta = utility_.displaceAngle(initial_theta_, configuration_.positions.at(2));
         
         float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled));
         //std::cout<<"\nactual theta: "<<actual_theta;

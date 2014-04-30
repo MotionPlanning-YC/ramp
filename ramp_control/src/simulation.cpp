@@ -26,8 +26,8 @@ int main(int argc, char** argv) {
   robot.sub_odometry_ = handle.subscribe("odom", 1000, &Corobot::updateState, &robot);
 
 
-  handle.param("orientation", robot.initial_theta, 0.);
-  std::cout<<"\nrobot.orientation: "<<robot.initial_theta;
+  handle.param("orientation", robot.initial_theta_, 0.);
+  std::cout<<"\nrobot.orientation: "<<robot.initial_theta_;
 
 
   // Make a blank ramp_msgs::Trajectory
