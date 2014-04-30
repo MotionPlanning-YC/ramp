@@ -72,8 +72,6 @@ int main(int argc, char** argv) {
 
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
-  
-  tr.request.resolutionRate = 10;
 
 
   std::cout<<"\nPress Enter to request and send the trajectory\n";

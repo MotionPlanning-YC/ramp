@@ -30,6 +30,7 @@ class Corobot {
     void stop() const;
 
     void moveOnTrajectory(bool simulation);
+    void moveOnTrajectoryRot(const ramp_msgs::Trajectory traj, bool simulation);
     void updateState(const nav_msgs::Odometry& msg);
     void updateTrajectory(const ramp_msgs::Trajectory msg); 
     void updatePublishTimer(const ros::TimerEvent&);

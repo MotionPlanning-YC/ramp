@@ -190,7 +190,6 @@ void Corobot::calculateSpeedsAndTime () {
     // Push on the orientation needed to move 
     // from point i to point i+1
     orientations_.push_back(utility_.findAngleFromAToB(current, next));
-      
 
     // Push on the angular speed for the waypoint
     // Angular speed is at index 2 of the point 
@@ -277,8 +276,6 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
 
   tr.request.path.points.push_back(temp1);
   tr.request.path.points.push_back(temp2);
-
-  tr.request.resolutionRate = 10;
       
   if(h_traj_req_->request(tr)) {
     result = tr.response.trajectory;  
@@ -288,6 +285,30 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
   std::cout<<"\nRotation trajectory: "<<utility_.toString(result);
   return result;
 }
+
+
+void Corobot::moveOnTrajectoryRot(const ramp_msgs::Trajectory traj, bool simulation) {
+  //std::cout<<"\nIn moveOnTrajectoryRot\n";
+
+  ros::Rate r(50);
+
+  ros::Time start = ros::Time::now();
+  for(int i=0;i<traj.trajectory.points.size();i++) {
+    twist_.linear.x  = 0;
+    twist_.angular.z = traj.trajectory.points.at(i).velocities.at(2);
+
+    ros::Time g_time = start + traj.trajectory.points.at(i).time_from_start;
+
+    while(ros::Time::now() < g_time) {
+      sendTwist();
+      if(simulation) pub_cmd_vel_.publish(twist_);
+
+      r.sleep();
+      ros::spinOnce();
+    }
+  }
+}
+
 
 /** This method moves the robot along trajectory_ */
 void Corobot::moveOnTrajectory(bool simulation) {
@@ -308,13 +329,12 @@ void Corobot::moveOnTrajectory(bool simulation) {
 
     // Check that we are at the correct orientation
     // If not, rotate
-    std::cout<<"\norientations_.at("<<num_traveled<<"): "<<orientations_.at(num_traveled);
-    std::cout<<"\nconfiguration_.positions.at(2): "<<configuration_.positions.at(2)<<"\n";
-    while(!checkOrientation(num_traveled)) {
-      updateTrajectory(getRotationTrajectory());
-      std::cout<<"\nJust got rotation trajectory! Press Enter to continue.\n";
-      std::cin.get();
+    // Because the last point is the goal
+    while(num_traveled < num-2 && !checkOrientation(num_traveled)) {
+      moveOnTrajectoryRot(getRotationTrajectory(), simulation);
+      calculateSpeedsAndTime();
     }
+
     
     // Set velocities
     twist_.linear.x  = speeds.at(num_traveled);
@@ -373,11 +393,10 @@ void Corobot::moveOnTrajectory(bool simulation) {
     ros::spinOnce();
   } // end while
 
-    // Stops the wheels
-    twist_.linear.x = 0;
-    twist_.angular.z = 0;
-    sendTwist();
-
+  // Stops the wheels
+  twist_.linear.x = 0;
+  twist_.angular.z = 0;
+  sendTwist();
 } // End moveOnTrajectory
 
 

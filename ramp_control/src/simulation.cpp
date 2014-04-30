@@ -29,6 +29,7 @@ int main(int argc, char** argv) {
   handle.param("orientation", robot.initial_theta_, 0.);
   std::cout<<"\nrobot.orientation: "<<robot.initial_theta_;
 
+  robot.init(handle);
 
   // Make a blank ramp_msgs::Trajectory
   ramp_msgs::Trajectory init;

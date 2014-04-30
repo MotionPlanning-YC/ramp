@@ -56,7 +56,7 @@ const float Utility::findAngleFromAToB(const std::vector<float> a, const std::ve
   // Set the result to the starting orientation if one is provided
   // Or to 0 if no starting orientation is provided
   // TODO: Make the comparison proportionate to size of space
-  if(euc_dist <= 0.01) {
+  if(euc_dist <= 0.0001) {
     if(a.size() > 2) {
       result = a.at(2);
     }

@@ -44,6 +44,8 @@ int main(int argc, char** argv) {
   
   // Publishers
   robot.pub_twist_ = handle.advertise<geometry_msgs::Twist>(Corobot::TOPIC_STR_TWIST, 1000);
+
+  robot.init(handle);
   
   ros::spin();
   std::cout<<"\nExiting Normally\n";
