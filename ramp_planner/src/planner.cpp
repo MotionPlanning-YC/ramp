@@ -7,7 +7,7 @@
 
 Planner::Planner() : resolutionRate_(5), populationSize_(1), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
 {
-  controlCycle_ = ros::Duration(1.f / 5.f);
+  controlCycle_ = ros::Duration(1.f / 50.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
   imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
 }
@@ -108,12 +108,12 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
 
   // Transform configuration from odometry to world coordinates
   start_.transformBase(T_od_w_);
-  //std::cout<<"\nNew starting configuration: "<<start_.toString();
+  //td::cout<<"\nNew starting configuration: "<<start_.toString();
   
 
   // Set proper velocity values
   start_.velocities_.at(0) = msg.velocities.at(0) * cos(msg.positions.at(2));
-  start_.velocities_.at(1) = msg.velocities.at(0) * sin(msg.positions.at(2));
+  start_.velocities_.at(1) = msg.velocities.at(0) * sin(start_.positions_.at(2));
 
   mutex_start_ = true;
 } // End updateCallback
@@ -154,7 +154,7 @@ void Planner::init(const ros::NodeHandle& h) {
 
 
 void Planner::planningCycleCallback(const ros::TimerEvent&) {
-  std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
+  //std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
   
   // Wait until mutex can be obtained
   while(!mutex_pop_) {}
@@ -172,7 +172,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
   // t=t+1
   generation_++;
 
-  std::cout<<"\nPlanning cycle "<<generation_<<" complete\n";
+  //std::cout<<"\nPlanning cycle "<<generation_-1<<" complete\n";
 } // End planningCycleCallback
 
 
@@ -212,11 +212,7 @@ void Planner::gradualTrajectory(RampTrajectory& t) {
  *  configuration of the robot, re-evaluates the population,
  *  and sends a new (and better) trajectory for the robot to move along */
 void Planner::controlCycleCallback(const ros::TimerEvent&) {
-  std::cout<<"\nControl cycle occurring\n";
-
-  // std::cout<<"\nSpinning once\n";
-  ros::spinOnce(); 
-  std::cout<<"\nControl cycle, robot pose: "<<start_.toString()<<"\n";
+  //std::cout<<"\nControl cycle occurring\n";
   
   // Obtain mutex on population and update it
   while(!mutex_pop_) {}
@@ -246,6 +242,8 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   
   // Send the best trajectory 
   sendBest(); 
+
+  sendPopulation();
   
   //std::cout<<"\nControl cycle complete\n";
 } // End controlCycleCallback
@@ -616,11 +614,9 @@ void Planner::updatePaths(MotionState start, ros::Duration dur) {
 /** This method updates the population with the current configuration 
  *  The duration is used to determine which knot points still remain in the trajectory */
 void Planner::updatePopulation(ros::Duration d) {
-  std::cout<<"\nIn updatePopulation\n";
   
   // First, get the updated current configuration
   start_ = getStartConfiguration();
-  std::cout<<"\nGot start\n";
   
   /*std::cout<<"\nPaths before updating:";
   for(int i=0;i<paths_.size();i++) {
@@ -698,24 +694,58 @@ const std::string Planner::pathsToString() const {
   
   // initialize population
   init_population();
+ 
+  KnotPoint kp1;
+  KnotPoint kp2;
   
+  kp1.motionState_.positions_.push_back(start_.positions_.at(0));
+  kp1.motionState_.positions_.push_back(start_.positions_.at(1));
+  kp1.motionState_.positions_.push_back(start_.positions_.at(2));
+  kp2.motionState_.positions_.push_back(goal_.positions_.at(0));
+  kp2.motionState_.positions_.push_back(goal_.positions_.at(1));
+  kp2.motionState_.positions_.push_back(goal_.positions_.at(2));
+  
+  kp1.motionState_.velocities_.push_back(0);
+  kp1.motionState_.velocities_.push_back(0);
+  kp1.motionState_.velocities_.push_back(0);
+  kp2.motionState_.velocities_.push_back(0);
+  kp2.motionState_.velocities_.push_back(0);
+  kp2.motionState_.velocities_.push_back(0);
 
-  std::cout<<"\nPopulation initialized!\n";
+  Path p(kp1, kp2);
+  
+  ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
+  requestTrajectory(tr);
+  
+  RampTrajectory traj(0);
+  traj.msg_trajec_ = tr.response.trajectory;
+  traj.path_ = p;
+
+  population_.clear();
+  population_.add(traj);
+
+  paths_.clear();
+  paths_.push_back(p);
+
+  /*std::cout<<"\nPopulation initialized!\n";
   std::cout<<"\npaths_.size(): "<<paths_.size()<<"\n";
   for(unsigned int i=0;i<paths_.size();i++) {
     std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
   }
-  std::cout<<"\n";
+  std::cout<<"\n";*/
   // std::cout<<"\nPress enter to continue\n";
   // std::cin.get();
 
 
   // Initialize the modifier
-  modifier_->paths_ = paths_;
+  // *****! Testing *****!
+  //modifier_->paths_ = paths_;
 
 
   // Evaluate the population and get the initial trajectory to move on
+  // *****! Testing *****!
   RampTrajectory T_move = evaluateAndObtainBest();
+  // *****! Testing *****!
   sendPopulation();
   //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n\n"; 
   // std::cout<<"\nPress enter to start the loop!\n";
@@ -726,10 +756,12 @@ const std::string Planner::pathsToString() const {
   // createSubpopulations();
   
   // Start the planning cycle timer
-  planningCycleTimer_.start();
+  // *****! Testing *****!
+  //planningCycleTimer_.start();
 
   // Wait for 100 generations before starting 
-  while(generation_ < 100) {ros::spinOnce();}
+  // *****! Testing *****!
+  //while(generation_ < 100) {ros::spinOnce();}
 
   std::cout<<"\n***************Starting Control Cycle*****************\n";
   // Start the control cycle timer
@@ -738,8 +770,8 @@ const std::string Planner::pathsToString() const {
   
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
-  goalThreshold_ = 0.25;
-  while( (start_.comparePosition(goal_, true) > goalThreshold_) && ros::ok()) {
+  goalThreshold_ = 0.01;
+  while( (start_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) {
     ros::spinOnce(); 
   } // end while
   

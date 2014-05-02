@@ -14,13 +14,13 @@ Reflexxes::Reflexxes() {
 
   // Set up the motion constraints (max velocity, acceleration and jerk)
   // Maximum velocity   
-  inputParameters->MaxVelocityVector->VecData[0] = .4;
-  inputParameters->MaxVelocityVector->VecData[1] = .4;
+  inputParameters->MaxVelocityVector->VecData[0] = .33;
+  inputParameters->MaxVelocityVector->VecData[1] = .33;
   inputParameters->MaxVelocityVector->VecData[2] = PI/3;
 
   // Maximum acceleration
-  inputParameters->MaxAccelerationVector->VecData[0] = 0.5;
-  inputParameters->MaxAccelerationVector->VecData[1] = 0.5;
+  inputParameters->MaxAccelerationVector->VecData[0] = 0.25;
+  inputParameters->MaxAccelerationVector->VecData[1] = 0.25;
   inputParameters->MaxAccelerationVector->VecData[2] = PI/3;
 
   // As the maximum jerk values are not known, this is just to try
@@ -170,7 +170,7 @@ void Reflexxes::setSelectionVector(const ramp_msgs::Path p) {
 
 // Service callback, the input is a path and the output a trajectory
 bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) {
-  std::cout<<"\nReceived request: "<<utility.toString(req)<<"\n";
+  //std::cout<<"\nReceived request: "<<utility.toString(req)<<"\n";
   //std::cin.get();
 
 
@@ -211,7 +211,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ra
   } // end for
 
   
-  std::cout<<"\nReturning: "<<utility.toString(res.trajectory)<<"\n";
+  //std::cout<<"\nReturning: "<<utility.toString(res.trajectory)<<"\n";
   //std::cin.get();
   return true;
 } // End trajectoryRequest callback
@@ -252,10 +252,12 @@ void Reflexxes::setInitialConditions() {
   // This is the latest acceleration value got from the path
   if(path.points.at(0).motionState.accelerations.size() > 0) {
     for(unsigned int i=0;i<NUMBER_OF_DOFS;i++) {
+      std::cout<<"\npath.points.at(0).motionState.accelerations.at("<<i<<"): "<<path.points.at(0).motionState.accelerations.at(i);
       inputParameters->CurrentAccelerationVector->VecData[i] = path.points.at(0).motionState.accelerations.at(i);
     }
   }
   else {//log some error
+    std::cout<<"\nAcceleration is empty!";
   }
 } // End setInitialConditions
 

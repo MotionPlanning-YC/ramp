@@ -45,7 +45,7 @@ class Corobot {
     ros::Publisher                    pub_cmd_vel_;
     ros::Publisher                    pub_update_;
     ros::Subscriber                   sub_odometry_;
-    ramp_msgs::MotionState            configuration_; 
+    ramp_msgs::MotionState            motion_state_; 
     geometry_msgs::Twist              velocity_;
     ramp_msgs::Trajectory             trajectory_;
     ros::Timer                        timer_;
@@ -67,8 +67,9 @@ class Corobot {
     void                        calculateSpeedsAndTime();
     void                        printVectors() const;
     const bool                  checkImminentCollision() const;
-    const bool                  checkOrientation(const int i) const;
+    const bool                  checkOrientation(const int i, const bool simulation) const;
     const ramp_msgs::Trajectory getRotationTrajectory() const;
+    const std::vector<float>    computeAcceleration() const;
     
     
     /** Data Members **/
@@ -80,10 +81,11 @@ class Corobot {
     const unsigned int        k_dof_;
     std::vector<ros::Time>    end_times; 
     std::vector<float>        speeds; 
-    std::vector<float>        angular_speeds;
     std::vector<float>        orientations_;
     geometry_msgs::Twist      twist_;
     TrajectoryRequestHandler* h_traj_req_;
+    ramp_msgs::MotionState    prev_motion_state_; 
+    ros::Time                 prev_t_;
 };
 
 #endif
