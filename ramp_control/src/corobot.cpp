@@ -144,7 +144,10 @@ void Corobot::updateState(const nav_msgs::Odometry& msg) {
 
   // Odometry does not have acceleration info, but
   // it would be pushed on here
-  // computeAcceleration
+  std::vector<float> a = computeAcceleration();
+  for(unsigned int i=0;i<a.size();i++) {
+    motion_state_.accelerations.push_back(a.at(i));
+  }
     
   prev_t_ = ros::Time::now();
 } // End updateState
@@ -216,6 +219,7 @@ void Corobot::calculateSpeedsAndTime () {
     //std::cout<<"\nCurrent: ("<<current.positions.at(0)<<", "<<current.positions.at(1)<<")";
     //std::cout<<"\nNext: ("<<next.positions.at(0)<<", "<<next.positions.at(1)<<")";
     orientations_.push_back(utility_.findAngleFromAToB(current, next));
+
     //std::cout<<"\norientation: "<<orientations_.at(i)<<"\n";
     
     // Calculate the ending time for each waypoints
@@ -339,14 +343,11 @@ void Corobot::moveOnTrajectoryRot(const ramp_msgs::Trajectory traj, bool simulat
 /** This method moves the robot along trajectory_ */
 void Corobot::moveOnTrajectory(bool simulation) {
   restart_ = false;
-  ros::Rate r(50);
-  ros::Rate d(0.5);
-    
+  ros::Rate r(35);
 
 
   // Execute the trajectory
   while( (num_traveled+1) < num) { 
-    //std::cout<<"\nnum_traveled: "<<num_traveled;
     restart_ = false;
     
     // Force a stop until there is no imminent collision
@@ -364,30 +365,39 @@ void Corobot::moveOnTrajectory(bool simulation) {
       moveOnTrajectoryRot(rot_t, simulation);
     
       ros::spinOnce();
-    }    
+    }   
+    
+    // Check if a new trajectory has been received before we go to next point
+    if(restart_) {
+      break;
+    } 
     
     
     // Set velocities
-    twist_.linear.x  = speeds.at(num_traveled);
+    /*std::cout<<"\nnum_traveled: "<<num_traveled;
+    std::cout<<"\nnum: "<<num;
+    std::cout<<"\nspeeds.size(): "<<speeds.size()<<"\n";*/
 
     // Move to the next point
     ros::Time g_time = end_times.at(num_traveled);
     while(ros::ok() && ros::Time::now() < g_time) {
     
+      twist_.linear.x = speeds.at(num_traveled);
+    
       // Adjust the angular speed to correct errors in turning
       // Commented out because it was producing erratic driving
       // Should be fixed at some point
-      if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.15) {
+      /*if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.15) {
         //std::cout<<"\ninitial_theta_: "<<initial_theta_;
-        float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
-        float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled));
+        //float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
+        //float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled));
         //std::cout<<"\nactual theta: "<<actual_theta;
         //std::cout<<"\norientations_.at("<<num_traveled<<"): "<<orientations_.at(num_traveled);
         //std::cout<<"\ndist: "<<dist;
         //twist_.angular.z = -1*dist;
-      }
+      }*/
     
-      //std::cout<<"\ntwist_linear: "<<twist_.linear.x;
+      std::cout<<"\ntwist_linear: "<<twist_.linear.x;
       //std::cout<<"\ntwist_angular: "<<twist_.angular.z<<"\n";
 
       // Send the twist_message to move the robot

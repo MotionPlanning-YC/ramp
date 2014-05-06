@@ -7,7 +7,7 @@
 
 Planner::Planner() : resolutionRate_(5), populationSize_(1), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
 {
-  controlCycle_ = ros::Duration(1.f / 50.f);
+  controlCycle_ = ros::Duration(1.f / 10.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
   imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
 }
@@ -108,12 +108,19 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
 
   // Transform configuration from odometry to world coordinates
   start_.transformBase(T_od_w_);
-  //td::cout<<"\nNew starting configuration: "<<start_.toString();
+  std::cout<<"\nNew starting configuration: "<<start_.toString();
   
 
   // Set proper velocity values
-  start_.velocities_.at(0) = msg.velocities.at(0) * cos(msg.positions.at(2));
+  start_.velocities_.at(0) = msg.velocities.at(0) * cos(start_.positions_.at(2));
   start_.velocities_.at(1) = msg.velocities.at(0) * sin(start_.positions_.at(2));
+
+  // Set proper acceleration values
+  start_.accelerations_.at(0) = msg.accelerations.at(0) * cos(start_.positions_.at(2));
+  start_.accelerations_.at(1) = msg.accelerations.at(0) * sin(start_.positions_.at(2));
+
+
+  std::cout<<"\nstart_: "<<start_.toString();
 
   mutex_start_ = true;
 } // End updateCallback
@@ -147,7 +154,9 @@ void Planner::init(const ros::NodeHandle& h) {
   // Set start and goal velocities
   for(unsigned int i=0;i<start_.positions_.size();i++) {
     start_.velocities_.push_back(0);
+    start_.accelerations_.push_back(0);
     goal_.velocities_.push_back(0);
+    goal_.accelerations_.push_back(0);
   }
 } // End init
 

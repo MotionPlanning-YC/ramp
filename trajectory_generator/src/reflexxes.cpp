@@ -10,7 +10,7 @@ Reflexxes::Reflexxes() {
   outputParameters = new RMLPositionOutputParameters( NUMBER_OF_DOFS );
   
   // Use time synchronization so the robot drives in a straight line towards goal 
-  flags.SynchronizationBehavior= RMLPositionFlags::ONLY_TIME_SYNCHRONIZATION;
+  flags.SynchronizationBehavior = RMLPositionFlags::ONLY_TIME_SYNCHRONIZATION;
 
   // Set up the motion constraints (max velocity, acceleration and jerk)
   // Maximum velocity   
@@ -19,13 +19,13 @@ Reflexxes::Reflexxes() {
   inputParameters->MaxVelocityVector->VecData[2] = PI/3;
 
   // Maximum acceleration
-  inputParameters->MaxAccelerationVector->VecData[0] = 0.25;
-  inputParameters->MaxAccelerationVector->VecData[1] = 0.25;
+  inputParameters->MaxAccelerationVector->VecData[0] = 0.33;
+  inputParameters->MaxAccelerationVector->VecData[1] = 0.33;
   inputParameters->MaxAccelerationVector->VecData[2] = PI/3;
 
   // As the maximum jerk values are not known, this is just to try
-  inputParameters->MaxJerkVector->VecData[0] = 1.0;
-  inputParameters->MaxJerkVector->VecData[1] = 1.0;
+  inputParameters->MaxJerkVector->VecData[0] = 1;
+  inputParameters->MaxJerkVector->VecData[1] = 1;
   inputParameters->MaxJerkVector->VecData[2] = PI/3;
 
   // Result
@@ -196,8 +196,8 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ra
     setTarget(path.points.at(i));
     
     // Push the initial state onto trajectory
-    //if(i==1)
-      //res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(*inputParameters));
+    if(i==1)
+      res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(*inputParameters));
 
     // We go to the next knotpoint only once we reach this one
     while (!isFinalStateReached()) {
@@ -252,12 +252,11 @@ void Reflexxes::setInitialConditions() {
   // This is the latest acceleration value got from the path
   if(path.points.at(0).motionState.accelerations.size() > 0) {
     for(unsigned int i=0;i<NUMBER_OF_DOFS;i++) {
-      std::cout<<"\npath.points.at(0).motionState.accelerations.at("<<i<<"): "<<path.points.at(0).motionState.accelerations.at(i);
+      //std::cout<<"\npath.points.at(0).motionState.accelerations.at("<<i<<"): "<<path.points.at(0).motionState.accelerations.at(i);
       inputParameters->CurrentAccelerationVector->VecData[i] = path.points.at(0).motionState.accelerations.at(i);
     }
   }
   else {//log some error
-    std::cout<<"\nAcceleration is empty!";
   }
 } // End setInitialConditions
 

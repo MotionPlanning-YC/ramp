@@ -11,6 +11,18 @@ void bestTrajecCallback(const ramp_msgs::Trajectory& msg) {
   robot.updateTrajectory(msg);
 }
 
+/** Initialize the Corobot's publishers and subscibers*/
+void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle) {
+  
+  // Publishers
+  robot.pub_twist_ = handle.advertise<geometry_msgs::Twist>(Corobot::TOPIC_STR_TWIST, 1000);
+  robot.pub_update_ = handle.advertise<ramp_msgs::MotionState>(Corobot::TOPIC_STR_UPDATE, 1000);
+ 
+  // Timers
+  robot.timer_ = handle.createTimer(ros::Duration(0.05), &Corobot::updatePublishTimer, &robot);
+}
+
+
 
 int main(int argc, char** argv) {
     
@@ -30,6 +42,7 @@ int main(int argc, char** argv) {
   std::cout<<"\nrobot.orientation: "<<robot.initial_theta_<<"\n";
 
   robot.init(handle);
+  //init_advertisers_subscribers(robot, handle);
 
   // Make a blank ramp_msgs::Trajectory
   ramp_msgs::Trajectory init;
