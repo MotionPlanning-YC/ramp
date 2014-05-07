@@ -134,18 +134,28 @@ const std::string MotionState::toString() const {
   std::ostringstream result;
   
   //Positions
-  result<<"\np: ["<<positions_.at(0);
-  for(unsigned int i=1;i<positions_.size();i++) {
-    result<<", "<<positions_.at(i);
+  if(positions_.size() == 0) {
+    result<<"\np: []";
   }
-  result<<"]";
+  else {
+    result<<"\np: ["<<positions_.at(0);
+    for(unsigned int i=1;i<positions_.size();i++) {
+      result<<", "<<positions_.at(i);
+    }
+    result<<"]";
+  }
 
   //Velocities
-  result<<"\nv: ["<<velocities_.at(0);
-  for(unsigned int i=1;i<velocities_.size();i++) {
-    result<<", "<<velocities_.at(i);
+  if(velocities_.size() == 0) {
+    result<<"\nv: []";
   }
-  result<<"]";
+  else {
+    result<<"\nv: ["<<velocities_.at(0);
+    for(unsigned int i=1;i<velocities_.size();i++) {
+      result<<", "<<velocities_.at(i);
+    }
+    result<<"]";
+  }
 
   //Accelerations
   if(accelerations_.size() > 0) {

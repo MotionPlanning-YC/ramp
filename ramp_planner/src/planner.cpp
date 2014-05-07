@@ -121,6 +121,7 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
 
 
   std::cout<<"\nstart_: "<<start_.toString();
+  std::cout<<"\nstartPlanning_: "<<startPlanning_.toString();
 
   mutex_start_ = true;
 } // End updateCallback
@@ -211,6 +212,112 @@ void Planner::gradualTrajectory(RampTrajectory& t) {
     } //end for
   } //end if i in range
 } // End gradualTrajectory
+
+
+
+/** This method updates all the paths with the current configuration */
+void Planner::updatePaths(MotionState start, ros::Duration dur) {
+   //std::cout<<"\nUpdating start to: "<<start.toString();
+   //std::cout<<"\ndur: "<<dur<<"\n";
+
+
+  // For each trajectory
+  for(unsigned int i=0;i<population_.population_.size();i++) {
+
+    // Track how many knot points we get rid of
+    unsigned int throwaway=0;
+
+    // For each knot point,
+    for(unsigned int i_kp=0;i_kp<population_.population_.at(i).msg_trajec_.index_knot_points.size();i_kp++) {
+     
+      // Get the knot point 
+      trajectory_msgs::JointTrajectoryPoint point = population_.population_.at(i).msg_trajec_.trajectory.points.at( population_.population_.at(i).msg_trajec_.index_knot_points.at(i_kp));
+      // std::cout<<"\npoint["<<i<<"].time_from_start:"<<point.time_from_start;
+
+      // Compare the durations
+      if( dur > point.time_from_start) {
+        throwaway++;
+      }
+      else {
+        break;
+      }
+    } //end for
+
+    //std::cout<<"\nthrowaway: "<<throwaway;
+
+    // If the whole path has been passed, adjust throwaway so that 
+    //  we are left with a path that is: {new_start_, goal_}
+    if( throwaway >= paths_.at(i).size() ) { 
+      throwaway = paths_.at(i).size()-1;
+    } 
+    
+    // Erase the amount of throwaway points (points we have already passed)
+    paths_.at(i).all_.erase( paths_.at(i).all_.begin(), paths_.at(i).all_.begin()+throwaway );
+    
+    // Insert the new starting configuration
+    paths_.at(i).all_.insert( paths_.at(i).all_.begin(), start);
+
+    // Set start_ to be the new starting configuration of the path
+    paths_.at(i).start_ = start;
+  } // end for
+
+  // Update the modifier's paths
+  modifier_->updateAll(paths_);
+} // End updatePaths
+
+
+
+
+
+/** This method updates the population with the current configuration 
+ *  The duration is used to determine which knot points still remain in the trajectory */
+void Planner::updatePopulation(ros::Duration d) {
+  
+  // First, get the updated current configuration
+  //start_ = getStartConfiguration();
+
+  // We want to plan ahead of time
+  MotionState ms(bestTrajec_.getPointAtTime(controlCycle_.toSec()));
+  startPlanning_ = ms;
+  
+  /*std::cout<<"\nPaths before updating:";
+  for(int i=0;i<paths_.size();i++) {
+    std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
+  }*/
+  // Update the paths with the new starting configuration 
+  updatePaths(startPlanning_, d*2);
+  /*std::cout<<"\nPaths after updating:";
+  for(int i=0;i<paths_.size();i++) {
+    std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
+  }*/
+
+  // Create the vector to hold updated trajectories
+  std::vector<RampTrajectory> updatedTrajecs;
+
+  // For each path, get a trajectory
+  for(unsigned int i=0;i<paths_.size();i++) {
+
+    // Build a TrajectoryRequest 
+    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(i);
+    
+    // Send the request 
+    if(requestTrajectory(msg_request)) {
+      RampTrajectory temp(resolutionRate_, population_.population_.at(i).id_);
+      
+      // Set the Trajectory msg and the path
+      temp.msg_trajec_  = msg_request.response.trajectory;
+      temp.path_        = paths_.at(i);
+      
+      // Push onto updatedTrajecs
+      updatedTrajecs.push_back(temp);
+    } // end if
+  } // end for
+
+  // Replace the population's trajectories_ with the updated trajectories
+  population_.replaceAll(updatedTrajecs);
+
+  //std::cout<<"\nLeaving updatePopulation\n";
+} // End updatePopulation
 
 
 
@@ -361,6 +468,8 @@ const std::vector<Path> Planner::modifyPath() {
   return modifier_->perform();
 }
 
+
+
 /** Modify a trajectory */ 
 const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
   //std::cout<<"\nIn modifyTrajec\n";
@@ -397,6 +506,43 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
   
   return result;
 } // End modifyTrajectory
+
+
+
+
+/** Modification procedure will modify 1-2 random trajectories,
+ *  add the new trajectories, evaluate the new trajectories,
+ *  and set tau to the new best */
+void Planner::modification() {
+
+  // Modify 1 or more trajectories
+  std::vector<ModifiedTrajectory> mod_trajec = modifyTrajec();
+  
+  // Add the modified trajectories to the population
+  // and update the planner and the modifier on the new paths
+  for(unsigned int i=0;i<mod_trajec.size();i++) {
+
+    // Evaluate the new trajectory
+    evaluateTrajectory(mod_trajec.at(i).trajec_);
+    
+    // Add the new trajectory to the population
+    // Index is where the trajectory was added in the population (may replace another)
+    int index = population_.add(mod_trajec.at(i).trajec_);
+
+    // Update the path and velocities in the planner 
+    paths_.at(index)      = mod_trajec.at(i).trajec_.path_;
+    
+    // Update the path and velocities in the modifier 
+    modifier_->update(paths_.at(index), index);
+  } // end for
+  
+  // Obtain and set best trajectory
+  bestTrajec_ = population_.findBest();
+  
+  // Send the whole population to the trajectory viewer
+  sendPopulation();
+} // End modification
+
 
 
 /******************************************************
@@ -496,42 +642,6 @@ void Planner::sendPopulation() {
 
 
 
-
-
-/** Modification procedure will modify 1-2 random trajectories,
- *  add the new trajectories, evaluate the new trajectories,
- *  and set tau to the new best */
-void Planner::modification() {
-
-  // Modify 1 or more trajectories
-  std::vector<ModifiedTrajectory> mod_trajec = modifyTrajec();
-  
-  // Add the modified trajectories to the population
-  // and update the planner and the modifier on the new paths
-  for(unsigned int i=0;i<mod_trajec.size();i++) {
-
-    // Evaluate the new trajectory
-    evaluateTrajectory(mod_trajec.at(i).trajec_);
-    
-    // Add the new trajectory to the population
-    // Index is where the trajectory was added in the population (may replace another)
-    int index = population_.add(mod_trajec.at(i).trajec_);
-
-    // Update the path and velocities in the planner 
-    paths_.at(index)      = mod_trajec.at(i).trajec_.path_;
-    
-    // Update the path and velocities in the modifier 
-    modifier_->update(paths_.at(index), index);
-  } // end for
-  
-  // Obtain and set best trajectory
-  bestTrajec_ = population_.findBest();
-  
-  // Send the whole population to the trajectory viewer
-  sendPopulation();
-} // End modification
-
-
 /** This method evaluates one trajectory.
  *  Eventually, we should be able to evaluate only specific segments along the trajectory  */
 void Planner::evaluateTrajectory(RampTrajectory& trajec) {
@@ -559,109 +669,6 @@ void Planner::evaluatePopulation() {
     evaluateTrajectory(population_.population_.at(i));
   } // end for   
 } // End evaluatePopulation
-
-
-
-/** This method updates all the paths with the current configuration */
-void Planner::updatePaths(MotionState start, ros::Duration dur) {
-   //std::cout<<"\nUpdating start to: "<<start.toString();
-   //std::cout<<"\ndur: "<<dur<<"\n";
-
-
-  // For each trajectory
-  for(unsigned int i=0;i<population_.population_.size();i++) {
-
-    // Track how many knot points we get rid of
-    unsigned int throwaway=0;
-
-    // For each knot point,
-    for(unsigned int i_kp=0;i_kp<population_.population_.at(i).msg_trajec_.index_knot_points.size();i_kp++) {
-     
-      // Get the knot point 
-      trajectory_msgs::JointTrajectoryPoint point = population_.population_.at(i).msg_trajec_.trajectory.points.at( population_.population_.at(i).msg_trajec_.index_knot_points.at(i_kp));
-      // std::cout<<"\npoint["<<i<<"].time_from_start:"<<point.time_from_start;
-
-      // Compare the durations
-      if( dur > point.time_from_start) {
-        throwaway++;
-      }
-      else {
-        break;
-      }
-    } //end for
-
-    //std::cout<<"\nthrowaway: "<<throwaway;
-
-    // If the whole path has been passed, adjust throwaway so that 
-    //  we are left with a path that is: {new_start_, goal_}
-    if( throwaway >= paths_.at(i).size() ) { 
-      throwaway = paths_.at(i).size()-1;
-    } 
-    
-    // Erase the amount of throwaway points (points we have already passed)
-    paths_.at(i).all_.erase( paths_.at(i).all_.begin(), paths_.at(i).all_.begin()+throwaway );
-    
-    // Insert the new starting configuration
-    paths_.at(i).all_.insert( paths_.at(i).all_.begin(), start_);
-
-    // Set start_ to be the new starting configuration of the path
-    MotionState start_ms(start);
-    paths_.at(i).start_ = start_ms;
-  } // end for
-
-  // Update the modifier's paths
-  modifier_->updateAll(paths_);
-} // End updatePaths
-
-
-
-
-
-/** This method updates the population with the current configuration 
- *  The duration is used to determine which knot points still remain in the trajectory */
-void Planner::updatePopulation(ros::Duration d) {
-  
-  // First, get the updated current configuration
-  start_ = getStartConfiguration();
-  
-  /*std::cout<<"\nPaths before updating:";
-  for(int i=0;i<paths_.size();i++) {
-    std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
-  }*/
-  // Update the paths with the new starting configuration 
-  updatePaths(getStartConfiguration(), d);
-  /*std::cout<<"\nPaths after updating:";
-  for(int i=0;i<paths_.size();i++) {
-    std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
-  }*/
-
-  // Create the vector to hold updated trajectories
-  std::vector<RampTrajectory> updatedTrajecs;
-
-  // For each path, get a trajectory
-  for(unsigned int i=0;i<paths_.size();i++) {
-
-    // Build a TrajectoryRequest 
-    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(i);
-    
-    // Send the request 
-    if(requestTrajectory(msg_request)) {
-      RampTrajectory temp(resolutionRate_, population_.population_.at(i).id_);
-      
-      // Set the Trajectory msg and the path
-      temp.msg_trajec_  = msg_request.response.trajectory;
-      temp.path_        = paths_.at(i);
-      
-      // Push onto updatedTrajecs
-      updatedTrajecs.push_back(temp);
-    } // end if
-  } // end for
-
-  // Replace the population's trajectories_ with the updated trajectories
-  population_.replaceAll(updatedTrajecs);
-
-  //std::cout<<"\nLeaving updatePopulation\n";
-} // End updatePopulation
 
 
 
@@ -750,7 +757,7 @@ const std::string Planner::pathsToString() const {
 
   // Evaluate the population and get the initial trajectory to move on
   // *****! Testing *****!
-  RampTrajectory T_move = evaluateAndObtainBest();
+  bestTrajec_ = evaluateAndObtainBest();
   // *****! Testing *****!
   sendPopulation();
   //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n\n"; 

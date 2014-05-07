@@ -42,13 +42,13 @@ class Planner {
     MotionState start_;
     MotionState goal_;
     std::vector<Range> ranges_;
+
+    MotionState startPlanning_;
     
     
     // The most fit trajectory in the population
     RampTrajectory bestTrajec_;
 
-
-    /* Members for cycles */
 
     // Timer for sending the best trajec
     // Control cycle - used for determining when to update P(t)
@@ -66,8 +66,6 @@ class Planner {
     // Cycle to check imminent collision
     ros::Timer imminentCollisionTimer_;
     ros::Duration imminentCollisionCycle_;
-
-    /**/
 
 
     // Transformation of the initial pose of the robot 
@@ -159,8 +157,6 @@ class Planner {
     void imminentCollisionCallback(const ros::TimerEvent& t);
 
     // Msg building methods
-    //const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const unsigned int i_path, const std::vector<float> v_s, const std::vector<float> v_e) const;
-    //const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
               const unsigned int i_path ) const;
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(

@@ -397,7 +397,7 @@ void Corobot::moveOnTrajectory(bool simulation) {
         //twist_.angular.z = -1*dist;
       }*/
     
-      std::cout<<"\ntwist_linear: "<<twist_.linear.x;
+      //std::cout<<"\ntwist_linear: "<<twist_.linear.x;
       //std::cout<<"\ntwist_angular: "<<twist_.angular.z<<"\n";
 
       // Send the twist_message to move the robot
