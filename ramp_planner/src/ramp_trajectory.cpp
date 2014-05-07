@@ -1,6 +1,6 @@
 #include "ramp_trajectory.h"
 
-RampTrajectory::RampTrajectory(unsigned int id) : id_(id), fitness_(-1.0), feasible_(true), time_until_collision_(9999.0f) {
+RampTrajectory::RampTrajectory(const float resRate, unsigned int id) : id_(id), fitness_(-1.0), feasible_(true), time_until_collision_(9999.0f), resolutionRate_(resRate) {
   msg_trajec_.feasible = true;
   msg_trajec_.fitness = -1;  
 }
@@ -27,6 +27,12 @@ const Path RampTrajectory::getPath() const {
   result.goal_ = result.all_.at( result.all_.size()-1 );
   
   return result;
+}
+
+
+/** Time is in seconds */
+const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const float t) const {
+  return msg_trajec_.trajectory.points.at( (t / resolutionRate_) );
 }
 
 

@@ -211,6 +211,9 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ra
   } // end for
 
   
+  // Set the trajectory's resolution rate
+  res.trajectory.resolution_rate = CYCLE_TIME_IN_SECONDS;
+
   //std::cout<<"\nReturning: "<<utility.toString(res.trajectory)<<"\n";
   //std::cin.get();
   return true;

@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(5), populationSize_(1), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
+Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(1), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
 {
   controlCycle_ = ros::Duration(1.f / 10.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
@@ -19,7 +19,7 @@ Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), popula
   imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
 }
 
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(5), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f)
+Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(1.f / 10.f), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f)
 {
   controlCycle_ = ros::Duration(1.f / 5.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
@@ -289,12 +289,9 @@ void Planner::init_population() {
       MotionState temp_ms(temp_config);
       
       // Push on velocity values (for target v when getting trajectory)
-      // 0 for the beginning and end of a path, max v otherwise
+      // //TODO: Not 0 for all knot points
       for(unsigned int i=0;i<temp_ms.positions_.size();i++) {
-        //if(j==0 || j==num-1)
-          temp_ms.velocities_.push_back(0);
-        //else
-          //temp_ms.velocities_.push_back(0.35f);
+        temp_ms.velocities_.push_back(0);
       }
       
       // Add the random configuration to the path
@@ -313,7 +310,7 @@ void Planner::init_population() {
     
     // Send the request and push the returned Trajectory onto population_
     if(requestTrajectory(msg_request)) {
-      RampTrajectory temp(getIRT());
+      RampTrajectory temp(resolutionRate_, getIRT());
       
       // Set the Trajectory msg
       temp.msg_trajec_ = msg_request.response.trajectory;
@@ -385,7 +382,7 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
     if(requestTrajectory(tr)) {
   
       // Build RampTrajectory
-      RampTrajectory temp(getIRT());
+      RampTrajectory temp(resolutionRate_, getIRT());
       temp.msg_trajec_ = tr.response.trajectory;
       temp.path_ = modded_paths.at(i);
 
@@ -649,7 +646,7 @@ void Planner::updatePopulation(ros::Duration d) {
     
     // Send the request 
     if(requestTrajectory(msg_request)) {
-      RampTrajectory temp(population_.population_.at(i).id_);
+      RampTrajectory temp(resolutionRate_, population_.population_.at(i).id_);
       
       // Set the Trajectory msg and the path
       temp.msg_trajec_  = msg_request.response.trajectory;
@@ -726,7 +723,7 @@ const std::string Planner::pathsToString() const {
   ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
   requestTrajectory(tr);
   
-  RampTrajectory traj(0);
+  RampTrajectory traj(resolutionRate_, 0);
   traj.msg_trajec_ = tr.response.trajectory;
   traj.path_ = p;
 

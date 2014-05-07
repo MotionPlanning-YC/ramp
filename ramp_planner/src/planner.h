@@ -35,7 +35,7 @@ class Planner {
     // and the resolution rate for the trajectories
     Population                          population_;
     std::vector<Path>                   paths_;
-    const unsigned int                  resolutionRate_;
+    const float                         resolutionRate_;
     
     // Hold the start and goal configurations
     // and the ranges for each DOF

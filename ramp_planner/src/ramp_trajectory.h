@@ -8,21 +8,24 @@
 class RampTrajectory {
   public:
     
-    RampTrajectory(unsigned int id=0);
+    RampTrajectory(const float resRate=1.f/10.f, unsigned int id=0);
     RampTrajectory(const ramp_msgs::Trajectory msg);
     ~RampTrajectory() {}
     
-    unsigned int id_;
+    unsigned int          id_;
     ramp_msgs::Trajectory msg_trajec_;
-    float fitness_;
-    bool feasible_;
-    float time_until_collision_;
-    Path path_;
+    float                 fitness_;
+    bool                  feasible_;
+    float                 time_until_collision_;
+    Path                  path_;
+    float                 resolutionRate_;
 
-    const bool equal(const RampTrajectory& other) const;
-    const Path getPath() const;
-    const std::string fitnessFeasibleToString() const;
-    const std::string toString() const;
+    const bool                                  equal(const RampTrajectory& other)  const;
+    const Path                                  getPath()                           const;
+    const trajectory_msgs::JointTrajectoryPoint getPointAtTime(const float t)       const;
+    
+    const std::string                           fitnessFeasibleToString()           const;
+    const std::string                           toString()                          const;
 
   private:
     Utility u;
