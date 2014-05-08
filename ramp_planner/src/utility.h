@@ -25,6 +25,7 @@ class Utility {
     
     const float positionDistance(const std::vector<float> a, const std::vector<float> b) const;
 
+    const float findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;
     const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;
     
     const float findDistanceBetweenAngles(const float a1, const float a2) const;

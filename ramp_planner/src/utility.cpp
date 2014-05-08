@@ -18,6 +18,22 @@ const float Utility::positionDistance(const std::vector<float> a, const std::vec
   return sqrt( pow(d_x,2) + pow(d_y,2) );
 } //End euclideanDistance
 
+
+
+
+const float Utility::findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const {
+  std::vector<float> c;
+  c.push_back(a.positions.at(0));
+  c.push_back(a.positions.at(1));
+  
+  std::vector<float> d;
+  d.push_back(b.positions.at(0));
+  d.push_back(b.positions.at(1));
+
+  return findAngleFromAToB(c, d);
+}
+
+
 /** This method returns the angle that will form a straight line from position a to position b. a and b are [x, y] vectors. */
 const float Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {
   float result;
@@ -31,7 +47,7 @@ const float Utility::findAngleFromAToB(const std::vector<float> a, const std::ve
   // Set the result to the starting orientation if one is provided
   // Or to 0 if no starting orientation is provided
   // TODO: Make the comparison proportionate to size of space
-  if(euc_dist <= 0.01) {
+  if(euc_dist <= 0.0001) {
     if(a.size() > 2) {
       result = a.at(2);
     }

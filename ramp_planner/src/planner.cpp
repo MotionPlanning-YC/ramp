@@ -220,52 +220,74 @@ void Planner::updatePaths(MotionState start, ros::Duration dur) {
    //std::cout<<"\nUpdating start to: "<<start.toString();
    //std::cout<<"\ndur: "<<dur<<"\n";
 
+  if(dur.toSec() > 0) {
 
-  // For each trajectory
-  for(unsigned int i=0;i<population_.population_.size();i++) {
+    // For each trajectory
+    for(unsigned int i=0;i<population_.population_.size();i++) {
 
-    // Track how many knot points we get rid of
-    unsigned int throwaway=0;
+      // Track how many knot points we get rid of
+      unsigned int throwaway=0;
 
-    // For each knot point,
-    for(unsigned int i_kp=0;i_kp<population_.population_.at(i).msg_trajec_.index_knot_points.size();i_kp++) {
-     
-      // Get the knot point 
-      trajectory_msgs::JointTrajectoryPoint point = population_.population_.at(i).msg_trajec_.trajectory.points.at( population_.population_.at(i).msg_trajec_.index_knot_points.at(i_kp));
-      // std::cout<<"\npoint["<<i<<"].time_from_start:"<<point.time_from_start;
+      // For each knot point,
+      for(unsigned int i_kp=0;i_kp<population_.population_.at(i).msg_trajec_.index_knot_points.size();i_kp++) {
+       
+        // Get the knot point 
+        trajectory_msgs::JointTrajectoryPoint point = population_.population_.at(i).msg_trajec_.trajectory.points.at( population_.population_.at(i).msg_trajec_.index_knot_points.at(i_kp));
+        // std::cout<<"\npoint["<<i<<"].time_from_start:"<<point.time_from_start;
 
-      // Compare the durations
-      if( dur > point.time_from_start) {
-        throwaway++;
-      }
-      else {
-        break;
-      }
-    } //end for
+        // Compare the durations
+        if( dur > point.time_from_start) {
+          throwaway++;
+        }
+        else {
+          break;
+        }
+      } //end for
 
-    //std::cout<<"\nthrowaway: "<<throwaway;
+      //std::cout<<"\nthrowaway: "<<throwaway;
 
-    // If the whole path has been passed, adjust throwaway so that 
-    //  we are left with a path that is: {new_start_, goal_}
-    if( throwaway >= paths_.at(i).size() ) { 
-      throwaway = paths_.at(i).size()-1;
-    } 
-    
-    // Erase the amount of throwaway points (points we have already passed)
-    paths_.at(i).all_.erase( paths_.at(i).all_.begin(), paths_.at(i).all_.begin()+throwaway );
-    
-    // Insert the new starting configuration
-    paths_.at(i).all_.insert( paths_.at(i).all_.begin(), start);
+      // If the whole path has been passed, adjust throwaway so that 
+      //  we are left with a path that is: {new_start_, goal_}
+      if( throwaway >= paths_.at(i).size() ) { 
+        throwaway = paths_.at(i).size()-1;
+      } 
+      
+      // Erase the amount of throwaway points (points we have already passed)
+      paths_.at(i).all_.erase( paths_.at(i).all_.begin(), paths_.at(i).all_.begin()+throwaway );
+      
+      // Insert the new starting configuration
+      paths_.at(i).all_.insert( paths_.at(i).all_.begin(), start);
 
-    // Set start_ to be the new starting configuration of the path
-    paths_.at(i).start_ = start;
-  } // end for
+      // Set start_ to be the new starting configuration of the path
+      paths_.at(i).start_ = start;
+    } // end for
 
-  // Update the modifier's paths
-  modifier_->updateAll(paths_);
+    // Update the modifier's paths
+    modifier_->updateAll(paths_);
+
+  }
 } // End updatePaths
 
 
+
+
+
+const bool Planner::checkOrientation() const {
+  float actual_theta = start_.positions_.at(2);
+  //std::cout<<"\nactual_theta: "<<actual_theta;
+  //std::cout<<"\norientations_.at("<<i<<"): "<<orientations_.at(i)<<"\n";
+  
+  int i2 = bestTrajec_.msg_trajec_.index_knot_points.at(1);
+  float t = utility_.findAngleFromAToB(bestTrajec_.msg_trajec_.trajectory.points.at(0),
+                                       bestTrajec_.msg_trajec_.trajectory.points.at(i2));
+
+  float diff = fabs(utility_.findDistanceBetweenAngles(actual_theta, t));
+  /*std::cout<<"\ndiff: "<<diff<<" actual_theta: "<<actual_theta<<" t: "<<t;
+  std::cout<<"\nbestTrajec_.msg_trajec_.trajectory.points.at(0): "<<utility_.toString(bestTrajec_.msg_trajec_.trajectory.points.at(0));
+  std::cout<<"\nbestTrajec_.msg_trajec_.trajectory.points.at("<<i2<<"): "<<utility_.toString(bestTrajec_.msg_trajec_.trajectory.points.at(i2))*/;
+  
+  return (diff > PI/12.);
+}
 
 
 
@@ -277,8 +299,15 @@ void Planner::updatePopulation(ros::Duration d) {
   //start_ = getStartConfiguration();
 
   // We want to plan ahead of time
-  MotionState ms(bestTrajec_.getPointAtTime(controlCycle_.toSec()));
-  startPlanning_ = ms;
+  // Check if the robot will be moving ahead
+  if(checkOrientation()) {
+    startPlanning_ = start_;
+    d = ros::Duration(0);
+  }
+  else {
+    MotionState ms(bestTrajec_.getPointAtTime(controlCycle_.toSec()));
+    startPlanning_ = ms;
+  }
   
   /*std::cout<<"\nPaths before updating:";
   for(int i=0;i<paths_.size();i++) {
@@ -346,9 +375,9 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
 
   // Find orientation difference between the old and new trajectory 
   // old configuration is the new start_ configuration (last point on old trajectory)
-  // new orientation is the amount to rotate towards first knot point
   /*float b = utility.findAngleFromAToB(start_.positions_, bestTrajec_.path_.all_.at(1).motionState_.positions_);
   float diff = utility.findDistanceBetweenAngles(start_.positions_.at(2), b);
+  float diff = utility_.findDistanceBetweenAngles(start_.positions_.at(2), b);
   //std::cout<<"\nb: "<<b<<" start_.positions_.at(2): "<<start_.positions_.at(2);
   //std::cout<<"\ndiff: "<<diff;
   if(fabs(diff) <= 0.52356f) {
@@ -389,7 +418,8 @@ void Planner::init_population() {
 
       // Create a random configuration
       Configuration temp_config;
-      temp_config.ranges_ = utility.standardRanges;
+      temp_config.ranges_ = utility_.standardRanges;
+      temp_config.ranges_ = utility_.standardRanges;
       temp_config.random();
 
       // Create a MotionState from the configuration
@@ -783,14 +813,14 @@ const std::string Planner::pathsToString() const {
   
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
-  goalThreshold_ = 0.01;
+  goalThreshold_ = 0.1;
   while( (start_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) {
     ros::spinOnce(); 
   } // end while
   
   // Stop timer
   controlCycleTimer_.stop();
-  planningCycleTimer_.stop();
+  //planningCycleTimer_.stop();
 
   // Send an empty trajectory
   ramp_msgs::Trajectory empty;
@@ -799,6 +829,6 @@ const std::string Planner::pathsToString() const {
   std::cout<<"\nPlanning complete!\n";
   std::cout<<"\nLatest pose: "<<start_.toString();
 
-  //std::cout<<"\nFinal population: ";
-  //std::cout<<"\n"<<pathsToString(); 
+  std::cout<<"\nFinal population: ";
+  std::cout<<"\n"<<pathsToString(); 
 } // End go

@@ -164,12 +164,15 @@ class Planner {
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(const unsigned int i_path);
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(const RampTrajectory trajec);
 
+    // Misc
+    const bool checkOrientation() const; 
+
 
 
     /***** Data members *****/
 
     // Utility instance
-    Utility utility; 
+    Utility utility_; 
 
     // Size of population
     const unsigned int populationSize_;

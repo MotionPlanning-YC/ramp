@@ -82,9 +82,16 @@ const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(cons
   
   // Push on the p, v, and a vectors
   for(unsigned int i=0;i<NUMBER_OF_DOFS;i++) {
-    point.positions.push_back(outputParameters.NewPositionVector->VecData[i]);
-    point.velocities.push_back(outputParameters.NewVelocityVector->VecData[i]);
-    point.accelerations.push_back(outputParameters.NewAccelerationVector->VecData[i]);
+    if(inputParameters->SelectionVector->VecData[i]) {
+      point.positions.push_back(outputParameters.NewPositionVector->VecData[i]);
+      point.velocities.push_back(outputParameters.NewVelocityVector->VecData[i]);
+      point.accelerations.push_back(outputParameters.NewAccelerationVector->VecData[i]);
+    }
+    else {
+      point.positions.push_back(0);
+      point.velocities.push_back(0);
+      point.accelerations.push_back(0);
+    }
   }
 
 
@@ -101,15 +108,22 @@ const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(cons
  *  This method will return a JointTrajectoryPoint given some input parameters from Reflexxes 
  *  This is used to generate the first point on a trajectory
  **/
-const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(const RMLPositionInputParameters inputParameters) {
+const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(const RMLPositionInputParameters my_inputParameters) {
   trajectory_msgs::JointTrajectoryPoint point;
 
   
   // Push on the p, v, and a vectors
   for(unsigned int i=0;i<NUMBER_OF_DOFS;i++) {
-    point.positions.push_back(inputParameters.CurrentPositionVector->VecData[i]);
-    point.velocities.push_back(inputParameters.CurrentVelocityVector->VecData[i]);
-    point.accelerations.push_back(inputParameters.CurrentAccelerationVector->VecData[i]);
+    if(inputParameters->SelectionVector->VecData[i]) {
+      point.positions.push_back(my_inputParameters.CurrentPositionVector->VecData[i]);
+      point.velocities.push_back(my_inputParameters.CurrentVelocityVector->VecData[i]);
+      point.accelerations.push_back(my_inputParameters.CurrentAccelerationVector->VecData[i]);
+    }
+    else {
+      point.positions.push_back(0);
+      point.velocities.push_back(0);
+      point.accelerations.push_back(0);
+    }
   }
 
 

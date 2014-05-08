@@ -106,8 +106,7 @@ ramp_msgs::Population Population::populationMsg()
 {
     ramp_msgs::Population msg;
     
-    for( int i =0; i<population_.size(); i++)
-    {
+    for( int i =0; i<population_.size(); i++) {
       msg.population.push_back(population_.at(i).msg_trajec_);
     }
     
