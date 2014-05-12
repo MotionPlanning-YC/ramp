@@ -13,13 +13,17 @@ void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
 
 
 /** Initialize the Corobot's publishers and subscibers*/
-void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle) {
+void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle, bool simulation) {
 
   
   // Publishers
   robot.pub_phidget_motor_ = handle.advertise<corobot_msgs::MotorCommand>(Corobot::TOPIC_STR_PHIDGET_MOTOR, 1000);
   robot.pub_twist_ = handle.advertise<geometry_msgs::Twist>(Corobot::TOPIC_STR_TWIST, 1000);
   robot.pub_update_ = handle.advertise<ramp_msgs::MotionState>(Corobot::TOPIC_STR_UPDATE, 1000);
+
+  if(simulation) {
+    robot.pub_cmd_vel_ = handle.advertise<geometry_msgs::Twist>("cmd_vel", 1000);
+  }
  
   // Subscribers
   robot.sub_odometry_ = handle.subscribe(Corobot::TOPIC_STR_ODOMETRY, 1000, &Corobot::updateState, &robot);
@@ -36,9 +40,14 @@ int main(int argc, char** argv) {
   
   handle.param("orientation", robot.initial_theta_, 0.);
   std::cout<<"\nrobot.orientation: "<<robot.initial_theta_;
+  
+  bool sim=false;
+  handle.param("/ramp_control/simulation", sim, false);
+ 
 
+  // Initialize publishers and subscribers
   robot.init(handle);
-  init_advertisers_subscribers(robot, handle);
+  init_advertisers_subscribers(robot, handle, sim);
 
 
   // Make a blank ramp_msgs::Trajectory
@@ -46,7 +55,7 @@ int main(int argc, char** argv) {
   robot.trajectory_ = init;
 
   while(ros::ok()) {
-    robot.moveOnTrajectory(false);
+    robot.moveOnTrajectory(sim);
     ros::spinOnce();
   }
 
