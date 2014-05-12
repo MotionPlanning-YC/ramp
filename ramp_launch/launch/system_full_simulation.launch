@@ -76,14 +76,18 @@
 <!-- Start the ramp_control simulation nodes (locally, not on remote machines) -->
 
 <group ns="$(arg robot_0_name)" >
-  <node name="simulation" pkg="ramp_control" type="simulation" output="screen" /> 
+  <node name="ramp_control" pkg="ramp_control" type="ramp_control" output="screen" /> 
+    <remap from="odometry" to="odom" />
     <param name="orientation" type="double" value="3.14159" />
+    <param name="simulation" value="true" />
 </group> 
 
 
 <group ns="$(arg robot_1_name)"> 
-  <node name="simulation" pkg="ramp_control" type="simulation" /> 
+  <node name="ramp_control" pkg="ramp_control" type="ramp_control" /> 
+    <remap from="odometry" to="odom" />
     <param name="orientation" type="double" value="0" />
+    <param name="simulation" value="true" />
 </group> 
 
 

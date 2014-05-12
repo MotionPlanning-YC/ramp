@@ -15,15 +15,11 @@
 
 
 <!-- Planner -->
-<!-- <group ns="robot2"> --> 
 <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" />
-  <!-- <rosparam command="load" file="yaml/robot2.yaml" /> -->
-<!-- </group> -->
 
 
 <!-- Simulation -->
 <node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/world/single_robot.world" /> 
-<!-- <node name="simulation" pkg="ramp_control" type="simulation" output="screen"/> -->
 <node name="ramp_control" pkg="ramp_control" type="ramp_control" output="screen">
   <remap from="odometry" to="odom" />
   <param name="simulation" value="true" />
