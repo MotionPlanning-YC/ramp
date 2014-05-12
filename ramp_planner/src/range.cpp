@@ -28,3 +28,12 @@ const ramp_msgs::Range Range::buildRangeMsg() const {
 
   return result;
 }
+
+
+const std::string Range::toString() const {
+  std::ostringstream result;
+
+  result<<"\nmin: "<<min_<<" max: "<<max_;
+
+  return result.str();
+}

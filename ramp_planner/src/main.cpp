@@ -55,39 +55,67 @@ void handleConfig(YAML::Node node) {
 }
 
 
+void setDOF(const XmlRpc::XmlRpcValue dof) {
+  
+  double a; 
+  std::string s;
+  for(unsigned int i=0;i<dof.size();i++) {
+    Range temp(dof[i][0].TypeDouble, dof[i][1].TypeDouble); 
+    std::string s = static_cast<std::string>(dof);
+    //double d = static_cast<double>(dof[i][0]);
+    //double a = static_cast<double>(dof[i][0]);
+    std::cout<<"\nRange "<<i<<": "<<temp.toString();
+  }
+}
+
+
+void init_start_goal(const std::vector<float> s, const std::vector<float> g) {
+  Configuration start, goal;
+
+  for(unsigned int i=0;i<s.size();i++) {
+    start.K_.push_back(s.at(i));
+    goal.K_.push_back(g.at(i));
+  }
+}
+
+
 void loadParameters(const ros::NodeHandle handle) {
+  std::cout<<"\nLoading parameters\n";
+
   std::string key;
   int id;
   std::vector<float> ranges;
-  std::vector<float> start;
-  std::vector<float> goal;
+  XmlRpc::XmlRpcValue dof;
 
 
   // Get the id of the robot
-  if(handle.searchParam("id", key)) {
+  if(handle.searchParam("robot_info/id", key)) {
     handle.getParam(key, id);
     std::cout<<"\nkey: "<<key<<" val(id): "<<id;
   }
 
- 
-  
-  std::vector<float> dof;
-  // Get the ranges for the degrees of freedom
-  if(handle.searchParam("DOF", key)) {
-    handle.getParam(key, dof);
+  if(handle.hasParam("robot_info/DOF")) {
+    handle.getParam("robot_info/DOF", dof); 
+    setDOF(dof);
+
+
     for(unsigned int i=0;i<dof.size();i++) {
-      std::cout<<"\ndof["<<i<<"]: "<<dof.at(i);
+      std::cout<<"\ndd["<<i<<"]: "<<dof[i][0];
     }
   }
 
+
+  // Get the start and goal vectors
+  std::vector<float> start;
+  std::vector<float> goal;
+  handle.getParam("/robot_info/start", start);
+  handle.getParam("/robot_info/goal",  goal );
+  init_start_goal(start, goal);
+  
   
 
-  if(handle.searchParam("", key)) {
-    int val;
-    handle.getParam(key, val);
-    std::cout<<"\nkey: "<<key<<" val: "<<val;
-  }
-
+  std::cout<<"\nDone loading parameters. Press Enter to continue\n";
+  std::cin.get();
 }
 
 
@@ -98,7 +126,7 @@ int main(int argc, char** argv) {
   ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
 
 
-  //loadParameters(handle);
+  loadParameters(handle);
   
   
   std::string update_topic;

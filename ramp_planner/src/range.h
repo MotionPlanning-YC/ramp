@@ -15,6 +15,7 @@ class Range {
     /** This method returns a random value in the range */
     const float random();
     const ramp_msgs::Range buildRangeMsg() const;
+    const std::string toString() const;
 
 };
 

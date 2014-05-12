@@ -1,5 +1,6 @@
 <launch>
 
+<rosparam file="$(find ramp_launch)/launch/config/robot_0.yaml" command="load" ns="robot_info/" />
 
 <!-- Trajectory Generator -->
 <node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" output="screen" />
@@ -11,7 +12,7 @@
 <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" />
 
 <!-- Trajectory Visualization -->
-<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> 
+<!-- <node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> -->
 
 
 <!-- Planner -->
