@@ -12,20 +12,6 @@ Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(1), generation
   imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
 }
 
-Planner::Planner(const unsigned int r, const int p) : resolutionRate_(r), populationSize_(p), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0)
-{
-  controlCycle_ = ros::Duration(1.f / 5.f);
-  planningCycle_ = ros::Duration(1.f / 25.f);
-  imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
-}
-
-Planner::Planner(const ros::NodeHandle& h) : resolutionRate_(1.f / 10.f), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f)
-{
-  controlCycle_ = ros::Duration(1.f / 5.f);
-  planningCycle_ = ros::Duration(1.f / 25.f);
-  imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
-  init(h); 
-}
 
 Planner::~Planner() {
   if(h_traj_req_!= 0) {
@@ -55,12 +41,13 @@ Planner::~Planner() {
  ********************** Methods **********************
  *****************************************************/
 
-/** This method initializes the T_od_w_ transform object */
-void Planner::setT_od_w(std::vector<float> od_info) {
+/** This method initializes the T_base_w_ transform object */
+void Planner::setT_base_w(std::vector<float> base_pos) {
  
-  T_od_w_.setRotation(tf::createQuaternionFromYaw(od_info.at(2)));
-  T_od_w_.setOrigin(tf::Vector3(od_info.at(0), od_info.at(1), 0));
-} // End setT_od_w
+  T_base_w_.setRotation(tf::createQuaternionFromYaw(base_pos.at(2)));
+  T_base_w_.setOrigin(tf::Vector3(base_pos.at(0), base_pos.at(1), 0));
+} // End setT_base_w
+
 
 
 /** Returns an id for RampTrajectory objects */
@@ -93,7 +80,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
 
 /** 
  * Sets start_ member by taking in the latest update 
- * and transforming it by T_od_w because 
+ * and transforming it by T_base_w because 
  * updates are relative to odometry frame
  * */
 void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
@@ -107,7 +94,7 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
   start_ = msg;
 
   // Transform configuration from odometry to world coordinates
-  start_.transformBase(T_od_w_);
+  start_.transformBase(T_base_w_);
   std::cout<<"\nNew starting configuration: "<<start_.toString();
   
 
@@ -127,13 +114,35 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
 } // End updateCallback
 
 
+
+
+
+
+/** This method sets random values for the position vector of ms
+ *  ONLY RANDOMIZES POSITIONS */
+const void Planner::randomizeMSPositions(MotionState& ms) const {
+  ms.positions_.clear();
+
+  for(unsigned int i=0;i<ranges_.size();i++) {
+    ms.positions_.push_back(ranges_.at(i).random());
+  }
+} // End randomizeMotionState
+
+
 /****************************************************
  ************** Initialization Methods **************
  ****************************************************/
 
 
+
+void Planner::initStartGoal(const MotionState s, const MotionState g) {
+  start_  = s;
+  goal_   = g; 
+}
+
+
 /** Initialize the handlers and allocate them on the heap */
-void Planner::init(const ros::NodeHandle& h) {
+void Planner::init(const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r) {
 
   // Initialize the handlers
   h_traj_req_ = new TrajectoryRequestHandler(h);
@@ -142,23 +151,29 @@ void Planner::init(const ros::NodeHandle& h) {
   modifier_   = new Modifier(h, paths_, num_ops_);
 
   // Initialize the timers, but don't start them yet
-  controlCycleTimer_ = h.createTimer(ros::Duration(controlCycle_), &Planner::controlCycleCallback, this);
+  controlCycleTimer_ = h.createTimer(ros::Duration(controlCycle_), 
+                                     &Planner::controlCycleCallback, this);
   controlCycleTimer_.stop();
 
-  planningCycleTimer_ = h.createTimer(ros::Duration(planningCycle_), &Planner::planningCycleCallback, this);
+  planningCycleTimer_ = h.createTimer(ros::Duration(planningCycle_), 
+                                      &Planner::planningCycleCallback, this);
   planningCycleTimer_.stop();
 
-  imminentCollisionTimer_ = h.createTimer(ros::Duration(imminentCollisionCycle_), &Planner::imminentCollisionCallback, this);
+  imminentCollisionTimer_ = h.createTimer(ros::Duration(imminentCollisionCycle_), 
+                                          &Planner::imminentCollisionCallback, this);
   imminentCollisionTimer_.stop();
 
 
-  // Set start and goal velocities
-  for(unsigned int i=0;i<start_.positions_.size();i++) {
-    start_.velocities_.push_back(0);
-    start_.accelerations_.push_back(0);
-    goal_.velocities_.push_back(0);
-    goal_.accelerations_.push_back(0);
-  }
+
+  // Set the ranges vector
+  ranges_ = r;
+
+  // Initialize the start and goal
+  initStartGoal(s, g);
+
+  // Set the base transformation
+  setT_base_w(start_.positions_);
+
 } // End init
 
 
@@ -242,7 +257,7 @@ void Planner::updatePaths(MotionState start, ros::Duration dur) {
         else {
           break;
         }
-      } //end for
+      } // end inner for
 
       //std::cout<<"\nthrowaway: "<<throwaway;
 
@@ -260,12 +275,12 @@ void Planner::updatePaths(MotionState start, ros::Duration dur) {
 
       // Set start_ to be the new starting configuration of the path
       paths_.at(i).start_ = start;
-    } // end for
+    } // end outer for
 
     // Update the modifier's paths
     modifier_->updateAll(paths_);
 
-  }
+  } // end if
 } // End updatePaths
 
 
@@ -400,7 +415,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
 
 
 /** This function generates the initial population of trajectories */
-void Planner::init_population() { 
+void Planner::initPopulation() { 
   
   // Create n random paths, where n=populationSize
   for(unsigned int i=0;i<populationSize_;i++) {
@@ -417,13 +432,8 @@ void Planner::init_population() {
     for(unsigned int j=0;j<num;j++) {
 
       // Create a random configuration
-      Configuration temp_config;
-      temp_config.ranges_ = utility_.standardRanges;
-      temp_config.ranges_ = utility_.standardRanges;
-      temp_config.random();
-
-      // Create a MotionState from the configuration
-      MotionState temp_ms(temp_config);
+      MotionState temp_ms;
+      randomizeMSPositions(temp_ms);
       
       // Push on velocity values (for target v when getting trajectory)
       // //TODO: Not 0 for all knot points
@@ -736,7 +746,7 @@ const std::string Planner::pathsToString() const {
   generation_ = 0;
   
   // initialize population
-  init_population();
+  initPopulation();
  
   KnotPoint kp1;
   KnotPoint kp2;

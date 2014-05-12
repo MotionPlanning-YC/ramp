@@ -19,8 +19,6 @@ struct ModifiedTrajectory {
 class Planner {
   public:
     Planner();
-    Planner(const ros::NodeHandle& h);
-    Planner(const unsigned int r, const int p);
     ~Planner();
 
 
@@ -43,6 +41,7 @@ class Planner {
     MotionState goal_;
     std::vector<Range> ranges_;
 
+    // Starting motion state for planning cycle
     MotionState startPlanning_;
     
     
@@ -70,11 +69,11 @@ class Planner {
 
     // Transformation of the initial pose of the robot 
     // We use this to transform the odometry updates into world CS
-    tf::Transform T_od_w_;
+    tf::Transform T_base_w_;
    
     
     // Robot ID
-    unsigned int id_;
+    int id_;
 
 
     
@@ -88,9 +87,9 @@ class Planner {
     // Start planning
     void go();
     
-    // Initialization steps
-    void init_population();
-    void init(const ros::NodeHandle& h);
+    // Initialization 
+    void initPopulation();
+    void init(const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r);
     
     // Send the best trajectory to the control package
     void sendBest();
@@ -122,7 +121,7 @@ class Planner {
     const std::string pathsToString() const;
 
     // Set the transformation from odometry to world CS
-    void setT_od_w(std::vector<float> od_info);
+    void setT_base_w(std::vector<float> base_pos);
 
     // Callback for receiving updates from the ramp_control
     void updateCallback(const ramp_msgs::MotionState& msg);
@@ -134,6 +133,9 @@ class Planner {
 
 
     /***** Methods *****/
+    
+    // Initialize start and goal
+    void initStartGoal(const MotionState s, const MotionState g);
 
     // This gets the new velocities for path segments after a path has been updated
     const std::vector< std::vector<float> > getNewVelocities(std::vector<Path> new_path, std::vector<int> i_old);
@@ -152,8 +154,8 @@ class Planner {
     void modification();
 
     // Callback methods for ros::Timers
-    void controlCycleCallback(const ros::TimerEvent& t);
-    void planningCycleCallback(const ros::TimerEvent& t);
+    void controlCycleCallback     (const ros::TimerEvent& t);
+    void planningCycleCallback    (const ros::TimerEvent& t);
     void imminentCollisionCallback(const ros::TimerEvent& t);
 
     // Msg building methods
@@ -165,7 +167,8 @@ class Planner {
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(const RampTrajectory trajec);
 
     // Misc
-    const bool checkOrientation() const; 
+    const bool        checkOrientation() const; 
+    const void        randomizeMSPositions(MotionState& ms) const;
 
 
 

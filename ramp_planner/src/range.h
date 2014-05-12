@@ -13,7 +13,7 @@ class Range {
     float max_;
 
     /** This method returns a random value in the range */
-    const float random();
+    const float random() const;
     const ramp_msgs::Range buildRangeMsg() const;
     const std::string toString() const;
 

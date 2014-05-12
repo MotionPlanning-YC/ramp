@@ -192,15 +192,6 @@ const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
   return result.str();
 }
 
-const std::string Utility::toString(const ramp_msgs::Configuration c) const {
-  std::ostringstream result;
-  result<<"(";
-  for(unsigned int i=0;i<c.K.size()-1;i++) {
-    result<<c.K.at(i)<<", ";
-  }
-  result<<c.K.at(c.K.size()-1)<<")";
-  return result.str();
-}
 
 const std::string Utility::toString(const ramp_msgs::Path path) const {
   std::ostringstream result;

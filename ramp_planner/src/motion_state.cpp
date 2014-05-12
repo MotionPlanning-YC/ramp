@@ -38,11 +38,6 @@ MotionState::MotionState(const ramp_msgs::MotionState ms) {
 }
 
 
-MotionState::MotionState(const Configuration c) : mobile_base_k_(2) {
-  for(unsigned int i=0;i<c.K_.size();i++) {
-    positions_.push_back(c.K_.at(i));
-  }
-}
 
 
 

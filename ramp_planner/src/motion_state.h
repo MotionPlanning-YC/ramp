@@ -1,7 +1,6 @@
 #ifndef MOTION_STATE_H
 #define MOTION_STATE_H
 #include "ramp_msgs/MotionState.h"
-#include "configuration.h"
 #include "utility.h"
 
 class MotionState {
@@ -9,7 +8,6 @@ class MotionState {
 
     MotionState();
     MotionState(const ramp_msgs::MotionState ms);
-    MotionState(const Configuration c);
     MotionState(const trajectory_msgs::JointTrajectoryPoint p);
 
     /***** Data Members *****/
@@ -23,11 +21,11 @@ class MotionState {
     double time_;
 
     /***** Methods *****/
-    double comparePosition(const MotionState& ms, bool base_theta) const;
-    void transformBase(const tf::Transform t);
+    double  comparePosition(const MotionState& ms, bool base_theta) const;
+    void    transformBase(const tf::Transform t);
     
-    const ramp_msgs::MotionState buildMotionStateMsg() const;
-    const std::string toString() const;
+    const   ramp_msgs::MotionState buildMotionStateMsg() const;
+    const   std::string toString() const;
 
   private:
     

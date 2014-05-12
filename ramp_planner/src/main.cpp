@@ -13,72 +13,71 @@
 
 
 
-Planner my_planner; 
-Utility u;
+Planner             my_planner; 
+Utility             utility;
+MotionState         start, goal;
+std::vector<Range>  ranges;
 
 
-const std::vector<Configuration> getStartGoal(bool robot0) {
-  std::cout<<"\nIn getStartGoal";
-  std::cout<<"\nrobot0: "<<robot0<<"\n";
-  std::vector<Configuration> result;
 
-  Configuration s, g;
-  
-  if(!robot0) {
-    s.K_.push_back(0);
-    s.K_.push_back(0);
-    s.K_.push_back(0);
-    
-    g.K_.push_back(1.5);
-    g.K_.push_back(1.5);
-    g.K_.push_back(PI/4);
-  }
-  else {
-    s.K_.push_back(3.5f);
-    s.K_.push_back(2.f);
-    s.K_.push_back(PI);
-    
-    g.K_.push_back(0.f);
-    g.K_.push_back(3.5f);
-    g.K_.push_back(PI);
-  }
-
-  result.push_back(s);
-  result.push_back(g);
-
-  return result;
-}
-
-
-void handleConfig(YAML::Node node) {
-  std::cout<<"\nIn handleConfig: "<<node.Type()<<"\n";
-}
-
-
-void setDOF(const XmlRpc::XmlRpcValue dof) {
+// Broken
+void initDOF(const XmlRpc::XmlRpcValue dof) {
   
   double a; 
   std::string s;
   for(unsigned int i=0;i<dof.size();i++) {
+    //std::string s = static_cast<std::string>(dof[i][0]);
     Range temp(dof[i][0].TypeDouble, dof[i][1].TypeDouble); 
-    std::string s = static_cast<std::string>(dof);
+    //std::vector< std::vector<double> > d = static_cast< std::vector< std::vector<double> > >(dof);
+    //double* d = (double*) dof[i];
+    //std::cout<<"\nd[0]: "<<d[0];
+    //std::cout<<"\nd[1]: "<<d[1];
     //double d = static_cast<double>(dof[i][0]);
     //double a = static_cast<double>(dof[i][0]);
     std::cout<<"\nRange "<<i<<": "<<temp.toString();
   }
-}
 
 
-void init_start_goal(const std::vector<float> s, const std::vector<float> g) {
-  Configuration start, goal;
+  /** Doing this dynamically isn't working
+   *  so hardcode values in until it works */
+  // Make some Ranges 
+  srand( time(0));
+  Range range0(0, 3.5);
+  Range range1(0, 3.5);
+  Range range2(-PI, PI);
 
+  // Set my_planner's ranges
+  ranges.push_back(range0);
+  ranges.push_back(range1);
+  ranges.push_back(range2); 
+} // End initDOF
+
+
+
+
+// Initializes global start and goal variables
+void initStartGoal(const std::vector<float> s, const std::vector<float> g) {
   for(unsigned int i=0;i<s.size();i++) {
-    start.K_.push_back(s.at(i));
-    goal.K_.push_back(g.at(i));
+    start.positions_.push_back(s.at(i));
+    goal.positions_.push_back(g.at(i));
+
+    start.velocities_.push_back(0);
+    goal.velocities_.push_back(0);
+
+    start.accelerations_.push_back(0);
+    goal.accelerations_.push_back(0);
+
+    start.jerks_.push_back(0);
+    goal.jerks_.push_back(0);
   }
-}
+} // End initStartGoal
 
 
+
+
+
+/** Loads all of the ros parameters from .yaml 
+ *  Calls initDOF, initStartGoal */
 void loadParameters(const ros::NodeHandle handle) {
   std::cout<<"\nLoading parameters\n";
 
@@ -90,17 +89,17 @@ void loadParameters(const ros::NodeHandle handle) {
 
   // Get the id of the robot
   if(handle.searchParam("robot_info/id", key)) {
-    handle.getParam(key, id);
-    std::cout<<"\nkey: "<<key<<" val(id): "<<id;
+    handle.getParam(key, my_planner.id_);
+    std::cout<<"\nkey: "<<key<<" val(id): "<<my_planner.id_;
   }
 
   if(handle.hasParam("robot_info/DOF")) {
     handle.getParam("robot_info/DOF", dof); 
-    setDOF(dof);
+    initDOF(dof);
 
 
     for(unsigned int i=0;i<dof.size();i++) {
-      std::cout<<"\ndd["<<i<<"]: "<<dof[i][0];
+      std::cout<<"\ndd["<<i<<"]: ("<<dof[i][0]<<", "<<dof[i][1]<<")";
     }
   }
 
@@ -110,13 +109,17 @@ void loadParameters(const ros::NodeHandle handle) {
   std::vector<float> goal;
   handle.getParam("/robot_info/start", start);
   handle.getParam("/robot_info/goal",  goal );
-  init_start_goal(start, goal);
+  initStartGoal(start, goal);
   
   
 
   std::cout<<"\nDone loading parameters. Press Enter to continue\n";
   std::cin.get();
 }
+
+
+
+
 
 
 int main(int argc, char** argv) {
@@ -126,58 +129,22 @@ int main(int argc, char** argv) {
   ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
 
 
+  // Load ros parameters
   loadParameters(handle);
   
   
-  std::string update_topic;
+  
+  // Pretty sure this isn't needed any longer. 
+  // Can't remember what it was used for
+  // Will leave it for now in case there are issues and it sparks ideas
+  /*std::string update_topic;
   handle.getParam("ramp_planner/robot_update", update_topic);
-  std::cout<<"\nupdate_topic:"<<update_topic;
-
-  
-  // Make some Ranges 
-  srand( time(0));
-  Range range0(0, 3.5);
-  Range range1(0, 3.5);
-  Range range2(-PI, PI);
-
-  // Set my_planner's ranges
-  my_planner.ranges_.push_back(range0);
-  my_planner.ranges_.push_back(range1);
-  my_planner.ranges_.push_back(range2);
-  
-  // Make Configurations
-  std::vector<Configuration> s_g = getStartGoal(update_topic == "/robot_0/update");
-  Configuration s = s_g.at(0);
-  Configuration g = s_g.at(1);
-
-  s.ranges_ = my_planner.ranges_;
-  g.ranges_ = my_planner.ranges_;
-  
-  // Set start and goal
-  my_planner.start_   = s;
-  my_planner.goal_    = g;
-  std::cout<<"\nStart:"<<s.toString();
-  std::cout<<"\nGoal:"<<g.toString();
-  
-  // Set transform matrix for odometry
-  my_planner.setT_od_w(s.K_);
+  std::cout<<"\nupdate_topic:"<<update_topic;*/
 
 
   /** Initialize the Planner's handlers */ 
-  my_planner.init(handle); 
+  my_planner.init(handle, start, goal, ranges); 
 
-  /** Set Planner Robot ID */
-  if(update_topic == "/robot_0/update") {
-    my_planner.id_ = 0;
-  }
-  else {
-    my_planner.id_ = 1;
-  }
-  /** End building Planner */
-
-
-  // Don't start planner, just wait for updates
-  //while(ros::ok()) {ros::spinOnce();}
   
   
   

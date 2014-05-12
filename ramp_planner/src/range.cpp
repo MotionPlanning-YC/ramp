@@ -12,7 +12,7 @@ Range::Range(ramp_msgs::Range r) {
 Range::~Range() {}
 
 
-const float Range::random() {
+const float Range::random() const {
   if(min_ == 0 && max_ == 0)
     return 0;
 

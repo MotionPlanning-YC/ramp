@@ -11,7 +11,6 @@
 #include "range.h"
 #include "ramp_msgs/Trajectory.h"
 #include "ramp_msgs/Path.h"
-#include "ramp_msgs/Configuration.h"
 #include <tf/transform_datatypes.h>
 
 #define PI 3.14159f
@@ -39,7 +38,6 @@ class Utility {
     
     const std::string toString(const ramp_msgs::MotionState mp) const;
     const std::string toString(const ramp_msgs::KnotPoint kp) const;
-    const std::string toString(const ramp_msgs::Configuration c) const;
     const std::string toString(const ramp_msgs::Path path) const;
     const std::string toString(const ramp_msgs::Trajectory traj) const;
     const std::string toString(const trajectory_msgs::JointTrajectoryPoint p) const;
