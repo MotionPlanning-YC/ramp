@@ -11,7 +11,7 @@ const float timeNeededToTurn = 2.5;
 
 
 
-Corobot::Corobot() : restart_(false), num(0), num_traveled(0), k_dof_(3), h_traj_req_(0) { 
+Corobot::Corobot() : restart_(false), num_(0), num_prev_(0), num_traveled_(0), k_dof_(3), h_traj_req_(0) { 
   for(unsigned int i=0;i<k_dof_;i++) {
     motion_state_.positions.push_back(0);
     motion_state_.velocities.push_back(0);
@@ -169,15 +169,15 @@ void Corobot::updatePublishTimer(const ros::TimerEvent&) {
  *   It calls calculateSpeedsAndTimes to update the robot's vectors needed to move */
 void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
   //std::cout<<"\nIn updateTrajectory!\n";
-  
   //std::cout<<"\nNew Trajectory: "<<utility_.toString(msg);
   
   // Update data members
-  restart_      = true;
-  num_traveled  = 0;
-  trajectory_   = msg;
-  num           = trajectory_.trajectory.points.size();
-
+  restart_        = true;
+  num_traveled_   = 0;
+  trajectory_     = msg;
+  num_prev_       = num_;
+  num_            = trajectory_.trajectory.points.size();
+  
   // Update vectors for speeds and times
   calculateSpeedsAndTime();
 } // End updateTrajectory
@@ -201,7 +201,7 @@ void Corobot::calculateSpeedsAndTime () {
   ros::Time start_time = ros::Time::now();
 
   // We go through all the waypoints
-  for(int i=0;i<num-1;i++) {
+  for(int i=0;i<num_-1;i++) {
 
     // Get the next points on the trajectory
     trajectory_msgs::JointTrajectoryPoint current = trajectory_.trajectory.points.at(i);
@@ -285,7 +285,7 @@ const bool Corobot::checkOrientation(const int i, const bool simulation) const {
   float diff = fabs(utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(i)));
   //std::cout<<"\ndiff: "<<diff;
 
-  if( (!simulation && diff > PI/12) || (simulation && diff > PI/6) ) {
+  if( (!simulation && diff > PI/12) || (simulation && diff > PI/18) ) {
     return false;
   }
 
@@ -298,16 +298,18 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
   //std::cout<<"\nIn getRotationTrajectory\n";
   ramp_msgs::Trajectory result;
 
+  // Build a trajectory request
   ramp_msgs::TrajectoryRequest tr; 
   ramp_msgs::KnotPoint temp1;
   ramp_msgs::KnotPoint temp2;
   temp1.motionState = motion_state_;
   temp2.motionState = motion_state_;
-  temp2.motionState.positions.at(2) = orientations_.at(num_traveled);
+  temp2.motionState.positions.at(2) = orientations_.at(num_traveled_);
 
   tr.request.path.points.push_back(temp1);
   tr.request.path.points.push_back(temp2);
       
+  // Send request
   if(h_traj_req_->request(tr)) {
     result = tr.response.trajectory;  
   }
@@ -317,39 +319,54 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
 }
 
 
+
+
 void Corobot::moveOnTrajectoryRot(const ramp_msgs::Trajectory traj, bool simulation) {
-  std::cout<<"\n**************In moveOnTrajectoryRot****************\n";
+  //std::cout<<"\n**************In moveOnTrajectoryRot****************\n";
+  //std::cout<<"\ntraj.size(): "<<traj.trajectory.points.size();
 
   ros::Rate r(50);
-
   ros::Time start = ros::Time::now();
+
+  // Go through each point
   for(int i=0;i<traj.trajectory.points.size();i++) {
+
+    // Set Twist values
     twist_.linear.x  = 0;
     twist_.angular.z = traj.trajectory.points.at(i).velocities.at(2);
 
+    // Set goal time
     ros::Time g_time = start + traj.trajectory.points.at(i).time_from_start;
 
+    // Send twist commands until goal time
     while(ros::Time::now() < g_time) {
       sendTwist();
       if(simulation) pub_cmd_vel_.publish(twist_);
 
       r.sleep();
       ros::spinOnce();
-    }
-  }
-}
+
+      // Check if the latest trajectory is different
+      if(restart_ && speeds.size() != (num_prev_-1)) {
+        i = traj.trajectory.points.size();
+        break;
+      } // end if
+    } // end while
+  } // end for
+} // End moveOnTrajectory
 
 
 /** This method moves the robot along trajectory_ */
 void Corobot::moveOnTrajectory(bool simulation) {
   restart_ = false;
-  ros::Rate r(35);
+  ros::Rate r(50);
 
 
   // Execute the trajectory
-  while( (num_traveled+1) < num) { 
+  while( (num_traveled_+1) < num_) { 
     restart_ = false;
     
+
     // Force a stop until there is no imminent collision
     while(checkImminentCollision()) {
       ros::spinOnce();
@@ -358,14 +375,14 @@ void Corobot::moveOnTrajectory(bool simulation) {
     // Check that we are at the correct orientation
     // If not, rotate
     // Because the last point is the goal
-    if(!checkOrientation(num_traveled, simulation)) {
-      ramp_msgs::Trajectory temp = trajectory_;
+    if(!checkOrientation(num_traveled_, simulation)) {
+
+      // Get rotation trajectory and move on it
       ramp_msgs::Trajectory rot_t = getRotationTrajectory();
-      updateTrajectory(rot_t);
       moveOnTrajectoryRot(rot_t, simulation);
     
       ros::spinOnce();
-    }   
+    } // end if   
     
     // Check if a new trajectory has been received before we go to next point
     if(restart_) {
@@ -373,29 +390,23 @@ void Corobot::moveOnTrajectory(bool simulation) {
     } 
     
     
-    // Set velocities
-    /*std::cout<<"\nnum_traveled: "<<num_traveled;
-    std::cout<<"\nnum: "<<num;
-    std::cout<<"\nspeeds.size(): "<<speeds.size()<<"\n";*/
-
+    
     // Move to the next point
-    ros::Time g_time = end_times.at(num_traveled);
+    ros::Time g_time = end_times.at(num_traveled_);
     while(ros::ok() && ros::Time::now() < g_time) {
     
-      twist_.linear.x = speeds.at(num_traveled);
+      twist_.linear.x = speeds.at(num_traveled_);
     
-      // Adjust the angular speed to correct errors in turning
-      // Commented out because it was producing erratic driving
-      // Should be fixed at some point
-      /*if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.15) {
+      // When driving straight, adjust the angular speed to maintain orientation
+      if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.15) {
         //std::cout<<"\ninitial_theta_: "<<initial_theta_;
-        //float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
-        //float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled));
+        float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
+        float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
         //std::cout<<"\nactual theta: "<<actual_theta;
-        //std::cout<<"\norientations_.at("<<num_traveled<<"): "<<orientations_.at(num_traveled);
+        //std::cout<<"\norientations_.at("<<num_traveled_<<"): "<<orientations_.at(num_traveled_);
         //std::cout<<"\ndist: "<<dist;
-        //twist_.angular.z = -1*dist;
-      }*/
+        twist_.angular.z = -1*dist;
+      }
     
       //std::cout<<"\ntwist_linear: "<<twist_.linear.x;
       //std::cout<<"\ntwist_angular: "<<twist_.angular.z<<"\n";
@@ -424,7 +435,7 @@ void Corobot::moveOnTrajectory(bool simulation) {
     }
 
     // Increment num_traveled
-    num_traveled++;
+    num_traveled_++;
 
     // Spin once to check for updates in the trajectory
     ros::spinOnce();

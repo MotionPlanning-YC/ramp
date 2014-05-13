@@ -76,8 +76,9 @@ class Corobot {
 
     Utility                   utility_;
     bool                      restart_;
-    int                       num;
-    int                       num_traveled;
+    int                       num_;
+    int                       num_prev_;
+    int                       num_traveled_;
     const unsigned int        k_dof_;
     std::vector<ros::Time>    end_times; 
     std::vector<float>        speeds; 

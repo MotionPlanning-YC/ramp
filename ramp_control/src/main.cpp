@@ -5,9 +5,9 @@
 Corobot robot;
 
 void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
-  std::cout<<"\nGot the message!\n";
- // std::cout<<"\nPress enter to call updateTrajectory\n";
- // std::cin.get();
+  //std::cout<<"\nGot the trajectory message!\n";
+  //std::cout<<"\nPress enter to call updateTrajectory\n";
+  //std::cin.get();
   robot.updateTrajectory(*msg);
 }
 

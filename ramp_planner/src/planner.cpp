@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(1), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
+Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
 {
   controlCycle_ = ros::Duration(1.f / 10.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
@@ -95,7 +95,7 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
 
   // Transform configuration from odometry to world coordinates
   start_.transformBase(T_base_w_);
-  std::cout<<"\nNew starting configuration: "<<start_.toString();
+  //std::cout<<"\nNew starting configuration: "<<start_.toString();
   
 
   // Set proper velocity values
@@ -107,8 +107,8 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
   start_.accelerations_.at(1) = msg.accelerations.at(0) * sin(start_.positions_.at(2));
 
 
-  std::cout<<"\nstart_: "<<start_.toString();
-  std::cout<<"\nstartPlanning_: "<<startPlanning_.toString();
+  //std::cout<<"\nstart_: "<<start_.toString();
+  //std::cout<<"\nstartPlanning_: "<<startPlanning_.toString();
 
   mutex_start_ = true;
 } // End updateCallback
@@ -747,38 +747,6 @@ const std::string Planner::pathsToString() const {
   
   // initialize population
   initPopulation();
- 
-  KnotPoint kp1;
-  KnotPoint kp2;
-  
-  kp1.motionState_.positions_.push_back(start_.positions_.at(0));
-  kp1.motionState_.positions_.push_back(start_.positions_.at(1));
-  kp1.motionState_.positions_.push_back(start_.positions_.at(2));
-  kp2.motionState_.positions_.push_back(goal_.positions_.at(0));
-  kp2.motionState_.positions_.push_back(goal_.positions_.at(1));
-  kp2.motionState_.positions_.push_back(goal_.positions_.at(2));
-  
-  kp1.motionState_.velocities_.push_back(0);
-  kp1.motionState_.velocities_.push_back(0);
-  kp1.motionState_.velocities_.push_back(0);
-  kp2.motionState_.velocities_.push_back(0);
-  kp2.motionState_.velocities_.push_back(0);
-  kp2.motionState_.velocities_.push_back(0);
-
-  Path p(kp1, kp2);
-  
-  ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
-  requestTrajectory(tr);
-  
-  RampTrajectory traj(resolutionRate_, 0);
-  traj.msg_trajec_ = tr.response.trajectory;
-  traj.path_ = p;
-
-  population_.clear();
-  population_.add(traj);
-
-  paths_.clear();
-  paths_.push_back(p);
 
   /*std::cout<<"\nPopulation initialized!\n";
   std::cout<<"\npaths_.size(): "<<paths_.size()<<"\n";
@@ -791,14 +759,11 @@ const std::string Planner::pathsToString() const {
 
 
   // Initialize the modifier
-  // *****! Testing *****!
-  //modifier_->paths_ = paths_;
+  modifier_->paths_ = paths_;
 
 
   // Evaluate the population and get the initial trajectory to move on
-  // *****! Testing *****!
   bestTrajec_ = evaluateAndObtainBest();
-  // *****! Testing *****!
   sendPopulation();
   //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n\n"; 
   // std::cout<<"\nPress enter to start the loop!\n";
@@ -809,17 +774,15 @@ const std::string Planner::pathsToString() const {
   // createSubpopulations();
   
   // Start the planning cycle timer
-  // *****! Testing *****!
-  //planningCycleTimer_.start();
+  planningCycleTimer_.start();
 
   // Wait for 100 generations before starting 
-  // *****! Testing *****!
-  //while(generation_ < 100) {ros::spinOnce();}
+  while(generation_ < 100) {ros::spinOnce();}
 
-  std::cout<<"\n***************Starting Control Cycle*****************\n";
   // Start the control cycle timer
+  std::cout<<"\n***************Starting Control Cycle*****************\n";
   controlCycleTimer_.start();
-  //imminentCollisionTimer_.start();
+  imminentCollisionTimer_.start();
   
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
@@ -828,17 +791,18 @@ const std::string Planner::pathsToString() const {
     ros::spinOnce(); 
   } // end while
   
+  std::cout<<"\nPlanning complete!";
+  std::cout<<"\nLatest pose: "<<start_.toString()<<"\n";
+  
   // Stop timer
   controlCycleTimer_.stop();
-  //planningCycleTimer_.stop();
+  planningCycleTimer_.stop();
+  imminentCollisionTimer_.stop();
 
   // Send an empty trajectory
   ramp_msgs::Trajectory empty;
   h_control_->send(empty);
-  
-  std::cout<<"\nPlanning complete!\n";
-  std::cout<<"\nLatest pose: "<<start_.toString();
 
-  std::cout<<"\nFinal population: ";
-  std::cout<<"\n"<<pathsToString(); 
+  //std::cout<<"\nFinal population: ";
+  //std::cout<<"\n"<<pathsToString(); 
 } // End go

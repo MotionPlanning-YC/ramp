@@ -23,11 +23,11 @@ std::vector<Range>  ranges;
 // Broken
 void initDOF(const XmlRpc::XmlRpcValue dof) {
   
-  double a; 
+  /*double a; 
   std::string s;
   for(unsigned int i=0;i<dof.size();i++) {
     //std::string s = static_cast<std::string>(dof[i][0]);
-    Range temp(dof[i][0].TypeDouble, dof[i][1].TypeDouble); 
+    //Range temp(dof[i][0].TypeDouble, dof[i][1].TypeDouble); 
     //std::vector< std::vector<double> > d = static_cast< std::vector< std::vector<double> > >(dof);
     //double* d = (double*) dof[i];
     //std::cout<<"\nd[0]: "<<d[0];
@@ -35,7 +35,7 @@ void initDOF(const XmlRpc::XmlRpcValue dof) {
     //double d = static_cast<double>(dof[i][0]);
     //double a = static_cast<double>(dof[i][0]);
     std::cout<<"\nRange "<<i<<": "<<temp.toString();
-  }
+  }*/
 
 
   /** Doing this dynamically isn't working
@@ -90,7 +90,6 @@ void loadParameters(const ros::NodeHandle handle) {
   // Get the id of the robot
   if(handle.searchParam("robot_info/id", key)) {
     handle.getParam(key, my_planner.id_);
-    std::cout<<"\nkey: "<<key<<" val(id): "<<my_planner.id_;
   }
 
   if(handle.hasParam("robot_info/DOF")) {
@@ -98,9 +97,9 @@ void loadParameters(const ros::NodeHandle handle) {
     initDOF(dof);
 
 
-    for(unsigned int i=0;i<dof.size();i++) {
-      std::cout<<"\ndd["<<i<<"]: ("<<dof[i][0]<<", "<<dof[i][1]<<")";
-    }
+    //for(unsigned int i=0;i<dof.size();i++) {
+      //std::cout<<"\ndd["<<i<<"]: ("<<dof[i][0]<<", "<<dof[i][1]<<")";
+    //}
   }
 
 
@@ -114,7 +113,7 @@ void loadParameters(const ros::NodeHandle handle) {
   
 
   std::cout<<"\nDone loading parameters. Press Enter to continue\n";
-  std::cin.get();
+  //std::cin.get();
 }
 
 
@@ -145,7 +144,8 @@ int main(int argc, char** argv) {
   /** Initialize the Planner's handlers */ 
   my_planner.init(handle, start, goal, ranges); 
 
-  
+  std::cout<<"\nStart: "<<my_planner.start_.toString();
+  std::cout<<"\nGoal: "<<my_planner.goal_.toString();
   
   
 
