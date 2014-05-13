@@ -25,13 +25,15 @@
 
 <!-- We need 2 planners, one for the first robot and one for the second robot -->
 <group ns="$(arg robot_0_name)">
+  <rosparam file="$(find ramp_launch)/launch/config/robot_0.yaml" command="load" ns="robot_info/" />
   <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" >
     <param name="robot_update" type="str" value="/$(arg robot_0_name)/update" />
   </node>
 </group> 
 
 <group ns="$(arg robot_1_name)"> 
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" > 
+  <rosparam file="$(find ramp_launch)/launch/config/robot_1.yaml" command="load" ns="robot_info/" />
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" > 
     <param name="robot_update" type="str" value="/$(arg robot_1_name)/update" /> 
   </node>
 </group> 
@@ -54,7 +56,6 @@
 
 
 
-<!-- Evaluation -->
 
 <group ns="$(arg robot_0_name)">
   <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen">
@@ -72,22 +73,21 @@
 
 
 
-
 <!-- Start the ramp_control simulation nodes (locally, not on remote machines) -->
 
 <group ns="$(arg robot_0_name)" >
   <node name="ramp_control" pkg="ramp_control" type="ramp_control" output="screen" /> 
-    <remap from="odometry" to="odom" />
+    <remap from="robot_0/odometry" to="odom" />
     <param name="orientation" type="double" value="3.14159" />
-    <param name="simulation" value="true" />
+    <param name="ramp_control/simulation" value="true" />
 </group> 
 
 
 <group ns="$(arg robot_1_name)"> 
   <node name="ramp_control" pkg="ramp_control" type="ramp_control" /> 
-    <remap from="odometry" to="odom" />
+    <remap from="robot_1/odometry" to="robot_1/odom" />
     <param name="orientation" type="double" value="0" />
-    <param name="simulation" value="true" />
+    <param name="ramp_control/simulation" value="true" />
 </group> 
 
 

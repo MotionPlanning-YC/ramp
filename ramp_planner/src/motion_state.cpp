@@ -46,7 +46,7 @@ MotionState::MotionState(const ramp_msgs::MotionState ms) {
  * if base_theta is true, we are considering the base orientation, otherwise do not
  * add base orientation difference into the result
  * */
-double MotionState::comparePosition(const MotionState& c, bool base_theta) const {
+double MotionState::comparePosition(const MotionState& c, const bool base_theta) const {
   //std::cout<<"\nComparing: "<<toString()<<" and "<<c.toString();
   double result = 0; 
 

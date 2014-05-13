@@ -2,7 +2,7 @@
 #include "corobot.h"
 
 const std::string Corobot::TOPIC_STR_PHIDGET_MOTOR="PhidgetMotor";
-const std::string Corobot::TOPIC_STR_ODOMETRY="odometry";
+const std::string Corobot::TOPIC_STR_ODOMETRY="odom";
 const std::string Corobot::TOPIC_STR_UPDATE="update";
 const std::string Corobot::TOPIC_STR_TWIST="twist";
 const float BASE_WIDTH=0.2413;

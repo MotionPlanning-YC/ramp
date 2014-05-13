@@ -1,5 +1,6 @@
 #ifndef PLANNER_H
 #define PLANNER_H
+
 #include "ros/ros.h"
 #include "path.h"
 #include "ramp_trajectory.h"
@@ -115,7 +116,7 @@ class Planner {
     MotionState getStartConfiguration();
 
     // Update the population 
-    void updatePopulation(ros::Duration d);
+    void adaptPopulation(ros::Duration d);
 
     // Display all of the paths
     const std::string pathsToString() const;
@@ -129,7 +130,7 @@ class Planner {
 
   
   private:
-    /** These are (mostly) utility members that are only used by Planner and should not be used by other classes*/
+    /** These are (mostly) utility members that are only used by Planner and should not be used by other classes */
 
 
     /***** Methods *****/
@@ -141,9 +142,9 @@ class Planner {
     const std::vector< std::vector<float> > getNewVelocities(std::vector<Path> new_path, std::vector<int> i_old);
     
     // Updates the paths in P(t) so we can get new trajectories
-    void updatePaths(MotionState start, ros::Duration dur);
+    void adaptPaths(MotionState start, ros::Duration dur);
 
-    // Returns an id for a RampTrajectory 
+    // Returns a unique id for a RampTrajectory 
     unsigned int getIRT();
 
     // Adjust the trajectory so that the robot does not
@@ -160,47 +161,51 @@ class Planner {
 
     // Msg building methods
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
-              const unsigned int i_path ) const;
+              const unsigned int i_path ) const ;
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
-              const Path path ) const;
-    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const unsigned int i_path);
-    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const RampTrajectory trajec);
+              const Path path ) const           ;
+    const ramp_msgs::EvaluationRequest buildEvaluationRequest(
+              const unsigned int i_path)        ;
+    const ramp_msgs::EvaluationRequest buildEvaluationRequest(
+              const RampTrajectory trajec)      ;
 
     // Misc
-    const bool        checkOrientation() const; 
-    const void        randomizeMSPositions(MotionState& ms) const;
+    const bool checkOrientation()                           const ; 
+    const void randomizeMSPositions(MotionState& ms)        const ;
+          void updateWithModifier(const int index, const Path p)  ;
+          void checkTrajChange();
 
 
 
     /***** Data members *****/
 
     // Utility instance
-    Utility utility_; 
+    Utility             utility_; 
 
     // Size of population
-    const unsigned int populationSize_;
+    const unsigned int  populationSize_;
 
     // Generation counter
-    unsigned int generation_;
+    unsigned int        generation_;
     
     // Mutex for start_ and population
-    bool mutex_start_;
-    bool mutex_pop_;
+    bool                mutex_start_;
+    bool                mutex_pop_;
 
     // ID counter for trajectories
-    unsigned int i_rt;
+    unsigned int        i_rt;
 
     // Last time P(t) was updated
-    ros::Time lastUpdate_;
+    ros::Time           lastUpdate_;
 
     // How far we need to get to the goal before stopping
-    float goalThreshold_;
+    float               goalThreshold_;
 
     // Number of modification operators 
-    unsigned int num_ops_;
+    unsigned int        num_ops_;
 
     // Distance threshold for imminent collision
-    float D_;
+    float               D_;
     
     // Handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
@@ -209,7 +214,7 @@ class Planner {
     Modifier*                   modifier_;
 
     // Parameter handler
-    ParameterHandler p_handler_;
+    ParameterHandler            h_parameters_;
 };
 
 #endif

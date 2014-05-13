@@ -40,8 +40,8 @@ void initDOF(const XmlRpc::XmlRpcValue dof) {
 
   /** Doing this dynamically isn't working
    *  so hardcode values in until it works */
+  
   // Make some Ranges 
-  srand( time(0));
   Range range0(0, 3.5);
   Range range1(0, 3.5);
   Range range2(-PI, PI);
@@ -90,6 +90,7 @@ void loadParameters(const ros::NodeHandle handle) {
   // Get the id of the robot
   if(handle.searchParam("robot_info/id", key)) {
     handle.getParam(key, my_planner.id_);
+    std::cout<<"\nid: "<<my_planner.id_;
   }
 
   if(handle.hasParam("robot_info/DOF")) {
@@ -106,11 +107,13 @@ void loadParameters(const ros::NodeHandle handle) {
   // Get the start and goal vectors
   std::vector<float> start;
   std::vector<float> goal;
-  handle.getParam("/robot_info/start", start);
-  handle.getParam("/robot_info/goal",  goal );
+  handle.getParam("robot_info/start", start);
+  handle.getParam("robot_info/goal",  goal );
   initStartGoal(start, goal);
   
+ 
   
+
 
   std::cout<<"\nDone loading parameters. Press Enter to continue\n";
   //std::cin.get();
@@ -122,6 +125,8 @@ void loadParameters(const ros::NodeHandle handle) {
 
 
 int main(int argc, char** argv) {
+  srand( time(0));
+
   ros::init(argc, argv, "ramp_planner");
   ros::NodeHandle handle;
   
@@ -156,7 +161,6 @@ int main(int argc, char** argv) {
   my_planner.go();
   
   
-  ros::spinOnce();
   std::cout<<"\nExiting Normally\n";
   return 0;
 }

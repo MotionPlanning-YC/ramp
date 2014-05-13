@@ -1,9 +1,8 @@
 #include "population.h"
 
+Population::Population() : maxSize_(5), i_best_(-1) {}
 
-Population::Population() : max_size(5), i_best(-1) {}
-
-Population::Population(const unsigned int size) : max_size(size), i_best(-1) {}
+Population::Population(const unsigned int size) : maxSize_(size), i_best_(-1) {}
 
 
 /** Return the size of the population */
@@ -26,7 +25,7 @@ const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
 const unsigned int Population::add(const RampTrajectory rt) {
  
   //If not full, simply push back
-  if(population_.size() < max_size) {
+  if(population_.size() < maxSize_) {
     population_.push_back(rt);  
     return population_.size()-1;
   } 
@@ -37,8 +36,8 @@ const unsigned int Population::add(const RampTrajectory rt) {
     //Generate a random index for a random trajectory to remove
     //Don't pick the fittest trajectory!!
     unsigned int i;
-    do {i = rand() % max_size;}
-    while(i == i_best);
+    do {i = rand() % maxSize_;}
+    while(i == i_best_);
   
     //Remove the random trajectory
     population_.erase(population_.begin()+i);
@@ -52,7 +51,13 @@ const unsigned int Population::add(const RampTrajectory rt) {
 
 
 
-/** Returns the fittest trajectory and sets i_best */
+const bool Population::checkIfChange() const {
+  return i_best_ != i_best_prev_;
+}
+
+
+
+/** Returns the fittest trajectory and sets i_best_ */
 const RampTrajectory Population::findBest() {
   //std::cout<<"\nIn findBest\n";
   
@@ -64,10 +69,12 @@ const RampTrajectory Population::findBest() {
     }
   } //end for
 
-  // Set i_best
-  i_best = i_max;
 
-  return population_.at(i_best); 
+  // Set i_best_
+  i_best_prev_ = i_best_;
+  i_best_ = i_max;
+
+  return population_.at(i_best_); 
 } //End getBest 
 
 
@@ -80,7 +87,7 @@ const std::string Population::fitnessFeasibleToString() const {
   result<<"\nPopulation's fitness and feasibility:";
   for(unsigned int i=0;i<population_.size();i++) {
     result<<"\n"<<population_.at(i).fitnessFeasibleToString();
-    if(i == i_best) {
+    if(i == i_best_) {
       result<<" - Best!";
     }
   }
@@ -110,6 +117,6 @@ ramp_msgs::Population Population::populationMsg()
       msg.population.push_back(population_.at(i).msg_trajec_);
     }
     
-    msg.best_id = i_best;
+    msg.best_id = i_best_;
     return msg;
 }

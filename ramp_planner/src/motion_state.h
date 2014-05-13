@@ -21,7 +21,8 @@ class MotionState {
     double time_;
 
     /***** Methods *****/
-    double  comparePosition(const MotionState& ms, bool base_theta) const;
+    double  comparePosition(const MotionState& ms, 
+                            const bool base_theta) const;
     void    transformBase(const tf::Transform t);
     
     const   ramp_msgs::MotionState buildMotionStateMsg() const;

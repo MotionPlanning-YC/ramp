@@ -24,7 +24,7 @@ const Path RampTrajectory::getPath() const {
   }
 
   result.start_ = result.all_.at(0);
-  result.goal_ = result.all_.at( result.all_.size()-1 );
+  result.goal_  = result.all_.at( result.all_.size()-1 );
   
   return result;
 }

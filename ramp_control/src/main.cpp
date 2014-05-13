@@ -42,7 +42,9 @@ int main(int argc, char** argv) {
   std::cout<<"\nrobot.orientation: "<<robot.initial_theta_;
   
   bool sim=false;
-  handle.param("/ramp_control/simulation", sim, false);
+  handle.param("ramp_control/simulation", sim, false);
+  std::cout<<"\nsim: "<<sim<<"\n";
+ 
  
 
   // Initialize publishers and subscribers

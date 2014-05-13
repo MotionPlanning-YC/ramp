@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
+Planner::Planner() : resolutionRate_(1.f / 5.f), populationSize_(5), generation_(0), mutex_start_(true), mutex_pop_(true), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0) 
 {
   controlCycle_ = ros::Duration(1.f / 10.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
@@ -43,6 +43,9 @@ Planner::~Planner() {
 
 /** This method initializes the T_base_w_ transform object */
 void Planner::setT_base_w(std::vector<float> base_pos) {
+  std::cout<<"\nid: "<<id_<<" base_pos.size(): "<<base_pos.size()<<"\n";
+  for(int i=0;i<base_pos.size();i++) 
+    std::cout<<"\n "<<base_pos.at(i);
  
   T_base_w_.setRotation(tf::createQuaternionFromYaw(base_pos.at(2)));
   T_base_w_.setOrigin(tf::Vector3(base_pos.at(0), base_pos.at(1), 0));
@@ -66,10 +69,10 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
   //std::cout<<"\nIn imminentCollisionCycle_\n";
 
   if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < D_)) {
-    p_handler_.setImminentCollision(true); 
+    h_parameters_.setImminentCollision(true); 
   } 
   else {
-    p_handler_.setImminentCollision(false);
+    h_parameters_.setImminentCollision(false);
   }
 
   //std::cout<<"\nAfter imminentCollisionCycle_\n";
@@ -231,7 +234,7 @@ void Planner::gradualTrajectory(RampTrajectory& t) {
 
 
 /** This method updates all the paths with the current configuration */
-void Planner::updatePaths(MotionState start, ros::Duration dur) {
+void Planner::adaptPaths(MotionState start, ros::Duration dur) {
    //std::cout<<"\nUpdating start to: "<<start.toString();
    //std::cout<<"\ndur: "<<dur<<"\n";
 
@@ -308,7 +311,7 @@ const bool Planner::checkOrientation() const {
 
 /** This method updates the population with the current configuration 
  *  The duration is used to determine which knot points still remain in the trajectory */
-void Planner::updatePopulation(ros::Duration d) {
+void Planner::adaptPopulation(ros::Duration d) {
   
   // First, get the updated current configuration
   //start_ = getStartConfiguration();
@@ -324,16 +327,8 @@ void Planner::updatePopulation(ros::Duration d) {
     startPlanning_ = ms;
   }
   
-  /*std::cout<<"\nPaths before updating:";
-  for(int i=0;i<paths_.size();i++) {
-    std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
-  }*/
   // Update the paths with the new starting configuration 
-  updatePaths(startPlanning_, d*2);
-  /*std::cout<<"\nPaths after updating:";
-  for(int i=0;i<paths_.size();i++) {
-    std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
-  }*/
+  adaptPaths(startPlanning_, d*2);
 
   // Create the vector to hold updated trajectories
   std::vector<RampTrajectory> updatedTrajecs;
@@ -377,7 +372,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   // Obtain mutex on population and update it
   while(!mutex_pop_) {}
   mutex_pop_ = false;
-  updatePopulation(controlCycle_);
+  adaptPopulation(controlCycle_);
   mutex_pop_ = true;
 
   /** TODO **/
@@ -389,21 +384,21 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
 
 
   // Find orientation difference between the old and new trajectory 
-  // old configuration is the new start_ configuration (last point on old trajectory)
-  /*float b = utility.findAngleFromAToB(start_.positions_, bestTrajec_.path_.all_.at(1).motionState_.positions_);
-  float diff = utility.findDistanceBetweenAngles(start_.positions_.at(2), b);
-  float diff = utility_.findDistanceBetweenAngles(start_.positions_.at(2), b);
-  //std::cout<<"\nb: "<<b<<" start_.positions_.at(2): "<<start_.positions_.at(2);
-  //std::cout<<"\ndiff: "<<diff;
+  float b = utility_.findAngleFromAToB(start_.positions_, 
+                bestTrajec_.path_.all_.at(1).motionState_.positions_);
+  float diff = utility_.findDistanceBetweenAngles(
+                start_.positions_.at(2), b);
+  
+
+  // If difference < 30 degrees
+  // Make the trajectory a gradual change
   if(fabs(diff) <= 0.52356f) {
     gradualTrajectory(bestTrajec_);
-  }*/
-
+  }
   
+
   // Send the best trajectory 
   sendBest(); 
-
-  sendPopulation();
   
   //std::cout<<"\nControl cycle complete\n";
 } // End controlCycleCallback
@@ -550,6 +545,22 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
 
 
 
+/** 
+ * This method updates the paths vector for the planner
+ * and the modifier 
+ **/
+void Planner::updateWithModifier(const int index, const Path path) {
+
+    // Update the path in the planner 
+    paths_.at(index) = path;
+    
+    // Update the path in the modifier 
+    modifier_->update(paths_.at(index), index);
+} // End updateWithModifier
+
+
+
+
 /** Modification procedure will modify 1-2 random trajectories,
  *  add the new trajectories, evaluate the new trajectories,
  *  and set tau to the new best */
@@ -558,7 +569,7 @@ void Planner::modification() {
   // Modify 1 or more trajectories
   std::vector<ModifiedTrajectory> mod_trajec = modifyTrajec();
   
-  // Add the modified trajectories to the population
+  // Evaluate and add the modified trajectories to the population
   // and update the planner and the modifier on the new paths
   for(unsigned int i=0;i<mod_trajec.size();i++) {
 
@@ -569,17 +580,46 @@ void Planner::modification() {
     // Index is where the trajectory was added in the population (may replace another)
     int index = population_.add(mod_trajec.at(i).trajec_);
 
-    // Update the path and velocities in the planner 
-    paths_.at(index)      = mod_trajec.at(i).trajec_.path_;
-    
-    // Update the path and velocities in the modifier 
-    modifier_->update(paths_.at(index), index);
+    // Update the path in the planner and the modifier
+    updateWithModifier(index, mod_trajec.at(i).trajec_.path_);
   } // end for
   
   // Obtain and set best trajectory
   bestTrajec_ = population_.findBest();
+
+  // Check if the best trajectory changed
+  if(generation_ >= 100 && population_.checkIfChange()) {
+    std::cout<<"\nBest has changed!";
   
-  // Send the whole population to the trajectory viewer
+    // Make a new Trajectory to stop the robot
+    // Current state of motion
+    // startPlanning position, 0 velocity
+    MotionState temp;
+    temp.positions_ = startPlanning_.positions_; 
+
+    // Set v and a
+    for(int i=0;i<temp.positions_.size();i++) {
+      temp.velocities_.push_back(0);
+      temp.accelerations_.push_back(0);
+    }
+
+    Path p(start_, temp);
+    std::cout<<"\nPath p: "<<p.toString();
+
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
+
+    h_traj_req_->request(tr);
+
+    RampTrajectory toSend(getIRT(), resolutionRate_);
+    toSend.msg_trajec_ = tr.response.trajectory;
+
+    std::cout<<"\nSending Trajectory: "<<toSend.toString();
+    h_control_->send(toSend.msg_trajec_); 
+
+  } // end if
+
+  
+  // Send the new population to the trajectory viewer
   sendPopulation();
 } // End modification
 
@@ -780,7 +820,7 @@ const std::string Planner::pathsToString() const {
   while(generation_ < 100) {ros::spinOnce();}
 
   // Start the control cycle timer
-  std::cout<<"\n***************Starting Control Cycle*****************\n";
+  std::cout<<"\n********Robot "<<id_<<": Starting Control Cycle********\n";
   controlCycleTimer_.start();
   imminentCollisionTimer_.start();
   
