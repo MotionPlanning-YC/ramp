@@ -581,9 +581,9 @@ const std::vector<Path> Planner::modifyPath() {
 
 
 /** Modify a trajectory */ 
-const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
+const std::vector<RampTrajectory> Planner::modifyTrajec() {
   //std::cout<<"\nIn modifyTrajec\n";
-  std::vector<ModifiedTrajectory> result;
+  std::vector<RampTrajectory> result;
   
 
   // The process begins by modifying one or more paths
@@ -605,11 +605,7 @@ const std::vector<ModifiedTrajectory> Planner::modifyTrajec() {
       temp.msg_trajec_ = tr.response.trajectory;
       temp.path_ = modded_paths.at(i);
 
-      // Build ModifiedTrajectory
-      ModifiedTrajectory mt;
-      mt.trajec_ = temp;
-
-      result.push_back(mt);
+      result.push_back(temp);
   
     } // end if
   } // end for

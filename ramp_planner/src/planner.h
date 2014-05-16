@@ -13,10 +13,6 @@
 #include "control_handler.h"
 #include "parameter_handler.h"
 
-struct ModifiedTrajectory {
-  RampTrajectory trajec_;
-};
-
 class Planner {
   public:
     Planner();
@@ -105,7 +101,7 @@ class Planner {
     
     // Modify trajectory or path
     const std::vector<Path> modifyPath();
-    const std::vector<ModifiedTrajectory> modifyTrajec();
+    const std::vector<RampTrajectory> modifyTrajec();
 
     // Request information from other packages
     // Cannot make the request srvs const because they have no serialize/deserialize
@@ -134,9 +130,6 @@ class Planner {
     
     // Initialize start and goal
     void initStartGoal(const MotionState s, const MotionState g);
-
-    // This gets the new velocities for path segments after a path has been updated
-    const std::vector< std::vector<float> > getNewVelocities(std::vector<Path> new_path, std::vector<int> i_old);
     
     // Updates the paths in P(t) so we can get new trajectories
     void adaptPaths(MotionState start, ros::Duration dur);
