@@ -27,7 +27,7 @@ class Population {
     std::vector<RampTrajectory> population_;
     
   private:
-    const unsigned int  maxSize_;
+    unsigned int        maxSize_;
     int                 i_best_;
     int                 i_best_prev_;
 };

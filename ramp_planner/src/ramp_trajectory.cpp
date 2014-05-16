@@ -40,7 +40,7 @@ const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const
 const std::string RampTrajectory::fitnessFeasibleToString() const {
   std::ostringstream result;
  
-  result<<"\nTrajectory "<<id_;
+  result<<"\nTrajectory ID: "<<id_;
   result<<"\n Number of knot points: "<<msg_trajec_.index_knot_points.size(); 
   result<<"\n Path: "<<path_.toString();
   result<<"\n Fitness: "<<fitness_<<" Feasible: "<<feasible_<<" Collision Time: "<<time_until_collision_;
@@ -51,7 +51,7 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
 const std::string RampTrajectory::toString() const {
   std::ostringstream result;
   
-  result<<"\nTrajectory "<<id_<<": "<<u.toString(msg_trajec_);
+  result<<"\nTrajectory ID: "<<id_<<"\n"<<u.toString(msg_trajec_);
   result<<fitnessFeasibleToString();
   
   return result.str();

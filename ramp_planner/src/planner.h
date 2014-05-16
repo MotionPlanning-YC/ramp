@@ -112,9 +112,6 @@ class Planner {
     bool requestTrajectory(ramp_msgs::TrajectoryRequest& tr);
     bool requestEvaluation(ramp_msgs::EvaluationRequest& er);
 
-    // Get the starting configuration
-    MotionState getStartConfiguration();
-
     // Update the population 
     void adaptPopulation(ros::Duration d);
 
@@ -173,7 +170,8 @@ class Planner {
     const bool checkOrientation()                           const ; 
     const void randomizeMSPositions(MotionState& ms)        const ;
           void updateWithModifier(const int index, const Path p)  ;
-          void checkTrajChange();
+          void checkTrajChange()                                  ;
+          void seedPopulation()                                   ;
 
 
 
@@ -187,10 +185,6 @@ class Planner {
 
     // Generation counter
     unsigned int        generation_;
-    
-    // Mutex for start_ and population
-    bool                mutex_start_;
-    bool                mutex_pop_;
 
     // ID counter for trajectories
     unsigned int        i_rt;
@@ -215,6 +209,10 @@ class Planner {
 
     // Parameter handler
     ParameterHandler            h_parameters_;
+
+
+
+    bool stop_;
 };
 
 #endif

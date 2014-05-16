@@ -1,8 +1,8 @@
 #include "population.h"
 
-Population::Population() : maxSize_(5), i_best_(-1) {}
+Population::Population() : maxSize_(2), i_best_(-1), i_best_prev_(-1) {}
 
-Population::Population(const unsigned int size) : maxSize_(size), i_best_(-1) {}
+Population::Population(const unsigned int size) : maxSize_(size), i_best_(-1), i_best_prev_(-1) {}
 
 
 /** Return the size of the population */
@@ -52,7 +52,8 @@ const unsigned int Population::add(const RampTrajectory rt) {
 
 
 const bool Population::checkIfChange() const {
-  return i_best_ != i_best_prev_;
+  std::cout<<"\ni_best_prev_: "<<i_best_prev_<<" i_best: "<<i_best_;
+  return (i_best_ != i_best_prev_);
 }
 
 
@@ -71,7 +72,9 @@ const RampTrajectory Population::findBest() {
 
 
   // Set i_best_
-  i_best_prev_ = i_best_;
+  if(i_max != i_best_) {
+    i_best_prev_ = i_best_;
+  }
   i_best_ = i_max;
 
   return population_.at(i_best_); 

@@ -28,9 +28,9 @@ int main(int argc, char** argv) {
 
 
   ramp_msgs::KnotPoint c3;
-  //c3.motionState.positions.push_back(1.5f);
-  //c3.motionState.positions.push_back(2.f);
-  //c3.motionState.positions.push_back(PI/18);
+  c3.motionState.positions.push_back(0.5f);
+  c3.motionState.positions.push_back(2.f);
+  c3.motionState.positions.push_back(PI/18);
 
 
 
@@ -43,14 +43,13 @@ int main(int argc, char** argv) {
   c1.motionState.velocities.push_back(0);
   c1.motionState.velocities.push_back(0);
 
-  c1.motionState.accelerations.push_back(0);
-  c1.motionState.accelerations.push_back(0);
-  c1.motionState.accelerations.push_back(0);
-
   c2.motionState.velocities.push_back(0);
   c2.motionState.velocities.push_back(0);
   c2.motionState.velocities.push_back(0);
-  
+ 
+  c3.motionState.velocities.push_back(0);
+  c3.motionState.velocities.push_back(0);
+  c3.motionState.velocities.push_back(0); 
   
   // Push on velocities
   /*for(unsigned int i=0;i<c1.motionState.positions.size();i++) {
@@ -70,8 +69,8 @@ int main(int argc, char** argv) {
 
   ramp_msgs::Path p;
   p.points.push_back(c1);
+  p.points.push_back(c3);
   p.points.push_back(c2);
-  //p.points.push_back(c3);
   //p.points.push_back(c4);
 
   ramp_msgs::TrajectoryRequest tr;

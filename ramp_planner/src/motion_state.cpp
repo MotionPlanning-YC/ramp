@@ -17,7 +17,7 @@ MotionState::MotionState(const trajectory_msgs::JointTrajectoryPoint p) : mobile
   }
 }
 
-MotionState::MotionState(const ramp_msgs::MotionState ms) {
+MotionState::MotionState(const ramp_msgs::MotionState ms) : mobile_base_k_(2) {
   for(unsigned int i=0;i<ms.positions.size();i++) {
     positions_.push_back(ms.positions.at(i));
   }
@@ -47,8 +47,10 @@ MotionState::MotionState(const ramp_msgs::MotionState ms) {
  * add base orientation difference into the result
  * */
 double MotionState::comparePosition(const MotionState& c, const bool base_theta) const {
-  //std::cout<<"\nComparing: "<<toString()<<" and "<<c.toString();
   double result = 0; 
+
+  if(mobile_base_k_ != 2)
+    std::cout<<"\nmobile_base_k: "<<mobile_base_k_;
 
   // For each DOF, sum the (X2-X1)^2
   for(unsigned int i=0;i<positions_.size();i++) {
@@ -59,14 +61,14 @@ double MotionState::comparePosition(const MotionState& c, const bool base_theta)
     else if(i == mobile_base_k_) {
       result += pow(utility.displaceAngle(c.positions_.at(i), positions_.at(i)), 2);
     }
-    else
+    else {
       result += pow(c.positions_.at(i) - positions_.at(i), 2);
+    }
   }
 
   // Get square root to complete euclidean distance
   result = sqrt(result);
 
-  //std::cout<<"\nReturning: "<<result;
   return result;
 }
 

@@ -12,6 +12,10 @@ void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
 }
 
 
+
+
+
+
 /** Initialize the Corobot's publishers and subscibers*/
 void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle, bool simulation) {
 
@@ -29,8 +33,13 @@ void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle, bool 
   robot.sub_odometry_ = handle.subscribe(Corobot::TOPIC_STR_ODOMETRY, 1000, &Corobot::updateState, &robot);
   
   // Timers
-  robot.timer_ = handle.createTimer(ros::Duration(0.04), &Corobot::updatePublishTimer, &robot);
-}
+  robot.timer_ = handle.createTimer(ros::Duration(1.f / 5.f), &Corobot::updatePublishTimer, &robot);
+} // End init_advertisers_subscribers
+
+
+
+
+
 
 int main(int argc, char** argv) {
 

@@ -2,7 +2,7 @@
 #include "corobot.h"
 
 const std::string Corobot::TOPIC_STR_PHIDGET_MOTOR="PhidgetMotor";
-const std::string Corobot::TOPIC_STR_ODOMETRY="odom";
+const std::string Corobot::TOPIC_STR_ODOMETRY="odometry";
 const std::string Corobot::TOPIC_STR_UPDATE="update";
 const std::string Corobot::TOPIC_STR_TWIST="twist";
 const float BASE_WIDTH=0.2413;
@@ -200,6 +200,7 @@ void Corobot::calculateSpeedsAndTime () {
   // Get the starting time
   ros::Time start_time = ros::Time::now();
 
+
   // We go through all the waypoints
   for(int i=0;i<num_-1;i++) {
 
@@ -213,12 +214,23 @@ void Corobot::calculateSpeedsAndTime () {
     speeds.push_back( sqrt(pow(current.velocities.at(0),2)
                            + pow(current.velocities.at(1),2) ));
 
+    // Find which knot point is next
+    int kp, kp_prev=0;
+    for(kp=0;kp<trajectory_.index_knot_points.size();kp++) {
+      //std::cout<<"\ntrajectory_.index_knot_points.at(kp): "<<trajectory_.index_knot_points.at(kp);
+      if(i < trajectory_.index_knot_points.at(kp)) {
+        kp_prev = trajectory_.index_knot_points.at(kp-1);
+        kp = trajectory_.index_knot_points.at(kp);
+        break;
+      }
+    }
+    //std::cout<<"\ni: "<<i<<" kp: "<<kp<<"kp_prev: "<<kp_prev<<"\n";
 
     // Push on the orientation needed to move 
     // from point i to point i+1
-    //std::cout<<"\nCurrent: ("<<current.positions.at(0)<<", "<<current.positions.at(1)<<")";
-    //std::cout<<"\nNext: ("<<next.positions.at(0)<<", "<<next.positions.at(1)<<")";
-    orientations_.push_back(utility_.findAngleFromAToB(current, next));
+    //std::cout<<"\nCurrent: "<<utility_.toString(current);
+    //std::cout<<"\nNext: "<<utility_.toString(trajectory_.trajectory.points.at(kp));
+    orientations_.push_back(utility_.findAngleFromAToB(trajectory_.trajectory.points.at(kp_prev), trajectory_.trajectory.points.at(kp)));
 
     //std::cout<<"\norientation: "<<orientations_.at(i)<<"\n";
     
@@ -279,10 +291,28 @@ const bool Corobot::checkImminentCollision() const {
 const bool Corobot::checkOrientation(const int i, const bool simulation) const {
   //std::cout<<"\nIn checkOrientation";
   
+  // Find which knot point is next
+  int kp;
+  for(kp=0;kp<trajectory_.index_knot_points.size();kp++) {
+    //std::cout<<"\ntrajectory_.index_knot_points.at(kp): "<<trajectory_.index_knot_points.at(kp);
+    if(i < trajectory_.index_knot_points.at(kp)) {
+      kp = trajectory_.index_knot_points.at(kp);
+      break;
+    }
+  }
+  /*std::cout<<"\ni: "<<i<<" kp: "<<kp;
+  std::cout<<"\n"<<utility_.toString(trajectory_.trajectory.points.at(i));
+  std::cout<<"\n"<<utility_.toString(trajectory_.trajectory.points.at(kp));*/
+
+  float t_or = utility_.findAngleFromAToB(trajectory_.trajectory.points.at(i),
+                                          trajectory_.trajectory.points.at(kp));
+
+
   float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
   //std::cout<<"\nactual_theta: "<<actual_theta;
   //std::cout<<"\norientations_.at("<<i<<"): "<<orientations_.at(i)<<"\n";
-  float diff = fabs(utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(i)));
+  //float diff = fabs(utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(i)));
+  float diff = fabs(utility_.findDistanceBetweenAngles(actual_theta, t_or));
   //std::cout<<"\ndiff: "<<diff;
 
   if( (!simulation && diff > PI/12) || (simulation && diff > PI/18) ) {
@@ -304,10 +334,15 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
   ramp_msgs::KnotPoint temp2;
   temp1.motionState = motion_state_;
   temp2.motionState = motion_state_;
+  //temp2.motionState.positions.at(2) = orientations_.at(num_traveled_);
   temp2.motionState.positions.at(2) = orientations_.at(num_traveled_);
 
   tr.request.path.points.push_back(temp1);
   tr.request.path.points.push_back(temp2);
+
+
+  //std::cout<<"\nRotation path: "<<utility_.toString(tr.request.path);
+  //std::cout<<"\nTrajectory: "<<utility_.toString(trajectory_);
       
   // Send request
   if(h_traj_req_->request(tr)) {
@@ -353,7 +388,12 @@ void Corobot::moveOnTrajectoryRot(const ramp_msgs::Trajectory traj, bool simulat
       } // end if
     } // end while
   } // end for
+
+  //std::cout<<"\nLeaving moveOnTrajectoryRot\n";
 } // End moveOnTrajectory
+
+
+
 
 
 /** This method moves the robot along trajectory_ */
@@ -364,6 +404,7 @@ void Corobot::moveOnTrajectory(bool simulation) {
 
   // Execute the trajectory
   while( (num_traveled_+1) < num_) { 
+    //std::cout<<"\nnum_traveled: "<<num_traveled_<<"\n";
     restart_ = false;
     
 
@@ -380,7 +421,7 @@ void Corobot::moveOnTrajectory(bool simulation) {
       // Get rotation trajectory and move on it
       ramp_msgs::Trajectory rot_t = getRotationTrajectory();
       moveOnTrajectoryRot(rot_t, simulation);
-    
+      
       ros::spinOnce();
     } // end if   
     
@@ -397,15 +438,17 @@ void Corobot::moveOnTrajectory(bool simulation) {
     
       twist_.linear.x = speeds.at(num_traveled_);
     
-      // When driving straight, adjust the angular speed to maintain orientation
-      if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.15) {
-        //std::cout<<"\ninitial_theta_: "<<initial_theta_;
-        float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
-        float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
-        //std::cout<<"\nactual theta: "<<actual_theta;
-        //std::cout<<"\norientations_.at("<<num_traveled_<<"): "<<orientations_.at(num_traveled_);
-        //std::cout<<"\ndist: "<<dist;
-        twist_.angular.z = -1*dist;
+      if(!simulation) {
+        // When driving straight, adjust the angular speed to maintain orientation
+        if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.15) {
+          //std::cout<<"\ninitial_theta_: "<<initial_theta_;
+          float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
+          float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
+          //std::cout<<"\nactual theta: "<<actual_theta;
+          //std::cout<<"\norientations_.at("<<num_traveled_<<"): "<<orientations_.at(num_traveled_);
+          //std::cout<<"\ndist: "<<dist;
+          twist_.angular.z = -1*dist;
+        }
       }
     
       //std::cout<<"\ntwist_linear: "<<twist_.linear.x;
