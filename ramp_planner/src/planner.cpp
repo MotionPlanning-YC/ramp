@@ -337,30 +337,17 @@ void Planner::adaptPopulation(ros::Duration d) {
     d = ros::Duration(0);
   }
   else {
-    std::cout<<"\nBefore getPointAtTime\n";
     MotionState ms(bestTrajec_.getPointAtTime(controlCycle_.toSec()));
-    std::cout<<"\nAfter getPointAtTime\n";
     startPlanning_ = ms;
   }
 
   
-  if(startPlanning_.positions_.size() < 3 ||
-     startPlanning_.velocities_.size() < 3 ||
-     startPlanning_.accelerations_.size() < 3 )
-  {
-    std::cout<<"\nCC, AP: startPlanning: "<<startPlanning_.toString()<<"\n";
-  }
-  
-  
-  std::cout<<"\nBefore adaptPaths\n";
   // Update the paths with the new starting configuration 
   adaptPaths(startPlanning_, d*2);
-  std::cout<<"\nAfter adaptPaths\n";
 
   // Create the vector to hold updated trajectories
   std::vector<RampTrajectory> updatedTrajecs;
 
-  std::cout<<"\nBefore new trajectories\n";
   // For each path, get a trajectory
   for(unsigned int i=0;i<paths_.size();i++) {
 
@@ -379,7 +366,6 @@ void Planner::adaptPopulation(ros::Duration d) {
       updatedTrajecs.push_back(temp);
     } // end if
   } // end for
-  std::cout<<"\nAfter new trajectories\n";
 
   // Replace the population's trajectories_ with the updated trajectories
   population_.replaceAll(updatedTrajecs);
@@ -409,29 +395,9 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     // Update starting state of motion
     start_ = latestUpdate_;
 
-    if(latestUpdate_.positions_.size() < 3 ||
-       latestUpdate_.velocities_.size() < 3 ||
-       latestUpdate_.accelerations_.size() < 3 )
-    {
-      std::cout<<"\nCC: latestUpdate: "<<latestUpdate_.toString()<<"\n";
-    }
-
     // Update the population 
     adaptPopulation(controlCycle_);
 
-    if(start_.positions_.size() < 3 ||
-       start_.velocities_.size() < 3 ||
-       start_.accelerations_.size() < 3 ) 
-    {
-      std::cout<<"\nCC: start_: "<<start_.toString()<<"\n";
-    }
-
-    if(startPlanning_.positions_.size() < 3 ||
-       startPlanning_.velocities_.size() < 3 ||
-       startPlanning_.accelerations_.size() < 3 ) 
-    {
-      std::cout<<"\nCC: startPlanning: "<<startPlanning_.toString()<<"\n";
-    }
 
     // Evaluate P(t) and obtain best T, T_move=T_best
     bestTrajec_ = evaluateAndObtainBest();
@@ -554,9 +520,6 @@ const RampTrajectory Planner::getChangingTrajectory() const {
     RampTrajectory toSend;
     toSend.msg_trajec_ = tr.response.trajectory;
 
-    if(toSend.msg_trajec_.trajectory.points.size() < 2) {
-      std::cout<<"\nGCT: toSend.size(): "<<toSend.msg_trajec_.trajectory.points.size()<<"\n";
-    }
 
     return toSend;
 } 
@@ -656,10 +619,6 @@ void Planner::modification() {
   // and update the planner and the modifier on the new paths
   for(unsigned int i=0;i<mod_trajec.size();i++) {
 
-    if(mod_trajec.at(i).msg_trajec_.trajectory.points.size() < 2) {
-      std::cout<<"\nPC, MOD: mod_trajec.size(): "<<mod_trajec.at(i).msg_trajec_.trajectory.points.size()<<"\n";
-    }
-
     // Evaluate the new trajectory
     evaluateTrajectory(mod_trajec.at(i));
     
@@ -679,14 +638,11 @@ void Planner::modification() {
 
   // If the best trajectory has changed and the control cycles have started
   if(index != i_best_prev_ && startPlanning_.positions_.size() > 0) {
-    std::cout<<"\nBest has changed! best: "<<index<<" i_best_prev_: "<<i_best_prev_<<"\n";
-
   
     // Set index of previous best
     i_best_prev_ = index;
   
     RampTrajectory toSend = getChangingTrajectory();
-    std::cout<<"\nAfter getChangingTrajectory\n";
 
     //std::cout<<"\nSending Trajectory: "<<toSend.toString();
     h_control_->send(toSend.msg_trajec_); 
@@ -910,10 +866,6 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   // Find the best trajectory
   int index = population_.findBest();
   i_best_prev_ = index;
-
-  if(population_.size() < index+1) {
-    std::cout<<"\npopulation.size(): "<<population_.size()<<" index: "<<index<<"\n";
-  }
 
   // Return the trajectory
   return population_.get(index);
