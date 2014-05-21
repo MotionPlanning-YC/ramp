@@ -40,6 +40,8 @@ class Planner {
 
     // Starting motion state for planning cycle
     MotionState startPlanning_;
+
+    MotionState latestUpdate_;
     
     
     // The most fit trajectory in the population
@@ -165,6 +167,7 @@ class Planner {
           void updateWithModifier(const int index, const Path p)  ;
           void checkTrajChange()                                  ;
           void seedPopulation()                                   ;
+    const RampTrajectory getChangingTrajectory() const;
 
 
 
@@ -193,7 +196,13 @@ class Planner {
 
     // Distance threshold for imminent collision
     float               D_;
-    
+
+    // Index of previous best trajectory
+    unsigned int        i_best_prev_;
+
+
+    bool                init_evaluation_;
+
     // Handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
     EvaluationRequestHandler*   h_eval_req_;

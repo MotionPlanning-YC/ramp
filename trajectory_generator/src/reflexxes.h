@@ -35,9 +35,6 @@ private:
   Utility utility;
   ramp_msgs::Path path;
   ros::Duration time_from_start;
- 
-  // Compute the orientation needed to reach the target, given an initial position
-  float computeOrientationNeededToGoal();
 
   // Execute one iteration of the Reflexxes control function
   trajectory_msgs::JointTrajectoryPoint spinOnce();
@@ -52,7 +49,7 @@ private:
   void setInitialConditions();
 
   // Compute the orientation needed to reach the target, given an initial position
-  float computeTargetOrientation(float initial_x, float intial_y, float target_x, float target_y);
+  double computeTargetOrientation(double initial_x, double intial_y, double target_x, double target_y);
   
   // Methods to build a trajectory point
   const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionOutputParameters outputParameters);

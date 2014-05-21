@@ -1,18 +1,22 @@
 #include "population.h"
 
-Population::Population() : maxSize_(2), i_best_(-1), i_best_prev_(-1) {}
+Population::Population() : i_best_(-1), maxSize_(3), changed_(false) {}
 
-Population::Population(const unsigned int size) : maxSize_(size), i_best_(-1), i_best_prev_(-1) {}
+Population::Population(const unsigned int size) : i_best_(-1), maxSize_(size), changed_(false) {}
 
 
 /** Return the size of the population */
 const unsigned int Population::size() const { return population_.size(); }
 
-void Population::clear() { population_.clear(); }
+void Population::clear() { 
+  population_.clear(); 
+  changed_ = true;
+}
 
 const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
   if(new_pop.size() == population_.size()) {
     population_ = new_pop;
+    changed_ = true;
     return true;
   }
   
@@ -20,9 +24,10 @@ const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
 }
 
 /** This method adds a trajectory to the population. 
- *  If the population is full, a random trajectory (that isn't the best one) is replaced.
+ *  If the population is full, a random trajectory (that isn't the best one) is replaced
  *  Returns the index that the trajectory is added at */
 const unsigned int Population::add(const RampTrajectory rt) {
+  changed_ = true;
  
   //If not full, simply push back
   if(population_.size() < maxSize_) {
@@ -51,16 +56,15 @@ const unsigned int Population::add(const RampTrajectory rt) {
 
 
 
-const bool Population::checkIfChange() const {
-  std::cout<<"\ni_best_prev_: "<<i_best_prev_<<" i_best: "<<i_best_;
-  return (i_best_ != i_best_prev_);
-}
-
-
-
 /** Returns the fittest trajectory and sets i_best_ */
-const RampTrajectory Population::findBest() {
+const unsigned int Population::findBest() {
   //std::cout<<"\nIn findBest\n";
+  
+  // If population has not changed since last
+  // findBest call, return without searching
+  if(!changed_) {
+    return i_best_;
+  }
   
   // Find the index of the trajectory with the highest fitness value
   unsigned int i_max = 0;
@@ -72,13 +76,20 @@ const RampTrajectory Population::findBest() {
 
 
   // Set i_best_
-  if(i_max != i_best_) {
-    i_best_prev_ = i_best_;
-  }
   i_best_ = i_max;
 
-  return population_.at(i_best_); 
-} //End getBest 
+  // Set changed 
+  changed_ = false;
+
+  return i_best_; 
+} //End findBest 
+
+
+/** This method returns the trajectory at index i */
+RampTrajectory& Population::get(const unsigned int i) {
+  return population_.at(i);
+} // End get
+
 
 
 
@@ -114,12 +125,12 @@ const std::string Population::toString() const {
 //Return a message of type ramp_msgs::Population to be sent to the trajectory viewer 
 ramp_msgs::Population Population::populationMsg()
 {
-    ramp_msgs::Population msg;
-    
-    for( int i =0; i<population_.size(); i++) {
-      msg.population.push_back(population_.at(i).msg_trajec_);
-    }
-    
-    msg.best_id = i_best_;
-    return msg;
+  ramp_msgs::Population msg;
+  
+  for(int i=0; i<population_.size(); i++) {
+    msg.population.push_back(population_.at(i).msg_trajec_);
+  }
+  
+  msg.best_id = i_best_;
+  return msg;
 }

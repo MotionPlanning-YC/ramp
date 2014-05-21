@@ -13,9 +13,9 @@ class MotionState {
     /***** Data Members *****/
     // Motion vectors
     std::vector<float> positions_;
-    std::vector<float> velocities_;
-    std::vector<float> accelerations_;
-    std::vector<float> jerks_;
+    std::vector<double> velocities_;
+    std::vector<double> accelerations_;
+    std::vector<double> jerks_;
 
     // Time
     double time_;
@@ -27,6 +27,8 @@ class MotionState {
     
     const   ramp_msgs::MotionState buildMotionStateMsg() const;
     const   std::string toString() const;
+
+    
 
   private:
     

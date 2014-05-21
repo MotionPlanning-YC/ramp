@@ -1,7 +1,3 @@
-# simple.world - basic world file example
-# Authors: Richard Vaughan
-# $Id$
-
 #include "map.inc"
 
 # time to pause (in GUI mode) or quit (in headless mode (-g)) the simulation
@@ -56,7 +52,7 @@ window
 corobot
 (		  
   name "r0"
-  pose [ 0 0 0 0 ] 
+  pose [ 3.5 2 0 180 ] 
 
   #size [1 1 0.5]
 )

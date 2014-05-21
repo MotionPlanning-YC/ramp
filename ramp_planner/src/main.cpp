@@ -125,6 +125,7 @@ void loadParameters(const ros::NodeHandle handle) {
 
 
 int main(int argc, char** argv) {
+  std::cout<<"\nutility.findDistanceBetweenAngles(3pi/4, -3pi/4): "<<utility.findDistanceBetweenAngles(3*PI/4, -3*PI/4);
   srand( time(0));
 
   ros::init(argc, argv, "ramp_planner");

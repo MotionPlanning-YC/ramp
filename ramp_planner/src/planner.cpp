@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(2), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
+Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(3), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), init_evaluation_(false), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
 {
   controlCycle_ = ros::Duration(1.f / 10.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
@@ -72,30 +72,40 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
 
 
 /** 
- * Sets start_ member by taking in the latest update 
- * and transforming it by T_base_w because 
+ * Sets the latest update member
+ * and transformes it by T_base_w because 
  * updates are relative to odometry frame
  * */
 void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
   //std::cout<<"\nReceived update!\n";
 
-  start_ = msg;
+  latestUpdate_ = msg;
+  
+  if(msg.positions.size() < 3 ||
+     msg.velocities.size() < 3 ||
+     msg.accelerations.size() < 3 )
+  { 
+    // Log Error
+  }
+  if(latestUpdate_.positions_.size() < 3 ||
+     latestUpdate_.velocities_.size() < 3 ||
+     latestUpdate_.accelerations_.size() < 3)
+  { 
+    // Log Error
+  }
 
   // Transform configuration from odometry to world coordinates
-  start_.transformBase(T_base_w_);
+  latestUpdate_.transformBase(T_base_w_);
 
   // Set proper velocity values
-  start_.velocities_.at(0) = msg.velocities.at(0) * cos(start_.positions_.at(2));
-  start_.velocities_.at(1) = msg.velocities.at(0) * sin(start_.positions_.at(2));
+  latestUpdate_.velocities_.at(0) = msg.velocities.at(0) * cos(latestUpdate_.positions_.at(2));
+  latestUpdate_.velocities_.at(1) = msg.velocities.at(0) * sin(latestUpdate_.positions_.at(2));
 
   // Set proper acceleration values
-  start_.accelerations_.at(0) = msg.accelerations.at(0) * cos(start_.positions_.at(2));
-  start_.accelerations_.at(1) = msg.accelerations.at(0) * sin(start_.positions_.at(2));
+  latestUpdate_.accelerations_.at(0) = msg.accelerations.at(0) * cos(latestUpdate_.positions_.at(2));
+  latestUpdate_.accelerations_.at(1) = msg.accelerations.at(0) * sin(latestUpdate_.positions_.at(2));
 
-
-  //std::cout<<"\nstart_: "<<start_.toString();
-  //std::cout<<"\nstartPlanning_: "<<startPlanning_.toString();
-
+  //std::cout<<"\nlatestUpdate: "<<latestUpdate_.toString()<<"\n";
 } // End updateCallback
 
 
@@ -231,81 +241,6 @@ void Planner::seedPopulation() {
 
 
 
-void Planner::planningCycleCallback(const ros::TimerEvent&) {
-  //std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
-  
-  // Call modification
-  modification();
-  
-  //std::cout<<"\nAfter generation "<<generation_<<", population: "<<population_.fitnessFeasibleToString();
-  //std::cout<<"\nBest: "<<bestTrajec_.toString();
-  
-  // t=t+1
-  generation_++;
-
-
-  // At generation 250, create a straight-line trajectory
-  // and add it to the population 
-  if(generation_ == 200) {
-    MotionState s = startPlanning_;
-    for(int i=0;i<s.velocities_.size();i++) {
-      s.velocities_.at(i) = 0;
-    }
-    
-    Path p(startPlanning_, goal_); 
-    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
-
-    h_traj_req_->request(tr);
-
-    RampTrajectory toAdd(resolutionRate_, getIRT());
-    toAdd.msg_trajec_ = tr.response.trajectory;
-    toAdd.path_ = p;
-
-    int index = population_.add(toAdd);
-    //std::cout<<"\nAdding new trajectory: "<<toAdd.toString();
-
-   // std::cout<<"\nPopulation: "<<population_.fitnessFeasibleToString();
-
-    evaluateTrajectory(toAdd);
-    //sendPopulation();
-    updateWithModifier(index, toAdd.path_);
-    
-  }
-
-  if( (generation_-1) % 50 == 0) {
-    std::cout<<"\nPlanning cycle "<<generation_-1<<" complete\n";
-  }
-} // End planningCycleCallback
-
-
-
-
-
-
-/* This method returns a trajectory to gradually move into a new trajectory */
-void Planner::gradualTrajectory(RampTrajectory& t) {
-
-  // Find where linear velocity starts
-  int i=0;
-  while(t.msg_trajec_.trajectory.points.at(i).velocities.at(0) == 0 &&
-        t.msg_trajec_.trajectory.points.at(i).velocities.at(1) == 0 &&
-        i < t.msg_trajec_.trajectory.points.size()) {i++;}
-
-  // If i is in the trajectory (it won't be if rotation-only) 
-  if( i < t.msg_trajec_.trajectory.points.size()) {
-
-    // Get the point
-    trajectory_msgs::JointTrajectoryPoint p = t.msg_trajec_.trajectory.points.at(i);
-
-    // Set the linear velocities to be the same as p
-    for(unsigned int j=0;j<i;j++) {
-      t.msg_trajec_.trajectory.points.at(j).velocities.at(0) = p.velocities.at(0);
-      t.msg_trajec_.trajectory.points.at(j).velocities.at(1) = p.velocities.at(1);
-    } //end for
-  } //end if i in range
-} // End gradualTrajectory
-
-
 
 /** This method updates all the paths with the current configuration */
 void Planner::adaptPaths(MotionState start, ros::Duration dur) {
@@ -315,16 +250,16 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
   if(dur.toSec() > 0) {
 
     // For each trajectory
-    for(unsigned int i=0;i<population_.population_.size();i++) {
+    for(unsigned int i=0;i<population_.size();i++) {
 
       // Track how many knot points we get rid of
       unsigned int throwaway=0;
 
       // For each knot point,
-      for(unsigned int i_kp=0;i_kp<population_.population_.at(i).msg_trajec_.index_knot_points.size();i_kp++) {
+      for(unsigned int i_kp=0;i_kp<population_.get(i).msg_trajec_.index_knot_points.size();i_kp++) {
        
         // Get the knot point 
-        trajectory_msgs::JointTrajectoryPoint point = population_.population_.at(i).msg_trajec_.trajectory.points.at( population_.population_.at(i).msg_trajec_.index_knot_points.at(i_kp));
+        trajectory_msgs::JointTrajectoryPoint point = population_.get(i).msg_trajec_.trajectory.points.at( population_.get(i).msg_trajec_.index_knot_points.at(i_kp));
         // std::cout<<"\npoint["<<i<<"].time_from_start:"<<point.time_from_start;
 
         // Compare the durations
@@ -365,6 +300,8 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
 
 
 const bool Planner::checkOrientation() const {
+  //std::cout<<"\nEntering checkOrientation\n";
+  
   float actual_theta = start_.positions_.at(2);
   //std::cout<<"\nactual_theta: "<<actual_theta;
   //std::cout<<"\norientations_.at("<<i<<"): "<<orientations_.at(i)<<"\n";
@@ -373,12 +310,16 @@ const bool Planner::checkOrientation() const {
   float t = utility_.findAngleFromAToB(bestTrajec_.msg_trajec_.trajectory.points.at(0),
                                        bestTrajec_.msg_trajec_.trajectory.points.at(i2));
 
+  if(t == 0 && utility_.getEuclideanDist(bestTrajec_.msg_trajec_.trajectory.points.at(0).positions, 
+        bestTrajec_.msg_trajec_.trajectory.points.at(i2).positions) < 0.0001f) 
+  {
+    return true;
+  }
+
   float diff = fabs(utility_.findDistanceBetweenAngles(actual_theta, t));
-  /*std::cout<<"\ndiff: "<<diff<<" actual_theta: "<<actual_theta<<" t: "<<t;
-  std::cout<<"\nbestTrajec_.msg_trajec_.trajectory.points.at(0): "<<utility_.toString(bestTrajec_.msg_trajec_.trajectory.points.at(0));
-  std::cout<<"\nbestTrajec_.msg_trajec_.trajectory.points.at("<<i2<<"): "<<utility_.toString(bestTrajec_.msg_trajec_.trajectory.points.at(i2));*/
-  
-  return (diff <= PI/12.);
+  //std::cout<<"\ndiff: "<<diff<<" actual_theta: "<<actual_theta<<" t: "<<t;
+
+  return (diff <= PI/36.f);
 }
 
 
@@ -392,22 +333,34 @@ void Planner::adaptPopulation(ros::Duration d) {
   // Check if the robot will be moving ahead
   // if not satisfied, the robot won't be moving
   if(!checkOrientation()) {
-    //std::cout<<"\nOrientation not satisfied, startPlanning_ = "<<start_.toString();
     startPlanning_ = start_;
     d = ros::Duration(0);
   }
   else {
+    std::cout<<"\nBefore getPointAtTime\n";
     MotionState ms(bestTrajec_.getPointAtTime(controlCycle_.toSec()));
-    //std::cout<<"\nbestTrajec_.getPointAtTime(controlCycle_.toSec()): "<<utility_.toString(bestTrajec_.getPointAtTime(controlCycle_.toSec()));
+    std::cout<<"\nAfter getPointAtTime\n";
     startPlanning_ = ms;
   }
+
   
+  if(startPlanning_.positions_.size() < 3 ||
+     startPlanning_.velocities_.size() < 3 ||
+     startPlanning_.accelerations_.size() < 3 )
+  {
+    std::cout<<"\nCC, AP: startPlanning: "<<startPlanning_.toString()<<"\n";
+  }
+  
+  
+  std::cout<<"\nBefore adaptPaths\n";
   // Update the paths with the new starting configuration 
   adaptPaths(startPlanning_, d*2);
+  std::cout<<"\nAfter adaptPaths\n";
 
   // Create the vector to hold updated trajectories
   std::vector<RampTrajectory> updatedTrajecs;
 
+  std::cout<<"\nBefore new trajectories\n";
   // For each path, get a trajectory
   for(unsigned int i=0;i<paths_.size();i++) {
 
@@ -416,7 +369,7 @@ void Planner::adaptPopulation(ros::Duration d) {
     
     // Send the request 
     if(requestTrajectory(msg_request)) {
-      RampTrajectory temp(resolutionRate_, population_.population_.at(i).id_);
+      RampTrajectory temp(resolutionRate_, population_.get(i).id_);
       
       // Set the Trajectory msg and the path
       temp.msg_trajec_  = msg_request.response.trajectory;
@@ -426,12 +379,14 @@ void Planner::adaptPopulation(ros::Duration d) {
       updatedTrajecs.push_back(temp);
     } // end if
   } // end for
+  std::cout<<"\nAfter new trajectories\n";
 
   // Replace the population's trajectories_ with the updated trajectories
   population_.replaceAll(updatedTrajecs);
 
   //std::cout<<"\nLeaving updatePopulation\n";
-} // End updatePopulation
+} // End adaptPopulation
+
 
 
 
@@ -444,34 +399,47 @@ void Planner::adaptPopulation(ros::Duration d) {
 void Planner::controlCycleCallback(const ros::TimerEvent&) {
   //std::cout<<"\nControl cycle occurring\n";
   
-  // Update the population 
-  adaptPopulation(controlCycle_);
-
+  
   /** TODO **/
   // Create subpopulations in P(t)
 
 
   if(!stop_) {
-  // Evaluate P(t) and obtain best T, T_move=T_best
-  bestTrajec_ = evaluateAndObtainBest();
+    
+    // Update starting state of motion
+    start_ = latestUpdate_;
+
+    if(latestUpdate_.positions_.size() < 3 ||
+       latestUpdate_.velocities_.size() < 3 ||
+       latestUpdate_.accelerations_.size() < 3 )
+    {
+      std::cout<<"\nCC: latestUpdate: "<<latestUpdate_.toString()<<"\n";
+    }
+
+    // Update the population 
+    adaptPopulation(controlCycle_);
+
+    if(start_.positions_.size() < 3 ||
+       start_.velocities_.size() < 3 ||
+       start_.accelerations_.size() < 3 ) 
+    {
+      std::cout<<"\nCC: start_: "<<start_.toString()<<"\n";
+    }
+
+    if(startPlanning_.positions_.size() < 3 ||
+       startPlanning_.velocities_.size() < 3 ||
+       startPlanning_.accelerations_.size() < 3 ) 
+    {
+      std::cout<<"\nCC: startPlanning: "<<startPlanning_.toString()<<"\n";
+    }
+
+    // Evaluate P(t) and obtain best T, T_move=T_best
+    bestTrajec_ = evaluateAndObtainBest();
 
 
-  // Find orientation difference between the old and new trajectory 
-  float b = utility_.findAngleFromAToB(start_.positions_, 
-                bestTrajec_.path_.all_.at(1).motionState_.positions_);
-  float diff = utility_.findDistanceBetweenAngles(
-                start_.positions_.at(2), b);
-  
 
-  // If difference < 30 degrees
-  // Make the trajectory a gradual change
-  if(fabs(diff) <= 0.52356f) {
-    gradualTrajectory(bestTrajec_);
-  }
-  
-
-  // Send the best trajectory 
-  sendBest();
+    // Send the best trajectory 
+    sendBest();
   } 
   
   //std::cout<<"\nControl cycle complete\n";
@@ -483,7 +451,11 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
 
 
 
-/** This function generates the initial population of trajectories */
+/** 
+ * This function generates the initial population of trajectories,
+ *  sets the paths in the Modifier class
+ *  and evaluates the population
+ **/
 void Planner::initPopulation() { 
   
   // Create n random paths, where n=populationSize
@@ -546,8 +518,48 @@ void Planner::initPopulation() {
 
   // Update the modifier
   modifier_->updateAll(paths_);
+
+  // Evaluate the population 
+  bestTrajec_ = evaluateAndObtainBest();
 } // End init_population
 
+
+
+
+const RampTrajectory Planner::getChangingTrajectory() const {
+    // Make a new Trajectory to stop the robot
+    // Current state of motion
+    // startPlanning position, 0 velocity
+    MotionState ms = startPlanning_;
+
+    /*std::cout<<"\nms: "<<ms.toString();
+    std::cout<<"\nstart: "<<start_.toString();
+    std::cout<<"\nstartPlanning_: "<<startPlanning_.toString();
+    std::cout<<"\nlatestUpdate_: "<<latestUpdate_.toString();*/
+    
+    // Set v and a
+    for(int i=0;i<ms.positions_.size();i++) {
+      ms.velocities_.at(i) = 0;
+      ms.accelerations_.at(i) = 0;
+    }
+
+    // Should we use latestUpdate_?
+    Path p(start_, ms);
+    //std::cout<<"\nPath p: "<<p.toString();
+
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
+
+    h_traj_req_->request(tr);
+
+    RampTrajectory toSend;
+    toSend.msg_trajec_ = tr.response.trajectory;
+
+    if(toSend.msg_trajec_.trajectory.points.size() < 2) {
+      std::cout<<"\nGCT: toSend.size(): "<<toSend.msg_trajec_.trajectory.points.size()<<"\n";
+    }
+
+    return toSend;
+} 
 
 
 
@@ -638,63 +650,49 @@ void Planner::updateWithModifier(const int index, const Path path) {
 void Planner::modification() {
 
   // Modify 1 or more trajectories
-  /*std::vector<ModifiedTrajectory> mod_trajec = modifyTrajec();
+  std::vector<RampTrajectory> mod_trajec = modifyTrajec();
   
   // Evaluate and add the modified trajectories to the population
   // and update the planner and the modifier on the new paths
   for(unsigned int i=0;i<mod_trajec.size();i++) {
 
+    if(mod_trajec.at(i).msg_trajec_.trajectory.points.size() < 2) {
+      std::cout<<"\nPC, MOD: mod_trajec.size(): "<<mod_trajec.at(i).msg_trajec_.trajectory.points.size()<<"\n";
+    }
+
     // Evaluate the new trajectory
-    evaluateTrajectory(mod_trajec.at(i).trajec_);
+    evaluateTrajectory(mod_trajec.at(i));
     
     // Add the new trajectory to the population
     // Index is where the trajectory was added in the population (may replace another)
-    int index = population_.add(mod_trajec.at(i).trajec_);
+    int index = population_.add(mod_trajec.at(i));
 
     // Update the path in the planner and the modifier
-    updateWithModifier(index, mod_trajec.at(i).trajec_.path_);
+    updateWithModifier(index, mod_trajec.at(i).path_);
   } // end for*/
   
-  // Obtain and set best trajectory
-  bestTrajec_ = population_.findBest();
+  // After adding new trajectories to population,
+  // get the best trajectory
+  int index = population_.findBest();
+  bestTrajec_ = population_.get(index);
 
 
-  // Check if the best trajectory changed
-  if(generation_ == 200 && population_.checkIfChange()) {
-    std::cout<<"\nBest has changed!";
+  // If the best trajectory has changed and the control cycles have started
+  if(index != i_best_prev_ && startPlanning_.positions_.size() > 0) {
+    std::cout<<"\nBest has changed! best: "<<index<<" i_best_prev_: "<<i_best_prev_<<"\n";
+
   
-    // Make a new Trajectory to stop the robot
-    // Current state of motion
-    // startPlanning position, 0 velocity
-    MotionState ms(bestTrajec_.getPointAtTime(controlCycle_.toSec()));
-    startPlanning_ = ms;
-    std::cout<<"\nstart: "<<start_.toString();
-    std::cout<<"\nstartPlanning_: "<<startPlanning_.toString();
-    std::cout<<"\nbestTrajec: "<<bestTrajec_.toString();
+    // Set index of previous best
+    i_best_prev_ = index;
+  
+    RampTrajectory toSend = getChangingTrajectory();
+    std::cout<<"\nAfter getChangingTrajectory\n";
 
-    MotionState temp;
-    temp.positions_ = startPlanning_.positions_; 
-    // Set v and a
-    for(int i=0;i<temp.positions_.size();i++) {
-      temp.velocities_.push_back(0);
-      temp.accelerations_.push_back(0);
-    }
-
-    Path p(start_, temp);
-    std::cout<<"\nPath p: "<<p.toString();
-
-    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
-
-    h_traj_req_->request(tr);
-
-    RampTrajectory toSend(getIRT(), resolutionRate_);
-    toSend.msg_trajec_ = tr.response.trajectory;
-
-    std::cout<<"\nSending Trajectory: "<<toSend.toString();
+    //std::cout<<"\nSending Trajectory: "<<toSend.toString();
     h_control_->send(toSend.msg_trajec_); 
 
      // Make population only contain the preparation trajectory 
-    Population temp_pop = population_;
+    /*Population temp_pop = population_;
     population_.clear();
     population_.add(toSend);
     sendPopulation();
@@ -709,13 +707,68 @@ void Planner::modification() {
     std::cin.get();
     stop_=false;
 
-    population_ = temp_pop;
+    population_ = temp_pop;*/
   } // end if
 
   
   // Send the new population to the trajectory viewer
   sendPopulation();
 } // End modification
+
+
+
+void Planner::planningCycleCallback(const ros::TimerEvent&) {
+  //std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
+  
+  //std::cout<<"\nAfter generation "<<generation_<<", population: "<<population_.fitnessFeasibleToString();
+  //std::cout<<"\nBest: "<<bestTrajec_.toString();
+
+
+  // At generation 250, create a straight-line trajectory
+  // and add it to the population 
+  /*if(generation_ == 200) {
+    std::cout<<"\nstartPlanning at time of creating new trajectory: "<<startPlanning_.toString();
+    MotionState s = startPlanning_;
+    for(int i=0;i<s.velocities_.size();i++) {
+      s.velocities_.at(i) = 0;
+    }
+    
+    Path p(startPlanning_, goal_); 
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
+
+    h_traj_req_->request(tr);
+
+    RampTrajectory toAdd(resolutionRate_, getIRT());
+    toAdd.msg_trajec_ = tr.response.trajectory;
+    toAdd.path_ = p;
+
+    int index = population_.add(toAdd);
+    //std::cout<<"\nAdding new trajectory: "<<toAdd.toString();
+
+   // std::cout<<"\nPopulation: "<<population_.fitnessFeasibleToString();
+
+    evaluateTrajectory(toAdd);
+    //sendPopulation();
+    updateWithModifier(index, toAdd.path_);
+    
+  }*/
+
+  
+  //std::cout<<"\nBefore modification\n";
+  // Call modification
+  modification();
+  //std::cout<<"\nAfter modification\n";
+  
+  // t=t+1
+  generation_++;
+  
+  if( (generation_-1) % 50 == 0) {
+    std::cout<<"\nPlanning cycle "<<generation_-1<<" complete\n";
+  }
+} // End planningCycleCallback
+
+
+
 
 
 
@@ -751,7 +804,7 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const unsigne
 const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const unsigned int i_trajec) {
   ramp_msgs::EvaluationRequest result;
 
-  result.request.trajectory = population_.population_.at(i_trajec).msg_trajec_;
+  result.request.trajectory = population_.get(i_trajec).msg_trajec_;
 
   return result;
 } // End buildEvaluationRequest
@@ -784,17 +837,12 @@ void Planner::sendBest() {
   // Stop the robot by sending a blank trajectory
   if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < 2.f)) {
     std::cout<<"\nCollision within 2 seconds! Stopping robot!\n";
-    ramp_msgs::Trajectory blank;
-    h_control_->send(blank); 
   }
   else if(!bestTrajec_.feasible_) {
     std::cout<<"\nBest trajectory is not feasible! Time until collision: "<<bestTrajec_.time_until_collision_;
-    h_control_->send(bestTrajec_.msg_trajec_);
   }
-  else {
-    //std::cout<<"\nSending Trajectory: \n"<<bestTrajec_.toString();
-    h_control_->send(bestTrajec_.msg_trajec_);
-  }
+  
+  h_control_->send(bestTrajec_.msg_trajec_);
 } // End sendBest
 
 
@@ -836,12 +884,19 @@ void Planner::evaluateTrajectory(RampTrajectory& trajec) {
 } // End evaluateTrajectory
 
 
+
+/** 
+ * This method evaluates each trajectory in the population
+ * It also sete i_best_prev_
+ **/
 void Planner::evaluatePopulation() {
   
   // Go through each trajectory in the population and evaluate it
-  for(unsigned int i=0;i<population_.population_.size();i++) {
-    evaluateTrajectory(population_.population_.at(i));
+  for(unsigned int i=0;i<population_.size();i++) {
+    evaluateTrajectory(population_.get(i));
   } // end for   
+
+  i_best_prev_ = population_.findBest();
 } // End evaluatePopulation
 
 
@@ -849,8 +904,19 @@ void Planner::evaluatePopulation() {
 
 /** This method calls evaluatePopulation and population_.getBest() */
 const RampTrajectory Planner::evaluateAndObtainBest() {
+  // Evaluate population
   evaluatePopulation();
-  return population_.findBest();
+  
+  // Find the best trajectory
+  int index = population_.findBest();
+  i_best_prev_ = index;
+
+  if(population_.size() < index+1) {
+    std::cout<<"\npopulation.size(): "<<population_.size()<<" index: "<<index<<"\n";
+  }
+
+  // Return the trajectory
+  return population_.get(index);
 }
 
 
@@ -881,7 +947,7 @@ const std::string Planner::pathsToString() const {
   
   // initialize population
   initPopulation();
-  seedPopulation();
+  //seedPopulation();
 
   /*std::cout<<"\nPopulation initialized!\n";
   std::cout<<"\npaths_.size(): "<<paths_.size()<<"\n";
@@ -892,13 +958,6 @@ const std::string Planner::pathsToString() const {
   // std::cout<<"\nPress enter to continue\n";
   // std::cin.get();
 
-
-  // Initialize the modifier
-  modifier_->paths_ = paths_;
-
-
-  // Evaluate the population and get the initial trajectory to move on
-  bestTrajec_ = evaluateAndObtainBest();
   sendPopulation();
   //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n\n"; 
   // std::cout<<"\nPress enter to start the loop!\n";
@@ -922,21 +981,27 @@ const std::string Planner::pathsToString() const {
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
   goalThreshold_ = 0.15;
-  while( (start_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) {
+  while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) {
     ros::spinOnce(); 
   } // end while
-  
-  std::cout<<"\nPlanning complete!";
-  std::cout<<"\nLatest pose: "<<start_.toString()<<"\n";
+  std::cout<<"\nOutside while\n";
   
   // Stop timer
   controlCycleTimer_.stop();
   planningCycleTimer_.stop();
   imminentCollisionTimer_.stop();
 
+  
   // Send an empty trajectory
   ramp_msgs::Trajectory empty;
   h_control_->send(empty);
+  
+  std::cout<<"\nPlanning complete!";
+  std::cout<<"\nLatest update: "<<latestUpdate_.toString();
+  std::cout<<"\nLatest start: "<<start_.toString();
+  std::cout<<"\nLatest startPlanning_: "<<startPlanning_.toString();
+  //std::cout<<"\nbestTrajec: "<<bestTrajec_.toString()<<"\n";
+  
 
   //std::cout<<"\nFinal population: ";
   //std::cout<<"\n"<<pathsToString(); 

@@ -44,13 +44,13 @@
 
 <group ns="$(arg robot_0_name)"> 
   <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="screen"> 
-    <param name="other_robot_odom" type="str" value="/$(arg robot_1_name)/odom" />  
+    <param name="other_robot_odom" type="str" value="/$(arg robot_1_name)/odometry" />  
   </node> 
 </group> 
 
 <group ns="$(arg robot_1_name)"> 
    <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="screen">  
-     <param name="other_robot_odom" type="str" value="/$(arg robot_0_name)/odom" /> 
+     <param name="other_robot_odom" type="str" value="/$(arg robot_0_name)/odometry" /> 
    </node> 
 </group> 
 
@@ -77,7 +77,7 @@
 
 <group ns="$(arg robot_0_name)" >
   <node name="ramp_control" pkg="ramp_control" type="ramp_control" output="screen" /> 
-    <remap from="robot_0/odometry" to="odom" />
+<!--    <remap from="robot_0/odometry" to="robot_0/odom" /> -->
     <param name="orientation" type="double" value="3.14159" />
     <param name="ramp_control/simulation" value="true" />
 </group> 
@@ -85,13 +85,16 @@
 
 <group ns="$(arg robot_1_name)"> 
   <node name="ramp_control" pkg="ramp_control" type="ramp_control" /> 
-    <remap from="robot_1/odometry" to="robot_1/odom" />
+    <!-- <remap from="/robot_0/odometry" to="/robot_0/odom" /> -->
     <param name="orientation" type="double" value="0" />
     <param name="ramp_control/simulation" value="true" />
 </group> 
 
 
 <!-- Simulation -->
-<node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/world/test1.world" />
+<node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/world/test1.world" >
+  <remap from="/robot_0/odom" to="/robot_0/odometry" />
+  <remap from="/robot_1/odom" to="/robot_1/odometry" />
+</node>
 
 </launch>

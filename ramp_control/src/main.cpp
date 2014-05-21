@@ -33,7 +33,7 @@ void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle, bool 
   robot.sub_odometry_ = handle.subscribe(Corobot::TOPIC_STR_ODOMETRY, 1000, &Corobot::updateState, &robot);
   
   // Timers
-  robot.timer_ = handle.createTimer(ros::Duration(1.f / 5.f), &Corobot::updatePublishTimer, &robot);
+  robot.timer_ = handle.createTimer(ros::Duration(1.f / 25.f), &Corobot::updatePublishTimer, &robot);
 } // End init_advertisers_subscribers
 
 
@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
   ros::NodeHandle handle;  
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
   
-  handle.param("orientation", robot.initial_theta_, 0.);
+  handle.param("orientation", robot.initial_theta_, 3.14159);
   std::cout<<"\nrobot.orientation: "<<robot.initial_theta_;
   
   bool sim=false;

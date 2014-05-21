@@ -88,10 +88,10 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
 {
   //std::cout<<"\n\nReceived Population!";
 
-  populations_.clear();
-  populations_.push_back(msg);
+  //populations_.clear();
+  //populations_.push_back(msg);
 
-  /*if(populations_.size() < 2) {
+  if(populations_.size() < 2) {
     populations_.push_back(msg);
   }
 
@@ -104,7 +104,7 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
       populations_.erase(populations_.begin()+1);
       populations_.insert(populations_.begin()+1, msg);
     }
-  }*/
+  }
 
   drawPopulation();
 }
@@ -170,9 +170,9 @@ void TrajectoryView::drawPopulation() {
 
       // If the best trajectory, set to red
       // Used for single robot traj viewing
-      if(t == i) {
-        pen = QPen( QColor(255,0,0,150) );
-      }
+      //if(t == i) {
+        //pen = QPen( QColor(255,0,0,150) );
+      //}
 
 
       if(points.size() == 1) {
@@ -182,7 +182,7 @@ void TrajectoryView::drawPopulation() {
 
         this->scene()->addEllipse(metersToPixels(p.at(0), true),
                                     metersToPixels(p.at(1), false),
-                                    metersToPixels(0.33f, true), metersToPixels(0.33f, false), pen);
+                                    metersToPixels(0.55f, true), metersToPixels(0.55f, false), pen);
       } //end if 1 point
 
       else if (points.size() > 0) {
@@ -191,8 +191,8 @@ void TrajectoryView::drawPopulation() {
 
           // If the first point
           if(j == 0) {
-            int radius = metersToPixels(0.275, true);
-            // Draw a line to the next point
+            int radius = metersToPixels(0.5, true);
+            // Draw a circle
             this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true)-radius,
                                       metersToPixels(points.at(j).positions.at(1), false)+radius,
                                       metersToPixels(0.55, true), metersToPixels(0.55, false));

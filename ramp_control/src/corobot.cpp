@@ -169,7 +169,7 @@ void Corobot::updatePublishTimer(const ros::TimerEvent&) {
  *   It calls calculateSpeedsAndTimes to update the robot's vectors needed to move */
 void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
   //std::cout<<"\nIn updateTrajectory!\n";
-  //std::cout<<"\nNew Trajectory: "<<utility_.toString(msg);
+  //std::cout<<"\nNew Trajectory first point: "<<utility_.toString(msg.trajectory.points.at(0));
   
   // Update data members
   restart_        = true;
@@ -281,7 +281,7 @@ const bool Corobot::checkImminentCollision() const {
   bool result;
   ros::param::get("imminent_collision", result);
   return result;
-}
+} // End checkImminentCollision
 
 
 /** 
@@ -307,20 +307,25 @@ const bool Corobot::checkOrientation(const int i, const bool simulation) const {
   float t_or = utility_.findAngleFromAToB(trajectory_.trajectory.points.at(i),
                                           trajectory_.trajectory.points.at(kp));
 
-
   float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
-  //std::cout<<"\nactual_theta: "<<actual_theta;
-  //std::cout<<"\norientations_.at("<<i<<"): "<<orientations_.at(i)<<"\n";
-  //float diff = fabs(utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(i)));
   float diff = fabs(utility_.findDistanceBetweenAngles(actual_theta, t_or));
-  //std::cout<<"\ndiff: "<<diff;
 
-  if( (!simulation && diff > PI/12) || (simulation && diff > PI/18) ) {
+  /*std::cout<<"\nactual_theta: "<<actual_theta;
+  std::cout<<"\norientations_.at("<<i<<"): "<<orientations_.at(i)<<"\n";
+  std::cout<<"\ndiff: "<<diff;*/
+  
+  if(t_or == 0 && utility_.getEuclideanDist(trajectory_.trajectory.points.at(i).positions, trajectory_.trajectory.points.at(kp).positions)) {
+    return true;
+  }
+
+  else if( (!simulation && diff > PI/12) || (simulation && diff > PI/36) ) {
     return false;
   }
 
   return true;
-}
+} // End checkOrientation
+
+
 
 
 /** This method returns a rotation trajectory for the robot */
@@ -332,17 +337,22 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
   ramp_msgs::TrajectoryRequest tr; 
   ramp_msgs::KnotPoint temp1;
   ramp_msgs::KnotPoint temp2;
+  
+  
   temp1.motionState = motion_state_;
+  temp1.motionState.positions.at(2) = 0;
+  
   temp2.motionState = motion_state_;
-  //temp2.motionState.positions.at(2) = orientations_.at(num_traveled_);
-  temp2.motionState.positions.at(2) = orientations_.at(num_traveled_);
+
+  double actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
+  temp2.motionState.positions.at(2) = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
+  //std::cout<<"\nactual_theta: "<<actual_theta<<" orientations_.at(num_traveled_): "<<orientations_.at(num_traveled_);
 
   tr.request.path.points.push_back(temp1);
   tr.request.path.points.push_back(temp2);
 
 
   //std::cout<<"\nRotation path: "<<utility_.toString(tr.request.path);
-  //std::cout<<"\nTrajectory: "<<utility_.toString(trajectory_);
       
   // Send request
   if(h_traj_req_->request(tr)) {
@@ -351,7 +361,7 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
 
   //std::cout<<"\nRotation trajectory: "<<utility_.toString(result);
   return result;
-}
+} // End getRotationTrajectory
 
 
 
