@@ -446,23 +446,24 @@ void Corobot::moveOnTrajectory(bool simulation) {
     ros::Time g_time = end_times.at(num_traveled_);
     while(ros::ok() && ros::Time::now() < g_time) {
     
-      twist_.linear.x = speeds.at(num_traveled_);
+      twist_.linear.x   = speeds.at(num_traveled_);
+      twist_.angular.z  = 0;
     
       if(!simulation) {
         // When driving straight, adjust the angular speed to maintain orientation
-        if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.15) {
+        if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.05) {
           //std::cout<<"\ninitial_theta_: "<<initial_theta_;
           float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
           float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
-          //std::cout<<"\nactual theta: "<<actual_theta;
-          //std::cout<<"\norientations_.at("<<num_traveled_<<"): "<<orientations_.at(num_traveled_);
-          //std::cout<<"\ndist: "<<dist;
-          twist_.angular.z = -1*dist;
+          std::cout<<"\nactual theta: "<<actual_theta;
+          std::cout<<"\norientations_.at("<<num_traveled_<<"): "<<orientations_.at(num_traveled_);
+          std::cout<<"\ndist: "<<dist;
+          twist_.angular.z = dist;
         }
       }
     
-      //std::cout<<"\ntwist_linear: "<<twist_.linear.x;
-      //std::cout<<"\ntwist_angular: "<<twist_.angular.z<<"\n";
+      std::cout<<"\ntwist_linear: "<<twist_.linear.x;
+      std::cout<<"\ntwist_angular: "<<twist_.angular.z<<"\n";
 
       // Send the twist_message to move the robot
       sendTwist();
