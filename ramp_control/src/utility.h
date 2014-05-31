@@ -20,7 +20,7 @@ class Utility {
 
     std::vector<ramp_msgs::Range> standardRanges;
     
-    const double euclideanDistance(const std::vector<double> a, const std::vector<double> b) const;
+    const double planarDistance(const std::vector<double> a, const std::vector<double> b) const;
 
     const double findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const;
     const double findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;
