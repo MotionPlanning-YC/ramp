@@ -20,7 +20,7 @@ Utility::Utility() {
 
 
 /** This method returns the Euclidean distance between two position vectors */
-const double Utility::euclideanDistance(const std::vector<double> a, const std::vector<double> b) const {
+const double Utility::planarDistance(const std::vector<double> a, const std::vector<double> b) const {
 
   double d_x = b.at(0) - a.at(0);
   double d_y = b.at(1) - a.at(1);

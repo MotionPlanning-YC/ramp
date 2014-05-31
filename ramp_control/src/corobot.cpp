@@ -124,6 +124,7 @@ const std::vector<float> Corobot::computeAcceleration() const {
 
 /** This is a callback for receiving odometry from the robot and sets the configuration of the robot */
 void Corobot::updateState(const nav_msgs::Odometry& msg) {
+  //std::cout<<"\nReceived odometry update\n";
   
   prev_motion_state_ = motion_state_;
 
@@ -157,6 +158,7 @@ void Corobot::updateState(const nav_msgs::Odometry& msg) {
 
 /** This method is on a timer to publish the robot's latest configuration */
 void Corobot::updatePublishTimer(const ros::TimerEvent&) {
+  //std::cout<<"\nIn updatePublishTimer\n";
     
   if (pub_update_) {
       pub_update_.publish(motion_state_);
@@ -230,7 +232,12 @@ void Corobot::calculateSpeedsAndTime () {
     // from point i to point i+1
     //std::cout<<"\nCurrent: "<<utility_.toString(current);
     //std::cout<<"\nNext: "<<utility_.toString(trajectory_.trajectory.points.at(kp));
-    orientations_.push_back(utility_.findAngleFromAToB(trajectory_.trajectory.points.at(kp_prev), trajectory_.trajectory.points.at(kp)));
+    double theta = utility_.findAngleFromAToB(trajectory_.trajectory.points.at(kp_prev), trajectory_.trajectory.points.at(kp));
+    if(theta == 0 && utility_.planarDistance(trajectory_.trajectory.points.at(kp_prev).positions, trajectory_.trajectory.points.at(kp).positions) < 0.01) {
+      orientations_.push_back(trajectory_.trajectory.points.at(kp).positions.at(2));
+    }
+    else 
+      orientations_.push_back(theta);
 
     //std::cout<<"\norientation: "<<orientations_.at(i)<<"\n";
     
@@ -314,11 +321,19 @@ const bool Corobot::checkOrientation(const int i, const bool simulation) const {
   std::cout<<"\norientations_.at("<<i<<"): "<<orientations_.at(i)<<"\n";
   std::cout<<"\ndiff: "<<diff;*/
   
-  if(t_or == 0 && utility_.getEuclideanDist(trajectory_.trajectory.points.at(i).positions, trajectory_.trajectory.points.at(kp).positions)) {
+  if(t_or == 0 && utility_.planarDistance(trajectory_.trajectory.points.at(i).positions, trajectory_.trajectory.points.at(kp).positions) < 0.01) {
     return true;
   }
 
   else if( (!simulation && diff > PI/12) || (simulation && diff > PI/36) ) {
+    std::cout<<"\nOrientation not met!";
+    std::cout<<"\nactual_theta: "<<actual_theta;
+    std::cout<<"\nt_or: "<<t_or<<"\n";
+    std::cout<<"\ndiff: "<<diff;
+    std::cout<<"\ni: "<<i<<" kp: "<<kp;
+    std::cout<<"\n"<<utility_.toString(trajectory_.trajectory.points.at(i));
+    std::cout<<"\n"<<utility_.toString(trajectory_.trajectory.points.at(kp));
+    std::cout<<"\nutility_.getEuclideanDist(trajectory_.trajectory.points.at(i).positions, trajectory_.trajectory.points.at(kp).positions: "<<utility_.planarDistance(trajectory_.trajectory.points.at(i).positions, trajectory_.trajectory.points.at(kp).positions);
     return false;
   }
 
@@ -430,6 +445,9 @@ void Corobot::moveOnTrajectory(bool simulation) {
 
       // Get rotation trajectory and move on it
       ramp_msgs::Trajectory rot_t = getRotationTrajectory();
+
+      std::cout<<"\nRotation Trajectory: "<<utility_.toString(rot_t);
+
       moveOnTrajectoryRot(rot_t, simulation);
       
       ros::spinOnce();
@@ -450,15 +468,19 @@ void Corobot::moveOnTrajectory(bool simulation) {
       twist_.angular.z  = 0;
     
       if(!simulation) {
-        // When driving straight, adjust the angular speed to maintain orientation
-        if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.05) {
+
+        // When driving straight, adjust the angular speed 
+        // to maintain orientation
+        if(fabs(twist_.linear.x) > 0.0f 
+            && fabs(twist_.angular.z) < 0.05) {
+          
           //std::cout<<"\ninitial_theta_: "<<initial_theta_;
           float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
           float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
           std::cout<<"\nactual theta: "<<actual_theta;
           std::cout<<"\norientations_.at("<<num_traveled_<<"): "<<orientations_.at(num_traveled_);
           std::cout<<"\ndist: "<<dist;
-          twist_.angular.z = dist;
+          twist_.angular.z = dist/2;
         }
       }
     
