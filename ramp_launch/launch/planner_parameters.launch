@@ -1,0 +1,9 @@
+<launch>
+
+<!-- Planner -->
+<node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" />
+
+<!-- Parameters -->
+<rosparam file="$(find ramp_launch)/launch/config/robot_0_test.yaml" command="load" ns="robot_info/" />
+
+</launch>

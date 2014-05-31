@@ -1,55 +1,24 @@
 #include "ros/ros.h"
-#include "ramp_msgs/Configuration.h"
 #include "planner.h"
-#include "range.h"
-#include "ramp_msgs/ModificationRequest.h"
-#include "ramp_msgs/EvaluationRequest.h"
-#include "yaml-cpp/yaml.h"
-#include <XmlRpc.h>
-#include <fstream>
-#include <map>
-#include <iterator>
+
  
 
 
-
 Planner             my_planner; 
-Utility             utility;
 MotionState         start, goal;
 std::vector<Range>  ranges;
 
 
 
-// Broken
-void initDOF(const XmlRpc::XmlRpcValue dof) {
+// Initializes a vector of Ranges that the Planner is initialized with
+void initDOF(const std::vector<double> dof_min, const std::vector<double> dof_max) {
   
-  /*double a; 
-  std::string s;
-  for(unsigned int i=0;i<dof.size();i++) {
-    //std::string s = static_cast<std::string>(dof[i][0]);
-    //Range temp(dof[i][0].TypeDouble, dof[i][1].TypeDouble); 
-    //std::vector< std::vector<double> > d = static_cast< std::vector< std::vector<double> > >(dof);
-    //double* d = (double*) dof[i];
-    //std::cout<<"\nd[0]: "<<d[0];
-    //std::cout<<"\nd[1]: "<<d[1];
-    //double d = static_cast<double>(dof[i][0]);
-    //double a = static_cast<double>(dof[i][0]);
-    std::cout<<"\nRange "<<i<<": "<<temp.toString();
-  }*/
+  for(unsigned int i=0;i<dof_min.size();i++) {
+    Range temp(dof_min.at(i), dof_max.at(i));
+    ranges.push_back(temp); 
+  }
 
 
-  /** Doing this dynamically isn't working
-   *  so hardcode values in until it works */
-  
-  // Make some Ranges 
-  Range range0(0, 3.5);
-  Range range1(0, 3.5);
-  Range range2(-PI, PI);
-
-  // Set my_planner's ranges
-  ranges.push_back(range0);
-  ranges.push_back(range1);
-  ranges.push_back(range2); 
 } // End initDOF
 
 
@@ -83,43 +52,42 @@ void loadParameters(const ros::NodeHandle handle) {
 
   std::string key;
   int id;
-  std::vector<float> ranges;
-  XmlRpc::XmlRpcValue dof;
+  std::vector<double> dof_min;
+  std::vector<double> dof_max;
 
 
   // Get the id of the robot
-  if(handle.searchParam("robot_info/id", key)) {
-    handle.getParam(key, my_planner.id_);
-    std::cout<<"\nPlanner ID: "<<my_planner.id_;
-  }
-  else {
-    std::cout<<"\nCannot find ID parameter\n";
+  if(handle.hasParam("robot_info/id")) {
+    handle.getParam("robot_info/id", my_planner.id_);
   }
 
-  if(handle.hasParam("robot_info/DOF")) {
-    handle.getParam("robot_info/DOF", dof); 
-    initDOF(dof);
 
+  // Get the dofs
+  if(handle.hasParam("robot_info/DOF_min") && 
+      handle.hasParam("robot_info/DOF_max")) 
+  {
 
-    //for(unsigned int i=0;i<dof.size();i++) {
-      //std::cout<<"\ndd["<<i<<"]: ("<<dof[i][0]<<", "<<dof[i][1]<<")";
-    //}
+    handle.getParam("robot_info/DOF_min", dof_min); 
+    handle.getParam("robot_info/DOF_max", dof_max); 
+
+    initDOF(dof_min, dof_max);
   }
 
 
   // Get the start and goal vectors
-  std::vector<float> start;
-  std::vector<float> goal;
-  handle.getParam("robot_info/start", start);
-  handle.getParam("robot_info/goal",  goal );
-  initStartGoal(start, goal);
+  if(handle.hasParam("robot_info/start") &&
+      handle.hasParam("robot_info/goal"))
+  {
+    std::vector<float> start;
+    std::vector<float> goal;
+    handle.getParam("/robot_info/start", start);
+    handle.getParam("/robot_info/goal",  goal );
+    initStartGoal(start, goal);
+  }
   
- 
-  
-
 
   std::cout<<"\nDone loading parameters. Press Enter to continue\n";
-  //std::cin.get();
+  std::cin.get();
 }
 
 
@@ -136,41 +104,9 @@ int main(int argc, char** argv) {
   ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
 
 
-
-  /*for(int i=0;i<3;i++) {
-    start.positions_.push_back( (float)rand() / ((float)RAND_MAX / 10) );
-    start.velocities_.push_back((float)rand() / ((float)RAND_MAX / 10) );
-    start.accelerations_.push_back((float)rand() / ((float)RAND_MAX / 10) );
-    start.jerks_.push_back((float)rand() / ((float)RAND_MAX / 10) );
-    
-    goal.positions_.push_back( (float)rand() / ((float)RAND_MAX / 10) );
-    goal.velocities_.push_back((float)rand() / ((float)RAND_MAX / 10) );
-    goal.accelerations_.push_back((float)rand() / ((float)RAND_MAX / 10) );
-    goal.jerks_.push_back((float)rand() / ((float)RAND_MAX / 10) );
-  }
-  std::cout<<"\nStart: "<<start.toString();
-  std::cout<<"\nGoal: "<<goal.toString();
-
-  std::cout<<"\nStart + Goal: "<<start.add(goal).toString();
-  std::cout<<"\nStart - Goal: "<<start.subtract(goal).toString();
-
-  std::cout<<"\nStart * 2: "<<start.multiply(2).toString();
-  std::cout<<"\nStart / 2: "<<start.divide(2).toString();
-
-
-  my_planner.start_ = start;
-  my_planner.m_cc = goal;
-  std::cout<<"\n\nstart: "<<my_planner.start_.toString();
-  std::cout<<"\nm_cc: "<<my_planner.m_cc.toString();
-  my_planner.setMi();
-
-  std::cin.get();
-  exit(1);*/
-
-
-
   // Load ros parameters
   loadParameters(handle);
+  
   
 
 
