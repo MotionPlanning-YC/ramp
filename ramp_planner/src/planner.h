@@ -117,12 +117,28 @@ class Planner {
     const std::string pathsToString() const;
 
     // Set the transformation from odometry to world CS
-    void setT_base_w(std::vector<float> base_pos);
+    void setT_base_w(std::vector<double> base_pos);
 
     // Callback for receiving updates from the ramp_control
     void updateCallback(const ramp_msgs::MotionState& msg);
 
+    // Sets the m_i vector
+    void setMi();
 
+    // Motion state that should be reached by next control cycle
+    MotionState m_cc_;
+
+    // Each element is the target motion state 
+    // for each of i planning cycles
+    std::vector<MotionState> m_i;
+    
+
+
+
+    // Hold the difference between previous startPlanning 
+    // and latestUpdate for each control cycle
+    std::vector<MotionState> SP_LU_diffs_;
+    const MotionState findAverageDiff();
   
   private:
     /** These are (mostly) utility members that are only used by Planner and should not be used by other classes */
@@ -153,11 +169,7 @@ class Planner {
 
     // Msg building methods
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
-              const unsigned int i_path ) const ;
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
               const Path path ) const           ;
-    const ramp_msgs::EvaluationRequest buildEvaluationRequest(
-              const unsigned int i_path)        ;
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(
               const RampTrajectory trajec)      ;
 
@@ -167,8 +179,12 @@ class Planner {
           void updateWithModifier(const int index, const Path p)  ;
           void checkTrajChange()                                  ;
           void seedPopulation()                                   ;
-    const RampTrajectory getChangingTrajectory() const;
+    const RampTrajectory  getChangingTrajectory() const ;
+    const MotionState     predictStartPlanning() const  ;
 
+
+    const std::vector<RampTrajectory> getTrajectories(const std::vector<Path> p);
+    void updatePathsStart(const MotionState s);
 
 
     /***** Data members *****/
@@ -200,8 +216,18 @@ class Planner {
     // Index of previous best trajectory
     unsigned int        i_best_prev_;
 
+    // Number of generations to wait before starting control cycles
+    unsigned int        generationsBeforeCC_;
 
-    bool                init_evaluation_;
+    // Maximum number of generations to occur between control cycles
+    unsigned int        generationsPerCC_;
+
+    // Flag for if the control cycles have started
+    bool                cc_started_;
+    
+    // Number of planning cycles since last control cycle
+    int c_pc_;
+
 
     // Handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
@@ -214,6 +240,7 @@ class Planner {
 
 
 
+    // Stop things for debugging
     bool stop_;
 };
 

@@ -90,7 +90,10 @@ void loadParameters(const ros::NodeHandle handle) {
   // Get the id of the robot
   if(handle.searchParam("robot_info/id", key)) {
     handle.getParam(key, my_planner.id_);
-    std::cout<<"\nid: "<<my_planner.id_;
+    std::cout<<"\nPlanner ID: "<<my_planner.id_;
+  }
+  else {
+    std::cout<<"\nCannot find ID parameter\n";
   }
 
   if(handle.hasParam("robot_info/DOF")) {
@@ -125,7 +128,6 @@ void loadParameters(const ros::NodeHandle handle) {
 
 
 int main(int argc, char** argv) {
-  std::cout<<"\nutility.findDistanceBetweenAngles(3pi/4, -3pi/4): "<<utility.findDistanceBetweenAngles(3*PI/4, -3*PI/4);
   srand( time(0));
 
   ros::init(argc, argv, "ramp_planner");
@@ -134,17 +136,42 @@ int main(int argc, char** argv) {
   ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
 
 
+
+  /*for(int i=0;i<3;i++) {
+    start.positions_.push_back( (float)rand() / ((float)RAND_MAX / 10) );
+    start.velocities_.push_back((float)rand() / ((float)RAND_MAX / 10) );
+    start.accelerations_.push_back((float)rand() / ((float)RAND_MAX / 10) );
+    start.jerks_.push_back((float)rand() / ((float)RAND_MAX / 10) );
+    
+    goal.positions_.push_back( (float)rand() / ((float)RAND_MAX / 10) );
+    goal.velocities_.push_back((float)rand() / ((float)RAND_MAX / 10) );
+    goal.accelerations_.push_back((float)rand() / ((float)RAND_MAX / 10) );
+    goal.jerks_.push_back((float)rand() / ((float)RAND_MAX / 10) );
+  }
+  std::cout<<"\nStart: "<<start.toString();
+  std::cout<<"\nGoal: "<<goal.toString();
+
+  std::cout<<"\nStart + Goal: "<<start.add(goal).toString();
+  std::cout<<"\nStart - Goal: "<<start.subtract(goal).toString();
+
+  std::cout<<"\nStart * 2: "<<start.multiply(2).toString();
+  std::cout<<"\nStart / 2: "<<start.divide(2).toString();
+
+
+  my_planner.start_ = start;
+  my_planner.m_cc = goal;
+  std::cout<<"\n\nstart: "<<my_planner.start_.toString();
+  std::cout<<"\nm_cc: "<<my_planner.m_cc.toString();
+  my_planner.setMi();
+
+  std::cin.get();
+  exit(1);*/
+
+
+
   // Load ros parameters
   loadParameters(handle);
   
-  
-  
-  // Pretty sure this isn't needed any longer. 
-  // Can't remember what it was used for
-  // Will leave it for now in case there are issues and it sparks ideas
-  /*std::string update_topic;
-  handle.getParam("ramp_planner/robot_update", update_topic);
-  std::cout<<"\nupdate_topic:"<<update_topic;*/
 
 
   /** Initialize the Planner's handlers */ 
@@ -160,9 +187,13 @@ int main(int argc, char** argv) {
   std::cin.get(); 
   
   my_planner.go();
+
+
+  MotionState exp_results = my_planner.findAverageDiff();
+  std::cout<<"\n\nAverage Difference: "<<exp_results.toString();
   
   
-  std::cout<<"\nExiting Normally\n";
+  std::cout<<"\n\nExiting Normally\n";
   return 0;
 }
 

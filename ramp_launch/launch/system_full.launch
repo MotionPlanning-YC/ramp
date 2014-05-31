@@ -9,9 +9,10 @@
 
 <!-- Define the machines -->
 
-<machine name="robot_0" address="192.168.1.101" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> 
-<machine name="robot_1" address="192.168.1.102" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" />
+<!-- <machine name="robot_0" address="192.168.1.101" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> 
+<machine name="robot_1" address="192.168.1.102" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> -->
 
+<include file="$(find ramp_launch)/launch/corobots.machine" />
 
 
 
@@ -32,12 +33,14 @@
 
 <!-- We need 2 planners, one for the first robot and one for the second robot -->
 <group ns="$(arg robot_0_name)">
+  <rosparam file="$(find ramp_launch)/launch/config/robot_0.yaml" command="load" ns="robot_info/" />
   <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" >
     <param name="robot_update" type="str" value="/$(arg robot_0_name)/update" />
   </node>
 </group> 
 
 <group ns="$(arg robot_1_name)"> 
+  <rosparam file="$(find ramp_launch)/launch/config/robot_1.yaml" command="load" ns="robot_info/" />
   <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen"> 
     <param name="robot_update" type="str" value="/$(arg robot_1_name)/update" /> 
   </node>

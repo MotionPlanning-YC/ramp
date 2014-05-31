@@ -166,6 +166,8 @@ const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> k
   return result;
 }
 
+
+
 const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
   std::ostringstream result;
 

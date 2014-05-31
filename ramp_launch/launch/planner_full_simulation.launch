@@ -12,7 +12,7 @@
 <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" />
 
 <!-- Trajectory Visualization -->
-<!-- <node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" />  -->
+<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> 
 
 
 <!-- Planner -->
@@ -21,7 +21,7 @@
 
 <!-- Simulation -->
 <node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/world/single_robot.world" /> 
-<node name="ramp_control" pkg="ramp_control" type="ramp_control" output="screen">
+<node name="ramp_control" pkg="ramp_control" type="ramp_control">
   <remap from="odometry" to="odom" />
   <param name="simulation" value="true" />
 </node>
