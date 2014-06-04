@@ -13,6 +13,12 @@ void Population::clear() {
   changed_ = true;
 }
 
+
+void Population::replace(const RampTrajectory trajec, uint8_t i) {
+  changed_ = true;
+  population_.at(i) = trajec;
+}
+
 const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
   if(new_pop.size() == population_.size()) {
     population_ = new_pop;
@@ -86,7 +92,7 @@ const unsigned int Population::findBest() {
 
 
 /** This method returns the trajectory at index i */
-RampTrajectory& Population::get(const unsigned int i) {
+const RampTrajectory Population::get(const unsigned int i) {
   return population_.at(i);
 } // End get
 

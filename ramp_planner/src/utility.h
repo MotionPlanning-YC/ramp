@@ -12,6 +12,7 @@
 #include "ramp_msgs/Trajectory.h"
 #include "ramp_msgs/Path.h"
 #include <tf/transform_datatypes.h>
+#include <ros/console.h>
 
 #define PI 3.14159f
 

@@ -17,8 +17,9 @@ class Population {
     const unsigned int    add(const RampTrajectory rt);
     const unsigned int    findBest();
     void                  clear();
+    void                  replace(const RampTrajectory trajec, uint8_t i);
     const bool            replaceAll(const std::vector<RampTrajectory> new_pop);
-    RampTrajectory&       get(const unsigned int i);
+    const RampTrajectory  get(const unsigned int i);
     const std::string     fitnessFeasibleToString() const;
     const std::string     toString() const;
     ramp_msgs::Population populationMsg();

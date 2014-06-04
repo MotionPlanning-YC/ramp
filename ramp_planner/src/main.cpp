@@ -7,6 +7,7 @@
 Planner             my_planner; 
 MotionState         start, goal;
 std::vector<Range>  ranges;
+int                 id;
 
 
 
@@ -26,6 +27,8 @@ void initDOF(const std::vector<double> dof_min, const std::vector<double> dof_ma
 
 // Initializes global start and goal variables
 void initStartGoal(const std::vector<float> s, const std::vector<float> g) {
+  std::cout<<"\ns.size(): "<<s.size();
+  std::cout<<"\ng.size(): "<<g.size();
   for(unsigned int i=0;i<s.size();i++) {
     start.positions_.push_back(s.at(i));
     goal.positions_.push_back(g.at(i));
@@ -49,16 +52,19 @@ void initStartGoal(const std::vector<float> s, const std::vector<float> g) {
  *  Calls initDOF, initStartGoal */
 void loadParameters(const ros::NodeHandle handle) {
   std::cout<<"\nLoading parameters\n";
+  std::cout<<"\nHandle NS: "<<handle.getNamespace();
 
   std::string key;
-  int id;
   std::vector<double> dof_min;
   std::vector<double> dof_max;
 
 
   // Get the id of the robot
   if(handle.hasParam("robot_info/id")) {
-    handle.getParam("robot_info/id", my_planner.id_);
+    handle.getParam("robot_info/id", id);
+  }
+  else {
+    ROS_ERROR("Did not find parameter robot_info/id");
   }
 
 
@@ -72,22 +78,35 @@ void loadParameters(const ros::NodeHandle handle) {
 
     initDOF(dof_min, dof_max);
   }
+  else {
+    ROS_ERROR("Did not find parameters robot_info/DOF_min, robot_info/DOF_max");
+  }
 
 
   // Get the start and goal vectors
   if(handle.hasParam("robot_info/start") &&
       handle.hasParam("robot_info/goal"))
   {
-    std::vector<float> start;
-    std::vector<float> goal;
-    handle.getParam("/robot_info/start", start);
-    handle.getParam("/robot_info/goal",  goal );
-    initStartGoal(start, goal);
+    std::vector<float> p_start;
+    std::vector<float> p_goal;
+    handle.getParam("robot_info/start", p_start);
+    handle.getParam("robot_info/goal",  p_goal );
+    initStartGoal(p_start, p_goal);
+  }
+  else {
+    ROS_ERROR("Did not find parameters robot_info/start, robot_info/goal");
   }
   
 
-  std::cout<<"\nDone loading parameters. Press Enter to continue\n";
-  std::cin.get();
+  std::cout<<"\n------- Done loading parameters -------\n";
+    std::cout<<"\nID: "<<id;
+    std::cout<<"\nStart: "<<start.toString();
+    std::cout<<"\nGoal: "<<goal.toString();
+    std::cout<<"\nRanges: ";
+    for(uint8_t i=0;i<ranges.size();i++) {
+      std::cout<<"\n  "<<i<<": "<<ranges.at(i).toString();
+    }
+  std::cout<<"\n---------------------------------------";
 }
 
 
@@ -100,6 +119,8 @@ int main(int argc, char** argv) {
 
   ros::init(argc, argv, "ramp_planner");
   ros::NodeHandle handle;
+
+  std::cout<<"\nHandle namespace: "<<handle.getNamespace();
   
   ros::Subscriber sub_update_ = handle.subscribe("update", 1000, &Planner::updateCallback, &my_planner);
 
@@ -111,7 +132,7 @@ int main(int argc, char** argv) {
 
 
   /** Initialize the Planner's handlers */ 
-  my_planner.init(handle, start, goal, ranges); 
+  my_planner.init(id, handle, start, goal, ranges); 
 
   std::cout<<"\nStart: "<<my_planner.start_.toString();
   std::cout<<"\nGoal: "<<my_planner.goal_.toString();

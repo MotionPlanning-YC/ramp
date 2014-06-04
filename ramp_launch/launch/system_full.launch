@@ -9,9 +9,6 @@
 
 <!-- Define the machines -->
 
-<!-- <machine name="robot_0" address="192.168.1.101" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> 
-<machine name="robot_1" address="192.168.1.102" env-loader="/opt/ros/hydro/env.sh" user="corobotclassic" /> -->
-
 <include file="$(find ramp_launch)/launch/corobots.machine" />
 
 
@@ -86,7 +83,7 @@
 <!-- Start the robot nodes -->
 
 <group ns="$(arg robot_0_name)" >
-  <node name="ramp_control" pkg="ramp_control" type="ramp_control" machine="robot_0"/> 
+  <node name="ramp_control" pkg="ramp_control" type="ramp_control" machine="robot_0" /> 
     <param name="orientation" type="double" value="3.14159" />
 </group> 
 

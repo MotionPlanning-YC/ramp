@@ -149,18 +149,12 @@ void TrajectoryView::drawPopulation() {
       //std::cout<<"\npoints[0]: ("<<points.at(0).positions.at(0)<<", "<<points.at(0).positions.at(1)<<")\n";
 
       // Green for robot 1 and feasible
-      if(populations_.at(p).robot_id == 0 && populations_.at(p).population.at(t).feasible && t==populations_.at(p).best_id) {
+      if(populations_.at(p).robot_id == 0 && populations_.at(p).population.at(t).feasible) {
         pen = QPen( QColor(0, 255, 0, 255) );
       }
-      else if(populations_.at(p).robot_id == 0 && populations_.at(p).population.at(t).feasible) {
-        pen = QPen( QColor(0, 255, 0, 200) );
-      }
       // Blue for robot 2 and feasible
-      else if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible && t==populations_.at(p).best_id) {
-        pen = QPen( QColor(0,0,255,255) );
-      }
       else if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible) {
-        pen = QPen( QColor(0,0,255,200) );
+        pen = QPen( QColor(0,0,255,255) );
       }
       
       // Else, if either are in collision, red

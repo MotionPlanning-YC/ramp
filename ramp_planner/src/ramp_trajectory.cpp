@@ -37,6 +37,11 @@ const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const
 
 
 
+const RampTrajectory RampTrajectory::clone() const { 
+  return *this;
+}
+
+
 const std::string RampTrajectory::fitnessFeasibleToString() const {
   std::ostringstream result;
  

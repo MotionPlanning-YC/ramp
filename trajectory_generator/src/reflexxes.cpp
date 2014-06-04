@@ -16,7 +16,7 @@ Reflexxes::Reflexxes() {
   // Maximum velocity   
   inputParameters->MaxVelocityVector->VecData[0] = .33;
   inputParameters->MaxVelocityVector->VecData[1] = .33;
-  inputParameters->MaxVelocityVector->VecData[2] = PI/3;
+  inputParameters->MaxVelocityVector->VecData[2] = PI/4;
 
   // Maximum acceleration
   inputParameters->MaxAccelerationVector->VecData[0] = 0.33;

@@ -291,6 +291,9 @@ const bool Corobot::checkImminentCollision() const {
 } // End checkImminentCollision
 
 
+
+
+
 /** 
  * Returns true if the robot has orientation to move 
  * from point i to point i+1
@@ -325,20 +328,13 @@ const bool Corobot::checkOrientation(const int i, const bool simulation) const {
     return true;
   }
 
-  else if( (!simulation && diff > PI/12) || (simulation && diff > PI/36) ) {
-    std::cout<<"\nOrientation not met!";
-    std::cout<<"\nactual_theta: "<<actual_theta;
-    std::cout<<"\nt_or: "<<t_or<<"\n";
-    std::cout<<"\ndiff: "<<diff;
-    std::cout<<"\ni: "<<i<<" kp: "<<kp;
-    std::cout<<"\n"<<utility_.toString(trajectory_.trajectory.points.at(i));
-    std::cout<<"\n"<<utility_.toString(trajectory_.trajectory.points.at(kp));
-    std::cout<<"\nutility_.getEuclideanDist(trajectory_.trajectory.points.at(i).positions, trajectory_.trajectory.points.at(kp).positions: "<<utility_.planarDistance(trajectory_.trajectory.points.at(i).positions, trajectory_.trajectory.points.at(kp).positions);
+  else if( (!simulation && diff > PI/12) || (simulation && diff > PI/24) ) {
     return false;
   }
 
   return true;
 } // End checkOrientation
+
 
 
 
@@ -381,12 +377,16 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
 
 
 
+
+
 void Corobot::moveOnTrajectoryRot(const ramp_msgs::Trajectory traj, bool simulation) {
   //std::cout<<"\n**************In moveOnTrajectoryRot****************\n";
   //std::cout<<"\ntraj.size(): "<<traj.trajectory.points.size();
 
   ros::Rate r(50);
   ros::Time start = ros::Time::now();
+
+  double goal_theta = traj.trajectory.points.at( traj.trajectory.points.size()-1 ).positions.at(2);
 
   // Go through each point
   for(int i=0;i<traj.trajectory.points.size();i++) {
@@ -411,11 +411,18 @@ void Corobot::moveOnTrajectoryRot(const ramp_msgs::Trajectory traj, bool simulat
         i = traj.trajectory.points.size();
         break;
       } // end if
+  
+      // TODO: make actual_theta a class member, set in odometry callback
+      double actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
+      if( fabs(utility_.findDistanceBetweenAngles( actual_theta, goal_theta )) <= PI/12) {
+        break;
+      }
     } // end while
   } // end for
 
   //std::cout<<"\nLeaving moveOnTrajectoryRot\n";
 } // End moveOnTrajectory
+
 
 
 
@@ -467,25 +474,24 @@ void Corobot::moveOnTrajectory(bool simulation) {
       twist_.linear.x   = speeds.at(num_traveled_);
       twist_.angular.z  = 0;
     
-      if(!simulation) {
+      //if(!simulation) {
 
         // When driving straight, adjust the angular speed 
         // to maintain orientation
-        if(fabs(twist_.linear.x) > 0.0f 
-            && fabs(twist_.angular.z) < 0.05) {
+        if(fabs(twist_.linear.x) > 0.0f) {
           
           //std::cout<<"\ninitial_theta_: "<<initial_theta_;
           float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
           float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
-          std::cout<<"\nactual theta: "<<actual_theta;
-          std::cout<<"\norientations_.at("<<num_traveled_<<"): "<<orientations_.at(num_traveled_);
-          std::cout<<"\ndist: "<<dist;
+          //std::cout<<"\nactual theta: "<<actual_theta;
+          //std::cout<<"\norientations_.at("<<num_traveled_<<"): "<<orientations_.at(num_traveled_);
+          //std::cout<<"\ndist: "<<dist;
           twist_.angular.z = dist/2;
         }
-      }
+      //}
     
-      std::cout<<"\ntwist_linear: "<<twist_.linear.x;
-      std::cout<<"\ntwist_angular: "<<twist_.angular.z<<"\n";
+      //std::cout<<"\ntwist_linear: "<<twist_.linear.x;
+      //std::cout<<"\ntwist_angular: "<<twist_.angular.z<<"\n";
 
       // Send the twist_message to move the robot
       sendTwist();

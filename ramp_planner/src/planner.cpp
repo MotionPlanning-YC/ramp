@@ -141,7 +141,10 @@ void Planner::initStartGoal(const MotionState s, const MotionState g) {
 
 
 /** Initialize the handlers and allocate them on the heap */
-void Planner::init(const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r) {
+void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r) {
+
+  // Set ID
+  id_ = i;
 
   // Initialize the handlers
   h_traj_req_ = new TrajectoryRequestHandler(h);
@@ -628,7 +631,8 @@ void Planner::modification() {
   for(unsigned int i=0;i<mod_trajec.size();i++) {
 
     // Evaluate the new trajectory
-    evaluateTrajectory(mod_trajec.at(i));
+    mod_trajec.at(i) = evaluateTrajectory(mod_trajec.at(i));
+    //std::cout<<"\nAfter evaluation, time_until_collision: "<<mod_trajec.at(i).time_until_collision_;
 
     
     // Add the new trajectory to the population
@@ -639,7 +643,7 @@ void Planner::modification() {
     // Update the path in the planner and the modifier
     updateWithModifier(index, mod_trajec.at(i).path_);
   } // end for*/
-  
+
   
   // After adding new trajectories to population,
   // get the best trajectory
@@ -660,6 +664,8 @@ void Planner::modification() {
 
   } // end if
 
+
+  //std::cout<<"\npopulation: "<<population_.fitnessFeasibleToString();
   
   // Send the new population to the trajectory viewer
   sendPopulation();
@@ -778,6 +784,9 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     modification();
     //std::cout<<"\nAfter modification\n";
     
+    // Evaluate entire population
+    bestTrajec_ = evaluateAndObtainBest();
+    
     // t=t+1
     generation_++;
     
@@ -812,6 +821,9 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     // Reset planning cycle count
     c_pc_ = 0;
 
+    // Evaluate entire population
+    bestTrajec_ = evaluateAndObtainBest();
+  
     // Send the best trajectory 
     sendBest();
     
@@ -922,21 +934,25 @@ void Planner::sendPopulation() {
 
 /** This method evaluates one trajectory.
  *  Eventually, we should be able to evaluate only specific segments along the trajectory  */
-void Planner::evaluateTrajectory(RampTrajectory& trajec) {
+const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
+  RampTrajectory result = trajec;
 
   ramp_msgs::EvaluationRequest er = buildEvaluationRequest(trajec);
   
   // Do the evaluation and set the fitness and feasibility members
   if(requestEvaluation(er)) {
-    trajec.fitness_   = er.response.fitness;
-    trajec.feasible_  = er.response.feasible;
-    trajec.msg_trajec_.fitness    = trajec.fitness_;
-    trajec.msg_trajec_.feasible   = trajec.feasible_;
-    trajec.time_until_collision_  = er.response.time_until_collision;
+    result.fitness_   = er.response.fitness;
+    result.feasible_  = er.response.feasible;
+    result.msg_trajec_.fitness    = result.fitness_;
+    result.msg_trajec_.feasible   = result.feasible_;
+    result.time_until_collision_  = er.response.time_until_collision;
+    //std::cout<<"\nEvaluation Request Time Until Collision: "<<er.response.time_until_collision;
   }
   else {
     // TODO: some error handling
   }
+
+  return result;
 } // End evaluateTrajectory
 
 
@@ -949,8 +965,8 @@ void Planner::evaluatePopulation() {
   
   // Go through each trajectory in the population and evaluate it
   for(unsigned int i=0;i<population_.size();i++) {
-    evaluateTrajectory(population_.get(i));
-  } // end for   
+    population_.replace(evaluateTrajectory(population_.get(i)), i);
+  } // end for
 
   i_best_prev_ = population_.findBest();
 } // End evaluatePopulation
@@ -970,6 +986,7 @@ const RampTrajectory Planner::evaluateAndObtainBest() {
   // Return the trajectory
   return population_.get(index);
 }
+
 
 
 const std::string Planner::pathsToString() const {

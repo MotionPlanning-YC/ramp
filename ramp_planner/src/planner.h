@@ -88,7 +88,7 @@ class Planner {
     
     // Initialization 
     void initPopulation();
-    void init(const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r);
+    void init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r);
     
     // Send the best trajectory to the control package
     void sendBest();
@@ -97,7 +97,7 @@ class Planner {
     void sendPopulation();
 
     // Evaluate the population 
-    void                  evaluateTrajectory(RampTrajectory& trajec);
+    const RampTrajectory  evaluateTrajectory(RampTrajectory trajec);
     void                  evaluatePopulation();
     const RampTrajectory  evaluateAndObtainBest();
     
