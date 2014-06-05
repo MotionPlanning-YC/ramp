@@ -89,8 +89,6 @@ class Corobot {
     TrajectoryRequestHandler* h_traj_req_;
     ramp_msgs::MotionState    prev_motion_state_; 
     ros::Time                 prev_t_;
-
-    bool                      backwards_;
 };
 
 #endif

@@ -11,7 +11,7 @@ const float timeNeededToTurn = 2.5;
 
 
 
-Corobot::Corobot() : restart_(false), num_(0), num_prev_(0), num_traveled_(0), k_dof_(3), h_traj_req_(0), backwards_(false) { 
+Corobot::Corobot() : restart_(false), num_(0), num_prev_(0), num_traveled_(0), k_dof_(3), h_traj_req_(0) { 
   for(unsigned int i=0;i<k_dof_;i++) {
     motion_state_.positions.push_back(0);
     motion_state_.velocities.push_back(0);
@@ -162,25 +162,6 @@ void Corobot::updateState(const nav_msgs::Odometry& msg) {
 /** This method is on a timer to publish the robot's latest configuration */
 void Corobot::updatePublishTimer(const ros::TimerEvent&) {
   //std::cout<<"\nIn updatePublishTimer\n";
-  
-  if(backwards_) {
-    
-    // X direction
-    /*if( (actual_theta_ > 0 && actual_theta_ < PI/2) ||
-        (actual_theta_ < 0 && actual_theta_ >= -PI/2) )
-    {
-      motion_state_.velocities.at(0) *= -1;
-    }*/
-
-    for(uint8_t i=0;i<motion_state_.velocities.size();i++) {
-      motion_state_.velocities.at(i) *= -1;
-    }
-
-    
-
-
-  }
-
     
   if (pub_update_) {
       pub_update_.publish(motion_state_);
@@ -345,27 +326,10 @@ const bool Corobot::checkOrientation(const int i, const bool simulation) {
 
   // Desired orientation
   double theta_prime = orientations_.at(i);
-
-  // Desired orientation if driving backwards
-  double phi = utility_.displaceAngle(theta_prime, PI);
   
   // Difference between orientation and desired orientation
   double delta_theta = fabs(utility_.findDistanceBetweenAngles(actual_theta_, theta_prime));
 
-  // Difference between orientation and desired backwards orientation
-  double delta_phi = fabs(utility_.findDistanceBetweenAngles(actual_theta_, phi));
-  /*std::cout<<"\ntheta_prime: "<<theta_prime;
-  std::cout<<"\nphi: "<<phi;
-  std::cout<<"\ndelta_theta: "<<delta_theta;
-  std::cout<<"\ndelta_phi: "<<delta_phi;*/
-
-  if(delta_phi < delta_theta) {
-    backwards_ = true;
-    delta_theta = delta_phi;
-  }
-  else {
-    backwards_ = false;
-  }
 
   // If the points are the same, theta_prime will be 0
   if(theta_prime == 0 && utility_.planarDistance(trajectory_.trajectory.points.at(i).positions, trajectory_.trajectory.points.at(kp).positions) < 0.01) {
@@ -401,9 +365,6 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() {
   temp2.motionState = motion_state_;
 
   double theta_gap = utility_.findDistanceBetweenAngles(actual_theta_, orientations_.at(num_traveled_));
-  if(backwards_) {
-    theta_gap = utility_.findDistanceBetweenAngles(actual_theta_, utility_.displaceAngle(orientations_.at(num_traveled_), PI));  
-  }
 
   // Set the target theta
   temp2.motionState.positions.at(2) = theta_gap;
@@ -516,9 +477,6 @@ void Corobot::moveOnTrajectory(bool simulation) {
     while(ros::ok() && ros::Time::now() < g_time) {
     
       twist_.linear.x   = speeds.at(num_traveled_);
-      if(backwards_) { 
-        twist_.linear.x *= -1;
-      }
       twist_.angular.z  = 0;
     
       if(!simulation) {

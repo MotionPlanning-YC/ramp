@@ -1,6 +1,6 @@
 #include "population.h"
 
-Population::Population() : i_best_(-1), maxSize_(3), changed_(false) {}
+Population::Population() : i_best_(-1), maxSize_(5), changed_(false) {}
 
 Population::Population(const unsigned int size) : i_best_(-1), maxSize_(size), changed_(false) {}
 
@@ -14,7 +14,7 @@ void Population::clear() {
 }
 
 
-void Population::replace(const RampTrajectory trajec, uint8_t i) {
+void Population::replace(uint8_t i, const RampTrajectory trajec) {
   changed_ = true;
   population_.at(i) = trajec;
 }
@@ -28,6 +28,9 @@ const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
   
   return false;
 }
+
+
+
 
 /** This method adds a trajectory to the population. 
  *  If the population is full, a random trajectory (that isn't the best one) is replaced
@@ -62,6 +65,8 @@ const unsigned int Population::add(const RampTrajectory rt) {
 
 
 
+
+
 /** Returns the fittest trajectory and sets i_best_ */
 const unsigned int Population::findBest() {
   //std::cout<<"\nIn findBest\n";
@@ -89,6 +94,9 @@ const unsigned int Population::findBest() {
 
   return i_best_; 
 } //End findBest 
+
+
+
 
 
 /** This method returns the trajectory at index i */

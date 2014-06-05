@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(3), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), generationsBeforeCC_(100), cc_started_(false), c_pc_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
+Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(5), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), generationsBeforeCC_(100), cc_started_(false), c_pc_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
 {
   controlCycle_ = ros::Duration(1.f / 5.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
@@ -757,20 +757,13 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     
   }*/
 
-
-  std::cout<<"\nPC :"<<c_pc_;
-  std::cout<<"\nstartPlanning: "<<startPlanning_.toString();
-  if(cc_started_) {
-    std::cout<<"\nm_i("<<c_pc_<<"): "<<m_i.at(c_pc_).toString();
-    std::cout<<"\nlatest: "<<latestUpdate_.toString();
-  }
   // Make sure not too many PC occur before next CC
   if(c_pc_ < generationsPerCC_ || !cc_started_) {
 
     if(cc_started_) {
       // Update startPlanning
       startPlanning_ = predictStartPlanning();
-      std::cout<<"\nAfter prediction, startPlanning: "<<startPlanning_.toString()<<"\n";
+      //std::cout<<"\nAfter prediction, startPlanning: "<<startPlanning_.toString()<<"\n";
       
 
       // Generate new trajectories
@@ -970,7 +963,7 @@ void Planner::evaluatePopulation() {
   
   // Go through each trajectory in the population and evaluate it
   for(unsigned int i=0;i<population_.size();i++) {
-    population_.replace(evaluateTrajectory(population_.get(i)), i);
+    population_.replace(i, evaluateTrajectory(population_.get(i)));
   } // end for
 
   i_best_prev_ = population_.findBest();
@@ -1037,12 +1030,12 @@ const MotionState Planner::findAverageDiff() {
   initPopulation();
   //seedPopulation();
 
-  /*std::cout<<"\nPopulation initialized!\n";
+  std::cout<<"\nPopulation initialized!\n";
   std::cout<<"\npaths_.size(): "<<paths_.size()<<"\n";
   for(unsigned int i=0;i<paths_.size();i++) {
     std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
   }
-  std::cout<<"\n";*/
+  std::cout<<"\n";
   // std::cout<<"\nPress enter to continue\n";
   // std::cin.get();
 

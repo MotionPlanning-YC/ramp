@@ -37,6 +37,17 @@ const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const
 
 
 
+/** Returns the direction of the trajectory, i.e. the 
+ * orientation the base needs to move on the trajectory */
+const double RampTrajectory::getDirection() const {
+  trajectory_msgs::JointTrajectoryPoint a = msg_trajec_.trajectory.points.at(0);
+  trajectory_msgs::JointTrajectoryPoint b = msg_trajec_.trajectory.points.at(msg_trajec_.index_knot_points.at(1));
+
+  return utility_.findAngleFromAToB(a, b);
+}
+
+
+
 const RampTrajectory RampTrajectory::clone() const { 
   return *this;
 }
@@ -56,7 +67,7 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
 const std::string RampTrajectory::toString() const {
   std::ostringstream result;
   
-  result<<"\nTrajectory ID: "<<id_<<"\n"<<u.toString(msg_trajec_);
+  result<<"\nTrajectory ID: "<<id_<<"\n"<<utility_.toString(msg_trajec_);
   result<<fitnessFeasibleToString();
   
   return result.str();
