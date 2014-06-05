@@ -40,6 +40,7 @@ class Corobot {
 
 
     /** Data Members **/
+
     ros::Publisher                    pub_phidget_motor_;
     ros::Publisher                    pub_twist_;
     ros::Publisher                    pub_cmd_vel_;
@@ -67,8 +68,8 @@ class Corobot {
     void                        calculateSpeedsAndTime();
     void                        printVectors() const;
     const bool                  checkImminentCollision() const;
-    const bool                  checkOrientation(const int i, const bool simulation) const;
-    const ramp_msgs::Trajectory getRotationTrajectory() const;
+    const bool                  checkOrientation(const int i, const bool simulation);
+    const ramp_msgs::Trajectory getRotationTrajectory();
     const std::vector<float>    computeAcceleration() const;
     
     
@@ -79,6 +80,7 @@ class Corobot {
     int                       num_;
     int                       num_prev_;
     int                       num_traveled_;
+    double                    actual_theta_;
     const unsigned int        k_dof_;
     std::vector<ros::Time>    end_times; 
     std::vector<float>        speeds; 
@@ -87,6 +89,8 @@ class Corobot {
     TrajectoryRequestHandler* h_traj_req_;
     ramp_msgs::MotionState    prev_motion_state_; 
     ros::Time                 prev_t_;
+
+    bool                      backwards_;
 };
 
 #endif

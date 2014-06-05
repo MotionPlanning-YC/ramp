@@ -758,14 +758,19 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
   }*/
 
 
+  std::cout<<"\nPC :"<<c_pc_;
+  std::cout<<"\nstartPlanning: "<<startPlanning_.toString();
+  if(cc_started_) {
+    std::cout<<"\nm_i("<<c_pc_<<"): "<<m_i.at(c_pc_).toString();
+    std::cout<<"\nlatest: "<<latestUpdate_.toString();
+  }
   // Make sure not too many PC occur before next CC
   if(c_pc_ < generationsPerCC_ || !cc_started_) {
 
     if(cc_started_) {
       // Update startPlanning
       startPlanning_ = predictStartPlanning();
-      //std::cout<<"\nAfter predicting startPlanning_:";
-      //std::cout<<"\nstartPlanning: "<<startPlanning_.toString()<<"\n";
+      std::cout<<"\nAfter prediction, startPlanning: "<<startPlanning_.toString()<<"\n";
       
 
       // Generate new trajectories
