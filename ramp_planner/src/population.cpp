@@ -31,28 +31,44 @@ const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
 
 
 
+const int Population::getMinFitness() const {
+  int result = trajectories_.at(0).fitness_;
+
+  for(uint8_t i=1;i<trajectories_.size();i++) {
+    if(trajectories_.at(i).fitness_ < result) {
+      result = trajectories_.at(i).fitness_;
+    }
+  }
+  
+  return result;
+}
+
+
 
 /** This method adds a trajectory to the population. 
  *  If the population is full, a random trajectory (that isn't the best one) is replaced
- *  Returns the index that the trajectory is added at */
-const unsigned int Population::add(const RampTrajectory rt) {
+ *  Returns the index that the trajectory is added at 
+ *  or -1 if the trajectory is not fit enough to be added */
+const int Population::add(const RampTrajectory rt) {
   changed_ = true;
  
-  //If not full, simply push back
+  // If not full, simply push back
   if(trajectories_.size() < maxSize_) {
     trajectories_.push_back(rt);  
     paths_.push_back(rt.getPath());
     return trajectories_.size()-1;
   } 
 
-  //If full, replace a trajectory
-  else {
+  // If full, replace a trajectory
+  else if(rt.fitness_ > getMinFitness()) {
 
-    //Generate a random index for a random trajectory to remove
-    //Don't pick the fittest trajectory!!
+    // Generate a random index for a random trajectory to remove
+    // Don't pick the fittest trajectory!!
     unsigned int i;
     do {i = rand() % maxSize_;}
-    while(i == i_best_);
+    while(i == i_best_ &&
+        rt.feasible_ != trajectories_.at(i).feasible_);
+
   
     //Remove the random trajectory
     trajectories_.erase(trajectories_.begin()+i);
@@ -64,6 +80,8 @@ const unsigned int Population::add(const RampTrajectory rt) {
 
     return i;
   }
+
+  return -1;
 } //End add
 
 
@@ -118,8 +136,6 @@ const std::vector<Population> Population::createSubPopulations(const double delt
 
   // Get the number of sub-pops for delta_theta
   int num = ceil((2*PI) / delta_theta);
-  std::cout<<"\ndelta_theta: "<<delta_theta;
-  std::cout<<"\nnum: "<<num;
   
   // Create the sub-populations
   // TODO: How to find sub-pop size?
@@ -130,7 +146,6 @@ const std::vector<Population> Population::createSubPopulations(const double delt
 
   // Go through each trajectory 
   for(uint8_t i=0;i<trajectories_.size();i++) {
-    std::cout<<"\nTrajectory "<<i<<": "<<trajectories_.at(i).getPath().toString();
 
     // Get direction and Convert to [0,2PI]
     double departure_direction = trajectories_.at(i).getDirection();

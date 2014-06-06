@@ -371,6 +371,10 @@ void Planner::adaptPopulation(ros::Duration d) {
   // Replace the population's trajectories_ with the updated trajectories
   population_.replaceAll(updatedTrajecs);
 
+  //TODO: Move this?
+  // Re-evaluate
+  evaluatePopulation();
+
   //std::cout<<"\nLeaving updatePopulation\n";
 } // End adaptPopulation
 
@@ -632,13 +636,17 @@ void Planner::modification() {
     mod_trajec.at(i) = evaluateTrajectory(mod_trajec.at(i));
     //std::cout<<"\nAfter evaluation, time_until_collision: "<<mod_trajec.at(i).time_until_collision_;
 
+    std::cout<<"\nmodified fitness: "<<mod_trajec.at(i).fitness_;
+    if(mod_trajec.at(i).fitness_ > population_.getMinFitness()) {
     
-    // Add the new trajectory to the population
-    // Index is where the trajectory was added in the population (may replace another)
-    int index = population_.add(mod_trajec.at(i));
+      // Add the new trajectory to the population
+      // Index is where the trajectory was added in the population 
+      // (may replace another)
+      int index = population_.add(mod_trajec.at(i));
 
-    // Update the path in the planner and the modifier
-    updateWithModifier(index, mod_trajec.at(i).path_);
+      // Update the path in the planner and the modifier
+      updateWithModifier(index, mod_trajec.at(i).path_);
+    }
   } // end for
 
   
@@ -785,6 +793,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     
     if( (generation_-1) % 50 == 0) {
       std::cout<<"\nPlanning cycle "<<generation_-1<<" complete\n";
+      std::cout<<"\nPop: "<<population_.fitnessFeasibleToString();
     }
 
     c_pc_++;

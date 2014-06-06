@@ -9,7 +9,7 @@
 <node name="path_modification" pkg="path_modification" type="path_modification" />
 
 <!-- Evaluation -->
-<node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" />
+<node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen" />
 
 <!-- Trajectory Visualization -->
 <node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> 
