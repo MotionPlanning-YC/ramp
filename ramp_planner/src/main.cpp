@@ -115,7 +115,7 @@ void loadParameters(const ros::NodeHandle handle) {
 
 
 int main(int argc, char** argv) {
-  srand( time(0));
+  srand(time(0));
 
   ros::init(argc, argv, "ramp_planner");
   ros::NodeHandle handle;
