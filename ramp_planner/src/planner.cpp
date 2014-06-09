@@ -150,7 +150,7 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
   h_traj_req_ = new TrajectoryRequestHandler(h);
   h_control_  = new ControlHandler(h);
   h_eval_req_ = new EvaluationRequestHandler(h);
-  modifier_   = new Modifier(h, population_.paths_, num_ops_);
+  modifier_   = new Modifier(h, num_ops_);
 
   // Initialize the timers, but don't start them yet
   controlCycleTimer_ = h.createTimer(ros::Duration(controlCycle_), 
@@ -241,8 +241,6 @@ void Planner::seedPopulation() {
   evaluatePopulation();
   std::cout<<"\nPopulation after seed: "<<population_.fitnessFeasibleToString();
 
-  // Update the modifier
-  modifier_->updateAll(population_.paths_);
 } // End seedPopulation
 
 
@@ -299,10 +297,6 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
       // Set start_ to be the new starting configuration of the path
       population_.paths_.at(i).start_ = start;
     } // end outer for
-
-    // Update the modifier's paths
-    modifier_->updateAll(population_.paths_);
-
   } // end if
 } // End updatePaths
 
@@ -494,9 +488,6 @@ void Planner::initPopulation() {
     population_.add(trajecs.at(i));
   }
 
-  // Update the modifier
-  modifier_->updateAll(population_.paths_);
-
   // Evaluate the population 
   bestTrajec_ = evaluateAndObtainBest();
 } // End init_population
@@ -562,7 +553,7 @@ bool Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er) {
 
 /** Modify a Path */
 const std::vector<Path> Planner::modifyPath() { 
-  return modifier_->perform();
+  return modifier_->perform(population_);
 }
 
 
@@ -611,9 +602,6 @@ void Planner::updateWithModifier(const int index, const Path path) {
 
     // Update the path in the planner 
     population_.paths_.at(index) = path;
-    
-    // Update the path in the modifier 
-    modifier_->update(population_.paths_.at(index), index);
 } // End updateWithModifier
 
 
@@ -717,8 +705,6 @@ void Planner::updatePathsStart(const MotionState s) {
     population_.paths_.at(i).all_.erase (population_.paths_.at(i).all_.begin());
     population_.paths_.at(i).all_.insert(population_.paths_.at(i).all_.begin(), s);
   } 
-
-  modifier_->updateAll(population_.paths_);
 
   //std::cout<<"\nLeaving updatePathsStart\n";
 } // End updatePathsStart

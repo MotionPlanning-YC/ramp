@@ -1,13 +1,10 @@
 #include "modifier.h"
 
 
-Modifier::Modifier(const ros::NodeHandle& h, const unsigned int n) : num_ops(n), i_changed1(-1), i_changed2(-1) {
+Modifier::Modifier(const ros::NodeHandle& h, const unsigned int n) : num_ops(n) {
   h_mod_req_ = new ModificationRequestHandler(h);
 }
 
-Modifier::Modifier(const ros::NodeHandle& h, const std::vector<Path> ps, const unsigned int n) : num_ops(n), paths_(ps), i_changed1(-1), i_changed2(-1) {
-  h_mod_req_ = new ModificationRequestHandler(h);
-}
 
 Modifier::~Modifier() {
   if(h_mod_req_ != 0) {
@@ -17,22 +14,8 @@ Modifier::~Modifier() {
 }
 
 
-void Modifier::updateAll(std::vector<Path> ps) {
-  paths_.clear();
-  
-  for(unsigned int i=0;i<ps.size()-1;i++) {
-    paths_.push_back(ps.at(i));
-  }
-
-  paths_.push_back(ps.at(ps.size()-1));
-}
-
-void Modifier::update(const Path p, const unsigned int i) {
-  paths_.at(i) = p;
-}
-
-
 /** This method returns a random operator */
+// TODO: Make an enum for operators
 const std::string Modifier::getOperator() const {
   std::string result;  
   
@@ -78,34 +61,25 @@ const std::string Modifier::getOperator() const {
 
 
 /** This method generates the random paths to use for the modification operator passed in as op argument */
-const std::vector<int> Modifier::getTargets(const std::string op) {
-  std::vector<int> result;
+const std::vector<Path> Modifier::getTargets(const std::string op, const Population pop) {
+  std::vector<Path> result;
 
   // Get random path(s) to modify
-  unsigned int i_p1;
-  i_p1 = rand() % paths_.size();
-
-  // Set i_changed1
-  i_changed1 = i_p1;
+  unsigned int i_p1 = rand() % pop.size();
   
   // Push on i_p1
-  result.push_back(i_p1);
+  result.push_back(pop.paths_.at(i_p1));
 
   // If crossover, get a second path
   if(op == "crossover") {
     unsigned int i_p2;
-    do { i_p2 = rand() % paths_.size(); } 
+    do { i_p2 = rand() % pop.size(); } 
     while (i_p1 == i_p2);
-
-    // Set i_changed2
-    i_changed2 = i_p2;
   
     // Push on i_p1
-    result.push_back(i_p2);
+    result.push_back(pop.paths_.at(i_p2));
   } // end if crossover 
 
-  // Else, no second path  
-  else {i_changed2 = -1;}
 
 
   return result;
@@ -116,18 +90,18 @@ const std::vector<int> Modifier::getTargets(const std::string op) {
  * This method builds a ModificationRequest srv 
  * For stop operator, the path can be retreived from srv
  * */
-const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
+const ramp_msgs::ModificationRequest Modifier::buildModificationRequest(const Population pop) {
   ramp_msgs::ModificationRequest result;
 
   result.request.op = getOperator();
   //std::cout<<"\nOperator: "<<result.request.op<<"\n";
 
+  // Get indices of target paths
+  std::vector<Path> targets = getTargets(result.request.op, pop);
+  
   // Push the target paths onto the modification request
-  std::vector<int> targets = getTargets(result.request.op);
   for(unsigned int i=0;i<targets.size();i++) {
-    //std::cout<<"\nTarget path "<<i<<" index: "<<targets.at(i);
-    //std::cout<<"\nPath "<<targets.at(i)<<" size: "<<paths_.at(targets.at(i)).size()<<"\n";
-    result.request.paths.push_back(paths_.at(targets.at(i)).buildPathMsg());
+    result.request.paths.push_back(targets.at(i).buildPathMsg());
   }
 
   return result;
@@ -135,35 +109,19 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest() {
 
 
 
-const Path Modifier::stop(Path p) {
-  // p was the random path chosen
-  
-  // Randomly choose a point in p
-  int i_point = rand() % (p.size()-1);
-
-  // Maximum of 4 seconds to stop
-  int time = (rand() % 4) + 1;
-
-  //p.all_.at(i_point).stop_time_ = time;
-
-  // Push on the values to stop_points and stop_times
-  //p.stop_points_.push_back(i_point);
-  //p.stop_times_.push_back(time);
-
-  return p;
-}
 
 
 
 /** This method performs all the tasks for path modification */
-const std::vector<Path> Modifier::perform() {
+const std::vector<Path> Modifier::perform(const Population pop) {
   std::vector<Path> result;
  
   // Build a modification request srv 
-  ramp_msgs::ModificationRequest mr = buildModificationRequest(); 
+  ramp_msgs::ModificationRequest mr = buildModificationRequest(pop); 
 
 
   // Check if the operation changes the path
+  // TODO: Implement Stop operator with Reflexxes
   if(mr.request.op == "stop") {
     // Call stop with the path chosen by buildModificationRequest
     //Path temp = stop(mr.request.paths.at(0));

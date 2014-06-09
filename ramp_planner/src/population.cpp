@@ -1,5 +1,10 @@
 #include "population.h"
 
+/*************************************
+ * The paths_ vector must be changed * 
+ * any time trajectories_ is changed *
+ *************************************/
+
 Population::Population() : i_best_(-1), maxSize_(6), changed_(false) {}
 
 Population::Population(const uint8_t maxSize) : i_best_(-1), maxSize_(maxSize), changed_(false) {}
@@ -10,27 +15,40 @@ const unsigned int Population::size() const { return trajectories_.size(); }
 
 void Population::clear() { 
   trajectories_.clear(); 
+  paths_.clear();
   changed_ = true;
 }
 
 
+/** This method replaces the trajectory at index i with the trajectory passed in as trajec. It also updates the paths_ vector */
 void Population::replace(uint8_t i, const RampTrajectory trajec) {
   changed_ = true;
   trajectories_.at(i) = trajec;
-}
+  paths_.at(i) = trajec.getPath();
+} // End replace
 
+
+
+/** This method replaces the whole population with a new set of trajectories. The paths_ vector is updated with the paths of the new trajectories. */
 const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
   if(new_pop.size() == trajectories_.size()) {
-    trajectories_ = new_pop;
     changed_ = true;
+
+    // Set trajectories and update paths
+    trajectories_ = new_pop;
+    for(uint8_t i=0;i<new_pop.size();i++) {
+      paths_.at(i) = new_pop.at(i).getPath();
+    }
+    
     return true;
   }
   
   return false;
-}
+} // End replaceAll
 
 
 
+/** This method returns the minimum fitness of the population */
 const int Population::getMinFitness() const {
   int result = trajectories_.at(0).fitness_;
 
@@ -41,28 +59,128 @@ const int Population::getMinFitness() const {
   }
   
   return result;
+} // End getMinFitness
+
+
+
+
+/** This method returns true if there is at least one feasible trajectory in the population */
+const bool Population::feasibleExists() const {
+  for(uint8_t i=0;i<trajectories_.size();i++) {
+    if(trajectories_.at(i).feasible_) {
+      return true;
+    }
+  }
+
+  return false;
+} // End feasibleExists
+
+
+
+/** This method returns true if there is at least one infeasible trajectory in the population */
+const bool Population::infeasibleExists() const {
+  for(uint8_t i=0;i<trajectories_.size();i++) {
+    if(!trajectories_.at(i).feasible_) {
+      return true;
+    }
+  }
+
+  return false;
+} // End infeasibleExists
+
+
+
+/** This method checks if a trajectory can replace an existing trajectory in the population */
+const bool Population::replacementPossible(const RampTrajectory rt) const {
+
+  // If the fitness is not higher than the minimum fitness
+  if(rt.fitness_ <= getMinFitness()) {
+    return false;
+  }
+  
+  // If the trajectory is infeasible and
+  // no infeasible trajectories exist, no
+  // trajectories can be replaced
+  if(!rt.feasible_ && !infeasibleExists()) {
+    return false;
+  } 
+
+  // If each subpopulation has <= 1 trajectory,
+  // no trajectories can be replaced
+  bool subPops=false;
+  std::vector<uint8_t> valid_subPops;
+  for(uint8_t i=0;i<subPopulations_.size();i++) {
+    if(subPopulations_.size() > 1) {
+      subPops = true;
+      valid_subPops.push_back(i);
+    }
+  }
+  if(valid_subPops.size() == 0) {
+    return false;
+  }
+
+  // If the valid sub-populations have only feasible trajectories
+  // no trajectories can be replaced
+  if(!rt.feasible_) {
+    bool valid=false;
+    for(uint8_t i=0;i<valid_subPops.size();i++) {
+      if(subPopulations_.at(valid_subPops.at(i)).infeasibleExists()) {
+        valid = true;
+      } 
+    }
+
+    if(!valid)
+      return false;
+  }
+
+  return true;
 }
 
 
 
 
+/** This method returns true if rt can replace the trajectory at index i */
+const bool Population::canReplace(const RampTrajectory rt, const int i) const {
+  if(i == i_best_) {
+    return false;
+  }
+
+  if(!rt.feasible_ && trajectories_.at(i).feasible_) {
+    return false;
+  }
 
 
+  return true;
+}
+
+
+
+
+/** This method determines which trajectory (if any) in the 
+ * population will be replaced if the population is full when 
+ * adding a trajectory to it
+ * A result of -1 means no trajectories could be removed 
+ *   - Will happen if rt is infeasible and the rest are feasible
+ *   - or if each sub-population has <= 1 trajectory */
 const int Population::getReplacementID(const RampTrajectory rt) const {
+  
+  // If the trajectory is infeasible and
+  // no infeasible trajectories exist, no
+  // trajectories can be replaced
   int result;
-
+  
   // Generate a random index for a random trajectory to remove
-  do {result = rand() % maxSize_;}
-
-  // Conditions for a valid replacement: 
-  // Cannot replace the best trajectory
-  // If infeasible, cannot replace any feasible trajectory
-  while(result == i_best_ &&
-      (!rt.feasible_ && trajectories_.at(result).feasible_) );
+  do {result = rand() % trajectories_.size();}
+  
+  // Keep getting a random index until it 
+  // is an index that rt can replace
+  while(!canReplace(rt, result));
 
   
   return result;
-}
+} // End getReplacementID
+
+
 
 
 
@@ -81,17 +199,11 @@ const int Population::add(const RampTrajectory rt) {
   } 
 
   // If full, replace a trajectory
-  else if(rt.fitness_ > getMinFitness()) {
+  else if(replacementPossible(rt)) {
 
-    // Generate a random index for a random trajectory to remove
-    // Don't pick the fittest trajectory!!
-/*    unsigned int i;
-    do {i = rand() % maxSize_;}
-    while(i == i_best_ &&
-        rt.feasible_ != trajectories_.at(i).feasible_);*/
+    // Generate an index for the trajectory to remove
     int i = getReplacementID(rt);
 
-  
     //Remove the random trajectory
     trajectories_.erase(trajectories_.begin()+i);
     paths_.erase(paths_.begin()+i);
@@ -99,10 +211,13 @@ const int Population::add(const RampTrajectory rt) {
     //Push back the new trajectory
     trajectories_.insert(trajectories_.begin()+i, rt);
     paths_.insert(paths_.begin()+i, rt.getPath());
-
+  
     return i;
   }
 
+  // If the trajectory could not be added, 
+  // set changed_ to false and return an error code
+  changed_ = false;
   return -1;
 } //End add
 
