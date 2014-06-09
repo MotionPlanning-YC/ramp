@@ -21,6 +21,7 @@ class Population {
     const bool              replaceAll(const std::vector<RampTrajectory> new_pop);
     const RampTrajectory    get(const uint8_t i);
     const int               getMinFitness() const;
+    const int               selectForModification();
 
 
     const std::string       fitnessFeasibleToString() const;
@@ -34,6 +35,9 @@ class Population {
     std::vector<Path> paths_;
     
   private:
+
+    const int getReplacementID(const RampTrajectory rt) const;
+
     int                         i_best_;
     std::vector<RampTrajectory> trajectories_;
     unsigned int                maxSize_;

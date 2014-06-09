@@ -45,6 +45,27 @@ const int Population::getMinFitness() const {
 
 
 
+
+
+
+const int Population::getReplacementID(const RampTrajectory rt) const {
+  int result;
+
+  // Generate a random index for a random trajectory to remove
+  do {result = rand() % maxSize_;}
+
+  // Conditions for a valid replacement: 
+  // Cannot replace the best trajectory
+  // If infeasible, cannot replace any feasible trajectory
+  while(result == i_best_ &&
+      (!rt.feasible_ && trajectories_.at(result).feasible_) );
+
+  
+  return result;
+}
+
+
+
 /** This method adds a trajectory to the population. 
  *  If the population is full, a random trajectory (that isn't the best one) is replaced
  *  Returns the index that the trajectory is added at 
@@ -64,10 +85,11 @@ const int Population::add(const RampTrajectory rt) {
 
     // Generate a random index for a random trajectory to remove
     // Don't pick the fittest trajectory!!
-    unsigned int i;
+/*    unsigned int i;
     do {i = rand() % maxSize_;}
     while(i == i_best_ &&
-        rt.feasible_ != trajectories_.at(i).feasible_);
+        rt.feasible_ != trajectories_.at(i).feasible_);*/
+    int i = getReplacementID(rt);
 
   
     //Remove the random trajectory

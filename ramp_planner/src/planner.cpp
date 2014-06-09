@@ -636,7 +636,6 @@ void Planner::modification() {
     mod_trajec.at(i) = evaluateTrajectory(mod_trajec.at(i));
     //std::cout<<"\nAfter evaluation, time_until_collision: "<<mod_trajec.at(i).time_until_collision_;
 
-    std::cout<<"\nmodified fitness: "<<mod_trajec.at(i).fitness_;
     if(mod_trajec.at(i).fitness_ > population_.getMinFitness()) {
     
       // Add the new trajectory to the population
@@ -793,7 +792,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     
     if( (generation_-1) % 50 == 0) {
       std::cout<<"\nPlanning cycle "<<generation_-1<<" complete\n";
-      std::cout<<"\nPop: "<<population_.fitnessFeasibleToString();
+      //std::cout<<"\nPop: "<<population_.fitnessFeasibleToString();
     }
 
     c_pc_++;
@@ -1082,12 +1081,14 @@ const MotionState Planner::findAverageDiff() {
   h_control_->send(empty);
   
   std::cout<<"\nPlanning complete!";
+  
+  std::cout<<"\nFinal population: ";
+  std::cout<<"\n"<<population_.toString();
+  
   std::cout<<"\nLatest update: "<<latestUpdate_.toString();
   std::cout<<"\nLatest start: "<<start_.toString();
   std::cout<<"\nLatest startPlanning_: "<<startPlanning_.toString();
   //std::cout<<"\nbestTrajec: "<<bestTrajec_.toString()<<"\n";
   
 
-  //std::cout<<"\nFinal population: ";
-  //std::cout<<"\n"<<pathsToString(); 
 } // End go
