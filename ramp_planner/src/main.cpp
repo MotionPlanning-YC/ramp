@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
 
 
   /** Initialize the Planner's handlers */ 
-  my_planner.init(id, handle, start, goal, ranges); 
+  my_planner.init(id, handle, start, goal, ranges, 3); 
 
   std::cout<<"\nStart: "<<my_planner.start_.toString();
   std::cout<<"\nGoal: "<<my_planner.goal_.toString();

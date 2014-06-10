@@ -87,7 +87,7 @@ class Planner {
     
     // Initialization 
     void initPopulation();
-    void init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r);
+    void init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r, const unsigned int popSize);
     
     // Send the best trajectory to the control package
     void sendBest();
@@ -191,9 +191,6 @@ class Planner {
     // Utility instance
     Utility             utility_; 
 
-    // Size of population
-    const unsigned int  populationSize_;
-
     // Generation counter
     unsigned int        generation_;
 
@@ -223,9 +220,13 @@ class Planner {
 
     // Flag for if the control cycles have started
     bool                cc_started_;
+
+    // Flag for if sub-populations are being used
+    bool                subPopulations_;
     
     // Number of planning cycles since last control cycle
-    int c_pc_;
+    // Necessary because setting m_i can crash if c_pc not managed
+    int                 c_pc_;
 
 
     // Handlers to communicate with other packages

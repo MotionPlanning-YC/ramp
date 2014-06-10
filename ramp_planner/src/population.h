@@ -17,25 +17,30 @@ class Population {
     const int               add(const RampTrajectory rt);
     const unsigned int      findBest();
     void                    clear();
-    void                    replace(const uint8_t i, const RampTrajectory trajec);
-    const bool              replaceAll(const std::vector<RampTrajectory> new_pop);
+
+    void                    replace(const uint8_t i, 
+                          const RampTrajectory trajec);
+
+    const bool              replaceAll(const 
+                          std::vector<RampTrajectory> new_pop);
+
     const RampTrajectory    get(const uint8_t i);
     const int               getMinFitness() const;
 
     const bool              feasibleExists() const;
     const bool              infeasibleExists() const;
 
+    const std::vector<Population> createSubPopulations
+                              (const double delta_theta=PI/3.);
 
 
     const std::string       fitnessFeasibleToString() const;
     const std::string       toString() const;
     ramp_msgs::Population   populationMsg();
-    
-    const std::vector<Population> createSubPopulations
-                              (const double delta_theta=PI/3.);
 
     /** Data Members */
     std::vector<Path> paths_;
+    unsigned int      maxSize_;
     
   private:
 
@@ -45,7 +50,6 @@ class Population {
 
     int                         i_best_;
     std::vector<RampTrajectory> trajectories_;
-    unsigned int                maxSize_;
     bool                        changed_;
     std::vector<Population>     subPopulations_;
 };

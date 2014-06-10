@@ -19,6 +19,7 @@ class RampTrajectory {
     float                 time_until_collision_;
     Path                  path_;
     float                 resolutionRate_;
+    int                   subPopulation_;
 
     const trajectory_msgs::JointTrajectoryPoint getPointAtTime(const float t)       const;
     const double                                getDirection()                      const;

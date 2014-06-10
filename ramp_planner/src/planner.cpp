@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(5), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), generationsBeforeCC_(100), cc_started_(false), c_pc_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
+Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), generationsBeforeCC_(100), cc_started_(false), subPopulations_(true), c_pc_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
 {
   controlCycle_ = ros::Duration(1.f / 5.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
@@ -141,7 +141,7 @@ void Planner::initStartGoal(const MotionState s, const MotionState g) {
 
 
 /** Initialize the handlers and allocate them on the heap */
-void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r) {
+void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r, const unsigned int popSize) {
 
   // Set ID
   id_ = i;
@@ -175,6 +175,10 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
 
   // Set the base transformation
   setT_base_w(start_.positions_);
+
+  // Set population size
+  population_.maxSize_ = popSize;
+  
 } // End init
 
 
@@ -447,7 +451,7 @@ const std::vector<RampTrajectory> Planner::getTrajectories(const std::vector<Pat
 void Planner::initPopulation() { 
   
   // Create n random paths, where n=populationSize
-  for(unsigned int i=0;i<populationSize_;i++) {
+  for(unsigned int i=0;i<population_.maxSize_;i++) {
     
     // Create the path with the start and goal
     Path temp_path(start_, goal_);
@@ -487,9 +491,6 @@ void Planner::initPopulation() {
   for(unsigned int i=0;i<trajecs.size();i++) {
     population_.add(trajecs.at(i));
   }
-
-  // Evaluate the population 
-  bestTrajec_ = evaluateAndObtainBest();
 } // End init_population
 
 
@@ -712,7 +713,7 @@ void Planner::updatePathsStart(const MotionState s) {
 
 
 void Planner::planningCycleCallback(const ros::TimerEvent&) {
-  //std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
+  std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
   
   //std::cout<<"\nAfter generation "<<generation_<<", population: "<<population_.fitnessFeasibleToString();
   //std::cout<<"\nBest: "<<bestTrajec_.toString();
@@ -783,6 +784,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
     c_pc_++;
   }
+  std::cout<<"\nPlanning cycle "<<generation_<<" completed\n";
 } // End planningCycleCallback
 
 
@@ -827,6 +829,11 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     
     // Build m_i
     setMi();
+
+    // If using sub-populations, create them now
+    if(subPopulations_) {
+      population_.createSubPopulations();
+    }
   } 
   
   // Set flag showing that CCs have started
@@ -1017,26 +1024,22 @@ const MotionState Planner::findAverageDiff() {
   
   // initialize population
   initPopulation();
-  //seedPopulation();
 
-  std::cout<<"\nPopulation initialized!\n";
-  std::cout<<"\npaths_.size(): "<<population_.size()<<"\n";
-  for(unsigned int i=0;i<population_.size();i++) {
-    std::cout<<"\nPath "<<i<<": "<<population_.paths_.at(i).toString();
+  // Evaluate the population 
+  bestTrajec_ = evaluateAndObtainBest();
+  
+  //std::cout<<"\nPopulation initialized: ";
+  //std::cout<<"\n"<<population_.fitnessFeasibleToString();
+
+  // If sub-populations are used, create them after initialization
+  if(subPopulations_) {
+    population_.createSubPopulations();
+    std::cout<<"\nAfter sub-populations:"<<population_.toString()<<"\n";
+    std::cin.get();
   }
-  std::cout<<"\n";
-  // std::cout<<"\nPress enter to continue\n";
-  // std::cin.get();
 
   sendPopulation();
-
-  population_.createSubPopulations();
-  std::cout<<"\n\nAfter Sub-Populations: "<<population_.toString()<<"\n";
-   std::cin.get();
   
-
-  /** TODO */
-  // createSubpopulations();
   
   // Start the planning cycle timer
   planningCycleTimer_.start();
