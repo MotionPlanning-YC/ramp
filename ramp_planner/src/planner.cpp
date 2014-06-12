@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), generationsBeforeCC_(100), cc_started_(false), subPopulations_(true), c_pc_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
+Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(2.f), generationsBeforeCC_(100), cc_started_(false), subPopulations_(false), c_pc_(0), delta_theta_(PI/3.), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
 {
   controlCycle_ = ros::Duration(1.f / 5.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
@@ -273,7 +273,9 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
        
         // Get the knot point 
         trajectory_msgs::JointTrajectoryPoint point = population_.get(i).msg_trajec_.trajectory.points.at( population_.get(i).msg_trajec_.index_knot_points.at(i_kp));
-        // std::cout<<"\npoint["<<i<<"].time_from_start:"<<point.time_from_start;
+        //if(i_kp == 1 && point.time_from_start.toSec() < 2) {
+          //std::cout<<"\ni: "<<i<<", point["<<i_kp<<"].time_from_start:"<<point.time_from_start;
+        //}
 
         // Compare the durations
         if( dur > point.time_from_start) {
@@ -298,7 +300,7 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
       // Insert the new starting configuration
       population_.paths_.at(i).all_.insert( population_.paths_.at(i).all_.begin(), start);
 
-      // Set start_ to be the new starting configuration of the path
+      // Set the path's start_ member to be the new starting configuration of the path
       population_.paths_.at(i).start_ = start;
     } // end outer for
   } // end if
@@ -336,6 +338,7 @@ const bool Planner::checkOrientation() const {
 /** This method updates the population with the current configuration 
  *  The duration is used to determine which knot points still remain in the trajectory */
 void Planner::adaptPopulation(ros::Duration d) {
+  std::cout<<"\nd: "<<d.toSec();
   
   /** First, get the updated current configuration */
 
@@ -487,11 +490,13 @@ void Planner::initPopulation() {
   // Get trajectories for the paths
   std::vector<RampTrajectory> trajecs = getTrajectories(population_.paths_);
 
+  std::cout<<"\nIn initPopulation\n";
   // Add each trajectory to the population
   for(unsigned int i=0;i<trajecs.size();i++) {
     population_.add(trajecs.at(i));
   }
-} // End init_population
+  std::cout<<"\nLeaving initPopulation\n";
+} // End initPopulation
 
 
 
@@ -615,11 +620,16 @@ void Planner::modification() {
 
   // Modify 1 or more trajectories
   std::vector<RampTrajectory> mod_trajec = modifyTrajec();
+  //std::cout<<"\nmod_trajec.size(): "<<mod_trajec.size();
   
 
   // Evaluate and add the modified trajectories to the population
   // and update the planner and the modifier on the new paths
   for(unsigned int i=0;i<mod_trajec.size();i++) {
+
+
+    // Create sub-populations
+    population_.createSubPopulations(delta_theta_);
 
     // Evaluate the new trajectory
     mod_trajec.at(i) = evaluateTrajectory(mod_trajec.at(i));
@@ -632,8 +642,14 @@ void Planner::modification() {
       // (may replace another)
       int index = population_.add(mod_trajec.at(i));
 
-      // Update the path in the planner and the modifier
-      updateWithModifier(index, mod_trajec.at(i).path_);
+      // If it was successfully added,
+      // Update the path 
+      //if(index > -1) {
+        //updateWithModifier(index, mod_trajec.at(i).path_);
+      //}
+    }
+    else {
+      //std::cout<<"\nmod_trajec.at("<<i<<").fitness: "<<mod_trajec.at(i).fitness_<<", population min fitness: "<<population_.getMinFitness()<<"\n";
     }
   } // end for
 
@@ -766,7 +782,6 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
       population_.replaceAll(trajecs);
     }
 
-
     
     // Call modification
     modification();
@@ -784,7 +799,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
     c_pc_++;
   }
-  std::cout<<"\nPlanning cycle "<<generation_<<" completed\n";
+  std::cout<<"\nPlanning cycle "<<generation_-1<<" completed\n";
 } // End planningCycleCallback
 
 
@@ -831,9 +846,9 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     setMi();
 
     // If using sub-populations, create them now
-    if(subPopulations_) {
-      population_.createSubPopulations();
-    }
+    /*if(subPopulations_) {
+      population_.createSubPopulations(delta_theta_);
+    }*/
   } 
   
   // Set flag showing that CCs have started
@@ -1033,7 +1048,8 @@ const MotionState Planner::findAverageDiff() {
 
   // If sub-populations are used, create them after initialization
   if(subPopulations_) {
-    population_.createSubPopulations();
+    std::cout<<"\nCreating sub-populations\n";
+    population_.createSubPopulations(delta_theta_);
     std::cout<<"\nAfter sub-populations:"<<population_.toString()<<"\n";
     std::cin.get();
   }

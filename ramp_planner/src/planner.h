@@ -228,6 +228,9 @@ class Planner {
     // Necessary because setting m_i can crash if c_pc not managed
     int                 c_pc_;
 
+    // Delta theta for sub-populations
+    double              delta_theta_;
+
 
     // Handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
