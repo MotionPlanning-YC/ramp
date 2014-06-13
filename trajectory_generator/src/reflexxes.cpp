@@ -191,17 +191,9 @@ void Reflexxes::setSelectionVector(const bool rotational) {
 
 // Service callback, the input is a path and the output a trajectory
 bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) {
-  /*if(req.cc_started) {
-    std::cout<<"\nRequest received\n";
-    std::cout<<"\nReceived request: "<<utility.toString(req.path)<<"\n";
-    std::cout<<"\nDone printing path\n";
-  }*/
+  //std::cout<<"\nReceived request: "<<utility.toString(req.path)<<"\n";
   //std::cin.get();
   
-  ros::Time start = ros::Time::now();
-  ros::Duration threshold(1);
-
-
   // Store the path
   path = req.path;
 
@@ -232,15 +224,6 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ra
 
       // Compute the motion state at t+1 and save it in the trajectory
       res.trajectory.trajectory.points.push_back(spinOnce());
-
-      /*if(ros::Time::now() - start > threshold) {
-        if(req.cc_started) {
-          std::cout<<"\nRequest received\n";
-          std::cout<<"\nReceived request: "<<utility.toString(req.path)<<"\n";
-          std::cout<<"\nDone printing path\n";
-          std::cout<<"\nTrajectory: "<<utility.toString(res.trajectory);
-        }
-      }*/
     }
 
     // Once we reached the target, we set that the latest point is a knotpoint
