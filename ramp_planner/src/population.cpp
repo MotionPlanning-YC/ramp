@@ -25,7 +25,7 @@ void Population::clear() {
 void Population::replace(uint8_t i, const RampTrajectory trajec) {
   changed_ = true;
   trajectories_.at(i) = trajec;
-  paths_.at(i) = trajec.getPath();
+  paths_.at(i) = trajec.path_;
 } // End replace
 
 
@@ -38,7 +38,7 @@ const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
     // Set trajectories and update paths
     trajectories_ = new_pop;
     for(uint8_t i=0;i<new_pop.size();i++) {
-      paths_.at(i) = new_pop.at(i).getPath();
+      paths_.at(i) = new_pop.at(i).path_;
     }
     
     return true;
@@ -97,7 +97,7 @@ const bool Population::replacementPossible(const RampTrajectory rt) const {
 
   // If the fitness is not higher than the minimum fitness
   if(rt.fitness_ <= getMinFitness()) {
-    //std::cout<<"\nfitness < min fitness, not possible\n";
+    std::cout<<"\nfitness < min fitness, not possible\n";
     return false;
   }
   
@@ -105,12 +105,13 @@ const bool Population::replacementPossible(const RampTrajectory rt) const {
   // no infeasible trajectories exist, no
   // trajectories can be replaced
   if(!rt.feasible_ && !infeasibleExists()) {
-    //std::cout<<"\nrt infeasible, no other infeasible, not possible\n";
+    std::cout<<"\nrt infeasible, no other infeasible, not possible\n";
     return false;
   } 
 
   /** IF subpopulations are being used */
   if(subPopulations_.size() > 0) {
+    std::cout<<"\nIn sub-pops\n";
     
     // If each subpopulation has <= 1 trajectory,
     // no trajectories can be replaced
@@ -239,9 +240,11 @@ const int Population::add(const RampTrajectory rt) {
   changed_ = true;
   //std::cout<<"\nIn add\n";
 
-  // Go through each sub-population and find best
-  for(uint8_t i=0;i<subPopulations_.size();i++) {
-    subPopulations_.at(i).findBest();
+  if(subPopulations_.size() > 0) {
+    // Go through each sub-population and find best
+    for(uint8_t i=0;i<subPopulations_.size();i++) {
+      subPopulations_.at(i).findBest();
+    }
   }
  
   // If not full, simply push back
@@ -270,6 +273,7 @@ const int Population::add(const RampTrajectory rt) {
   }
 
 
+  std::cout<<"\nCould not add trajectory\n";
   // If the trajectory could not be added, 
   // set changed_ to false and return an error code
   changed_ = false;
@@ -405,7 +409,8 @@ const std::string Population::toString() const {
   // Otherwise, print population as a whole
   else {
     for(unsigned int i=0;i<trajectories_.size();i++) {
-      result<<"\nTrajectory "<<i<<": "<<trajectories_.at(i).path_.toString();
+      //result<<"\nTrajectory "<<i<<": "<<trajectories_.at(i).path_.toString();
+      result<<"\nTrajectory "<<i<<": "<<paths_.at(i).toString();
     }
   }
 

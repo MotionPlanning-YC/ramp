@@ -272,7 +272,10 @@ int main(int argc, char** argv) {
   std::cout<<"\n"<<u.displaceAngle(PI/2, 7*PI/4);*/
 
   std::cout<<"\nSpinning...\n";
-  ros::spin();
+  
+  // Create a multi-threaded spinner because this service node is used so heavily
+  ros::MultiThreadedSpinner spinner(4); 
+  spinner.spin(); 
 
 
   std::cout<<"\nExiting Normally\n";

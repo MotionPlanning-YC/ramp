@@ -19,8 +19,8 @@ Reflexxes::Reflexxes() {
   inputParameters->MaxVelocityVector->VecData[2] = PI/4;
 
   // Maximum acceleration
-  inputParameters->MaxAccelerationVector->VecData[0] = 0.33;
-  inputParameters->MaxAccelerationVector->VecData[1] = 0.33;
+  inputParameters->MaxAccelerationVector->VecData[0] = 0.5;
+  inputParameters->MaxAccelerationVector->VecData[1] = 0.5;
   inputParameters->MaxAccelerationVector->VecData[2] = PI;
 
   // As the maximum jerk values are not known, this is just to try
@@ -167,12 +167,11 @@ void Reflexxes::setTarget(const ramp_msgs::KnotPoint kp) {
 
 
 /** This method sets the SelectionVector based on the path p */
-void Reflexxes::setSelectionVector(const ramp_msgs::Path p) {
+void Reflexxes::setSelectionVector(const bool rotational) {
 
   // If the x,y positions are different, this should 
   // be a translational trajectory, otherwise rotational
-  if(utility.getEuclideanDist(p.points.at(0), 
-              p.points.at(p.points.size()-1)) > 0.0001) 
+  if(!rotational) 
   {
     inputParameters->SelectionVector->VecData[0] = true;
     inputParameters->SelectionVector->VecData[1] = true;
@@ -192,18 +191,25 @@ void Reflexxes::setSelectionVector(const ramp_msgs::Path p) {
 
 // Service callback, the input is a path and the output a trajectory
 bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) {
-  //std::cout<<"\nReceived request: "<<utility.toString(req)<<"\n";
+  /*if(req.cc_started) {
+    std::cout<<"\nRequest received\n";
+    std::cout<<"\nReceived request: "<<utility.toString(req.path)<<"\n";
+    std::cout<<"\nDone printing path\n";
+  }*/
   //std::cin.get();
+  
+  ros::Time start = ros::Time::now();
+  ros::Duration threshold(1);
 
 
   // Store the path
   path = req.path;
-  
+
   // Set the initial conditions of the reflexxes library
   setInitialConditions();
 
   // Set SelectionVector
-  setSelectionVector(path);
+  setSelectionVector(req.rotational);
 
   // Push 0 onto knot point indices
   res.trajectory.index_knot_points.push_back(0);
@@ -226,6 +232,15 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ra
 
       // Compute the motion state at t+1 and save it in the trajectory
       res.trajectory.trajectory.points.push_back(spinOnce());
+
+      /*if(ros::Time::now() - start > threshold) {
+        if(req.cc_started) {
+          std::cout<<"\nRequest received\n";
+          std::cout<<"\nReceived request: "<<utility.toString(req.path)<<"\n";
+          std::cout<<"\nDone printing path\n";
+          std::cout<<"\nTrajectory: "<<utility.toString(res.trajectory);
+        }
+      }*/
     }
 
     // Once we reached the target, we set that the latest point is a knotpoint
@@ -235,7 +250,8 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ra
   
   // Set the trajectory's resolution rate
   res.trajectory.resolution_rate = CYCLE_TIME_IN_SECONDS;
-
+ 
+  
   //std::cout<<"\nReturning: "<<utility.toString(res.trajectory)<<"\n";
   //std::cin.get();
   return true;
@@ -254,7 +270,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ra
  **/
 void Reflexxes::setInitialConditions() {
   
-  // Initialise the time
+  // Initialize the time
   time_from_start = ros::Duration(0);
   
 

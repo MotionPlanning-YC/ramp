@@ -2,7 +2,7 @@
 
 
 ModificationRequestHandler::ModificationRequestHandler(const ros::NodeHandle& h) : handle_(h) {
-  client_ = handle_.serviceClient<ramp_msgs::ModificationRequest>("/path_modification");
+  client_ = handle_.serviceClient<ramp_msgs::ModificationRequest>("/path_modification", true);
 }
 
 

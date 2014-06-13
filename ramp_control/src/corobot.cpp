@@ -375,6 +375,8 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() {
 
   //std::cout<<"\nRotation path: "<<utility_.toString(tr.request.path);
       
+  tr.request.rotational = true;
+
   // Send request
   if(h_traj_req_->request(tr)) {
     result = tr.response.trajectory;  

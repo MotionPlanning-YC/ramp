@@ -2,7 +2,7 @@
 
 
 EvaluationRequestHandler::EvaluationRequestHandler(const ros::NodeHandle& h) : handle_(h) {
-  client_ = handle_.serviceClient<ramp_msgs::EvaluationRequest>("trajectory_evaluation");
+  client_ = handle_.serviceClient<ramp_msgs::EvaluationRequest>("trajectory_evaluation", true);
 }
 
 

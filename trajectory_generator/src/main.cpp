@@ -13,14 +13,16 @@ int main(int argc, char** argv)
   // Variable Declaration
   Reflexxes reflexxes;
   ros::NodeHandle n;
-  geometry_msgs::Twist twist;
 
 
   // Declare the service that gives a path and returns a trajectory
   ros::ServiceServer service = n.advertiseService("trajectory_generator", &Reflexxes::trajectoryRequest, &reflexxes);
 
   std::cout<<"\nWaiting for requests...\n";
-  ros::spin();
+
+  // Use a multithreaded spinner since the node is used so heavily
+  ros::MultiThreadedSpinner spinner; 
+  spinner.spin();
 
   return 0; 
 }

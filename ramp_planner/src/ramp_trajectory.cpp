@@ -30,8 +30,19 @@ const Path RampTrajectory::getPath() const {
 }
 
 
-/** Time is in seconds */
+/** 
+ * This method returns the point on the trajectory at time t 
+ * Time is in seconds 
+ **/
 const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const float t) const {
+  
+  // If the time is greater than trajectory's length
+  // Return the last point
+  if( (t / resolutionRate_) >= msg_trajec_.trajectory.points.size() ) {
+    return msg_trajec_.trajectory.points.at( 
+              msg_trajec_.trajectory.points.size()-1 );
+  }
+
   return msg_trajec_.trajectory.points.at( (t / resolutionRate_) );
 }
 

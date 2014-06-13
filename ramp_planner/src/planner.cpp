@@ -9,7 +9,7 @@ Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalT
 {
   controlCycle_ = ros::Duration(1.f / 5.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
-  imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
+  imminentCollisionCycle_ = ros::Duration(1.f / 15.f);
   generationsPerCC_ = controlCycle_.toSec() / planningCycle_.toSec();
 }
 
@@ -72,7 +72,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
 
 
 
-/** 
+/**
  * Sets the latest update member
  * and transformes it by T_base_w because 
  * updates are relative to odometry frame
@@ -238,7 +238,7 @@ void Planner::seedPopulation() {
       population_.add(temp);
     }
     else {
-      // some error handling
+      ROS_ERROR("Error occurred when requesting trajectory");
     }
   } // end for
 
@@ -256,8 +256,8 @@ void Planner::seedPopulation() {
  * its time_from_start is <= the Duration argument
  * */
 void Planner::adaptPaths(MotionState start, ros::Duration dur) {
-   //std::cout<<"\nUpdating start to: "<<start.toString();
-   //std::cout<<"\ndur: "<<dur<<"\n";
+  //std::cout<<"\nUpdating start to: "<<start.toString();
+  //std::cout<<"\ndur: "<<dur<<"\n";
 
   if(dur.toSec() > 0) {
 
@@ -273,9 +273,6 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
        
         // Get the knot point 
         trajectory_msgs::JointTrajectoryPoint point = population_.get(i).msg_trajec_.trajectory.points.at( population_.get(i).msg_trajec_.index_knot_points.at(i_kp));
-        //if(i_kp == 1 && point.time_from_start.toSec() < 2) {
-          //std::cout<<"\ni: "<<i<<", point["<<i_kp<<"].time_from_start:"<<point.time_from_start;
-        //}
 
         // Compare the durations
         if( dur > point.time_from_start) {
@@ -286,7 +283,6 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
         }
       } // end inner for
 
-      //std::cout<<"\nthrowaway: "<<throwaway;
 
       // If the whole path has been passed, adjust throwaway so that 
       //  we are left with a path that is: {new_start_, goal_}
@@ -304,7 +300,7 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
       population_.paths_.at(i).start_ = start;
     } // end outer for
   } // end if
-} // End updatePaths
+} // End adaptPaths
 
 
 
@@ -338,7 +334,6 @@ const bool Planner::checkOrientation() const {
 /** This method updates the population with the current configuration 
  *  The duration is used to determine which knot points still remain in the trajectory */
 void Planner::adaptPopulation(ros::Duration d) {
-  std::cout<<"\nd: "<<d.toSec();
   
   /** First, get the updated current configuration */
 
@@ -367,6 +362,9 @@ void Planner::adaptPopulation(ros::Duration d) {
       // Push onto updatedTrajecs
       updatedTrajecs.push_back(temp);
     } // end if
+    else {
+      ROS_ERROR("Error occurred when requesting trajectory");
+    }
   } // end for
 
   // Replace the population's trajectories_ with the updated trajectories
@@ -435,7 +433,7 @@ const std::vector<RampTrajectory> Planner::getTrajectories(const std::vector<Pat
       result.push_back(temp);
     }
     else {
-      // some error handling
+      ROS_ERROR("Error occurred when requesting trajectory");
     }
   } // end for
 
@@ -490,12 +488,10 @@ void Planner::initPopulation() {
   // Get trajectories for the paths
   std::vector<RampTrajectory> trajecs = getTrajectories(population_.paths_);
 
-  std::cout<<"\nIn initPopulation\n";
   // Add each trajectory to the population
   for(unsigned int i=0;i<trajecs.size();i++) {
     population_.add(trajecs.at(i));
   }
-  std::cout<<"\nLeaving initPopulation\n";
 } // End initPopulation
 
 
@@ -524,7 +520,9 @@ const RampTrajectory Planner::getChangingTrajectory() const {
 
     ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
 
-    h_traj_req_->request(tr);
+    if(!h_traj_req_->request(tr)) {
+      ROS_ERROR("Error occurred when requesting trajectory");
+    }
 
     RampTrajectory toSend;
     toSend.msg_trajec_ = tr.response.trajectory;
@@ -592,6 +590,9 @@ const std::vector<RampTrajectory> Planner::modifyTrajec() {
       result.push_back(temp);
   
     } // end if
+    else {
+      ROS_ERROR("Error occurred when requesting trajectory");
+    }
   } // end for
   
   return result;
@@ -629,7 +630,9 @@ void Planner::modification() {
 
 
     // Create sub-populations
-    population_.createSubPopulations(delta_theta_);
+    if(subPopulations_) {
+      population_.createSubPopulations(delta_theta_);
+    }
 
     // Evaluate the new trajectory
     mod_trajec.at(i) = evaluateTrajectory(mod_trajec.at(i));
@@ -684,12 +687,12 @@ void Planner::modification() {
 
 const MotionState Planner::predictStartPlanning() const {
   //std::cout<<"\nIn predictStartPlanning\n";
+  
   MotionState result;
 
   // If the orientation is not satisfied, 
   if(!checkOrientation()) {
     result = start_;
-    //d = ros::Duration(0);
   }
   else {
     //std::cout<<"\nc_pc: "<<c_pc_<<" m_i.size(): "<<m_i.size()<<" latestUpdate_.size(): "<<latestUpdate_.positions_.size()<<"\n";
@@ -770,15 +773,12 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     if(cc_started_) {
       // Update startPlanning
       startPlanning_ = predictStartPlanning();
-      //std::cout<<"\nAfter prediction, startPlanning: "<<startPlanning_.toString()<<"\n";
-      
 
       // Generate new trajectories
       // Update paths with startPlanning
       updatePathsStart(startPlanning_);
       
       std::vector<RampTrajectory> trajecs = getTrajectories(population_.paths_);
-      //std::cout<<"\ntrajecs.size(): "<<trajecs.size()<<"\n";
       population_.replaceAll(trajecs);
     }
 
@@ -799,6 +799,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
     c_pc_++;
   }
+
   std::cout<<"\nPlanning cycle "<<generation_-1<<" completed\n";
 } // End planningCycleCallback
 
@@ -836,11 +837,14 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
 
     // Set m_cc_ and startPlanning
     // The motion state that we should reach by the next control cycle
+    //m_cc_ = bestTrajec_.msg_trajec_.trajectory.points.at( (controlCycle_.toSec() / resolutionRate_));
     m_cc_ = bestTrajec_.getPointAtTime(controlCycle_.toSec());
     startPlanning_ = m_cc_;
     
+    
     // After m_cc_ and startPlanning are set, update the population
     adaptPopulation(controlCycle_);
+
     
     // Build m_i
     setMi();
@@ -855,6 +859,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   if(!cc_started_) {
     cc_started_ = true;
   }
+  
   //std::cout<<"\nControl cycle complete\n";
 } // End controlCycleCallback
 
@@ -877,6 +882,8 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
 
   result.request.path           = path.buildPathMsg();
   result.request.resolutionRate = resolutionRate_;
+
+  result.request.rotational     = false;
 
   return result;
 } // End buildTrajectoryRequest
