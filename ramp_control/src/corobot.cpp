@@ -214,11 +214,14 @@ void Corobot::calculateSpeedsAndTime () {
     trajectory_msgs::JointTrajectoryPoint current = trajectory_.trajectory.points.at(i);
     trajectory_msgs::JointTrajectoryPoint next    = trajectory_.trajectory.points.at(i+1);
 
-
     // Push on the linear speed for the waypoint
     // Find the norm of the velocity vector
-    speeds.push_back( sqrt(pow(current.velocities.at(0),2)
-                           + pow(current.velocities.at(1),2) ));
+    double s = sqrt(pow(current.velocities.at(0),2) + pow(current.velocities.at(1),2) );
+    /*if(s < 0.1) {
+      s = 0.1;
+    }*/
+    
+    speeds.push_back(s);
 
     // Find which knot point is next
     int kp, kp_prev=0;
@@ -309,7 +312,6 @@ const bool Corobot::checkImminentCollision() const {
 /** 
  * Returns true if the robot has orientation to move 
  * from point i to point i+1
- * sets backwards_ member
  **/
 const bool Corobot::checkOrientation(const int i, const bool simulation) {
   //std::cout<<"\nIn checkOrientation";
@@ -332,12 +334,16 @@ const bool Corobot::checkOrientation(const int i, const bool simulation) {
 
 
   // If the points are the same, theta_prime will be 0
-  if(theta_prime == 0 && utility_.planarDistance(trajectory_.trajectory.points.at(i).positions, trajectory_.trajectory.points.at(kp).positions) < 0.01) {
+  if(theta_prime == 0 && utility_.planarDistance(trajectory_.trajectory.points.at(i).positions, trajectory_.trajectory.points.at(kp).positions) < 0.1) {
     return true;
   }
 
   // If the change in orientation is too large, return false
   else if( (!simulation && delta_theta > PI/12) || (simulation && delta_theta > PI/24) ) {
+
+    std::cout<<"\nPoint "<<i<<"\n  "<<utility_.toString(trajectory_.trajectory.points.at(i));
+    std::cout<<"\nPoint "<<kp<<"\n  "<<utility_.toString(trajectory_.trajectory.points.at(kp));
+    std::cout<<"\ntheta_prime: "<<theta_prime<<" actual_theta_: "<<actual_theta_<<" delta_theta: "<<delta_theta;
     return false;
   }
 
@@ -365,6 +371,7 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() {
   temp2.motionState = motion_state_;
 
   double theta_gap = utility_.findDistanceBetweenAngles(actual_theta_, orientations_.at(num_traveled_));
+  std::cout<<"\nactual_theta: "<<actual_theta_<<" orientations_.at("<<num_traveled_<<"): "<<orientations_.at(num_traveled_)<<" theta_gap: "<<theta_gap;
 
   // Set the target theta
   temp2.motionState.positions.at(2) = theta_gap;
@@ -373,7 +380,7 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() {
   tr.request.path.points.push_back(temp1);
   tr.request.path.points.push_back(temp2);
 
-  //std::cout<<"\nRotation path: "<<utility_.toString(tr.request.path);
+  std::cout<<"\nRotation path: "<<utility_.toString(tr.request.path);
       
   tr.request.rotational = true;
 
@@ -382,7 +389,7 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() {
     result = tr.response.trajectory;  
   }
 
-  //std::cout<<"\nRotation trajectory: "<<utility_.toString(result);
+  std::cout<<"\nRotation trajectory: "<<utility_.toString(result)<<"\n";
   return result;
 } // End getRotationTrajectory
 
@@ -482,7 +489,6 @@ void Corobot::moveOnTrajectory(bool simulation) {
       twist_.angular.z  = 0;
     
       if(!simulation) {
-
         // When driving straight, adjust the angular speed 
         // to maintain orientation
         if(fabs(twist_.linear.x) > 0.0f) {

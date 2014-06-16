@@ -17,7 +17,7 @@
 <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" /> 
 
 
-<rosparam file="$(find ramp_launch)/launch/config/robot_1.yaml" command="load" ns="robot_info/" />
+<rosparam file="$(find ramp_launch)/launch/config/robot_0.yaml" command="load" ns="robot_info/" />
 
 
 </launch>

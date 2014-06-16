@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(2.f), generationsBeforeCC_(100), cc_started_(false), subPopulations_(false), c_pc_(0), delta_theta_(PI/3.), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
+Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(2.f), generationsBeforeCC_(100), cc_started_(false), subPopulations_(false), c_pc_(0), delta_theta_(PI/3.), simulation_(true), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
 {
   controlCycle_ = ros::Duration(1.f / 5.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
@@ -324,8 +324,10 @@ const bool Planner::checkOrientation() const {
   }
 
   float diff = fabs(utility_.findDistanceBetweenAngles(actual_theta, t));
+  //std::cout<<"\nactual_theta: "<<actual_theta<<" t: "<<t<<" diff: "<<diff;
+  //std::cout<<"\ncheckOrientation result: "<<( (!simulation_ && diff <= PI/12.) || (simulation_ && diff <= PI/24.) );
 
-  return (diff <= PI/12.f);
+  return ( (!simulation_ && diff <= PI/12.) || (simulation_ && diff <= PI/24.) );
 } // End checkOrientation
 
 
@@ -333,14 +335,14 @@ const bool Planner::checkOrientation() const {
 
 /** This method updates the population with the current configuration 
  *  The duration is used to determine which knot points still remain in the trajectory */
-void Planner::adaptPopulation(ros::Duration d) {
+void Planner::adaptPopulation(const MotionState ms, const ros::Duration d) {
   
   /** First, get the updated current configuration */
 
   
   // ***** TODO: PREDICT DURATION *****
   // Update the paths with the new starting configuration 
-  adaptPaths(m_cc_, d);
+  adaptPaths(ms, d);
 
   // Create the vector to hold updated trajectories
   std::vector<RampTrajectory> updatedTrajecs;
@@ -678,9 +680,6 @@ void Planner::modification() {
 
 
   //std::cout<<"\npopulation: "<<population_.fitnessFeasibleToString();
-  
-  // Send the new population to the trajectory viewer
-  sendPopulation();
 } // End modification
 
 
@@ -800,6 +799,9 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     c_pc_++;
   }
 
+  
+  // Send the new population to the trajectory viewer
+  sendPopulation();
   std::cout<<"\nPlanning cycle "<<generation_-1<<" completed\n";
 } // End planningCycleCallback
 
@@ -813,18 +815,20 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 void Planner::controlCycleCallback(const ros::TimerEvent&) {
   //std::cout<<"\nControl cycle occurring\n";
   
-  
-  /** TODO **/
-  // Create subpopulations in P(t)
-
 
   if(!stop_) {
+
     //std::cout<<"\nstartPlanning: "<<startPlanning_.toString();
     //std::cout<<"\nlatestUpdate: "<<latestUpdate_.toString()<<"\n";
     SP_LU_diffs_.push_back(startPlanning_.subtract(latestUpdate_));
 
     // Reset planning cycle count
     c_pc_ = 0;
+
+    // If using sub-populations, create them now
+    if(subPopulations_) {
+      population_.createSubPopulations(delta_theta_);
+    }
 
     // Evaluate entire population
     bestTrajec_ = evaluateAndObtainBest();
@@ -837,22 +841,16 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
 
     // Set m_cc_ and startPlanning
     // The motion state that we should reach by the next control cycle
-    //m_cc_ = bestTrajec_.msg_trajec_.trajectory.points.at( (controlCycle_.toSec() / resolutionRate_));
     m_cc_ = bestTrajec_.getPointAtTime(controlCycle_.toSec());
     startPlanning_ = m_cc_;
     
     
     // After m_cc_ and startPlanning are set, update the population
-    adaptPopulation(controlCycle_);
+    adaptPopulation(m_cc_, controlCycle_);
 
     
     // Build m_i
     setMi();
-
-    // If using sub-populations, create them now
-    /*if(subPopulations_) {
-      population_.createSubPopulations(delta_theta_);
-    }*/
   } 
   
   // Set flag showing that CCs have started
@@ -915,17 +913,17 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
 /** Send the fittest feasible trajectory to the robot package */
 void Planner::sendBest() {
 
+    // If infeasible and too close to obstacle, 
+    // Stop the robot by sending a blank trajectory
+    if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < 2.f)) {
+      std::cout<<"\nCollision within 2 seconds! Stopping robot!\n";
+    }
+    else if(!bestTrajec_.feasible_) {
+      std::cout<<"\nBest trajectory is not feasible! Time until collision: "<<bestTrajec_.time_until_collision_;
+    }
+    
+    h_control_->send(bestTrajec_.msg_trajec_);
 
-  // If infeasible and too close to obstacle, 
-  // Stop the robot by sending a blank trajectory
-  if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < 2.f)) {
-    std::cout<<"\nCollision within 2 seconds! Stopping robot!\n";
-  }
-  else if(!bestTrajec_.feasible_) {
-    std::cout<<"\nBest trajectory is not feasible! Time until collision: "<<bestTrajec_.time_until_collision_;
-  }
-  
-  h_control_->send(bestTrajec_.msg_trajec_);
 } // End sendBest
 
 

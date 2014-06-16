@@ -110,7 +110,7 @@ class Planner {
     bool requestEvaluation(ramp_msgs::EvaluationRequest& er);
 
     // Update the population 
-    void adaptPopulation(ros::Duration d);
+    void adaptPopulation(const MotionState ms, const ros::Duration d);
 
     // Display all of the paths
     const std::string pathsToString() const;
@@ -230,6 +230,9 @@ class Planner {
 
     // Delta theta for sub-populations
     double              delta_theta_;
+
+    // Flag for using a simulation or not
+    bool                simulation_;
 
 
     // Handlers to communicate with other packages

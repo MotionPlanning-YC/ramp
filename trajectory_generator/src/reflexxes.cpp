@@ -19,9 +19,9 @@ Reflexxes::Reflexxes() {
   inputParameters->MaxVelocityVector->VecData[2] = PI/4;
 
   // Maximum acceleration
-  inputParameters->MaxAccelerationVector->VecData[0] = 0.5;
-  inputParameters->MaxAccelerationVector->VecData[1] = 0.5;
-  inputParameters->MaxAccelerationVector->VecData[2] = PI;
+  inputParameters->MaxAccelerationVector->VecData[0] = 0.33;
+  inputParameters->MaxAccelerationVector->VecData[1] = 0.33;
+  inputParameters->MaxAccelerationVector->VecData[2] = PI/4;
 
   // As the maximum jerk values are not known, this is just to try
   inputParameters->MaxJerkVector->VecData[0] = 1;
