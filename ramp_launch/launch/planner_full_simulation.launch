@@ -16,7 +16,7 @@
 
 
 <!-- Planner -->
-<node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" />
+<node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" /> 
 
 
 <!-- Simulation -->

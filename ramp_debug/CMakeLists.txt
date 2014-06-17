@@ -48,3 +48,8 @@ add_executable(imminent_collision src/imminent_collision.cpp)
 set_target_properties(imminent_collision PROPERTIES COMPILE_FLAGS -std=c++0x)
 target_link_libraries(imminent_collision ${catkin_LIBRARIES})
 add_dependencies(imminent_collision ramp_msgs_generate_messages_cpp)
+
+add_executable(interrupt_trajectory src/interrupt_trajectory.cpp src/utility.cpp)
+set_target_properties(interrupt_trajectory PROPERTIES COMPILE_FLAGS -std=c++0x)
+target_link_libraries(interrupt_trajectory ${catkin_LIBRARIES})
+add_dependencies(interrupt_trajectory ramp_msgs_generate_messages_cpp)

@@ -16,12 +16,12 @@ Reflexxes::Reflexxes() {
   // Maximum velocity   
   inputParameters->MaxVelocityVector->VecData[0] = .33;
   inputParameters->MaxVelocityVector->VecData[1] = .33;
-  inputParameters->MaxVelocityVector->VecData[2] = PI/3;
+  inputParameters->MaxVelocityVector->VecData[2] = PI/4;
 
   // Maximum acceleration
   inputParameters->MaxAccelerationVector->VecData[0] = 0.33;
   inputParameters->MaxAccelerationVector->VecData[1] = 0.33;
-  inputParameters->MaxAccelerationVector->VecData[2] = PI/3;
+  inputParameters->MaxAccelerationVector->VecData[2] = PI;
 
   // As the maximum jerk values are not known, this is just to try
   inputParameters->MaxJerkVector->VecData[0] = 1;
@@ -53,17 +53,15 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce() {
   // Calling the Reflexxes OTG algorithm
   resultValue = rml->RMLPosition(*inputParameters, outputParameters, flags);
 
-  // the input of the next iteration is the output of this one
+
+  /** Build the JointTrajectoryPoint object that will be used to build the trajectory */
+  trajectory_msgs::JointTrajectoryPoint point = buildTrajectoryPoint(*outputParameters);
+
+
+  // The input of the next iteration is the output of this one
   *inputParameters->CurrentPositionVector = *outputParameters->NewPositionVector;
   *inputParameters->CurrentVelocityVector = *outputParameters->NewVelocityVector;
   *inputParameters->CurrentAccelerationVector = *outputParameters->NewAccelerationVector;
-
-
-
-  /** Build the JointTrajectoryPoint object that will be used to build the trajectory */
-  
-  // Lets first put the new position to the trajectory point, we get it from the output of reflexxes
-  trajectory_msgs::JointTrajectoryPoint point = buildTrajectoryPoint(*outputParameters);
 
   return point;
 } // End spinOnce
@@ -76,21 +74,30 @@ trajectory_msgs::JointTrajectoryPoint Reflexxes::spinOnce() {
 
 
 /** This method will return a JointTrajectoryPoint given some output parameters from Reflexxes */
-const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(const RMLPositionOutputParameters outputParameters) {
+const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(const RMLPositionOutputParameters my_outputParameters) {
   trajectory_msgs::JointTrajectoryPoint point;
 
   
   // Push on the p, v, and a vectors
   for(unsigned int i=0;i<NUMBER_OF_DOFS;i++) {
     if(inputParameters->SelectionVector->VecData[i]) {
-      point.positions.push_back(outputParameters.NewPositionVector->VecData[i]);
-      point.velocities.push_back(outputParameters.NewVelocityVector->VecData[i]);
-      point.accelerations.push_back(outputParameters.NewAccelerationVector->VecData[i]);
+      point.positions.push_back(my_outputParameters.NewPositionVector->VecData[i]);
+      point.velocities.push_back(my_outputParameters.NewVelocityVector->VecData[i]);
+      point.accelerations.push_back(my_outputParameters.NewAccelerationVector->VecData[i]);
     }
-    else {
-      point.positions.push_back(0);
+    else if(i == 2) {
+      double p = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],
+                                          inputParameters->CurrentPositionVector->VecData[1],
+                                          my_outputParameters.NewPositionVector->VecData[0],
+                                          my_outputParameters.NewPositionVector->VecData[1]);
+      point.positions.push_back(p);
       point.velocities.push_back(0);
       point.accelerations.push_back(0);
+    }
+    else {
+      point.positions.push_back(inputParameters->CurrentPositionVector->VecData[i]);
+      point.velocities.push_back(inputParameters->CurrentVelocityVector->VecData[i]);
+      point.accelerations.push_back(inputParameters->CurrentAccelerationVector->VecData[i]);
     }
   }
 
@@ -119,10 +126,11 @@ const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(cons
       point.velocities.push_back(my_inputParameters.CurrentVelocityVector->VecData[i]);
       point.accelerations.push_back(my_inputParameters.CurrentAccelerationVector->VecData[i]);
     }
+
     else {
-      point.positions.push_back(0);
-      point.velocities.push_back(0);
-      point.accelerations.push_back(0);
+      point.positions.push_back(inputParameters->CurrentPositionVector->VecData[i]);
+      point.velocities.push_back(inputParameters->CurrentVelocityVector->VecData[i]);
+      point.accelerations.push_back(inputParameters->CurrentAccelerationVector->VecData[i]);
     }
   }
 
@@ -164,7 +172,7 @@ void Reflexxes::setSelectionVector(const ramp_msgs::Path p) {
   // If the x,y positions are different, this should 
   // be a translational trajectory, otherwise rotational
   if(utility.getEuclideanDist(p.points.at(0), 
-              p.points.at(p.points.size()-1)) > 0) 
+              p.points.at(p.points.size()-1)) > 0.0001) 
   {
     inputParameters->SelectionVector->VecData[0] = true;
     inputParameters->SelectionVector->VecData[1] = true;
@@ -269,7 +277,6 @@ void Reflexxes::setInitialConditions() {
   // This is the latest acceleration value got from the path
   if(path.points.at(0).motionState.accelerations.size() > 0) {
     for(unsigned int i=0;i<NUMBER_OF_DOFS;i++) {
-      //std::cout<<"\npath.points.at(0).motionState.accelerations.at("<<i<<"): "<<path.points.at(0).motionState.accelerations.at(i);
       inputParameters->CurrentAccelerationVector->VecData[i] = path.points.at(0).motionState.accelerations.at(i);
     }
   }
@@ -282,18 +289,18 @@ void Reflexxes::setInitialConditions() {
 
 
 // Compute the orientation needed to reach the target, given an initial position
-float Reflexxes::computeTargetOrientation(float initial_x, float initial_y, float target_x, float target_y) {
+double Reflexxes::computeTargetOrientation(double initial_x, double initial_y, double target_x, double target_y) {
   //We need to recalculate the target orientation
   // For that we first need to create a vector for the current position and the target position
-  std::vector<float> current_position;
+  std::vector<double> current_position;
   current_position.push_back(initial_x);
   current_position.push_back(initial_y);
 
-  std::vector<float> target_position;
+  std::vector<double> target_position;
   target_position.push_back(target_x);
   target_position.push_back(target_y);
 
-  float angle = utility.findAngleFromAToB(current_position, target_position);
+  double angle = utility.findAngleFromAToB(current_position, target_position);
 
   return angle;
 }

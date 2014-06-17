@@ -67,7 +67,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   //std::cout<<"\nQuery on "<<utility.toString(trajectory_)<<" \n*******and*******\n"<<utility.toString(ob_trajectory);
   CollisionDetection::QueryResult result;
 
-  /*if(ob_trajectory.trajectory.points.size() == 0) {
+  /*if(ob_trajectory.trajectory.points.size() <= 2) {
     if(id == 0)
       std::cout<<"\nObstacle 1 has no trajectory!\n";
     else  
@@ -83,7 +83,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
 
     // ***Test position i for collision against some points on obstacle's trajectory***
     // Obstacle trajectory should already be in world coordinates!
-    for(int j = (i>0 ? i-1 : 0) ;j<i+1 && j<ob_trajectory.trajectory.points.size();j++) {
+    for(int j = (i>20 ? i-1 : 0) ;j<i+20 && j<ob_trajectory.trajectory.points.size();j++) {
 
       // Get the jth point of the obstacle's trajectory
       trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
@@ -91,6 +91,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // Get the distance between the centers
       float dist = sqrt( pow(p_i.positions.at(0) - p_ob.positions.at(0),2) + pow(p_i.positions.at(1) - p_ob.positions.at(1),2) );
         
+
       // If the distance between the two centers is less than the sum of the two radii, 
       // there is collision
       if( dist <= radius*2 ) {
@@ -101,6 +102,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       } // end if
     } // end for
   } // end for
+
 
   return result;
 } //End query

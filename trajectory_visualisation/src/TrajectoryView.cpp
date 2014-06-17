@@ -149,18 +149,12 @@ void TrajectoryView::drawPopulation() {
       //std::cout<<"\npoints[0]: ("<<points.at(0).positions.at(0)<<", "<<points.at(0).positions.at(1)<<")\n";
 
       // Green for robot 1 and feasible
-      if(populations_.at(p).robot_id == 0 && populations_.at(p).population.at(t).feasible && t==populations_.at(p).best_id) {
+      if(populations_.at(p).robot_id == 0 && populations_.at(p).population.at(t).feasible) {
         pen = QPen( QColor(0, 255, 0, 255) );
       }
-      else if(populations_.at(p).robot_id == 0 && populations_.at(p).population.at(t).feasible) {
-        pen = QPen( QColor(0, 255, 0, 200) );
-      }
       // Blue for robot 2 and feasible
-      else if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible && t==populations_.at(p).best_id) {
-        pen = QPen( QColor(0,0,255,255) );
-      }
       else if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible) {
-        pen = QPen( QColor(0,0,255,200) );
+        pen = QPen( QColor(0,0,255,255) );
       }
       
       // Else, if either are in collision, red
@@ -170,9 +164,9 @@ void TrajectoryView::drawPopulation() {
 
       // If the best trajectory, set to red
       // Used for single robot traj viewing
-      if(t == i) {
-        pen = QPen( QColor(255,0,0,150) );
-      }
+      //if(t == i) {
+        //pen = QPen( QColor(255,0,0,150) );
+      //}
 
 
       if(points.size() == 1) {
@@ -182,7 +176,7 @@ void TrajectoryView::drawPopulation() {
 
         this->scene()->addEllipse(metersToPixels(p.at(0), true),
                                     metersToPixels(p.at(1), false),
-                                    metersToPixels(0.33f, true), metersToPixels(0.33f, false), pen);
+                                    metersToPixels(0.55f, true), metersToPixels(0.55f, false), pen);
       } //end if 1 point
 
       else if (points.size() > 0) {
@@ -191,8 +185,8 @@ void TrajectoryView::drawPopulation() {
 
           // If the first point
           if(j == 0) {
-            int radius = metersToPixels(0.275, true);
-            // Draw a line to the next point
+            int radius = metersToPixels(0.5, true);
+            // Draw a circle
             this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true)-radius,
                                       metersToPixels(points.at(j).positions.at(1), false)+radius,
                                       metersToPixels(0.55, true), metersToPixels(0.55, false));

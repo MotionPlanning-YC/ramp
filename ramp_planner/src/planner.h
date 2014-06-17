@@ -1,5 +1,6 @@
 #ifndef PLANNER_H
 #define PLANNER_H
+
 #include "ros/ros.h"
 #include "path.h"
 #include "ramp_trajectory.h"
@@ -11,10 +12,6 @@
 #include "population.h"
 #include "control_handler.h"
 #include "parameter_handler.h"
-
-struct ModifiedTrajectory {
-  RampTrajectory trajec_;
-};
 
 class Planner {
   public:
@@ -32,7 +29,6 @@ class Planner {
     // the trajectory's path,
     // and the resolution rate for the trajectories
     Population                          population_;
-    std::vector<Path>                   paths_;
     const float                         resolutionRate_;
     
     // Hold the start and goal configurations
@@ -43,6 +39,8 @@ class Planner {
 
     // Starting motion state for planning cycle
     MotionState startPlanning_;
+
+    MotionState latestUpdate_;
     
     
     // The most fit trajectory in the population
@@ -89,7 +87,7 @@ class Planner {
     
     // Initialization 
     void initPopulation();
-    void init(const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r, const int population_size, const bool sub_populations);
+    void init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r);
     
     // Send the best trajectory to the control package
     void sendBest();
@@ -98,52 +96,63 @@ class Planner {
     void sendPopulation();
 
     // Evaluate the population 
-    void                  evaluateTrajectory(RampTrajectory& trajec);
+    const RampTrajectory  evaluateTrajectory(RampTrajectory trajec);
     void                  evaluatePopulation();
     const RampTrajectory  evaluateAndObtainBest();
     
     // Modify trajectory or path
     const std::vector<Path> modifyPath();
-    const std::vector<ModifiedTrajectory> modifyTrajec();
+    const std::vector<RampTrajectory> modifyTrajec();
 
     // Request information from other packages
     // Cannot make the request srvs const because they have no serialize/deserialize
     bool requestTrajectory(ramp_msgs::TrajectoryRequest& tr);
     bool requestEvaluation(ramp_msgs::EvaluationRequest& er);
 
-    // Get the starting configuration
-    MotionState getStartConfiguration();
 
     // Update the population 
-    void updatePopulation(ros::Duration d);
+    void adaptPopulation(ros::Duration d);
 
     // Display all of the paths
     const std::string pathsToString() const;
 
     // Set the transformation from odometry to world CS
-    void setT_base_w(std::vector<float> base_pos);
+    void setT_base_w(std::vector<double> base_pos);
 
     // Callback for receiving updates from the ramp_control
     void updateCallback(const ramp_msgs::MotionState& msg);
 
+    // Sets the m_i vector
+    void setMi();
 
+    // Motion state that should be reached by next control cycle
+    MotionState m_cc_;
+
+    // Each element is the target motion state 
+    // for each of i planning cycles
+    std::vector<MotionState> m_i;
+    
+
+
+
+    // Hold the difference between previous startPlanning 
+    // and latestUpdate for each control cycle
+    std::vector<MotionState> SP_LU_diffs_;
+    const MotionState findAverageDiff();
   
   private:
-    /** These are (mostly) utility members that are only used by Planner and should not be used by other classes*/
+    /** These are (mostly) utility members that are only used by Planner and should not be used by other classes */
 
 
     /***** Methods *****/
     
     // Initialize start and goal
     void initStartGoal(const MotionState s, const MotionState g);
-
-    // This gets the new velocities for path segments after a path has been updated
-    const std::vector< std::vector<float> > getNewVelocities(std::vector<Path> new_path, std::vector<int> i_old);
     
     // Updates the paths in P(t) so we can get new trajectories
-    void updatePaths(MotionState start, ros::Duration dur);
+    void adaptPaths(MotionState start, ros::Duration dur);
 
-    // Returns an id for a RampTrajectory 
+    // Returns a unique id for a RampTrajectory 
     unsigned int getIRT();
 
     // Adjust the trajectory so that the robot does not
@@ -160,48 +169,68 @@ class Planner {
 
     // Msg building methods
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
-              const unsigned int i_path ) const;
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
-              const Path path ) const;
-    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const unsigned int i_path);
-    const ramp_msgs::EvaluationRequest buildEvaluationRequest(const RampTrajectory trajec);
+              const Path path ) const           ;
+    const ramp_msgs::EvaluationRequest buildEvaluationRequest(
+              const RampTrajectory trajec)      ;
 
     // Misc
-    const bool        checkOrientation() const; 
-    const void        randomizeMSPositions(MotionState& ms) const;
+    const bool checkOrientation()                           const ; 
+    const void randomizeMSPositions(MotionState& ms)        const ;
+          void checkTrajChange()                                  ;
+          void seedPopulation()                                   ;
+    const RampTrajectory  getChangingTrajectory() const ;
+    const MotionState     predictStartPlanning() const  ;
 
+
+    const std::vector<RampTrajectory> getTrajectories(const std::vector<Path> p);
+    void updatePathsStart(const MotionState s);
 
 
     /***** Data members *****/
 
     // Utility instance
-    Utility utility_; 
+    Utility             utility_; 
 
     // Size of population
-    unsigned int populationSize_;
+    const unsigned int  populationSize_;
 
     // Generation counter
-    unsigned int generation_;
-    
-    // Mutex for start_ and population
-    bool mutex_start_;
-    bool mutex_pop_;
+    unsigned int        generation_;
 
     // ID counter for trajectories
-    unsigned int i_rt;
+    unsigned int        i_rt;
 
     // Last time P(t) was updated
-    ros::Time lastUpdate_;
+    ros::Time           lastUpdate_;
 
     // How far we need to get to the goal before stopping
-    float goalThreshold_;
+    float               goalThreshold_;
 
     // Number of modification operators 
-    unsigned int num_ops_;
+    unsigned int        num_ops_;
 
     // Distance threshold for imminent collision
-    float D_;
+    float               D_;
+
+    // Index of previous best trajectory
+    unsigned int        i_best_prev_;
+
+    // Number of generations to wait before starting control cycles
+    unsigned int        generationsBeforeCC_;
+
+    // Maximum number of generations to occur between control cycles
+    unsigned int        generationsPerCC_;
+
+    // Flag for if the control cycles have started
+    bool                cc_started_;
+
+    // Flag for if sub-populations are being used
+    bool                subPopulations_;
     
+    // Number of planning cycles since last control cycle
+    int c_pc_;
+
+
     // Handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
     EvaluationRequestHandler*   h_eval_req_;
@@ -209,7 +238,12 @@ class Planner {
     Modifier*                   modifier_;
 
     // Parameter handler
-    ParameterHandler p_handler_;
+    ParameterHandler            h_parameters_;
+
+
+
+    // Stop things for debugging
+    bool stop_;
 };
 
 #endif

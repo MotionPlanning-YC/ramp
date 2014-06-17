@@ -12,24 +12,39 @@ class MotionState {
 
     /***** Data Members *****/
     // Motion vectors
-    std::vector<float> positions_;
-    std::vector<float> velocities_;
-    std::vector<float> accelerations_;
-    std::vector<float> jerks_;
+    std::vector<double> positions_;
+    std::vector<double> velocities_;
+    std::vector<double> accelerations_;
+    std::vector<double> jerks_;
 
     // Time
     double time_;
 
     /***** Methods *****/
-    double  comparePosition(const MotionState& ms, bool base_theta) const;
+    const double  comparePosition(const MotionState& ms, 
+                            const bool base_theta) const;
     void    transformBase(const tf::Transform t);
+
+    const MotionState add(const MotionState m) const;
+    const MotionState subtract(const MotionState m) const; 
+    const MotionState multiply(const int num) const;
+    const MotionState divide(const int num) const;
+    const MotionState abs() const;
+    const double      norm() const;
+    const double      normPosition() const;
+    const double      normVelocity() const;
+    const double      normAcceleration() const;
+    const double      normJerk() const;
+    
     
     const   ramp_msgs::MotionState buildMotionStateMsg() const;
     const   std::string toString() const;
 
+    
+
   private:
     
-    Utility utility;
+    Utility utility_;
     unsigned int mobile_base_k_;
     
     tf::Vector3 transformBasePosition(const tf::Transform t);

@@ -20,17 +20,18 @@ class Utility {
 
     std::vector<ramp_msgs::Range> standardRanges;
     
-    const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;
+    const double planarDistance(const std::vector<double> a, const std::vector<double> b) const;
 
-    const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;
-    const float findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;
+    const double findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const;
+    const double findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;
     
-    const float findDistanceBetweenAngles(const float a1, const float a2) const;
+    const double findDistanceBetweenAngles(const double a1, const double a2) const;
     
-    const float displaceAngle(const float a1, float a2) const;
+    const double displaceAngle(const double a1, double a2) const;
     
-    const float getEuclideanDist(const std::vector<float> a, std::vector<float> b) const;
+    const double getEuclideanDist(const std::vector<double> a, std::vector<double> b) const;
     
+    const std::string toString(const trajectory_msgs::JointTrajectoryPoint p) const;
     const std::string toString(const ramp_msgs::Trajectory traj) const;
     const std::string toString(const ramp_msgs::Path p) const;
     const std::string toString(const ramp_msgs::MotionState c) const;
