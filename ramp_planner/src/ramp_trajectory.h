@@ -19,10 +19,13 @@ class RampTrajectory {
     float                 time_until_collision_;
     Path                  path_;
     float                 resolutionRate_;
+    int                   subPopulation_;
 
     const bool                                  equal(const RampTrajectory& other)  const;
     const Path                                  getPath()                           const;
     const trajectory_msgs::JointTrajectoryPoint getPointAtTime(const float t)       const;
+
+    const double                                getDirection() const;
 
     const RampTrajectory                        clone() const;
     
@@ -30,7 +33,7 @@ class RampTrajectory {
     const std::string                           toString()                          const;
 
   private:
-    Utility u;
+    Utility utility_;
 };
 
 

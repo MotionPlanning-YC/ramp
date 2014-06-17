@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(3), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(2.f), generationsBeforeCC_(100), cc_started_(false), c_pc_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
+Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(6), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(2.f), generationsBeforeCC_(100), cc_started_(false), subPopulations_(true), c_pc_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
 {
   controlCycle_ = ros::Duration(1.f / 5.f);
   planningCycle_ = ros::Duration(1.f / 25.f);
@@ -150,7 +150,7 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
   h_traj_req_ = new TrajectoryRequestHandler(h);
   h_control_  = new ControlHandler(h);
   h_eval_req_ = new EvaluationRequestHandler(h);
-  modifier_   = new Modifier(h, paths_, num_ops_);
+  modifier_   = new Modifier(h, num_ops_);
 
   // Initialize the timers, but don't start them yet
   controlCycleTimer_ = h.createTimer(ros::Duration(controlCycle_), 
@@ -180,7 +180,7 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
 
 
 void Planner::seedPopulation() {
-  paths_.clear();
+  population_.paths_.clear();
   population_.clear();
   
   Path p_one(start_, goal_);
@@ -211,14 +211,14 @@ void Planner::seedPopulation() {
 
   p_two.Add(ms_two);
 
-  paths_.push_back(p_one);
-  paths_.push_back(p_two);
+  population_.paths_.push_back(p_one);
+  population_.paths_.push_back(p_two);
   
   // For each path
-  for(unsigned int i=0;i<paths_.size();i++) {
+  for(unsigned int i=0;i<population_.paths_.size();i++) {
 
     // Build a TrajectoryRequest 
-    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(paths_.at(i));
+    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(population_.paths_.at(i));
     
     // Send the request and push the returned Trajectory onto population_
     if(requestTrajectory(msg_request)) {
@@ -228,7 +228,7 @@ void Planner::seedPopulation() {
       temp.msg_trajec_ = msg_request.response.trajectory;
 
       // Set trajectory path
-      temp.path_ = paths_.at(i);
+      temp.path_ = population_.paths_.at(i);
 
       
       // Add the trajectory to the population
@@ -241,9 +241,6 @@ void Planner::seedPopulation() {
 
   evaluatePopulation();
   std::cout<<"\nPopulation after seed: "<<population_.fitnessFeasibleToString();
-
-  // Update the modifier
-  modifier_->updateAll(paths_);
 } // End seedPopulation
 
 
@@ -287,23 +284,19 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
 
       // If the whole path has been passed, adjust throwaway so that 
       //  we are left with a path that is: {new_start_, goal_}
-      if( throwaway >= paths_.at(i).size() ) { 
-        throwaway = paths_.at(i).size()-1;
+      if( throwaway >= population_.paths_.at(i).size() ) { 
+        throwaway = population_.paths_.at(i).size()-1;
       } 
       
       // Erase the amount of throwaway points (points we have already passed)
-      paths_.at(i).all_.erase( paths_.at(i).all_.begin(), paths_.at(i).all_.begin()+throwaway );
+      population_.paths_.at(i).all_.erase( population_.paths_.at(i).all_.begin(), population_.paths_.at(i).all_.begin()+throwaway );
       
       // Insert the new starting configuration
-      paths_.at(i).all_.insert( paths_.at(i).all_.begin(), start);
+      population_.paths_.at(i).all_.insert( population_.paths_.at(i).all_.begin(), start);
 
       // Set start_ to be the new starting configuration of the path
-      paths_.at(i).start_ = start;
+      population_.paths_.at(i).start_ = start;
     } // end outer for
-
-    // Update the modifier's paths
-    modifier_->updateAll(paths_);
-
   } // end if
 } // End updatePaths
 
@@ -344,17 +337,17 @@ void Planner::adaptPopulation(ros::Duration d) {
 
   
   // ***** TODO: PREDICT DURATION *****
-  // Update the paths with the new starting configuration 
+  // Update the paths with the new starting configuration
   adaptPaths(m_cc_, d);
 
   // Create the vector to hold updated trajectories
   std::vector<RampTrajectory> updatedTrajecs;
 
   // For each path, get a trajectory
-  for(unsigned int i=0;i<paths_.size();i++) {
+  for(unsigned int i=0;i<population_.paths_.size();i++) {
 
     // Build a TrajectoryRequest 
-    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(paths_.at(i));
+    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(population_.paths_.at(i));
     
     // Send the request 
     if(requestTrajectory(msg_request)) {
@@ -362,7 +355,7 @@ void Planner::adaptPopulation(ros::Duration d) {
       
       // Set the Trajectory msg and the path
       temp.msg_trajec_  = msg_request.response.trajectory;
-      temp.path_        = paths_.at(i);
+      temp.path_        = population_.paths_.at(i);
       
       // Push onto updatedTrajecs
       updatedTrajecs.push_back(temp);
@@ -425,7 +418,7 @@ const std::vector<RampTrajectory> Planner::getTrajectories(const std::vector<Pat
       temp.msg_trajec_ = msg_request.response.trajectory;
 
       // Set trajectory path
-      temp.path_ = paths_.at(i);
+      temp.path_ = p.at(i);
       
       // Add the trajectory to the population
       result.push_back(temp);
@@ -450,6 +443,7 @@ const std::vector<RampTrajectory> Planner::getTrajectories(const std::vector<Pat
  **/
 void Planner::initPopulation() { 
   
+  std::vector<Path> randomPaths;
   // Create n random paths, where n=populationSize
   for(unsigned int i=0;i<populationSize_;i++) {
     
@@ -457,9 +451,8 @@ void Planner::initPopulation() {
     Path temp_path(start_, goal_);
 
     // Each trajectory will have a random number of knot points
-    // Put a max of 5 knot points for practicality...
-    //unsigned int num = rand() % 5;
-    unsigned int num = 3;
+    // Put a max of 3 knot points for practicality...
+    unsigned int num = rand() % 3;
   
 
     // For each knot point to be created
@@ -480,20 +473,17 @@ void Planner::initPopulation() {
     }
 
     // Add the path to the list of paths
-    paths_.push_back(temp_path);
+    randomPaths.push_back(temp_path);
   } // end for create n paths
   
 
   // Get trajectories for the paths
-  std::vector<RampTrajectory> trajecs = getTrajectories(paths_);
+  std::vector<RampTrajectory> trajecs = getTrajectories(randomPaths);
 
   // Add each trajectory to the population
   for(unsigned int i=0;i<trajecs.size();i++) {
     population_.add(trajecs.at(i));
   }
-
-  // Update the modifier
-  modifier_->updateAll(paths_);
 
   // Evaluate the population 
   bestTrajec_ = evaluateAndObtainBest();
@@ -560,7 +550,7 @@ bool Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er) {
 
 /** Modify a Path */
 const std::vector<Path> Planner::modifyPath() { 
-  return modifier_->perform();
+  return modifier_->perform(population_);
 }
 
 
@@ -601,19 +591,6 @@ const std::vector<RampTrajectory> Planner::modifyTrajec() {
 
 
 
-/** 
- * This method updates the paths vector for the planner
- * and the modifier 
- **/
-void Planner::updateWithModifier(const int index, const Path path) {
-
-    // Update the path in the planner 
-    paths_.at(index) = path;
-    
-    // Update the path in the modifier 
-    modifier_->update(paths_.at(index), index);
-} // End updateWithModifier
-
 
 
 
@@ -639,10 +616,14 @@ void Planner::modification() {
     // Index is where the trajectory was added in the population (may replace another)
     int index = population_.add(mod_trajec.at(i));
 
-
-    // Update the path in the planner and the modifier
-    updateWithModifier(index, mod_trajec.at(i).path_);
-  } // end for*/
+    // If sub-populations are being used and
+    // the trajectory was added to the population, update the sub-populations 
+    // (can result in infinite loop if not updated but re-evaluated)
+    if(subPopulations_ && index >= 0) {
+       population_.createSubPopulations();
+    }
+  
+  } // end for
 
   
   // After adding new trajectories to population,
@@ -707,14 +688,12 @@ const MotionState Planner::predictStartPlanning() const {
 void Planner::updatePathsStart(const MotionState s) {
   //std::cout<<"\nIn updatePathsStart\n";
 
-  for(unsigned int i=0;i<paths_.size();i++) {
-    paths_.at(i).start_ = s;
+  for(unsigned int i=0;i<population_.paths_.size();i++) {
+    population_.paths_.at(i).start_ = s;
 
-    paths_.at(i).all_.erase (paths_.at(i).all_.begin());
-    paths_.at(i).all_.insert(paths_.at(i).all_.begin(), s);
+    population_.paths_.at(i).all_.erase (population_.paths_.at(i).all_.begin());
+    population_.paths_.at(i).all_.insert(population_.paths_.at(i).all_.begin(), s);
   } 
-
-  modifier_->updateAll(paths_);
 
   //std::cout<<"\nLeaving updatePathsStart\n";
 } // End updatePathsStart
@@ -722,7 +701,7 @@ void Planner::updatePathsStart(const MotionState s) {
 
 
 void Planner::planningCycleCallback(const ros::TimerEvent&) {
-  //std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
+  std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
   
   //std::cout<<"\nAfter generation "<<generation_<<", population: "<<population_.fitnessFeasibleToString();
   //std::cout<<"\nBest: "<<bestTrajec_.toString();
@@ -772,7 +751,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
       // Update paths with startPlanning
       updatePathsStart(startPlanning_);
       
-      std::vector<RampTrajectory> trajecs = getTrajectories(paths_);
+      std::vector<RampTrajectory> trajecs = getTrajectories(population_.paths_);
       //std::cout<<"\ntrajecs.size(): "<<trajecs.size()<<"\n";
       population_.replaceAll(trajecs);
     }
@@ -796,6 +775,8 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
     c_pc_++;
   }
+
+  std::cout<<"\nGeneration "<<generation_-1<<" Completed";
 } // End planningCycleCallback
 
 
@@ -808,10 +789,6 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 void Planner::controlCycleCallback(const ros::TimerEvent&) {
   //std::cout<<"\nControl cycle occurring\n";
   
-  
-  /** TODO **/
-  // Create subpopulations in P(t)
-
 
   if(!stop_) {
     //std::cout<<"\nstartPlanning: "<<startPlanning_.toString();
@@ -822,7 +799,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     c_pc_ = 0;
 
     // Evaluate entire population
-    bestTrajec_ = evaluateAndObtainBest();
+    //bestTrajec_ = evaluateAndObtainBest();
   
     // Send the best trajectory 
     sendBest();
@@ -838,6 +815,11 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     // After m_cc_ and startPlanning are set, update the population
     adaptPopulation(controlCycle_);
 
+    if(subPopulations_) {
+      std::cout<<"\n**********Creating sub-populations in PC***********\n";
+      population_.createSubPopulations();
+    }
+
 
     // Build m_i
     setMi();
@@ -847,6 +829,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   if(!cc_started_) {
     cc_started_ = true;
   }
+
   //std::cout<<"\nControl cycle complete\n";
 } // End controlCycleCallback
 
@@ -965,7 +948,7 @@ void Planner::evaluatePopulation() {
   
   // Go through each trajectory in the population and evaluate it
   for(unsigned int i=0;i<population_.size();i++) {
-    population_.replace(evaluateTrajectory(population_.get(i)), i);
+    population_.replace(i, evaluateTrajectory(population_.get(i)));
   } // end for
 
   i_best_prev_ = population_.findBest();
@@ -993,8 +976,8 @@ const std::string Planner::pathsToString() const {
   std::ostringstream result;
 
   result<<"\nPaths:";
-  for(unsigned int i=0;i<paths_.size();i++) {
-    result<<"\n  "<<paths_.at(i).toString();
+  for(unsigned int i=0;i<population_.paths_.size();i++) {
+    result<<"\n  "<<population_.paths_.at(i).toString();
   }
   result<<"\n";
   return result.str();
@@ -1032,23 +1015,26 @@ const MotionState Planner::findAverageDiff() {
   initPopulation();
   //seedPopulation();
 
-  /*std::cout<<"\nPopulation initialized!\n";
-  std::cout<<"\npaths_.size(): "<<paths_.size()<<"\n";
-  for(unsigned int i=0;i<paths_.size();i++) {
-    std::cout<<"\nPath "<<i<<": "<<paths_.at(i).toString();
+  std::cout<<"\nPopulation initialized!\n";
+  std::cout<<"\npopulation_.paths_.size(): "<<population_.paths_.size()<<"\n";
+  for(unsigned int i=0;i<population_.paths_.size();i++) {
+    std::cout<<"\nPath "<<i<<": "<<population_.paths_.at(i).toString();
   }
-  std::cout<<"\n";*/
-  // std::cout<<"\nPress enter to continue\n";
-  // std::cin.get();
+  std::cout<<"\n";
+  std::cout<<"\nPress enter to continue\n";
+  std::cin.get();
+
+
+  if(subPopulations_) {
+    population_.createSubPopulations();
+  }
+
 
   sendPopulation();
   //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n\n"; 
   // std::cout<<"\nPress enter to start the loop!\n";
   // std::cin.get();
   
-
-  /** TODO */
-  // createSubpopulations();
   
   // Start the planning cycle timer
   planningCycleTimer_.start();

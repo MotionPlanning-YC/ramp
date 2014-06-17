@@ -29,7 +29,6 @@ class Planner {
     // the trajectory's path,
     // and the resolution rate for the trajectories
     Population                          population_;
-    std::vector<Path>                   paths_;
     const float                         resolutionRate_;
     
     // Hold the start and goal configurations
@@ -176,7 +175,6 @@ class Planner {
     // Misc
     const bool checkOrientation()                           const ; 
     const void randomizeMSPositions(MotionState& ms)        const ;
-          void updateWithModifier(const int index, const Path p)  ;
           void checkTrajChange()                                  ;
           void seedPopulation()                                   ;
     const RampTrajectory  getChangingTrajectory() const ;
@@ -224,6 +222,9 @@ class Planner {
 
     // Flag for if the control cycles have started
     bool                cc_started_;
+
+    // Flag for if sub-populations are being used
+    bool                subPopulations_;
     
     // Number of planning cycles since last control cycle
     int c_pc_;

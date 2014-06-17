@@ -14,23 +14,35 @@ class Population {
 
     /* Methods */
     const unsigned int    size() const;
-    const unsigned int    add(const RampTrajectory rt);
-    const unsigned int    findBest();
+    const int             add(const RampTrajectory rt);
+    const int             findBest();
     void                  clear();
-    void                  replace(const RampTrajectory trajec, uint8_t i);
+    void                  replace(const uint8_t i, const RampTrajectory trajec);
     const bool            replaceAll(const std::vector<RampTrajectory> new_pop);
     const RampTrajectory  get(const unsigned int i);
+    const int             getMinFitness() const;
+    const bool            feasibleExists() const;
+    const bool            infeasibleExists() const;
+    const bool            replacementPossible(const RampTrajectory rt) const;
+    const bool            canReplace(const RampTrajectory rt, const int i) const;
+    const int             getReplacementID(const RampTrajectory rt) const;
+
+    const std::vector<Population> createSubPopulations(const double delta_theta=PI/3);
+
+
     const std::string     fitnessFeasibleToString() const;
     const std::string     toString() const;
     ramp_msgs::Population populationMsg();
 
     /** Data Members */
+    std::vector<Path>     paths_;
     
   private:
     int                         i_best_;
-    std::vector<RampTrajectory> population_;
+    std::vector<RampTrajectory> trajectories_;
     unsigned int                maxSize_;
     bool                        changed_;
+    std::vector<Population>     subPopulations_;
 };
 
 #endif
