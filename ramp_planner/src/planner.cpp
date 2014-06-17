@@ -256,8 +256,8 @@ void Planner::seedPopulation() {
  * its time_from_start is <= the Duration argument
  * */
 void Planner::adaptPaths(MotionState start, ros::Duration dur) {
-  //std::cout<<"\nUpdating start to: "<<start.toString();
-  //std::cout<<"\ndur: "<<dur<<"\n";
+  std::cout<<"\nUpdating start to: "<<start.toString();
+  std::cout<<"\ndur: "<<dur<<"\n";
 
   if(dur.toSec() > 0) {
 
@@ -327,7 +327,7 @@ const bool Planner::checkOrientation() const {
   //std::cout<<"\nactual_theta: "<<actual_theta<<" t: "<<t<<" diff: "<<diff;
   //std::cout<<"\ncheckOrientation result: "<<( (!simulation_ && diff <= PI/12.) || (simulation_ && diff <= PI/24.) );
 
-  return ( (!simulation_ && diff <= PI/12.) || (simulation_ && diff <= PI/24.) );
+  return ( (!simulation_ && diff <= PI/12.) || (simulation_ && diff <= PI/36.) );
 } // End checkOrientation
 
 
@@ -345,36 +345,12 @@ void Planner::adaptPopulation(const MotionState ms, const ros::Duration d) {
   adaptPaths(ms, d);
 
   // Create the vector to hold updated trajectories
-  std::vector<RampTrajectory> updatedTrajecs;
+  std::vector<RampTrajectory> updatedTrajecs = getTrajectories(population_.paths_);
 
-  // For each path, get a trajectory
-  for(unsigned int i=0;i<population_.size();i++) {
-
-    // Build a TrajectoryRequest 
-    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(population_.paths_.at(i));
-    
-    // Send the request 
-    if(requestTrajectory(msg_request)) {
-      RampTrajectory temp(resolutionRate_, population_.get(i).id_);
-      
-      // Set the Trajectory msg and the path
-      temp.msg_trajec_  = msg_request.response.trajectory;
-      temp.path_        = population_.paths_.at(i);
-      
-      // Push onto updatedTrajecs
-      updatedTrajecs.push_back(temp);
-    } // end if
-    else {
-      ROS_ERROR("Error occurred when requesting trajectory");
-    }
-  } // end for
 
   // Replace the population's trajectories_ with the updated trajectories
   population_.replaceAll(updatedTrajecs);
 
-  //TODO: Move this?
-  // Re-evaluate
-  evaluatePopulation();
 
   //std::cout<<"\nLeaving updatePopulation\n";
 } // End adaptPopulation
@@ -772,6 +748,8 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     if(cc_started_) {
       // Update startPlanning
       startPlanning_ = predictStartPlanning();
+      //std::cout<<"\nm_cc: "<<m_cc_.toString();
+      //std::cout<<"\nstartPlanning: "<<startPlanning_.toString();
 
       // Generate new trajectories
       // Update paths with startPlanning
@@ -824,14 +802,6 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
 
     // Reset planning cycle count
     c_pc_ = 0;
-
-    // If using sub-populations, create them now
-    if(subPopulations_) {
-      population_.createSubPopulations(delta_theta_);
-    }
-
-    // Evaluate entire population
-    bestTrajec_ = evaluateAndObtainBest();
   
     // Send the best trajectory 
     sendBest();
@@ -847,6 +817,11 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     
     // After m_cc_ and startPlanning are set, update the population
     adaptPopulation(m_cc_, controlCycle_);
+
+    // If using sub-populations, create them now
+    if(subPopulations_) {
+      population_.createSubPopulations(delta_theta_);
+    }
 
     
     // Build m_i
@@ -1075,7 +1050,7 @@ const MotionState Planner::findAverageDiff() {
   
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
-  goalThreshold_ = 0.2;
+  goalThreshold_ = 0.33;
   while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) {
     ros::spinOnce(); 
   } // end while
