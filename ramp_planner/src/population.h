@@ -36,11 +36,11 @@ class Population {
 
     /** Data Members */
     std::vector<Path>           paths_;
+    unsigned int                maxSize_;
     
   private:
     int                         i_best_;
     std::vector<RampTrajectory> trajectories_;
-    unsigned int                maxSize_;
     bool                        changed_;
     std::vector<Population>     subPopulations_;
     bool                        isSubPopulation_;

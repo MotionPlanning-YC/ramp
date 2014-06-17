@@ -142,7 +142,7 @@ void Planner::initStartGoal(const MotionState s, const MotionState g) {
 
 
 /** Initialize the handlers and allocate them on the heap */
-void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r) {
+void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r, const int population_size, const bool sub_populations) {
 
   // Set ID
   id_ = i;
@@ -450,6 +450,9 @@ const std::vector<RampTrajectory> Planner::getTrajectories(const std::vector<Pat
  *  and evaluates the population
  **/
 void Planner::initPopulation() { 
+  
+  // Set the max size
+  population_.maxSize_ = populationSize_;
   
   std::vector<Path> randomPaths;
   // Create n random paths, where n=populationSize

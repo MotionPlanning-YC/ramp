@@ -5,11 +5,11 @@
 
 
 Planner             my_planner; 
+int 				        id;
 MotionState         start, goal;
 std::vector<Range>  ranges;
 int                 population_size;
 bool                sub_populations;
-int 				id;
 
 
 
@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
 
 
   /** Initialize the Planner's handlers */ 
-  my_planner.init(id, handle, start, goal, ranges); 
+  my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations); 
 
   std::cout<<"\nStart: "<<my_planner.start_.toString();
   std::cout<<"\nGoal: "<<my_planner.goal_.toString();
