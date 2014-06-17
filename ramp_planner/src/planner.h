@@ -89,7 +89,7 @@ class Planner {
     
     // Initialization 
     void initPopulation();
-    void init(const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r);
+    void init(const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r, const int population_size, const bool sub_populations);
     
     // Send the best trajectory to the control package
     void sendBest();
@@ -178,7 +178,7 @@ class Planner {
     Utility utility_; 
 
     // Size of population
-    const unsigned int populationSize_;
+    unsigned int populationSize_;
 
     // Generation counter
     unsigned int generation_;

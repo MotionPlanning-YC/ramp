@@ -7,6 +7,8 @@
 Planner             my_planner; 
 MotionState         start, goal;
 std::vector<Range>  ranges;
+int                 population_size;
+bool                sub_populations;
 
 
 
@@ -86,6 +88,20 @@ void loadParameters(const ros::NodeHandle handle) {
     initStartGoal(start, goal);
   }
   
+
+
+  if(handle.hasParam("ramp_planner/population_size")) {
+    handle.getParam("ramp_planner/population_size", population_size); 
+    std::cout<<"\npopulation_size: "<<population_size;
+  }
+
+
+  
+  if(handle.hasParam("ramp_planner/sub_populations")) {
+    handle.getParam("ramp_planner/sub_populations", sub_populations);
+    std::cout<<"\nsub_populations: "<<sub_populations;
+  }
+
 
   std::cout<<"\nDone loading parameters. Press Enter to continue\n";
   std::cin.get();

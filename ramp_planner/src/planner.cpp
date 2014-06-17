@@ -142,7 +142,7 @@ void Planner::initStartGoal(const MotionState s, const MotionState g) {
 
 
 /** Initialize the handlers and allocate them on the heap */
-void Planner::init(const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r) {
+void Planner::init(const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r, const int population_size, const bool sub_populations) {
 
   // Initialize the handlers
   h_traj_req_ = new TrajectoryRequestHandler(h);
@@ -173,6 +173,10 @@ void Planner::init(const ros::NodeHandle& h, const MotionState s, const MotionSt
 
   // Set the base transformation
   setT_base_w(start_.positions_);
+
+  // Set misc members
+  populationSize_ = population_size;
+  subPopulations_ = sub_populations;
 
 } // End init
 
