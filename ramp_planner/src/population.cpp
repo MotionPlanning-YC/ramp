@@ -1,8 +1,8 @@
 #include "population.h"
 
-Population::Population() : i_best_(-1), maxSize_(3), changed_(true) {}
+Population::Population() : i_best_(-1), maxSize_(3), changed_(true), isSubPopulation_(false) {}
 
-Population::Population(const unsigned int size) : i_best_(-1), maxSize_(size), changed_(false) {}
+Population::Population(const unsigned int size, const bool isSubPop) : i_best_(-1), maxSize_(size), changed_(false), isSubPopulation_(isSubPop) {}
 
 
 /** Return the size of the population */
@@ -13,6 +13,15 @@ void Population::clear() {
   paths_.clear();
   changed_ = true;
 }
+
+
+/** This method returns the trajectory at index i */
+const RampTrajectory Population::get(const unsigned int i) {
+  return trajectories_.at(i);
+} // End get
+
+
+
 
 
 void Population::replace(const uint8_t i, const RampTrajectory trajec) {
@@ -255,10 +264,11 @@ const int Population::add(const RampTrajectory rt) {
     }
   }
  
-  // If not full, simply push back
-  if(trajectories_.size() < maxSize_) {
-    trajectories_.push_back(rt);  
-    paths_.push_back(rt.path_);
+  // If it's a sub-population or
+  // If it's not full, simply push back
+  if(isSubPopulation_ || trajectories_.size() < maxSize_) {
+    trajectories_.push_back (rt);  
+    paths_.push_back        (rt.path_);
     return trajectories_.size()-1;
   } 
 
@@ -309,14 +319,6 @@ const int Population::findBest() {
 } //End findBest 
 
 
-/** This method returns the trajectory at index i */
-const RampTrajectory Population::get(const unsigned int i) {
-  return trajectories_.at(i);
-} // End get
-
-
-
-
 
 
 
@@ -330,9 +332,8 @@ const std::vector<Population> Population::createSubPopulations(const double delt
   int num = ceil((2*PI) / delta_theta);
   
   // Create the sub-populations
-  // TODO: How to find sub-pop size?
   for(uint8_t i=0;i<num;i++) {
-    Population sub(3);
+    Population sub(maxSize_, true);
     subPopulations_.push_back(sub);
   }
 

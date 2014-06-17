@@ -10,7 +10,7 @@ class Population {
   public:
 
     Population();
-    Population(const unsigned int size);
+    Population(const unsigned int size, const bool isSubPop=false);
 
     /* Methods */
     const unsigned int    size() const;
@@ -35,7 +35,7 @@ class Population {
     ramp_msgs::Population populationMsg();
 
     /** Data Members */
-    std::vector<Path>     paths_;
+    std::vector<Path>           paths_;
     
   private:
     int                         i_best_;
@@ -43,6 +43,7 @@ class Population {
     unsigned int                maxSize_;
     bool                        changed_;
     std::vector<Population>     subPopulations_;
+    bool                        isSubPopulation_;
 };
 
 #endif
