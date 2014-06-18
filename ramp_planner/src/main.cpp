@@ -97,9 +97,15 @@ void loadParameters(const ros::NodeHandle handle) {
   }
 
 
+
+  if(handle.hasParam("ramp/population_size")) {
+    handle.getParam("ramp/population_size", population_size);
+    std::cout<<"\npopulation_size: "<<population_size;
+  }
+
   
-  if(handle.hasParam("ramp_planner/sub_populations")) {
-    handle.getParam("ramp_planner/sub_populations", sub_populations);
+  if(handle.hasParam("ramp/sub_populations")) {
+    handle.getParam("ramp/sub_populations", sub_populations);
     std::cout<<"\nsub_populations: "<<sub_populations;
   }
 
@@ -133,17 +139,7 @@ int main(int argc, char** argv) {
   // Load ros parameters
   loadParameters(handle);
 
-  
-  exit(0); 
-  
-  // Pretty sure this isn't needed any longer. 
-  // Can't remember what it was used for
-  // Will leave it for now in case there are issues and it sparks ideas
-  /*std::string update_topic;
-  handle.getParam("ramp_planner/robot_update", update_topic);
-  std::cout<<"\nupdate_topic:"<<update_topic;*/
-
-
+ 
   /** Initialize the Planner's handlers */ 
   my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations); 
 
@@ -157,6 +153,11 @@ int main(int argc, char** argv) {
   std::cin.get(); 
   
   my_planner.go();
+
+
+  
+  MotionState exp_results = my_planner.findAverageDiff();
+  std::cout<<"\n\nAverage Difference: "<<exp_results.toString();
   
   
   std::cout<<"\n\nExiting Normally\n";

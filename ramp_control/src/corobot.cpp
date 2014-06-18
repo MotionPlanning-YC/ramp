@@ -365,6 +365,8 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
 
   //std::cout<<"\nRotation path: "<<utility_.toString(tr.request.path);
       
+  tr.request.rotational = true;
+
   // Send request
   if(h_traj_req_->request(tr)) {
     result = tr.response.trajectory;  
@@ -453,7 +455,7 @@ void Corobot::moveOnTrajectory(bool simulation) {
       // Get rotation trajectory and move on it
       ramp_msgs::Trajectory rot_t = getRotationTrajectory();
 
-      std::cout<<"\nRotation Trajectory: "<<utility_.toString(rot_t);
+      //std::cout<<"\nRotation Trajectory: "<<utility_.toString(rot_t);
 
       moveOnTrajectoryRot(rot_t, simulation);
       

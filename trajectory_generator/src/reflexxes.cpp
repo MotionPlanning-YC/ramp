@@ -167,12 +167,10 @@ void Reflexxes::setTarget(const ramp_msgs::KnotPoint kp) {
 
 
 /** This method sets the SelectionVector based on the path p */
-void Reflexxes::setSelectionVector(const ramp_msgs::Path p) {
+void Reflexxes::setSelectionVector(const bool rot) {
 
-  // If the x,y positions are different, this should 
-  // be a translational trajectory, otherwise rotational
-  if(utility.getEuclideanDist(p.points.at(0), 
-              p.points.at(p.points.size()-1)) > 0.0001) 
+  // If it is not a rotational trajectory, set x,y true 
+  if(!rot) 
   {
     inputParameters->SelectionVector->VecData[0] = true;
     inputParameters->SelectionVector->VecData[1] = true;
@@ -203,7 +201,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ra
   setInitialConditions();
 
   // Set SelectionVector
-  setSelectionVector(path);
+  setSelectionVector(req.rotational);
 
   // Push 0 onto knot point indices
   res.trajectory.index_knot_points.push_back(0);

@@ -56,7 +56,7 @@ private:
   const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionInputParameters inputParameters);
 
   // Set the selection vector for a path
-  void setSelectionVector(const ramp_msgs::Path p);
+  void setSelectionVector(const bool rot);
 
 };
 

@@ -7,9 +7,9 @@
 
 Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(6), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(2.f), generationsBeforeCC_(100), cc_started_(false), subPopulations_(true), c_pc_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
 {
-  controlCycle_ = ros::Duration(1.f / 5.f);
-  planningCycle_ = ros::Duration(1.f / 25.f);
-  imminentCollisionCycle_ = ros::Duration(1.f / 50.f);
+  controlCycle_ = ros::Duration(1.f / 2.f);
+  planningCycle_ = ros::Duration(1.f / 20.f);
+  imminentCollisionCycle_ = ros::Duration(1.f / 25.f);
   generationsPerCC_ = controlCycle_.toSec() / planningCycle_.toSec();
 }
 
@@ -864,6 +864,9 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   result.request.path           = path.buildPathMsg();
   result.request.resolutionRate = resolutionRate_;
 
+  result.request.rotational     = false;
+  
+
   return result;
 } // End buildTrajectoryRequest
 
@@ -1032,9 +1035,9 @@ const MotionState Planner::findAverageDiff() {
   for(unsigned int i=0;i<population_.paths_.size();i++) {
     std::cout<<"\nPath "<<i<<": "<<population_.paths_.at(i).toString();
   }
-  std::cout<<"\n";
-  std::cout<<"\nPress enter to continue\n";
-  std::cin.get();
+  //std::cout<<"\n";
+  //std::cout<<"\nPress enter to continue\n";
+  //std::cin.get();
 
 
   if(subPopulations_) {

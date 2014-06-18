@@ -25,14 +25,23 @@
 
 <!-- We need 2 planners, one for the first robot and one for the second robot -->
 <group ns="$(arg robot_0_name)">
+  
+  <include file="$(find ramp_launch)/launch/planner_parameters.launch" />
   <rosparam file="$(find ramp_launch)/launch/config/robot_0.yaml" command="load" ns="robot_info/" />
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" >
+
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" >
   </node>
 </group> 
 
+
+
+
 <group ns="$(arg robot_1_name)"> 
+  
+  <include file="$(find ramp_launch)/launch/planner_parameters.launch" />
   <rosparam file="$(find ramp_launch)/launch/config/robot_1.yaml" command="load" ns="robot_info/" />
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" > 
+  
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" > 
   </node>
 </group> 
 
