@@ -29,8 +29,7 @@
   <include file="$(find ramp_launch)/launch/planner_parameters.launch" />
   <rosparam file="$(find ramp_launch)/launch/config/robot_0.yaml" command="load" ns="robot_info/" />
 
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" >
-  </node>
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen"/>
 </group> 
 
 
@@ -41,8 +40,7 @@
   <include file="$(find ramp_launch)/launch/planner_parameters.launch" />
   <rosparam file="$(find ramp_launch)/launch/config/robot_1.yaml" command="load" ns="robot_info/" />
   
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" > 
-  </node>
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" /> 
 </group> 
 
 
@@ -50,13 +48,13 @@
 <!-- Sensing nodes -->
 
 <group ns="$(arg robot_0_name)"> 
-  <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="screen"> 
+  <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" > 
     <param name="other_robot_odom" type="str" value="/$(arg robot_1_name)/odometry" />  
   </node> 
 </group> 
 
 <group ns="$(arg robot_1_name)"> 
-   <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="screen">  
+   <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" >  
      <param name="other_robot_odom" type="str" value="/$(arg robot_0_name)/odometry" /> 
    </node> 
 </group> 

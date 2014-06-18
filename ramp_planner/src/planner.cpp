@@ -658,9 +658,6 @@ void Planner::modification() {
 
 
   //std::cout<<"\npopulation: "<<population_.fitnessFeasibleToString();
-  
-  // Send the new population to the trajectory viewer
-  sendPopulation();
 } // End modification
 
 
@@ -763,6 +760,8 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
       updatePathsStart(startPlanning_);
       
       std::vector<RampTrajectory> trajecs = getTrajectories(population_.paths_);
+      evaluatePopulation();
+
       //std::cout<<"\ntrajecs.size(): "<<trajecs.size()<<"\n";
       population_.replaceAll(trajecs);
     }
@@ -786,6 +785,9 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
     c_pc_++;
   }
+  
+  // Send the new population to the trajectory viewer
+  sendPopulation();
 
   std::cout<<"\nGeneration "<<generation_-1<<" Completed";
 } // End planningCycleCallback
@@ -825,9 +827,10 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     
     // After m_cc_ and startPlanning are set, update the population
     adaptPopulation(controlCycle_);
+    evaluatePopulation();
 
     if(subPopulations_) {
-      std::cout<<"\n**********Creating sub-populations in PC***********\n";
+      //std::cout<<"\n**********Creating sub-populations in PC***********\n";
       population_.createSubPopulations();
     }
 

@@ -75,7 +75,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   }*/
   
   // For every 3 points, check circle detection
-  float radius = 0.4f;
+  float radius = 0.33f;
   for(unsigned int i=0;i<trajectory_.trajectory.points.size();i+=3) {
     
     // Get the ith point on the trajectory
@@ -83,18 +83,22 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
 
     // ***Test position i for collision against some points on obstacle's trajectory***
     // Obstacle trajectory should already be in world coordinates!
-    for(int j = (i>20 ? i-1 : 0) ;j<i+20 && j<ob_trajectory.trajectory.points.size();j++) {
+    for(int j = (i>10 ? i-1 : 0) ;j<i+10 && j<ob_trajectory.trajectory.points.size();j++) {
 
       // Get the jth point of the obstacle's trajectory
       trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
 
       // Get the distance between the centers
       float dist = sqrt( pow(p_i.positions.at(0) - p_ob.positions.at(0),2) + pow(p_i.positions.at(1) - p_ob.positions.at(1),2) );
+
+      
         
 
       // If the distance between the two centers is less than the sum of the two radii, 
       // there is collision
       if( dist <= radius*2 ) {
+        //std::cout<<"\nPoints in collision: ("<<p_i.positions.at(0)<<", "<<p_i.positions.at(1)<<") and ";
+        //std::cout<<"("<<p_ob.positions.at(0)<<", "<<p_ob.positions.at(1)<<"), dist: "<<dist<<" i: "<<i<<" j: "<<j;
         result.collision_ = true;
         result.time_until_collision_ = p_i.time_from_start.toSec();
         j = i+1;
