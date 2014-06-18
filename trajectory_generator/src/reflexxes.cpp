@@ -190,9 +190,12 @@ void Reflexxes::setSelectionVector(const bool rot) {
 
 // Service callback, the input is a path and the output a trajectory
 bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) {
-  //std::cout<<"\nReceived request: "<<utility.toString(req)<<"\n";
+  //std::cout<<"\nReceived request: "<<utility_.toString(req)<<"\n";
   //std::cin.get();
-
+  
+  ros::Time start = ros::Time::now();
+  ros::Duration stop(1);
+  
 
   // Store the path
   path = req.path;
@@ -224,6 +227,12 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ra
 
       // Compute the motion state at t+1 and save it in the trajectory
       res.trajectory.trajectory.points.push_back(spinOnce());
+
+      if(ros::Time::now() - start > stop) {
+        std::cout<<"\nCannot find trajectory for path: ";
+        std::cout<<"\n"<<utility_.toString(path)<<"\n";
+        break;
+      }
     }
 
     // Once we reached the target, we set that the latest point is a knotpoint
@@ -234,7 +243,7 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ra
   // Set the trajectory's resolution rate
   res.trajectory.resolution_rate = CYCLE_TIME_IN_SECONDS;
 
-  //std::cout<<"\nReturning: "<<utility.toString(res.trajectory)<<"\n";
+  //std::cout<<"\nReturning: "<<utility_.toString(res.trajectory)<<"\n";
   //std::cin.get();
   return true;
 } // End trajectoryRequest callback
@@ -298,7 +307,7 @@ double Reflexxes::computeTargetOrientation(double initial_x, double initial_y, d
   target_position.push_back(target_x);
   target_position.push_back(target_y);
 
-  double angle = utility.findAngleFromAToB(current_position, target_position);
+  double angle = utility_.findAngleFromAToB(current_position, target_position);
 
   return angle;
 }
@@ -306,7 +315,8 @@ double Reflexxes::computeTargetOrientation(double initial_x, double initial_y, d
 
 // Returns true if the target has been reached
 bool Reflexxes::isFinalStateReached() {
-  return (resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
+  return (resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED || 
+          time_from_start.toSec() >= 2.5);
 }
 
 

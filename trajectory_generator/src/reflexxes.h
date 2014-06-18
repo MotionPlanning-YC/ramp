@@ -32,7 +32,7 @@ private:
   RMLPositionInputParameters *inputParameters;          
   RMLPositionOutputParameters *outputParameters;
   RMLPositionFlags flags;
-  Utility utility;
+  Utility utility_;
   ramp_msgs::Path path;
   ros::Duration time_from_start;
 

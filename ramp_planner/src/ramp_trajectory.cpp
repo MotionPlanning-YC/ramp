@@ -32,6 +32,10 @@ const Path RampTrajectory::getPath() const {
 
 /** Time is in seconds */
 const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const float t) const {
+  if( (t/resolutionRate_) > msg_trajec_.trajectory.points.size() ) {
+    return msg_trajec_.trajectory.points.at( msg_trajec_.trajectory.points.size()-1 );
+  }
+
   return msg_trajec_.trajectory.points.at( (t / resolutionRate_) );
 }
 
