@@ -316,7 +316,7 @@ double Reflexxes::computeTargetOrientation(double initial_x, double initial_y, d
 // Returns true if the target has been reached
 bool Reflexxes::isFinalStateReached() {
   return (resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED || 
-          time_from_start.toSec() >= 2.5);
+          time_from_start.toSec() >= 4);
 }
 
 

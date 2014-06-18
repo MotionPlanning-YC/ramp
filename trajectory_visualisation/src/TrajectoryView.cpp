@@ -187,8 +187,8 @@ void TrajectoryView::drawPopulation() {
           if(j == 0) {
             int radius = metersToPixels(0.5, true);
             // Draw a circle
-            this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true)-radius,
-                                      metersToPixels(points.at(j).positions.at(1), false)+radius,
+            this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true)-(radius/2),
+                                      metersToPixels(points.at(j).positions.at(1), false)+(radius/2),
                                       metersToPixels(0.55, true), metersToPixels(0.55, false));
                                       
           }
