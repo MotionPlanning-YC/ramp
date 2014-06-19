@@ -36,6 +36,9 @@ private:
   ramp_msgs::Path path;
   ros::Duration time_from_start;
 
+  uint8_t i_kp_;
+  ros::Duration timeCutoff_;
+
   // Execute one iteration of the Reflexxes control function
   trajectory_msgs::JointTrajectoryPoint spinOnce();
 
@@ -57,6 +60,7 @@ private:
 
   // Set the selection vector for a path
   void setSelectionVector(const bool rot);
+
 
 };
 

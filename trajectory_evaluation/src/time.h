@@ -10,6 +10,9 @@ class Time {
     const double perform();
 
     ramp_msgs::Trajectory trajectory_;
+    ramp_msgs::MotionState goal_;
+
+    Utility utility_;
 };
 
 #endif

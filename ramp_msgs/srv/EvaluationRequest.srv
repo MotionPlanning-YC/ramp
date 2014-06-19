@@ -1,5 +1,6 @@
 Trajectory trajectory
 uint8[] i_segments
+MotionState goal
 
 ---
 

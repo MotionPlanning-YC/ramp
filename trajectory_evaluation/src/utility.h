@@ -1,55 +1,47 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 #include <iostream>
-#include <math.h>
 #include <vector>
-#include "ramp_msgs/TrajectoryRequest.h"
+#include <queue>
+#include <sstream>
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 #include "ramp_msgs/Trajectory.h"
 #include "ramp_msgs/Path.h"
-#include "ramp_msgs/Configuration.h"
 #include <tf/transform_datatypes.h>
-
+#include <ros/console.h>
 
 #define PI 3.14159f
-
-//Modified: Add a structure
-struct obstacle_struct // defines where an obstacle is
-{
-  double x1;
-  double x2;
-  double y1;
-  double y2;
-};
 
 
 class Utility {
   public:
     Utility();
-    ~Utility();
+    
+    const double positionDistance(const std::vector<double> a, const std::vector<double> b) const;
 
-    std::vector<ramp_msgs::Range> ranges_;
+    const double findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;
+    const double findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;
+    const double findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const;
     
-    /** Geometrics function */
-     const float euclideanDistance(const std::vector<float> a, const std::vector<float> b) const;
-     const float findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;
-     const float findAngleFromAToB(const tf::Vector3 a, const tf::Vector3 b) const;
-     const float findDistanceBetweenAngles(const float a1, const float a2) const;
-     const float displaceAngle(const float a1, float a2) const;
+    const double findDistanceBetweenAngles(const double a1, const double a2) const;
     
-    /** Misc functions */
-     const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;
+    const double displaceAngle(const double a1, double a2) const;
+    
+    const double getEuclideanDist(const std::vector<double> a, std::vector<double> b) const;
+
     const ramp_msgs::Path getPath(const std::vector<ramp_msgs::MotionState> mps) const;
-     const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint> kps) const;
+    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint>   kps) const;
 
-    /** Msg building */
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(const ramp_msgs::Path path, const std::vector<float> v_s, const std::vector<float> v_e) const;
-
-    /** toString functions */
-     const std::string toString(const ramp_msgs::Trajectory traj) const;
-     const std::string toString(const ramp_msgs::Path p) const;
-     const std::string toString(const ramp_msgs::Configuration c) const;
-     const std::string toString(const ramp_msgs::MotionState c) const;
-     const std::string toString(const ramp_msgs::KnotPoint kp) const;
+    
+    const std::string toString(const ramp_msgs::MotionState mp) const;
+    const std::string toString(const ramp_msgs::KnotPoint kp) const;
+    const std::string toString(const ramp_msgs::Path path) const;
+    const std::string toString(const ramp_msgs::Trajectory traj) const;
+    const std::string toString(const trajectory_msgs::JointTrajectoryPoint p) const;
 };
 
-#endif
+
+#endif 

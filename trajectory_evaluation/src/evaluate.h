@@ -22,18 +22,14 @@ class Evaluate {
     const double performFitness(CollisionDetection::QueryResult feasible);
 
     /** Different evaluation criteria */
-    EuclideanDistance euc_dist_;
+    EuclideanDistance eucDist_;
     Time time_;
 
-
-    /** Collision detection */
-    //CollisionDetection collision_;
-    //ramp_msgs::ObstacleList obstacleList_;
-    //const bool performCollisionDetection();
     
 
     //Information sent by the request
     ramp_msgs::Trajectory trajectory_;
+    ramp_msgs::MotionState goal_;
     std::vector<unsigned int> i_segments_;
 
     float Q;

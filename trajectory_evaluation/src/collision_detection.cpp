@@ -75,7 +75,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   }*/
   
   // For every 3 points, check circle detection
-  float radius = 0.33f;
+  float radius = 0.4f;
   for(unsigned int i=0;i<trajectory_.trajectory.points.size();i+=3) {
     
     // Get the ith point on the trajectory

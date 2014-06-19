@@ -10,6 +10,7 @@ Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) : Q(10000.f
 /** This method accepts an EvaluationRequest and sets the appropriate members for evaluation */
 void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request& req) {
   trajectory_ = req.trajectory;
+  goal_ = req.goal;
   
   /*Set the i_segments_ member*/
   // First, clear
@@ -22,23 +23,29 @@ void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request& req) {
 } //End setRequest
 
 
+
+
+
 /** This method computes the fitness of the trajectory_ member */
 //TODO: Automate the weights for each evaluation criteria
 const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) {
   double result=0;
 
-  //Create the path to evaluate
-  //We do this because we may only be evaluating parts of a path
-  ramp_msgs::Trajectory t_eval;
-
-  //For now, we evaluate the whole trajectory
-  //TODO: Be able to specify which segments are evaluated
-  t_eval = trajectory_;
 
   // Set values for time and add to result
   // Negate because for this criterion, shorter values are better
-  time_.trajectory_ = t_eval;
-  result+=(time_.perform()) * -1;
+  time_.trajectory_ = trajectory_;
+  time_.goal_       = goal_;
+  //std::cout<<"\nTime: "<<time_.perform();
+  result += (time_.perform()) * -1;
+
+
+  // Set values for euclidean distace and add to result
+  // Negate because for this criterion, shorter values are better
+  eucDist_.trajectory_  = trajectory_;
+  eucDist_.goal_        = goal_; 
+  //std::cout<<"\nEuclid Dist: "<<eucDist_.perform();
+  result += (2*eucDist_.perform()) * -1;
 
   
   // If the trajectory is infeasible

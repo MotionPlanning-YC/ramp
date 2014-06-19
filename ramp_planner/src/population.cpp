@@ -1,8 +1,8 @@
 #include "population.h"
 
-Population::Population() : i_best_(-1), maxSize_(3), changed_(true), isSubPopulation_(false) {}
+Population::Population() : maxSize_(3), i_best_(-1), changed_(true), isSubPopulation_(false) {}
 
-Population::Population(const unsigned int size, const bool isSubPop) : i_best_(-1), maxSize_(size), changed_(false), isSubPopulation_(isSubPop) {}
+Population::Population(const unsigned int size, const bool isSubPop) : maxSize_(size), i_best_(-1), changed_(true), isSubPopulation_(isSubPop) {}
 
 
 /** Return the size of the population */
@@ -43,6 +43,14 @@ const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
   }
   
   return false;
+}
+
+
+
+
+
+const int Population::getNumSubPops() const {
+  return subPopulations_.size();
 }
 
 
@@ -319,6 +327,28 @@ const int Population::findBest() {
 } //End findBest 
 
 
+
+
+
+/** This method will return the best trajectory from each sub-population */
+const std::vector<RampTrajectory> Population::getBestFromSubPops() {
+  std::vector<RampTrajectory> result;
+
+  if(subPopulations_.size() == 0) {
+    ROS_ERROR("Calling Population::getBestFromSubPops, but Population has no sub-populations!");
+  }
+
+  else {
+    for(uint8_t i=0;i<subPopulations_.size();i++) {
+      if(subPopulations_.at(i).size() > 0) {
+        int i_best = subPopulations_.at(i).findBest(); 
+        result.push_back(subPopulations_.at(i).get(i_best));
+      }
+    }
+  }
+
+  return result;
+}
 
 
 

@@ -26,7 +26,9 @@ class Population {
     const bool            replacementPossible(const RampTrajectory rt) const;
     const bool            canReplace(const RampTrajectory rt, const int i) const;
     const int             getReplacementID(const RampTrajectory rt) const;
-
+    const int             getNumSubPops() const;
+   
+    const std::vector<RampTrajectory> getBestFromSubPops();
     const std::vector<Population> createSubPopulations(const double delta_theta=PI/3);
 
 

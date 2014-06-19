@@ -15,7 +15,8 @@ bool received_ob = false;
 bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
                    ramp_msgs::EvaluationRequest::Response& res) 
 {
-  //std::cout<<"\nIn handleRequest!\n";
+
+  //std::cout<<"\nEvaluating trajectory: \n"<<u.toString(req.trajectory);
   ev.setRequest(req);
   
   // Make a QueryResult object

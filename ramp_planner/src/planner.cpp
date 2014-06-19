@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(6), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(2.f), generationsBeforeCC_(100), cc_started_(false), subPopulations_(true), c_pc_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
+Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(6), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(2.f), generationsBeforeCC_(100), cc_started_(false), subPopulations_(false), c_pc_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
 {
   controlCycle_ = ros::Duration(1.f / 2.f);
   planningCycle_ = ros::Duration(1.f / 20.f);
@@ -185,67 +185,28 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
 
 
 void Planner::seedPopulation() {
-  population_.paths_.clear();
-  population_.clear();
-  
+
   Path p_one(start_, goal_);
-  MotionState ms_one;
+
+  ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(p_one);
   
-  ms_one.positions_.push_back(0.5);
-  ms_one.positions_.push_back(2);
-  ms_one.positions_.push_back(1.3089);  //75 degrees
-
-  for(int i=0;i<3;i++) {
-    ms_one.velocities_.push_back(0);
-    ms_one.accelerations_.push_back(0);
-  }
-
-  p_one.Add(ms_one);
-
-  Path p_two(start_, goal_);
-  MotionState ms_two;
-  
-  ms_two.positions_.push_back(3);
-  ms_two.positions_.push_back(0.5);
-  ms_two.positions_.push_back(0.1624);  //9 degrees
-
-  for(int i=0;i<3;i++) {
-    ms_two.velocities_.push_back(0);
-    ms_two.accelerations_.push_back(0);
-  }
-
-  p_two.Add(ms_two);
-
-  population_.paths_.push_back(p_one);
-  population_.paths_.push_back(p_two);
-  
-  // For each path
-  for(unsigned int i=0;i<population_.paths_.size();i++) {
-
-    // Build a TrajectoryRequest 
-    ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(population_.paths_.at(i));
+  // Send the request and push the returned Trajectory onto population_
+  if(requestTrajectory(msg_request)) {
+    RampTrajectory temp(resolutionRate_, getIRT());
     
-    // Send the request and push the returned Trajectory onto population_
-    if(requestTrajectory(msg_request)) {
-      RampTrajectory temp(resolutionRate_, getIRT());
-      
-      // Set the Trajectory msg
-      temp.msg_trajec_ = msg_request.response.trajectory;
+    // Set the Trajectory msg
+    temp.msg_trajec_ = msg_request.response.trajectory;
 
-      // Set trajectory path
-      temp.path_ = population_.paths_.at(i);
+    // Set trajectory path
+    temp.path_ = p_one;
 
-      
-      // Add the trajectory to the population
-      population_.add(temp);
-    }
-    else {
-      // some error handling
-    }
-  } // end for
+    // Evaluati and add the trajectory to the population
+    population_.replace(0, evaluateTrajectory(temp));
+  }
 
-  evaluatePopulation();
   std::cout<<"\nPopulation after seed: "<<population_.fitnessFeasibleToString();
+  std::cout<<"\nBest: "<<population_.findBest()<<"\n";
+  std::cin.get();
 } // End seedPopulation
 
 
@@ -633,7 +594,6 @@ void Planner::modification() {
     if(subPopulations_ && index >= 0) {
        population_.createSubPopulations();
     }
-  
   } // end for
 
   
@@ -811,9 +771,6 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     // Reset planning cycle count
     c_pc_ = 0;
 
-    // Evaluate entire population
-    //bestTrajec_ = evaluateAndObtainBest();
-  
     // Send the best trajectory 
     sendBest();
     
@@ -882,6 +839,7 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
   ramp_msgs::EvaluationRequest result;
 
   result.request.trajectory = trajec.msg_trajec_;
+  result.request.goal = goal_.buildMotionStateMsg();
 
   return result;
 } // End buildEvaluationRequest
@@ -903,8 +861,8 @@ void Planner::sendBest() {
 
   // If infeasible and too close to obstacle, 
   // Stop the robot by sending a blank trajectory
-  if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < 2.f)) {
-    std::cout<<"\nCollision within 2 seconds! Stopping robot!\n";
+  if(!bestTrajec_.feasible_ && (bestTrajec_.time_until_collision_ < 3.f)) {
+    std::cout<<"\nCollision within 3 seconds! Stopping robot!\n";
 
   }
   else if(!bestTrajec_.feasible_) {
@@ -922,11 +880,23 @@ void Planner::sendBest() {
 
 /** Send the whole population of trajectories to the trajectory viewer */
 void Planner::sendPopulation() {
+  ramp_msgs::Population msg;
 
-  // Need to set robot id
-  ramp_msgs::Population msg = population_.populationMsg();
+  if(subPopulations_) {
+    Population temp(population_.getNumSubPops());
+    std::vector<RampTrajectory> trajecs = population_.getBestFromSubPops();
+    for(uint8_t i=0;i<trajecs.size();i++) {
+      temp.add(trajecs.at(i));
+    }
+
+    temp.findBest();
+    msg = temp.populationMsg();
+  }
+  else {
+    msg = population_.populationMsg();
+  }
+
   msg.robot_id = id_;
-
   h_control_->sendPopulation(msg);
 }
 
@@ -1031,13 +1001,11 @@ const MotionState Planner::findAverageDiff() {
   
   // initialize population
   initPopulation();
-  //seedPopulation();
+  seedPopulation();
 
   std::cout<<"\nPopulation initialized!\n";
-  std::cout<<"\npopulation_.paths_.size(): "<<population_.paths_.size()<<"\n";
-  for(unsigned int i=0;i<population_.paths_.size();i++) {
-    std::cout<<"\nPath "<<i<<": "<<population_.paths_.at(i).toString();
-  }
+  std::cout<<"\n"<<population_.fitnessFeasibleToString();
+
   //std::cout<<"\n";
   //std::cout<<"\nPress enter to continue\n";
   //std::cin.get();

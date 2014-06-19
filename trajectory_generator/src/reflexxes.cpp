@@ -21,7 +21,7 @@ Reflexxes::Reflexxes() {
   // Maximum acceleration
   inputParameters->MaxAccelerationVector->VecData[0] = 0.33;
   inputParameters->MaxAccelerationVector->VecData[1] = 0.33;
-  inputParameters->MaxAccelerationVector->VecData[2] = PI;
+  inputParameters->MaxAccelerationVector->VecData[2] = PI/4;
 
   // As the maximum jerk values are not known, this is just to try
   inputParameters->MaxJerkVector->VecData[0] = 1;
@@ -30,6 +30,9 @@ Reflexxes::Reflexxes() {
 
   // Result
   resultValue = 0;
+
+  // Set the time to cutoff generating points
+  timeCutoff_ = ros::Duration(3.5);
 } 
 
 /** Destructor */
@@ -86,10 +89,11 @@ const trajectory_msgs::JointTrajectoryPoint Reflexxes::buildTrajectoryPoint(cons
       point.accelerations.push_back(my_outputParameters.NewAccelerationVector->VecData[i]);
     }
     else if(i == 2) {
+      
       double p = computeTargetOrientation(inputParameters->CurrentPositionVector->VecData[0],
                                           inputParameters->CurrentPositionVector->VecData[1],
-                                          my_outputParameters.NewPositionVector->VecData[0],
-                                          my_outputParameters.NewPositionVector->VecData[1]);
+                                          path.points.at(i_kp_).motionState.positions.at(0),
+                                          path.points.at(i_kp_).motionState.positions.at(1));
       point.positions.push_back(p);
       point.velocities.push_back(0);
       point.accelerations.push_back(0);
@@ -212,14 +216,15 @@ bool Reflexxes::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ra
 
 
   // Go through every knotpoint in the path
-  for (int i = 1; i<path.points.size(); i++) {
+  // (or until timeCutoff has been reached)
+  for (i_kp_ = 1; i_kp_<path.points.size() && time_from_start < timeCutoff_; i_kp_++) {
     resultValue = 0;
     
     // Set target to next knot point
-    setTarget(path.points.at(i));
+    setTarget(path.points.at(i_kp_));
     
     // Push the initial state onto trajectory
-    if(i==1)
+    if(i_kp_ == 1)
       res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(*inputParameters));
 
     // We go to the next knotpoint only once we reach this one
@@ -316,7 +321,7 @@ double Reflexxes::computeTargetOrientation(double initial_x, double initial_y, d
 // Returns true if the target has been reached
 bool Reflexxes::isFinalStateReached() {
   return (resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED || 
-          time_from_start.toSec() >= 4);
+          time_from_start >= timeCutoff_);
 }
 
 

@@ -9,7 +9,42 @@ const double Utility::positionDistance(const std::vector<double> a, const std::v
   double d_x = b.at(0) - a.at(0);
   double d_y = b.at(1) - a.at(1);
   return sqrt( pow(d_x,2) + pow(d_y,2) );
-} //End euclideanDistance
+} // End euclideanDistance
+
+
+
+
+const double Utility::findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const {
+  std::vector<double> c;
+  std::vector<double> d;
+  
+  // Set c
+  for(unsigned int i=0;i<a.positions.size();i++) {
+    c.push_back(a.positions.at(i));
+  }
+  
+  //Set d
+  for(unsigned int i=0;i<b.positions.size();i++) {
+    d.push_back(b.positions.at(i));
+  }
+
+  return findAngleFromAToB(c, d);
+}
+
+const double Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {
+  std::vector<double> d_a;
+  std::vector<double> d_b;
+  
+  for(unsigned int i=0;i<a.size();i++) {
+    d_a.push_back(a.at(i));
+  }
+  
+  for(unsigned int i=0;i<b.size();i++) {
+    d_b.push_back(b.at(i));
+  }
+
+  return findAngleFromAToB(d_a, d_b);
+}
 
 /** This method returns the angle that will form a straight line from position a to position b. a and b are [x, y] vectors. */
 const double Utility::findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const {
@@ -23,8 +58,7 @@ const double Utility::findAngleFromAToB(const std::vector<double> a, const std::
   // If the positions are the same,
   // Set the result to the starting orientation if one is provided
   // Or to 0 if no starting orientation is provided
-  // TODO: Make the comparison proportionate to size of space
-  if(euc_dist <= 0.01) {
+  if(euc_dist <= 0.0001) {
     result = 0;
   }
 
@@ -44,7 +78,7 @@ const double Utility::findAngleFromAToB(const std::vector<double> a, const std::
   }
 
   return result;
-} //End findAngleFromAToB
+} // End findAngleFromAToB
 
 
 /** This method returns distance between orientations a1 and a2. The distance is in the range [-PI, PI]. */
@@ -69,7 +103,7 @@ const double Utility::findDistanceBetweenAngles(const double a1, const double a2
   }
 
   return result;
-} //End findDistanceBetweenAngles
+} // End findDistanceBetweenAngles
 
 
 
@@ -82,7 +116,7 @@ const double Utility::displaceAngle(const double a1, double a2) const {
   }
 
   return findDistanceBetweenAngles(-a1, a2);
-} //End displaceAngle
+} // End displaceAngle
 
 
 
@@ -99,27 +133,32 @@ const double Utility::getEuclideanDist(const std::vector<double> a, const std::v
 }
 
 
-const double Utility::getEuclideanDist(const ramp_msgs::KnotPoint a, const ramp_msgs::KnotPoint b) const {
-  std::vector<double> v_a;
-  v_a.push_back(a.motionState.positions.at(0));
-  v_a.push_back(a.motionState.positions.at(1));
-  
-  std::vector<double> v_b;
-  v_b.push_back(b.motionState.positions.at(0));
-  v_b.push_back(b.motionState.positions.at(1));
 
-  return getEuclideanDist(v_a, v_b);
+const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::MotionState> mps) const {
+  ramp_msgs::Path result;
+
+  for(unsigned int i=0;i<mps.size();i++) {
+    ramp_msgs::KnotPoint kp;
+    kp.motionState = mps.at(i);
+    kp.stopTime = 0;
+    result.points.push_back(kp);
+  }
+
+  return result;
 }
 
 
-const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
-  std::ostringstream result;
 
-  result<<"\nConfiguration: "<<toString(kp.motionState);
-  result<<", Stop time: "<<kp.stopTime;
+const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> kps) const {
+  ramp_msgs::Path result;
 
-  return result.str();
+  for(unsigned int i=0;i<kps.size();i++) {
+    result.points.push_back(kps.at(i));
+  }
+
+  return result;
 }
+
 
 
 const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
@@ -152,15 +191,15 @@ const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
   return result.str();
 }
 
-const std::string Utility::toString(const ramp_msgs::Configuration c) const {
+const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
   std::ostringstream result;
-  result<<"(";
-  for(unsigned int i=0;i<c.K.size()-1;i++) {
-    result<<c.K.at(i)<<", ";
-  }
-  result<<c.K.at(c.K.size()-1)<<")";
+
+  result<<"\nMotion State: "<<toString(kp.motionState);
+  result<<", Stop time: "<<kp.stopTime;
+
   return result.str();
 }
+
 
 const std::string Utility::toString(const ramp_msgs::Path path) const {
   std::ostringstream result;
@@ -174,6 +213,36 @@ const std::string Utility::toString(const ramp_msgs::Path path) const {
 }
 
 
+const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint p) const {
+  std::ostringstream result;
+
+  //Positions
+  result<<"\n       Positions: ("<<p.positions.at(0);
+  for(unsigned int k=1;k<p.positions.size();k++) {
+    result<<", "<<p.positions.at(k);
+  }
+  result<<")";
+
+  //Velocities
+  result<<"\n       Velocities: ("<<p.velocities.at(0);
+  for(unsigned int k=1;k<p.velocities.size();k++) {
+    result<<", "<<p.velocities.at(k);
+  }
+  result<<")";
+  
+  //Accelerations
+  result<<"\n       Accelerations: ("<<p.accelerations.at(0);
+  for(unsigned int k=1;k<p.accelerations.size();k++) {
+    result<<", "<<p.accelerations.at(k);
+  }
+  result<<")";
+  
+  result<<"\n Time From Start: "<<p.time_from_start;
+
+  return result.str();
+}
+
+
 const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
   std::ostringstream result;
 
@@ -182,18 +251,11 @@ const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
   for(unsigned int i=0;i<traj.index_knot_points.size();i++) {
     
     result<<"\n   "<<i<<":";
+    
     unsigned int index = traj.index_knot_points.at(i);
-
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);
     
-
-
-    result<<"\n       Positions: ("<<p.positions.at(0);
-    for(unsigned int k=1;k<p.positions.size();k++) {
-      result<<", "<<p.positions.at(k);
-    }
-    result<<")";
-
+    result<<"\n       "<<toString(p);
   }
 
 
@@ -203,42 +265,8 @@ const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
     
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);
   
-    //Positions
-    result<<"\n       Positions: ("<<p.positions.at(0);
-    for(unsigned int k=1;k<p.positions.size();k++) {
-      result<<", "<<p.positions.at(k);
-    }
-    result<<")";
-  
-    //Velocities
-    result<<"\n       Velocities: ("<<p.velocities.at(0);
-    for(unsigned int k=1;k<p.velocities.size();k++) {
-      result<<", "<<p.velocities.at(k);
-    }
-    result<<")";
-    
-    //Accelerations
-    result<<"\n       Accelerations: ("<<p.accelerations.at(0);
-    for(unsigned int k=1;k<p.accelerations.size();k++) {
-      result<<", "<<p.accelerations.at(k);
-    }
-    result<<")";
-    
-    result<<"\n Time From Start: "<<p.time_from_start;
-
+    result<<"\n"<<toString(p);
   }
 
   return result.str();
 }
-
-
-const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request tr) const {
-  std::ostringstream result;
-  result<<"\nTrajectory Request:";
-  result<<"\nPath:"<<toString(tr.path);
-  result<<"\nresolutionRate: "<<tr.resolutionRate;
-
-  return result.str();
-}
-
-
