@@ -86,12 +86,12 @@ void TrajectoryView::size_changed()
 void TrajectoryView::population(const ramp_msgs::Population& msg)
 // Update the population and called the drawing function
 {
-  //std::cout<<"\n\nReceived Population!";
+  std::cout<<"\n\nReceived Population!";
 
-  //populations_.clear();
-  //populations_.push_back(msg);
+  populations_.clear();
+  populations_.push_back(msg);
 
-  if(populations_.size() < 2) {
+  /*if(populations_.size() < 2) {
     populations_.push_back(msg);
   }
 
@@ -104,7 +104,7 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
       populations_.erase(populations_.begin()+1);
       populations_.insert(populations_.begin()+1, msg);
     }
-  }
+  }*/
 
   drawPopulation();
 }

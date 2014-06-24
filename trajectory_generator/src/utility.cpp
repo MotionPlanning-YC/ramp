@@ -31,20 +31,6 @@ const double Utility::findAngleFromAToB(const trajectory_msgs::JointTrajectoryPo
   return findAngleFromAToB(c, d);
 }
 
-const double Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {
-  std::vector<double> d_a;
-  std::vector<double> d_b;
-  
-  for(unsigned int i=0;i<a.size();i++) {
-    d_a.push_back(a.at(i));
-  }
-  
-  for(unsigned int i=0;i<b.size();i++) {
-    d_b.push_back(b.at(i));
-  }
-
-  return findAngleFromAToB(d_a, d_b);
-}
 
 /** This method returns the angle that will form a straight line from position a to position b. a and b are [x, y] vectors. */
 const double Utility::findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const {

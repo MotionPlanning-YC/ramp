@@ -21,7 +21,7 @@ const ramp_msgs::Path Insert::perform() {
     i_knotPoint2 = swap;
   }
 
-  // Generate a new, random configuration (gets stored in motion state position)
+  // Generate a new, random motion state
   ramp_msgs::KnotPoint kp;
   for(unsigned int i=0;i<path_.points.at(0).motionState.positions.size();i++) {
     
