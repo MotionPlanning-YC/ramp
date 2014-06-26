@@ -41,6 +41,11 @@ int main(int argc, char** argv) {
   
   p2.positions.push_back(2);
   p2.positions.push_back(2);
+  p2.positions.push_back(0);
+  
+  p2.velocities.push_back(0);
+  p2.velocities.push_back(0);
+  p2.velocities.push_back(0);
 
   p3.positions.push_back(3);
   p3.positions.push_back(3);
@@ -68,15 +73,15 @@ int main(int argc, char** argv) {
 
   ramp_msgs::Trajectory trj;
 
-  /** Turn path inth Bezier */
+  /** Turn path inth Bezier 
   std::cout<<"\nPath before Bezier: "<<u.toString(p)<<"\n";
   ramp_msgs::Path p_bezier = mobileBase.Bezier(p);
-  std::cout<<"\nPath after Bezier: "<<u.toString(p_bezier)<<"\n";
+  std::cout<<"\nPath after Bezier: "<<u.toString(p_bezier)<<"\n"; */
 
-  /** Make a trajectory from the path */
+  /** Make a trajectory from the path 
   for(uint8_t i=0;i<p_bezier.points.size();i++) {
     trj.trajectory.points.push_back(u.getTrajectoryPoint(p_bezier.points.at(i).motionState));
-  }
+  } */ 
 
   /** Create Bezier curve 
   BezierCurve bc;
@@ -90,23 +95,24 @@ int main(int argc, char** argv) {
   for(uint8_t i=0;i<p_bc.size();i++) {
     trj.trajectory.points.push_back(u.getTrajectoryPoint(p_bc.at(i)));
   }*/
-
-  // Make a Population
-  ramp_msgs::Population pop;
-  pop.population.push_back(trj);
  
 
-  /** Get a trajectory 
+  /** Get a trajectory */
   
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
   
   mobileBase.trajectoryRequest(tr.request, tr.response);
   
-  std::cout<<"\nTrajectory: "<<u.toString(tr.response.trajectory);*/
+  std::cout<<"\nTrajectory: "<<u.toString(tr.response.trajectory);
 
   /** Publish the Population */
+
   ros::Publisher pub = n.advertise<ramp_msgs::Population>("population", 1000);
+  
+  // Make a Population
+  ramp_msgs::Population pop;
+  pop.population.push_back(tr.response.trajectory);
   
   std::cout<<"\nPress Enter to publish the population\n";
   std::cin.get();
