@@ -34,10 +34,11 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> cp, const doubl
   lambda_ = lambda;
   
   initControlPoints();
-  initReflexxes();
   
   calculateConstants();
 
+  initReflexxes();
+  
   initialized_ = true;
 }
 
@@ -53,10 +54,15 @@ void BezierCurve::initReflexxes() {
 
   reflexxesData_.inputParameters->SelectionVector->VecData[0] = true;
   
-  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = 0.1;
-  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 0.1;
+  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = fabs(0.33 / A_+C_);
+  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = fabs(0.33 / B_);
   reflexxesData_.inputParameters->MaxJerkVector->VecData[0]         = 1;
   
+  std::cout<<"\nA: "<<A_<<" B: "<<B_<<" C: "<<C_<<" D: "<<D_;
+  std::cout<<"\nreflexxesData_.inputParameters->MaxVelocityVector->VecData[0]: "<<reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
+  std::cout<<"\nreflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]: "<<reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0];
+  std::cin.get();
+
   reflexxesData_.inputParameters->CurrentPositionVector->VecData[0]     = 0.;
   reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]     = 0.;
   reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0] = 0.;
@@ -185,6 +191,8 @@ const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve() {
 
   reflexxesData_.resultValue = 0;
  
+  result.push_back(control_points_.at(0));
+
   while(!finalStateReached()) {
     result.push_back(spinOnce());
   }
@@ -244,6 +252,6 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   result.accelerations.push_back(x_dot_dot);
   result.accelerations.push_back(y_dot_dot);
   result.accelerations.push_back(0);
-
+  
   return result;
 }

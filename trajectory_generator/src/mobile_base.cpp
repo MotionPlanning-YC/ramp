@@ -189,7 +189,7 @@ const ramp_msgs::Path MobileBase::Bezier(const ramp_msgs::Path p) {
     bc.init(segment_points, lambda);
 
     std::vector<ramp_msgs::MotionState> curve = bc.generateCurve();
-    for(uint8_t j=0;j<curve.size();j++) {
+    for(uint8_t j=0;j<curve.size()-1;j++) {
       result.points.push_back(utility_.getKnotPoint(curve.at(j))); 
     }
   }
@@ -199,6 +199,7 @@ const ramp_msgs::Path MobileBase::Bezier(const ramp_msgs::Path p) {
   result.points.push_back(p.points.at(p.points.size()-1));
   
 
+  std::cout<<"\nPath after Bezier: "<<utility_.toString(result)<<"\n";
   return result;
 }
 
@@ -214,7 +215,7 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce() {
 
 
   /** Build the JointTrajectoryPoint object that will be used to build the trajectory */
-  trajectory_msgs::JointTrajectoryPoint point = buildTrajectoryPoint(*reflexxesData_.outputParameters);
+  trajectory_msgs::JointTrajectoryPoint point = buildTrajectoryPoint(*reflexxesData_.inputParameters, *reflexxesData_.outputParameters);
 
 
   // The input of the next iteration is the output of this one
@@ -232,27 +233,40 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce() {
 
 
 /** This method will return a JointTrajectoryPoint given some output parameters from Reflexxes */
-const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const RMLPositionOutputParameters my_outputParameters) {
+const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const RMLPositionInputParameters input, const RMLPositionOutputParameters output) {
   trajectory_msgs::JointTrajectoryPoint point;
 
   
   // Push on the p, v, and a vectors
   for(unsigned int i=0;i<reflexxesData_.NUMBER_OF_DOFS;i++) {
     if(reflexxesData_.inputParameters->SelectionVector->VecData[i]) {
-      point.positions.push_back(my_outputParameters.NewPositionVector->VecData[i]);
-      point.velocities.push_back(my_outputParameters.NewVelocityVector->VecData[i]);
-      point.accelerations.push_back(my_outputParameters.NewAccelerationVector->VecData[i]);
+      point.positions.push_back(output.NewPositionVector->VecData[i]);
+      point.velocities.push_back(output.NewVelocityVector->VecData[i]);
+      point.accelerations.push_back(output.NewAccelerationVector->VecData[i]);
     }
+
     else if(i == 2) {
       
-      double p = computeTargetOrientation(reflexxesData_.inputParameters->CurrentPositionVector->VecData[0],
-                                          reflexxesData_.inputParameters->CurrentPositionVector->VecData[1],
-                                          path_.points.at(i_kp_).motionState.positions.at(0),
-                                          path_.points.at(i_kp_).motionState.positions.at(1));
+      double p = computeTargetOrientation(input.CurrentPositionVector->VecData[0],
+                                          input.CurrentPositionVector->VecData[1],
+                                          output.NewPositionVector->VecData[0],
+                                          output.NewPositionVector->VecData[1]);
+                                          //path_.points.at(i_kp_).motionState.positions.at(0),
+                                          //path_.points.at(i_kp_).motionState.positions.at(1));
       point.positions.push_back(p);
-      point.velocities.push_back(0);
+
+      std::cout<<"\np: "<<p;
+      std::cout<<"\ninput.CurrentPositionVector->VecData[2]: "<<input.CurrentPositionVector->VecData[2];
+      double v = (p - input.CurrentPositionVector->VecData[2]) / CYCLE_TIME_IN_SECONDS;
+      point.velocities.push_back(v);
       point.accelerations.push_back(0);
+
+
+      reflexxesData_.outputParameters->NewPositionVector->VecData[2] = p;
+      reflexxesData_.outputParameters->NewVelocityVector->VecData[2] = v;
+     
     }
+
     else {
       point.positions.push_back(reflexxesData_.inputParameters->CurrentPositionVector->VecData[i]);
       point.velocities.push_back(reflexxesData_.inputParameters->CurrentVelocityVector->VecData[i]);
@@ -268,6 +282,10 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
 
   return point;
 } // End buildTrajectoryPoint
+
+
+
+
 
 
 
@@ -331,23 +349,43 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) {
     resultValue = 0;
 
-    std::cout<<"\nSetting target to "<<utility_.toString(path_.points.at(i_kp_).motionState)<<"\n";
-    // Set target to next knot point
-    setTarget(path_.points.at(i_kp_).motionState);
-    
-    // Push the initial state onto trajectory
-    if(i_kp_ == 1)
-      res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(*reflexxesData_.inputParameters));
+    if(i_kp_ > 1 && i_kp_ < path_.points.size()-1) {
+      res.trajectory.trajectory.points.push_back(utility_.getTrajectoryPoint(path_.points.at(i_kp_).motionState));
 
-    // We go to the next knotpoint only once we reach this one
-    while (!finalStateReached()) {
-
-      // Compute the motion state at t+1 and save it in the trajectory
-      res.trajectory.trajectory.points.push_back(spinOnce());
+      reflexxesData_.inputParameters->CurrentPositionVector->VecData[0] = path_.points.at(i_kp_).motionState.positions.at(0);
+      reflexxesData_.inputParameters->CurrentPositionVector->VecData[1] = path_.points.at(i_kp_).motionState.positions.at(1);
+      reflexxesData_.inputParameters->CurrentPositionVector->VecData[2] = path_.points.at(i_kp_).motionState.positions.at(2);
+      
+      
+      reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0] = path_.points.at(i_kp_).motionState.velocities.at(0);
+      reflexxesData_.inputParameters->CurrentVelocityVector->VecData[1] = path_.points.at(i_kp_).motionState.velocities.at(1);
+      reflexxesData_.inputParameters->CurrentVelocityVector->VecData[2] = path_.points.at(i_kp_).motionState.velocities.at(2);
+      
+      reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0] = path_.points.at(i_kp_).motionState.accelerations.at(0);
+      reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[1] = path_.points.at(i_kp_).motionState.accelerations.at(1);
+      reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[2] = path_.points.at(i_kp_).motionState.accelerations.at(2);
     }
 
-    // Once we reached the target, we set that the latest point is a knotpoint
-    res.trajectory.index_knot_points.push_back(res.trajectory.trajectory.points.size() - 1);
+    else {
+      std::cout<<"\ni_kp: "<<i_kp_<<" target: "<<utility_.toString(path_.points.at(i_kp_));
+      // Set target to next knot point
+      setTarget(path_.points.at(i_kp_).motionState);
+      
+      // Push the initial state onto trajectory
+      if(i_kp_ == 1)
+        res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(*reflexxesData_.inputParameters));
+
+      // We go to the next knotpoint only once we reach this one
+      while (!finalStateReached()) {
+
+        // Compute the motion state at t+1 and save it in the trajectory
+        res.trajectory.trajectory.points.push_back(spinOnce());
+      }
+
+      std::cout<<"\nReached Target at "<<utility_.toString(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1));
+      // Once we reached the target, we set that the latest point is a knotpoint
+      res.trajectory.index_knot_points.push_back(res.trajectory.trajectory.points.size() - 1);
+    }
   } // end for
 
   

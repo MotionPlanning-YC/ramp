@@ -203,7 +203,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   ros::Time start_time = ros::Time::now();
 
 
-  // We go through all the waypoints
+  // We go through all the points
   for(int i=0;i<num_-1;i++) {
 
     // Get the next points on the trajectory
@@ -213,7 +213,7 @@ void MobileRobot::calculateSpeedsAndTime () {
 
     // Push on the linear speed for the waypoint
     // Find the norm of the velocity vector
-    speeds.push_back( sqrt(pow(current.velocities.at(0),2)
+    speeds_linear_.push_back( sqrt(pow(current.velocities.at(0),2)
                            + pow(current.velocities.at(1),2) ));
 
     // Find which knot point is next

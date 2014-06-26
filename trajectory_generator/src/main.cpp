@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
   
   p0.positions.push_back(1);
   p0.positions.push_back(1);
-  p0.positions.push_back(0);
+  p0.positions.push_back(PI/2);
   
   p1.positions.push_back(1);
   p1.positions.push_back(3);
@@ -122,6 +122,26 @@ int main(int argc, char** argv) {
   std::cout<<"\nPublished Population";
 /*********************************************************************/
 
+
+
+
+  std::vector<double> a;
+  a.push_back(1.05686);
+  a.push_back(2.50403);
+  a.push_back(1.25105);
+
+  std::vector<double> b;
+  b.push_back(1.0603);
+  b.push_back(2.51382);
+  b.push_back(1.23257);
+
+  std::vector<double> c;
+  c.push_back(1.06205);
+  c.push_back(2.52197);
+  c.push_back(1.35928);
+
+  std::cout<<"\ntheta between points: "<<u.findAngleFromAToB(a, b)<<"\n";
+  std::cout<<"\ntheta between points: "<<u.findAngleFromAToB(b, c)<<"\n";
 
   std::cout<<"\nWaiting for requests...\n";
   ros::spin();

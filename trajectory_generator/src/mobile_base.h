@@ -77,7 +77,7 @@ private:
   double computeTargetOrientation(double initial_x, double intial_y, double target_x, double target_y);
   
   // Methods to build a trajectory point
-  const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionOutputParameters outputParameters);
+  const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionInputParameters input, const RMLPositionOutputParameters output);
   const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionInputParameters inputParameters);
   
 

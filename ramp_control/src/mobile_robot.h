@@ -81,7 +81,10 @@ class MobileRobot {
     int                       num_traveled_;
     const unsigned int        k_dof_;
     std::vector<ros::Time>    end_times; 
-    std::vector<float>        speeds; 
+    std::vector<float>        speeds;
+    std::vector<double>       speeds_linear_;
+    std::vector<double>       speeds_angular_;
+
     std::vector<float>        orientations_;
     geometry_msgs::Twist      twist_;
     TrajectoryRequestHandler* h_traj_req_;
