@@ -1,6 +1,6 @@
 
-#ifndef COROBOT_H
-#define COROBOT_H
+#ifndef MOBILE_ROBOT_H
+#define MOBILE_ROBOT_H
 
 #include "ros/ros.h"
 #include "utility.h"
@@ -14,11 +14,11 @@
 #include "trajectory_request_handler.h"
 #include <math.h>
 
-class Corobot {
+class MobileRobot {
   public:
     
-    Corobot();
-    ~Corobot();
+    MobileRobot();
+    ~MobileRobot();
     
     /** Methods **/ 
     void init(ros::NodeHandle& h);

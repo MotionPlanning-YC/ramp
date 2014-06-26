@@ -1,8 +1,8 @@
 #include "ros/ros.h"
-#include "corobot.h"
+#include "mobile_robot.h"
 #include "ramp_msgs/MotionState.h"
 
-Corobot robot;
+MobileRobot robot;
 
 void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
   //std::cout<<"\nGot the trajectory message!\n";
@@ -16,24 +16,24 @@ void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
 
 
 
-/** Initialize the Corobot's publishers and subscibers*/
-void init_advertisers_subscribers(Corobot& robot, ros::NodeHandle& handle, bool simulation) {
+/** Initialize the MobileRobot's publishers and subscibers*/
+void init_advertisers_subscribers(MobileRobot& robot, ros::NodeHandle& handle, bool simulation) {
 
   
   // Publishers
-  robot.pub_phidget_motor_ = handle.advertise<corobot_msgs::MotorCommand>(Corobot::TOPIC_STR_PHIDGET_MOTOR, 1000);
-  robot.pub_twist_ = handle.advertise<geometry_msgs::Twist>(Corobot::TOPIC_STR_TWIST, 1000);
-  robot.pub_update_ = handle.advertise<ramp_msgs::MotionState>(Corobot::TOPIC_STR_UPDATE, 1000);
+  robot.pub_phidget_motor_ = handle.advertise<corobot_msgs::MotorCommand>(MobileRobot::TOPIC_STR_PHIDGET_MOTOR, 1000);
+  robot.pub_twist_ = handle.advertise<geometry_msgs::Twist>(MobileRobot::TOPIC_STR_TWIST, 1000);
+  robot.pub_update_ = handle.advertise<ramp_msgs::MotionState>(MobileRobot::TOPIC_STR_UPDATE, 1000);
 
   if(simulation) {
     robot.pub_cmd_vel_ = handle.advertise<geometry_msgs::Twist>("cmd_vel", 1000);
   }
  
   // Subscribers
-  robot.sub_odometry_ = handle.subscribe(Corobot::TOPIC_STR_ODOMETRY, 1000, &Corobot::updateState, &robot);
+  robot.sub_odometry_ = handle.subscribe(MobileRobot::TOPIC_STR_ODOMETRY, 1000, &MobileRobot::updateState, &robot);
   
   // Timers
-  robot.timer_ = handle.createTimer(ros::Duration(1.f / 25.f), &Corobot::updatePublishTimer, &robot);
+  robot.timer_ = handle.createTimer(ros::Duration(1.f / 25.f), &MobileRobot::updatePublishTimer, &robot);
 } // End init_advertisers_subscribers
 
 

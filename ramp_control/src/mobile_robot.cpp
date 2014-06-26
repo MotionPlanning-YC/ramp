@@ -1,17 +1,17 @@
 
-#include "corobot.h"
+#include "mobile_robot.h"
 
-const std::string Corobot::TOPIC_STR_PHIDGET_MOTOR="PhidgetMotor";
-const std::string Corobot::TOPIC_STR_ODOMETRY="odometry";
-const std::string Corobot::TOPIC_STR_UPDATE="update";
-const std::string Corobot::TOPIC_STR_TWIST="twist";
+const std::string MobileRobot::TOPIC_STR_PHIDGET_MOTOR="PhidgetMotor";
+const std::string MobileRobot::TOPIC_STR_ODOMETRY="odometry";
+const std::string MobileRobot::TOPIC_STR_UPDATE="update";
+const std::string MobileRobot::TOPIC_STR_TWIST="twist";
 const float BASE_WIDTH=0.2413;
 
 const float timeNeededToTurn = 2.5; 
 
 
 
-Corobot::Corobot() : restart_(false), num_(0), num_prev_(0), num_traveled_(0), k_dof_(3), h_traj_req_(0) { 
+MobileRobot::MobileRobot() : restart_(false), num_(0), num_prev_(0), num_traveled_(0), k_dof_(3), h_traj_req_(0) { 
   for(unsigned int i=0;i<k_dof_;i++) {
     motion_state_.positions.push_back(0);
     motion_state_.velocities.push_back(0);
@@ -23,7 +23,7 @@ Corobot::Corobot() : restart_(false), num_(0), num_prev_(0), num_traveled_(0), k
 }
 
 
-Corobot::~Corobot() {
+MobileRobot::~MobileRobot() {
   if(h_traj_req_ != 0) {
     delete h_traj_req_;
     h_traj_req_ = 0;
@@ -31,19 +31,19 @@ Corobot::~Corobot() {
 }
 
 
-void Corobot::init(ros::NodeHandle& h) {
+void MobileRobot::init(ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler((const ros::NodeHandle&)h);
 }
 
 
 
 
-/** Publishes the MotorCommand msg. The Corobot will drive based on the msg. */
-void Corobot::drive(const corobot_msgs::MotorCommand msg) const {
+/** Publishes the MotorCommand msg. The MobileRobot will drive based on the msg. */
+void MobileRobot::drive(const corobot_msgs::MotorCommand msg) const {
   pub_phidget_motor_.publish(msg);
 }
 
-void Corobot::stop() const {
+void MobileRobot::stop() const {
   corobot_msgs::MotorCommand msg;
   msg.leftSpeed  = 0;
   msg.rightSpeed = 0;
@@ -55,7 +55,7 @@ void Corobot::stop() const {
 }
 
 
-void Corobot::driveStraight(const unsigned int speed) const {
+void MobileRobot::driveStraight(const unsigned int speed) const {
 
   corobot_msgs::MotorCommand msg;
 
@@ -74,7 +74,7 @@ void Corobot::driveStraight(const unsigned int speed) const {
 }
 
 
-void Corobot::turn(const unsigned int speed, const bool cwise) const {
+void MobileRobot::turn(const unsigned int speed, const bool cwise) const {
 
 
   corobot_msgs::MotorCommand msg;
@@ -99,7 +99,7 @@ void Corobot::turn(const unsigned int speed, const bool cwise) const {
 }
 
 
-void Corobot::turn(const float speed, const float angle) const {
+void MobileRobot::turn(const float speed, const float angle) const {
  geometry_msgs::Twist v;
 
  v.linear.x = 0;
@@ -110,7 +110,7 @@ void Corobot::turn(const float speed, const float angle) const {
 }
 
 
-const std::vector<float> Corobot::computeAcceleration() const {
+const std::vector<float> MobileRobot::computeAcceleration() const {
   std::vector<float> result;
 
   for(unsigned int i=0;i<k_dof_;i++) {
@@ -123,7 +123,7 @@ const std::vector<float> Corobot::computeAcceleration() const {
 }
 
 /** This is a callback for receiving odometry from the robot and sets the configuration of the robot */
-void Corobot::updateState(const nav_msgs::Odometry& msg) {
+void MobileRobot::updateState(const nav_msgs::Odometry& msg) {
   //std::cout<<"\nReceived odometry update\n";
   
   prev_motion_state_ = motion_state_;
@@ -157,7 +157,7 @@ void Corobot::updateState(const nav_msgs::Odometry& msg) {
 
 
 /** This method is on a timer to publish the robot's latest configuration */
-void Corobot::updatePublishTimer(const ros::TimerEvent&) {
+void MobileRobot::updatePublishTimer(const ros::TimerEvent&) {
   //std::cout<<"\nIn updatePublishTimer\n";
     
   if (pub_update_) {
@@ -167,9 +167,9 @@ void Corobot::updatePublishTimer(const ros::TimerEvent&) {
 
 
 
-/** This method updates the Corobot's trajectory
+/** This method updates the MobileRobot's trajectory
  *   It calls calculateSpeedsAndTimes to update the robot's vectors needed to move */
-void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
+void MobileRobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
   //std::cout<<"\nIn updateTrajectory!\n";
   //std::cout<<"\nNew Trajectory first point: "<<utility_.toString(msg.trajectory.points.at(0));
   
@@ -191,7 +191,7 @@ void Corobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
  * the linear and angular velocities as well as ending times
  * This method sets the vectors speeds, orientations, and end_times
  **/
-void Corobot::calculateSpeedsAndTime () {
+void MobileRobot::calculateSpeedsAndTime () {
   orientations_.clear();
   speeds.clear();
   end_times.clear();
@@ -249,18 +249,18 @@ void Corobot::calculateSpeedsAndTime () {
 }
 
 
-void Corobot::sendTwist() const {
+void MobileRobot::sendTwist() const {
   pub_twist_.publish(twist_); 
 }
 
 
-void Corobot::sendTwist(const geometry_msgs::Twist t) const {
+void MobileRobot::sendTwist(const geometry_msgs::Twist t) const {
   pub_twist_.publish(t); 
 }
 
 
 /** This method prints out the information vectors */
-void Corobot::printVectors() const {
+void MobileRobot::printVectors() const {
     
   std::cout<<"\nspeeds: [";
   for(unsigned int i=0;i<speeds.size()-1;i++) {
@@ -284,7 +284,7 @@ void Corobot::printVectors() const {
 
 
 /** Returns true if there is imminent collision */
-const bool Corobot::checkImminentCollision() const {
+const bool MobileRobot::checkImminentCollision() const {
   bool result;
   ros::param::get("imminent_collision", result);
   return result;
@@ -298,7 +298,7 @@ const bool Corobot::checkImminentCollision() const {
  * Returns true if the robot has orientation to move 
  * from point i to point i+1
  **/
-const bool Corobot::checkOrientation(const int i, const bool simulation) const {
+const bool MobileRobot::checkOrientation(const int i, const bool simulation) const {
   //std::cout<<"\nIn checkOrientation";
   
   // Find which knot point is next
@@ -340,7 +340,7 @@ const bool Corobot::checkOrientation(const int i, const bool simulation) const {
 
 
 /** This method returns a rotation trajectory for the robot */
-const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
+const ramp_msgs::Trajectory MobileRobot::getRotationTrajectory() const {
   //std::cout<<"\nIn getRotationTrajectory\n";
   ramp_msgs::Trajectory result;
 
@@ -381,7 +381,7 @@ const ramp_msgs::Trajectory Corobot::getRotationTrajectory() const {
 
 
 
-void Corobot::moveOnTrajectoryRot(const ramp_msgs::Trajectory traj, bool simulation) {
+void MobileRobot::moveOnTrajectoryRot(const ramp_msgs::Trajectory traj, bool simulation) {
   //std::cout<<"\n**************In moveOnTrajectoryRot****************\n";
   //std::cout<<"\ntraj.size(): "<<traj.trajectory.points.size();
 
@@ -431,7 +431,7 @@ void Corobot::moveOnTrajectoryRot(const ramp_msgs::Trajectory traj, bool simulat
 
 
 /** This method moves the robot along trajectory_ */
-void Corobot::moveOnTrajectory(bool simulation) {
+void MobileRobot::moveOnTrajectory(bool simulation) {
   restart_ = false;
   ros::Rate r(50);
 

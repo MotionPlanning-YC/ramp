@@ -1,9 +1,9 @@
 #include <iostream>
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
-#include "corobot.h"
+#include "mobile_robot.h"
 
-Corobot robot;
+MobileRobot robot;
 
 
 void twistCallback(const geometry_msgs::Twist msg) {
@@ -40,10 +40,10 @@ int main(int argc, char** argv) {
   // Subscribers
   ros::Subscriber sub_twist = handle.subscribe("twist_single", 1000, twistCallback);
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
-  robot.sub_odometry_ = handle.subscribe(Corobot::TOPIC_STR_ODOMETRY, 1000, &Corobot::updateState, &robot);
+  robot.sub_odometry_ = handle.subscribe(MobileRobot::TOPIC_STR_ODOMETRY, 1000, &MobileRobot::updateState, &robot);
   
   // Publishers
-  robot.pub_twist_ = handle.advertise<geometry_msgs::Twist>(Corobot::TOPIC_STR_TWIST, 1000);
+  robot.pub_twist_ = handle.advertise<geometry_msgs::Twist>(MobileRobot::TOPIC_STR_TWIST, 1000);
 
   robot.init(handle);
   
