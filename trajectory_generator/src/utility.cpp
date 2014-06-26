@@ -147,6 +147,35 @@ const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> k
 
 
 
+
+const ramp_msgs::KnotPoint Utility::getKnotPoint(const ramp_msgs::MotionState ms) const {
+  ramp_msgs::KnotPoint result;
+
+  result.motionState = ms;
+
+  return result;
+}
+
+const trajectory_msgs::JointTrajectoryPoint Utility::getTrajectoryPoint(const ramp_msgs::MotionState ms) const {
+  trajectory_msgs::JointTrajectoryPoint result;
+
+  for(unsigned int i=0;i<ms.positions.size();i++) {
+    result.positions.push_back(ms.positions.at(i));
+  }
+
+  for(unsigned int i=0;i<ms.velocities.size();i++) {
+    result.velocities.push_back(ms.velocities.at(i));
+  }
+
+  for(unsigned int i=0;i<ms.accelerations.size();i++) {
+    result.accelerations.push_back(ms.accelerations.at(i));
+  }
+
+  return result; 
+}
+
+
+
 const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
   std::ostringstream result;
 

@@ -34,6 +34,9 @@ class Utility {
     const ramp_msgs::Path getPath(const std::vector<ramp_msgs::MotionState> mps) const;
     const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint>   kps) const;
 
+    const ramp_msgs::KnotPoint getKnotPoint(const ramp_msgs::MotionState ms) const;
+    const trajectory_msgs::JointTrajectoryPoint getTrajectoryPoint(const ramp_msgs::MotionState ms) const;
+
     
     const std::string toString(const ramp_msgs::MotionState mp) const;
     const std::string toString(const ramp_msgs::KnotPoint kp) const;

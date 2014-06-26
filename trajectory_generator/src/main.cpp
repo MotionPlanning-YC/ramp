@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <iostream>
 #include <stdlib.h>
-#include "reflexxes.h"
+#include "mobile_base.h"
 #include "ros/ros.h"
 
+#include "bezier_curve.h"
 #include "ramp_msgs/Population.h"
 
+Utility u;
 
 
 // Main function
@@ -15,11 +17,11 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "reflexxes");
 
   // Variable Declaration
-  Reflexxes reflexxes;
+  MobileBase mobileBase;
   ros::NodeHandle n;
 
   // Declare the service that gives a path and returns a trajectory
-  ros::ServiceServer service = n.advertiseService("trajectory_generator", &Reflexxes::trajectoryRequest, &reflexxes);
+  ros::ServiceServer service = n.advertiseService("trajectory_generator", &MobileBase::trajectoryRequest, &mobileBase);
 
 
 /*********************************************************************/
@@ -64,17 +66,51 @@ int main(int argc, char** argv) {
   p.points.push_back(kp2);
   //p.points.push_back(kp3);
 
+  ramp_msgs::Trajectory trj;
+
+  /** Turn path inth Bezier */
+  std::cout<<"\nPath before Bezier: "<<u.toString(p)<<"\n";
+  ramp_msgs::Path p_bezier = mobileBase.Bezier(p);
+  std::cout<<"\nPath after Bezier: "<<u.toString(p_bezier)<<"\n";
+
+  /** Make a trajectory from the path */
+  for(uint8_t i=0;i<p_bezier.points.size();i++) {
+    trj.trajectory.points.push_back(u.getTrajectoryPoint(p_bezier.points.at(i).motionState));
+  }
+
+  /** Create Bezier curve 
+  BezierCurve bc;
+  std::vector<ramp_msgs::MotionState> sp;
+  sp.push_back(kp0.motionState);
+  sp.push_back(kp1.motionState);
+  sp.push_back(kp2.motionState);
+  bc.init(sp, 0.5);
+  
+  std::vector<ramp_msgs::MotionState> p_bc = bc.generateCurve();
+  for(uint8_t i=0;i<p_bc.size();i++) {
+    trj.trajectory.points.push_back(u.getTrajectoryPoint(p_bc.at(i)));
+  }*/
+
+  // Make a Population
+  ramp_msgs::Population pop;
+  pop.population.push_back(trj);
+ 
+
+  /** Get a trajectory 
   
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
   
-  reflexxes.trajectoryRequest(tr.request, tr.response);
+  mobileBase.trajectoryRequest(tr.request, tr.response);
   
+  std::cout<<"\nTrajectory: "<<u.toString(tr.response.trajectory);*/
 
+  /** Publish the Population */
+  ros::Publisher pub = n.advertise<ramp_msgs::Population>("population", 1000);
   
   std::cout<<"\nPress Enter to publish the population\n";
   std::cin.get();
-  //pub.publish(pop);
+  pub.publish(pop);
 
 
   std::cout<<"\nPublished Population";
