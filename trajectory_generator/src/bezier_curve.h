@@ -13,7 +13,7 @@ public:
   BezierCurve();
   ~BezierCurve();
   
-  void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda);
+  void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta);
   const std::vector<ramp_msgs::MotionState> generateCurve();
   
 
@@ -27,10 +27,12 @@ public:
 
 private:
 
-  Utility       utility_      ;
-  ReflexxesData reflexxesData_;
-  double        lambda_       ;
-  bool          initialized_  ;
+  Utility       utility_          ;
+  ReflexxesData reflexxesData_    ;
+  double        lambda_           ;
+  bool          initialized_      ;
+  double        theta_prev_       ;
+  double        theta_dot_prev_   ;
 
   void initReflexxes()    ;
   void initControlPoints();

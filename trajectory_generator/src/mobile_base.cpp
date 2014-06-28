@@ -186,7 +186,7 @@ const ramp_msgs::Path MobileBase::Bezier(const ramp_msgs::Path p) {
     segment_points.push_back(p.points.at(i).motionState);
     segment_points.push_back(p.points.at(i+1).motionState);
 
-    bc.init(segment_points, lambda);
+    bc.init(segment_points, lambda, p.points.at(0).motionState.positions.at(2));
 
     std::vector<ramp_msgs::MotionState> curve = bc.generateCurve();
     for(uint8_t j=0;j<curve.size()-1;j++) {
@@ -251,8 +251,6 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
                                           input.CurrentPositionVector->VecData[1],
                                           output.NewPositionVector->VecData[0],
                                           output.NewPositionVector->VecData[1]);
-                                          //path_.points.at(i_kp_).motionState.positions.at(0),
-                                          //path_.points.at(i_kp_).motionState.positions.at(1));
       point.positions.push_back(p);
 
       std::cout<<"\np: "<<p;

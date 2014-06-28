@@ -29,7 +29,7 @@ BezierCurve::~BezierCurve() {
 
 
 
-void BezierCurve::init(const std::vector<ramp_msgs::MotionState> cp, const double lambda) {
+void BezierCurve::init(const std::vector<ramp_msgs::MotionState> cp, const double lambda, const double theta) {
   segment_points_ = cp;
   lambda_ = lambda;
   
@@ -38,6 +38,8 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> cp, const doubl
   calculateConstants();
 
   initReflexxes();
+
+  theta_prev_ = theta;
   
   initialized_ = true;
 }
@@ -212,15 +214,15 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
                                   reflexxesData_.outputParameters, 
                                   reflexxesData_.flags );
   
-  // Set current vectors the output 
-  *reflexxesData_.inputParameters->CurrentPositionVector = *reflexxesData_.outputParameters->NewPositionVector;
-  *reflexxesData_.inputParameters->CurrentVelocityVector = *reflexxesData_.outputParameters->NewVelocityVector;
-  *reflexxesData_.inputParameters->CurrentAccelerationVector = *reflexxesData_.outputParameters->NewAccelerationVector;
+  // Set u's p, v, a
+  double u_prev          = reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];
+  double u_dot_prev      = reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0];
+  double u_dot_dot_prev  = reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0];
   
   // Set u's p, v, a
-  double u      = reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];
-  double u_dot  = reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0];
-  double u_dot_dot  = reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0];
+  double u          = reflexxesData_.outputParameters->NewPositionVector->VecData[0];
+  double u_dot      = reflexxesData_.outputParameters->NewVelocityVector->VecData[0];
+  double u_dot_dot  = reflexxesData_.outputParameters->NewAccelerationVector->VecData[0];
   std::cout<<"\nu: "<<u<<" u_dot: "<<u_dot<<" u_dot_dot: "<<u_dot_dot;
 
 
@@ -231,6 +233,15 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   // Position
   double x = (pow((1-u),2) * X0.positions.at(0)) + ((2*u)*(1-u)*X1.positions.at(0)) + (pow(u,2)*X2.positions.at(0));
   double y = (pow((1-u),2) * X0.positions.at(1)) + ((2*u)*(1-u)*X1.positions.at(1)) + (pow(u,2)*X2.positions.at(1));
+  double x_prev = (pow((1-u_prev),2) * X0.positions.at(0)) + ((2*u_prev)*(1-u_prev)*X1.positions.at(0)) + (pow(u_prev,2)*X2.positions.at(0));
+  double y_prev = (pow((1-u_prev),2) * X0.positions.at(1)) + ((2*u_prev)*(1-u_prev)*X1.positions.at(1)) + (pow(u_prev,2)*X2.positions.at(1));
+
+  double theta  = utility_.findAngleFromAToB(x_prev, y_prev, x, y);
+  double theta_dot = (theta - theta_prev_) / CYCLE_TIME_IN_SECONDS;
+  double theta_dot_dot = (theta_dot - theta_dot_prev_) / CYCLE_TIME_IN_SECONDS;
+
+  theta_prev_ = theta;
+  theta_dot_prev_ = theta_dot;
   
   // Velocity
   double x_dot = ((A_*u) + C_)*u_dot;
@@ -243,15 +254,22 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   // Push values onto MotionState
   result.positions.push_back(x);
   result.positions.push_back(y);
-  result.positions.push_back(0);
+  result.positions.push_back(theta);
 
   result.velocities.push_back(x_dot);
   result.velocities.push_back(y_dot);
-  result.velocities.push_back(0);
+  result.velocities.push_back(theta_dot);
 
   result.accelerations.push_back(x_dot_dot);
   result.accelerations.push_back(y_dot_dot);
-  result.accelerations.push_back(0);
+  result.accelerations.push_back(theta_dot_dot);
   
+  
+  // Set current vectors the output 
+  *reflexxesData_.inputParameters->CurrentPositionVector = *reflexxesData_.outputParameters->NewPositionVector;
+  *reflexxesData_.inputParameters->CurrentVelocityVector = *reflexxesData_.outputParameters->NewVelocityVector;
+  *reflexxesData_.inputParameters->CurrentAccelerationVector = *reflexxesData_.outputParameters->NewAccelerationVector;
+
+
   return result;
 }
