@@ -109,6 +109,7 @@ int main(int argc, char** argv) {
   /** Publish the Population */
 
   ros::Publisher pub = n.advertise<ramp_msgs::Population>("population", 1000);
+  ros::Publisher pub_trj = n.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000);
   
   // Make a Population
   ramp_msgs::Population pop;
@@ -117,6 +118,7 @@ int main(int argc, char** argv) {
   std::cout<<"\nPress Enter to publish the population\n";
   std::cin.get();
   pub.publish(pop);
+  pub_trj.publish(tr.response.trajectory);
 
 
   std::cout<<"\nPublished Population";

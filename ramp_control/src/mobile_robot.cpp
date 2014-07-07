@@ -201,7 +201,7 @@ void MobileRobot::calculateSpeedsAndTime () {
 
   // Get the starting time
   ros::Time start_time = ros::Time::now();
-
+  std::cout<<"\nstart_time: "<<start_time.toSec();
 
   // We go through all the points
   for(int i=0;i<num_-1;i++) {
@@ -216,8 +216,10 @@ void MobileRobot::calculateSpeedsAndTime () {
     speeds_linear_.push_back( sqrt(pow(current.velocities.at(0),2)
                            + pow(current.velocities.at(1),2) ));
 
+    speeds_angular_.push_back( current.velocities.at(2) );
+
     // Find which knot point is next
-    int kp, kp_prev=0;
+    /*int kp, kp_prev=0;
     for(kp=0;kp<trajectory_.index_knot_points.size();kp++) {
       //std::cout<<"\ntrajectory_.index_knot_points.at(kp): "<<trajectory_.index_knot_points.at(kp);
       if(i < trajectory_.index_knot_points.at(kp)) {
@@ -237,16 +239,25 @@ void MobileRobot::calculateSpeedsAndTime () {
       orientations_.push_back(trajectory_.trajectory.points.at(kp).positions.at(2));
     }
     else 
-      orientations_.push_back(theta);
+      orientations_.push_back(theta);*/
 
     //std::cout<<"\norientation: "<<orientations_.at(i)<<"\n";
     
     // Calculate the ending time for each waypoints
-    end_times.push_back(start_time + next.time_from_start );
+    ros::Duration d(next.time_from_start.toSec());
+    ros::Time t = start_time + d;
+    end_times.push_back(t);
+    //std::cout<<"\nnext.time_from_start: "<<next.time_from_start;
+    std::cout<<"\nd: "<<d.toSec();
+    std::cout<<"\nstart + d: "<< t;
   } 
   
-  //printVectors();
-}
+  printVectors();
+} // End calculateSpeedsAndTime
+
+
+
+
 
 
 void MobileRobot::sendTwist() const {
@@ -263,10 +274,10 @@ void MobileRobot::sendTwist(const geometry_msgs::Twist t) const {
 void MobileRobot::printVectors() const {
     
   std::cout<<"\nspeeds: [";
-  for(unsigned int i=0;i<speeds.size()-1;i++) {
-    std::cout<<speeds.at(i)<<", ";
+  for(unsigned int i=0;i<speeds_linear_.size()-1;i++) {
+    std::cout<<speeds_linear_.at(i)<<", ";
   }
-  std::cout<<speeds.at(speeds.size()-1)<<"]";
+  std::cout<<speeds_linear_.at(speeds_linear_.size()-1)<<"]";
 
   std::cout<<"\nend_times: [";
   for(unsigned int i=0;i<end_times.size()-1;i++) {
@@ -275,10 +286,10 @@ void MobileRobot::printVectors() const {
   std::cout<<end_times.at(end_times.size()-1)<<"]";
 
   std::cout<<"\norientations_: [";
-  for(unsigned int i=0;i<orientations_.size()-1;i++) {
-    std::cout<<orientations_.at(i)<<", ";
+  for(unsigned int i=0;i<speeds_angular_.size()-1;i++) {
+    std::cout<<speeds_angular_.at(i)<<", ";
   }
-  std::cout<<orientations_.at(orientations_.size()-1)<<"]";
+  std::cout<<speeds_angular_.at(speeds_angular_.size()-1)<<"]";
 } // End printVectors
 
 
@@ -423,7 +434,7 @@ void MobileRobot::moveOnTrajectoryRot(const ramp_msgs::Trajectory traj, bool sim
   } // end for
 
   //std::cout<<"\nLeaving moveOnTrajectoryRot\n";
-} // End moveOnTrajectory
+} // End moveOnTrajectoryRot
 
 
 
@@ -438,7 +449,7 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
 
   // Execute the trajectory
   while( (num_traveled_+1) < num_) { 
-    //std::cout<<"\nnum_traveled: "<<num_traveled_<<"\n";
+    std::cout<<"\nnum_traveled: "<<num_traveled_<<"\n";
     restart_ = false;
     
 
@@ -450,7 +461,7 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
     // Check that we are at the correct orientation
     // If not, rotate
     // Because the last point is the goal
-    if(!checkOrientation(num_traveled_, simulation)) {
+    /*if(!checkOrientation(num_traveled_, simulation)) {
 
       // Get rotation trajectory and move on it
       ramp_msgs::Trajectory rot_t = getRotationTrajectory();
@@ -465,7 +476,7 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
     // Check if a new trajectory has been received before we go to next point
     if(restart_) {
       break;
-    } 
+    }*/
     
     
     
@@ -473,14 +484,15 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
     ros::Time g_time = end_times.at(num_traveled_);
     while(ros::ok() && ros::Time::now() < g_time) {
     
-      twist_.linear.x   = speeds.at(num_traveled_);
-      twist_.angular.z  = 0;
+      twist_.linear.x   = speeds_linear_.at(num_traveled_);
+      twist_.angular.z  = speeds_angular_.at(num_traveled_);
     
       //if(!simulation) {
 
         // When driving straight, adjust the angular speed 
         // to maintain orientation
-        if(fabs(twist_.linear.x) > 0.0f) {
+        // TODO: Works with Bezier curve?
+        /*if(fabs(twist_.linear.x) > 0.0f) {
           
           //std::cout<<"\ninitial_theta_: "<<initial_theta_;
           float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
@@ -489,7 +501,7 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
           //std::cout<<"\norientations_.at("<<num_traveled_<<"): "<<orientations_.at(num_traveled_);
           //std::cout<<"\ndist: "<<dist;
           twist_.angular.z = dist/2;
-        }
+        }*/
       //}
     
       //std::cout<<"\ntwist_linear: "<<twist_.linear.x;

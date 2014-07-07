@@ -348,7 +348,10 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     resultValue = 0;
 
     if(i_kp_ > 1 && i_kp_ < path_.points.size()-1) {
-      res.trajectory.trajectory.points.push_back(utility_.getTrajectoryPoint(path_.points.at(i_kp_).motionState));
+      trajectory_msgs::JointTrajectoryPoint jp = utility_.getTrajectoryPoint(path_.points.at(i_kp_).motionState);
+      jp.time_from_start = timeFromStart_;
+      timeFromStart_ += ros::Duration(CYCLE_TIME_IN_SECONDS);
+      res.trajectory.trajectory.points.push_back(jp);
 
       reflexxesData_.inputParameters->CurrentPositionVector->VecData[0] = path_.points.at(i_kp_).motionState.positions.at(0);
       reflexxesData_.inputParameters->CurrentPositionVector->VecData[1] = path_.points.at(i_kp_).motionState.positions.at(1);

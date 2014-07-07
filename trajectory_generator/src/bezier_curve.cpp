@@ -238,6 +238,7 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
 
   double theta  = utility_.findAngleFromAToB(x_prev, y_prev, x, y);
   double theta_dot = (theta - theta_prev_) / CYCLE_TIME_IN_SECONDS;
+  // TODO: Fix theta acceleration
   double theta_dot_dot = (theta_dot - theta_dot_prev_) / CYCLE_TIME_IN_SECONDS;
 
   theta_prev_ = theta;
@@ -263,7 +264,6 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   result.accelerations.push_back(x_dot_dot);
   result.accelerations.push_back(y_dot_dot);
   result.accelerations.push_back(theta_dot_dot);
-  
   
   // Set current vectors the output 
   *reflexxesData_.inputParameters->CurrentPositionVector = *reflexxesData_.outputParameters->NewPositionVector;
