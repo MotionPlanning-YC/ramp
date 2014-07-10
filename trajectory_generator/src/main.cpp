@@ -24,126 +24,112 @@ int main(int argc, char** argv) {
   ros::ServiceServer service = n.advertiseService("trajectory_generator", &MobileBase::trajectoryRequest, &mobileBase);
 
 
-/*********************************************************************/
-/********************* Testing Bezier ********************************/
-/*********************************************************************/
 
-  
-  // Creating MotionStates
-  ramp_msgs::MotionState p0, p1, p2, p3;
-  
-  p0.positions.push_back(1);
-  p0.positions.push_back(1);
-  p0.positions.push_back(PI/2);
-  
-  p1.positions.push_back(1);
-  p1.positions.push_back(3);
-  
-  p2.positions.push_back(2);
-  p2.positions.push_back(2);
-  p2.positions.push_back(0);
-  
-  p2.velocities.push_back(0);
-  p2.velocities.push_back(0);
-  p2.velocities.push_back(0);
+  /*********************************************************************/
+  /********************* Testing Bezier ********************************/
+  /*********************************************************************/
 
-  p3.positions.push_back(3);
-  p3.positions.push_back(3);
-  
+    
+    // Creating MotionStates
+    ramp_msgs::MotionState p0, p1, p2, p3;
+    
+    p0.positions.push_back(1);
+    p0.positions.push_back(1);
+    p0.positions.push_back(PI/2);
+    
+    p1.positions.push_back(1);
+    p1.positions.push_back(3);
+    p1.positions.push_back(PI/2);
+    p1.velocities.push_back(0);
+    p1.velocities.push_back(0);
+    p1.velocities.push_back(0);
+    
+    p2.positions.push_back(2);
+    p2.positions.push_back(2);
+    p2.positions.push_back(0);
+    
+    p2.velocities.push_back(0);
+    p2.velocities.push_back(0);
+    p2.velocities.push_back(0);
 
-  // Create Path
-  ramp_msgs::Path p;
+    p3.positions.push_back(3);
+    p3.positions.push_back(3);
+    
 
-  ramp_msgs::KnotPoint kp0;
-  kp0.motionState = p0;
-  
-  ramp_msgs::KnotPoint kp1;
-  kp1.motionState = p1;
-  
-  ramp_msgs::KnotPoint kp2;
-  kp2.motionState = p2;
+    // Create Path
+    ramp_msgs::Path p;
 
-  ramp_msgs::KnotPoint kp3;
-  kp3.motionState = p3;
-  
-  p.points.push_back(kp0);
-  p.points.push_back(kp1);
-  p.points.push_back(kp2);
-  //p.points.push_back(kp3);
+    ramp_msgs::KnotPoint kp0;
+    kp0.motionState = p0;
+    
+    ramp_msgs::KnotPoint kp1;
+    kp1.motionState = p1;
+    
+    ramp_msgs::KnotPoint kp2;
+    kp2.motionState = p2;
 
-  ramp_msgs::Trajectory trj;
+    ramp_msgs::KnotPoint kp3;
+    kp3.motionState = p3;
+    
+    p.points.push_back(kp0);
+    p.points.push_back(kp1);
+    p.points.push_back(kp2);
+    //p.points.push_back(kp3);
 
-  /** Turn path inth Bezier 
-  std::cout<<"\nPath before Bezier: "<<u.toString(p)<<"\n";
-  ramp_msgs::Path p_bezier = mobileBase.Bezier(p);
-  std::cout<<"\nPath after Bezier: "<<u.toString(p_bezier)<<"\n"; */
+    ramp_msgs::Trajectory trj;
 
-  /** Make a trajectory from the path 
-  for(uint8_t i=0;i<p_bezier.points.size();i++) {
-    trj.trajectory.points.push_back(u.getTrajectoryPoint(p_bezier.points.at(i).motionState));
-  } */ 
+    /** Turn path inth Bezier 
+    std::cout<<"\nPath before Bezier: "<<u.toString(p)<<"\n";
+    ramp_msgs::Path p_bezier = mobileBase.Bezier(p);
+    std::cout<<"\nPath after Bezier: "<<u.toString(p_bezier)<<"\n"; */
 
-  /** Create Bezier curve 
-  BezierCurve bc;
-  std::vector<ramp_msgs::MotionState> sp;
-  sp.push_back(kp0.motionState);
-  sp.push_back(kp1.motionState);
-  sp.push_back(kp2.motionState);
-  bc.init(sp, 0.5);
-  
-  std::vector<ramp_msgs::MotionState> p_bc = bc.generateCurve();
-  for(uint8_t i=0;i<p_bc.size();i++) {
-    trj.trajectory.points.push_back(u.getTrajectoryPoint(p_bc.at(i)));
-  }*/
- 
+    /** Make a trajectory from the path 
+    for(uint8_t i=0;i<p_bezier.points.size();i++) {
+      trj.trajectory.points.push_back(u.getTrajectoryPoint(p_bezier.points.at(i).motionState));
+    } */ 
 
-  /** Get a trajectory */
-  
-  ramp_msgs::TrajectoryRequest tr;
-  tr.request.path = p;
-  
-  mobileBase.trajectoryRequest(tr.request, tr.response);
-  
-  std::cout<<"\nTrajectory: "<<u.toString(tr.response.trajectory);
+    /** Create Bezier curve 
+    BezierCurve bc;
+    std::vector<ramp_msgs::MotionState> sp;
+    sp.push_back(kp0.motionState);
+    sp.push_back(kp1.motionState);
+    sp.push_back(kp2.motionState);
+    bc.init(sp, 0.5);
+    
+    std::vector<ramp_msgs::MotionState> p_bc = bc.generateCurve();
+    for(uint8_t i=0;i<p_bc.size();i++) {
+      trj.trajectory.points.push_back(u.getTrajectoryPoint(p_bc.at(i)));
+    }*/
+   
 
-  /** Publish the Population */
+    /** Get a trajectory */
+    
+    /*ramp_msgs::TrajectoryRequest tr;
+    tr.request.path = p;
+    
+    mobileBase.trajectoryRequest(tr.request, tr.response);
+    
+    std::cout<<"\nTrajectory: "<<u.toString(tr.response.trajectory);*/
 
-  ros::Publisher pub = n.advertise<ramp_msgs::Population>("population", 1000);
-  ros::Publisher pub_trj = n.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000);
-  
-  // Make a Population
-  ramp_msgs::Population pop;
-  pop.population.push_back(tr.response.trajectory);
-  
-  std::cout<<"\nPress Enter to publish the population\n";
-  std::cin.get();
-  pub.publish(pop);
-  pub_trj.publish(tr.response.trajectory);
+    /** Publish the Population */
 
-
-  std::cout<<"\nPublished Population";
-/*********************************************************************/
-
-
+    /*ros::Publisher pub = n.advertise<ramp_msgs::Population>("population", 1000);
+    ros::Publisher pub_trj = n.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000);
+    
+    // Make a Population
+    ramp_msgs::Population pop;
+    pop.population.push_back(tr.response.trajectory);
+    
+    std::cout<<"\nPress Enter to publish the population\n";
+    std::cin.get();
+    pub.publish(pop);
+    pub_trj.publish(tr.response.trajectory);
 
 
-  std::vector<double> a;
-  a.push_back(1.05686);
-  a.push_back(2.50403);
-  a.push_back(1.25105);
+    std::cout<<"\nPublished Population";*/
+  /*********************************************************************/
 
-  std::vector<double> b;
-  b.push_back(1.0603);
-  b.push_back(2.51382);
-  b.push_back(1.23257);
 
-  std::vector<double> c;
-  c.push_back(1.06205);
-  c.push_back(2.52197);
-  c.push_back(1.35928);
-
-  std::cout<<"\ntheta between points: "<<u.findAngleFromAToB(a, b)<<"\n";
-  std::cout<<"\ntheta between points: "<<u.findAngleFromAToB(b, c)<<"\n";
 
   std::cout<<"\nWaiting for requests...\n";
   ros::spin();

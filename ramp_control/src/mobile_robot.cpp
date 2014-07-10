@@ -201,7 +201,6 @@ void MobileRobot::calculateSpeedsAndTime () {
 
   // Get the starting time
   ros::Time start_time = ros::Time::now();
-  std::cout<<"\nstart_time: "<<start_time.toSec();
 
   // We go through all the points
   for(int i=0;i<num_-1;i++) {
@@ -244,12 +243,7 @@ void MobileRobot::calculateSpeedsAndTime () {
     //std::cout<<"\norientation: "<<orientations_.at(i)<<"\n";
     
     // Calculate the ending time for each waypoints
-    ros::Duration d(next.time_from_start.toSec());
-    ros::Time t = start_time + d;
-    end_times.push_back(t);
-    //std::cout<<"\nnext.time_from_start: "<<next.time_from_start;
-    std::cout<<"\nd: "<<d.toSec();
-    std::cout<<"\nstart + d: "<< t;
+    end_times.push_back(start_time + next.time_from_start);
   } 
   
   printVectors();
@@ -449,7 +443,7 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
 
   // Execute the trajectory
   while( (num_traveled_+1) < num_) { 
-    std::cout<<"\nnum_traveled: "<<num_traveled_<<"\n";
+    //std::cout<<"\nnum_traveled: "<<num_traveled_<<"\n";
     restart_ = false;
     
 

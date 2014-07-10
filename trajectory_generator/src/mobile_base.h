@@ -36,6 +36,10 @@ private:
   int resultValue;
 
 
+  // Time for getting control points on bezier
+  double t_control_points_;
+
+
   // Reflexxes variables 
   ReflexxesData reflexxesData_;
   
@@ -57,6 +61,14 @@ private:
 
 
   /***** Methods *****/
+
+  const std::vector<ramp_msgs::MotionState> getCurve(const std::vector<ramp_msgs::MotionState> ms);
+
+
+  void insertPoint(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryRequest::Response& res);
+  void insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ramp_msgs::TrajectoryRequest::Response& res);
+
+  
 
   // Execute one iteration of the Reflexxes control function
   const trajectory_msgs::JointTrajectoryPoint spinOnce();

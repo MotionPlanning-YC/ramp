@@ -59,7 +59,7 @@ const double Utility::findAngleFromAToB(const std::vector<double> a, const std::
   // If the positions are the same,
   // Set the result to the starting orientation if one is provided
   // Or to 0 if no starting orientation is provided
-  if(euc_dist <= 0.0001) {
+  if(euc_dist <= 0.00001) {
     result = 0;
   }
 
@@ -185,6 +185,8 @@ const trajectory_msgs::JointTrajectoryPoint Utility::getTrajectoryPoint(const ra
   for(unsigned int i=0;i<ms.accelerations.size();i++) {
     result.accelerations.push_back(ms.accelerations.at(i));
   }
+
+  result.time_from_start = ros::Duration(ms.time);
 
   return result; 
 }
