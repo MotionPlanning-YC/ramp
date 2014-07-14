@@ -1,6 +1,5 @@
 ramp_msgs/Path path
 uint8 resolutionRate
-bool rotational
 
 ---
 

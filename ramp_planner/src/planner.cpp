@@ -824,9 +824,6 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   result.request.path           = path.buildPathMsg();
   result.request.resolutionRate = resolutionRate_;
 
-  result.request.rotational     = false;
-  
-
   return result;
 } // End buildTrajectoryRequest
 

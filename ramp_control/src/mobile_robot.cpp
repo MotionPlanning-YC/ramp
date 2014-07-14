@@ -369,8 +369,6 @@ const ramp_msgs::Trajectory MobileRobot::getRotationTrajectory() const {
 
 
   //std::cout<<"\nRotation path: "<<utility_.toString(tr.request.path);
-      
-  tr.request.rotational = true;
 
   // Send request
   if(h_traj_req_->request(tr)) {

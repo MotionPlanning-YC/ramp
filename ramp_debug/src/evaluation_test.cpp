@@ -110,11 +110,9 @@ int main(int argc, char** argv) {
 
   ramp_msgs::TrajectoryRequest tr1;
   tr1.request.path = p1;
-  tr1.request.rotational = false;
 
   ramp_msgs::TrajectoryRequest tr2;
   tr2.request.path = p2;
-  tr2.request.rotational = false;
 
 
   /************************************************/

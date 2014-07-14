@@ -28,9 +28,8 @@ public:
 
   // Get Bezier curves over the path
   const ramp_msgs::Path Bezier(const ramp_msgs::Path p);
-
-  bool bezier_;
   
+  bool bezier_;
 private:
 
   
@@ -79,7 +78,7 @@ private:
   void setTarget(const ramp_msgs::MotionState ms);
 
   // Set the selection vector for a path
-  void setSelectionVector(const bool rot);
+  void setSelectionVector();
 
   // Returns true if the target has been reached
   bool finalStateReached();
@@ -96,6 +95,9 @@ private:
   
 
   void init(const ramp_msgs::TrajectoryRequest::Request req);
+
+  const std::vector<trajectory_msgs::JointTrajectoryPoint> rotate(const double start, const double goal);
+  void setSelectionVectorRotation();
 
 };
 

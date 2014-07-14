@@ -263,7 +263,7 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
   result<<")";
   
   //Accelerations
-  result<<"\n       Accelerations: ("<<p.accelerations.at(0);
+  //result<<"\n       Accelerations: ("<<p.accelerations.at(0);
   for(unsigned int k=1;k<p.accelerations.size();k++) {
     result<<", "<<p.accelerations.at(k);
   }
