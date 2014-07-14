@@ -28,6 +28,8 @@ public:
 
   // Get Bezier curves over the path
   const ramp_msgs::Path Bezier(const ramp_msgs::Path p);
+
+  bool bezier_;
   
 private:
 

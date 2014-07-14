@@ -60,6 +60,15 @@ void BezierCurve::initReflexxes() {
 
   reflexxesData_.inputParameters->SelectionVector->VecData[0] = true;
   
+  double denom_v, denom_a;
+  if( (D_*D_) > (C_*C_) ) {
+    denom_v = B_+D_;
+    denom_a = B_;
+  }
+  else {
+    denom_v = A_+C_;
+    denom_a = C_;
+  }
   reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = fabs(0.33 / (A_+C_));
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = fabs(0.33 / B_);
   reflexxesData_.inputParameters->MaxJerkVector->VecData[0]         = 0.33;
