@@ -210,33 +210,12 @@ const std::vector<ramp_msgs::MotionState> MobileBase::getCurve(const std::vector
 
 const ramp_msgs::Path MobileBase::Bezier(const ramp_msgs::Path p) {
   ramp_msgs::Path result;
-  double lambda = 0.5;
   
   // Push on the initial point
   result.points.push_back(p.points.at(0));
 
-  if(p.points.size() == 2) {
-    std::cout<<"\nIn if\n";
-    BezierCurve bc;
 
-    std::vector<ramp_msgs::MotionState> segment_points;
-    segment_points.push_back(p.points.at(0).motionState);
-    segment_points.push_back(p.points.at(1).motionState);
-    
-    std::cout<<"\nBefore init\n";
-    bc.init(segment_points, lambda, p.points.at(0).motionState.positions.at(2), 0.33, 0.33);
-    std::cout<<"\nAfter init\n";
-
-    std::vector<ramp_msgs::MotionState> curve = bc.generateCurve();
-    for(uint8_t j=0;j<curve.size()-1;j++) {
-      result.points.push_back(utility_.getKnotPoint(curve.at(j))); 
-    }
-
-  }
-
-
-
-
+  double lambda = 0.5;
   for(uint8_t i=1;i<p.points.size()-1;i++) {
     BezierCurve bc;
 

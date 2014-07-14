@@ -33,15 +33,11 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> cp, const doubl
   x_init_v_ = a;
   y_init_v_ = b;
   
-  std::cout<<"\nBefore initControlPoints\n";
   initControlPoints();
-  std::cout<<"\nAfter initControlPoints\n";
   
   calculateConstants();
-  std::cout<<"\nAfter calculateConstants\n";
 
   initReflexxes();
-  std::cout<<"\nAfter initReflexxes\n";
 
   theta_prev_ = theta;
   
@@ -64,7 +60,7 @@ void BezierCurve::initReflexxes() {
 
   reflexxesData_.inputParameters->SelectionVector->VecData[0] = true;
   
-  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = fabs(0.33 / (B_+D_));
+  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = fabs(0.33 / (A_+C_));
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = fabs(0.33 / B_);
   reflexxesData_.inputParameters->MaxJerkVector->VecData[0]         = 0.33;
   
@@ -88,28 +84,12 @@ void BezierCurve::initReflexxes() {
 
 
 void BezierCurve::initControlPoints() {
-  ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;
+  ramp_msgs::MotionState X0;
+  ramp_msgs::MotionState X2;
 
-  if(segment_points_.size() == 2) {
-
-    // Set known motion states
-    p0 = segment_points_.at(0);
-    p2 = segment_points_.at(1);
-
-    // Compute third one
-    p1.positions.push_back( p2.positions.at(0) );
-    p1.positions.push_back( p0.positions.at(1) );
-
-    X1 = p1;
-  }
-
-  else {
-    p0 = segment_points_.at(0);
-    p1 = segment_points_.at(1);
-    p2 = segment_points_.at(2);
-
-    X1 = segment_points_.at(1);
-  }
+  ramp_msgs::MotionState p0 = segment_points_.at(0);
+  ramp_msgs::MotionState p1 = segment_points_.at(1);
+  ramp_msgs::MotionState p2 = segment_points_.at(2);
 
   /** Positions */
   X0.positions.push_back( (1-lambda_)*p0.positions.at(0) + lambda_*p1.positions.at(0) );
@@ -124,6 +104,7 @@ void BezierCurve::initControlPoints() {
   /** Velocities */
   // Have to predict the initial velocities
 
+  std::cout<<"\nx_init_v: "<<x_init_v_<<" y_init_v_: "<<y_init_v_;
   X0.velocities.push_back(x_init_v_);
   X0.velocities.push_back(y_init_v_);
   X0.velocities.push_back(0);
@@ -135,16 +116,16 @@ void BezierCurve::initControlPoints() {
   X0.accelerations.push_back(0);
   X0.accelerations.push_back(0);
 
+  std::cout<<"\nX0: "<<utility_.toString(X0);
+
 
   control_points_.push_back(X0);
-  control_points_.push_back(X1);
+  control_points_.push_back(segment_points_.at(1));
   control_points_.push_back(X2);
-  
 
-  std::cout<<"\nControl Points:";
-  for(int i=0;i<control_points_.size();i++) {
-    std::cout<<"\n"<<utility_.toString(control_points_.at(i));
-  }
+
+  // Set initial u_dot
+  //reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]     = (x_dot < y_dot) ? x_dot/C_ : y_dot/D_;
 } // End initControlPoints
 
 
