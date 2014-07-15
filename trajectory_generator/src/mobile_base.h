@@ -30,6 +30,8 @@ public:
   const ramp_msgs::Path Bezier(const ramp_msgs::Path p);
   
   bool bezier_;
+  std::vector<double> timeToReachV_max_;
+  const double findVelocity(const uint8_t i, const double s) const;
 private:
 
   
@@ -62,8 +64,6 @@ private:
 
 
   /***** Methods *****/
-
-  const std::vector<ramp_msgs::MotionState> getCurve(const std::vector<ramp_msgs::MotionState> ms);
 
 
   void insertPoint(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryRequest::Response& res);

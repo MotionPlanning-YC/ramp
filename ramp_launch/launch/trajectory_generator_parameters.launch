@@ -1,5 +1,5 @@
 <launch>
 
-<rosparam file="$(find trajectory_generator)/config.yaml" command="load" ns="ramp" />
+<rosparam file="$(find trajectory_generator)/config.yaml" command="load" />
 
 </launch>

@@ -42,13 +42,14 @@ int main(int argc, char** argv) {
   mobileBase.bezier_ = bezier;
   std::cout<<"\nbezier: "<<mobileBase.bezier_;
 
+
   /*********************************************************************/
   /********************* Testing Bezier ********************************/
   /*********************************************************************/
 
     
     // Creating MotionStates
-    ramp_msgs::MotionState p0, p1, p2, p3;
+    /*ramp_msgs::MotionState p0, p1, p2, p3;
     
     p0.positions.push_back(1);
     p0.positions.push_back(1);
@@ -93,7 +94,7 @@ int main(int argc, char** argv) {
     p.points.push_back(kp2);
     //p.points.push_back(kp3);
 
-    ramp_msgs::Trajectory trj;
+    ramp_msgs::Trajectory trj;*/
 
     /** Turn path inth Bezier 
     std::cout<<"\nPath before Bezier: "<<u.toString(p)<<"\n";

@@ -4,91 +4,121 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-A	mobile_base.cpp	/^  double A = 2 * (p0.positions.at(0) - (2*p1.positions.at(0)) + p2.positions.at(0));$/;"	l
-A	mobile_base.h	/^  double A, B, C, D;$/;"	m	struct:BezierConstants	access:public
-B	mobile_base.cpp	/^  double B = 2 * (p0.positions.at(1) - (2*p1.positions.at(1)) + p2.positions.at(1));$/;"	l
-B	mobile_base.h	/^  double A, B, C, D;$/;"	m	struct:BezierConstants	access:public
+A_	bezier_curve.h	/^  double A_, B_, C_, D_ ;$/;"	m	class:BezierCurve	access:public
+BEZIER_CURVE	bezier_curve.h	2;"	d
+B_	bezier_curve.h	/^  double A_, B_, C_, D_ ;$/;"	m	class:BezierCurve	access:public
 Bezier	mobile_base.cpp	/^const ramp_msgs::Path MobileBase::Bezier(const ramp_msgs::Path p) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::Path p)
 Bezier	mobile_base.h	/^  const ramp_msgs::Path Bezier(const ramp_msgs::Path p);$/;"	p	class:MobileBase	access:public	signature:(const ramp_msgs::Path p)
-BezierConstants	mobile_base.h	/^struct BezierConstants {$/;"	s
-BezierConstants::A	mobile_base.h	/^  double A, B, C, D;$/;"	m	struct:BezierConstants	access:public
-BezierConstants::B	mobile_base.h	/^  double A, B, C, D;$/;"	m	struct:BezierConstants	access:public
-BezierConstants::C	mobile_base.h	/^  double A, B, C, D;$/;"	m	struct:BezierConstants	access:public
-BezierConstants::D	mobile_base.h	/^  double A, B, C, D;$/;"	m	struct:BezierConstants	access:public
-BezierCurve	mobile_base.cpp	/^const std::vector<ramp_msgs::MotionState> MobileBase::BezierCurve(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2)
-BezierCurve	mobile_base.h	/^  const std::vector<ramp_msgs::MotionState> BezierCurve(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2);$/;"	p	class:MobileBase	access:public	signature:(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2)
-BezierPoint	mobile_base.cpp	/^    result.push_back(BezierPoint(u, u_dot, u_dot_dot, p0, p1, p2));$/;"	p	file:	signature:(u, u_dot, u_dot_dot, p0, p1, p2)
-BezierPoint	mobile_base.cpp	/^const ramp_msgs::MotionState MobileBase::BezierPoint(const double u, const double u_dot, const double u_dot_dot, const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2) {$/;"	f	class:MobileBase	signature:(const double u, const double u_dot, const double u_dot_dot, const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2)
-BezierPoint	mobile_base.h	/^  const ramp_msgs::MotionState BezierPoint(const double u, const double u_dot, const double u_dot_dot, const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2);$/;"	p	class:MobileBase	access:public	signature:(const double u, const double u_dot, const double u_dot_dot, const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2)
-C	mobile_base.cpp	/^  double C = 2 * (p1.positions.at(0) - p0.positions.at(0));$/;"	l
-C	mobile_base.h	/^  double A, B, C, D;$/;"	m	struct:BezierConstants	access:public
-CYCLE_TIME_IN_SECONDS	mobile_base.h	15;"	d
-D	mobile_base.cpp	/^  double D = 2 * (p1.positions.at(1) - p0.positions.at(1));$/;"	l
-D	mobile_base.cpp	/^  std::cout<<"\\nA: "<<A<<" B: "<<B<<" C: "<<C<<" D: "<<D;$/;"	l
-D	mobile_base.h	/^  double A, B, C, D;$/;"	m	struct:BezierConstants	access:public
+BezierCurve	bezier_curve.cpp	/^BezierCurve::BezierCurve() {$/;"	f	class:BezierCurve	signature:()
+BezierCurve	bezier_curve.h	/^  BezierCurve();$/;"	p	class:BezierCurve	access:public	signature:()
+BezierCurve	bezier_curve.h	/^class BezierCurve {$/;"	c
+BezierCurve::A_	bezier_curve.h	/^  double A_, B_, C_, D_ ;$/;"	m	class:BezierCurve	access:public
+BezierCurve::B_	bezier_curve.h	/^  double A_, B_, C_, D_ ;$/;"	m	class:BezierCurve	access:public
+BezierCurve::BezierCurve	bezier_curve.cpp	/^BezierCurve::BezierCurve() {$/;"	f	class:BezierCurve	signature:()
+BezierCurve::BezierCurve	bezier_curve.h	/^  BezierCurve();$/;"	p	class:BezierCurve	access:public	signature:()
+BezierCurve::C_	bezier_curve.h	/^  double A_, B_, C_, D_ ;$/;"	m	class:BezierCurve	access:public
+BezierCurve::D_	bezier_curve.h	/^  double A_, B_, C_, D_ ;$/;"	m	class:BezierCurve	access:public
+BezierCurve::R_min_	bezier_curve.h	/^  double R_min_         ;$/;"	m	class:BezierCurve	access:public
+BezierCurve::calculateABCD	bezier_curve.cpp	/^void BezierCurve::calculateABCD() {$/;"	f	class:BezierCurve	signature:()
+BezierCurve::calculateABCD	bezier_curve.h	/^  void calculateABCD()      ;$/;"	p	class:BezierCurve	access:private	signature:()
+BezierCurve::calculateConstants	bezier_curve.cpp	/^void BezierCurve::calculateConstants() {$/;"	f	class:BezierCurve	signature:()
+BezierCurve::calculateConstants	bezier_curve.h	/^  void calculateConstants() ;$/;"	p	class:BezierCurve	access:private	signature:()
+BezierCurve::calculateR_min	bezier_curve.cpp	/^void BezierCurve::calculateR_min() {$/;"	f	class:BezierCurve	signature:()
+BezierCurve::calculateR_min	bezier_curve.h	/^  void calculateR_min()     ;$/;"	p	class:BezierCurve	access:private	signature:()
+BezierCurve::calculateT_min	bezier_curve.cpp	/^void BezierCurve::calculateT_min() {$/;"	f	class:BezierCurve	signature:()
+BezierCurve::calculateT_min	bezier_curve.h	/^  void calculateT_min()     ;$/;"	p	class:BezierCurve	access:private	signature:()
+BezierCurve::control_points_	bezier_curve.h	/^  std::vector<ramp_msgs::MotionState> control_points_ ;$/;"	m	class:BezierCurve	access:public
+BezierCurve::finalStateReached	bezier_curve.cpp	/^const bool BezierCurve::finalStateReached() const {$/;"	f	class:BezierCurve	signature:() const
+BezierCurve::finalStateReached	bezier_curve.h	/^  const bool finalStateReached() const;$/;"	p	class:BezierCurve	access:private	signature:() const
+BezierCurve::generateCurve	bezier_curve.cpp	/^const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve() {$/;"	f	class:BezierCurve	signature:()
+BezierCurve::generateCurve	bezier_curve.h	/^  const std::vector<ramp_msgs::MotionState> generateCurve();$/;"	p	class:BezierCurve	access:public	signature:()
+BezierCurve::init	bezier_curve.cpp	/^void BezierCurve::init(const std::vector<ramp_msgs::MotionState> cp, const double lambda, const double theta, const double a, const double b) {$/;"	f	class:BezierCurve	signature:(const std::vector<ramp_msgs::MotionState> cp, const double lambda, const double theta, const double a, const double b)
+BezierCurve::init	bezier_curve.h	/^  void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double a, const double b);$/;"	p	class:BezierCurve	access:public	signature:(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double a, const double b)
+BezierCurve::initControlPoints	bezier_curve.cpp	/^void BezierCurve::initControlPoints() {$/;"	f	class:BezierCurve	signature:()
+BezierCurve::initControlPoints	bezier_curve.h	/^  void initControlPoints();$/;"	p	class:BezierCurve	access:public	signature:()
+BezierCurve::initReflexxes	bezier_curve.cpp	/^void BezierCurve::initReflexxes() {$/;"	f	class:BezierCurve	signature:()
+BezierCurve::initReflexxes	bezier_curve.h	/^  void initReflexxes()    ;$/;"	p	class:BezierCurve	access:private	signature:()
+BezierCurve::initialized_	bezier_curve.h	/^  bool          initialized_      ;$/;"	m	class:BezierCurve	access:private
+BezierCurve::lambda_	bezier_curve.h	/^  double        lambda_           ;$/;"	m	class:BezierCurve	access:private
+BezierCurve::points_	bezier_curve.h	/^  std::vector<ramp_msgs::MotionState> points_         ;$/;"	m	class:BezierCurve	access:public
+BezierCurve::reflexxesData_	bezier_curve.h	/^  ReflexxesData reflexxesData_    ;$/;"	m	class:BezierCurve	access:private
+BezierCurve::segment_points_	bezier_curve.h	/^  std::vector<ramp_msgs::MotionState> segment_points_ ;$/;"	m	class:BezierCurve	access:public
+BezierCurve::spinOnce	bezier_curve.cpp	/^const ramp_msgs::MotionState BezierCurve::spinOnce() {$/;"	f	class:BezierCurve	signature:()
+BezierCurve::spinOnce	bezier_curve.h	/^  const ramp_msgs::MotionState spinOnce();$/;"	p	class:BezierCurve	access:private	signature:()
+BezierCurve::t_min_	bezier_curve.h	/^  double t_min_         ;$/;"	m	class:BezierCurve	access:public
+BezierCurve::theta_dot_prev_	bezier_curve.h	/^  double        theta_dot_prev_   ;$/;"	m	class:BezierCurve	access:private
+BezierCurve::theta_prev_	bezier_curve.h	/^  double        theta_prev_       ;$/;"	m	class:BezierCurve	access:private
+BezierCurve::utility_	bezier_curve.h	/^  Utility       utility_          ;$/;"	m	class:BezierCurve	access:private
+BezierCurve::x_init_v_	bezier_curve.h	/^  double x_init_v_, y_init_v_;$/;"	m	class:BezierCurve	access:public
+BezierCurve::y_init_v_	bezier_curve.h	/^  double x_init_v_, y_init_v_;$/;"	m	class:BezierCurve	access:public
+BezierCurve::~BezierCurve	bezier_curve.cpp	/^BezierCurve::~BezierCurve() {$/;"	f	class:BezierCurve	signature:()
+BezierCurve::~BezierCurve	bezier_curve.h	/^  ~BezierCurve();$/;"	p	class:BezierCurve	access:public	signature:()
+CYCLE_TIME_IN_SECONDS	bezier_curve.h	7;"	d
+CYCLE_TIME_IN_SECONDS	mobile_base.h	13;"	d
+C_	bezier_curve.h	/^  double A_, B_, C_, D_ ;$/;"	m	class:BezierCurve	access:public
+D_	bezier_curve.cpp	/^  std::cout<<"\\nA: "<<A_<<" B: "<<B_<<" C: "<<C_<<" D: "<<D_;$/;"	l
+D_	bezier_curve.h	/^  double A_, B_, C_, D_ ;$/;"	m	class:BezierCurve	access:public
 MOBILE_BASE_H	mobile_base.h	2;"	d
 MobileBase	mobile_base.cpp	/^MobileBase::MobileBase() {$/;"	f	class:MobileBase	signature:()
 MobileBase	mobile_base.h	/^  MobileBase();$/;"	p	class:MobileBase	access:public	signature:()
 MobileBase	mobile_base.h	/^class MobileBase {$/;"	c
 MobileBase::Bezier	mobile_base.cpp	/^const ramp_msgs::Path MobileBase::Bezier(const ramp_msgs::Path p) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::Path p)
 MobileBase::Bezier	mobile_base.h	/^  const ramp_msgs::Path Bezier(const ramp_msgs::Path p);$/;"	p	class:MobileBase	access:public	signature:(const ramp_msgs::Path p)
-MobileBase::BezierCurve	mobile_base.cpp	/^const std::vector<ramp_msgs::MotionState> MobileBase::BezierCurve(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2)
-MobileBase::BezierCurve	mobile_base.h	/^  const std::vector<ramp_msgs::MotionState> BezierCurve(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2);$/;"	p	class:MobileBase	access:public	signature:(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2)
-MobileBase::BezierPoint	mobile_base.cpp	/^const ramp_msgs::MotionState MobileBase::BezierPoint(const double u, const double u_dot, const double u_dot_dot, const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2) {$/;"	f	class:MobileBase	signature:(const double u, const double u_dot, const double u_dot_dot, const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2)
-MobileBase::BezierPoint	mobile_base.h	/^  const ramp_msgs::MotionState BezierPoint(const double u, const double u_dot, const double u_dot_dot, const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2);$/;"	p	class:MobileBase	access:public	signature:(const double u, const double u_dot, const double u_dot_dot, const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2)
 MobileBase::MobileBase	mobile_base.cpp	/^MobileBase::MobileBase() {$/;"	f	class:MobileBase	signature:()
 MobileBase::MobileBase	mobile_base.h	/^  MobileBase();$/;"	p	class:MobileBase	access:public	signature:()
+MobileBase::bezier_	mobile_base.h	/^  bool bezier_;$/;"	m	class:MobileBase	access:public
+MobileBase::buildTrajectoryPoint	mobile_base.cpp	/^const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const RMLPositionInputParameters input, const RMLPositionOutputParameters output) {$/;"	f	class:MobileBase	signature:(const RMLPositionInputParameters input, const RMLPositionOutputParameters output)
 MobileBase::buildTrajectoryPoint	mobile_base.cpp	/^const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const RMLPositionInputParameters my_inputParameters) {$/;"	f	class:MobileBase	signature:(const RMLPositionInputParameters my_inputParameters)
-MobileBase::buildTrajectoryPoint	mobile_base.cpp	/^const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const RMLPositionOutputParameters my_outputParameters) {$/;"	f	class:MobileBase	signature:(const RMLPositionOutputParameters my_outputParameters)
+MobileBase::buildTrajectoryPoint	mobile_base.h	/^  const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionInputParameters input, const RMLPositionOutputParameters output);$/;"	p	class:MobileBase	access:private	signature:(const RMLPositionInputParameters input, const RMLPositionOutputParameters output)
 MobileBase::buildTrajectoryPoint	mobile_base.h	/^  const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionInputParameters inputParameters);$/;"	p	class:MobileBase	access:private	signature:(const RMLPositionInputParameters inputParameters)
-MobileBase::buildTrajectoryPoint	mobile_base.h	/^  const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionOutputParameters outputParameters);$/;"	p	class:MobileBase	access:private	signature:(const RMLPositionOutputParameters outputParameters)
-MobileBase::calculateConstants	mobile_base.cpp	/^const BezierConstants MobileBase::calculateConstants(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2) const {$/;"	f	class:MobileBase	signature:(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2) const
-MobileBase::calculateConstants	mobile_base.h	/^  const BezierConstants calculateConstants(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2) const; $/;"	p	class:MobileBase	access:public	signature:(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2) const
-MobileBase::calculateR_min	mobile_base.cpp	/^const double MobileBase::calculateR_min(const double t_min, const double A, const double B, const double C, const double D) const {$/;"	f	class:MobileBase	signature:(const double t_min, const double A, const double B, const double C, const double D) const
-MobileBase::calculateR_min	mobile_base.h	/^  const double calculateR_min(const double t_min, const double A, const double B, const double C, const double D) const;$/;"	p	class:MobileBase	access:public	signature:(const double t_min, const double A, const double B, const double C, const double D) const
 MobileBase::computeTargetOrientation	mobile_base.cpp	/^double MobileBase::computeTargetOrientation(double initial_x, double initial_y, double target_x, double target_y) {$/;"	f	class:MobileBase	signature:(double initial_x, double initial_y, double target_x, double target_y)
 MobileBase::computeTargetOrientation	mobile_base.h	/^  double computeTargetOrientation(double initial_x, double intial_y, double target_x, double target_y);$/;"	p	class:MobileBase	access:private	signature:(double initial_x, double intial_y, double target_x, double target_y)
-MobileBase::getSegmentControlPoints	mobile_base.cpp	/^const std::vector<ramp_msgs::MotionState> MobileBase::getSegmentControlPoints(const double lambda, const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2) const {$/;"	f	class:MobileBase	signature:(const double lambda, const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2) const
-MobileBase::getSegmentControlPoints	mobile_base.h	/^  const std::vector<ramp_msgs::MotionState> getSegmentControlPoints(const double lambda, const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2) const;$/;"	p	class:MobileBase	access:public	signature:(const double lambda, const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2) const
+MobileBase::finalStateReached	mobile_base.cpp	/^bool MobileBase::finalStateReached() {$/;"	f	class:MobileBase	signature:()
+MobileBase::finalStateReached	mobile_base.h	/^  bool finalStateReached();$/;"	p	class:MobileBase	access:private	signature:()
+MobileBase::getCurve	mobile_base.cpp	/^const std::vector<ramp_msgs::MotionState> MobileBase::getCurve(const std::vector<ramp_msgs::MotionState> segment_points) {$/;"	f	class:MobileBase	signature:(const std::vector<ramp_msgs::MotionState> segment_points)
+MobileBase::getCurve	mobile_base.h	/^  const std::vector<ramp_msgs::MotionState> getCurve(const std::vector<ramp_msgs::MotionState> ms);$/;"	p	class:MobileBase	access:private	signature:(const std::vector<ramp_msgs::MotionState> ms)
 MobileBase::i_kp_	mobile_base.h	/^  uint8_t i_kp_;$/;"	m	class:MobileBase	access:private
-MobileBase::initialize	mobile_base.cpp	/^void MobileBase::initialize(const ramp_msgs::TrajectoryRequest::Request req) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::TrajectoryRequest::Request req)
-MobileBase::initialize	mobile_base.h	/^  void initialize(const ramp_msgs::TrajectoryRequest::Request req);$/;"	p	class:MobileBase	access:private	signature:(const ramp_msgs::TrajectoryRequest::Request req)
-MobileBase::initializeBezier	mobile_base.cpp	/^void MobileBase::initializeBezier() {$/;"	f	class:MobileBase	signature:()
-MobileBase::initializeBezier	mobile_base.h	/^  void initializeBezier();$/;"	p	class:MobileBase	access:public	signature:()
-MobileBase::isFinalStateReached	mobile_base.cpp	/^bool MobileBase::isFinalStateReached() {$/;"	f	class:MobileBase	signature:()
-MobileBase::isFinalStateReached	mobile_base.h	/^  bool isFinalStateReached();$/;"	p	class:MobileBase	access:private	signature:()
+MobileBase::init	mobile_base.cpp	/^void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::TrajectoryRequest::Request req)
+MobileBase::init	mobile_base.h	/^  void init(const ramp_msgs::TrajectoryRequest::Request req);$/;"	p	class:MobileBase	access:private	signature:(const ramp_msgs::TrajectoryRequest::Request req)
+MobileBase::insertPoint	mobile_base.cpp	/^void MobileBase::insertPoint(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryRequest::Response& res) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryRequest::Response& res)
+MobileBase::insertPoint	mobile_base.cpp	/^void MobileBase::insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ramp_msgs::TrajectoryRequest::Response& res) {$/;"	f	class:MobileBase	signature:(const trajectory_msgs::JointTrajectoryPoint jp, ramp_msgs::TrajectoryRequest::Response& res)
+MobileBase::insertPoint	mobile_base.h	/^  void insertPoint(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryRequest::Response& res);$/;"	p	class:MobileBase	access:private	signature:(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryRequest::Response& res)
+MobileBase::insertPoint	mobile_base.h	/^  void insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ramp_msgs::TrajectoryRequest::Response& res);$/;"	p	class:MobileBase	access:private	signature:(const trajectory_msgs::JointTrajectoryPoint jp, ramp_msgs::TrajectoryRequest::Response& res)
 MobileBase::path_	mobile_base.h	/^  ramp_msgs::Path path_;$/;"	m	class:MobileBase	access:private
-MobileBase::reflexBezier_	mobile_base.h	/^  ReflexxesData reflexBezier_;$/;"	m	class:MobileBase	access:private
-MobileBase::reflexPlanar_	mobile_base.h	/^  ReflexxesData reflexPlanar_;$/;"	m	class:MobileBase	access:private
+MobileBase::reflexxesData_	mobile_base.h	/^  ReflexxesData reflexxesData_;$/;"	m	class:MobileBase	access:private
 MobileBase::resultValue	mobile_base.h	/^  int resultValue;$/;"	m	class:MobileBase	access:private
+MobileBase::rotate	mobile_base.cpp	/^const std::vector<trajectory_msgs::JointTrajectoryPoint> MobileBase::rotate(const double start, const double goal) {$/;"	f	class:MobileBase	signature:(const double start, const double goal)
+MobileBase::rotate	mobile_base.h	/^  const std::vector<trajectory_msgs::JointTrajectoryPoint> rotate(const double start, const double goal);$/;"	p	class:MobileBase	access:private	signature:(const double start, const double goal)
 MobileBase::setInitialConditions	mobile_base.cpp	/^void MobileBase::setInitialConditions() {$/;"	f	class:MobileBase	signature:()
 MobileBase::setInitialConditions	mobile_base.h	/^  void setInitialConditions();$/;"	p	class:MobileBase	access:private	signature:()
-MobileBase::setPlanarSelectionVector	mobile_base.cpp	/^void MobileBase::setPlanarSelectionVector(const bool rot) {$/;"	f	class:MobileBase	signature:(const bool rot)
-MobileBase::setPlanarSelectionVector	mobile_base.h	/^  void setPlanarSelectionVector(const bool rot);$/;"	p	class:MobileBase	access:private	signature:(const bool rot)
-MobileBase::setTarget	mobile_base.cpp	/^void MobileBase::setTarget(const ramp_msgs::MotionState ms, ReflexxesData& reflex) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::MotionState ms, ReflexxesData& reflex)
-MobileBase::setTarget	mobile_base.h	/^  void setTarget(const ramp_msgs::MotionState ms, ReflexxesData& reflex);$/;"	p	class:MobileBase	access:private	signature:(const ramp_msgs::MotionState ms, ReflexxesData& reflex)
-MobileBase::spinOnce	mobile_base.cpp	/^trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce() {$/;"	f	class:MobileBase	signature:()
-MobileBase::spinOnce	mobile_base.h	/^  trajectory_msgs::JointTrajectoryPoint spinOnce();$/;"	p	class:MobileBase	access:private	signature:()
-MobileBase::spinOnceBezier	mobile_base.cpp	/^ramp_msgs::MotionState MobileBase::spinOnceBezier(const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2)
-MobileBase::spinOnceBezier	mobile_base.h	/^  ramp_msgs::MotionState spinOnceBezier(const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2);$/;"	p	class:MobileBase	access:private	signature:(const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2)
+MobileBase::setSelectionVector	mobile_base.cpp	/^void MobileBase::setSelectionVector() {$/;"	f	class:MobileBase	signature:()
+MobileBase::setSelectionVector	mobile_base.h	/^  void setSelectionVector();$/;"	p	class:MobileBase	access:private	signature:()
+MobileBase::setSelectionVectorRotation	mobile_base.cpp	/^void MobileBase::setSelectionVectorRotation() {$/;"	f	class:MobileBase	signature:()
+MobileBase::setSelectionVectorRotation	mobile_base.h	/^  void setSelectionVectorRotation();$/;"	p	class:MobileBase	access:private	signature:()
+MobileBase::setTarget	mobile_base.cpp	/^void MobileBase::setTarget(const ramp_msgs::MotionState ms) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::MotionState ms)
+MobileBase::setTarget	mobile_base.h	/^  void setTarget(const ramp_msgs::MotionState ms);$/;"	p	class:MobileBase	access:private	signature:(const ramp_msgs::MotionState ms)
+MobileBase::spinOnce	mobile_base.cpp	/^const trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce() {$/;"	f	class:MobileBase	signature:()
+MobileBase::spinOnce	mobile_base.h	/^  const trajectory_msgs::JointTrajectoryPoint spinOnce();$/;"	p	class:MobileBase	access:private	signature:()
+MobileBase::t_control_points_	mobile_base.h	/^  double t_control_points_;$/;"	m	class:MobileBase	access:private
 MobileBase::timeCutoff_	mobile_base.h	/^  ros::Duration timeCutoff_;$/;"	m	class:MobileBase	access:private
 MobileBase::timeFromStart_	mobile_base.h	/^  ros::Duration timeFromStart_;$/;"	m	class:MobileBase	access:private
+MobileBase::timeToReachV_max_	mobile_base.h	/^  std::vector<double> timeToReachV_max_;$/;"	m	class:MobileBase	access:public
 MobileBase::trajectoryRequest	mobile_base.cpp	/^bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) {$/;"	f	class:MobileBase	signature:(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res)
 MobileBase::trajectoryRequest	mobile_base.h	/^  bool trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res);$/;"	p	class:MobileBase	access:public	signature:(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res)
 MobileBase::utility_	mobile_base.h	/^  Utility utility_;$/;"	m	class:MobileBase	access:private
 MobileBase::~MobileBase	mobile_base.cpp	/^MobileBase::~MobileBase() {$/;"	f	class:MobileBase	signature:()
 MobileBase::~MobileBase	mobile_base.h	/^  ~MobileBase();$/;"	p	class:MobileBase	access:public	signature:()
-NUMBER_OF_DOFS	mobile_base.h	/^  unsigned int NUMBER_OF_DOFS;$/;"	m	struct:ReflexxesData	access:public
+NUMBER_OF_DOFS	reflexxes_data.h	/^  unsigned int NUMBER_OF_DOFS;$/;"	m	struct:ReflexxesData	access:public
 PI	utility.h	16;"	d
-R_min	mobile_base.cpp	/^  double R_min                = sqrt( numerator \/ denominator );$/;"	l
-R_min	mobile_base.cpp	/^  double R_min = calculateR_min(t_min, A, B, C, D);$/;"	l
-R_min	mobile_base.cpp	/^  std::cout<<"\\nR_min: "<<R_min;$/;"	l
-ReflexxesData	mobile_base.h	/^struct ReflexxesData {$/;"	s
-ReflexxesData::NUMBER_OF_DOFS	mobile_base.h	/^  unsigned int NUMBER_OF_DOFS;$/;"	m	struct:ReflexxesData	access:public
-ReflexxesData::flags	mobile_base.h	/^  RMLPositionFlags flags;$/;"	m	struct:ReflexxesData	access:public
-ReflexxesData::inputParameters	mobile_base.h	/^  RMLPositionInputParameters *inputParameters;          $/;"	m	struct:ReflexxesData	access:public
-ReflexxesData::outputParameters	mobile_base.h	/^  RMLPositionOutputParameters *outputParameters;$/;"	m	struct:ReflexxesData	access:public
-ReflexxesData::rml	mobile_base.h	/^  ReflexxesAPI *rml;$/;"	m	struct:ReflexxesData	access:public
+REFLEXXES_DATA	reflexxes_data.h	2;"	d
+R_min_	bezier_curve.h	/^  double R_min_         ;$/;"	m	class:BezierCurve	access:public
+ReflexxesData	reflexxes_data.h	/^struct ReflexxesData {$/;"	s
+ReflexxesData::NUMBER_OF_DOFS	reflexxes_data.h	/^  unsigned int NUMBER_OF_DOFS;$/;"	m	struct:ReflexxesData	access:public
+ReflexxesData::flags	reflexxes_data.h	/^  RMLPositionFlags flags;$/;"	m	struct:ReflexxesData	access:public
+ReflexxesData::inputParameters	reflexxes_data.h	/^  RMLPositionInputParameters *inputParameters;          $/;"	m	struct:ReflexxesData	access:public
+ReflexxesData::outputParameters	reflexxes_data.h	/^  RMLPositionOutputParameters *outputParameters;$/;"	m	struct:ReflexxesData	access:public
+ReflexxesData::resultValue	reflexxes_data.h	/^  int resultValue;$/;"	m	struct:ReflexxesData	access:public
+ReflexxesData::rml	reflexxes_data.h	/^  ReflexxesAPI *rml;$/;"	m	struct:ReflexxesData	access:public
 UTILITY_H	utility.h	2;"	d
 Utility	utility.cpp	/^Utility::Utility() {}$/;"	f	class:Utility	signature:()
 Utility	utility.h	/^    Utility();$/;"	p	class:Utility	access:public	signature:()
@@ -97,8 +127,10 @@ Utility::Utility	utility.cpp	/^Utility::Utility() {}$/;"	f	class:Utility	signatu
 Utility::Utility	utility.h	/^    Utility();$/;"	p	class:Utility	access:public	signature:()
 Utility::displaceAngle	utility.cpp	/^const double Utility::displaceAngle(const double a1, double a2) const {$/;"	f	class:Utility	signature:(const double a1, double a2) const
 Utility::displaceAngle	utility.h	/^    const double displaceAngle(const double a1, double a2) const;$/;"	p	class:Utility	access:public	signature:(const double a1, double a2) const
+Utility::findAngleFromAToB	utility.cpp	/^const double Utility::findAngleFromAToB(const double x_prev, const double y_prev, const double x, const double y) const {$/;"	f	class:Utility	signature:(const double x_prev, const double y_prev, const double x, const double y) const
 Utility::findAngleFromAToB	utility.cpp	/^const double Utility::findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const {$/;"	f	class:Utility	signature:(const std::vector<double> a, const std::vector<double> b) const
 Utility::findAngleFromAToB	utility.cpp	/^const double Utility::findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const {$/;"	f	class:Utility	signature:(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const
+Utility::findAngleFromAToB	utility.h	/^    const double findAngleFromAToB(const double x_prev, const double y_prev, const double x, const double y) const;$/;"	p	class:Utility	access:public	signature:(const double x_prev, const double y_prev, const double x, const double y) const
 Utility::findAngleFromAToB	utility.h	/^    const double findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<double> a, const std::vector<double> b) const
 Utility::findAngleFromAToB	utility.h	/^    const double findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;$/;"	p	class:Utility	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const
 Utility::findDistanceBetweenAngles	utility.cpp	/^const double Utility::findDistanceBetweenAngles(const double a1, const double a2) const {$/;"	f	class:Utility	signature:(const double a1, const double a2) const
@@ -111,6 +143,8 @@ Utility::getPath	utility.cpp	/^const ramp_msgs::Path Utility::getPath(const std:
 Utility::getPath	utility.cpp	/^const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::MotionState> mps) const {$/;"	f	class:Utility	signature:(const std::vector<ramp_msgs::MotionState> mps) const
 Utility::getPath	utility.h	/^    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint>   kps) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<ramp_msgs::KnotPoint> kps) const
 Utility::getPath	utility.h	/^    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::MotionState> mps) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<ramp_msgs::MotionState> mps) const
+Utility::getTrajectoryPoint	utility.cpp	/^const trajectory_msgs::JointTrajectoryPoint Utility::getTrajectoryPoint(const ramp_msgs::MotionState ms) const {$/;"	f	class:Utility	signature:(const ramp_msgs::MotionState ms) const
+Utility::getTrajectoryPoint	utility.h	/^    const trajectory_msgs::JointTrajectoryPoint getTrajectoryPoint(const ramp_msgs::MotionState ms) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::MotionState ms) const
 Utility::positionDistance	utility.cpp	/^const double Utility::positionDistance(const std::vector<double> a, const std::vector<double> b) const {$/;"	f	class:Utility	signature:(const std::vector<double> a, const std::vector<double> b) const
 Utility::positionDistance	utility.h	/^    const double positionDistance(const std::vector<double> a, const std::vector<double> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<double> a, const std::vector<double> b) const
 Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {$/;"	f	class:Utility	signature:(const ramp_msgs::KnotPoint kp) const
@@ -123,6 +157,14 @@ Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Mo
 Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Path path) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path path) const
 Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
 Utility::toString	utility.h	/^    const std::string toString(const trajectory_msgs::JointTrajectoryPoint p) const;$/;"	p	class:Utility	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
+X0	bezier_curve.cpp	/^  ramp_msgs::MotionState X0 = control_points_.at(0);$/;"	l
+X0	bezier_curve.cpp	/^  ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;$/;"	l
+X1	bezier_curve.cpp	/^  ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;$/;"	l
+X1	bezier_curve.cpp	/^  ramp_msgs::MotionState X1 = control_points_.at(1);$/;"	l
+X2	bezier_curve.cpp	/^  ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;$/;"	l
+X2	bezier_curve.cpp	/^  ramp_msgs::MotionState X2 = control_points_.at(2);$/;"	l
+a	mobile_base.cpp	/^    double a, b;$/;"	l
+a	utility.cpp	/^  std::vector<double> a, b;$/;"	l
 angle	mobile_base.cpp	/^  double angle = utility_.findAngleFromAToB(current_position, target_position);$/;"	l
 at	utility.cpp	/^    result<<", "<<p.accelerations.at(k);$/;"	p	file:	signature:(k)
 at	utility.cpp	/^    result<<", "<<p.positions.at(k);$/;"	p	file:	signature:(k)
@@ -131,47 +173,66 @@ at	utility.cpp	/^    result<<mp.accelerations.at(i)<<" ";$/;"	p	file:	signature:
 at	utility.cpp	/^    result<<mp.jerks.at(i)<<" ";$/;"	p	file:	signature:(i)
 at	utility.cpp	/^    result<<mp.positions.at(i)<<" ";$/;"	p	file:	signature:(i)
 at	utility.cpp	/^    result<<mp.velocities.at(i)<<" ";$/;"	p	file:	signature:(i)
-bc	mobile_base.cpp	/^  BezierConstants bc = calculateConstants(p0, p1, p2);$/;"	l
-bc	mobile_base.cpp	/^  BezierConstants bc = calculateConstants(x0, x1, x2);$/;"	l
+b	mobile_base.cpp	/^    double a, b;$/;"	l
+b	mobile_base.cpp	/^    std::cout<<"\\na: "<<a<<" b: "<<b;$/;"	l
+b	utility.cpp	/^  std::vector<double> a, b;$/;"	l
+bc	mobile_base.cpp	/^    BezierCurve bc;$/;"	l
+bezier	main.cpp	/^bool bezier;$/;"	v
+bezier_	mobile_base.h	/^  bool bezier_;$/;"	m	class:MobileBase	access:public
+buildTrajectoryPoint	mobile_base.cpp	/^const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const RMLPositionInputParameters input, const RMLPositionOutputParameters output) {$/;"	f	class:MobileBase	signature:(const RMLPositionInputParameters input, const RMLPositionOutputParameters output)
 buildTrajectoryPoint	mobile_base.cpp	/^const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const RMLPositionInputParameters my_inputParameters) {$/;"	f	class:MobileBase	signature:(const RMLPositionInputParameters my_inputParameters)
-buildTrajectoryPoint	mobile_base.cpp	/^const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const RMLPositionOutputParameters my_outputParameters) {$/;"	f	class:MobileBase	signature:(const RMLPositionOutputParameters my_outputParameters)
+buildTrajectoryPoint	mobile_base.h	/^  const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionInputParameters input, const RMLPositionOutputParameters output);$/;"	p	class:MobileBase	access:private	signature:(const RMLPositionInputParameters input, const RMLPositionOutputParameters output)
 buildTrajectoryPoint	mobile_base.h	/^  const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionInputParameters inputParameters);$/;"	p	class:MobileBase	access:private	signature:(const RMLPositionInputParameters inputParameters)
-buildTrajectoryPoint	mobile_base.h	/^  const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const RMLPositionOutputParameters outputParameters);$/;"	p	class:MobileBase	access:private	signature:(const RMLPositionOutputParameters outputParameters)
 c	utility.cpp	/^  std::vector<double> c;$/;"	l
-calculateConstants	mobile_base.cpp	/^const BezierConstants MobileBase::calculateConstants(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2) const {$/;"	f	class:MobileBase	signature:(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2) const
-calculateConstants	mobile_base.h	/^  const BezierConstants calculateConstants(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2) const; $/;"	p	class:MobileBase	access:public	signature:(const ramp_msgs::MotionState p0, const ramp_msgs::MotionState p1, const ramp_msgs::MotionState p2) const
-calculateR_min	mobile_base.cpp	/^const double MobileBase::calculateR_min(const double t_min, const double A, const double B, const double C, const double D) const {$/;"	f	class:MobileBase	signature:(const double t_min, const double A, const double B, const double C, const double D) const
-calculateR_min	mobile_base.h	/^  const double calculateR_min(const double t_min, const double A, const double B, const double C, const double D) const;$/;"	p	class:MobileBase	access:public	signature:(const double t_min, const double A, const double B, const double C, const double D) const
+calculateABCD	bezier_curve.cpp	/^void BezierCurve::calculateABCD() {$/;"	f	class:BezierCurve	signature:()
+calculateABCD	bezier_curve.h	/^  void calculateABCD()      ;$/;"	p	class:BezierCurve	access:private	signature:()
+calculateConstants	bezier_curve.cpp	/^void BezierCurve::calculateConstants() {$/;"	f	class:BezierCurve	signature:()
+calculateConstants	bezier_curve.h	/^  void calculateConstants() ;$/;"	p	class:BezierCurve	access:private	signature:()
+calculateR_min	bezier_curve.cpp	/^void BezierCurve::calculateR_min() {$/;"	f	class:BezierCurve	signature:()
+calculateR_min	bezier_curve.h	/^  void calculateR_min()     ;$/;"	p	class:BezierCurve	access:private	signature:()
+calculateT_min	bezier_curve.cpp	/^void BezierCurve::calculateT_min() {$/;"	f	class:BezierCurve	signature:()
+calculateT_min	bezier_curve.h	/^  void calculateT_min()     ;$/;"	p	class:BezierCurve	access:private	signature:()
 computeTargetOrientation	mobile_base.cpp	/^double MobileBase::computeTargetOrientation(double initial_x, double initial_y, double target_x, double target_y) {$/;"	f	class:MobileBase	signature:(double initial_x, double initial_y, double target_x, double target_y)
 computeTargetOrientation	mobile_base.h	/^  double computeTargetOrientation(double initial_x, double intial_y, double target_x, double target_y);$/;"	p	class:MobileBase	access:private	signature:(double initial_x, double intial_y, double target_x, double target_y)
-control_points	mobile_base.cpp	/^    std::vector<ramp_msgs::MotionState> control_points = $/;"	l
-cout	main.cpp	/^  std::cout<<"\\nPublished Population";$/;"	m	class:std	file:
+control_points_	bezier_curve.h	/^  std::vector<ramp_msgs::MotionState> control_points_ ;$/;"	m	class:BezierCurve	access:public
+cout	bezier_curve.cpp	/^  std::cout<<"\\nAfter calculateConstants\\n";$/;"	m	class:std	file:
+cout	bezier_curve.cpp	/^  std::cout<<"\\nAfter initControlPoints\\n";$/;"	m	class:std	file:
+cout	bezier_curve.cpp	/^  std::cout<<"\\nAfter initReflexxes\\n";$/;"	m	class:std	file:
+cout	bezier_curve.cpp	/^  std::cout<<"\\nBefore initControlPoints\\n";$/;"	m	class:std	file:
+cout	bezier_curve.cpp	/^  std::cout<<"\\nControl Points:";$/;"	m	class:std	file:
 cout	main.cpp	/^  std::cout<<"\\nWaiting for requests...\\n";$/;"	m	class:std	file:
-cout	mobile_base.cpp	/^      std::cout<<"\\nin while\\n";$/;"	m	class:std	file:
-cout	mobile_base.cpp	/^    std::cout<<"\\nTarget set\\n";$/;"	m	class:std	file:
-cout	mobile_base.cpp	/^  std::cout<<"\\n"<<((0.33\/R_min)<PI\/4);$/;"	p	class:std	file:	signature:(0.33/R_min)<PI/4
-cout	mobile_base.cpp	/^  std::cout<<"\\nDone initializing\\n";$/;"	m	class:std	file:
-cout	mobile_base.cpp	/^  std::cout<<"\\nIn Bezier\\n";$/;"	m	class:std	file:
-cout	mobile_base.cpp	/^  std::cout<<"\\nIn getSegmentControlPoints\\n";$/;"	m	class:std	file:
-cout	mobile_base.cpp	/^  std::cout<<"\\nIn spinOnceBezier\\n";$/;"	m	class:std	file:
-cout	mobile_base.cpp	/^  std::cout<<"\\nLeaving getSegmentControlPoints\\n";$/;"	m	class:std	file:
-cout	mobile_base.cpp	/^  std::cout<<"\\nLeaving spinOnceBezier\\n";$/;"	m	class:std	file:
+cout	mobile_base.cpp	/^    std::cout<<"\\nAfter init\\n";$/;"	m	class:std	file:
+cout	mobile_base.cpp	/^    std::cout<<"\\nBefore init\\n";$/;"	m	class:std	file:
+cout	mobile_base.cpp	/^    std::cout<<"\\nIn if\\n";$/;"	m	class:std	file:
 current_position	mobile_base.cpp	/^  std::vector<double> current_position;$/;"	l
+curve	mobile_base.cpp	/^    std::vector<ramp_msgs::MotionState> curve = bc.generateCurve();$/;"	l
 d	utility.cpp	/^  std::vector<double> d;$/;"	l
 d_x	utility.cpp	/^  double d_x = b.at(0) - a.at(0);$/;"	l
 d_y	utility.cpp	/^  double d_y = b.at(1) - a.at(1);$/;"	l
-denominator	mobile_base.cpp	/^  double denominator          = pow((B*C) - (A*D), 2);$/;"	l
+denom_a	bezier_curve.cpp	/^  double denom_v, denom_a;$/;"	l
+denom_v	bezier_curve.cpp	/^  double denom_v, denom_a;$/;"	l
+denominator	bezier_curve.cpp	/^  double denominator          = pow((B_*C_) - (A_*D_), 2);$/;"	l
 difference	utility.cpp	/^  double difference = a2 - a1;$/;"	l
 displaceAngle	utility.cpp	/^const double Utility::displaceAngle(const double a1, double a2) const {$/;"	f	class:Utility	signature:(const double a1, double a2) const
 displaceAngle	utility.h	/^    const double displaceAngle(const double a1, double a2) const;$/;"	p	class:Utility	access:public	signature:(const double a1, double a2) const
 euc_dist	utility.cpp	/^  double euc_dist = sqrt( pow(d_x,2) + pow(d_y,2) );$/;"	l
+finalStateReached	bezier_curve.cpp	/^const bool BezierCurve::finalStateReached() const {$/;"	f	class:BezierCurve	signature:() const
+finalStateReached	bezier_curve.h	/^  const bool finalStateReached() const;$/;"	p	class:BezierCurve	access:private	signature:() const
+finalStateReached	mobile_base.cpp	/^bool MobileBase::finalStateReached() {$/;"	f	class:MobileBase	signature:()
+finalStateReached	mobile_base.h	/^  bool finalStateReached();$/;"	p	class:MobileBase	access:private	signature:()
+findAngleFromAToB	utility.cpp	/^const double Utility::findAngleFromAToB(const double x_prev, const double y_prev, const double x, const double y) const {$/;"	f	class:Utility	signature:(const double x_prev, const double y_prev, const double x, const double y) const
 findAngleFromAToB	utility.cpp	/^const double Utility::findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const {$/;"	f	class:Utility	signature:(const std::vector<double> a, const std::vector<double> b) const
 findAngleFromAToB	utility.cpp	/^const double Utility::findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const {$/;"	f	class:Utility	signature:(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const
+findAngleFromAToB	utility.h	/^    const double findAngleFromAToB(const double x_prev, const double y_prev, const double x, const double y) const;$/;"	p	class:Utility	access:public	signature:(const double x_prev, const double y_prev, const double x, const double y) const
 findAngleFromAToB	utility.h	/^    const double findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<double> a, const std::vector<double> b) const
 findAngleFromAToB	utility.h	/^    const double findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;$/;"	p	class:Utility	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const
 findDistanceBetweenAngles	utility.cpp	/^const double Utility::findDistanceBetweenAngles(const double a1, const double a2) const {$/;"	f	class:Utility	signature:(const double a1, const double a2) const
 findDistanceBetweenAngles	utility.h	/^    const double findDistanceBetweenAngles(const double a1, const double a2) const;$/;"	p	class:Utility	access:public	signature:(const double a1, const double a2) const
-flags	mobile_base.h	/^  RMLPositionFlags flags;$/;"	m	struct:ReflexxesData	access:public
+flags	reflexxes_data.h	/^  RMLPositionFlags flags;$/;"	m	struct:ReflexxesData	access:public
+generateCurve	bezier_curve.cpp	/^const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve() {$/;"	f	class:BezierCurve	signature:()
+generateCurve	bezier_curve.h	/^  const std::vector<ramp_msgs::MotionState> generateCurve();$/;"	p	class:BezierCurve	access:public	signature:()
+getCurve	mobile_base.cpp	/^const std::vector<ramp_msgs::MotionState> MobileBase::getCurve(const std::vector<ramp_msgs::MotionState> segment_points) {$/;"	f	class:MobileBase	signature:(const std::vector<ramp_msgs::MotionState> segment_points)
+getCurve	mobile_base.h	/^  const std::vector<ramp_msgs::MotionState> getCurve(const std::vector<ramp_msgs::MotionState> ms);$/;"	p	class:MobileBase	access:private	signature:(const std::vector<ramp_msgs::MotionState> ms)
 getEuclideanDist	utility.cpp	/^const double Utility::getEuclideanDist(const std::vector<double> a, const std::vector<double> b) const {$/;"	f	class:Utility	signature:(const std::vector<double> a, const std::vector<double> b) const
 getEuclideanDist	utility.h	/^    const double getEuclideanDist(const std::vector<double> a, std::vector<double> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<double> a, std::vector<double> b) const
 getKnotPoint	utility.cpp	/^const ramp_msgs::KnotPoint Utility::getKnotPoint(const ramp_msgs::MotionState ms) const {$/;"	f	class:Utility	signature:(const ramp_msgs::MotionState ms) const
@@ -180,140 +241,200 @@ getPath	utility.cpp	/^const ramp_msgs::Path Utility::getPath(const std::vector<r
 getPath	utility.cpp	/^const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::MotionState> mps) const {$/;"	f	class:Utility	signature:(const std::vector<ramp_msgs::MotionState> mps) const
 getPath	utility.h	/^    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint>   kps) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<ramp_msgs::KnotPoint> kps) const
 getPath	utility.h	/^    const ramp_msgs::Path getPath(const std::vector<ramp_msgs::MotionState> mps) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<ramp_msgs::MotionState> mps) const
-getSegmentControlPoints	mobile_base.cpp	/^const std::vector<ramp_msgs::MotionState> MobileBase::getSegmentControlPoints(const double lambda, const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2) const {$/;"	f	class:MobileBase	signature:(const double lambda, const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2) const
-getSegmentControlPoints	mobile_base.h	/^  const std::vector<ramp_msgs::MotionState> getSegmentControlPoints(const double lambda, const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2) const;$/;"	p	class:MobileBase	access:public	signature:(const double lambda, const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2) const
-i	mobile_base.cpp	/^    std::cout<<"\\ni: "<<i<<"\\n";$/;"	l
+getTrajectoryPoint	utility.cpp	/^const trajectory_msgs::JointTrajectoryPoint Utility::getTrajectoryPoint(const ramp_msgs::MotionState ms) const {$/;"	f	class:Utility	signature:(const ramp_msgs::MotionState ms) const
+getTrajectoryPoint	utility.h	/^    const trajectory_msgs::JointTrajectoryPoint getTrajectoryPoint(const ramp_msgs::MotionState ms) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::MotionState ms) const
 i	utility.cpp	/^    result<<"\\n   "<<i<<":";$/;"	l
 i	utility.cpp	/^    result<<"\\n\\n   Point "<<i<<":";$/;"	l
 i_kp_	mobile_base.h	/^  uint8_t i_kp_;$/;"	m	class:MobileBase	access:private
 index	utility.cpp	/^    unsigned int index = traj.index_knot_points.at(i);$/;"	l
+init	bezier_curve.cpp	/^void BezierCurve::init(const std::vector<ramp_msgs::MotionState> cp, const double lambda, const double theta, const double a, const double b) {$/;"	f	class:BezierCurve	signature:(const std::vector<ramp_msgs::MotionState> cp, const double lambda, const double theta, const double a, const double b)
+init	bezier_curve.h	/^  void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double a, const double b);$/;"	p	class:BezierCurve	access:public	signature:(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double a, const double b)
 init	main.cpp	/^  ros::init(argc, argv, "reflexxes");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
-initialize	mobile_base.cpp	/^void MobileBase::initialize(const ramp_msgs::TrajectoryRequest::Request req) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::TrajectoryRequest::Request req)
-initialize	mobile_base.h	/^  void initialize(const ramp_msgs::TrajectoryRequest::Request req);$/;"	p	class:MobileBase	access:private	signature:(const ramp_msgs::TrajectoryRequest::Request req)
-initializeBezier	mobile_base.cpp	/^void MobileBase::initializeBezier() {$/;"	f	class:MobileBase	signature:()
-initializeBezier	mobile_base.h	/^  void initializeBezier();$/;"	p	class:MobileBase	access:public	signature:()
-inputParameters	mobile_base.h	/^  RMLPositionInputParameters *inputParameters;          $/;"	m	struct:ReflexxesData	access:public
-isFinalStateReached	mobile_base.cpp	/^bool MobileBase::isFinalStateReached() {$/;"	f	class:MobileBase	signature:()
-isFinalStateReached	mobile_base.h	/^  bool isFinalStateReached();$/;"	p	class:MobileBase	access:private	signature:()
+init	mobile_base.cpp	/^    bc.init(segment_points, lambda, p.points.at(0).motionState.positions.at(2), 0.33, 0.33);$/;"	p	file:	signature:(segment_points, lambda, p.points.at(0).motionState.positions.at(2), 0.33, 0.33)
+init	mobile_base.cpp	/^    bc.init(segment_points, lambda, p.points.at(0).motionState.positions.at(2), a, b);$/;"	p	file:	signature:(segment_points, lambda, p.points.at(0).motionState.positions.at(2), a, b)
+init	mobile_base.cpp	/^  result.init(segment_points, t_control_points_, segment_points.at(0).positions.at(2), 0.33, 0.33);$/;"	p	file:	signature:(segment_points, t_control_points_, segment_points.at(0).positions.at(2), 0.33, 0.33)
+init	mobile_base.cpp	/^void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::TrajectoryRequest::Request req)
+init	mobile_base.h	/^  void init(const ramp_msgs::TrajectoryRequest::Request req);$/;"	p	class:MobileBase	access:private	signature:(const ramp_msgs::TrajectoryRequest::Request req)
+initControlPoints	bezier_curve.cpp	/^void BezierCurve::initControlPoints() {$/;"	f	class:BezierCurve	signature:()
+initControlPoints	bezier_curve.h	/^  void initControlPoints();$/;"	p	class:BezierCurve	access:public	signature:()
+initReflexxes	bezier_curve.cpp	/^void BezierCurve::initReflexxes() {$/;"	f	class:BezierCurve	signature:()
+initReflexxes	bezier_curve.h	/^  void initReflexxes()    ;$/;"	p	class:BezierCurve	access:private	signature:()
+initialized_	bezier_curve.h	/^  bool          initialized_      ;$/;"	m	class:BezierCurve	access:private
+inputParameters	reflexxes_data.h	/^  RMLPositionInputParameters *inputParameters;          $/;"	m	struct:ReflexxesData	access:public
+insertPoint	mobile_base.cpp	/^void MobileBase::insertPoint(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryRequest::Response& res) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryRequest::Response& res)
+insertPoint	mobile_base.cpp	/^void MobileBase::insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ramp_msgs::TrajectoryRequest::Response& res) {$/;"	f	class:MobileBase	signature:(const trajectory_msgs::JointTrajectoryPoint jp, ramp_msgs::TrajectoryRequest::Response& res)
+insertPoint	mobile_base.h	/^  void insertPoint(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryRequest::Response& res);$/;"	p	class:MobileBase	access:private	signature:(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryRequest::Response& res)
+insertPoint	mobile_base.h	/^  void insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ramp_msgs::TrajectoryRequest::Response& res);$/;"	p	class:MobileBase	access:private	signature:(const trajectory_msgs::JointTrajectoryPoint jp, ramp_msgs::TrajectoryRequest::Response& res)
+jp	mobile_base.cpp	/^  trajectory_msgs::JointTrajectoryPoint jp = utility_.getTrajectoryPoint(ms);$/;"	l
 kp	utility.cpp	/^    ramp_msgs::KnotPoint kp;$/;"	l
-kp0	main.cpp	/^  ramp_msgs::KnotPoint kp0;$/;"	l
-kp1	main.cpp	/^  ramp_msgs::KnotPoint kp1;$/;"	l
-kp2	main.cpp	/^  ramp_msgs::KnotPoint kp2;$/;"	l
-kp3	main.cpp	/^  ramp_msgs::KnotPoint kp3;$/;"	l
+kp0	main.cpp	/^    ramp_msgs::KnotPoint kp0;$/;"	l
+kp1	main.cpp	/^    ramp_msgs::KnotPoint kp1;$/;"	l
+kp2	main.cpp	/^    ramp_msgs::KnotPoint kp2;$/;"	l
+kp3	main.cpp	/^    ramp_msgs::KnotPoint kp3;$/;"	l
 lambda	mobile_base.cpp	/^  double lambda = 0.5;$/;"	l
+lambda_	bezier_curve.h	/^  double        lambda_           ;$/;"	m	class:BezierCurve	access:private
+last	mobile_base.cpp	/^          trajectory_msgs::JointTrajectoryPoint last = res.trajectory.trajectory.points.at(trajec_size-1);$/;"	l
+loadParameters	main.cpp	/^void loadParameters(const ros::NodeHandle& handle) {$/;"	f	signature:(const ros::NodeHandle& handle)
 main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
 mobileBase	main.cpp	/^  MobileBase mobileBase;$/;"	l
-ms	mobile_base.cpp	/^      ramp_msgs::MotionState ms = spinOnceBezier( control_points.at(0), $/;"	l
-mu	mobile_base.cpp	/^  double mu = 1-u;$/;"	l
-mu2	mobile_base.cpp	/^  double mu2 = mu * mu;$/;"	l
 n	main.cpp	/^  ros::NodeHandle n;$/;"	l
-numerator	mobile_base.cpp	/^  double numerator            = pow(numerator_term_one + numerator_term_two + numerator_term_three, 3); $/;"	l
-numerator_term_one	mobile_base.cpp	/^  double numerator_term_one   = ((A*A) + (B*B)) * (t_min*t_min);$/;"	l
-numerator_term_three	mobile_base.cpp	/^  double numerator_term_three = (C*C) + (D*D);$/;"	l
-numerator_term_two	mobile_base.cpp	/^  double numerator_term_two   = 2 * ((A*C)+(B*D)) * t_min;$/;"	l
-outputParameters	mobile_base.h	/^  RMLPositionOutputParameters *outputParameters;$/;"	m	struct:ReflexxesData	access:public
-p	main.cpp	/^  ramp_msgs::Path p;$/;"	l
-p	mobile_base.cpp	/^      double p = computeTargetOrientation(reflexPlanar_.inputParameters->CurrentPositionVector->VecData[0],$/;"	l
+next_knot	mobile_base.cpp	/^          trajectory_msgs::JointTrajectoryPoint next_knot = utility_.getTrajectoryPoint(path_.points.at(i_kp_).motionState);$/;"	l
+numerator	bezier_curve.cpp	/^  double numerator            = pow(numerator_term_one + numerator_term_two + numerator_term_three, 3); $/;"	l
+numerator_term_one	bezier_curve.cpp	/^  double numerator_term_one   = ((A_*A_) + (B_*B_)) * (t_min_*t_min_);$/;"	l
+numerator_term_three	bezier_curve.cpp	/^  double numerator_term_three = (C_*C_) + (D_*D_);$/;"	l
+numerator_term_two	bezier_curve.cpp	/^  double numerator_term_two   = 2 * ((A_*C_)+(B_*D_)) * t_min_;$/;"	l
+outputParameters	reflexxes_data.h	/^  RMLPositionOutputParameters *outputParameters;$/;"	m	struct:ReflexxesData	access:public
+p	main.cpp	/^    ramp_msgs::Path p;$/;"	l
+p	mobile_base.cpp	/^          trajectory_msgs::JointTrajectoryPoint p = spinOnce();$/;"	l
+p	mobile_base.cpp	/^      double p = computeTargetOrientation(input.CurrentPositionVector->VecData[0],$/;"	l
+p	mobile_base.cpp	/^    trajectory_msgs::JointTrajectoryPoint p = spinOnce();$/;"	l
 p	utility.cpp	/^    trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);$/;"	l
 p	utility.cpp	/^    trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);$/;"	l
-p0	main.cpp	/^  ramp_msgs::MotionState p0, p1, p2, p3;$/;"	l
-p1	main.cpp	/^  ramp_msgs::MotionState p0, p1, p2, p3;$/;"	l
-p2	main.cpp	/^  ramp_msgs::MotionState p0, p1, p2, p3;$/;"	l
-p3	main.cpp	/^  ramp_msgs::MotionState p0, p1, p2, p3;$/;"	l
-p_bezier	main.cpp	/^  ramp_msgs::Path p_bezier = mobileBase.Bezier(p);$/;"	l
+p0	bezier_curve.cpp	/^  ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;$/;"	l
+p0	bezier_curve.cpp	/^  ramp_msgs::MotionState p0 = control_points_.at(0);$/;"	l
+p0	main.cpp	/^    ramp_msgs::MotionState p0, p1, p2, p3;$/;"	l
+p1	bezier_curve.cpp	/^  ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;$/;"	l
+p1	bezier_curve.cpp	/^  ramp_msgs::MotionState p1 = control_points_.at(1);$/;"	l
+p1	main.cpp	/^    ramp_msgs::MotionState p0, p1, p2, p3;$/;"	l
+p2	bezier_curve.cpp	/^  ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;$/;"	l
+p2	bezier_curve.cpp	/^  ramp_msgs::MotionState p2 = control_points_.at(2);$/;"	l
+p2	main.cpp	/^    ramp_msgs::MotionState p0, p1, p2, p3;$/;"	l
+p3	main.cpp	/^    ramp_msgs::MotionState p0, p1, p2, p3;$/;"	l
 path_	mobile_base.h	/^  ramp_msgs::Path path_;$/;"	m	class:MobileBase	access:private
-point	mobile_base.cpp	/^  trajectory_msgs::JointTrajectoryPoint point = buildTrajectoryPoint(*reflexPlanar_.outputParameters);$/;"	l
+point	mobile_base.cpp	/^  trajectory_msgs::JointTrajectoryPoint point = buildTrajectoryPoint(*reflexxesData_.inputParameters, *reflexxesData_.outputParameters);$/;"	l
 point	mobile_base.cpp	/^  trajectory_msgs::JointTrajectoryPoint point;$/;"	l
+points_	bezier_curve.h	/^  std::vector<ramp_msgs::MotionState> points_         ;$/;"	m	class:BezierCurve	access:public
 positionDistance	utility.cpp	/^const double Utility::positionDistance(const std::vector<double> a, const std::vector<double> b) const {$/;"	f	class:Utility	signature:(const std::vector<double> a, const std::vector<double> b) const
 positionDistance	utility.h	/^    const double positionDistance(const std::vector<double> a, const std::vector<double> b) const;$/;"	p	class:Utility	access:public	signature:(const std::vector<double> a, const std::vector<double> b) const
-positions	mobile_base.cpp	/^  x1_next.positions.push_back( (1-lambda)*x1.positions.at(0) + lambda*x2.positions.at(0) );$/;"	p	file:	signature:(1-lambda)*x1.positions.at(0) + lambda*x2.positions.at(0) 
-positions	mobile_base.cpp	/^  x1_next.positions.push_back( (1-lambda)*x1.positions.at(1) + lambda*x2.positions.at(1) );$/;"	p	file:	signature:(1-lambda)*x1.positions.at(1) + lambda*x2.positions.at(1) 
-positions	mobile_base.cpp	/^  x1_prev.positions.push_back( (1-lambda)*x0.positions.at(0) + lambda*x1.positions.at(0) );$/;"	p	file:	signature:(1-lambda)*x0.positions.at(0) + lambda*x1.positions.at(0) 
-positions	mobile_base.cpp	/^  x1_prev.positions.push_back( (1-lambda)*x0.positions.at(1) + lambda*x1.positions.at(1) );$/;"	p	file:	signature:(1-lambda)*x0.positions.at(1) + lambda*x1.positions.at(1) 
-push_back	main.cpp	/^  p.points.push_back(kp0);$/;"	p	file:	signature:(kp0)
-push_back	main.cpp	/^  p.points.push_back(kp1);$/;"	p	file:	signature:(kp1)
-push_back	main.cpp	/^  p.points.push_back(kp2);$/;"	p	file:	signature:(kp2)
+positions	bezier_curve.cpp	/^  X0.positions.push_back( (1-lambda_)*p0.positions.at(0) + lambda_*p1.positions.at(0) );$/;"	p	file:	signature:(1-lambda_)*p0.positions.at(0) + lambda_*p1.positions.at(0) 
+positions	bezier_curve.cpp	/^  X0.positions.push_back( (1-lambda_)*p0.positions.at(1) + lambda_*p1.positions.at(1) );$/;"	p	file:	signature:(1-lambda_)*p0.positions.at(1) + lambda_*p1.positions.at(1) 
+positions	bezier_curve.cpp	/^  X2.positions.push_back( (1-lambda_)*p1.positions.at(0) + lambda_*p2.positions.at(0) );$/;"	p	file:	signature:(1-lambda_)*p1.positions.at(0) + lambda_*p2.positions.at(0) 
+positions	bezier_curve.cpp	/^  X2.positions.push_back( (1-lambda_)*p1.positions.at(1) + lambda_*p2.positions.at(1) );$/;"	p	file:	signature:(1-lambda_)*p1.positions.at(1) + lambda_*p2.positions.at(1) 
+push_back	bezier_curve.cpp	/^    p1.positions.push_back( p0.positions.at(1) );$/;"	p	file:	signature:( p0.positions.at(1) )
+push_back	bezier_curve.cpp	/^    p1.positions.push_back( p2.positions.at(0) );$/;"	p	file:	signature:( p2.positions.at(0) )
+push_back	bezier_curve.cpp	/^  X0.positions.push_back(p0.positions.at(2));$/;"	p	file:	signature:(p0.positions.at(2))
+push_back	bezier_curve.cpp	/^  X0.velocities.push_back(x_init_v_);$/;"	p	file:	signature:(x_init_v_)
+push_back	bezier_curve.cpp	/^  X0.velocities.push_back(y_init_v_);$/;"	p	file:	signature:(y_init_v_)
+push_back	bezier_curve.cpp	/^  control_points_.push_back(X0);$/;"	p	file:	signature:(X0)
+push_back	bezier_curve.cpp	/^  control_points_.push_back(X1);$/;"	p	file:	signature:(X1)
+push_back	bezier_curve.cpp	/^  control_points_.push_back(X2);$/;"	p	file:	signature:(X2)
+push_back	bezier_curve.cpp	/^  result.accelerations.push_back(theta_dot_dot);$/;"	p	file:	signature:(theta_dot_dot)
+push_back	bezier_curve.cpp	/^  result.accelerations.push_back(x_dot_dot);$/;"	p	file:	signature:(x_dot_dot)
+push_back	bezier_curve.cpp	/^  result.accelerations.push_back(y_dot_dot);$/;"	p	file:	signature:(y_dot_dot)
+push_back	bezier_curve.cpp	/^  result.positions.push_back(theta);$/;"	p	file:	signature:(theta)
+push_back	bezier_curve.cpp	/^  result.positions.push_back(x);$/;"	p	file:	signature:(x)
+push_back	bezier_curve.cpp	/^  result.positions.push_back(y);$/;"	p	file:	signature:(y)
+push_back	bezier_curve.cpp	/^  result.push_back(control_points_.at(0));$/;"	p	file:	signature:(control_points_.at(0))
+push_back	bezier_curve.cpp	/^  result.velocities.push_back(theta_dot);$/;"	p	file:	signature:(theta_dot)
+push_back	bezier_curve.cpp	/^  result.velocities.push_back(x_dot);$/;"	p	file:	signature:(x_dot)
+push_back	bezier_curve.cpp	/^  result.velocities.push_back(y_dot);$/;"	p	file:	signature:(y_dot)
+push_back	main.cpp	/^    p.points.push_back(kp0);$/;"	p	file:	signature:(kp0)
+push_back	main.cpp	/^    p.points.push_back(kp1);$/;"	p	file:	signature:(kp1)
+push_back	main.cpp	/^    p.points.push_back(kp2);$/;"	p	file:	signature:(kp2)
+push_back	mobile_base.cpp	/^            res.trajectory.trajectory.points.push_back(rotate_points.at(p));$/;"	p	file:	signature:(rotate_points.at(p))
+push_back	mobile_base.cpp	/^          res.trajectory.index_knot_points.push_back(res.trajectory.trajectory.points.size() - 1);$/;"	p	file:	signature:(res.trajectory.trajectory.points.size() - 1)
+push_back	mobile_base.cpp	/^          res.trajectory.trajectory.points.push_back(p);$/;"	p	file:	signature:(p)
+push_back	mobile_base.cpp	/^        res.trajectory.index_knot_points.push_back(res.trajectory.trajectory.points.size() - 1);$/;"	p	file:	signature:(res.trajectory.trajectory.points.size() - 1)
+push_back	mobile_base.cpp	/^        res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(*reflexxesData_.inputParameters));$/;"	p	file:	signature:(buildTrajectoryPoint(reflexxesData_.inputParameters))
 push_back	mobile_base.cpp	/^      point.accelerations.push_back(my_inputParameters.CurrentAccelerationVector->VecData[i]);$/;"	p	file:	signature:(my_inputParameters.CurrentAccelerationVector->VecData[i])
-push_back	mobile_base.cpp	/^      point.accelerations.push_back(my_outputParameters.NewAccelerationVector->VecData[i]);$/;"	p	file:	signature:(my_outputParameters.NewAccelerationVector->VecData[i])
-push_back	mobile_base.cpp	/^      point.accelerations.push_back(reflexPlanar_.inputParameters->CurrentAccelerationVector->VecData[i]);$/;"	p	file:	signature:(reflexPlanar_.inputParameters->CurrentAccelerationVector->VecData[i])
+push_back	mobile_base.cpp	/^      point.accelerations.push_back(output.NewAccelerationVector->VecData[i]);$/;"	p	file:	signature:(output.NewAccelerationVector->VecData[i])
+push_back	mobile_base.cpp	/^      point.accelerations.push_back(reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[i]);$/;"	p	file:	signature:(reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[i])
 push_back	mobile_base.cpp	/^      point.positions.push_back(my_inputParameters.CurrentPositionVector->VecData[i]);$/;"	p	file:	signature:(my_inputParameters.CurrentPositionVector->VecData[i])
-push_back	mobile_base.cpp	/^      point.positions.push_back(my_outputParameters.NewPositionVector->VecData[i]);$/;"	p	file:	signature:(my_outputParameters.NewPositionVector->VecData[i])
+push_back	mobile_base.cpp	/^      point.positions.push_back(output.NewPositionVector->VecData[i]);$/;"	p	file:	signature:(output.NewPositionVector->VecData[i])
 push_back	mobile_base.cpp	/^      point.positions.push_back(p);$/;"	p	file:	signature:(p)
-push_back	mobile_base.cpp	/^      point.positions.push_back(reflexPlanar_.inputParameters->CurrentPositionVector->VecData[i]);$/;"	p	file:	signature:(reflexPlanar_.inputParameters->CurrentPositionVector->VecData[i])
+push_back	mobile_base.cpp	/^      point.positions.push_back(reflexxesData_.inputParameters->CurrentPositionVector->VecData[i]);$/;"	p	file:	signature:(reflexxesData_.inputParameters->CurrentPositionVector->VecData[i])
 push_back	mobile_base.cpp	/^      point.velocities.push_back(my_inputParameters.CurrentVelocityVector->VecData[i]);$/;"	p	file:	signature:(my_inputParameters.CurrentVelocityVector->VecData[i])
-push_back	mobile_base.cpp	/^      point.velocities.push_back(my_outputParameters.NewVelocityVector->VecData[i]);$/;"	p	file:	signature:(my_outputParameters.NewVelocityVector->VecData[i])
-push_back	mobile_base.cpp	/^      point.velocities.push_back(reflexPlanar_.inputParameters->CurrentVelocityVector->VecData[i]);$/;"	p	file:	signature:(reflexPlanar_.inputParameters->CurrentVelocityVector->VecData[i])
-push_back	mobile_base.cpp	/^      res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(*reflexPlanar_.inputParameters));$/;"	p	file:	signature:(buildTrajectoryPoint(reflexPlanar_.inputParameters))
-push_back	mobile_base.cpp	/^      result.points.push_back(utility_.getKnotPoint(ms));$/;"	p	file:	signature:(utility_.getKnotPoint(ms))
-push_back	mobile_base.cpp	/^    res.trajectory.index_knot_points.push_back(res.trajectory.trajectory.points.size() - 1);$/;"	p	file:	signature:(res.trajectory.trajectory.points.size() - 1)
+push_back	mobile_base.cpp	/^      point.velocities.push_back(output.NewVelocityVector->VecData[i]);$/;"	p	file:	signature:(output.NewVelocityVector->VecData[i])
+push_back	mobile_base.cpp	/^      point.velocities.push_back(reflexxesData_.inputParameters->CurrentVelocityVector->VecData[i]);$/;"	p	file:	signature:(reflexxesData_.inputParameters->CurrentVelocityVector->VecData[i])
+push_back	mobile_base.cpp	/^      point.velocities.push_back(v);$/;"	p	file:	signature:(v)
+push_back	mobile_base.cpp	/^      result.points.push_back(utility_.getKnotPoint(curve.at(j))); $/;"	p	file:	signature:(utility_.getKnotPoint(curve.at(j)))
+push_back	mobile_base.cpp	/^    result.push_back(p);$/;"	p	file:	signature:(p)
+push_back	mobile_base.cpp	/^    segment_points.push_back(p.points.at(0).motionState);$/;"	p	file:	signature:(p.points.at(0).motionState)
+push_back	mobile_base.cpp	/^    segment_points.push_back(p.points.at(1).motionState);$/;"	p	file:	signature:(p.points.at(1).motionState)
+push_back	mobile_base.cpp	/^    segment_points.push_back(p.points.at(i).motionState);$/;"	p	file:	signature:(p.points.at(i).motionState)
+push_back	mobile_base.cpp	/^    segment_points.push_back(p.points.at(i+1).motionState);$/;"	p	file:	signature:(p.points.at(i+1).motionState)
+push_back	mobile_base.cpp	/^    segment_points.push_back(p.points.at(i-1).motionState);$/;"	p	file:	signature:(p.points.at(i-1).motionState)
+push_back	mobile_base.cpp	/^    timeToReachV_max_.push_back( reflexxesData_.inputParameters->MaxVelocityVector->VecData[i] \/ $/;"	p	file:	signature:( reflexxesData_.inputParameters->MaxVelocityVector->VecData[i] / reflexxesData_.inputParameters->MaxAccelerationVector->VecData[i] )
 push_back	mobile_base.cpp	/^  current_position.push_back(initial_x);$/;"	p	file:	signature:(initial_x)
 push_back	mobile_base.cpp	/^  current_position.push_back(initial_y);$/;"	p	file:	signature:(initial_y)
-push_back	mobile_base.cpp	/^  result.accelerations.push_back(x_dot_dot);$/;"	p	file:	signature:(x_dot_dot)
-push_back	mobile_base.cpp	/^  result.accelerations.push_back(y_dot_dot);$/;"	p	file:	signature:(y_dot_dot)
+push_back	mobile_base.cpp	/^  res.trajectory.trajectory.points.push_back(jp);$/;"	p	file:	signature:(jp)
 push_back	mobile_base.cpp	/^  result.points.push_back(p.points.at(0));$/;"	p	file:	signature:(p.points.at(0))
 push_back	mobile_base.cpp	/^  result.points.push_back(p.points.at(p.points.size()-1));$/;"	p	file:	signature:(p.points.at(p.points.size()-1))
-push_back	mobile_base.cpp	/^  result.positions.push_back(x);$/;"	p	file:	signature:(x)
-push_back	mobile_base.cpp	/^  result.positions.push_back(y);$/;"	p	file:	signature:(y)
-push_back	mobile_base.cpp	/^  result.push_back(x1_next);$/;"	p	file:	signature:(x1_next)
-push_back	mobile_base.cpp	/^  result.push_back(x1_prev);$/;"	p	file:	signature:(x1_prev)
-push_back	mobile_base.cpp	/^  result.velocities.push_back(x_dot);$/;"	p	file:	signature:(x_dot)
-push_back	mobile_base.cpp	/^  result.velocities.push_back(y_dot);$/;"	p	file:	signature:(y_dot)
 push_back	mobile_base.cpp	/^  target_position.push_back(target_x);$/;"	p	file:	signature:(target_x)
 push_back	mobile_base.cpp	/^  target_position.push_back(target_y);$/;"	p	file:	signature:(target_y)
-push_back	mobile_base.cpp	/^  x1_prev.velocities.push_back(x_dot);$/;"	p	file:	signature:(x_dot)
-push_back	mobile_base.cpp	/^  x1_prev.velocities.push_back(y_dot);$/;"	p	file:	signature:(y_dot)
 push_back	utility.cpp	/^    c.push_back(a.positions.at(i));$/;"	p	file:	signature:(a.positions.at(i))
 push_back	utility.cpp	/^    d.push_back(b.positions.at(i));$/;"	p	file:	signature:(b.positions.at(i))
+push_back	utility.cpp	/^    result.accelerations.push_back(ms.accelerations.at(i));$/;"	p	file:	signature:(ms.accelerations.at(i))
 push_back	utility.cpp	/^    result.points.push_back(kp);$/;"	p	file:	signature:(kp)
 push_back	utility.cpp	/^    result.points.push_back(kps.at(i));$/;"	p	file:	signature:(kps.at(i))
-reflexBezier_	mobile_base.h	/^  ReflexxesData reflexBezier_;$/;"	m	class:MobileBase	access:private
-reflexPlanar_	mobile_base.h	/^  ReflexxesData reflexPlanar_;$/;"	m	class:MobileBase	access:private
-result	mobile_base.cpp	/^  BezierConstants result;$/;"	l
-result	mobile_base.cpp	/^  ramp_msgs::MotionState result;$/;"	l
+push_back	utility.cpp	/^    result.positions.push_back(ms.positions.at(i));$/;"	p	file:	signature:(ms.positions.at(i))
+push_back	utility.cpp	/^    result.velocities.push_back(ms.velocities.at(i));$/;"	p	file:	signature:(ms.velocities.at(i))
+push_back	utility.cpp	/^  a.push_back(x_prev);$/;"	p	file:	signature:(x_prev)
+push_back	utility.cpp	/^  a.push_back(y_prev);$/;"	p	file:	signature:(y_prev)
+push_back	utility.cpp	/^  b.push_back(x);$/;"	p	file:	signature:(x)
+push_back	utility.cpp	/^  b.push_back(y);$/;"	p	file:	signature:(y)
+reflexxesData_	bezier_curve.h	/^  ReflexxesData reflexxesData_    ;$/;"	m	class:BezierCurve	access:private
+reflexxesData_	mobile_base.h	/^  ReflexxesData reflexxesData_;$/;"	m	class:MobileBase	access:private
+result	bezier_curve.cpp	/^  ramp_msgs::MotionState result;$/;"	l
+result	bezier_curve.cpp	/^  std::vector<ramp_msgs::MotionState> result;$/;"	l
+result	mobile_base.cpp	/^  BezierCurve result;$/;"	l
 result	mobile_base.cpp	/^  ramp_msgs::Path result;$/;"	l
-result	mobile_base.cpp	/^  std::vector<ramp_msgs::MotionState> result;$/;"	l
+result	mobile_base.cpp	/^  std::vector<trajectory_msgs::JointTrajectoryPoint> result;$/;"	l
 result	utility.cpp	/^  double result;$/;"	l
 result	utility.cpp	/^  double result=0;$/;"	l
 result	utility.cpp	/^  ramp_msgs::KnotPoint result;$/;"	l
 result	utility.cpp	/^  ramp_msgs::Path result;$/;"	l
 result	utility.cpp	/^  std::ostringstream result;$/;"	l
+result	utility.cpp	/^  trajectory_msgs::JointTrajectoryPoint result;$/;"	l
 resultValue	mobile_base.h	/^  int resultValue;$/;"	m	class:MobileBase	access:private
-rml	mobile_base.h	/^  ReflexxesAPI *rml;$/;"	m	struct:ReflexxesData	access:public
+resultValue	reflexxes_data.h	/^  int resultValue;$/;"	m	struct:ReflexxesData	access:public
+rml	reflexxes_data.h	/^  ReflexxesAPI *rml;$/;"	m	struct:ReflexxesData	access:public
 ros::init	main.cpp	/^  ros::init(argc, argv, "reflexxes");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
 ros::spin	main.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
+rotate	mobile_base.cpp	/^const std::vector<trajectory_msgs::JointTrajectoryPoint> MobileBase::rotate(const double start, const double goal) {$/;"	f	class:MobileBase	signature:(const double start, const double goal)
+rotate	mobile_base.h	/^  const std::vector<trajectory_msgs::JointTrajectoryPoint> rotate(const double start, const double goal);$/;"	p	class:MobileBase	access:private	signature:(const double start, const double goal)
+rotate_points	mobile_base.cpp	/^          std::vector<trajectory_msgs::JointTrajectoryPoint> rotate_points = rotate(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot));$/;"	l
+segment_points	mobile_base.cpp	/^    std::vector<ramp_msgs::MotionState> segment_points;$/;"	l
+segment_points_	bezier_curve.h	/^  std::vector<ramp_msgs::MotionState> segment_points_ ;$/;"	m	class:BezierCurve	access:public
 service	main.cpp	/^  ros::ServiceServer service = n.advertiseService("trajectory_generator", &MobileBase::trajectoryRequest, &mobileBase);$/;"	l
 setInitialConditions	mobile_base.cpp	/^void MobileBase::setInitialConditions() {$/;"	f	class:MobileBase	signature:()
 setInitialConditions	mobile_base.h	/^  void setInitialConditions();$/;"	p	class:MobileBase	access:private	signature:()
-setPlanarSelectionVector	mobile_base.cpp	/^void MobileBase::setPlanarSelectionVector(const bool rot) {$/;"	f	class:MobileBase	signature:(const bool rot)
-setPlanarSelectionVector	mobile_base.h	/^  void setPlanarSelectionVector(const bool rot);$/;"	p	class:MobileBase	access:private	signature:(const bool rot)
-setTarget	mobile_base.cpp	/^void MobileBase::setTarget(const ramp_msgs::MotionState ms, ReflexxesData& reflex) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::MotionState ms, ReflexxesData& reflex)
-setTarget	mobile_base.h	/^  void setTarget(const ramp_msgs::MotionState ms, ReflexxesData& reflex);$/;"	p	class:MobileBase	access:private	signature:(const ramp_msgs::MotionState ms, ReflexxesData& reflex)
+setSelectionVector	mobile_base.cpp	/^void MobileBase::setSelectionVector() {$/;"	f	class:MobileBase	signature:()
+setSelectionVector	mobile_base.h	/^  void setSelectionVector();$/;"	p	class:MobileBase	access:private	signature:()
+setSelectionVectorRotation	mobile_base.cpp	/^void MobileBase::setSelectionVectorRotation() {$/;"	f	class:MobileBase	signature:()
+setSelectionVectorRotation	mobile_base.h	/^  void setSelectionVectorRotation();$/;"	p	class:MobileBase	access:private	signature:()
+setTarget	mobile_base.cpp	/^void MobileBase::setTarget(const ramp_msgs::MotionState ms) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::MotionState ms)
+setTarget	mobile_base.h	/^  void setTarget(const ramp_msgs::MotionState ms);$/;"	p	class:MobileBase	access:private	signature:(const ramp_msgs::MotionState ms)
+slope	mobile_base.cpp	/^    double slope = (segment_points.at(1).positions.at(1) - segment_points.at(0).positions.at(1)) \/$/;"	l
+slope	mobile_base.cpp	/^    std::cout<<"\\nslope: "<<slope;$/;"	l
 spin	main.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
-spinOnce	mobile_base.cpp	/^      res.trajectory.trajectory.points.push_back(spinOnce());$/;"	p	file:	signature:()
-spinOnce	mobile_base.cpp	/^trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce() {$/;"	f	class:MobileBase	signature:()
-spinOnce	mobile_base.h	/^  trajectory_msgs::JointTrajectoryPoint spinOnce();$/;"	p	class:MobileBase	access:private	signature:()
-spinOnceBezier	mobile_base.cpp	/^ramp_msgs::MotionState MobileBase::spinOnceBezier(const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2) {$/;"	f	class:MobileBase	signature:(const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2)
-spinOnceBezier	mobile_base.h	/^  ramp_msgs::MotionState spinOnceBezier(const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2);$/;"	p	class:MobileBase	access:private	signature:(const ramp_msgs::MotionState x0, const ramp_msgs::MotionState x1, const ramp_msgs::MotionState x2)
-std::cout	main.cpp	/^  std::cout<<"\\nPublished Population";$/;"	m	class:std	file:
+spinOnce	bezier_curve.cpp	/^    result.push_back(spinOnce());$/;"	p	file:	signature:()
+spinOnce	bezier_curve.cpp	/^const ramp_msgs::MotionState BezierCurve::spinOnce() {$/;"	f	class:BezierCurve	signature:()
+spinOnce	bezier_curve.h	/^  const ramp_msgs::MotionState spinOnce();$/;"	p	class:BezierCurve	access:private	signature:()
+spinOnce	mobile_base.cpp	/^const trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce() {$/;"	f	class:MobileBase	signature:()
+spinOnce	mobile_base.h	/^  const trajectory_msgs::JointTrajectoryPoint spinOnce();$/;"	p	class:MobileBase	access:private	signature:()
+std::cout	bezier_curve.cpp	/^  std::cout<<"\\nAfter calculateConstants\\n";$/;"	m	class:std	file:
+std::cout	bezier_curve.cpp	/^  std::cout<<"\\nAfter initControlPoints\\n";$/;"	m	class:std	file:
+std::cout	bezier_curve.cpp	/^  std::cout<<"\\nAfter initReflexxes\\n";$/;"	m	class:std	file:
+std::cout	bezier_curve.cpp	/^  std::cout<<"\\nBefore initControlPoints\\n";$/;"	m	class:std	file:
+std::cout	bezier_curve.cpp	/^  std::cout<<"\\nControl Points:";$/;"	m	class:std	file:
 std::cout	main.cpp	/^  std::cout<<"\\nWaiting for requests...\\n";$/;"	m	class:std	file:
-std::cout	mobile_base.cpp	/^      std::cout<<"\\nin while\\n";$/;"	m	class:std	file:
-std::cout	mobile_base.cpp	/^    std::cout<<"\\nTarget set\\n";$/;"	m	class:std	file:
-std::cout	mobile_base.cpp	/^  std::cout<<"\\n"<<((0.33\/R_min)<PI\/4);$/;"	p	class:std	file:	signature:(0.33/R_min)<PI/4
-std::cout	mobile_base.cpp	/^  std::cout<<"\\nDone initializing\\n";$/;"	m	class:std	file:
-std::cout	mobile_base.cpp	/^  std::cout<<"\\nIn Bezier\\n";$/;"	m	class:std	file:
-std::cout	mobile_base.cpp	/^  std::cout<<"\\nIn getSegmentControlPoints\\n";$/;"	m	class:std	file:
-std::cout	mobile_base.cpp	/^  std::cout<<"\\nIn spinOnceBezier\\n";$/;"	m	class:std	file:
-std::cout	mobile_base.cpp	/^  std::cout<<"\\nLeaving getSegmentControlPoints\\n";$/;"	m	class:std	file:
-std::cout	mobile_base.cpp	/^  std::cout<<"\\nLeaving spinOnceBezier\\n";$/;"	m	class:std	file:
-t_min	mobile_base.cpp	/^  double t_min = -((A*C) + (B*D)) \/ ((A*A) + (B*B));$/;"	l
-t_min	mobile_base.cpp	/^  std::cout<<"\\nt_min: "<<t_min;$/;"	l
+std::cout	mobile_base.cpp	/^    std::cout<<"\\nAfter init\\n";$/;"	m	class:std	file:
+std::cout	mobile_base.cpp	/^    std::cout<<"\\nBefore init\\n";$/;"	m	class:std	file:
+std::cout	mobile_base.cpp	/^    std::cout<<"\\nIn if\\n";$/;"	m	class:std	file:
+t_control_points_	mobile_base.h	/^  double t_control_points_;$/;"	m	class:MobileBase	access:private
+t_min_	bezier_curve.h	/^  double t_min_         ;$/;"	m	class:BezierCurve	access:public
 target_position	mobile_base.cpp	/^  std::vector<double> target_position;$/;"	l
+theta	bezier_curve.cpp	/^  double theta  = utility_.findAngleFromAToB(x_prev, y_prev, x, y);$/;"	l
+theta_dot	bezier_curve.cpp	/^  double theta_dot = (theta - theta_prev_) \/ CYCLE_TIME_IN_SECONDS;$/;"	l
+theta_dot_dot	bezier_curve.cpp	/^  double theta_dot_dot = (theta_dot - theta_dot_prev_) \/ CYCLE_TIME_IN_SECONDS;$/;"	l
+theta_dot_prev_	bezier_curve.h	/^  double        theta_dot_prev_   ;$/;"	m	class:BezierCurve	access:private
+theta_prev_	bezier_curve.h	/^  double        theta_prev_       ;$/;"	m	class:BezierCurve	access:private
 timeCutoff_	mobile_base.h	/^  ros::Duration timeCutoff_;$/;"	m	class:MobileBase	access:private
 timeFromStart_	mobile_base.h	/^  ros::Duration timeFromStart_;$/;"	m	class:MobileBase	access:private
-toString	main.cpp	/^  std::cout<<"\\nPath after Bezier: "<<u.toString(p_bezier)<<"\\n";$/;"	p	file:	signature:(p_bezier)
-toString	main.cpp	/^  std::cout<<"\\nPath before Bezier: "<<u.toString(p)<<"\\n";$/;"	p	file:	signature:(p)
-toString	mobile_base.cpp	/^    std::cout<<"\\ncontrol_points[0]: "<<utility_.toString(control_points.at(0))<<"\\n";$/;"	p	file:	signature:(control_points.at(0))
-toString	mobile_base.cpp	/^    std::cout<<"\\ncontrol_points[1]: "<<utility_.toString(control_points.at(1))<<"\\n";$/;"	p	file:	signature:(control_points.at(1))
+timeToReachV_max_	mobile_base.h	/^  std::vector<double> timeToReachV_max_;$/;"	m	class:MobileBase	access:public
+toString	bezier_curve.cpp	/^    std::cout<<"\\n"<<utility_.toString(control_points_.at(i));$/;"	p	file:	signature:(control_points_.at(i))
+toString	mobile_base.cpp	/^  std::cout<<"\\nPath: "<<utility_.toString(path_);$/;"	p	file:	signature:(path_)
 toString	utility.cpp	/^    result<<"\\n       "<<toString(p);$/;"	p	file:	signature:(p)
 toString	utility.cpp	/^    result<<"\\n "<<i<<": "<<toString(path.points.at(i));$/;"	p	file:	signature:(path.points.at(i))
 toString	utility.cpp	/^    result<<"\\n"<<toString(p);$/;"	p	file:	signature:(p)
@@ -328,29 +449,32 @@ toString	utility.h	/^    const std::string toString(const ramp_msgs::MotionState
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Path path) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path path) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Trajectory traj) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Trajectory traj) const
 toString	utility.h	/^    const std::string toString(const trajectory_msgs::JointTrajectoryPoint p) const;$/;"	p	class:Utility	access:public	signature:(const trajectory_msgs::JointTrajectoryPoint p) const
+trajec_size	mobile_base.cpp	/^          double trajec_size = res.trajectory.trajectory.points.size();$/;"	l
 trajectoryRequest	mobile_base.cpp	/^bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) {$/;"	f	class:MobileBase	signature:(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res)
 trajectoryRequest	mobile_base.h	/^  bool trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res);$/;"	p	class:MobileBase	access:public	signature:(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res)
+trj	main.cpp	/^    ramp_msgs::Trajectory trj;$/;"	l
+u	bezier_curve.cpp	/^  double u          = reflexxesData_.outputParameters->NewPositionVector->VecData[0];$/;"	l
 u	main.cpp	/^Utility u;$/;"	v
-u	mobile_base.cpp	/^  double u      = reflexBezier_.inputParameters->CurrentPositionVector->VecData[0];$/;"	l
-u2	mobile_base.cpp	/^  double u2 = u * u;$/;"	l
-u_dot	mobile_base.cpp	/^  double u_dot  = reflexBezier_.inputParameters->CurrentVelocityVector->VecData[0];$/;"	l
-u_dot	mobile_base.cpp	/^  double u_dot = CYCLE_TIME_IN_SECONDS;$/;"	l
-u_dot_dot	mobile_base.cpp	/^  double u_dot_dot  = reflexBezier_.inputParameters->CurrentAccelerationVector->VecData[0];$/;"	l
-u_dot_dot	mobile_base.cpp	/^  double u_dot_dot=0;$/;"	l
+u_dot	bezier_curve.cpp	/^  double u_dot      = reflexxesData_.outputParameters->NewVelocityVector->VecData[0];$/;"	l
+u_dot_dot	bezier_curve.cpp	/^  double u_dot_dot  = reflexxesData_.outputParameters->NewAccelerationVector->VecData[0];$/;"	l
+u_dot_dot_prev	bezier_curve.cpp	/^  double u_dot_dot_prev  = reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0];$/;"	l
+u_dot_dot_prev	bezier_curve.cpp	/^  std::cout<<"\\nu: "<<u_prev<<" u_dot: "<<u_dot_prev<<" u_dot_dot: "<<u_dot_dot_prev;$/;"	l
+u_dot_prev	bezier_curve.cpp	/^  double u_dot_prev      = reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0];$/;"	l
+u_prev	bezier_curve.cpp	/^  double u_prev          = reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];$/;"	l
+utility_	bezier_curve.h	/^  Utility       utility_          ;$/;"	m	class:BezierCurve	access:private
 utility_	mobile_base.h	/^  Utility utility_;$/;"	m	class:MobileBase	access:private
-x	mobile_base.cpp	/^  double x = (1-u)*x0.positions.at(0) + u*x1.positions.at(0);$/;"	l
-x	mobile_base.cpp	/^  double x = mu2*p0.positions.at(0) + 2*mu*u*p1.positions.at(0) + u2*p2.positions.at(0);$/;"	l
-x1_next	mobile_base.cpp	/^  ramp_msgs::MotionState x1_next;$/;"	l
-x1_prev	mobile_base.cpp	/^  ramp_msgs::MotionState x1_prev;$/;"	l
-x_diff	mobile_base.cpp	/^  double x_diff = fabs(x1.positions.at(0) - x0.positions.at(0));$/;"	l
-x_dot	mobile_base.cpp	/^  double x_dot = ((bc.A*u) + bc.C)*u_dot;$/;"	l
-x_dot	mobile_base.cpp	/^  double x_dot, y_dot;$/;"	l
-x_dot_dot	mobile_base.cpp	/^  double x_dot_dot = bc.A * u_dot_dot;$/;"	l
-y	mobile_base.cpp	/^  double y = (1-u)*x0.positions.at(1) + u*x1.positions.at(1);$/;"	l
-y	mobile_base.cpp	/^  double y = mu2*p0.positions.at(1) + 2*mu*u*p1.positions.at(1) + u2*p2.positions.at(1);$/;"	l
-y_diff	mobile_base.cpp	/^  double y_diff = fabs(x1.positions.at(1) - x0.positions.at(1));$/;"	l
-y_dot	mobile_base.cpp	/^  double x_dot, y_dot;$/;"	l
-y_dot	mobile_base.cpp	/^  double y_dot = ((bc.B*u) + bc.D)*u_dot;$/;"	l
-y_dot_dot	mobile_base.cpp	/^  double y_dot_dot = bc.B * u_dot_dot;$/;"	l
+v	mobile_base.cpp	/^      double v = (p - input.CurrentPositionVector->VecData[2]) \/ CYCLE_TIME_IN_SECONDS;$/;"	l
+x	bezier_curve.cpp	/^  double x = (pow((1-u),2) * X0.positions.at(0)) + ((2*u)*(1-u)*X1.positions.at(0)) + (pow(u,2)*X2.positions.at(0));$/;"	l
+x_dot	bezier_curve.cpp	/^  double x_dot = ((A_*u) + C_)*u_dot;$/;"	l
+x_dot_dot	bezier_curve.cpp	/^  double x_dot_dot = A_ * u_dot_dot;$/;"	l
+x_init_v_	bezier_curve.h	/^  double x_init_v_, y_init_v_;$/;"	m	class:BezierCurve	access:public
+x_prev	bezier_curve.cpp	/^  double x_prev = (pow((1-u_prev),2) * X0.positions.at(0)) + ((2*u_prev)*(1-u_prev)*X1.positions.at(0)) + (pow(u_prev,2)*X2.positions.at(0));$/;"	l
+y	bezier_curve.cpp	/^  double y = (pow((1-u),2) * X0.positions.at(1)) + ((2*u)*(1-u)*X1.positions.at(1)) + (pow(u,2)*X2.positions.at(1));$/;"	l
+y_dot	bezier_curve.cpp	/^  double y_dot = ((B_*u) + D_)*u_dot;$/;"	l
+y_dot_dot	bezier_curve.cpp	/^  double y_dot_dot = B_ * u_dot_dot;$/;"	l
+y_init_v_	bezier_curve.h	/^  double x_init_v_, y_init_v_;$/;"	m	class:BezierCurve	access:public
+y_prev	bezier_curve.cpp	/^  double y_prev = (pow((1-u_prev),2) * X0.positions.at(1)) + ((2*u_prev)*(1-u_prev)*X1.positions.at(1)) + (pow(u_prev,2)*X2.positions.at(1));$/;"	l
+~BezierCurve	bezier_curve.cpp	/^BezierCurve::~BezierCurve() {$/;"	f	class:BezierCurve	signature:()
+~BezierCurve	bezier_curve.h	/^  ~BezierCurve();$/;"	p	class:BezierCurve	access:public	signature:()
 ~MobileBase	mobile_base.cpp	/^MobileBase::~MobileBase() {$/;"	f	class:MobileBase	signature:()
 ~MobileBase	mobile_base.h	/^  ~MobileBase();$/;"	p	class:MobileBase	access:public	signature:()

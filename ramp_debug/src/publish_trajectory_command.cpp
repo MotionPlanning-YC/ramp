@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
   ramp_msgs::KnotPoint c2;
   c2.motionState.positions.push_back(1);
   c2.motionState.positions.push_back(1);
-  c2.motionState.positions.push_back(PI/4);
+  c2.motionState.positions.push_back(0);
 
 
   ramp_msgs::KnotPoint c3;
