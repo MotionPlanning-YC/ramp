@@ -27,7 +27,7 @@ public:
 
 
   // Get Bezier curves over the path
-  const ramp_msgs::Path Bezier(const ramp_msgs::Path p);
+  const std::vector<BezierCurve> bezier(ramp_msgs::Path& p);
   
   bool bezier_;
   std::vector<double> timeToReachV_max_;

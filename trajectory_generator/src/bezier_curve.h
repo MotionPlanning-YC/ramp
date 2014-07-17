@@ -33,10 +33,11 @@ private:
   ReflexxesData reflexxesData_    ;
   double        lambda_           ;
   bool          initialized_      ;
+  bool          deallocated_      ;
   double        theta_prev_       ;
   double        theta_dot_prev_   ;
 
-  void initReflexxes(const double v_max, const double a_max)    ;
+  void initReflexxes(const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max)    ;
 
   void calculateConstants() ;
   void calculateABCD()      ;
@@ -47,6 +48,7 @@ private:
 
   const ramp_msgs::MotionState spinOnce();
 
+  void dealloc();
 };
 
 #endif
