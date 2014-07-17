@@ -311,8 +311,10 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
     double theta = utility_.findAngleFromAToB(segment_points.at(0).positions, segment_points.at(1).positions);
 
     bc.init(segment_points, lambda, theta, a, b,
-        reflexxesData_.inputParameters->MaxVelocityVector->VecData[i_max],
-        reflexxesData_.inputParameters->MaxAccelerationVector->VecData[i_max]);
+        reflexxesData_.inputParameters->MaxVelocityVector->VecData[0],
+        reflexxesData_.inputParameters->MaxVelocityVector->VecData[1],
+        reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
+        reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
     std::cout<<"\nAfter bc.init\n";
     std::cin.get();
     bc.generateCurve();
