@@ -13,7 +13,7 @@ public:
   BezierCurve();
   ~BezierCurve();
   
-  void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double a, const double b, const double x_dot_max, const double y_dot_max);
+  void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double a, const double b, const double v_max, const double a_max);
   const std::vector<ramp_msgs::MotionState> generateCurve();
   
 
@@ -37,7 +37,7 @@ private:
   double        theta_prev_       ;
   double        theta_dot_prev_   ;
 
-  void initReflexxes(const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max)    ;
+  void initReflexxes(const double v_max, const double a_max)    ;
 
   void calculateConstants() ;
   void calculateABCD()      ;

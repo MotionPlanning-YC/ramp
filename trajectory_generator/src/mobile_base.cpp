@@ -222,6 +222,7 @@ const double MobileBase::findVelocity(const uint8_t i, const double s) const {
   
   double t = (v - x_dot_init) / a;
   
+  std::cout<<"\ni: "<<(int)i;
   std::cout<<"\ns: "<<s<<" a: "<<a<<" x_dot_init: "<<x_dot_init;
   std::cout<<"\nradicand: "<<radicand;
   std::cout<<"\nv: "<<v;
