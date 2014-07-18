@@ -46,15 +46,19 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> cp, const doubl
   
   calculateConstants();
 
-  initReflexxes(x_dot_max, y_dot_max, x_dot_dot_max, y_dot_dot_max);
-
-  theta_prev_ = theta;
+  // If both C and D == 0, the first two points are the same
+  if(C_ != 0 || D_ != 0) {
   
-  initialized_ = true;
+    initReflexxes(x_dot_max, y_dot_max, x_dot_dot_max, y_dot_dot_max);
 
-  /*for(int i=0;i<segment_points_.size();i++) {
-    std::cout<<"\n\nSegment Point "<<i<<": "<<utility_.toString(segment_points_.at(i));
-  }*/
+    theta_prev_ = theta;
+    
+    initialized_ = true;
+
+    /*for(int i=0;i<segment_points_.size();i++) {
+      std::cout<<"\n\nSegment Point "<<i<<": "<<utility_.toString(segment_points_.at(i));
+    }*/
+  } // end if 
 }
 
 
