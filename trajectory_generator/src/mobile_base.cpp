@@ -350,7 +350,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
     }
     else if(slope < 0 && ryse < 0) {
       a = findVelocity(0, s);
-      b = a / slope;
+      b = a * slope;
       i_max = 0;
     } 
     else if(slope < 0 && run < 0) {
@@ -360,12 +360,13 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
     }
     else {
       a = findVelocity(0, s);
-      b = a / slope;  
+      b = a * slope;  
       i_max = 0;
     }
     
     
     std::cout<<"\nslope: "<<slope;
+    std::cout<<"\nryse: "<<ryse<<" run: "<<run;
     std::cout<<"\na: "<<a<<" b: "<<b;
 
     double theta = utility_.findAngleFromAToB(segment_points.at(0).positions, segment_points.at(1).positions);
@@ -461,10 +462,22 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
 
     else if(i == 2) {
       
+
+      
       double p = computeTargetOrientation(input.CurrentPositionVector->VecData[0],
                                           input.CurrentPositionVector->VecData[1],
                                           output.NewPositionVector->VecData[0],
                                           output.NewPositionVector->VecData[1]);
+
+      // If straight-line paths, make theta be towards next knot point
+      if(!bezier_) {
+        p = computeTargetOrientation(prevKP_.positions.at(0),
+                                            prevKP_.positions.at(1),
+                                            input.TargetPositionVector->VecData[0],
+                                            input.TargetPositionVector->VecData[1]);
+      } // end if
+
+
       point.positions.push_back(p);
 
       double v = (p - input.CurrentPositionVector->VecData[2]) / CYCLE_TIME_IN_SECONDS;
@@ -572,8 +585,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       resultValue = 0;
         
       // Push the initial state onto trajectory
-      if(i_kp_ == 1)
+      // And set previous knot point
+      if(i_kp_ == 1) {
         res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(*reflexxesData_.inputParameters));
+        prevKP_ = res.trajectory.trajectory.points.at(0);
+      }
 
 
       // If at a Bezier point
@@ -630,6 +646,9 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
         // Once we reached the target, we set that the latest point is a knotpoint
         res.trajectory.index_knot_points.push_back(res.trajectory.trajectory.points.size() - 1);
+        
+        // Set previous knot point
+        prevKP_ = res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size() - 1);
       } // end else
   } // end for
 

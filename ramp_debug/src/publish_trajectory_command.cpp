@@ -21,11 +21,11 @@ int main(int argc, char** argv) {
   ramp_msgs::KnotPoint c1;
   c1.motionState.positions.push_back(0);
   c1.motionState.positions.push_back(1);
-  c1.motionState.positions.push_back(PI/4);
+  c1.motionState.positions.push_back(0);
   
   ramp_msgs::KnotPoint c2;
   c2.motionState.positions.push_back(1);
-  c2.motionState.positions.push_back(1);
+  c2.motionState.positions.push_back(0.5);
   c2.motionState.positions.push_back(PI/4);
 
 

@@ -46,10 +46,10 @@ int main(int argc, char** argv) {
 
 
   std::vector<double> a, b;
-  a.push_back(1.49);
-  a.push_back(0.5099);
+  a.push_back(0);
+  a.push_back(1);
 
-  b.push_back(1.5);
+  b.push_back(1);
   b.push_back(0.5);
 
   std::cout<<"\nDifference: "<<u.findAngleFromAToB(a,b)<<"\n";

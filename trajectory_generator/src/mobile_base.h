@@ -58,6 +58,9 @@ private:
   // Time from start to stop planning trajectory points
   ros::Duration timeCutoff_;
 
+  // Previous knot point - used for straight line trajectories
+  trajectory_msgs::JointTrajectoryPoint prevKP_;
+
   // Utility
   Utility utility_;
 
