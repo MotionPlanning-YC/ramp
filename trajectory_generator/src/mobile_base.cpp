@@ -243,12 +243,71 @@ const double MobileBase::findVelocity(const uint8_t i, const double s) const {
 
 
 
+const bool MobileBase::lambasOkay(const std::vector<ramp_msgs::MotionState> segment_points, const double lambda_x0, const double lambda_x2) const {
+  ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;
+
+  p0 = segment_points.at(0);
+  p1 = segment_points.at(1);
+  p2 = segment_points.at(2);
+  
+  X1 = segment_points.at(1);
+  
+  X0.positions.push_back( (1-lambda_x0)*p0.positions.at(0) + lambda_x0*p1.positions.at(0) );
+  X0.positions.push_back( (1-lambda_x0)*p0.positions.at(1) + lambda_x0*p1.positions.at(1) );
+  X0.positions.push_back(utility_.findAngleFromAToB(p0.positions, p1.positions));
+
+  X2.positions.push_back( (1-lambda_x2)*p1.positions.at(0) + lambda_x2*p2.positions.at(0) );
+  X2.positions.push_back( (1-lambda_x2)*p1.positions.at(1) + lambda_x2*p2.positions.at(1) );
+  X2.positions.push_back(utility_.findAngleFromAToB(p1.positions, p2.positions));
+
+
+  if(X1.positions.at(0) == ( (X0.positions.at(0) + X2.positions.at(0)) / 2. ) &&
+      X1.positions.at(1) == ( (X0.positions.at(1) + X2.positions.at(1)) / 2. )) {
+    return false;
+  }
+
+  return true;
+}
+
+
+
+
+
+const std::vector<double> MobileBase::getControlPointLambas(const std::vector<ramp_msgs::MotionState> segment_points) const {
+  std::vector<double> result;
+
+  double lambda_x0 = 0.5;
+  double lambda_x2 = lambda_x0;
+
+  std::cout<<"\nlambda_x2: "<<lambda_x2;
+  while(!lambasOkay(segment_points, lambda_x0, lambda_x2)) {
+    lambda_x2+=0.1; 
+    std::cout<<"\nlambda_x2: "<<lambda_x2;
+
+    if(lambda_x2 > 0.9) {
+      lambda_x2 = 0.1;
+    }
+    else {
+      std::cout<<"\nIn else";
+    }
+    
+    std::cin.get();
+  }
+
+  result.push_back(lambda_x0);
+  result.push_back(lambda_x2);
+
+  return result;
+}
+
+
 
 
 
 const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
   std::vector<BezierCurve> result;
-  double lambda = 0.5;
+  double lambda_x0 = 0.5;
+  double lambda_x2 = 0.5;
 
   ramp_msgs::Path p_copy = p;
 
@@ -270,7 +329,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
 
     // Find the slope
     double ryse = segment_points.at(1).positions.at(1) - segment_points.at(0).positions.at(1);
-    double run = segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0);
+    double run  = segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0);
 
     double slope = (run != 0) ? ryse / run : ryse;
     double a, b;
@@ -278,8 +337,9 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
     std::cout<<"\nBefore s";
     std::cout<<"\nsegment_points.at(i-1).positions.size(): "<<segment_points.at(0).positions.size();
     std::cout<<"\nsegment_points.at(i).positions.size(): "<<segment_points.at(1).positions.size()<<"\n";
+
     // Segment points size != path size
-    double s = lambda * utility_.positionDistance(segment_points.at(0).positions, segment_points.at(1).positions);
+    double s = lambda_x0 * utility_.positionDistance(segment_points.at(0).positions, segment_points.at(1).positions);
     std::cout<<"\nAfter s\n";
 
     // If the y is greater
@@ -310,7 +370,15 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
 
     double theta = utility_.findAngleFromAToB(segment_points.at(0).positions, segment_points.at(1).positions);
 
-    bc.init(segment_points, lambda, theta, a, b,
+
+
+    std::vector<double> lambdas = getControlPointLambas(segment_points);
+    std::cout<<"\nlambda_x0: "<<lambdas.at(0);
+    std::cout<<"\nlambda_x2: "<<lambdas.at(1)<<"\n";
+    
+
+
+    bc.init(segment_points, lambdas.at(0), lambdas.at(1), theta, a, b,
         reflexxesData_.inputParameters->MaxVelocityVector->VecData[0],
         reflexxesData_.inputParameters->MaxVelocityVector->VecData[1],
         reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
