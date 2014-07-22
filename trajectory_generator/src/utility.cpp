@@ -263,11 +263,13 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
   result<<")";
   
   //Accelerations
-  //result<<"\n       Accelerations: ("<<p.accelerations.at(0);
-  for(unsigned int k=1;k<p.accelerations.size();k++) {
-    result<<", "<<p.accelerations.at(k);
+  if(p.accelerations.size() > 0) {
+    result<<"\n       Accelerations: ("<<p.accelerations.at(0);
+    for(unsigned int k=1;k<p.accelerations.size();k++) {
+      result<<", "<<p.accelerations.at(k);
+    }
+    result<<")";
   }
-  result<<")";
   
   result<<"\n Time From Start: "<<p.time_from_start;
 

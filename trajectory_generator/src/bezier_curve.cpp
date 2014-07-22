@@ -308,11 +308,11 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   // Velocity
   double x_dot = ((A_*u) + C_)*u_dot;
   double y_dot = ((B_*u) + D_)*u_dot;
-  std::cout<<"\nA: "<<A_<<" u: "<<u<<" A*u: "<<A_*u;
+  /*std::cout<<"\nA: "<<A_<<" u: "<<u<<" A*u: "<<A_*u;
   std::cout<<"\nC: "<<C_<<" (A*u)+C: "<<((A_*u) + C_);
   std::cout<<"\nB: "<<B_<<" u: "<<u<<" B*u: "<<B_*u;
   std::cout<<"\nD: "<<D_<<" (B*u)+D: "<<((D_*u) + D_);
-  std::cout<<"\nx_dot: "<<x_dot<<" y_dot: "<<y_dot;
+  std::cout<<"\nx_dot: "<<x_dot<<" y_dot: "<<y_dot;*/
 
   // Acceleration
   double x_dot_dot = A_ * u_dot_dot;
