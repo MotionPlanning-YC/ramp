@@ -20,25 +20,25 @@ int main(int argc, char** argv) {
   // Build a Path
   ramp_msgs::KnotPoint c1;
   c1.motionState.positions.push_back(0);
-  c1.motionState.positions.push_back(1);
   c1.motionState.positions.push_back(0);
+  c1.motionState.positions.push_back(PI/4);
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(1);
-  c2.motionState.positions.push_back(0.5);
+  c2.motionState.positions.push_back(2);
+  c2.motionState.positions.push_back(2);
   c2.motionState.positions.push_back(PI/4);
 
 
   ramp_msgs::KnotPoint c3;
-  c3.motionState.positions.push_back(2.);
-  c3.motionState.positions.push_back(1.);
+  c3.motionState.positions.push_back(4.);
+  c3.motionState.positions.push_back(0.);
   c3.motionState.positions.push_back(-PI/4);
 
 
   ramp_msgs::KnotPoint c4;
-  c4.motionState.positions.push_back(3.);
-  c4.motionState.positions.push_back(3.);
-  c4.motionState.positions.push_back(-1.249);
+  c4.motionState.positions.push_back(6.);
+  c4.motionState.positions.push_back(2.);
+  c4.motionState.positions.push_back(PI/4);
 
   ramp_msgs::KnotPoint c5;
   c5.motionState.positions.push_back(4.);
@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
   p.points.push_back(c1);
   p.points.push_back(c2);
   p.points.push_back(c3);
-  //p.points.push_back(c4);
+  p.points.push_back(c4);
   //p.points.push_back(c5);
 
   ramp_msgs::TrajectoryRequest tr;

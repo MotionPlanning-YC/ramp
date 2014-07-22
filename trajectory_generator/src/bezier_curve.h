@@ -17,10 +17,11 @@ public:
   const std::vector<ramp_msgs::MotionState> generateCurve();
   
 
-  double A_, B_, C_, D_ ;
-  double t_min_         ;
-  double R_min_         ;
-  double x_init_v_, y_init_v_;
+  double A_, B_, C_, D_       ;
+  double t_min_               ;
+  double R_min_               ;
+  double lambda_x0_           ;
+  double lambda_x2_           ;
   std::vector<ramp_msgs::MotionState> segment_points_ ;
   std::vector<ramp_msgs::MotionState> control_points_ ;
   std::vector<ramp_msgs::MotionState> points_         ;
@@ -29,14 +30,13 @@ public:
 
 private:
 
-  Utility       utility_          ;
-  ReflexxesData reflexxesData_    ;
-  double        lambda_x0_        ;
-  double        lambda_x2_        ;
-  bool          initialized_      ;
-  bool          deallocated_      ;
-  double        theta_prev_       ;
-  double        theta_dot_prev_   ;
+  Utility       utility_            ;
+  ReflexxesData reflexxesData_      ;
+  bool          initialized_        ;
+  bool          deallocated_        ;
+  double        theta_prev_         ;
+  double        theta_dot_prev_     ;
+  double        x_init_v_, y_init_v_;
 
   void initReflexxes(const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max)    ;
 

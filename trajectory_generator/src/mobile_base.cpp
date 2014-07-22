@@ -276,21 +276,23 @@ const bool MobileBase::lambasOkay(const std::vector<ramp_msgs::MotionState> segm
 const std::vector<double> MobileBase::getControlPointLambas(const std::vector<ramp_msgs::MotionState> segment_points) const {
   std::vector<double> result;
 
-  double lambda_x0 = 0.5;
-  double lambda_x2 = lambda_x0;
+  double lambda_x0 = 0.9;
+  double lambda_x2 = 0.1;
 
   std::cout<<"\nlambda_x2: "<<lambda_x2;
   while(!lambasOkay(segment_points, lambda_x0, lambda_x2)) {
     lambda_x2+=0.1; 
-    std::cout<<"\nlambda_x2: "<<lambda_x2;
+    lambda_x0-=0.1;
 
     if(lambda_x2 > 0.9) {
       lambda_x2 = 0.1;
     }
-    else {
-      std::cout<<"\nIn else";
+    if(lambda_x0 < 0.1) {
+      lambda_x0 = 0.9;
     }
     
+    std::cout<<"\nlambda_x0: "<<lambda_x0;
+    std::cout<<"\nlambda_x2: "<<lambda_x2<<"\n";
     std::cin.get();
   }
 
@@ -306,14 +308,19 @@ const std::vector<double> MobileBase::getControlPointLambas(const std::vector<ra
 
 const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
   std::vector<BezierCurve> result;
-  double lambda_x0 = 0.5;
-  double lambda_x2 = 0.5;
+  double lambda_x0 = 0.7;
+  double lambda_x2 = 0.3;
 
   ramp_msgs::Path p_copy = p;
 
   std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
   for(uint8_t i=1;i<p_copy.points.size()-1;i++) {
     std::cout<<"\n---i: "<<(int)i<<"---\n";
+    
+    if(i==2) {
+      lambda_x0 = 0.7;
+      lambda_x2 = 0.3;
+    }
     BezierCurve bc;
 
     std::vector<ramp_msgs::MotionState> segment_points;
@@ -389,13 +396,13 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
     bc.generateCurve();
     std::cout<<"\nAfter generateCurve\n";
     
-    std::cout<<"\nErasing at index: "<<i<<": "<<utility_.toString(p.points.at(i))<<"\n";
+    std::cout<<"\nErasing at index: "<<(int)i<<": "<<utility_.toString(p.points.at(i))<<"\n";
     p.points.erase(p.points.begin()+i);
-    std::cout<<"\nInserting at index: "<<i<<": "<<utility_.toString(bc.points_.at(0))<<"\n";
+    std::cout<<"\nInserting at index: "<<(int)i<<": "<<utility_.toString(bc.points_.at(0))<<"\n";
     p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(0)));
 
     if(i == p_copy.points.size()-2) {
-      std::cout<<"\nInserting at index: "<<i<<": "<<utility_.toString(bc.points_.at(bc.points_.size()-1))<<"\n";
+      std::cout<<"\nInserting at index: "<<(int)i+1<<": "<<utility_.toString(bc.points_.at(bc.points_.size()-1))<<"\n";
       p.points.insert(p.points.begin()+i+1, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
     }
 
@@ -601,11 +608,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
           // If it's the first or last point on the curve, push the index to knot point vector
           if( p==curves.at(i_kp_-2).points_.size()-1) {
-            //std::cout<<"\nChanging orientation "<<res.trajectory.trajectory.points.at( res.trajectory.trajectory.points.size()-1 ).positions.at(2)<<" to ";
-            //res.trajectory.trajectory.points.at( res.trajectory.trajectory.points.size()-1 ).positions.at(2) = 
-              //  utility_.findAngleFromAToB(res.trajectory.trajectory.points.at( res.trajectory.trajectory.points.size()-2 ),
-                //                           res.trajectory.trajectory.points.at( res.trajectory.trajectory.points.size()-1 ));
-            //std::cout<<res.trajectory.trajectory.points.at( res.trajectory.trajectory.points.size()-1 ).positions.at(2)<<"\n";
             res.trajectory.index_knot_points.push_back(res.trajectory.trajectory.points.size() - 1);
           } // end if knot point
         } // end for
