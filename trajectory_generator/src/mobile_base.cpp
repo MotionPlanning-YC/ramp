@@ -243,7 +243,7 @@ const double MobileBase::findVelocity(const uint8_t i, const double s) const {
 
 
 
-const bool MobileBase::lambasOkay(const std::vector<ramp_msgs::MotionState> segment_points, const double lambda_x0, const double lambda_x2) const {
+const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segment_points, const double lambda) const {
   ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;
 
   p0 = segment_points.at(0);
@@ -252,12 +252,12 @@ const bool MobileBase::lambasOkay(const std::vector<ramp_msgs::MotionState> segm
   
   X1 = segment_points.at(1);
   
-  X0.positions.push_back( (1-lambda_x0)*p0.positions.at(0) + lambda_x0*p1.positions.at(0) );
-  X0.positions.push_back( (1-lambda_x0)*p0.positions.at(1) + lambda_x0*p1.positions.at(1) );
+  X0.positions.push_back( (1-lambda)*p0.positions.at(0) + lambda*p1.positions.at(0) );
+  X0.positions.push_back( (1-lambda)*p0.positions.at(1) + lambda*p1.positions.at(1) );
   X0.positions.push_back(utility_.findAngleFromAToB(p0.positions, p1.positions));
 
-  X2.positions.push_back( (1-lambda_x2)*p1.positions.at(0) + lambda_x2*p2.positions.at(0) );
-  X2.positions.push_back( (1-lambda_x2)*p1.positions.at(1) + lambda_x2*p2.positions.at(1) );
+  X2.positions.push_back( (1-lambda)*p1.positions.at(0) + lambda*p2.positions.at(0) );
+  X2.positions.push_back( (1-lambda)*p1.positions.at(1) + lambda*p2.positions.at(1) );
   X2.positions.push_back(utility_.findAngleFromAToB(p1.positions, p2.positions));
 
 
@@ -273,33 +273,24 @@ const bool MobileBase::lambasOkay(const std::vector<ramp_msgs::MotionState> segm
 
 
 
-const std::vector<double> MobileBase::getControlPointLambas(const std::vector<ramp_msgs::MotionState> segment_points) const {
+const double MobileBase::getControlPointLamba(const std::vector<ramp_msgs::MotionState> segment_points) const {
   std::vector<double> result;
 
-  double lambda_x0 = 0.5;
-  double lambda_x2 = 0.5;
+  double lambda = 0.5;
 
-  std::cout<<"\nlambda_x2: "<<lambda_x2;
-  while(!lambasOkay(segment_points, lambda_x0, lambda_x2)) {
-    lambda_x2+=0.1; 
-    lambda_x0-=0.1;
+  std::cout<<"\nlambda: "<<lambda;
+  while(!lambdaOkay(segment_points, lambda)) {
+    lambda+=0.1; 
 
-    if(lambda_x2 > 0.9) {
-      lambda_x2 = 0.1;
-    }
-    if(lambda_x0 < 0.1) {
-      lambda_x0 = 0.9;
+    if(lambda > 0.9) {
+      lambda = 0.1;
     }
     
-    std::cout<<"\nlambda_x0: "<<lambda_x0;
-    std::cout<<"\nlambda_x2: "<<lambda_x2<<"\n";
+    std::cout<<"\nlambda_x0 is now: "<<lambda;
     std::cin.get();
   }
 
-  result.push_back(lambda_x0);
-  result.push_back(lambda_x2);
-
-  return result;
+  return lambda;
 }
 
 
@@ -308,19 +299,13 @@ const std::vector<double> MobileBase::getControlPointLambas(const std::vector<ra
 
 const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
   std::vector<BezierCurve> result;
-  double lambda_x0 = 0.5;
-  double lambda_x2 = 0.5;
+  double lambda = 0.5;
 
   ramp_msgs::Path p_copy = p;
 
   std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
   for(uint8_t i=1;i<p_copy.points.size()-1;i++) {
     std::cout<<"\n---i: "<<(int)i<<"---\n";
-    
-    if(i==2) {
-      lambda_x0 = 0.5;
-      lambda_x2 = 0.5;
-    }
     BezierCurve bc;
 
     std::vector<ramp_msgs::MotionState> segment_points;
@@ -346,7 +331,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
     std::cout<<"\nsegment_points.at(i).positions.size(): "<<segment_points.at(1).positions.size()<<"\n";
 
     // Segment points size != path size
-    double s = lambda_x0 * utility_.positionDistance(segment_points.at(0).positions, segment_points.at(1).positions);
+    double s = lambda * utility_.positionDistance(segment_points.at(0).positions, segment_points.at(1).positions);
     std::cout<<"\nAfter s\n";
 
     // If the y is greater
@@ -372,21 +357,52 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
     }
     
     
+    double a2, b2;
+    double ryse2 = segment_points.at(2).positions.at(1) - segment_points.at(1).positions.at(1);
+    double run2  = segment_points.at(2).positions.at(0) - segment_points.at(1).positions.at(0);
+
+    double slope2 = (run2 != 0) ? ryse2 / run2 : ryse2;
+    double s2 = (1-lambda) * utility_.positionDistance(segment_points.at(1).positions, segment_points.at(2).positions);
+    
+    if(slope2 >= 1) {
+      b2 = findVelocity(1, s2);
+      a2 = b2 / slope2;  
+      i_max = 1;
+    }
+    else if(slope2 < 0 && ryse2 < 0) {
+      a2 = findVelocity(0, s2);
+      b2 = a2 * slope2;
+      i_max = 0;
+    } 
+    else if(slope2 < 0 && run2 < 0) {
+      b2 = findVelocity(1, s2);
+      a2 = b2 / slope2;
+      i_max = 1;
+    }
+    else {
+      a2 = findVelocity(0, s2);
+      b2 = a2 * slope2;  
+      i_max = 0;
+    }
+    
+    
     std::cout<<"\nslope: "<<slope;
     std::cout<<"\nryse: "<<ryse<<" run: "<<run;
     std::cout<<"\na: "<<a<<" b: "<<b;
+    
+    std::cout<<"\nslope2: "<<slope2;
+    std::cout<<"\nryse2: "<<ryse2<<" run2: "<<run2;
+    std::cout<<"\na2: "<<a2<<" b2: "<<b2;
 
     double theta = utility_.findAngleFromAToB(segment_points.at(0).positions, segment_points.at(1).positions);
 
 
 
-    std::vector<double> lambdas = getControlPointLambas(segment_points);
-    std::cout<<"\nlambda_x0: "<<lambdas.at(0);
-    std::cout<<"\nlambda_x2: "<<lambdas.at(1)<<"\n";
+    double lambda = getControlPointLamba(segment_points);
+    std::cout<<"\nlambda: "<<lambda;
     
 
-
-    bc.init(segment_points, lambdas.at(0), lambdas.at(1), theta, a, b,
+    bc.init(segment_points, lambda, theta, a, b,
         reflexxesData_.inputParameters->MaxVelocityVector->VecData[0],
         reflexxesData_.inputParameters->MaxVelocityVector->VecData[1],
         reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
@@ -471,40 +487,29 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
       
 
       
-      double p = computeTargetOrientation(input.CurrentPositionVector->VecData[0],
+      double theta = computeTargetOrientation(input.CurrentPositionVector->VecData[0],
                                           input.CurrentPositionVector->VecData[1],
                                           output.NewPositionVector->VecData[0],
                                           output.NewPositionVector->VecData[1]);
-      std::cout<<"\nCurrent: ";
-      std::cout<<" ("<<input.CurrentPositionVector->VecData[0]<<", "<<input.CurrentPositionVector->VecData[1]<<")";
-      std::cout<<"\nNext: ";
-      std::cout<<" ("<<output.NewPositionVector->VecData[0]<<", "<< output.NewPositionVector->VecData[1]<<")";
-
 
       // If straight-line paths, make theta be towards next knot point
       if(!bezier_) {
-        p = computeTargetOrientation(prevKP_.positions.at(0),
+        theta = computeTargetOrientation(prevKP_.positions.at(0),
                                             prevKP_.positions.at(1),
                                             input.TargetPositionVector->VecData[0],
                                             input.TargetPositionVector->VecData[1]);
       } // end if
 
-      /*std::cout<<"\nPrev KP: ";
-      std::cout<<" ("<<prevKP_.positions.at(0)<<", "<<prevKP_.positions.at(1)<<")";
-      std::cout<<"\nTarget: ";
-      std::cout<<" ("<<input.TargetPositionVector->VecData[0]<<", "<<input.TargetPositionVector->VecData[1]<<")";*/
+      // Push on theta
+      point.positions.push_back(theta);
 
-      std::cout<<"\np: "<<p;
-
-      point.positions.push_back(p);
-
-      double v = (p - input.CurrentPositionVector->VecData[2]) / CYCLE_TIME_IN_SECONDS;
-      point.velocities.push_back(v);
+      double w = (theta - input.CurrentPositionVector->VecData[2]) / CYCLE_TIME_IN_SECONDS;
+      point.velocities.push_back(w);
       point.accelerations.push_back(0);
 
 
-      reflexxesData_.outputParameters->NewPositionVector->VecData[2] = p;
-      reflexxesData_.outputParameters->NewVelocityVector->VecData[2] = v;
+      reflexxesData_.outputParameters->NewPositionVector->VecData[2] = theta;
+      reflexxesData_.outputParameters->NewVelocityVector->VecData[2] = w;
      
     }
 
@@ -601,7 +606,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Go through every knotpoint in the path
   // (or until timeCutoff has been reached)
   for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) {
-    std::cout<<"\ni_kp: "<<(int)i_kp_<<" c: "<<(int)c;
       resultValue = 0;
         
       // Push the initial state onto trajectory
@@ -630,7 +634,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
       // Else if not bezier or 1st/last segment with bezier
       else {
-        std::cout<<"\nin else\n";
 
         // if not Bezier, get rotation
         if(!bezier_) {
@@ -667,6 +670,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         res.trajectory.index_knot_points.push_back(res.trajectory.trajectory.points.size() - 1);
         
       } // end else
+
       // Set previous knot point
       prevKP_ = res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size() - 1);
 

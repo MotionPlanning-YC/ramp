@@ -36,10 +36,9 @@ void BezierCurve::dealloc() {
 } 
 
 
-void BezierCurve::init(const std::vector<ramp_msgs::MotionState> cp, const double lambda_x0, const double lambda_x2, const double theta, const double a, const double b, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max) {
-  segment_points_ = cp;
-  lambda_x0_ = lambda_x0;
-  lambda_x2_ = lambda_x2;
+void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double a, const double b, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max) {
+  segment_points_ = sp;
+  lambda_ = lambda;
   x_init_v_ = a;
   y_init_v_ = b;
   
@@ -76,6 +75,7 @@ void BezierCurve::initReflexxes(const double x_dot_max, const double y_dot_max, 
 
   double v_max, a_max, denom_v, denom_a, v;
 
+  std::cout<<"\nx_dot_max: "<<x_dot_max<<" y_dot_max: "<<y_dot_max;
   if(A_ + C_ != 0) {
     v_max = x_dot_max;
     denom_v = A_ + C_;
@@ -152,12 +152,14 @@ void BezierCurve::initControlPoints() {
 
 
   /** Positions */
-  X0.positions.push_back( (1-lambda_x0_)*p0.positions.at(0) + lambda_x0_*p1.positions.at(0) );
-  X0.positions.push_back( (1-lambda_x0_)*p0.positions.at(1) + lambda_x0_*p1.positions.at(1) );
+  X0.positions.push_back( (1-lambda_)*p0.positions.at(0) + lambda_*p1.positions.at(0) );
+  X0.positions.push_back( (1-lambda_)*p0.positions.at(1) + lambda_*p1.positions.at(1) );
   X0.positions.push_back(utility_.findAngleFromAToB(p0.positions, p1.positions));
 
-  X2.positions.push_back( (1-lambda_x2_)*p1.positions.at(0) + lambda_x2_*p2.positions.at(0) );
-  X2.positions.push_back( (1-lambda_x2_)*p1.positions.at(1) + lambda_x2_*p2.positions.at(1) );
+  X2.positions.push_back( lambda_*p1.positions.at(0) + (1-lambda_)*p2.positions.at(0) );  
+  X2.positions.push_back( lambda_*p1.positions.at(1) + (1-lambda_)*p2.positions.at(1) );
+  //X2.positions.push_back( (1-lambda_)*p1.positions.at(0) + lambda_*p2.positions.at(0) );
+  //X2.positions.push_back( (1-lambda_)*p1.positions.at(1) + lambda_*p2.positions.at(1) );
   X2.positions.push_back(utility_.findAngleFromAToB(p1.positions, p2.positions));
 
 

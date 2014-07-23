@@ -102,9 +102,9 @@ private:
   const std::vector<trajectory_msgs::JointTrajectoryPoint> rotate(const double start, const double goal);
   void setSelectionVectorRotation();
 
-  const std::vector<double> getControlPointLambas(const std::vector<ramp_msgs::MotionState> segment_points) const;
+  const double getControlPointLamba(const std::vector<ramp_msgs::MotionState> segment_points) const;
 
-  const bool lambasOkay(const std::vector<ramp_msgs::MotionState> segment_points, const double lambda_x0, const double lambda_x2) const;
+  const bool lambdaOkay(const std::vector<ramp_msgs::MotionState> segment_points, const double lambda) const;
 
 };
 

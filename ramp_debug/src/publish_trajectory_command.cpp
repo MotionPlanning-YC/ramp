@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
 
 
   ramp_msgs::KnotPoint c4;
-  c4.motionState.positions.push_back(6.);
+  c4.motionState.positions.push_back(3.01);
   c4.motionState.positions.push_back(2.);
   c4.motionState.positions.push_back(PI/4);
 
@@ -58,13 +58,17 @@ int main(int argc, char** argv) {
   c3.motionState.velocities.push_back(0);
   c3.motionState.velocities.push_back(0);
   c3.motionState.velocities.push_back(0); 
+ 
+  c4.motionState.velocities.push_back(0);
+  c4.motionState.velocities.push_back(0);
+  c4.motionState.velocities.push_back(0); 
 
 
   ramp_msgs::Path p;
-  p.points.push_back(c1);
+  //p.points.push_back(c1);
   p.points.push_back(c2);
   p.points.push_back(c3);
-  //p.points.push_back(c4);
+  p.points.push_back(c4);
   //p.points.push_back(c5);
 
   ramp_msgs::TrajectoryRequest tr;
