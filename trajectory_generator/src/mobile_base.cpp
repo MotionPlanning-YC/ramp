@@ -210,6 +210,7 @@ void MobileBase::insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ram
 
 
 
+/** TODO: get x_dot_0, y_dot_0 when they're not 0 */
 const double MobileBase::findVelocity(const uint8_t i, const double s) const {
   
   double a = reflexxesData_.inputParameters->MaxAccelerationVector->VecData[i];
@@ -324,7 +325,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
     double run  = segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0);
 
     double slope = (run != 0) ? ryse / run : ryse;
-    double a, b;
+    double x_dot_0, y_dot_0, x_dot_max, y_dot_max, x_dot_dot_max, y_dot_dot_max;
     uint8_t i_max;
     std::cout<<"\nBefore s";
     std::cout<<"\nsegment_points.at(i-1).positions.size(): "<<segment_points.at(0).positions.size();
@@ -336,63 +337,44 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
 
     // If the y is greater
     if(slope >= 1) {
-      b = findVelocity(1, s);
-      a = b / slope;  
+      y_dot_0 = findVelocity(1, s);
+      x_dot_0 = y_dot_0 / slope;  
       i_max = 1;
+
+      y_dot_max = y_dot_0;
+      x_dot_max = y_dot_max / slope;
+
     }
     else if(slope < 0 && ryse < 0) {
-      a = findVelocity(0, s);
-      b = a * slope;
+      x_dot_0 = findVelocity(0, s);
+      y_dot_0 = x_dot_0 * slope;
       i_max = 0;
+
+      x_dot_max = x_dot_0;
+      y_dot_max = slope*x_dot_max;
     } 
     else if(slope < 0 && run < 0) {
-      b = findVelocity(1, s);
-      a = b / slope;
+      y_dot_0 = findVelocity(1, s);
+      x_dot_0 = y_dot_0 / slope;
       i_max = 1;
-    }
-    else {
-      a = findVelocity(0, s);
-      b = a * slope;  
-      i_max = 0;
-    }
-    
-    
-    double a2, b2;
-    double ryse2 = segment_points.at(2).positions.at(1) - segment_points.at(1).positions.at(1);
-    double run2  = segment_points.at(2).positions.at(0) - segment_points.at(1).positions.at(0);
 
-    double slope2 = (run2 != 0) ? ryse2 / run2 : ryse2;
-    double s2 = (1-lambda) * utility_.positionDistance(segment_points.at(1).positions, segment_points.at(2).positions);
-    
-    if(slope2 >= 1) {
-      b2 = findVelocity(1, s2);
-      a2 = b2 / slope2;  
-      i_max = 1;
-    }
-    else if(slope2 < 0 && ryse2 < 0) {
-      a2 = findVelocity(0, s2);
-      b2 = a2 * slope2;
-      i_max = 0;
-    } 
-    else if(slope2 < 0 && run2 < 0) {
-      b2 = findVelocity(1, s2);
-      a2 = b2 / slope2;
-      i_max = 1;
+      y_dot_max = y_dot_0;
+      x_dot_max = y_dot_max / slope;
     }
     else {
-      a2 = findVelocity(0, s2);
-      b2 = a2 * slope2;  
+      x_dot_0 = findVelocity(0, s);
+      y_dot_0 = x_dot_0 * slope;  
       i_max = 0;
+      
+      x_dot_max = x_dot_0;
+      y_dot_max = slope*x_dot_max;
     }
+    
     
     
     std::cout<<"\nslope: "<<slope;
     std::cout<<"\nryse: "<<ryse<<" run: "<<run;
-    std::cout<<"\na: "<<a<<" b: "<<b;
-    
-    std::cout<<"\nslope2: "<<slope2;
-    std::cout<<"\nryse2: "<<ryse2<<" run2: "<<run2;
-    std::cout<<"\na2: "<<a2<<" b2: "<<b2;
+    std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
 
     double theta = utility_.findAngleFromAToB(segment_points.at(0).positions, segment_points.at(1).positions);
 
@@ -400,11 +382,9 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p) {
 
     double lambda = getControlPointLamba(segment_points);
     std::cout<<"\nlambda: "<<lambda;
-    
 
-    bc.init(segment_points, lambda, theta, a, b,
-        reflexxesData_.inputParameters->MaxVelocityVector->VecData[0],
-        reflexxesData_.inputParameters->MaxVelocityVector->VecData[1],
+    bc.init(segment_points, lambda, theta, x_dot_0, y_dot_0, 0, 0,
+        x_dot_max, y_dot_max, 
         reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
         reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
     std::cout<<"\nAfter bc.init\n";
@@ -590,12 +570,12 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
   }
 
-  /*for(int c=0;c<curves.size();c++) {
+  for(int c=0;c<curves.size();c++) {
     std::cout<<"\nCurve "<<c<<": ";
     for(int p=0;p<curves.at(c).points_.size();p++) {
       std::cout<<"\n"<<utility_.toString(curves.at(c).points_.at(p));
     }
-  }*/
+  }
   
 
   // Push 0 onto knot point indices

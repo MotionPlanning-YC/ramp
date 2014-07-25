@@ -36,11 +36,13 @@ void BezierCurve::dealloc() {
 } 
 
 
-void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double a, const double b, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max) {
+void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max) {
   segment_points_ = sp;
   lambda_ = lambda;
-  x_init_v_ = a;
-  y_init_v_ = b;
+  x_init_v_ = x_dot_0;
+  y_init_v_ = y_dot_0;
+  x_init_a_ = x_dot_dot_0;
+  y_init_a_ = y_dot_dot_0;
   
   initControlPoints();
   
@@ -69,70 +71,51 @@ void BezierCurve::initReflexxes(const double x_dot_max, const double y_dot_max, 
   reflexxesData_.inputParameters = new RMLPositionInputParameters( 1 );
   reflexxesData_.outputParameters = new RMLPositionOutputParameters( 1 );
   
-  reflexxesData_.flags.SynchronizationBehavior = RMLPositionFlags::NO_SYNCHRONIZATION;
+  reflexxesData_.flags.SynchronizationBehavior = RMLPositionFlags::ONLY_TIME_SYNCHRONIZATION;
 
   reflexxesData_.inputParameters->SelectionVector->VecData[0] = true;
 
-  double v_max, a_max, denom_v, denom_a, v;
 
-  std::cout<<"\nx_dot_max: "<<x_dot_max<<" y_dot_max: "<<y_dot_max;
-  if(A_ + C_ != 0) {
-    v_max = x_dot_max;
-    denom_v = A_ + C_;
-  }
-  else if(B_ + D_ != 0) {
-    v_max = y_dot_max;
-    denom_v = B_ + D_;
-  }
-  else {
-    v_max = -99;
-    denom_v = -99;
-  }
 
-  if(A_ != 0) {
-    a_max = x_dot_dot_max;
-    denom_a = A_;
-  }
-  else if(B_ != 0) {
-    a_max = y_dot_dot_max;
-    denom_a = B_;
-  }
-  else {
-    a_max = -99;
-    denom_a = -99;
-  }
-  
-  
-  std::cout<<"\nv_max: "<<v_max<<" a_max: "<<a_max;
-  std::cout<<"\ndenom_v: "<<denom_v<<" denom_a: "<<denom_a<<"\n";
-  // Change .33 to relative max
-  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = fabs(v_max / denom_v);
-  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = fabs(a_max / denom_a);
+
+  double y_0 = y_init_v_ / D_;
+  double x_0 = x_init_v_ / C_;
+  double y_max = y_dot_max / (B_+D_);
+  double x_max = x_dot_max / (A_+C_);
+
+
+
+  double u_dot_0 = (D_*D_ > C_*C_) ? y_init_v_ / D_ : x_init_v_ / C_;
+  double u_dot_max = (x_init_a_ - A_*u_dot_0) / C_;
+  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = u_dot_max;
+  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = (x_dot_dot_max - A_*u_dot_max) / (A_+C_);
 
   reflexxesData_.inputParameters->CurrentPositionVector->VecData[0]     = 0.;
-  reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]     = (D_*D_ > C_*C_) ? y_init_v_ / D_ : x_init_v_ / C_;
-  reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0] = 0.;
+  reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]     = u_dot_0;
+
+  // Set u_dotdot_0
+  double u_dotdot_0 = A_ / C_;
+  std::cout<<"\nu_dot_0: "<<u_dot_0;
+  std::cout<<"\nu_dotdot_0: "<<u_dotdot_0;
+  reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0] = u_dotdot_0;
+
+  // Set targets
+  reflexxesData_.inputParameters->TargetPositionVector->VecData[0] = 1;
+  reflexxesData_.inputParameters->TargetVelocityVector->VecData[0] = reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
+  
   
   std::cout<<"\nx_init_v: "<<x_init_v_<<" y_init_v_: "<<y_init_v_;
   std::cout<<"\nA: "<<A_<<" B: "<<B_<<" C: "<<C_<<" D: "<<D_;
   std::cout<<"\nreflexxesData_.inputParameters->MaxVelocityVector->VecData[0]: "<<reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
   std::cout<<"\nreflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]: "<<reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0];
   std::cout<<"\nreflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]: "<<reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]<<"\n";
+  std::cout<<"\nreflexxesData_.inputParameters->TargetPositionVector->VecData[0]: "<<reflexxesData_.inputParameters->TargetPositionVector->VecData[0]<<"\n";
+  std::cout<<"\nreflexxesData_.inputParameters->TargetVelocityVector->VecData[0]: "<<reflexxesData_.inputParameters->TargetVelocityVector->VecData[0]<<"\n";
 
-  /*if(reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0] >
-      reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]) 
-  {
-    reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0] = 
-      reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
-  }*/
 
-  //std::cin.get();
 
-  reflexxesData_.inputParameters->TargetPositionVector->VecData[0] = 1;
-  reflexxesData_.inputParameters->TargetVelocityVector->VecData[0] = reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0];
-  
+
   reflexxesData_.resultValue = 0;
-  
   //std::cout<<"\nLeaving initReflexxes\n";
 } // End initReflexxes
 
@@ -158,8 +141,6 @@ void BezierCurve::initControlPoints() {
 
   X2.positions.push_back( lambda_*p1.positions.at(0) + (1-lambda_)*p2.positions.at(0) );  
   X2.positions.push_back( lambda_*p1.positions.at(1) + (1-lambda_)*p2.positions.at(1) );
-  //X2.positions.push_back( (1-lambda_)*p1.positions.at(0) + lambda_*p2.positions.at(0) );
-  //X2.positions.push_back( (1-lambda_)*p1.positions.at(1) + lambda_*p2.positions.at(1) );
   X2.positions.push_back(utility_.findAngleFromAToB(p1.positions, p2.positions));
 
 
@@ -273,7 +254,7 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   double u_prev          = reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];
   double u_dot_prev      = reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0];
   double u_dot_dot_prev  = reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0];
-  std::cout<<"\nu: "<<u_prev<<" u_dot: "<<u_dot_prev<<" u_dot_dot: "<<u_dot_dot_prev;
+  std::cout<<"\n\nu_prev: "<<u_prev<<" u_dot_prev: "<<u_dot_prev<<" u_dot_dot_prev: "<<u_dot_dot_prev;
   //std::cout<<"\nMax v: "<<reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
   //std::cout<<"\nMax a: "<<reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0];
 
@@ -309,16 +290,22 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   
   // Velocity
   double x_dot = ((A_*u) + C_)*u_dot;
-  double y_dot = ((B_*u) + D_)*u_dot;
+  double y_dot = (x_dot*(B_*u+D_)) / (A_*u+C_);
+  //double y_dot = ((B_*u) + D_)*u_dot;
   /*std::cout<<"\nA: "<<A_<<" u: "<<u<<" A*u: "<<A_*u;
   std::cout<<"\nC: "<<C_<<" (A*u)+C: "<<((A_*u) + C_);
   std::cout<<"\nB: "<<B_<<" u: "<<u<<" B*u: "<<B_*u;
   std::cout<<"\nD: "<<D_<<" (B*u)+D: "<<((D_*u) + D_);
   std::cout<<"\nx_dot: "<<x_dot<<" y_dot: "<<y_dot;*/
 
+
   // Acceleration
   double x_dot_dot = A_ * u_dot_dot;
   double y_dot_dot = B_ * u_dot_dot;
+  
+  std::cout<<"\nu: "<<u<<" u_dot: "<<u_dot<<" u_dot_dot: "<<u_dot_dot;
+  std::cout<<"\nx_dot: "<<x_dot<<" y_dot: "<<y_dot;
+  std::cout<<"\nx_dot_dot: "<<x_dot_dot<<" y_dot_dot: "<<y_dot_dot;
 
   // Push values onto MotionState
   result.positions.push_back(x);
