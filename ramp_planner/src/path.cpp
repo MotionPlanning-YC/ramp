@@ -3,12 +3,12 @@
 Path::Path() {}
 
 
-Path::Path(KnotPoint start, KnotPoint goal) : start_(start), goal_(goal) {
+Path::Path(const KnotPoint start, const KnotPoint goal) : start_(start), goal_(goal) {
   all_.push_back(start);
   all_.push_back(goal); 
 }
 
-Path::Path(MotionState start, MotionState goal) : start_(start), goal_(goal) {
+Path::Path(const MotionState start, const MotionState goal) : start_(start), goal_(goal) {
   KnotPoint kp_s(start);
   KnotPoint kp_g(goal);
   all_.push_back(kp_s);
@@ -16,7 +16,7 @@ Path::Path(MotionState start, MotionState goal) : start_(start), goal_(goal) {
 }
 
 
-Path::Path(std::vector<KnotPoint> all) {
+Path::Path(const std::vector<KnotPoint> all) {
   start_ = all.at(0);
   goal_ = all.at(all.size()-1);
   
@@ -26,7 +26,7 @@ Path::Path(std::vector<KnotPoint> all) {
   }
 }
 
-Path::Path(ramp_msgs::Path p) {
+Path::Path(const ramp_msgs::Path p) {
 
   KnotPoint s(p.points.at(0));
   start_ = s;
@@ -44,7 +44,12 @@ Path::~Path() {}
 
 
 void Path::Add(const KnotPoint kp) {
-  all_.insert(all_.end()-1, kp);
+  if(all_.size() > 0) {
+    all_.insert(all_.end()-1, kp);
+  }
+  else {
+    all_.push_back(kp);
+  }
 }
 
 

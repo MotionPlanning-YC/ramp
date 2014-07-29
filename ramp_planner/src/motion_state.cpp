@@ -66,10 +66,6 @@ const double MotionState::comparePosition(const MotionState& c, const bool base_
   // Get square root to complete euclidean distance
   result = sqrt(result);
 
-  if(result < 0.15) {
-    std::cout<<"\ncurrent: "<<toString()<<" goal: "<<c.toString();
-    std::cout<<"\nresult: "<<result;
-  }
   return result;
 }
 
@@ -387,6 +383,7 @@ const std::string MotionState::toString() const {
     result<<"]";
   }
 
+  result<<"\n----\n";
 
   return result.str();
 }

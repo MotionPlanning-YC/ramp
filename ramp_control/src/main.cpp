@@ -33,7 +33,8 @@ void init_advertisers_subscribers(MobileRobot& robot, ros::NodeHandle& handle, b
   robot.sub_odometry_ = handle.subscribe(MobileRobot::TOPIC_STR_ODOMETRY, 1000, &MobileRobot::updateState, &robot);
   
   // Timers
-  robot.timer_ = handle.createTimer(ros::Duration(1.f / 25.f), &MobileRobot::updatePublishTimer, &robot);
+  // 15 Hz seems to be the fastest possible while avoiding nan errors
+  robot.timer_ = handle.createTimer(ros::Duration(1.f / 15.f), &MobileRobot::updatePublishTimer, &robot);
 } // End init_advertisers_subscribers
 
 
@@ -47,7 +48,7 @@ int main(int argc, char** argv) {
   ros::NodeHandle handle;  
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
   
-  handle.param("orientation", robot.initial_theta_, 3.14159);
+  handle.param("orientation", robot.initial_theta_, PI/4.);
   std::cout<<"\nrobot.orientation: "<<robot.initial_theta_;
   
   bool sim=false;

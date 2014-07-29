@@ -192,8 +192,8 @@ void MobileRobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
  * This method sets the vectors speeds, orientations, and end_times
  **/
 void MobileRobot::calculateSpeedsAndTime () {
-  orientations_.clear();
-  speeds.clear();
+  speeds_linear_.clear();
+  speeds_angular_.clear();
   end_times.clear();
   
   // Get number of knot points
@@ -217,36 +217,12 @@ void MobileRobot::calculateSpeedsAndTime () {
 
     speeds_angular_.push_back( current.velocities.at(2) );
 
-    // Find which knot point is next
-    /*int kp, kp_prev=0;
-    for(kp=0;kp<trajectory_.index_knot_points.size();kp++) {
-      //std::cout<<"\ntrajectory_.index_knot_points.at(kp): "<<trajectory_.index_knot_points.at(kp);
-      if(i < trajectory_.index_knot_points.at(kp)) {
-        kp_prev = trajectory_.index_knot_points.at(kp-1);
-        kp = trajectory_.index_knot_points.at(kp);
-        break;
-      }
-    }
-    //std::cout<<"\ni: "<<i<<" kp: "<<kp<<"kp_prev: "<<kp_prev<<"\n";
-
-    // Push on the orientation needed to move 
-    // from point i to point i+1
-    //std::cout<<"\nCurrent: "<<utility_.toString(current);
-    //std::cout<<"\nNext: "<<utility_.toString(trajectory_.trajectory.points.at(kp));
-    double theta = utility_.findAngleFromAToB(trajectory_.trajectory.points.at(kp_prev), trajectory_.trajectory.points.at(kp));
-    if(theta == 0 && utility_.planarDistance(trajectory_.trajectory.points.at(kp_prev).positions, trajectory_.trajectory.points.at(kp).positions) < 0.01) {
-      orientations_.push_back(trajectory_.trajectory.points.at(kp).positions.at(2));
-    }
-    else 
-      orientations_.push_back(theta);*/
-
-    //std::cout<<"\norientation: "<<orientations_.at(i)<<"\n";
-    
+  
     // Calculate the ending time for each waypoints
     end_times.push_back(start_time + next.time_from_start);
   } 
   
-  printVectors();
+  //printVectors();
 } // End calculateSpeedsAndTime
 
 
@@ -267,23 +243,25 @@ void MobileRobot::sendTwist(const geometry_msgs::Twist t) const {
 /** This method prints out the information vectors */
 void MobileRobot::printVectors() const {
     
-  std::cout<<"\nspeeds: [";
+  std::cout<<"\nspeeds_linear size: "<<speeds_linear_.size();
+  std::cout<<"\nspeeds_linear: [";
   for(unsigned int i=0;i<speeds_linear_.size()-1;i++) {
     std::cout<<speeds_linear_.at(i)<<", ";
   }
   std::cout<<speeds_linear_.at(speeds_linear_.size()-1)<<"]";
+  
+  std::cout<<"\nspeeds_angular size: "<<speeds_angular_.size();
+  std::cout<<"\nspeeds_angular_: [";
+  for(unsigned int i=0;i<speeds_angular_.size()-1;i++) {
+    std::cout<<speeds_angular_.at(i)<<", ";
+  }
+  std::cout<<speeds_angular_.at(speeds_angular_.size()-1)<<"]";
 
   std::cout<<"\nend_times: [";
   for(unsigned int i=0;i<end_times.size()-1;i++) {
     std::cout<<end_times.at(i)<<", ";
   }
   std::cout<<end_times.at(end_times.size()-1)<<"]";
-
-  std::cout<<"\norientations_: [";
-  for(unsigned int i=0;i<speeds_angular_.size()-1;i++) {
-    std::cout<<speeds_angular_.at(i)<<", ";
-  }
-  std::cout<<speeds_angular_.at(speeds_angular_.size()-1)<<"]";
 } // End printVectors
 
 
@@ -339,95 +317,6 @@ const bool MobileRobot::checkOrientation(const int i, const bool simulation) con
 
   return true;
 } // End checkOrientation
-
-
-
-
-
-/** This method returns a rotation trajectory for the robot */
-const ramp_msgs::Trajectory MobileRobot::getRotationTrajectory() const {
-  //std::cout<<"\nIn getRotationTrajectory\n";
-  ramp_msgs::Trajectory result;
-
-  // Build a trajectory request
-  ramp_msgs::TrajectoryRequest tr; 
-  ramp_msgs::KnotPoint temp1;
-  ramp_msgs::KnotPoint temp2;
-  
-  
-  temp1.motionState = motion_state_;
-  temp1.motionState.positions.at(2) = 0;
-  
-  temp2.motionState = motion_state_;
-
-  double actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
-  temp2.motionState.positions.at(2) = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
-  //std::cout<<"\nactual_theta: "<<actual_theta<<" orientations_.at(num_traveled_): "<<orientations_.at(num_traveled_);
-
-  tr.request.path.points.push_back(temp1);
-  tr.request.path.points.push_back(temp2);
-
-
-  //std::cout<<"\nRotation path: "<<utility_.toString(tr.request.path);
-
-  // Send request
-  if(h_traj_req_->request(tr)) {
-    result = tr.response.trajectory;  
-  }
-
-  //std::cout<<"\nRotation trajectory: "<<utility_.toString(result);
-  return result;
-} // End getRotationTrajectory
-
-
-
-
-
-
-void MobileRobot::moveOnTrajectoryRot(const ramp_msgs::Trajectory traj, bool simulation) {
-  //std::cout<<"\n**************In moveOnTrajectoryRot****************\n";
-  //std::cout<<"\ntraj.size(): "<<traj.trajectory.points.size();
-
-  ros::Rate r(50);
-  ros::Time start = ros::Time::now();
-
-  double goal_theta = traj.trajectory.points.at( traj.trajectory.points.size()-1 ).positions.at(2);
-
-  // Go through each point
-  for(int i=0;i<traj.trajectory.points.size();i++) {
-
-    // Set Twist values
-    twist_.linear.x  = 0;
-    twist_.angular.z = traj.trajectory.points.at(i).velocities.at(2);
-
-    // Set goal time
-    ros::Time g_time = start + traj.trajectory.points.at(i).time_from_start;
-
-    // Send twist commands until goal time
-    while(ros::Time::now() < g_time) {
-      sendTwist();
-      if(simulation) pub_cmd_vel_.publish(twist_);
-
-      r.sleep();
-      ros::spinOnce();
-
-      // Check if the latest trajectory is different
-      if(restart_ && speeds.size() != (num_prev_-1)) {
-        i = traj.trajectory.points.size();
-        break;
-      } // end if
-  
-      // TODO: make actual_theta a class member, set in odometry callback
-      double actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
-      if( fabs(utility_.findDistanceBetweenAngles( actual_theta, goal_theta )) <= PI/12) {
-        break;
-      }
-    } // end while
-  } // end for
-
-  //std::cout<<"\nLeaving moveOnTrajectoryRot\n";
-} // End moveOnTrajectoryRot
-
 
 
 

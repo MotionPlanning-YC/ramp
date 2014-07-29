@@ -30,17 +30,15 @@ public:
   const std::vector<BezierCurve> bezier(ramp_msgs::Path& p);
   
   bool bezier_;
-  std::vector<double> timeToReachV_max_;
   const double findVelocity(const uint8_t i, const double s) const;
 private:
 
+
+  // Store the time it started
+  ros::Time t_started_;
   
   // Flag for result
   int resultValue;
-
-
-  // Time for getting control points on bezier
-  double t_control_points_;
 
 
   // Reflexxes variables 

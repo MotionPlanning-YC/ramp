@@ -304,3 +304,18 @@ const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
 
   return result.str();
 }
+
+
+
+
+const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request tr) const {
+  std::ostringstream result;
+
+  result<<"\nTrajectory Request:\n";
+  result<<"\n  Path: "<<toString(tr.path);
+  result<<"\n  bezier: "<<tr.bezier<<"\n";
+
+  return result.str();
+}
+
+

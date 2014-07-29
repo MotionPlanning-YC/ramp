@@ -156,8 +156,8 @@ int main(int argc, char** argv) {
 
 
   
-  MotionState exp_results = my_planner.findAverageDiff();
-  std::cout<<"\n\nAverage Difference: "<<exp_results.toString();
+  //****MotionState exp_results = my_planner.findAverageDiff();
+  //****std::cout<<"\n\nAverage Difference: "<<exp_results.toString();
   
   
   std::cout<<"\n\nExiting Normally\n";

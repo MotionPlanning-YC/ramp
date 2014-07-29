@@ -7,10 +7,10 @@ class Path {
   public:
 
     Path();
-    Path(KnotPoint start, KnotPoint goal);
-    Path(MotionState start, MotionState goal);
-    Path(std::vector<KnotPoint> all);
-    Path(ramp_msgs::Path p);
+    Path(const KnotPoint start, const KnotPoint goal);
+    Path(const MotionState start, const MotionState goal);
+    Path(const std::vector<KnotPoint> all);
+    Path(const ramp_msgs::Path p);
     ~Path();
     
     //Data members

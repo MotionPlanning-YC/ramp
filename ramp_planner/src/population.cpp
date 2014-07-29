@@ -25,9 +25,17 @@ const RampTrajectory Population::get(const unsigned int i) {
 
 
 void Population::replace(const uint8_t i, const RampTrajectory trajec) {
+  if(i < trajectories_.size()) {
+    trajectories_.at(i) = trajec;
+    paths_.at(i) = trajec.path_;
+  }
+  else {
+    ROS_WARN("Replacing trajectory at index %i, but population size = %lu\n", (int)i, trajectories_.size());
+    trajectories_.push_back(trajec);
+    paths_.push_back(trajec.path_);  
+  }
+  
   changed_ = true;
-  trajectories_.at(i) = trajec;
-  paths_.at(i) = trajec.path_;
 }
 
 const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
@@ -268,7 +276,7 @@ const int Population::add(const RampTrajectory rt) {
   if(subPopulations_.size() > 0) {
     // Go through each sub-population and find best
     for(uint8_t i=0;i<subPopulations_.size();i++) {
-      subPopulations_.at(i).findBest();
+      subPopulations_.at(i).getBestID();
     }
   }
  
@@ -299,7 +307,7 @@ const int Population::add(const RampTrajectory rt) {
 
 
 /** Returns the fittest trajectory and sets i_best_ */
-const int Population::findBest() {
+const int Population::getBestID() {
   //std::cout<<"\nIn findBest\n";
   
   // If population has not changed since last
@@ -341,7 +349,7 @@ const std::vector<RampTrajectory> Population::getBestFromSubPops() {
   else {
     for(uint8_t i=0;i<subPopulations_.size();i++) {
       if(subPopulations_.at(i).size() > 0) {
-        int i_best = subPopulations_.at(i).findBest(); 
+        int i_best = subPopulations_.at(i).getBestID(); 
         result.push_back(subPopulations_.at(i).get(i_best));
       }
     }
@@ -390,7 +398,7 @@ const std::vector<Population> Population::createSubPopulations(const double delt
 
   // Go through each sub-population and find best
   for(uint8_t i=0;i<subPopulations_.size();i++) {
-    subPopulations_.at(i).findBest();
+    subPopulations_.at(i).getBestID();
   }
 
   //std::cout<<"\n***********Leaving createSubPopulations***********\n";

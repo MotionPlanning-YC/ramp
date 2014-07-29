@@ -8,19 +8,7 @@
 #include "ramp_msgs/Population.h"
 
 Utility u;
-bool bezier;
 
-void loadParameters(const ros::NodeHandle& handle) {
-  
-  if(handle.hasParam("bezier")) {
-    handle.getParam("bezier", bezier);
-  }
-  else {
-    ROS_ERROR("Cannot find trajectory_generator parameter: bezier");
-    ROS_ERROR("Defaulting bezier to true");
-    bezier = true;
-  }
-}
 
 
 // Main function
@@ -36,13 +24,6 @@ int main(int argc, char** argv) {
   // Declare the service that gives a path and returns a trajectory
   ros::ServiceServer service = n.advertiseService("trajectory_generator", &MobileBase::trajectoryRequest, &mobileBase);
 
-
-  // Load parameters
-  loadParameters(n);
-
-  // Set Bezier
-  mobileBase.bezier_ = bezier;
-  std::cout<<"\nbezier: "<<mobileBase.bezier_;
 
 
   std::vector<double> a, b;
