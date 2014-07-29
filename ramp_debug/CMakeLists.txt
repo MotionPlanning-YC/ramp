@@ -16,11 +16,6 @@ catkin_package(
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-#add_executable(display_base_location src/display_base_location.cpp src/configuration.cpp src/range.cpp src/utility.cpp)
-#set_target_properties(display_base_location PROPERTIES COMPILE_FLAGS -std=c++0x)
-#target_link_libraries(display_base_location ${catkin_LIBRARIES})
-#add_dependencies(display_base_location ramp_msgs_generate_messages_cpp)
-
 
 add_executable(viewPredicted src/viewPredicted.cpp src/configuration.cpp src/range.cpp src/utility.cpp src/trajectory_request_handler.cpp)
 set_target_properties(viewPredicted PROPERTIES COMPILE_FLAGS -std=c++0x)

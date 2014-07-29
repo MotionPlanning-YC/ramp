@@ -86,17 +86,28 @@ void BezierCurve::initReflexxes(const double x_dot_max, const double y_dot_max, 
 
 
   double u_dot_0 = (D_*D_ > C_*C_) ? y_init_v_ / D_ : x_init_v_ / C_;
-  double u_dot_max = (x_init_a_ - A_*u_dot_0) / C_;
+  double u_dot_max = fabs(x_dot_max / (A_+C_));
+  if(u_dot_0 > u_dot_max) {
+    std::cout<<"\nu_dot_0: "<<u_dot_0;
+    std::cout<<"\nu_dot_max: "<<u_dot_max;
+    std::cout<<"\nu_dot_0 > u_dot_max -> setting u_dot_0 = u_dot_max";
+    u_dot_0 = u_dot_max;
+  }
+  // Occurs when A+C < C, which means sgn(A) != sgn(C), which means X1 > avg(X0, X2)
+  else if(u_dot_0 < u_dot_max) {
+    std::cout<<"\nu_dot_0: "<<u_dot_0;
+    std::cout<<"\nu_dot_max: "<<u_dot_max;
+    std::cout<<"\nu_dot_0 < u_dot_max -> setting u_dot_max = u_dot_0";
+    u_dot_max = u_dot_0;
+  }
   reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = u_dot_max;
-  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = (x_dot_dot_max - A_*u_dot_max) / (A_+C_);
+  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = fabs( (x_dot_dot_max - A_*u_dot_max) / (A_+C_) );
 
   reflexxesData_.inputParameters->CurrentPositionVector->VecData[0]     = 0.;
   reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]     = u_dot_0;
 
   // Set u_dotdot_0
-  double u_dotdot_0 = A_ / C_;
-  std::cout<<"\nu_dot_0: "<<u_dot_0;
-  std::cout<<"\nu_dotdot_0: "<<u_dotdot_0;
+  double u_dotdot_0 = (x_init_a_ - A_*u_dot_0) / C_;
   reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0] = u_dotdot_0;
 
   // Set targets
