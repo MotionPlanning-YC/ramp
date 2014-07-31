@@ -16,17 +16,19 @@ int main(int argc, char** argv) {
   ros::Publisher pub_pop = handle.advertise<ramp_msgs::Population>("population", 1000);
   ros::ServiceClient client_ = handle.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");
 
-  
+
+
+
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(0.886248);
-  c1.motionState.positions.push_back(0.886248);
-  c1.motionState.positions.push_back(0);
+  c1.motionState.positions.push_back(0.0066);
+  c1.motionState.positions.push_back(0.0066);
+  c1.motionState.positions.push_back(1.32582);
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(1);
-  c2.motionState.positions.push_back(1);
-  c2.motionState.positions.push_back(PI/4);
+  c2.motionState.positions.push_back(0.5);
+  c2.motionState.positions.push_back(2.);
+  c2.motionState.positions.push_back(1.32816);
 
 
   ramp_msgs::KnotPoint c3;
@@ -47,16 +49,16 @@ int main(int argc, char** argv) {
   
   
   // Velocities
-  c1.motionState.velocities.push_back(0.274);
-  c1.motionState.velocities.push_back(0.274);
+  c1.motionState.velocities.push_back(0.066);
+  c1.motionState.velocities.push_back(0.066);
   c1.motionState.velocities.push_back(0);
  
-  c2.motionState.velocities.push_back(0);
-  c2.motionState.velocities.push_back(0);
+  c2.motionState.velocities.push_back(0.);
+  c2.motionState.velocities.push_back(0.);
   c2.motionState.velocities.push_back(0); 
  
-  c3.motionState.velocities.push_back(0);
-  c3.motionState.velocities.push_back(0);
+  c3.motionState.velocities.push_back(0.);
+  c3.motionState.velocities.push_back(0.);
   c3.motionState.velocities.push_back(0); 
  
   c4.motionState.velocities.push_back(0);
@@ -67,11 +69,20 @@ int main(int argc, char** argv) {
   c5.motionState.velocities.push_back(0);
   c5.motionState.velocities.push_back(0); 
 
+
   // Accelerations
-  c1.motionState.accelerations.push_back(-0.33);
-  c1.motionState.accelerations.push_back(-0.33);
+  c1.motionState.accelerations.push_back(0.33);
+  c1.motionState.accelerations.push_back(0.33);
   c1.motionState.accelerations.push_back(0);
 
+  c2.motionState.accelerations.push_back(0.);
+  c2.motionState.accelerations.push_back(0.);
+  c2.motionState.accelerations.push_back(0);
+  
+  c3.motionState.accelerations.push_back(0);
+  c3.motionState.accelerations.push_back(0);
+  c3.motionState.accelerations.push_back(0);
+  
   ramp_msgs::Path p;
   p.points.push_back(c1);
   p.points.push_back(c2);
@@ -104,6 +115,10 @@ int main(int argc, char** argv) {
   pop.population.push_back(tr.response.trajectory);
   
   pub_pop.publish(pop);
+
+
+  std::cout<<"\nDifference: "<<u.findAngleFromAToB(c1.motionState.positions, c2.motionState.positions);
+  std::cout<<"\nDifference: "<<u.findAngleFromAToB(c2.motionState.positions, c3.motionState.positions);
 
 
   std::cout<<"\nExiting Normally\n";

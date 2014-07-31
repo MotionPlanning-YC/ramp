@@ -14,12 +14,12 @@ Utility u;
 // Main function
 int main(int argc, char** argv) {
 
-  // Initialises the ROS node 
+  // Initialize the ROS node 
   ros::init(argc, argv, "reflexxes");
+  ros::NodeHandle n;
 
   // Variable Declaration
   MobileBase mobileBase;
-  ros::NodeHandle n;
 
   // Declare the service that gives a path and returns a trajectory
   ros::ServiceServer service = n.advertiseService("trajectory_generator", &MobileBase::trajectoryRequest, &mobileBase);

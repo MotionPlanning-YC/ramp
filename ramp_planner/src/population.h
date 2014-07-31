@@ -46,6 +46,7 @@ class Population {
     bool                        changed_;
     std::vector<Population>     subPopulations_;
     bool                        isSubPopulation_;
+    Utility                     utility_;
 };
 
 #endif

@@ -10,6 +10,7 @@ class Path {
     Path(const KnotPoint start, const KnotPoint goal);
     Path(const MotionState start, const MotionState goal);
     Path(const std::vector<KnotPoint> all);
+    Path(const std::vector<MotionState> all);
     Path(const ramp_msgs::Path p);
     ~Path();
     

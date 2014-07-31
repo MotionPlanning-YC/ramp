@@ -16,6 +16,7 @@ Path::Path(const MotionState start, const MotionState goal) : start_(start), goa
 }
 
 
+
 Path::Path(const std::vector<KnotPoint> all) {
   start_ = all.at(0);
   goal_ = all.at(all.size()-1);
@@ -25,6 +26,16 @@ Path::Path(const std::vector<KnotPoint> all) {
     all_.push_back(all.at(i));
   }
 }
+
+
+Path::Path(const std::vector<MotionState> all) {
+  for(uint8_t i=0;i<all.size();i++) {
+    KnotPoint temp(all.at(i));
+    all_.push_back(temp);
+  }
+}
+
+
 
 Path::Path(const ramp_msgs::Path p) {
 

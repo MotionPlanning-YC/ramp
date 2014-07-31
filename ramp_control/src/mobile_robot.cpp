@@ -330,7 +330,7 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
 
   // Execute the trajectory
   while( (num_traveled_+1) < num_) { 
-    //std::cout<<"\nnum_traveled: "<<num_traveled_<<"\n";
+    std::cout<<"\nnum_traveled: "<<num_traveled_<<"\n";
     restart_ = false;
     
 

@@ -160,7 +160,7 @@ class Planner {
     void gradualTrajectory(RampTrajectory& t);
 
     // Modification procedure
-    const int modification();
+    void modification();
 
     // Callback methods for ros::Timers
     void controlCycleCallback     (const ros::TimerEvent& t);
@@ -179,7 +179,7 @@ class Planner {
           void checkTrajChange()                                  ;
           void seedPopulation()                                   ;
           void seedPopulationLine()                               ;
-    const RampTrajectory  getChangingTrajectory() const ;
+    const RampTrajectory  getChangingTrajectory() ;
     const MotionState     predictStartPlanning() const  ;
 
 
