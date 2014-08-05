@@ -21,20 +21,20 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(0.0066);
-  c1.motionState.positions.push_back(0.0066);
-  c1.motionState.positions.push_back(1.32582);
+  c1.motionState.positions.push_back(0.);
+  c1.motionState.positions.push_back(0.);
+  c1.motionState.positions.push_back(PI/4);
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(0.5);
-  c2.motionState.positions.push_back(2.);
-  c2.motionState.positions.push_back(1.32816);
+  c2.motionState.positions.push_back(2.5);
+  c2.motionState.positions.push_back(1);
+  c2.motionState.positions.push_back(PI/4);
 
 
   ramp_msgs::KnotPoint c3;
   c3.motionState.positions.push_back(3.5);
-  c3.motionState.positions.push_back(2.);
-  c3.motionState.positions.push_back(0);
+  c3.motionState.positions.push_back(0.5);
+  c3.motionState.positions.push_back(-PI/4);
 
 
   ramp_msgs::KnotPoint c4;
@@ -49,13 +49,13 @@ int main(int argc, char** argv) {
   
   
   // Velocities
-  c1.motionState.velocities.push_back(0.066);
-  c1.motionState.velocities.push_back(0.066);
-  c1.motionState.velocities.push_back(0);
+  c1.motionState.velocities.push_back(0.);
+  c1.motionState.velocities.push_back(0.);
+  c1.motionState.velocities.push_back(0.);
  
+  /*c2.motionState.velocities.push_back(0.);
   c2.motionState.velocities.push_back(0.);
-  c2.motionState.velocities.push_back(0.);
-  c2.motionState.velocities.push_back(0); 
+  c2.motionState.velocities.push_back(0);*/
  
   c3.motionState.velocities.push_back(0.);
   c3.motionState.velocities.push_back(0.);
@@ -71,17 +71,17 @@ int main(int argc, char** argv) {
 
 
   // Accelerations
-  c1.motionState.accelerations.push_back(0.33);
-  c1.motionState.accelerations.push_back(0.33);
-  c1.motionState.accelerations.push_back(0);
+  c1.motionState.accelerations.push_back(0.);
+  c1.motionState.accelerations.push_back(0.);
+  c1.motionState.accelerations.push_back(0.);
 
   c2.motionState.accelerations.push_back(0.);
   c2.motionState.accelerations.push_back(0.);
   c2.motionState.accelerations.push_back(0);
   
-  c3.motionState.accelerations.push_back(0);
-  c3.motionState.accelerations.push_back(0);
-  c3.motionState.accelerations.push_back(0);
+  c3.motionState.accelerations.push_back(0.);
+  c3.motionState.accelerations.push_back(0.);
+  c3.motionState.accelerations.push_back(0.);
   
   ramp_msgs::Path p;
   p.points.push_back(c1);
@@ -92,7 +92,8 @@ int main(int argc, char** argv) {
 
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
-  tr.request.bezier = false;
+  tr.request.bezier = true;
+  tr.request.transition = false;
 
 
   std::cout<<"\nPress Enter to request and send the trajectory\n";

@@ -21,11 +21,14 @@ class RampTrajectory {
     float                 resolutionRate_;
     int                   subPopulation_;
 
+
     const bool                                  equal(const RampTrajectory& other)  const;
     const Path                                  getPath()                           const;
     const trajectory_msgs::JointTrajectoryPoint getPointAtTime(const float t)       const;
 
     const double                                getDirection() const;
+    
+    const RampTrajectory                        getStraightSegment(uint8_t i) const;
 
     const RampTrajectory                        clone() const;
     

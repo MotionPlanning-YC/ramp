@@ -48,6 +48,8 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const doubl
   
   calculateConstants();
 
+  std::cout<<"\nlambda: "<<lambda_;
+
   // If both C and D == 0, the first two points are the same
   if(C_ != 0 || D_ != 0) {
   
@@ -86,7 +88,8 @@ void BezierCurve::initReflexxes(const double x_dot_max, const double y_dot_max, 
 
 
   double u_dot_0 = (D_*D_ > C_*C_) ? y_init_v_ / D_ : x_init_v_ / C_;
-  double u_dot_max = fabs(x_dot_max / (A_+C_));
+  double u_dot_max = fabs(y_dot_max / (B_+D_));
+  //double u_dot_max = fabs(x_dot_max / (A_+C_));
   if(u_dot_0 > u_dot_max) {
     std::cout<<"\nu_dot_0: "<<u_dot_0;
     std::cout<<"\nu_dot_max: "<<u_dot_max;
@@ -134,45 +137,64 @@ void BezierCurve::initReflexxes(const double x_dot_max, const double y_dot_max, 
 
 
 void BezierCurve::initControlPoints() {
-  ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;
+  ramp_msgs::MotionState C0, C1, C2, p0, p1, p2;
 
 
   p0 = segment_points_.at(0);
   p1 = segment_points_.at(1);
   p2 = segment_points_.at(2);
 
-  X1 = segment_points_.at(1);
-  X1.positions.at(2) = utility_.findAngleFromAToB(p0.positions, p1.positions);
+  C1 = segment_points_.at(1);
+  C1.positions.at(2) = utility_.findAngleFromAToB(p0.positions, p1.positions);
 
 
   /** Positions */
-  X0.positions.push_back( (1-lambda_)*p0.positions.at(0) + lambda_*p1.positions.at(0) );
-  X0.positions.push_back( (1-lambda_)*p0.positions.at(1) + lambda_*p1.positions.at(1) );
-  X0.positions.push_back(utility_.findAngleFromAToB(p0.positions, p1.positions));
+  C0.positions.push_back( (1-lambda_)*p0.positions.at(0) + lambda_*p1.positions.at(0) );
+  C0.positions.push_back( (1-lambda_)*p0.positions.at(1) + lambda_*p1.positions.at(1) );
+  C0.positions.push_back(utility_.findAngleFromAToB(p0.positions, p1.positions));
 
-  X2.positions.push_back( lambda_*p1.positions.at(0) + (1-lambda_)*p2.positions.at(0) );  
-  X2.positions.push_back( lambda_*p1.positions.at(1) + (1-lambda_)*p2.positions.at(1) );
-  X2.positions.push_back(utility_.findAngleFromAToB(p1.positions, p2.positions));
+  double s1 = sqrt( pow(C1.positions.at(0) - C0.positions.at(0), 2) +
+                    pow(C1.positions.at(1) - C0.positions.at(1), 2) );
+  double theta_s2 = utility_.findAngleFromAToB(p1.positions, p2.positions);
+  double x = C1.positions.at(0) + s1*cos(theta_s2);
+  double y = C1.positions.at(1) + s1*sin(theta_s2);
+
+  double d2 = sqrt( pow(p2.positions.at(0) - p1.positions.at(0), 2) +
+                    pow(p2.positions.at(1) - p1.positions.at(1), 2) );
+
+
+  if(s1 > d2) {
+    C2.positions.push_back(p2.positions.at(0));  
+    C2.positions.push_back(p2.positions.at(1));
+  }
+  else {
+    C2.positions.push_back(x);  
+    C2.positions.push_back(y);
+  }
+
+  //C2.positions.push_back( lambda_*p1.positions.at(0) + (1-lambda_)*p2.positions.at(0) );  
+  //C2.positions.push_back( lambda_*p1.positions.at(1) + (1-lambda_)*p2.positions.at(1) );
+  C2.positions.push_back(utility_.findAngleFromAToB(p1.positions, p2.positions));
 
 
   /** Velocities */
   // Have to predict the initial velocities
 
-  X0.velocities.push_back(x_init_v_);
-  X0.velocities.push_back(y_init_v_);
-  X0.velocities.push_back(0);
+  C0.velocities.push_back(x_init_v_);
+  C0.velocities.push_back(y_init_v_);
+  C0.velocities.push_back(0);
 
 
   /** Accelerations */
 
-  X0.accelerations.push_back(0);
-  X0.accelerations.push_back(0);
-  X0.accelerations.push_back(0);
+  C0.accelerations.push_back(0);
+  C0.accelerations.push_back(0);
+  C0.accelerations.push_back(0);
 
 
-  control_points_.push_back(X0);
-  control_points_.push_back(X1);
-  control_points_.push_back(X2);
+  control_points_.push_back(C0);
+  control_points_.push_back(C1);
+  control_points_.push_back(C2);
   
 
   std::cout<<"\nControl Points:";

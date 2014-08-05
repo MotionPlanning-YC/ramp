@@ -54,6 +54,29 @@ const double RampTrajectory::getDirection() const {
 
 
 
+const RampTrajectory RampTrajectory::getStraightSegment(uint8_t i) const {
+
+  int i_startSegment = msg_trajec_.index_knot_points.at(i);
+
+  for(uint16_t i=i_startSegment;i<msg_trajec_.index_knot_points.at(i+1);i++) {
+    if(msg_trajec_.trajectory.points.at(i).positions.at(2) > 0.0001) {
+      RampTrajectory result = *this;
+      
+      // Get subset of vector
+      std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator first = 
+        msg_trajec_.trajectory.points.begin()+i;
+      std::vector<trajectory_msgs::JointTrajectoryPoint> m(first, msg_trajec_.trajectory.points.end());
+
+      result.msg_trajec_.trajectory.points = m;
+
+      return result;
+    }
+  } 
+
+  return *this;
+}
+
+
 const RampTrajectory RampTrajectory::clone() const { 
   return *this;
 }

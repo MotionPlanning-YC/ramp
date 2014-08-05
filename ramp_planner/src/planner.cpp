@@ -181,6 +181,35 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
   populationSize_ = population_size;
   subPopulations_ = sub_populations;
 
+
+
+  /*KnotPoint k1, k2, k3;
+  k1.motionState_.positions_.push_back(0);
+  k1.motionState_.positions_.push_back(0);
+  k1.motionState_.positions_.push_back(0);
+  
+  k2.motionState_.positions_.push_back(1);
+  k2.motionState_.positions_.push_back(1);
+  k2.motionState_.positions_.push_back(PI/4);
+  
+  k3.motionState_.positions_.push_back(1);
+  k3.motionState_.positions_.push_back(3);
+  k3.motionState_.positions_.push_back(0);
+
+  std::vector<KnotPoint> all;
+  all.push_back(k1);
+  all.push_back(k2);
+  all.push_back(k3);
+
+  Path p(all);
+
+  ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
+  requestTrajectory(tr);
+  RampTrajectory trj = tr.response.trajectory;
+  std::cout<<"\nTrajectory: "<<trj.toString();
+
+  std::cout<<"\nSegment 0: "<<trj.getStraightSegment(0).toString();
+  std::cout<<"\nSegment 1: "<<trj.getStraightSegment(1).toString();*/
 } // End init
 
 
@@ -543,7 +572,7 @@ const RampTrajectory Planner::getChangingTrajectory() {
   std::vector<MotionState> segment_points;
   segment_points.push_back(start_);
   segment_points.push_back(startPlanning_);
-  segment_points.push_back(bestTrajec_.getPointAtTime(4));
+  segment_points.push_back(bestTrajec_.path_.goal_.motionState_);
 
   std::cout<<"\nstart: "<<start_.toString();
   std::cout<<"\nstartPlaning: "<<startPlanning_.toString();
@@ -555,6 +584,7 @@ const RampTrajectory Planner::getChangingTrajectory() {
 
   ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
   tr.request.bezier = true;
+  tr.request.transition = true;
 
   h_traj_req_->request(tr);
 
@@ -565,12 +595,27 @@ const RampTrajectory Planner::getChangingTrajectory() {
 
 
 
-
-  stop_ = true;
+  h_parameters_.setImminentCollision(true); 
   ramp_msgs::Population pop;
   pop.population.push_back(toSend.msg_trajec_);
   h_control_->sendPopulation(pop);
+
+  std::cout<<"\nTransition trajectory published, Press Enter to continue\n";
   std::cin.get();
+
+  h_parameters_.setImminentCollision(false); 
+  h_control_->send(toSend.msg_trajec_);
+
+  controlCycleTimer_.stop();
+  planningCycleTimer_.stop();
+  imminentCollisionTimer_.stop();
+  
+  std::cout<<"\nPress Enter to continue trajectory\n";
+  std::cin.get();
+
+  controlCycleTimer_.start();
+  planningCycleTimer_.start();
+  imminentCollisionTimer_.start();
 
 
   return toSend;
@@ -752,10 +797,10 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
   //std::cout<<"\nBest: "<<bestTrajec_.toString();
 
 
-  // At generation 150, insert a straight-line trajectory to the goal
-  //if(generation_ == 75) {
-    //seedPopulationLine();
-  //}
+  // At generation x, insert a straight-line trajectory to the goal
+  if(generation_ == 75) {
+    seedPopulationLine();
+  }
 
 
 
@@ -795,7 +840,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     // t=t+1
     generation_++;
     
-    if( (generation_-1) % 50 == 0) {
+    if( (generation_-1) % 10 == 0) {
       std::cout<<"\nPlanning cycle "<<generation_-1<<" complete\n";
     }
 
@@ -883,6 +928,7 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   result.request.path           = path.buildPathMsg();
   result.request.resolutionRate = resolutionRate_;
   result.request.bezier         = false;
+  result.request.transition     = false;
 
   return result;
 } // End buildTrajectoryRequest
@@ -931,6 +977,7 @@ void Planner::sendBest() {
   
   }
   else {
+    std::cout<<"\nSending Blank\n";
     RampTrajectory blank;
     h_control_->send(blank.msg_trajec_);
   }

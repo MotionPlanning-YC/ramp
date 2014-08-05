@@ -171,7 +171,7 @@ void MobileRobot::updatePublishTimer(const ros::TimerEvent&) {
  *   It calls calculateSpeedsAndTimes to update the robot's vectors needed to move */
 void MobileRobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
   //std::cout<<"\nIn updateTrajectory!\n";
-  //std::cout<<"\nNew Trajectory first point: "<<utility_.toString(msg.trajectory.points.at(0));
+  //std::cout<<"\nTrajectory: "<<utility_.toString(msg);
   
   // Update data members
   restart_        = true;
@@ -330,7 +330,7 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
 
   // Execute the trajectory
   while( (num_traveled_+1) < num_) { 
-    std::cout<<"\nnum_traveled: "<<num_traveled_<<"\n";
+    //std::cout<<"\nnum_traveled: "<<num_traveled_<<"\n";
     restart_ = false;
     
 
@@ -339,27 +339,6 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
       ros::spinOnce();
     }
 
-    // Check that we are at the correct orientation
-    // If not, rotate
-    // Because the last point is the goal
-    /*if(!checkOrientation(num_traveled_, simulation)) {
-
-      // Get rotation trajectory and move on it
-      ramp_msgs::Trajectory rot_t = getRotationTrajectory();
-
-      //std::cout<<"\nRotation Trajectory: "<<utility_.toString(rot_t);
-
-      moveOnTrajectoryRot(rot_t, simulation);
-      
-      ros::spinOnce();
-    } // end if   
-    
-    // Check if a new trajectory has been received before we go to next point
-    if(restart_) {
-      break;
-    }*/
-    
-    
     
     // Move to the next point
     ros::Time g_time = end_times.at(num_traveled_);
