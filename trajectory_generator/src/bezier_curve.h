@@ -56,6 +56,9 @@ private:
   void dealloc();
 
   const bool satisfiesConstraints(const double u_dot_max) const;
+  const double getUDotMax(const double u_dot_0) const;
+
+  void printReflexxesInfo() const;
 };
 
 #endif
