@@ -213,6 +213,10 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
 } // End init
 
 
+
+
+
+
 /** Place code to seed population here */
 void Planner::seedPopulation() {
 
@@ -226,10 +230,21 @@ void Planner::seedPopulation() {
   kp.motionState.velocities.push_back(0);
   kp.motionState.velocities.push_back(0);
   kp.motionState.velocities.push_back(0);
+  
+  ramp_msgs::KnotPoint kp1;
+  
+  kp1.motionState.positions.push_back(2.);
+  kp1.motionState.positions.push_back(0.);
+  kp1.motionState.positions.push_back(PI/4);
+  
+  kp1.motionState.velocities.push_back(0);
+  kp1.motionState.velocities.push_back(0);
+  kp1.motionState.velocities.push_back(0);
 
   std::vector<KnotPoint> all;
   all.push_back(start_);
   all.push_back(kp);
+  all.push_back(kp1);
   all.push_back(goal_);
 
   Path p1(all);
@@ -245,10 +260,21 @@ void Planner::seedPopulation() {
   kp2.motionState.velocities.push_back(0);
   kp2.motionState.velocities.push_back(0);
   kp2.motionState.velocities.push_back(0);
+  
+  ramp_msgs::KnotPoint kp3;
+  
+  kp3.motionState.positions.push_back(1);
+  kp3.motionState.positions.push_back(1);
+  kp3.motionState.positions.push_back(PI/4);
+  
+  kp3.motionState.velocities.push_back(0);
+  kp3.motionState.velocities.push_back(0);
+  kp3.motionState.velocities.push_back(0);
 
   std::vector<KnotPoint> all2;
   all2.push_back(start_);
   all2.push_back(kp2);
+  all2.push_back(kp3);
   all2.push_back(goal_);
 
   Path p2(all2);
@@ -258,7 +284,7 @@ void Planner::seedPopulation() {
 
   std::vector<Path> paths;
   paths.push_back(p1);
-  paths.push_back(p2);
+  paths.push_back(p1);
   /************************************/
 
   /**** Get trajectories ****/  
@@ -292,9 +318,38 @@ void Planner::seedPopulation() {
 /** Will seed population with a straight-line trajectory to the goal */
 void Planner::seedPopulationLine() {
 
-  Path p_one(startPlanning_, goal_);
+  //Path p_one(startPlanning_, goal_);
+  
+  ramp_msgs::KnotPoint kp2;
+  
+  kp2.motionState.positions.push_back(0.5);
+  kp2.motionState.positions.push_back(2);
+  kp2.motionState.positions.push_back(PI/4);
+  
+  kp2.motionState.velocities.push_back(0);
+  kp2.motionState.velocities.push_back(0);
+  kp2.motionState.velocities.push_back(0);
+  
+  ramp_msgs::KnotPoint kp3;
+  
+  kp3.motionState.positions.push_back(1);
+  kp3.motionState.positions.push_back(1);
+  kp3.motionState.positions.push_back(PI/4);
+  
+  kp3.motionState.velocities.push_back(0);
+  kp3.motionState.velocities.push_back(0);
+  kp3.motionState.velocities.push_back(0);
 
-  ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(p_one);
+  std::vector<KnotPoint> all2;
+  all2.push_back(start_);
+  all2.push_back(kp2);
+  all2.push_back(kp3);
+  all2.push_back(goal_);
+
+  Path p2(all2);
+
+  ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(p2);
+  //ramp_msgs::TrajectoryRequest msg_request = buildTrajectoryRequest(p_one);
   
   // Send the request and push the returned Trajectory onto population_
   if(requestTrajectory(msg_request)) {
@@ -304,7 +359,7 @@ void Planner::seedPopulationLine() {
     temp.msg_trajec_ = msg_request.response.trajectory;
 
     // Set trajectory path
-    temp.path_ = p_one;
+    temp.path_ = p2;
 
     // Evaluati and add the trajectory to the population
     population_.replace(0, evaluateTrajectory(temp));
@@ -566,8 +621,10 @@ void Planner::initPopulation() {
 
 
 
-const RampTrajectory Planner::getChangingTrajectory() {
-  std::cout<<"\nIn getChangingTrajectory\n";
+
+
+const RampTrajectory Planner::getTransitionTrajectory() {
+  std::cout<<"\nIn getTransitionTrajectory\n";
 
   std::vector<MotionState> segment_points;
   segment_points.push_back(start_);
@@ -583,42 +640,60 @@ const RampTrajectory Planner::getChangingTrajectory() {
   std::cout<<"\nPath to change trajectories: "<<p.toString();
 
   ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
-  tr.request.bezier = true;
-  tr.request.transition = true;
+  tr.request.type = TRANSITION;
 
   h_traj_req_->request(tr);
 
-  RampTrajectory toSend;
-  toSend.msg_trajec_ = tr.response.trajectory;
+  RampTrajectory transition;
+  transition.msg_trajec_ = tr.response.trajectory;
   
-  std::cout<<"\nTrajectory to change: "<<toSend.toString();
+  std::cout<<"\nTrajectory to change: "<<transition.toString();
+
+  
+
+  // Make a new path
+  std::vector<MotionState> ms;
+  ms.push_back(transition.msg_trajec_.trajectory.points.at(transition.msg_trajec_.trajectory.points.size()-1 ));
+  ms.push_back(goal_);
+
+  Path p_new(ms);
+  ramp_msgs::TrajectoryRequest tr2 = buildTrajectoryRequest(p_new);
+  requestTrajectory(tr2);
+  RampTrajectory rest = tr2.response.trajectory;
+
+  // Concatenate the rest onto the transition trajectory
+  for(uint16_t p=0;p<rest.msg_trajec_.trajectory.points.size();p++) {
+    transition.msg_trajec_.trajectory.points.push_back(rest.msg_trajec_.trajectory.points.at(p)); 
+  }
+
+  std::vector<MotionState> p_ms;
+  p_ms.push_back(segment_points.at(0));
+  p_ms.push_back(goal_);
+  Path p_trans(p_ms);
+
+  transition.path_ = p_trans;
 
 
-
-  h_parameters_.setImminentCollision(true); 
+  /*h_parameters_.setImminentCollision(true); 
   ramp_msgs::Population pop;
-  pop.population.push_back(toSend.msg_trajec_);
+  pop.population.push_back(transition.msg_trajec_);
   h_control_->sendPopulation(pop);
 
   std::cout<<"\nTransition trajectory published, Press Enter to continue\n";
   std::cin.get();
 
   h_parameters_.setImminentCollision(false); 
-  h_control_->send(toSend.msg_trajec_);
+  h_control_->send(transition.msg_trajec_);
 
   controlCycleTimer_.stop();
   planningCycleTimer_.stop();
   imminentCollisionTimer_.stop();
   
   std::cout<<"\nPress Enter to continue trajectory\n";
-  std::cin.get();
-
-  controlCycleTimer_.start();
-  planningCycleTimer_.start();
-  imminentCollisionTimer_.start();
+  std::cin.get();*/
 
 
-  return toSend;
+  return transition;
 } 
 
 
@@ -732,12 +807,15 @@ void Planner::modification() {
     // Set index of previous best
     i_best_prev_ = index;
   
-    RampTrajectory toSend = getChangingTrajectory();
+    // Get the transition trajectory
+    RampTrajectory transition = getTransitionTrajectory();
+
 
     std::cout<<"\nSending Trajectory: \n";
-    h_control_->send(toSend.msg_trajec_); 
+    h_control_->send(transition.msg_trajec_); 
     std::cout<<"\nAfter Sending Trajectory:\n";
 
+    population_.replace(index, transition);
   } // end if
 
 } // End modification
@@ -844,7 +922,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
       std::cout<<"\nPlanning cycle "<<generation_-1<<" complete\n";
     }
 
-    //****c_pc_++;
+    c_pc_++;
   
     // Send the new population to the trajectory viewer
     sendPopulation();
@@ -898,7 +976,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
 
     // Build m_i
     //*****setMi();
-  } 
+  }
   
   // Set flag showing that CCs have started
   if(!cc_started_) {
@@ -921,14 +999,15 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
 
 
 
-/** Build a TrajectoryRequest srv */
+/** Build a TrajectoryRequest srv 
+ *  type = 0 if all straight-lines, 1 if bezier, 2 if partial bezier, 3 for transition
+ * */
 const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path) const {
   ramp_msgs::TrajectoryRequest result;
 
   result.request.path           = path.buildPathMsg();
   result.request.resolutionRate = resolutionRate_;
-  result.request.bezier         = false;
-  result.request.transition     = false;
+  result.request.type           = PARTIAL_BEZIER;
 
   return result;
 } // End buildTrajectoryRequest
@@ -1120,8 +1199,6 @@ const MotionState Planner::findAverageDiff() {
   i_best_prev_ = population_.getBestID();
   std::cout<<"\nPopulation seeded!\n";
   std::cout<<"\n"<<population_.fitnessFeasibleToString()<<"\n";
-  std::cout<<"\nPress enter to continue\n";
-  std::cin.get();
 
 
 
@@ -1130,9 +1207,9 @@ const MotionState Planner::findAverageDiff() {
   }
 
   sendPopulation();
-  //std::cout<<"\nPopulation evaluated!\n"<<population_.fitnessFeasibleToString()<<"\n\n"; 
-  // std::cout<<"\nPress enter to start the loop!\n";
-  // std::cin.get();
+  
+  std::cout<<"\nPress enter to continue\n";
+  std::cin.get();
   
 
   

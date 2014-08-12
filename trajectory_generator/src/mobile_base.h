@@ -30,6 +30,8 @@ public:
   const std::vector<BezierCurve> bezier(ramp_msgs::Path& p, const bool only_curve);
   
   bool bezier_;
+  bool transition_;
+  bool partial_;
   const double findVelocity(const uint8_t i, const double s) const;
 private:
 
@@ -40,7 +42,6 @@ private:
   // Flag for result
   int resultValue;
 
-  bool transition_;
 
 
   // Reflexxes variables 

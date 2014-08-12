@@ -33,10 +33,14 @@ private:
   ReflexxesData reflexxesData_      ;
   bool          initialized_        ;
   bool          deallocated_        ;
-  double        theta_prev_         ;
-  double        theta_dot_prev_     ;
   double        x_init_v_, y_init_v_;
   double        x_init_a_, y_init_a_;
+  double        x_dot_max_, y_dot_max_;
+
+  // Variables to manually track some motion info
+  double        theta_prev_             ;
+  double        theta_dot_prev_         ;
+  double        x_dot_prev_, y_dot_prev_;
 
   void initReflexxes(const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max)    ;
 
@@ -50,6 +54,8 @@ private:
   const ramp_msgs::MotionState spinOnce();
 
   void dealloc();
+
+  const bool satisfiesConstraints(const double u_dot_max) const;
 };
 
 #endif

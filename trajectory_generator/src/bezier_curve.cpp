@@ -43,6 +43,8 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const doubl
   y_init_v_ = y_dot_0;
   x_init_a_ = x_dot_dot_0;
   y_init_a_ = y_dot_dot_0;
+  x_dot_max_ = x_dot_max;
+  y_dot_max_ = y_dot_max;
   
   initControlPoints();
   
@@ -67,6 +69,20 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const doubl
 
 
 
+/** Returns true if u_dot_max satisfies the motion constraints for maximum x,y velocity */
+const bool BezierCurve::satisfiesConstraints(const double u_dot_max) const {
+  // Square them in case they are negative 
+  // Add 0.001 because I was getting 0.055 != 0.055...very weird?
+  if( pow((A_+C_)*u_dot_max,2) > pow((x_dot_max_+0.001),2) ||
+      pow((B_+D_)*u_dot_max,2) > pow((y_dot_max_+0.001),2))
+  {
+    return false;
+  }
+
+  return true;
+}
+
+
 
 void BezierCurve::initReflexxes(const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max) {
   reflexxesData_.rml = new ReflexxesAPI( 1, CYCLE_TIME_IN_SECONDS );
@@ -87,46 +103,107 @@ void BezierCurve::initReflexxes(const double x_dot_max, const double y_dot_max, 
 
 
 
-  double u_dot_0 = (D_*D_ > C_*C_) ? y_init_v_ / D_ : x_init_v_ / C_;
-  double u_dot_max = fabs(y_dot_max / (B_+D_));
-  //double u_dot_max = fabs(x_dot_max / (A_+C_));
-  if(u_dot_0 > u_dot_max) {
-    std::cout<<"\nu_dot_0: "<<u_dot_0;
-    std::cout<<"\nu_dot_max: "<<u_dot_max;
-    std::cout<<"\nu_dot_0 > u_dot_max -> setting u_dot_0 = u_dot_max";
-    u_dot_0 = u_dot_max;
+  double u_dot_0 = (D_*D_ > C_*C_) ? fabs(y_init_v_ / D_) : fabs(x_init_v_ / C_);
+  std::cout<<"\nu_dot_0: "<<u_dot_0;
+
+  double u_dot_max_y = B_ + D_ == 0 ? 0 : fabs(y_dot_max / (B_+D_));
+  double u_dot_max_x = A_ + C_ == 0 ? 0 : fabs(x_dot_max / (A_+C_));
+  std::cout<<"\nu_dot_max_x: "<<u_dot_max_x;
+  std::cout<<"\nu_dot_max_y: "<<u_dot_max_y;
+  
+  double u_dot_max = u_dot_max_x < u_dot_max_y ? u_dot_max_x : u_dot_max_y;
+  if(u_dot_max_x == 0 && u_dot_max_y == 0) {
+    u_dot_max = 0.33;
   }
-  // Occurs when A+C < C, which means sgn(A) != sgn(C), which means X1 > avg(X0, X2)
-  else if(u_dot_0 < u_dot_max) {
-    std::cout<<"\nu_dot_0: "<<u_dot_0;
-    std::cout<<"\nu_dot_max: "<<u_dot_max;
-    std::cout<<"\nu_dot_0 < u_dot_max -> setting u_dot_max = u_dot_0";
-    u_dot_max = u_dot_0;
+  else if (u_dot_max_x > u_dot_max_y) {
+    std::cout<<"\nIn else if";
+
+    //if( pow((A_+C_)*u_dot_max_x,2) > pow((x_dot_max+0.001),2) ||
+    //    pow((B_+D_)*u_dot_max_x,2) > pow((y_dot_max+0.001),2))
+    if(satisfiesConstraints(u_dot_max_x)) { 
+      std::cout<<"\nu_dot_max_x violates constraints";
+      std::cout<<"\nx_dot_max: "<<x_dot_max<<" (A_+C_)*u_dot_max_x: "<<(A_+C_)*u_dot_max_x;
+      std::cout<<"\ny_dot_max: "<<y_dot_max<<" (B_+D_)*u_dot_max_x: "<<(B_+D_)*u_dot_max_x;
+      std::cout<<"\nx: "<<((A_+C_)*u_dot_max_x > x_dot_max);
+      std::cout<<"\ny: "<<((B_+D_)*u_dot_max_x > y_dot_max);
+
+      if(u_dot_max_y != 0) {
+        u_dot_max = u_dot_max_y;
+      }
+      else {
+        u_dot_max = u_dot_0;
+      }
+    }
+    else {
+      u_dot_max = u_dot_max_x;
+    }
   }
-  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = u_dot_max;
-  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = fabs( (x_dot_dot_max - A_*u_dot_max) / (A_+C_) );
+  else {
+    std::cout<<"\nIn else";
+    
+    //if( (A_+C_)*u_dot_max_y <= (x_dot_max+0.001) &&
+        //(B_+D_)*u_dot_max_y <= (y_dot_max+0.001))
+    if(satisfiesConstraints(u_dot_max_y))  
+    {
+      u_dot_max = u_dot_max_y;
+    }
+    else {
+      std::cout<<"\nu_dot_max_y violates constraints";
+      std::cout<<"\nx_dot_max: "<<x_dot_max<<" (A_+C_)*u_dot_max_y: "<<(A_+C_)*u_dot_max_y;
+      std::cout<<"\ny_dot_max: "<<y_dot_max<<" (B_+D_)*u_dot_max_y: "<<(B_+D_)*u_dot_max_y;
+      std::cout<<"\nx: "<<((A_+C_)*u_dot_max_y > x_dot_max);
+      std::cout<<"\ny: "<<((B_+D_)*u_dot_max_y > y_dot_max);
+
+      if(u_dot_max_x != 0) {
+        u_dot_max = u_dot_max_x;
+      }
+      else {
+        u_dot_max = u_dot_0;
+      }
+    }
+  }
+  // TODO: Check for neither satisfying constraints
+
+ 
+  std::cout<<"\nu_dot_max: "<<u_dot_max;
+  
+
 
   reflexxesData_.inputParameters->CurrentPositionVector->VecData[0]     = 0.;
+  
   reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]     = u_dot_0;
+  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]         = u_dot_max;
 
-  // Set u_dotdot_0
-  double u_dotdot_0 = (x_init_a_ - A_*u_dot_0) / C_;
-  reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0] = u_dotdot_0;
+  //**********Testing*************
+  //reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]     = 0.33;
+  //reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]         = 0.260888;
+  
+  // Set u max acceleration
+  // We don't actually use this, but it's necessary for Reflexxes to work
+  if(A_ + C_ != 0) {
+    reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = fabs( (x_dot_dot_max - A_*u_dot_max) / (A_+C_) );
+  }
+  else {
+    reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 0.1;
+  }
+
+
 
   // Set targets
   reflexxesData_.inputParameters->TargetPositionVector->VecData[0] = 1;
   reflexxesData_.inputParameters->TargetVelocityVector->VecData[0] = reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
   
   
-  std::cout<<"\nx_init_v: "<<x_init_v_<<" y_init_v_: "<<y_init_v_;
+  std::cout<<"\n\nx_init_v: "<<x_init_v_<<" y_init_v_: "<<y_init_v_;
   std::cout<<"\nA: "<<A_<<" B: "<<B_<<" C: "<<C_<<" D: "<<D_;
+  std::cout<<"\n\nreflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]: "<<reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0];
   std::cout<<"\nreflexxesData_.inputParameters->MaxVelocityVector->VecData[0]: "<<reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
+  std::cout<<"\n\nreflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0]: "<<reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0];
   std::cout<<"\nreflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]: "<<reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0];
-  std::cout<<"\nreflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]: "<<reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]<<"\n";
-  std::cout<<"\nreflexxesData_.inputParameters->TargetPositionVector->VecData[0]: "<<reflexxesData_.inputParameters->TargetPositionVector->VecData[0]<<"\n";
+  std::cout<<"\n\nreflexxesData_.inputParameters->TargetPositionVector->VecData[0]: "<<reflexxesData_.inputParameters->TargetPositionVector->VecData[0]<<"\n";
   std::cout<<"\nreflexxesData_.inputParameters->TargetVelocityVector->VecData[0]: "<<reflexxesData_.inputParameters->TargetVelocityVector->VecData[0]<<"\n";
 
-
+  std::cin.get();
 
 
   reflexxesData_.resultValue = 0;
@@ -172,8 +249,6 @@ void BezierCurve::initControlPoints() {
     C2.positions.push_back(y);
   }
 
-  //C2.positions.push_back( lambda_*p1.positions.at(0) + (1-lambda_)*p2.positions.at(0) );  
-  //C2.positions.push_back( lambda_*p1.positions.at(1) + (1-lambda_)*p2.positions.at(1) );
   C2.positions.push_back(utility_.findAngleFromAToB(p1.positions, p2.positions));
 
 
@@ -313,28 +388,28 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   double x_prev = (pow((1-u_prev),2) * X0.positions.at(0)) + ((2*u_prev)*(1-u_prev)*X1.positions.at(0)) + (pow(u_prev,2)*X2.positions.at(0));
   double y_prev = (pow((1-u_prev),2) * X0.positions.at(1)) + ((2*u_prev)*(1-u_prev)*X1.positions.at(1)) + (pow(u_prev,2)*X2.positions.at(1));
 
-  double theta  = utility_.findAngleFromAToB(x_prev, y_prev, x, y);
-  // TODO: Fix theta velocity/acceleration
-  double theta_dot = (theta - theta_prev_) / CYCLE_TIME_IN_SECONDS;
-  double theta_dot_dot = (theta_dot - theta_dot_prev_) / CYCLE_TIME_IN_SECONDS;
-
-  theta_prev_ = theta;
-  theta_dot_prev_ = theta_dot;
+  double theta          = utility_.findAngleFromAToB(x_prev, y_prev, x, y);
+  double theta_dot      = (theta - theta_prev_) / CYCLE_TIME_IN_SECONDS;
+  double theta_dot_dot  = (theta_dot - theta_dot_prev_) / CYCLE_TIME_IN_SECONDS;
   
   // Velocity
   double x_dot = ((A_*u) + C_)*u_dot;
   double y_dot = (x_dot*(B_*u+D_)) / (A_*u+C_);
-  //double y_dot = ((B_*u) + D_)*u_dot;
-  /*std::cout<<"\nA: "<<A_<<" u: "<<u<<" A*u: "<<A_*u;
-  std::cout<<"\nC: "<<C_<<" (A*u)+C: "<<((A_*u) + C_);
-  std::cout<<"\nB: "<<B_<<" u: "<<u<<" B*u: "<<B_*u;
-  std::cout<<"\nD: "<<D_<<" (B*u)+D: "<<((D_*u) + D_);
-  std::cout<<"\nx_dot: "<<x_dot<<" y_dot: "<<y_dot;*/
 
 
   // Acceleration
-  double x_dot_dot = A_ * u_dot_dot;
-  double y_dot_dot = B_ * u_dot_dot;
+  double x_dot_dot = (x_dot - x_dot_prev_) / CYCLE_TIME_IN_SECONDS;
+  double y_dot_dot = (y_dot - y_dot_prev_) / CYCLE_TIME_IN_SECONDS;
+
+  // We never have u acceleration, but if we did the x,y accelerations are:
+  //double x_dot_dot = u_dot_dot*(A_*u+C_) + A_*u_dot;
+  //double y_dot_dot = u_dot_dot*(B_*u+D_) + B_*u_dot;
+
+  // Set previous motion values that we cannot get from Reflexxes
+  x_dot_prev_ = x_dot;
+  y_dot_prev_ = y_dot;
+  theta_prev_ = theta;
+  theta_dot_prev_ = theta_dot;
   
   std::cout<<"\nu: "<<u<<" u_dot: "<<u_dot<<" u_dot_dot: "<<u_dot_dot;
   std::cout<<"\nx_dot: "<<x_dot<<" y_dot: "<<y_dot;

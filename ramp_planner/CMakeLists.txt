@@ -31,6 +31,10 @@ set (CMAKE_CXX_FLAGS "-g")
 add_executable(${PROJECT_NAME} src/main.cpp src/planner.cpp src/control_handler.cpp src/knot_point.cpp src/modification_request_handler.cpp src/modifier.cpp src/motion_state.cpp src/parameter_handler.cpp src/path.cpp src/population.cpp src/ramp_trajectory.cpp src/range.cpp src/trajectory_request_handler.cpp src/evaluation_request_handler.cpp src/utility.cpp)
 
 
+# Add the -std argument to compile enum
+set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS -std=c++0x)
+
+
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} yaml-cpp)
 

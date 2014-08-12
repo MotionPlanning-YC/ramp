@@ -313,7 +313,22 @@ const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request 
 
   result<<"\nTrajectory Request:\n";
   result<<"\n  Path: "<<toString(tr.path);
-  result<<"\n  bezier: "<<tr.bezier<<"\n";
+  result<<"\n  type: ";
+  switch(tr.type) {
+    case ALL_STRAIGHT_SEGMENTS:
+      result<<"All Straight Segments";
+      break;
+    case ALL_BEZIER:
+      result<<"All Bezier";
+      break;
+    case PARTIAL_BEZIER:
+      result<<"Partial Bezier";
+      break;
+    case TRANSITION:
+      result<<"Transition";
+  }
+  
+  result<<"\n";
 
   return result.str();
 }

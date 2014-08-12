@@ -179,7 +179,8 @@ class Planner {
           void checkTrajChange()                                  ;
           void seedPopulation()                                   ;
           void seedPopulationLine()                               ;
-    const RampTrajectory  getChangingTrajectory() ;
+
+    const RampTrajectory  getTransitionTrajectory()     ;
     const MotionState     predictStartPlanning() const  ;
 
 
