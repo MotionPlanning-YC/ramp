@@ -623,6 +623,7 @@ void Planner::initPopulation() {
 
 
 
+// **** TODO: Adapt population before continuing ****
 const RampTrajectory Planner::getTransitionTrajectory() {
   std::cout<<"\nIn getTransitionTrajectory\n";
   h_parameters_.setImminentCollision(true); 
@@ -653,13 +654,15 @@ const RampTrajectory Planner::getTransitionTrajectory() {
   
   std::cout<<"\nTrajectory to change: "<<transition.toString()<<"\n";
 
+  std::cout<<"\nFirst point of target curve: ";
+  std::cout<<"\n"<<bestTrajec_.path_.all_.at(1).toString()<<"\n";
 
 
   ramp_msgs::Population pop;
   pop.population.push_back(transition.msg_trajec_);
   h_control_->sendPopulation(pop);
 
-  std::cout<<"\nTransition trajectory published, Press Enter to continue\n";
+  std::cout<<"\nTransition trajectory published, Press Enter to move on transition trajectory\n";
   std::cin.get();
 
   h_parameters_.setImminentCollision(false); 
@@ -669,7 +672,7 @@ const RampTrajectory Planner::getTransitionTrajectory() {
   planningCycleTimer_.stop();
   imminentCollisionTimer_.stop();
   
-  std::cout<<"\nPress Enter to continue trajectory\n";
+  std::cout<<"\nPress Enter to continue with planner\n";
   std::cin.get();
 
 

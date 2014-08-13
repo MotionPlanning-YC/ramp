@@ -688,7 +688,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Go through every knotpoint in the path
   // (or until timeCutoff has been reached)
   for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) {
-    std::cout<<"\ni_kp: "<<(int)i_kp_<<"\n";
+    //std::cout<<"\ni_kp: "<<(int)i_kp_<<"\n";
     resultValue = 0;
       
     // Push the initial state onto trajectory
@@ -707,7 +707,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         (partial_ && i_kp_ > 1 && i_kp_ < 3) ||
         (transition_ && i_kp_ == 1) ) 
     {
-      std::cout<<"\nIn if\n";
+      //std::cout<<"\nIn if\n";
 
 
       // Insert all points on the curves into the trajectory
@@ -728,7 +728,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     // 2nd clause is for not doing the last part if its a transition trj
     //else if(i_kp_ > 1 && i_kp_ < path_.points.size()-1) {
     else {
-      std::cout<<"\nIn else\n";
+      //std::cout<<"\nIn else\n";
 
       // Get rotation if needed
         double trajec_size = res.trajectory.trajectory.points.size();
