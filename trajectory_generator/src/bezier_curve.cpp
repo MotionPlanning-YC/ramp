@@ -138,40 +138,56 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const {
   // If x is greater
   else if (u_dot_max_x > u_dot_max_y) {
 
-    if(satisfiesConstraints(u_dot_max_x)) { 
+    // If x satisfies motion constraints
+    if(satisfiesConstraints(u_dot_max_x)) {
 
-      if(u_dot_max_y != 0) {
+      // If x is not 0, it's good
+      if(u_dot_max_x != 0) {
+        u_dot_max = u_dot_max_x;
+      }
+      // else, test y
+      else if(satisfiesConstraints(u_dot_max_y)) {
         u_dot_max = u_dot_max_y;
       }
-      else {
+      // else, set it to initial u_dot
+      else {  
         u_dot_max = u_dot_0;
       }
     }
-    else {
-      std::cout<<"\nu_dot_max violates constraints";
-      u_dot_max = u_dot_max_x;
-    }
-  }
 
-  // If y satisfies constraints
-  // (and we know it's greater)
-  else if(satisfiesConstraints(u_dot_max_y)) {
+    // If x does not satisfy constraints, test y
+    else if (satisfiesConstraints(u_dot_max_y)) {
       u_dot_max = u_dot_max_y;
-  }
-  else {
-    std::cout<<"\nu_dot_max_y violates constraints";
-    
-    if(u_dot_max_x != 0) {
-      u_dot_max = u_dot_max_x;
     }
+
+    // If neither satisfy, set to initial u_dot
     else {
       u_dot_max = u_dot_0;
     }
-
-    // *** Testing ***
-    u_dot_max = u_dot_max_y;
   }
 
+  // If y is greater, test for constraints
+  else if(satisfiesConstraints(u_dot_max_y)) {
+      u_dot_max = u_dot_max_y;
+  }
+
+  // If y is greater and does not satisfy constraints
+  else {
+    std::cout<<"\nu_dot_max_y violates constraints";
+    
+    // Test x
+    if(satisfiesConstraints(u_dot_max_x) && u_dot_max_x != 0) {
+      u_dot_max = u_dot_max_x;
+    }
+    // Else, set u_dot_max to initial u_dot
+    else {
+      u_dot_max = u_dot_0;
+    }
+  }
+
+
+  // *** Testing ***
+  //u_dot_max = u_dot_max_y;
   return u_dot_max;
 }
 
