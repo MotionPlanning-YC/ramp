@@ -14,6 +14,8 @@ public:
   ~BezierCurve();
   
   void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max);
+
+  void initTransition(const std::vector<ramp_msgs::MotionState> cp, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max);
   const std::vector<ramp_msgs::MotionState> generateCurve();
   
 
@@ -26,6 +28,7 @@ public:
   std::vector<ramp_msgs::MotionState> points_         ;
 
   void initControlPoints();
+  bool print_;
 
 private:
 
@@ -59,6 +62,7 @@ private:
   const double getUDotMax(const double u_dot_0) const;
 
   void printReflexxesInfo() const;
+
 };
 
 #endif

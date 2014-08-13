@@ -1,7 +1,9 @@
 ramp_msgs/Path path
 uint8 resolutionRate
 int8 type 
+bool print
 
 ---
 
 Trajectory trajectory
+ramp_msgs/Path newPath

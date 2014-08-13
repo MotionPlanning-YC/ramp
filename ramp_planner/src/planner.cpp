@@ -225,7 +225,7 @@ void Planner::seedPopulation() {
   
   kp.motionState.positions.push_back(0.5);
   kp.motionState.positions.push_back(3);
-  kp.motionState.positions.push_back(PI/4);
+  kp.motionState.positions.push_back(1.396263); // 80 degrees 
   
   kp.motionState.velocities.push_back(0);
   kp.motionState.velocities.push_back(0);
@@ -302,7 +302,7 @@ void Planner::seedPopulation() {
       temp.msg_trajec_ = msg_request.response.trajectory;
 
       // Set trajectory path
-      temp.path_ = paths.at(i);
+      temp.path_ = msg_request.response.newPath;
 
       // Evaluati and add the trajectory to the population
       new_pop.push_back(evaluateTrajectory(temp));
@@ -359,10 +359,10 @@ void Planner::seedPopulationLine() {
     temp.msg_trajec_ = msg_request.response.trajectory;
 
     // Set trajectory path
-    temp.path_ = p2;
+    temp.path_ = msg_request.response.newPath;
 
     // Evaluati and add the trajectory to the population
-    population_.replace(0, evaluateTrajectory(temp));
+    population_.replace(1, evaluateTrajectory(temp));
   }
 } // End seedPopulationLine
 
@@ -544,7 +544,7 @@ const std::vector<RampTrajectory> Planner::getTrajectories(const std::vector<Pat
       temp.msg_trajec_ = msg_request.response.trajectory;
 
       // Set trajectory path
-      temp.path_ = p.at(i);
+      temp.path_ = msg_request.response.newPath;
       
       // Add the trajectory to the population
       result.push_back(temp);
@@ -625,11 +625,13 @@ void Planner::initPopulation() {
 
 const RampTrajectory Planner::getTransitionTrajectory() {
   std::cout<<"\nIn getTransitionTrajectory\n";
+  h_parameters_.setImminentCollision(true); 
 
   std::vector<MotionState> segment_points;
   segment_points.push_back(start_);
   segment_points.push_back(startPlanning_);
-  segment_points.push_back(bestTrajec_.path_.goal_.motionState_);
+  // 2nd knot point should be the initial point on that trajectory's bezier 
+  segment_points.push_back(bestTrajec_.path_.all_.at(1).motionState_);
 
   std::cout<<"\nstart: "<<start_.toString();
   std::cout<<"\nstartPlaning: "<<startPlanning_.toString();
@@ -641,40 +643,18 @@ const RampTrajectory Planner::getTransitionTrajectory() {
 
   ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
   tr.request.type = TRANSITION;
+  tr.request.print = true;
 
   h_traj_req_->request(tr);
 
   RampTrajectory transition;
-  transition.msg_trajec_ = tr.response.trajectory;
+  transition.msg_trajec_  = tr.response.trajectory;
+  transition.path_        = tr.response.newPath;
   
-  std::cout<<"\nTrajectory to change: "<<transition.toString();
-
-  
-
-  // Make a new path
-  std::vector<MotionState> ms;
-  ms.push_back(transition.msg_trajec_.trajectory.points.at(transition.msg_trajec_.trajectory.points.size()-1 ));
-  ms.push_back(goal_);
-
-  Path p_new(ms);
-  ramp_msgs::TrajectoryRequest tr2 = buildTrajectoryRequest(p_new);
-  requestTrajectory(tr2);
-  RampTrajectory rest = tr2.response.trajectory;
-
-  // Concatenate the rest onto the transition trajectory
-  for(uint16_t p=0;p<rest.msg_trajec_.trajectory.points.size();p++) {
-    transition.msg_trajec_.trajectory.points.push_back(rest.msg_trajec_.trajectory.points.at(p)); 
-  }
-
-  std::vector<MotionState> p_ms;
-  p_ms.push_back(segment_points.at(0));
-  p_ms.push_back(goal_);
-  Path p_trans(p_ms);
-
-  transition.path_ = p_trans;
+  std::cout<<"\nTrajectory to change: "<<transition.toString()<<"\n";
 
 
-  /*h_parameters_.setImminentCollision(true); 
+
   ramp_msgs::Population pop;
   pop.population.push_back(transition.msg_trajec_);
   h_control_->sendPopulation(pop);
@@ -690,8 +670,12 @@ const RampTrajectory Planner::getTransitionTrajectory() {
   imminentCollisionTimer_.stop();
   
   std::cout<<"\nPress Enter to continue trajectory\n";
-  std::cin.get();*/
+  std::cin.get();
 
+
+  controlCycleTimer_.start();
+  planningCycleTimer_.start();
+  imminentCollisionTimer_.start();
 
   return transition;
 } 
@@ -876,8 +860,9 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
 
   // At generation x, insert a straight-line trajectory to the goal
-  if(generation_ == 75) {
+  if(generation_ == 50) {
     seedPopulationLine();
+    std::cout<<"\nPop: "<<population_.fitnessFeasibleToString();
   }
 
 

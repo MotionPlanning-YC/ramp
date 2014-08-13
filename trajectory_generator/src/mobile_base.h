@@ -33,6 +33,8 @@ public:
   bool transition_;
   bool partial_;
   const double findVelocity(const uint8_t i, const double s) const;
+
+  bool print_;
 private:
 
 

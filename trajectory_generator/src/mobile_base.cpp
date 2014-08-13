@@ -27,8 +27,8 @@ MobileBase::MobileBase() {
   
 
   // Maximum acceleration
-  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 0.153046667;
-  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1] = 0.153046667;
+  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 0.66;
+  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1] = 0.66;
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[2] = PI/4;
   
 
@@ -167,6 +167,8 @@ void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
 
   // Store the path
   path_ = req.path;
+
+  print_ = req.print;
   
 
   switch(req.type) {
@@ -181,7 +183,7 @@ void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
       transition_ = false;
       break;
     case PARTIAL_BEZIER:
-      bezier_ = true;
+      bezier_ = false;
       partial_ = true;
       transition_ = false;
       break;
@@ -242,11 +244,11 @@ const double MobileBase::findVelocity(const uint8_t i, const double s) const {
   
   double t = (v - x_dot_init) / a;
   
-  std::cout<<"\ni: "<<(int)i;
+  /*std::cout<<"\ni: "<<(int)i;
   std::cout<<"\ns: "<<s<<" a: "<<a<<" x_dot_init: "<<x_dot_init<<" y_dot_init: "<<y_dot_init;
   std::cout<<"\nradicand: "<<radicand;
   std::cout<<"\nv: "<<v;
-  std::cout<<"\nt: "<<t;
+  std::cout<<"\nt: "<<t;*/
     
 
   // Check for bounds
@@ -335,6 +337,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
   for(uint8_t i=1;i<stop;i++) {
     //std::cout<<"\n---i: "<<(int)i<<"---\n";
     BezierCurve bc;
+    bc.print_ = print_;
 
     std::vector<ramp_msgs::MotionState> segment_points;
     segment_points.push_back(p_copy.points.at(i-1).motionState);
@@ -355,8 +358,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     double x_dot_0, y_dot_0, x_dot_max, y_dot_max;
     uint8_t i_max;
     
-    std::cout<<"\nslope: "<<slope;
-    std::cout<<"\nryse: "<<ryse<<" run: "<<run;
+    //std::cout<<"\nslope: "<<slope;
+    //std::cout<<"\nryse: "<<ryse<<" run: "<<run;
 
     // Segment 1 size
     double s = lambda * utility_.positionDistance(segment_points.at(0).positions, segment_points.at(1).positions);
@@ -412,7 +415,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       x_dot_max = x_dot_0;
       y_dot_max = slope*x_dot_max;
     }
-    std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
+    //std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
     
 
     double theta = utility_.findAngleFromAToB(segment_points.at(0).positions, segment_points.at(1).positions);
@@ -421,27 +424,53 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
     double lambda = getControlPointLambda(segment_points);
     //std::cout<<"\nlambda: "<<lambda;
+   
 
-    bc.init(segment_points, lambda, theta, 
-        x_dot_0, y_dot_0, 0, 0,
-        x_dot_max, y_dot_max, 
-        reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
-        reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
-    bc.generateCurve();
-    
-    //std::cout<<"\nErasing at index: "<<(int)i<<": "<<utility_.toString(p.points.at(i))<<"\n";
-    p.points.erase(p.points.begin()+i);
-    //std::cout<<"\nInserting at index: "<<(int)i<<": "<<utility_.toString(bc.points_.at(0))<<"\n";
-    p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(0)));
+    if(transition_) {
+      bc.init(segment_points, 0, theta, 
+          segment_points.at(0).velocities.at(0),
+          segment_points.at(0).velocities.at(1),
+          segment_points.at(0).accelerations.at(0),
+          segment_points.at(0).accelerations.at(1),
+          x_dot_max, y_dot_max,
+          reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
+          reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);      
 
-    if(i == p_copy.points.size()-2) {
-      //std::cout<<"\nInserting at index: "<<(int)i+1<<": "<<utility_.toString(bc.points_.at(bc.points_.size()-1))<<"\n";
-      p.points.insert(p.points.begin()+i+1, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
+    } 
+    else {
+       bc.init(segment_points, lambda, theta, 
+         x_dot_0, y_dot_0, 0, 0,
+         x_dot_max, y_dot_max, 
+         reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
+         reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
     }
 
+
+    bc.generateCurve();
+
+    // Insert the first point as a knot point in the path
+    // The first point is control point c0 with v and a information
+    // If it's a transition, the first point on curve is the first point that's already there
+    if(!transition_) {
+      p.points.erase(p.points.begin()+i);
+      p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(0)));
+      p.points.insert(p.points.begin()+i+1, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
+    }
+    
+    // Else, erase the 2nd control point
+    else {
+      std::cout<<"\nErasing point "<<utility_.toString(p.points.at(1));
+      p.points.erase(p.points.begin()+1);
+      p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
+    }
+
+    // Insert the last point as a knot point in the path
+    // The last point is control point c2 with v and a information
+    std::cout<<"\nInserting point "<<utility_.toString(bc.points_.at(bc.points_.size()-1));
+
     result.push_back(bc);
-  }
-  
+  } // end for
+
 
   //std::cout<<"\nPath after Bezier: "<<utility_.toString(result)<<"\n";
   return result;
@@ -614,6 +643,12 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
 // Service callback, the input is a path and the output a trajectory
 bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) {
   //std::cout<<"\nTrajectory Request Received: "<<utility_.toString(req)<<"\n";
+
+  // If there's less than 3 points,
+  // make it have straight segments
+  if(req.path.points.size() < 3 && req.type != TRANSITION) {
+    req.type = ALL_STRAIGHT_SEGMENTS;
+  }
   
   // Initialize Reflexxes with request
   init(req);
@@ -627,16 +662,20 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   std::vector<BezierCurve> curves;
 
   // Use Bezier curves to smooth path
-  if(bezier_ || partial_) {
-    std::cout<<"\nPath before Bezier: "<<utility_.toString(path_);
+  if(bezier_ || partial_ || transition_) {
+    if(print_) 
+      std::cout<<"\nPath before Bezier: "<<utility_.toString(path_)<<"\n";
     curves = bezier(path_, transition_);
-    std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
+    if(print_)
+      std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
   }
 
-  for(int c=0;c<curves.size();c++) {
-    std::cout<<"\nCurve "<<c<<": ";
-    for(int p=0;p<curves.at(c).points_.size();p++) {
-      std::cout<<"\n"<<utility_.toString(curves.at(c).points_.at(p));
+  if(print_) {
+    for(int c=0;c<curves.size();c++) {
+      std::cout<<"\nCurve "<<c<<": ";
+      for(int p=0;p<curves.at(c).points_.size();p++) {
+        std::cout<<"\n"<<utility_.toString(curves.at(c).points_.at(p));
+      }
     }
   }
   
@@ -665,9 +704,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     // all points between first and last are bezier point
     // TODO: straight-line segments between beziers
     if( (bezier_ && i_kp_ > 1 && i_kp_ < path_.points.size()-1) ||
-        (partial_ && i_kp_ > 1 && i_kp_ < 3) ) 
+        (partial_ && i_kp_ > 1 && i_kp_ < 3) ||
+        (transition_ && i_kp_ == 1) ) 
     {
       std::cout<<"\nIn if\n";
+
 
       // Insert all points on the curves into the trajectory
       for(uint32_t p=1;p<curves.at(c).points_.size()-1;p++) {
@@ -685,7 +726,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     /** Straight Line Segment */
     // Else if not bezier or 1st/last segment with bezier
     // 2nd clause is for not doing the last part if its a transition trj
-    else if(i_kp_ == 1 || !transition_) {
+    //else if(i_kp_ > 1 && i_kp_ < path_.points.size()-1) {
+    else {
       std::cout<<"\nIn else\n";
 
       // Get rotation if needed
@@ -745,6 +787,9 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     //std::cin.get();
   } // end for
 
+  
+  // Lastly, set newPath in case the path changed
+  res.newPath = path_;
   //std::cout<<"\nReturning: "<<utility_.toString(res.trajectory)<<"\n";
   //std::cin.get();
   return true;
