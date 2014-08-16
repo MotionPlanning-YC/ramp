@@ -1,7 +1,7 @@
 #include "bezier_curve.h"
 
 
-BezierCurve::BezierCurve() {
+BezierCurve::BezierCurve() : initialized_(false), deallocated_(false) {
   reflexxesData_.rml = 0;
   reflexxesData_.inputParameters  = 0;
   reflexxesData_.outputParameters = 0;
@@ -36,7 +36,7 @@ void BezierCurve::dealloc() {
 } 
 
 
-void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max) {
+void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_02, const double y_dot_02, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_max2, const double y_dot_max2, const double x_dot_dot_max, const double y_dot_dot_max) {
   segment_points_ = sp;
   lambda_         = lambda;
   x_init_v_       = x_dot_0;
@@ -46,12 +46,18 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const doubl
   x_dot_max_      = x_dot_max;
   y_dot_max_      = y_dot_max;
   
+  x_init_v2_ = x_dot_02;
+  y_init_v2_ = y_dot_02;
+  x_dot_max2_ = x_dot_max2;
+  y_dot_max2_ = y_dot_max2;
+  
   initControlPoints();
+  std::cout<<"\nA: "<<A_<<" B: "<<B_<<" C: "<<C_<<" D: "<<D_<<"\n";
   
   calculateConstants();
 
   // If both C and D == 0, the first two points are the same
-  if(C_ != 0 || D_ != 0) {
+  if(C_ > 0.0001 && D_ > 0.0001) {
   
     initReflexxes(x_dot_max, y_dot_max, x_dot_dot_max, y_dot_dot_max);
 
@@ -63,133 +69,11 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const doubl
       std::cout<<"\n\nSegment Point "<<i<<": "<<utility_.toString(segment_points_.at(i));
     }*/
   } // end if 
-}
-
-
-void BezierCurve::initTransition(const std::vector<ramp_msgs::MotionState> cp, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max) {
-  segment_points_ = cp;
-  control_points_ = cp;
-  lambda_         = 0.;
-  x_init_v_       = x_dot_0;
-  y_init_v_       = y_dot_0;
-  x_init_a_       = x_dot_dot_0;
-  y_init_a_       = y_dot_dot_0;
-  x_dot_max_      = x_dot_max;
-  y_dot_max_      = y_dot_max;
-  
-  calculateConstants();
-
-  // If both C and D == 0, the first two points are the same
-  if(C_ != 0 || D_ != 0) {
-  
-    initReflexxes(x_dot_max, y_dot_max, x_dot_dot_max, y_dot_dot_max);
-
-    theta_prev_ = theta;
-    
-    initialized_ = true;
-
-    /*for(int i=0;i<segment_points_.size();i++) {
-      std::cout<<"\n\nSegment Point "<<i<<": "<<utility_.toString(segment_points_.at(i));
-    }*/
-  } // end if 
-}
-
-
-
-/** Returns true if u_dot_max satisfies the motion constraints for maximum x,y velocity */
-const bool BezierCurve::satisfiesConstraints(const double u_dot_max) const {
-  
-  // If they share the same sign, max is when u=1, otherwise when u=0
-  double u_x = (A_*C_ > 0) ? 1 : 0;
-  double u_y = (B_*D_ > 0) ? 1 : 0;
-  std::cout<<"\nu_x: "<<u_x;
-  std::cout<<"\nu_y: "<<u_y;
-  
-  // Square them in case they are negative 
-  // Add 0.001 because I was getting 0.055 != 0.055...very weird?
-  if( pow( (A_*u_x+C_)*u_dot_max,2) > pow((x_dot_max_+0.01),2) ||
-      pow( (B_*u_y+D_)*u_dot_max,2) > pow((y_dot_max_+0.01),2))
-  {
-      
-    std::cout<<"\n(A_*u_x+C_)*u_dot_max: "<<(A_*u_x+C_)*u_dot_max<<" x_dot_max: "<<x_dot_max_;
-    std::cout<<"\n(B_*u_y+D_)*u_dot_max: "<<(B_*u_y+D_)*u_dot_max<<" y_dot_max: "<<y_dot_max_;
-    return false;
-  }
-
-  return true;
-}
-
-
-const double BezierCurve::getUDotMax(const double u_dot_0) const {
-  double u_dot_max=0;
-  double u_x = (A_*C_ > 0) ? 1 : 0;
-  double u_y = (B_*D_ > 0) ? 1 : 0;
-  double u_dot_max_y = B_ + D_ == 0 ? 0 : fabs(y_dot_max_ / (B_*u_y+D_));
-  double u_dot_max_x = A_ + C_ == 0 ? 0 : fabs(x_dot_max_ / (A_*u_x+C_));
-  if(print_) {
-    std::cout<<"\nu_dot_max_x: "<<u_dot_max_x;
-    std::cout<<"\nu_dot_max_y: "<<u_dot_max_y;
-  }
-  
-  if(u_dot_max_x == 0 && u_dot_max_y == 0) {
-    ROS_ERROR("u_dot_max_x == 0 && u_dot_max_y == 0");
-  }
-
-  // If x is greater
-  else if (u_dot_max_x > u_dot_max_y) {
-
-    // If x satisfies motion constraints
-    if(satisfiesConstraints(u_dot_max_x)) {
-
-      // If x is not 0, it's good
-      if(u_dot_max_x != 0) {
-        u_dot_max = u_dot_max_x;
-      }
-      // else, test y
-      else if(satisfiesConstraints(u_dot_max_y)) {
-        u_dot_max = u_dot_max_y;
-      }
-      // else, set it to initial u_dot
-      else {  
-        u_dot_max = u_dot_0;
-      }
-    }
-
-    // If x does not satisfy constraints, test y
-    else if (satisfiesConstraints(u_dot_max_y)) {
-      u_dot_max = u_dot_max_y;
-    }
-
-    // If neither satisfy, set to initial u_dot
-    else {
-      u_dot_max = u_dot_0;
-    }
-  }
-
-  // If y is greater, test for constraints
-  else if(satisfiesConstraints(u_dot_max_y)) {
-      u_dot_max = u_dot_max_y;
-  }
-
-  // If y is greater and does not satisfy constraints
   else {
-    std::cout<<"\nu_dot_max_y violates constraints";
-    
-    // Test x
-    if(satisfiesConstraints(u_dot_max_x) && u_dot_max_x != 0) {
-      u_dot_max = u_dot_max_x;
-    }
-    // Else, set u_dot_max to initial u_dot
-    else {
-      u_dot_max = u_dot_0;
-    }
+    std::cout<<"\nThe 2 points are the same\n";
   }
-
-
-  // *** Testing ***
-  //u_dot_max = u_dot_max_y;
-  return u_dot_max;
 }
+
 
 
 void BezierCurve::printReflexxesInfo() const {
@@ -202,6 +86,111 @@ void BezierCurve::printReflexxesInfo() const {
   std::cout<<"\nreflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]: "<<reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0];
   std::cout<<"\n\nreflexxesData_.inputParameters->TargetPositionVector->VecData[0]: "<<reflexxesData_.inputParameters->TargetPositionVector->VecData[0]<<"\n";
   std::cout<<"\nreflexxesData_.inputParameters->TargetVelocityVector->VecData[0]: "<<reflexxesData_.inputParameters->TargetVelocityVector->VecData[0]<<"\n";
+}
+
+
+
+
+
+/** Returns true if u_dot_max satisfies the motion constraints for maximum x,y velocity */
+const bool BezierCurve::satisfiesConstraints(const double u_dot_max) const {
+  std::cout<<"\nTesting constraints for "<<u_dot_max;
+  std::cout<<"\nx_dot_max: "<<x_dot_max_<<" x_dot_max2: "<<x_dot_max2_;
+  std::cout<<"\ny_dot_max: "<<y_dot_max_<<" y_dot_max2: "<<y_dot_max2_;
+  
+  double x_dot_max = (fabs(x_dot_max_) > fabs(x_dot_max2_)) ? x_dot_max_ : x_dot_max2_;
+  double y_dot_max = (fabs(y_dot_max_) > fabs(y_dot_max2_)) ? y_dot_max_ : y_dot_max2_;
+  //double x_dot_max = 0.33;
+  //double y_dot_max = 0.33;
+  std::cout<<"\n***x_dot_max: "<<x_dot_max;
+  std::cout<<"\n***y_dot_max: "<<y_dot_max;
+  
+  // If they share the same sign, max is when u=1, otherwise when u=0
+  double u_x = ( fabs(A_+C_) > fabs(C_) ) ? 1 : 0;
+  double u_y = ( fabs(B_+D_) > fabs(D_) ) ? 1 : 0;
+  std::cout<<"\nu_x: "<<u_x;
+  std::cout<<"\nu_y: "<<u_y;
+    
+  std::cout<<"\n(A_*u_x+C_)*u_dot_max: "<<(A_*u_x+C_)*u_dot_max<<" x_dot_max: "<<x_dot_max;
+  std::cout<<"\n(B_*u_y+D_)*u_dot_max: "<<(B_*u_y+D_)*u_dot_max<<" y_dot_max: "<<y_dot_max;
+  
+  // Square them in case they are negative 
+  // Add .0001 because I was getting 0.33 > 0.33
+  if( pow( (A_*u_x+C_)*u_dot_max,2) > pow((x_dot_max)+0.0001,2) ||
+      pow( (B_*u_y+D_)*u_dot_max,2) > pow((y_dot_max)+0.0001,2) )
+  {
+    std::cout<<"\nFalse";
+    return false;
+  }
+
+  std::cout<<"\nTrue";
+  return true;
+}
+
+
+
+
+const double BezierCurve::getUDotMax(const double u_dot_0) const {
+  double u_dot_max=0;
+  double u_x = ( fabs(A_+C_) > fabs(C_) ) ? 1 : 0;
+  double u_y = ( fabs(B_+D_) > fabs(D_) ) ? 1 : 0;
+  //double u_dot_max_y = B_*u_y + D_ == 0 ? 0 : fabs(y_dot_max_ / (B_*u_y+D_));
+  //double u_dot_max_x = A_*u_x + C_ == 0 ? 0 : fabs(x_dot_max_ / (A_*u_x+C_));
+  double u_dot_max_y = B_*u_y + D_ == 0 ? 0 : fabs(0.33 / (B_*u_y+D_));
+  double u_dot_max_x = A_*u_x + C_ == 0 ? 0 : fabs(0.33 / (A_*u_x+C_));
+  if(print_) {
+    std::cout<<"\nu_dot_max_x: "<<u_dot_max_x;
+    std::cout<<"\nu_dot_max_y: "<<u_dot_max_y;
+  }
+  
+  if(u_dot_max_x == 0 && u_dot_max_y == 0) {
+    ROS_ERROR("u_dot_max_x == 0 && u_dot_max_y == 0");
+  }
+
+  // If x is greater
+  else if ( u_dot_max_x > u_dot_max_y ) {
+
+    // If x satisfies motion constraints
+    if(satisfiesConstraints(u_dot_max_x) && u_dot_max_x != 0) {
+      u_dot_max = u_dot_max_x;
+    }
+
+    // else, test y
+    else if(satisfiesConstraints(u_dot_max_y) && u_dot_max_y != 0) {
+      u_dot_max = u_dot_max_y;
+    }
+
+    // else, set it to initial u_dot
+    // TODO: Something else?
+    else {  
+      u_dot_max = u_dot_0;
+    }
+  } // end if x is greater
+
+  // If y is greater, test it against constraints 
+  else if(satisfiesConstraints(u_dot_max_y) && u_dot_max_y != 0) {
+      u_dot_max = u_dot_max_y;
+  }
+
+  // If y is greater and does not satisfy constraints, test x
+  else if(satisfiesConstraints(u_dot_max_x) && u_dot_max_x != 0) {
+    u_dot_max = u_dot_max_x;
+  }
+
+  // Else, set u_dot_max to initial u_dot
+  // TODO: Something else?
+  else {
+    u_dot_max = u_dot_0;
+  }
+
+
+
+  // *** Testing ***
+  //u_dot_max = u_dot_max_y;
+  //u_dot_max = (x_dot_max2_ - C_) / A_;
+  //u_dot_max = (y_dot_max2_ - D_) / B_;
+  std::cout<<"\nFixed u_dot_max: "<<u_dot_max;
+  return u_dot_max;
 }
 
 
@@ -237,7 +226,8 @@ void BezierCurve::initReflexxes(const double x_dot_max, const double y_dot_max, 
   // Set u max acceleration
   // We don't actually use this, but it's necessary for Reflexxes to work
   if(A_ + C_ != 0) {
-    reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = fabs( (x_dot_dot_max - A_*u_dot_max) / (A_+C_) );
+    //reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = fabs( (x_dot_dot_max - A_*u_dot_max) / (A_+C_) );
+    reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = fabs( (y_dot_dot_max - B_*u_dot_max) / (B_+D_) );
   }
   else {
     reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 0.1;
@@ -389,17 +379,18 @@ void BezierCurve::calculateConstants() {
 
 
 const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve() {
-  std::vector<ramp_msgs::MotionState> result;
+  if(initialized_) {
 
-  reflexxesData_.resultValue = 0;
- 
-  points_.push_back(control_points_.at(0));
+    reflexxesData_.resultValue = 0;
+   
+    points_.push_back(control_points_.at(0));
 
-  while(!finalStateReached()) {
-    points_.push_back(spinOnce());
+    while(!finalStateReached()) {
+      points_.push_back(spinOnce());
+    }
+
+    dealloc();
   }
-
-  dealloc();
 
   return points_;
 }

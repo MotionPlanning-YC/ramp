@@ -180,12 +180,15 @@ class Planner {
           void seedPopulation()                                   ;
           void seedPopulationLine()                               ;
 
-    const RampTrajectory  getTransitionTrajectory()     ;
+    const RampTrajectory  getTransitionTrajectory(const RampTrajectory trgt_traj)     ;
+    const RampTrajectory  getTrajectoryWithCurve(const RampTrajectory trgt_traj);
     const MotionState     predictStartPlanning() const  ;
 
 
     const std::vector<RampTrajectory> getTrajectories(const std::vector<Path> p);
     void updatePathsStart(const MotionState s);
+
+    const bool compareSwitchToBest(const RampTrajectory traj) const;
 
 
     /***** Data members *****/

@@ -624,7 +624,7 @@ void Planner::initPopulation() {
 
 
 // **** TODO: Adapt population before continuing ****
-const RampTrajectory Planner::getTransitionTrajectory() {
+const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trgt_traj) {
   std::cout<<"\nIn getTransitionTrajectory\n";
   h_parameters_.setImminentCollision(true); 
 
@@ -644,7 +644,7 @@ const RampTrajectory Planner::getTransitionTrajectory() {
 
   ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
   tr.request.type = TRANSITION;
-  tr.request.print = true;
+  tr.request.print = false;
 
   h_traj_req_->request(tr);
 
@@ -658,30 +658,29 @@ const RampTrajectory Planner::getTransitionTrajectory() {
   std::cout<<"\n"<<bestTrajec_.path_.all_.at(1).toString()<<"\n";
 
 
-  ramp_msgs::Population pop;
-  pop.population.push_back(transition.msg_trajec_);
-  h_control_->sendPopulation(pop);
-
-  std::cout<<"\nTransition trajectory published, Press Enter to move on transition trajectory\n";
-  std::cin.get();
-
-  h_parameters_.setImminentCollision(false); 
-  h_control_->send(transition.msg_trajec_);
-
-  controlCycleTimer_.stop();
-  planningCycleTimer_.stop();
-  imminentCollisionTimer_.stop();
-  
-  std::cout<<"\nPress Enter to continue with planner\n";
-  std::cin.get();
-
-
-  controlCycleTimer_.start();
-  planningCycleTimer_.start();
-  imminentCollisionTimer_.start();
-
   return transition;
-} 
+}
+
+
+const RampTrajectory Planner::getTrajectoryWithCurve(const RampTrajectory trgt_traj) {
+  RampTrajectory result = getTransitionTrajectory(trgt_traj);
+
+
+  // Keep a counter for the knot points
+  int c_kp=2;
+
+  // Start at the bezier curve in trgt_traj and push on the rest of the trajectory to result
+  for(uint16_t i=trgt_traj.msg_trajec_.index_knot_points.at(1); i<trgt_traj.msg_trajec_.trajectory.points.size(); i++) {
+    result.msg_trajec_.trajectory.points.push_back( trgt_traj.msg_trajec_.trajectory.points.at(i) );
+   
+    if( i == trgt_traj.msg_trajec_.index_knot_points.at(c_kp) ) {
+      result.msg_trajec_.index_knot_points.push_back(i);
+      c_kp++;
+    }
+  }
+
+  return result;
+}
 
 
 
@@ -790,19 +789,44 @@ void Planner::modification() {
   
   // If the best trajectory has changed and the control cycles have started
   if(index != i_best_prev_ && cc_started_) {
+    std::cout<<"\nBest trajectory now index: "<<index;
   
     // Set index of previous best
     i_best_prev_ = index;
   
     // Get the transition trajectory
-    RampTrajectory transition = getTransitionTrajectory();
+    //RampTrajectory transition = getTransitionTrajectory(population_.get(index));
+
+    /** Test Trajectory **/
+    /*ramp_msgs::Population pop;
+    pop.population.push_back(transition.msg_trajec_);
+    h_control_->sendPopulation(pop);
+
+    std::cout<<"\nTransition trajectory published, Press Enter to move on transition trajectory\n";
+    std::cin.get();
+
+    h_parameters_.setImminentCollision(false); 
+    h_control_->send(transition.msg_trajec_);
+
+    controlCycleTimer_.stop();
+    planningCycleTimer_.stop();
+    imminentCollisionTimer_.stop();
+ 
+    std::cout<<"\nPress Enter to continue with planner\n";
+    std::cin.get();
 
 
-    std::cout<<"\nSending Trajectory: \n";
+    controlCycleTimer_.start();
+    planningCycleTimer_.start();
+    imminentCollisionTimer_.start();*/
+    /*************************/
+
+
+    /*std::cout<<"\nSending Trajectory: \n";
     h_control_->send(transition.msg_trajec_); 
     std::cout<<"\nAfter Sending Trajectory:\n";
 
-    population_.replace(index, transition);
+    population_.replace(index, transition);*/
   } // end if
 
 } // End modification
@@ -1080,6 +1104,20 @@ void Planner::sendPopulation() {
 
 
 
+const bool Planner::compareSwitchToBest(const RampTrajectory traj) const {
+  double bestFitness = bestTrajec_.msg_trajec_.fitness;
+  std::cout<<"\nbestFitness: "<<bestFitness;
+  std::cout<<"\nc_pc: "<<c_pc_;
+  std::cout<<"\n(generationsPerCC_ - c_pc_) * planningCycle_.toSec(): "<<(generationsPerCC_ - c_pc_) * planningCycle_.toSec();
+
+  // Add delta t to bestFitness
+  // delta t = time until next control cycle occurs = time until startPlanning
+  bestFitness -= (generationsPerCC_ - c_pc_) * planningCycle_.toSec();
+
+  return (traj.msg_trajec_.fitness < bestFitness);
+}
+
+
 
 /** This method evaluates one trajectory.
  *  Eventually, we should be able to evaluate only specific segments along the trajectory  */
@@ -1100,6 +1138,44 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
   else {
     // TODO: some error handling
   }
+
+
+  // If the fitness is close to the best trajectory's fitness
+  if( result.msg_trajec_.fitness > bestTrajec_.msg_trajec_.fitness ||
+      fabs(result.msg_trajec_.fitness - bestTrajec_.msg_trajec_.fitness) < 5) {
+    std::cout<<"\nIn evaluateTrajectory if";
+    std::cout<<"\nresult.msg_trajec_.fitness: "<<result.msg_trajec_.fitness;
+    std::cout<<"\nbestTrajec_.msg_trajec_.fitness: "<<bestTrajec_.msg_trajec_.fitness;
+
+    // Get transition trajectory
+    RampTrajectory temp = getTransitionTrajectory(trajec);
+    std::cout<<"\nAfter getting transition trajectory\n";
+
+    ramp_msgs::EvaluationRequest er_switch = buildEvaluationRequest(temp);
+    
+    // Do the evaluation and set the fitness and feasibility member_switchs
+    if(requestEvaluation(er_switch)) {
+      temp.fitness_   = er_switch.response.fitness;
+      temp.feasible_  = er_switch.response.feasible;
+      temp.msg_trajec_.fitness    = temp.fitness_;
+      temp.msg_trajec_.feasible   = temp.feasible_;
+      temp.time_until_collision_  = er_switch.response.time_until_collision;
+      //std::cout<<"\nEvaluation Request Time Until Collision: "<<er_switch.response.time_until_collision;
+    }
+    else {
+      // TODO: some error handling
+    }
+   
+    // If the trajectory including the curve to switch is more fit than 
+    // the best trajectory, return it
+    if(compareSwitchToBest(temp)) {
+      std::cout<<"\ncompareSwitchToBest: true";
+      return temp;
+    }
+    std::cout<<"\ncompareSwitchToBest: false";
+    std::cout<<"\nPress Enter to continue\n";
+    std::cin.get();
+  } // end if 
 
   return result;
 } // End evaluateTrajectory

@@ -353,9 +353,12 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     // Find the slope
     double ryse = segment_points.at(1).positions.at(1) - segment_points.at(0).positions.at(1);
     double run  = segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0);
+    double ryse2 = segment_points.at(2).positions.at(1) - segment_points.at(1).positions.at(1);
+    double run2  = segment_points.at(2).positions.at(0) - segment_points.at(1).positions.at(0);
 
-    double slope = (run != 0) ? ryse / run : ryse;
-    double x_dot_0, y_dot_0, x_dot_max, y_dot_max;
+    double slope  = (run != 0) ? ryse / run : ryse;
+    double slope2 = (run2 != 0) ? ryse2 / run2 : ryse2;
+    double x_dot_0, y_dot_0, x_dot_max, y_dot_max, x_dot_02, y_dot_02, x_dot_max2, y_dot_max2;
     uint8_t i_max;
     
     //std::cout<<"\nslope: "<<slope;
@@ -365,6 +368,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     double s = lambda * utility_.positionDistance(segment_points.at(0).positions, segment_points.at(1).positions);
     //std::cout<<"\nAfter s\n";
 
+
+    /*** Segment 1 ***/
     // If the y is greater
     if(slope >= 1) {
       y_dot_0 = findVelocity(1, s);
@@ -418,6 +423,59 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     //std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
     
 
+    /*** Segment 2 ***/
+    // If the y is greater
+    if(slope2 >= 1) {
+      y_dot_02 = findVelocity(1, s);
+      x_dot_02 = y_dot_02 / slope2;  
+      i_max = 1;
+
+      y_dot_max2 = y_dot_02;
+      x_dot_max2 = y_dot_max2 / slope2;
+
+    }
+    else if(slope2 == -1 && ryse < 0) {
+      x_dot_02 = findVelocity(0, s);
+      y_dot_02 = x_dot_02 * slope2;
+      i_max = 1;
+
+      x_dot_max2 = x_dot_02;
+      y_dot_max2 = x_dot_max2 * slope2;
+    }
+    else if(slope2 == -1 && run < 0) {
+      y_dot_02 = findVelocity(1, s);
+      x_dot_02 = y_dot_02 / slope2;
+      i_max = 1;
+
+      y_dot_max2 = y_dot_02;
+      x_dot_max2 = y_dot_max2 / slope2;
+    }
+    else if(slope2 < -1) {
+      y_dot_02 = findVelocity(1, s);
+      x_dot_02 = y_dot_02 / slope2;
+      i_max = 1;
+
+      y_dot_max2 = y_dot_02;
+      x_dot_max2 = y_dot_max2 / slope2;
+    } 
+    else if(slope2 < 0) {
+      x_dot_02 = findVelocity(0, s);
+      y_dot_02 = x_dot_02 * slope2;
+      i_max = 1;
+
+      x_dot_max2 = x_dot_02;
+      y_dot_max2 = x_dot_max2 * slope2;
+    }
+    else {
+      x_dot_02 = findVelocity(0, s);
+      y_dot_02 = x_dot_02 * slope2;  
+      i_max = 0;
+      
+      x_dot_max2 = x_dot_02;
+      y_dot_max2 = slope*x_dot_max2;
+    }
+    //std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
+
     double theta = utility_.findAngleFromAToB(segment_points.at(0).positions, segment_points.at(1).positions);
 
 
@@ -430,46 +488,57 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       bc.init(segment_points, 0, theta, 
           segment_points.at(0).velocities.at(0),
           segment_points.at(0).velocities.at(1),
+          x_dot_02, y_dot_02,
           segment_points.at(0).accelerations.at(0),
           segment_points.at(0).accelerations.at(1),
           x_dot_max, y_dot_max,
+          x_dot_max2, y_dot_max2,
           reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
           reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);      
 
     } 
     else {
        bc.init(segment_points, lambda, theta, 
-         x_dot_0, y_dot_0, 0, 0,
+         x_dot_0, y_dot_0, 
+         x_dot_02, y_dot_02,         
+         0, 0,
          x_dot_max, y_dot_max, 
+         x_dot_max2, y_dot_max2,
          reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
          reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
     }
 
 
+    std::cout<<"\nBefore generateCurve\n";
     bc.generateCurve();
+    std::cout<<"\nAfter generateCurve\n";
 
-    // Insert the first point as a knot point in the path
-    // The first point is control point c0 with v and a information
-    // If it's a transition, the first point on curve is the first point that's already there
-    if(!transition_) {
-      p.points.erase(p.points.begin()+i);
-      p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(0)));
-      p.points.insert(p.points.begin()+i+1, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
-    }
-    
-    // Else, erase the 2nd control point
-    else {
-      std::cout<<"\nErasing point "<<utility_.toString(p.points.at(1));
-      p.points.erase(p.points.begin()+1);
-      p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
-    }
+    if(bc.points_.size() > 0) {
+      
+      // Insert the first point as a knot point in the path
+      // The first point is control point c0 with v and a information
+      // If it's a transition, the first point on curve is the first point that's already there
+      if(!transition_) {
+        p.points.erase(p.points.begin()+i);
+        p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(0)));
+        p.points.insert(p.points.begin()+i+1, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
+      }
+      
+      // Else, erase the 2nd control point
+      else if (bc.points_.size() > 0) {
+        std::cout<<"\nErasing point "<<utility_.toString(p.points.at(1))<<"\n";
+        p.points.erase(p.points.begin()+1);
+        p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
+      }
 
-    // Insert the last point as a knot point in the path
-    // The last point is control point c2 with v and a information
-    std::cout<<"\nInserting point "<<utility_.toString(bc.points_.at(bc.points_.size()-1));
+      // Insert the last point as a knot point in the path
+      // The last point is control point c2 with v and a information
+      std::cout<<"\nInserting point "<<utility_.toString(bc.points_.at(bc.points_.size()-1))<<"\n";
 
-    result.push_back(bc);
+      result.push_back(bc);
+    } // end if
   } // end for
+  
 
 
   //std::cout<<"\nPath after Bezier: "<<utility_.toString(result)<<"\n";
