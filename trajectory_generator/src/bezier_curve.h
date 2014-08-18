@@ -13,7 +13,7 @@ public:
   BezierCurve();
   ~BezierCurve();
   
-  void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_02, const double y_dot_02, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_max2, const double y_dot_max2, const double x_dot_dot_max, const double y_dot_dot_max);
+  void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max);
 
   const std::vector<ramp_msgs::MotionState> generateCurve();
   
@@ -39,13 +39,11 @@ private:
   double        x_init_a_, y_init_a_;
   double        x_dot_max_, y_dot_max_;
 
-  double x_init_v2_, y_init_v2_;
-  double x_dot_max2_, y_dot_max2_;
-
   // Variables to manually track some motion info
+  double        x_prev_, y_prev_;
+  double        x_dot_prev_, y_dot_prev_;
   double        theta_prev_             ;
   double        theta_dot_prev_         ;
-  double        x_dot_prev_, y_dot_prev_;
 
   void initReflexxes(const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max)    ;
 
@@ -60,7 +58,7 @@ private:
 
   void dealloc();
 
-  const bool satisfiesConstraints(const double u_dot_max) const;
+  const bool satisfiesConstraints(const double u_dot_max, const double u_x, const double u_y) const;
   const double getUDotMax(const double u_dot_0) const;
 
   void printReflexxesInfo() const;

@@ -26,13 +26,13 @@ int main(int argc, char** argv) {
   c1.motionState.positions.push_back(0);
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(0.);
-  c2.motionState.positions.push_back(0.);
+  c2.motionState.positions.push_back(0.5); // 0
+  c2.motionState.positions.push_back(0.2); // 0
   c2.motionState.positions.push_back(0);
 
 
   ramp_msgs::KnotPoint c3;
-  c3.motionState.positions.push_back(.25);
+  c3.motionState.positions.push_back(1.); //0.25
   c3.motionState.positions.push_back(1.5);
   c3.motionState.positions.push_back(0);
 
@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
 
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
-  tr.request.type = TRANSITION;
+  tr.request.type = PARTIAL_BEZIER;
   tr.request.print = true;
 
 

@@ -29,20 +29,19 @@ public:
   // Get Bezier curves over the path
   const std::vector<BezierCurve> bezier(ramp_msgs::Path& p, const bool only_curve);
   
-  bool bezier_;
-  bool transition_;
-  bool partial_;
   const double findVelocity(const uint8_t i, const double s) const;
 
+  TrajectoryType type_;
   bool print_;
 private:
 
+  void initReflexxes();
 
   // Store the time it started
   ros::Time t_started_;
   
   // Flag for result
-  int resultValue;
+  int resultValue_;
 
 
 
@@ -90,7 +89,7 @@ private:
   bool finalStateReached();
 
   // Initialize variables just after receiving a service request
-  void setInitialConditions();
+  void setCurrentMotion();
 
   // Compute the orientation needed to reach the target, given an initial position
   double computeTargetOrientation(double initial_x, double intial_y, double target_x, double target_y);
@@ -108,6 +107,10 @@ private:
   const double getControlPointLambda(const std::vector<ramp_msgs::MotionState> segment_points) const;
 
   const bool lambdaOkay(const std::vector<ramp_msgs::MotionState> segment_points, const double lambda) const;
+
+  const ramp_msgs::MotionState getInitialState(const std::vector<ramp_msgs::MotionState> segment_points) const;
+
+  void printReflexxesSpinInfo() const;
 
 };
 

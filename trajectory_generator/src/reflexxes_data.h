@@ -8,7 +8,7 @@
 
 struct ReflexxesData {
   ReflexxesAPI *rml;
-  RMLPositionInputParameters *inputParameters;          
+  RMLPositionInputParameters *inputParameters;
   RMLPositionOutputParameters *outputParameters;
   RMLPositionFlags flags;
   unsigned int NUMBER_OF_DOFS;
