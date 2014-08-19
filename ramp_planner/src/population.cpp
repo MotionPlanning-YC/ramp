@@ -448,6 +448,7 @@ const std::string Population::toString() const {
   else {
     for(unsigned int i=0;i<trajectories_.size();i++) {
       result<<"\nTrajectory "<<i<<": "<<paths_.at(i).toString();
+      //result<<"\nTrajectory "<<i<<": "<<trajectories_.at(i).toString();
     }
   }
 

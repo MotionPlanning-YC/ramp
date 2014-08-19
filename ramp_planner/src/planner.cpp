@@ -180,36 +180,6 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
   // Set misc members
   populationSize_ = population_size;
   subPopulations_ = sub_populations;
-
-
-
-  /*KnotPoint k1, k2, k3;
-  k1.motionState_.positions_.push_back(0);
-  k1.motionState_.positions_.push_back(0);
-  k1.motionState_.positions_.push_back(0);
-  
-  k2.motionState_.positions_.push_back(1);
-  k2.motionState_.positions_.push_back(1);
-  k2.motionState_.positions_.push_back(PI/4);
-  
-  k3.motionState_.positions_.push_back(1);
-  k3.motionState_.positions_.push_back(3);
-  k3.motionState_.positions_.push_back(0);
-
-  std::vector<KnotPoint> all;
-  all.push_back(k1);
-  all.push_back(k2);
-  all.push_back(k3);
-
-  Path p(all);
-
-  ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
-  requestTrajectory(tr);
-  RampTrajectory trj = tr.response.trajectory;
-  std::cout<<"\nTrajectory: "<<trj.toString();
-
-  std::cout<<"\nSegment 0: "<<trj.getStraightSegment(0).toString();
-  std::cout<<"\nSegment 1: "<<trj.getStraightSegment(1).toString();*/
 } // End init
 
 
@@ -304,7 +274,7 @@ void Planner::seedPopulation() {
       // Set trajectory path
       temp.path_ = msg_request.response.newPath;
 
-      // Evaluati and add the trajectory to the population
+      // Evaluate and add the trajectory to the population
       new_pop.push_back(evaluateTrajectory(temp));
     }
   } // end for
@@ -833,6 +803,30 @@ void Planner::modification() {
 
 
 
+
+
+
+void Planner::stopForDebugging() {
+
+  h_parameters_.setImminentCollision(true); 
+
+  controlCycleTimer_.stop();
+  planningCycleTimer_.stop();
+  imminentCollisionTimer_.stop();
+}
+
+void Planner::restartAfterDebugging() {
+  h_parameters_.setImminentCollision(false); 
+
+  controlCycleTimer_.start();
+  planningCycleTimer_.start();
+  imminentCollisionTimer_.start();
+}
+
+
+
+
+
 const MotionState Planner::predictStartPlanning() const {
   //std::cout<<"\nIn predictStartPlanning\n";
   MotionState result;
@@ -1141,15 +1135,20 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
 
 
   // If the fitness is close to the best trajectory's fitness
-  if( result.msg_trajec_.fitness > bestTrajec_.msg_trajec_.fitness ||
-      fabs(result.msg_trajec_.fitness - bestTrajec_.msg_trajec_.fitness) < 5) {
-    std::cout<<"\nIn evaluateTrajectory if";
-    std::cout<<"\nresult.msg_trajec_.fitness: "<<result.msg_trajec_.fitness;
-    std::cout<<"\nbestTrajec_.msg_trajec_.fitness: "<<bestTrajec_.msg_trajec_.fitness;
+  if(cc_started_ && trajec.id_ != bestTrajec_.id_ &&
+      (result.msg_trajec_.fitness > bestTrajec_.msg_trajec_.fitness ||
+      fabs(result.msg_trajec_.fitness - bestTrajec_.msg_trajec_.fitness) < 5) ) 
+  {
+    std::cout<<"\nTrajectory being evaluated: "<<trajec.path_.toString();
+    std::cout<<"\nTrajectory being evaluated is close to best fitness";
+    std::cout<<"\ntrajec_.fitness: "<<result.msg_trajec_.fitness;
+    std::cout<<"\nbestTrajec_.fitness: "<<bestTrajec_.msg_trajec_.fitness;
+    stopForDebugging();
+    std::cout<<"\nPress Enter to continue\n";
+    std::cin.get();
 
     // Get transition trajectory
     RampTrajectory temp = getTransitionTrajectory(trajec);
-    std::cout<<"\nAfter getting transition trajectory\n";
 
     ramp_msgs::EvaluationRequest er_switch = buildEvaluationRequest(temp);
     
@@ -1173,8 +1172,6 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
       return temp;
     }
     std::cout<<"\ncompareSwitchToBest: false";
-    std::cout<<"\nPress Enter to continue\n";
-    std::cin.get();
   } // end if 
 
   return result;
@@ -1263,7 +1260,7 @@ const MotionState Planner::findAverageDiff() {
   i_best_prev_ = population_.getBestID();
   std::cout<<"\nPopulation seeded!\n";
   std::cout<<"\n"<<population_.fitnessFeasibleToString()<<"\n";
-
+  std::cout<<"\n"<<population_.toString();
 
 
   if(subPopulations_) {
@@ -1297,6 +1294,9 @@ const MotionState Planner::findAverageDiff() {
     r.sleep();
     ros::spinOnce(); 
   } // end while
+
+  std::cout<<"\nlatestUpdate: "<<latestUpdate_.toString();
+  std::cout<<"\ngoal: "<<goal_.toString();
   
   // Stop timer
   controlCycleTimer_.stop();

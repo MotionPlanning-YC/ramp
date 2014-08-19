@@ -22,19 +22,19 @@ class RampTrajectory {
     int                   subPopulation_;
 
 
-    const bool                                  equal(const RampTrajectory& other)  const;
-    const Path                                  getPath()                           const;
+    const bool           equal(const RampTrajectory& other)  const;
+    const Path           getPath()                           const;
+
+    const double         getDirection() const;
+    
+    const RampTrajectory getStraightSegment(uint8_t i) const;
+
+    const RampTrajectory clone() const;
+    
+    const std::string    fitnessFeasibleToString()           const;
+    const std::string    toString()                          const;
+
     const trajectory_msgs::JointTrajectoryPoint getPointAtTime(const float t)       const;
-
-    const double                                getDirection() const;
-    
-    const RampTrajectory                        getStraightSegment(uint8_t i) const;
-
-    const RampTrajectory                        clone() const;
-    
-    const std::string                           fitnessFeasibleToString()           const;
-    const std::string                           toString()                          const;
-
   private:
     Utility utility_;
 };

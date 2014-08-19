@@ -190,6 +190,8 @@ class Planner {
 
     const bool compareSwitchToBest(const RampTrajectory traj) const;
 
+    void stopForDebugging();
+    void restartAfterDebugging();
 
     /***** Data members *****/
 
@@ -234,7 +236,6 @@ class Planner {
     
     // Number of planning cycles since last control cycle
     int c_pc_;
-
 
     // Handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
