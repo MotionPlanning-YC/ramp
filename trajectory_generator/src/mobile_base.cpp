@@ -40,6 +40,7 @@ MobileBase::~MobileBase() {
 
 /** Initialize Reflexxes variables */
 void MobileBase::initReflexxes() {
+
   // Set DOF
   reflexxesData_.NUMBER_OF_DOFS = 3;
 
@@ -70,7 +71,12 @@ void MobileBase::initReflexxes() {
   reflexxesData_.inputParameters->MaxJerkVector->VecData[1] = 1;
   reflexxesData_.inputParameters->MaxJerkVector->VecData[2] = PI/3;
 
-  
+  std::cout<<"\nBefore setting flag\n";
+  // Set flag value to know if Reflexxes has been called yet
+  reflexxesData_.outputParameters->NewPositionVector->VecData[0] = -99;
+  reflexxesData_.outputParameters->NewPositionVector->VecData[1] = -99;
+  reflexxesData_.outputParameters->NewPositionVector->VecData[2] = -99;
+  std::cout<<"\nAfter setting flag\n";
   
   // Result
   resultValue_ = 0;
@@ -92,7 +98,7 @@ void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
   type_ = (TrajectoryType)req.type;
  
   // Set the initial conditions of the reflexxes library
-  setCurrentMotion();
+  setInitialMotion();
 
   // Set SelectionVector
   setSelectionVector();
@@ -142,7 +148,7 @@ void MobileBase::setSelectionVectorRotation() {
  * Initialize variables after receiving a service request
  * Set-up the input parameters
  **/
-void MobileBase::setCurrentMotion() {
+void MobileBase::setInitialMotion() {
   
   // Initialise the time to use for each trajectory point
   timeFromStart_ = ros::Duration(0);
@@ -208,9 +214,10 @@ void MobileBase::insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ram
 
 
 
-/** Returns an approximation of a dof's velocity at the end of a segment with length s */
- // TODO: get x_dot_0, y_dot_0 when they're not 0 
+/** Returns an approximation of the ith DOF's velocity at the end of a segment with length s 
+ *  Assumes constant acceleration */
 const double MobileBase::findVelocity(const uint8_t i, const double s) const {
+  // s = s_0 + v_0*t + 1/2*a*t^2
   
   // Use 2/3 of max acceleration
   double a = (2.*reflexxesData_.inputParameters->MaxAccelerationVector->VecData[i]/3.);
@@ -221,14 +228,7 @@ const double MobileBase::findVelocity(const uint8_t i, const double s) const {
   double radicand = (2*a*s) + pow(v_0, 2);
   double v = sqrt(radicand);
   
-  double t = (v - v_0) / a;
-  
-  /*std::cout<<"\ni: "<<(int)i;
-  std::cout<<"\ns: "<<s<<" a: "<<a<<" x_dot_init: "<<x_dot_init<<" y_dot_init: "<<y_dot_init;
-  std::cout<<"\nradicand: "<<radicand;
-  std::cout<<"\nv: "<<v;
-  std::cout<<"\nt: "<<t;*/
-  
+  //double t = (v - v_0) / a;
 
   // Check for bounds
   if(v > reflexxesData_.inputParameters->MaxVelocityVector->VecData[i]) {
@@ -244,12 +244,16 @@ const double MobileBase::findVelocity(const uint8_t i, const double s) const {
 
   
 
+/** Returns the initial motion state of the curve given the segment points */
+// TODO: Put position, acceleration in here too?
 const ramp_msgs::MotionState MobileBase::getInitialState(const std::vector<ramp_msgs::MotionState> segment_points) const {
+  std::cout<<"\nIn getInitialState\n";
   ramp_msgs::MotionState result;
   for(uint8_t i=0;i<3;i++) {
-    result.positions.push_back(0);
+    result.velocities.push_back(0);
   }
   
+
   // Get lambda value for segment points
   double lambda = getControlPointLambda(segment_points);
 
@@ -257,40 +261,39 @@ const ramp_msgs::MotionState MobileBase::getInitialState(const std::vector<ramp_
   double ryse = segment_points.at(1).positions.at(1) - segment_points.at(0).positions.at(1);
   double run  = segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0);
   double slope  = (run != 0) ? ryse / run : ryse;
-
-  double x_dot_0, y_dot_0, x_dot_max, y_dot_max;
-  uint8_t i_max;
-  
-  //std::cout<<"\nslope: "<<slope;
-  //std::cout<<"\nryse: "<<ryse<<" run: "<<run;
+  if(print_) {
+    std::cout<<"\nryse: "<<ryse<<" run: "<<run;
+    std::cout<<"\nslope: "<<slope<<"\n";
+  }
 
   // Segment 1 size
   double s = lambda * utility_.positionDistance(segment_points.at(0).positions, segment_points.at(1).positions);
-  //std::cout<<"\nAfter s\n";
+  std::cout<<"s: "<<s<<"\n";
 
-  // If the y is greater
+
+  // If change in y is greater
   if( (slope >= 1)  ||
       (slope == -1 && run < 0) ||
       (slope < -1) ) 
   {
-    result.positions.at(1) = findVelocity(1, s);
-    result.positions.at(0) = result.positions.at(0) / slope;  
+    result.velocities.at(1) = findVelocity(1, s);
+    result.velocities.at(0) = result.velocities.at(0) / slope;  
   }
   // if slope == -1 && ryse < 0
   // if slope < 0
   // else
   else {
-    result.positions.at(0) = findVelocity(0, s);
-    result.positions.at(1) = result.positions.at(0) * slope;
+    result.velocities.at(0) = findVelocity(0, s);
+    result.velocities.at(1) = result.velocities.at(0) * slope;
   }
   
 
+  std::cout<<"\nLeaving getInitialState\n";
   return result;
 } // End getInitialState
 
 
 /** Tests if a lambda value will have Bezier equations that are defined */
-// TODO: Fix to having a fixed length on both sides
 const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segment_points, const double lambda) const {
   ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;
 
@@ -304,11 +307,16 @@ const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segm
   X0.positions.push_back( (1-lambda)*p0.positions.at(1) + lambda*p1.positions.at(1) );
   X0.positions.push_back(utility_.findAngleFromAToB(p0.positions, p1.positions));
 
-  X2.positions.push_back( (1-lambda)*p1.positions.at(0) + lambda*p2.positions.at(0) );
-  X2.positions.push_back( (1-lambda)*p1.positions.at(1) + lambda*p2.positions.at(1) );
-  X2.positions.push_back(utility_.findAngleFromAToB(p1.positions, p2.positions));
+  double s = sqrt( pow(p1.positions.at(0) - X0.positions.at(0), 2) + 
+                   pow(p1.positions.at(1) - X0.positions.at(1), 2) );
+  double theta = utility_.findAngleFromAToB(p1.positions, p2.positions);
+
+  X2.positions.push_back( p1.positions.at(0) + s*cos(theta) );
+  X2.positions.push_back( p1.positions.at(1) + s*sin(theta) );
+  X2.positions.push_back( theta );
 
 
+  // If both A and B will equal 0
   if(X1.positions.at(0) == ( (X0.positions.at(0) + X2.positions.at(0)) / 2. ) &&
       X1.positions.at(1) == ( (X0.positions.at(1) + X2.positions.at(1)) / 2. )) {
     return false;
@@ -322,16 +330,19 @@ const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segm
 
 /** Returns a lambda value that will lead to defined Bezier equations */
 const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::MotionState> segment_points) const {
+  std::cout<<"\nIn getControlPointLambda\n";
   std::vector<double> result;
 
-  double lambda = type_ == TRANSITION ? 0.5 : 0.5;
+  // Start transition trajectories right away,
+  // otherwise, try to go straight for a while
+  double lambda = type_ == TRANSITION ? 0. : 0.5;
 
   while(!lambdaOkay(segment_points, lambda)) {
     if(type_ == TRANSITION) {
-      lambda-=0.1; 
+      lambda+=0.1; 
     }
     else {
-      lambda+=0.1;
+      lambda-=0.1;
     }
 
     // TODO: Report/Handle error
@@ -353,110 +364,129 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
 /** */
 const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool only_curve) {
   std::vector<BezierCurve> result;
-  ramp_msgs::Path p_copy = p;
 
-  // Set the index of which knot point to stop at
-  int stop = type_ == PARTIAL_BEZIER ? stop = 2 : p_copy.points.size()-1;
+  if(utility_.positionDistance(p.points.at(0).motionState.positions, p.points.at(1).motionState.positions) > 0.01 &&
+     utility_.positionDistance(p.points.at(1).motionState.positions, p.points.at(2).motionState.positions) > 0.01 ) 
+  {
+    ramp_msgs::Path p_copy = p;
 
-  //std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
-  for(uint8_t i=1;i<stop;i++) {
-    //std::cout<<"\n---i: "<<(int)i<<"---\n";
-    BezierCurve bc;
-    bc.print_ = print_;
+    // Set the index of which knot point to stop at
+    int stop = type_ == PARTIAL_BEZIER ? stop = 2 : p_copy.points.size()-1;
+    std::cout<<"\nstop: "<<stop<<"\n";
 
-    // Set segment points
-    std::vector<ramp_msgs::MotionState> segment_points;
-    segment_points.push_back(p_copy.points.at(i-1).motionState);
-    segment_points.push_back(p_copy.points.at(i).motionState);
-    segment_points.push_back(p_copy.points.at(i+1).motionState);
+    //std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
+    for(uint8_t i=1;i<stop;i++) {
+      std::cout<<"\n---i: "<<(int)i<<"---\n";
+      BezierCurve bc;
+      bc.print_ = print_;
 
-    if(print_) {
-      std::cout<<"\nSegment points: ";
-      for(uint8_t a=0;a<segment_points.size();a++) {
-        std::cout<<"\n "<<a<<"\n"<<utility_.toString(segment_points.at(a));
-      }
-    }
+      // Set segment points
+      std::vector<ramp_msgs::MotionState> segment_points;
+      segment_points.push_back(p_copy.points.at(i-1).motionState);
+      segment_points.push_back(p_copy.points.at(i).motionState);
+      segment_points.push_back(p_copy.points.at(i+1).motionState);
 
-    // Get lambda value for segment points
-    double lambda = getControlPointLambda(segment_points);
-
-    // Find the slope
-    double ryse = segment_points.at(1).positions.at(1) - segment_points.at(0).positions.at(1);
-    double run  = segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0);
-    double slope  = (run != 0) ? ryse / run : ryse;
-
-    double x_dot_0, y_dot_0, x_dot_max, y_dot_max;
-    uint8_t i_max;
-    
-    //std::cout<<"\nslope: "<<slope;
-    //std::cout<<"\nryse: "<<ryse<<" run: "<<run;
-
-    // Segment 1 size
-    double s = lambda * utility_.positionDistance(segment_points.at(0).positions, segment_points.at(1).positions);
-    //std::cout<<"\nAfter s\n";
-
-    
-    ramp_msgs::MotionState initState = getInitialState(segment_points);
-
-    double theta = utility_.findAngleFromAToB(segment_points.at(0).positions, segment_points.at(1).positions);
-
-
-    if(type_ == TRANSITION) {
-      bc.init(segment_points, 0, theta, 
-          segment_points.at(0).velocities.at(0),
-          segment_points.at(0).velocities.at(1),
-          segment_points.at(0).accelerations.at(0),
-          segment_points.at(0).accelerations.at(1),
-          reflexxesData_.inputParameters->MaxVelocityVector->VecData[0],
-          reflexxesData_.inputParameters->MaxVelocityVector->VecData[1],
-          reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
-          reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);      
-
-    } 
-    else {
-      bc.init(segment_points, lambda, theta, 
-          initState.positions.at(0), 
-          initState.positions.at(1), 
-          0, 0,
-          reflexxesData_.inputParameters->MaxVelocityVector->VecData[0],
-          reflexxesData_.inputParameters->MaxVelocityVector->VecData[1],
-          reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
-          reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
-    }
-
-
-    std::cout<<"\nBefore generateCurve\n";
-    bc.generateCurve();
-    std::cout<<"\nAfter generateCurve\n";
-
-    if(bc.points_.size() > 0) {
-      
-      // Insert the first point as a knot point in the path
-      // The first point is control point c0 with v and a information
-      // If it's a transition, the first point on curve is the first point that's already there
-      //if(!transition_) {
-      if(type_ != TRANSITION) {
-        p.points.erase(p.points.begin()+i);
-        p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(0)));
-        p.points.insert(p.points.begin()+i+1, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
+      if(print_) {
+        std::cout<<"\nSegment points: ";
+        for(uint8_t a=0;a<segment_points.size();a++) {
+          std::cout<<"\n "<<a<<"\n"<<utility_.toString(segment_points.at(a));
+        }
       }
       
-      // Else, erase the 2nd control point
-      else if (bc.points_.size() > 0) {
-        std::cout<<"\nErasing point "<<utility_.toString(p.points.at(1))<<"\n";
-        p.points.erase(p.points.begin()+1);
-        p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
+      double theta = utility_.findAngleFromAToB(segment_points.at(0).positions, segment_points.at(1).positions);
+      std::cout<<"\ntheta: "<<theta<<"\n";
+
+      // For transition trajectories, the segment points are the 
+      // control points, so we have all the info now
+      if(type_ == TRANSITION) {
+        std::cout<<"\nIn if\n";
+        bc.init(segment_points, 0, theta, 
+            segment_points.at(0).velocities.at(0),
+            segment_points.at(0).velocities.at(1),
+            segment_points.at(0).accelerations.at(0),
+            segment_points.at(0).accelerations.at(1),
+            reflexxesData_.inputParameters->MaxVelocityVector->VecData[0],
+            reflexxesData_.inputParameters->MaxVelocityVector->VecData[1],
+            reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
+            reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);      
       }
 
-      // Insert the last point as a knot point in the path
-      // The last point is control point c2 with v and a information
-      std::cout<<"\nInserting point "<<utility_.toString(bc.points_.at(bc.points_.size()-1))<<"\n";
+      // Else if not a transition trajectory,
+      else {
+        std::cout<<"\nIn else\n";
 
-      result.push_back(bc);
-    } // end if
-  } // end for
-  
+        // Get lambda value for segment points
+        double lambda = getControlPointLambda(segment_points);
+        std::cout<<"\nAfter getControlPointLambda\n";
 
+        // Find the slope
+        double ryse = segment_points.at(1).positions.at(1) - segment_points.at(0).positions.at(1);
+        double run  = segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0);
+        double slope  = (run != 0) ? ryse / run : ryse;
+        if(print_) {
+          std::cout<<"\nryse: "<<ryse<<" run: "<<run<<"\n";
+          std::cout<<"\nslope: "<<slope;
+        }
+
+
+
+        // Segment 1 size
+        double s = lambda * 
+               utility_.positionDistance(segment_points.at(0).positions,
+                                         segment_points.at(1).positions);
+        std::cout<<"\ns: "<<s<<"\n";
+
+        // Inital state of curve (first control point)
+        ramp_msgs::MotionState initState = 
+                                getInitialState(segment_points);
+        std::cout<<"\nAfter getInitialState\n";
+
+
+        std::cout<<"\nBefore init\n";
+        bc.init(segment_points, lambda, theta, 
+              initState.velocities.at(0), 
+              initState.velocities.at(1), 
+              0, 0, // initial accelerations = 0
+              reflexxesData_.inputParameters->MaxVelocityVector->VecData[0],
+              reflexxesData_.inputParameters->MaxVelocityVector->VecData[1],
+              reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
+              reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
+        std::cout<<"\nAfter init\n";
+      } // end else
+
+
+      // Generate the curve
+      bc.generateCurve();
+
+      // If the curve was valid,
+      if(bc.points_.size() > 0) {
+        
+        // Replace the knot point with the first and last points on the curve
+        // The first point is control point c0 with v and a information, 
+        // The last point is control point c2 with v and a information,
+        // If it's a transition, the first point on curve is the first point that's already there
+        if(type_ != TRANSITION) {
+          p.points.erase(p.points.begin()+i);
+          p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(0)));
+          p.points.insert(p.points.begin()+i+1, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
+        }
+        
+        // Else if it's transition, replace the 2nd knot point with the last control point
+        else if (bc.points_.size() > 0) {
+          //std::cout<<"\nErasing point "<<utility_.toString(p.points.at(1))<<"\n";
+          p.points.erase(p.points.begin()+1);
+          p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
+        }
+
+        // Push back the curve
+        result.push_back(bc);
+      } // end if
+    } // end for
+  } // end if
+  else {
+    ROS_WARN("Two of the three segment points for Bezier curve are too close");
+    type_ = ALL_STRAIGHT_SEGMENTS;
+  }
 
   //std::cout<<"\nPath after Bezier: "<<utility_.toString(result)<<"\n";
   return result;
@@ -521,7 +551,7 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce() {
   
 
   /** Build the JointTrajectoryPoint object that will be used to build the trajectory */
-  trajectory_msgs::JointTrajectoryPoint point = buildTrajectoryPoint(*reflexxesData_.inputParameters, *reflexxesData_.outputParameters);
+  trajectory_msgs::JointTrajectoryPoint point = buildTrajectoryPoint(reflexxesData_);
 
 
   // The input of the next iteration is the output of this one
@@ -535,25 +565,26 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce() {
 
 
 
-// TODO: buildTrajectoryPoint(ReflexxesData)
-
-
-
-
-/** This method will return a JointTrajectoryPoint given some output parameters from Reflexxes */
-const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const RMLPositionInputParameters input, const RMLPositionOutputParameters output) {
+/** Given Reflexxes data, return a trajectory point */
+const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const ReflexxesData data) {
   trajectory_msgs::JointTrajectoryPoint point;
 
-  
-  // Push on the p, v, and a vectors
   for(unsigned int i=0;i<reflexxesData_.NUMBER_OF_DOFS;i++) {
+      
+    // If Reflexxes has not been called yet
+    if(data.outputParameters->NewPositionVector->VecData[0] == -99) {
+      point.positions.push_back(data.inputParameters->CurrentPositionVector->VecData[i]);
+      point.velocities.push_back(data.inputParameters->CurrentVelocityVector->VecData[i]);
+      point.accelerations.push_back(data.inputParameters->CurrentAccelerationVector->VecData[i]);
+    }
     
-    // If we are planning on DOF i, just push on values
-    if(reflexxesData_.inputParameters->SelectionVector->VecData[i]) {
-      point.positions.push_back(output.NewPositionVector->VecData[i]);
-      point.velocities.push_back(output.NewVelocityVector->VecData[i]);
-      point.accelerations.push_back(output.NewAccelerationVector->VecData[i]);
-    } // end if
+    // If selection vector is true
+    else if(reflexxesData_.inputParameters->SelectionVector->VecData[i]) {
+      
+      point.positions.push_back(data.outputParameters->NewPositionVector->VecData[i]);
+      point.velocities.push_back(data.outputParameters->NewVelocityVector->VecData[i]);
+      point.accelerations.push_back(data.outputParameters->NewAccelerationVector->VecData[i]);
+    } // end if selection vector is true
     
     // Else if we're at orientation dof
     else if(i == 2) {
@@ -561,11 +592,11 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
       // If straight-line paths, make theta be towards next knot point
       double theta = utility_.findAngleFromAToB( prevKP_.positions.at(0),
                                                  prevKP_.positions.at(1),
-                                  input.TargetPositionVector->VecData[0],
-                                  input.TargetPositionVector->VecData[1]);
+                                  data.inputParameters->TargetPositionVector->VecData[0],
+                                  data.inputParameters->TargetPositionVector->VecData[1]);
 
       // Get angular velocity
-      double w = (theta - input.CurrentPositionVector->VecData[2]) / 
+      double w = (theta - data.inputParameters->CurrentPositionVector->VecData[2]) / 
                   CYCLE_TIME_IN_SECONDS;
       
       // Push on p,v,a
@@ -579,55 +610,20 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
       reflexxesData_.outputParameters->NewPositionVector->VecData[2] = theta;
       reflexxesData_.outputParameters->NewVelocityVector->VecData[2] = w;
     } // end else-if orientation
-
-    // Else, push on current values
-    else {
-      point.positions.push_back(reflexxesData_.inputParameters->CurrentPositionVector->VecData[i]);
-      point.velocities.push_back(reflexxesData_.inputParameters->CurrentVelocityVector->VecData[i]);
-      point.accelerations.push_back(reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[i]);
-    } // end else
-  } // end for
-
-
-  // Set the timeFromStart_ value for the point
-  point.time_from_start = timeFromStart_;
-  timeFromStart_ += ros::Duration(CYCLE_TIME_IN_SECONDS);
-
-
-  return point;
-} // End buildTrajectoryPoint
-
-
-
-
-/** 
- *  This method will return a JointTrajectoryPoint given some input parameters from Reflexxes 
- *  This is used to generate the first point on a trajectory
- **/
-const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const RMLPositionInputParameters my_inputParameters) {
-  trajectory_msgs::JointTrajectoryPoint point;
-
- 
-  // Push on the p, v, and a vectors
-  for(unsigned int i=0;i<reflexxesData_.NUMBER_OF_DOFS;i++) {
-    if(reflexxesData_.inputParameters->SelectionVector->VecData[i]) {
-      point.positions.push_back(my_inputParameters.CurrentPositionVector->VecData[i]);
-      point.velocities.push_back(my_inputParameters.CurrentVelocityVector->VecData[i]);
-      point.accelerations.push_back(my_inputParameters.CurrentAccelerationVector->VecData[i]);
-    }
-
+      
+    // Else, just push on the current value
     else {
       point.positions.push_back(reflexxesData_.inputParameters->CurrentPositionVector->VecData[i]);
       point.velocities.push_back(reflexxesData_.inputParameters->CurrentVelocityVector->VecData[i]);
       point.accelerations.push_back(reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[i]);
     }
-  }
+  } // end for 
 
 
-  // The timeFromStart_ is the time of the previous point plus the cycle period
+  // The timeFromStart_ is the time of the previous point 
+  // plus the cycle period
   point.time_from_start = timeFromStart_;
   timeFromStart_ += ros::Duration(CYCLE_TIME_IN_SECONDS);
-
 
   return point;
 } // End buildTrajectoryPoint
@@ -659,7 +655,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   std::vector<BezierCurve> curves;
 
   // Use Bezier curves to smooth path
-  //if(bezier_ || partial_ || transition_) {
   if(type_ == ALL_BEZIER || type_ == PARTIAL_BEZIER || type_ != TRANSITION) {
     if(print_) 
       std::cout<<"\nPath before Bezier: "<<utility_.toString(path_)<<"\n";
@@ -668,6 +663,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
   }
 
+  // Print curves
   if(print_) {
     for(int c=0;c<curves.size();c++) {
       std::cout<<"\nCurve "<<c<<": ";
@@ -692,7 +688,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     // Push the initial state onto trajectory
     // And set previous knot point
     if(i_kp_ == 1) {
-      res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(*reflexxesData_.inputParameters));
+      res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(reflexxesData_));
       prevKP_ = res.trajectory.trajectory.points.at(0);
     }
 
@@ -701,9 +697,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     // If its a Bezier curve traj, and we're at a Bezier point
     // all points between first and last are bezier point
     // TODO: straight-line segments between beziers
-    //if( (bezier_ && i_kp_ > 1 && i_kp_ < path_.points.size()-1) ||
-    //   (partial_ && i_kp_ > 1 && i_kp_ < 3) ||
-    //    (transition_ && i_kp_ == 1) ) 
     if( (type_ == ALL_BEZIER && i_kp_ > 1 && i_kp_ < path_.points.size()-1) ||
         (type_ == PARTIAL_BEZIER && i_kp_ > 1 && i_kp_ < 3) ||
         (type_ == TRANSITION && i_kp_ == 1) ) 
@@ -727,7 +720,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     /** Straight Line Segment */
     // Else if not bezier or 1st/last segment with bezier
     // 2nd clause is for not doing the last part if its a transition trj
-    //else if(i_kp_ > 1 && i_kp_ < path_.points.size()-1) {
     else {
       //std::cout<<"\nIn else\n";
 
