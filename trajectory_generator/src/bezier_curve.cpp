@@ -46,17 +46,13 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const doubl
   x_dot_max_      = x_dot_max;
   y_dot_max_      = y_dot_max;
   
-  std::cout<<"\nBefore initControlPoints\n";
   initControlPoints();
-  std::cout<<"\nAfter initControlPoints\n";
   calculateConstants();
 
   // If both C and D == 0, the first two points are the same
   if(C_ > 0.0001 && D_ > 0.0001) {
   
-    std::cout<<"\nBefore initReflexxes\n";
     initReflexxes(x_dot_max, y_dot_max, x_dot_dot_max, y_dot_dot_max);
-    std::cout<<"\nAfter initReflexxes\n";
 
     theta_prev_ = theta;
     

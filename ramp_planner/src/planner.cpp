@@ -138,6 +138,8 @@ void Planner::initStartGoal(const MotionState s, const MotionState g) {
 
   m_cc_ = start_;
   startPlanning_ = start_;
+
+  latestUpdate_ = start_;
 }
 
 
@@ -970,7 +972,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     
     // After m_cc_ and startPlanning are set, update the population
     adaptPopulation(controlCycle_);
-    evaluatePopulation();
+    //****evaluatePopulation();
 
     //std::cout<<"\nPopulation now: "<<population_.toString();
     
@@ -979,6 +981,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
       population_.createSubPopulations();
     }
 
+    sendPopulation();
 
     // Build m_i
     //*****setMi();
@@ -1100,9 +1103,10 @@ void Planner::sendPopulation() {
 
 const bool Planner::compareSwitchToBest(const RampTrajectory traj) const {
   double bestFitness = bestTrajec_.msg_trajec_.fitness;
-  std::cout<<"\nbestFitness: "<<bestFitness;
+  std::cout<<"\ntraj.fitness: "<<traj.msg_trajec_.fitness<<" bestFitness: "<<bestFitness;
   std::cout<<"\nc_pc: "<<c_pc_;
   std::cout<<"\n(generationsPerCC_ - c_pc_) * planningCycle_.toSec(): "<<(generationsPerCC_ - c_pc_) * planningCycle_.toSec();
+  std::cout<<"\nAdding on "<<c_pc_ * (generationsPerCC_ - c_pc_) * planningCycle_.toSec()<<" seconds";
 
   // Add delta t to bestFitness
   // delta t = time until next control cycle occurs = time until startPlanning
@@ -1141,14 +1145,16 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
   {
     std::cout<<"\nTrajectory being evaluated: "<<trajec.path_.toString();
     std::cout<<"\nTrajectory being evaluated is close to best fitness";
-    std::cout<<"\ntrajec_.fitness: "<<result.msg_trajec_.fitness;
-    std::cout<<"\nbestTrajec_.fitness: "<<bestTrajec_.msg_trajec_.fitness;
+    std::cout<<"\ntrajec id: "<<trajec.id_<<" trajec_.fitness: "<<result.msg_trajec_.fitness;
+    std::cout<<"\nbestTrajec.id: "<<bestTrajec_.id_<<" bestTrajec_.fitness: "<<bestTrajec_.msg_trajec_.fitness;
     stopForDebugging();
     std::cout<<"\nPress Enter to continue\n";
     std::cin.get();
 
     // Get transition trajectory
-    RampTrajectory temp = getTransitionTrajectory(trajec);
+    RampTrajectory temp = getTrajectoryWithCurve(trajec);
+
+    std::cout<<"\n\n\nbestTrajec: "<<bestTrajec_.toString();
 
     ramp_msgs::EvaluationRequest er_switch = buildEvaluationRequest(temp);
     
@@ -1164,6 +1170,7 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
     else {
       // TODO: some error handling
     }
+    std::cout<<"\n\n\nTransition trajectory: "<<temp.toString();
    
     // If the trajectory including the curve to switch is more fit than 
     // the best trajectory, return it
@@ -1260,8 +1267,8 @@ const MotionState Planner::findAverageDiff() {
   i_best_prev_ = population_.getBestID();
   std::cout<<"\nPopulation seeded!\n";
   std::cout<<"\n"<<population_.fitnessFeasibleToString()<<"\n";
-  std::cout<<"\n"<<population_.toString();
 
+  evaluatePopulation();
 
   if(subPopulations_) {
     population_.createSubPopulations();
@@ -1275,10 +1282,10 @@ const MotionState Planner::findAverageDiff() {
 
   
   // Start the planning cycle timer
-  planningCycleTimer_.start();
+  //****planningCycleTimer_.start();
 
   // Wait for 100 generations before starting 
-  while(generation_ < generationsBeforeCC_) {ros::spinOnce();}
+  //****while(generation_ < generationsBeforeCC_) {ros::spinOnce();}
 
   std::cout<<"\n***************Starting Control Cycle*****************\n";
   // Start the control cycle timer

@@ -170,8 +170,8 @@ void MobileRobot::updatePublishTimer(const ros::TimerEvent&) {
 /** This method updates the MobileRobot's trajectory
  *   It calls calculateSpeedsAndTimes to update the robot's vectors needed to move */
 void MobileRobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
-  //std::cout<<"\nIn updateTrajectory!\n";
-  //std::cout<<"\nTrajectory: "<<utility_.toString(msg);
+  std::cout<<"\nIn updateTrajectory!\n";
+  std::cout<<"\nTrajectory: "<<utility_.toString(msg);
   
   // Update data members
   restart_        = true;

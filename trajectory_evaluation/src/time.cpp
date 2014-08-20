@@ -11,10 +11,10 @@ const double Time::perform() {
   }
 
 
-
+  /* 
+  // Estimate time for any turns
   trajectory_msgs::JointTrajectoryPoint a, b, c;
 
-  // Estimate time for any turns
   int num_turns = trajectory_.index_knot_points.size()-1;
   for(uint8_t i=0;i<num_turns;i++) {
 
@@ -47,7 +47,7 @@ const double Time::perform() {
   double beta = utility_.findDistanceBetweenAngles(phi, last.positions.at(2));
 
   result += pow(beta / max_ang_speed, 2);
-
+  */
 
   return result;
 }
