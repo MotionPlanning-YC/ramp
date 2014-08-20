@@ -274,7 +274,8 @@ void Planner::seedPopulation() {
       temp.msg_trajec_ = msg_request.response.trajectory;
 
       // Set trajectory path
-      temp.path_ = msg_request.response.newPath;
+      temp.path_        = paths.at(i);
+      temp.bezierPath_  = msg_request.response.newPath;
 
       // Evaluate and add the trajectory to the population
       new_pop.push_back(evaluateTrajectory(temp));
@@ -331,7 +332,8 @@ void Planner::seedPopulationLine() {
     temp.msg_trajec_ = msg_request.response.trajectory;
 
     // Set trajectory path
-    temp.path_ = msg_request.response.newPath;
+    temp.path_        = msg_request.request.path;
+    temp.bezierPath_  = msg_request.response.newPath;
 
     // Evaluati and add the trajectory to the population
     population_.replace(1, evaluateTrajectory(temp));
@@ -431,7 +433,6 @@ const bool Planner::checkOrientation() const {
  *  The duration is used to determine which knot points still remain in the trajectory */
 void Planner::adaptPopulation(ros::Duration d) {
   
-  /** First, get the updated current configuration */
 
   
   // ***** TODO: PREDICT DURATION *****
@@ -454,6 +455,7 @@ void Planner::adaptPopulation(ros::Duration d) {
       // Set the Trajectory msg and the path
       temp.msg_trajec_  = msg_request.response.trajectory;
       temp.path_        = population_.paths_.at(i);
+      temp.bezierPath_  = msg_request.response.newPath;
       
       // Push onto updatedTrajecs
       updatedTrajecs.push_back(temp);
@@ -515,8 +517,9 @@ const std::vector<RampTrajectory> Planner::getTrajectories(const std::vector<Pat
       // Set the Trajectory msg
       temp.msg_trajec_ = msg_request.response.trajectory;
 
-      // Set trajectory path
-      temp.path_ = msg_request.response.newPath;
+      // Set trajectory paths 
+      temp.path_       = p.at(i);
+      temp.bezierPath_ = msg_request.response.newPath;
       
       // Add the trajectory to the population
       result.push_back(temp);
@@ -604,7 +607,7 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trgt_
   segment_points.push_back(start_);
   segment_points.push_back(startPlanning_);
   // 2nd knot point should be the initial point on that trajectory's bezier 
-  segment_points.push_back(bestTrajec_.path_.all_.at(1).motionState_);
+  segment_points.push_back(bestTrajec_.bezierPath_.all_.at(1).motionState_);
 
   std::cout<<"\nstart: "<<start_.toString();
   std::cout<<"\nstartPlaning: "<<startPlanning_.toString();
@@ -623,6 +626,7 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trgt_
   RampTrajectory transition;
   transition.msg_trajec_  = tr.response.trajectory;
   transition.path_        = tr.response.newPath;
+
   
   std::cout<<"\nTrajectory to change: "<<transition.toString()<<"\n";
 
@@ -709,6 +713,7 @@ const std::vector<RampTrajectory> Planner::modifyTrajec() {
       RampTrajectory temp(resolutionRate_, getIRT());
       temp.msg_trajec_ = tr.response.trajectory;
       temp.path_ = modded_paths.at(i);
+      temp.bezierPath_ = tr.response.newPath;
 
       result.push_back(temp);
   
@@ -883,10 +888,10 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
 
   // At generation x, insert a straight-line trajectory to the goal
-  if(generation_ == 50) {
-    seedPopulationLine();
-    std::cout<<"\nPop: "<<population_.fitnessFeasibleToString();
-  }
+  //if(generation_ == 50) {
+    //seedPopulationLine();
+    //std::cout<<"\nPop: "<<population_.fitnessFeasibleToString();
+  //}
 
 
 
@@ -916,7 +921,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     
     //std::cout<<"\nBefore modification\n";
     // Call modification
-    modification();
+    //modification();
     //std::cout<<"\nAfter modification\n";
 
 
@@ -933,7 +938,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     c_pc_++;
   
     // Send the new population to the trajectory viewer
-    sendPopulation();
+    //sendPopulation();
   
     //std::cout<<"\nGeneration "<<generation_-1<<" Completed";
   } // end if c_pc<genPerCC
@@ -968,13 +973,11 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     // The motion state that we should reach by the next control cycle
     m_cc_ = bestTrajec_.getPointAtTime(controlCycle_.toSec());
     startPlanning_ = m_cc_;
-    //std::cout<<"\n new startPlanning: "<<startPlanning_.toString();
     
     // After m_cc_ and startPlanning are set, update the population
     adaptPopulation(controlCycle_);
-    //****evaluatePopulation();
+    //evaluatePopulation();
 
-    //std::cout<<"\nPopulation now: "<<population_.toString();
     
     if(subPopulations_) {
       //std::cout<<"\n**********Creating sub-populations in PC***********\n";
@@ -1139,7 +1142,7 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
 
 
   // If the fitness is close to the best trajectory's fitness
-  if(cc_started_ && trajec.id_ != bestTrajec_.id_ &&
+  /*if(cc_started_ && trajec.id_ != bestTrajec_.id_ &&
       (result.msg_trajec_.fitness > bestTrajec_.msg_trajec_.fitness ||
       fabs(result.msg_trajec_.fitness - bestTrajec_.msg_trajec_.fitness) < 5) ) 
   {
@@ -1179,7 +1182,7 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
       return temp;
     }
     std::cout<<"\ncompareSwitchToBest: false";
-  } // end if 
+  } // end if */
 
   return result;
 } // End evaluateTrajectory
@@ -1268,7 +1271,8 @@ const MotionState Planner::findAverageDiff() {
   std::cout<<"\nPopulation seeded!\n";
   std::cout<<"\n"<<population_.fitnessFeasibleToString()<<"\n";
 
-  evaluatePopulation();
+  // Evaluate after seeding
+  bestTrajec_ = evaluateAndObtainBest();
 
   if(subPopulations_) {
     population_.createSubPopulations();
@@ -1282,7 +1286,7 @@ const MotionState Planner::findAverageDiff() {
 
   
   // Start the planning cycle timer
-  //****planningCycleTimer_.start();
+  planningCycleTimer_.start();
 
   // Wait for 100 generations before starting 
   //****while(generation_ < generationsBeforeCC_) {ros::spinOnce();}

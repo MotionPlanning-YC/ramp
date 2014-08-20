@@ -18,6 +18,7 @@ class RampTrajectory {
     bool                  feasible_;
     float                 time_until_collision_;
     Path                  path_;
+    Path                  bezierPath_;
     float                 resolutionRate_;
     int                   subPopulation_;
 
