@@ -28,7 +28,7 @@ class Evaluate {
     
 
     //Information sent by the request
-    ramp_msgs::Trajectory trajectory_;
+    ramp_msgs::RampTrajectory trajectory_;
     ramp_msgs::MotionState goal_;
     std::vector<unsigned int> i_segments_;
 

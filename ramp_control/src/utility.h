@@ -32,7 +32,7 @@ class Utility {
     const double getEuclideanDist(const std::vector<double> a, std::vector<double> b) const;
     
     const std::string toString(const trajectory_msgs::JointTrajectoryPoint p) const;
-    const std::string toString(const ramp_msgs::Trajectory traj) const;
+    const std::string toString(const ramp_msgs::RampTrajectory traj) const;
     const std::string toString(const ramp_msgs::Path p) const;
     const std::string toString(const ramp_msgs::MotionState c) const;
     const std::string toString(const ramp_msgs::KnotPoint kp) const;

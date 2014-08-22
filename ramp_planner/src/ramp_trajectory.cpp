@@ -1,11 +1,12 @@
 #include "ramp_trajectory.h"
 
-RampTrajectory::RampTrajectory(const float resRate, unsigned int id) : id_(id), fitness_(-1.0), feasible_(true), time_until_collision_(9999.0f), resolutionRate_(resRate) {
-  msg_trajec_.feasible = true;
-  msg_trajec_.fitness = -1;  
+RampTrajectory::RampTrajectory(const float resRate, unsigned int id) : id_(id), timeUntilCollision_(9999.f)  {
+  msg_.feasible = true;
+  msg_.fitness = -1;  
+  msg_.resolutionRate = resRate;
 }
 
-RampTrajectory::RampTrajectory(const ramp_msgs::Trajectory msg) : msg_trajec_(msg), fitness_(msg.fitness), feasible_(msg.feasible), time_until_collision_(9999.0f) {}
+RampTrajectory::RampTrajectory(const ramp_msgs::RampTrajectory msg) : msg_(msg), timeUntilCollision_(9999.0f) {}
 
 
 const bool RampTrajectory::equal(const RampTrajectory& other) const {
@@ -16,9 +17,9 @@ const bool RampTrajectory::equal(const RampTrajectory& other) const {
 const Path RampTrajectory::getPath() const {
   Path result;
 
-  for(unsigned int i=0;i<msg_trajec_.index_knot_points.size();i++) {
+  for(unsigned int i=0;i<msg_.i_knotPoints.size();i++) {
 
-    MotionState ms(msg_trajec_.trajectory.points.at( msg_trajec_.index_knot_points.at(i)));
+    MotionState ms(msg_.trajectory.points.at( msg_.i_knotPoints.at(i)));
   
     result.all_.push_back(ms);
   }
@@ -32,11 +33,11 @@ const Path RampTrajectory::getPath() const {
 
 /** Time is in seconds */
 const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const float t) const {
-  if( (t/resolutionRate_) > msg_trajec_.trajectory.points.size() ) {
-    return msg_trajec_.trajectory.points.at( msg_trajec_.trajectory.points.size()-1 );
+  if( (t/msg_.resolutionRate) > msg_.trajectory.points.size() ) {
+    return msg_.trajectory.points.at( msg_.trajectory.points.size()-1 );
   }
 
-  return msg_trajec_.trajectory.points.at( (t / resolutionRate_) );
+  return msg_.trajectory.points.at( (t / msg_.resolutionRate) );
 }
 
 
@@ -46,8 +47,8 @@ const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const
 /** Returns the direction of the trajectory, i.e. the
 * orientation the base needs to move on the trajectory */
 const double RampTrajectory::getDirection() const {
-  trajectory_msgs::JointTrajectoryPoint a = msg_trajec_.trajectory.points.at(0);
-  trajectory_msgs::JointTrajectoryPoint b = msg_trajec_.trajectory.points.at(msg_trajec_.index_knot_points.at(1));
+  trajectory_msgs::JointTrajectoryPoint a = msg_.trajectory.points.at(0);
+  trajectory_msgs::JointTrajectoryPoint b = msg_.trajectory.points.at(msg_.i_knotPoints.at(1));
 
   return utility_.findAngleFromAToB(a, b);
 }
@@ -56,18 +57,18 @@ const double RampTrajectory::getDirection() const {
 
 const RampTrajectory RampTrajectory::getStraightSegment(uint8_t i) const {
 
-  int i_startSegment = msg_trajec_.index_knot_points.at(i);
+  int i_startSegment = msg_.i_knotPoints.at(i);
 
-  for(uint16_t i=i_startSegment;i<msg_trajec_.index_knot_points.at(i+1);i++) {
-    if(msg_trajec_.trajectory.points.at(i).positions.at(2) > 0.0001) {
+  for(uint16_t i=i_startSegment;i<msg_.i_knotPoints.at(i+1);i++) {
+    if(msg_.trajectory.points.at(i).positions.at(2) > 0.0001) {
       RampTrajectory result = *this;
       
       // Get subset of vector
       std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator first = 
-        msg_trajec_.trajectory.points.begin()+i;
-      std::vector<trajectory_msgs::JointTrajectoryPoint> m(first, msg_trajec_.trajectory.points.end());
+        msg_.trajectory.points.begin()+i;
+      std::vector<trajectory_msgs::JointTrajectoryPoint> m(first, msg_.trajectory.points.end());
 
-      result.msg_trajec_.trajectory.points = m;
+      result.msg_.trajectory.points = m;
 
       return result;
     }
@@ -86,9 +87,9 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
   std::ostringstream result;
  
   result<<"\nTrajectory ID: "<<id_;
-  result<<"\n Number of knot points: "<<msg_trajec_.index_knot_points.size(); 
+  result<<"\n Number of knot points: "<<msg_.i_knotPoints.size(); 
   result<<"\n Path: "<<path_.toString();
-  result<<"\n Fitness: "<<fitness_<<" Feasible: "<<feasible_<<" Collision Time: "<<time_until_collision_;
+  result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<msg_.feasible<<" Collision Time: "<<timeUntilCollision_;
 
   return result.str();
 }
@@ -96,8 +97,8 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
 const std::string RampTrajectory::toString() const {
   std::ostringstream result;
   
-  result<<"\nTrajectory ID: "<<id_<<"\n"<<utility_.toString(msg_trajec_);
-  result<<"\n Fitness: "<<fitness_<<" Feasible: "<<feasible_<<" Collision Time: "<<time_until_collision_;
+  result<<"\nTrajectory ID: "<<id_<<"\n"<<utility_.toString(msg_);
+  result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<msg_.feasible<<" Collision Time: "<<timeUntilCollision_;
   
   return result.str();
 }

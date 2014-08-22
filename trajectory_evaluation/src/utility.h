@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include "ramp_msgs/Trajectory.h"
+#include "ramp_msgs/RampTrajectory.h"
 #include "ramp_msgs/Path.h"
 #include <tf/transform_datatypes.h>
 #include <ros/console.h>
@@ -39,7 +39,7 @@ class Utility {
     const std::string toString(const ramp_msgs::MotionState mp) const;
     const std::string toString(const ramp_msgs::KnotPoint kp) const;
     const std::string toString(const ramp_msgs::Path path) const;
-    const std::string toString(const ramp_msgs::Trajectory traj) const;
+    const std::string toString(const ramp_msgs::RampTrajectory traj) const;
     const std::string toString(const trajectory_msgs::JointTrajectoryPoint p) const;
 };
 

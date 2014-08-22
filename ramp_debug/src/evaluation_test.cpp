@@ -8,12 +8,12 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "evaluation_test");
   ros::NodeHandle handle;
 
-  ros::Publisher pub_traj = handle.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000);
+  ros::Publisher pub_traj = handle.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
   ros::ServiceClient client_traj = handle.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");
   ros::ServiceClient client_eval = handle.serviceClient<ramp_msgs::EvaluationRequest>("trajectory_evaluation");
 
-  ramp_msgs::Trajectory traj1;
-  ramp_msgs::Trajectory traj2;
+  ramp_msgs::RampTrajectory traj1;
+  ramp_msgs::RampTrajectory traj2;
   
   /**************************************************/
   /********** Build Paths for trajectories **********/

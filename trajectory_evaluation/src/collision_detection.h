@@ -2,7 +2,6 @@
 #define COLLISION_DETECTION
 #include "utility.h"
 #include "ramp_msgs/ObstacleList.h"
-//#include "ramp_msgs/Trajectory.h"
 #include "ramp_msgs/Population.h"
 #include "motion_type.h"
 #include "tf/transform_datatypes.h"
@@ -32,15 +31,15 @@ class CollisionDetection {
     /***** Methods *****/ 
     void                        init(ros::NodeHandle& h);
     const QueryResult           perform() const;
-    const QueryResult           query(const ramp_msgs::Trajectory ob_trajectory) const;
-    const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle) const;
+    const QueryResult           query(const ramp_msgs::RampTrajectory ob_trajectory) const;
+    const ramp_msgs::RampTrajectory getPredictedTrajectory(const ramp_msgs::Obstacle) const;
 
 
     /***** Data Members ****/
     int                   id;
     tf::Transform         ob_T_w_b_;
     ramp_msgs::Obstacle   obstacle_;
-    ramp_msgs::Trajectory trajectory_;
+    ramp_msgs::RampTrajectory trajectory_;
     ros::Duration         predictionTime_;
   
 

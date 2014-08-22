@@ -49,7 +49,7 @@ class Utility {
     const std::string toString(const ramp_msgs::MotionState mp) const;
     const std::string toString(const ramp_msgs::KnotPoint kp) const;
     const std::string toString(const ramp_msgs::Path path) const;
-    const std::string toString(const ramp_msgs::Trajectory traj) const;
+    const std::string toString(const ramp_msgs::RampTrajectory traj) const;
     const std::string toString(const trajectory_msgs::JointTrajectoryPoint p) const;
 };
 

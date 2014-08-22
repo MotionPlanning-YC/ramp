@@ -21,7 +21,7 @@ void twistCallback(const geometry_msgs::Twist msg) {
 }
 
 
-void trajCallback(const ramp_msgs::Trajectory& msg) {
+void trajCallback(const ramp_msgs::RampTrajectory& msg) {
   std::cout<<"\nGot trajectory message!\n";
 
   // If we got a trajectory, set the robot's trajectory 

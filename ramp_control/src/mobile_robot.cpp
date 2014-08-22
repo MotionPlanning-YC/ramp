@@ -169,7 +169,7 @@ void MobileRobot::updatePublishTimer(const ros::TimerEvent&) {
 
 /** This method updates the MobileRobot's trajectory
  *   It calls calculateSpeedsAndTimes to update the robot's vectors needed to move */
-void MobileRobot::updateTrajectory(const ramp_msgs::Trajectory msg) {
+void MobileRobot::updateTrajectory(const ramp_msgs::RampTrajectory msg) {
   std::cout<<"\nIn updateTrajectory!\n";
   std::cout<<"\nTrajectory: "<<utility_.toString(msg);
   
@@ -286,10 +286,10 @@ const bool MobileRobot::checkOrientation(const int i, const bool simulation) con
   
   // Find which knot point is next
   int kp;
-  for(kp=0;kp<trajectory_.index_knot_points.size();kp++) {
-    //std::cout<<"\ntrajectory_.index_knot_points.at(kp): "<<trajectory_.index_knot_points.at(kp);
-    if(i < trajectory_.index_knot_points.at(kp)) {
-      kp = trajectory_.index_knot_points.at(kp);
+  for(kp=0;kp<trajectory_.i_knotPoints.size();kp++) {
+    //std::cout<<"\ntrajectory_.i_knotPoints.at(kp): "<<trajectory_.i_knotPoints.at(kp);
+    if(i < trajectory_.i_knotPoints.at(kp)) {
+      kp = trajectory_.i_knotPoints.at(kp);
       break;
     }
   }

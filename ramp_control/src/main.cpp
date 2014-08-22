@@ -4,7 +4,7 @@
 
 MobileRobot robot;
 
-void trajCallback(const ramp_msgs::Trajectory::ConstPtr& msg) {
+void trajCallback(const ramp_msgs::RampTrajectory::ConstPtr& msg) {
   //std::cout<<"\nGot the trajectory message!\n";
   //std::cout<<"\nPress enter to call updateTrajectory\n";
   //std::cin.get();
@@ -62,8 +62,8 @@ int main(int argc, char** argv) {
   init_advertisers_subscribers(robot, handle, sim);
 
 
-  // Make a blank ramp_msgs::Trajectory
-  ramp_msgs::Trajectory init;
+  // Make a blank ramp_msgs::RampTrajectory
+  ramp_msgs::RampTrajectory init;
   robot.trajectory_ = init;
 
   while(ros::ok()) {

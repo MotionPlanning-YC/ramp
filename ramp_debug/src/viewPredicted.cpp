@@ -203,8 +203,8 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
 
 /** This method returns the predicted trajectory for an obstacle for the future duration d 
  * TODO: Remove Duration parameter and make the predicted trajectory be computed until robot reaches bounds of environment */
-const ramp_msgs::Trajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob, const ros::Duration d) {
-  ramp_msgs::Trajectory result;
+const ramp_msgs::RampTrajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob, const ros::Duration d) {
+  ramp_msgs::RampTrajectory result;
 
   // First, identify which type of trajectory it is
   // translations only, self-rotation, translation and self-rotation, or global rotation
@@ -256,7 +256,7 @@ void getAndSendTrajectory() {
 
   if(odom_recv) {
     ros::Duration d(10);
-    ramp_msgs::Trajectory t = getPredictedTrajectory(obstacle, d);
+    ramp_msgs::RampTrajectory t = getPredictedTrajectory(obstacle, d);
 
     ramp_msgs::Population pop;
     pop.population.push_back(t);

@@ -4,14 +4,13 @@
 
 #include "ros/ros.h"
 #include "utility.h"
+#include "trajectory_request_handler.h"
 #include "nav_msgs/Odometry.h"
 #include "corobot_msgs/MotorCommand.h"
 #include "geometry_msgs/Twist.h"
-#include "ramp_msgs/Configuration.h"
-#include "ramp_msgs/Trajectory.h"
 #include "tf/transform_datatypes.h"
 #include "ramp_msgs/MotionState.h"
-#include "trajectory_request_handler.h"
+#include "ramp_msgs/Configuration.h"
 #include <math.h>
 
 class MobileRobot {
@@ -30,9 +29,9 @@ class MobileRobot {
     void stop() const;
 
     void moveOnTrajectory(bool simulation);
-    void moveOnTrajectoryRot(const ramp_msgs::Trajectory traj, bool simulation);
+    void moveOnTrajectoryRot(const ramp_msgs::RampTrajectory traj, bool simulation);
     void updateState(const nav_msgs::Odometry& msg);
-    void updateTrajectory(const ramp_msgs::Trajectory msg); 
+    void updateTrajectory(const ramp_msgs::RampTrajectory msg); 
     void updatePublishTimer(const ros::TimerEvent&);
     void sendTwist(const geometry_msgs::Twist twist) const;
     void controlCycle(geometry_msgs::Twist twist, ros::Time end_time, ros::Rate r);
@@ -47,7 +46,7 @@ class MobileRobot {
     ros::Subscriber                   sub_odometry_;
     ramp_msgs::MotionState            motion_state_; 
     geometry_msgs::Twist              velocity_;
-    ramp_msgs::Trajectory             trajectory_;
+    ramp_msgs::RampTrajectory             trajectory_;
     ros::Timer                        timer_;
     double                            initial_theta_;
 
@@ -68,7 +67,7 @@ class MobileRobot {
     void                        printVectors() const;
     const bool                  checkImminentCollision() const;
     const bool                  checkOrientation(const int i, const bool simulation) const;
-    const ramp_msgs::Trajectory getRotationTrajectory() const;
+    const ramp_msgs::RampTrajectory getRotationTrajectory() const;
     const std::vector<float>    computeAcceleration() const;
     
     

@@ -14,6 +14,7 @@ public:
   ~BezierCurve();
   
   void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max);
+  void init(const std::vector<ramp_msgs::MotionState> sp, const ramp_msgs::MotionState curveStart, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max);
 
   const std::vector<ramp_msgs::MotionState> generateCurve();
   
@@ -27,6 +28,7 @@ public:
   std::vector<ramp_msgs::MotionState> points_         ;
 
   void initControlPoints();
+  void initControlPoints(const ramp_msgs::MotionState start);
   bool print_;
 
 private:

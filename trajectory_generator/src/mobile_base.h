@@ -63,6 +63,9 @@ private:
   // Previous knot point - used for straight line trajectories
   trajectory_msgs::JointTrajectoryPoint prevKP_;
 
+  // Curve start
+  ramp_msgs::MotionState curveStart_;
+
   // Utility
   Utility utility_;
 

@@ -250,16 +250,16 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
 }
 
 
-const std::string Utility::toString(const ramp_msgs::Trajectory traj) const {
+const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const {
   std::ostringstream result;
 
   result<<"\n Knot Points:";
 
-  for(unsigned int i=0;i<traj.index_knot_points.size();i++) {
+  for(unsigned int i=0;i<traj.i_knotPoints.size();i++) {
     
     result<<"\n   "<<i<<":";
     
-    unsigned int index = traj.index_knot_points.at(i);
+    unsigned int index = traj.i_knotPoints.at(i);
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);
     
     result<<"\n       "<<toString(p);

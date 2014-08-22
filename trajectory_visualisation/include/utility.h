@@ -4,7 +4,6 @@
 #include <math.h>
 #include <vector>
 #include "ramp_msgs/TrajectoryRequest.h"
-#include "ramp_msgs/Trajectory.h"
 #include "ramp_msgs/Path.h"
 #include "ramp_msgs/Configuration.h"
 
@@ -40,7 +39,7 @@ class Utility {
     const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint> configs) const;
 
 
-    const std::string toString(const ramp_msgs::Trajectory traj) const;
+    const std::string toString(const ramp_msgs::RampTrajectory traj) const;
     const std::string toString(const ramp_msgs::Path p) const;
     const std::string toString(const ramp_msgs::KnotPoint kp) const;
     const std::string toString(const ramp_msgs::Configuration c) const;

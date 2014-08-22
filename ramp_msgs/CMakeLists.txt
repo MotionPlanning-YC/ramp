@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS genmsg message_generation nav_msgs std_m
 #######################################
 
 ## Generate messages in the 'msg' folder
-add_message_files(FILES Configuration.msg KnotPoint.msg MotionState.msg Path.msg Range.msg Trajectory.msg Update.msg IRObject.msg Obstacle.msg ObstacleList.msg Population.msg)
+add_message_files(FILES Configuration.msg KnotPoint.msg MotionState.msg Path.msg Range.msg RampTrajectory.msg Update.msg IRObject.msg Obstacle.msg ObstacleList.msg Population.msg)
 
 ## Generate services in the 'srv' folder
 add_service_files(FILES EvaluationRequest.srv ModificationRequest.srv TrajectoryRequest.srv)

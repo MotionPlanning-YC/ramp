@@ -1,6 +1,5 @@
 #include <iostream>
 #include "ros/ros.h"
-#include "ramp_msgs/Trajectory.h"
 #include "ramp_msgs/Path.h"
 #include "utility.h"
 #include "ramp_msgs/TrajectoryRequest.h"
@@ -32,7 +31,7 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "interrupt_trajectory");
   ros::NodeHandle handle;
 
-  ros::Publisher pub_traj = handle.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000);
+  ros::Publisher pub_traj = handle.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
   ros::Publisher pub_pop = handle.advertise<ramp_msgs::Population>("population", 1000);
   ros::Subscriber sub_start = handle.subscribe("update", 1000, &updateCallback);
   ros::ServiceClient client_ = handle.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");
@@ -83,7 +82,7 @@ int main(int argc, char** argv) {
 
   // Request and send trajectory
   client_.call(tr);
-  ramp_msgs::Trajectory trj = tr.response.trajectory;
+  ramp_msgs::RampTrajectory trj = tr.response.trajectory;
   pub_traj.publish(tr.response.trajectory);
 
   
@@ -102,7 +101,7 @@ int main(int argc, char** argv) {
   ros::spinOnce();
   
   // Stop the robot from driving
-  ramp_msgs::Trajectory blank;
+  ramp_msgs::RampTrajectory blank;
   pub_traj.publish(blank);
 
 
@@ -139,7 +138,7 @@ int main(int argc, char** argv) {
 
   // Request trajectory, but don't send yet
   client_.call(tr2);
-  ramp_msgs::Trajectory trj2 = tr2.response.trajectory;
+  ramp_msgs::RampTrajectory trj2 = tr2.response.trajectory;
 
   std::cout<<"\nTrajectory 2: "<<u.toString(trj2);
   
@@ -173,7 +172,7 @@ int main(int argc, char** argv) {
 
   // Request trajectory, but don't send yet
   client_.call(tr3);
-  ramp_msgs::Trajectory trj3 = tr3.response.trajectory;
+  ramp_msgs::RampTrajectory trj3 = tr3.response.trajectory;
   
   // Push trajectory onto population 
   // and publish population

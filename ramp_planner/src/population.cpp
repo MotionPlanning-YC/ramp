@@ -67,11 +67,11 @@ const int Population::getNumSubPops() const {
 
 /** This method returns the minimum fitness of the population */
 const int Population::getMinFitness() const {
-  int result = trajectories_.at(0).fitness_;
+  int result = trajectories_.at(0).msg_.fitness;
 
   for(uint8_t i=1;i<trajectories_.size();i++) {
-    if(trajectories_.at(i).fitness_ < result) {
-      result = trajectories_.at(i).fitness_;
+    if(trajectories_.at(i).msg_.fitness < result) {
+      result = trajectories_.at(i).msg_.fitness;
     }
   }
   
@@ -88,7 +88,7 @@ const int Population::getMinFitness() const {
 /** This method returns true if there is at least one feasible trajectory in the population */
 const bool Population::feasibleExists() const {
   for(uint8_t i=0;i<trajectories_.size();i++) {
-    if(trajectories_.at(i).feasible_) {
+    if(trajectories_.at(i).msg_.feasible) {
       return true;
     }
   }
@@ -101,7 +101,7 @@ const bool Population::feasibleExists() const {
 /** This method returns true if there is at least one infeasible trajectory in the population */
 const bool Population::infeasibleExists() const {
   for(uint8_t i=0;i<trajectories_.size();i++) {
-    if(!trajectories_.at(i).feasible_) {
+    if(!trajectories_.at(i).msg_.feasible) {
       return true;
     }
   }
@@ -121,7 +121,7 @@ const bool Population::replacementPossible(const RampTrajectory rt) const {
   //std::cout<<"\n=========In replacementPossible==========\n";
 
   // If the fitness is not higher than the minimum fitness
-  if(rt.fitness_ <= getMinFitness()) {
+  if(rt.msg_.fitness <= getMinFitness()) {
     //std::cout<<"\nfitness < min fitness, not possible\n";
     return false;
   }
@@ -129,7 +129,7 @@ const bool Population::replacementPossible(const RampTrajectory rt) const {
   // If the trajectory is infeasible and
   // no infeasible trajectories exist, no
   // trajectories can be replaced
-  if(!rt.feasible_ && !infeasibleExists()) {
+  if(!rt.msg_.feasible && !infeasibleExists()) {
     //std::cout<<"\nrt infeasible, no other infeasible, not possible\n";
     return false;
   }
@@ -157,12 +157,12 @@ const bool Population::replacementPossible(const RampTrajectory rt) const {
     // If the valid sub-populations have only feasible trajectories
     // no trajectories can be replaced
     // or if rt's fitness is lower than the min fitness of sub-population
-    if(!rt.feasible_) {
+    if(!rt.msg_.feasible) {
       //std::cout<<"\nIn infeasible\n";
       bool valid=false;
       for(uint8_t i=0;i<i_validSubpops.size();i++) {
         if(subPopulations_.at(i_validSubpops.at(i)).infeasibleExists() &&
-            rt.fitness_ > subPopulations_.at(i_validSubpops.at(i)).getMinFitness())
+            rt.msg_.fitness > subPopulations_.at(i_validSubpops.at(i)).getMinFitness())
         {
           valid = true;
         }
@@ -194,7 +194,7 @@ const bool Population::canReplace(const RampTrajectory rt, const int i) const {
     return false;
   }
 
-  if(!rt.feasible_ && trajectories_.at(i).feasible_) {
+  if(!rt.msg_.feasible && trajectories_.at(i).msg_.feasible) {
     //std::cout<<"\nrt infeasible, i feasible, returning false\n";
     return false;
   }
@@ -319,7 +319,7 @@ const int Population::getBestID() {
   // Find the index of the trajectory with the highest fitness value
   unsigned int i_max = 0;
   for(unsigned int i=1;i<trajectories_.size();i++) {
-    if(trajectories_.at(i).fitness_ > trajectories_.at(i_max).fitness_) {
+    if(trajectories_.at(i).msg_.fitness > trajectories_.at(i_max).msg_.fitness) {
       i_max = i;
     }
   } //end for
@@ -464,7 +464,7 @@ ramp_msgs::Population Population::populationMsg()
   ramp_msgs::Population msg;
   
   for(int i=0; i<trajectories_.size(); i++) {
-    msg.population.push_back(trajectories_.at(i).msg_trajec_);
+    msg.population.push_back(trajectories_.at(i).msg_);
   }
   
   msg.best_id = i_best_;

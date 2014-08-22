@@ -63,6 +63,36 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const doubl
     std::cout<<"\nThe 2 points are the same\n";
   }
 }
+  
+
+//TODO: Test throughly
+void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const ramp_msgs::MotionState curveStart, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max) {
+  segment_points_ = sp;
+  x_init_v_       = x_dot_0;
+  y_init_v_       = y_dot_0;
+  x_init_a_       = x_dot_dot_0;
+  y_init_a_       = y_dot_dot_0;
+  x_dot_max_      = x_dot_max;
+  y_dot_max_      = y_dot_max;
+  
+  initControlPoints(curveStart);
+  calculateConstants();
+
+  // If both C and D == 0, the first two points are the same
+  if(C_ > 0.0001 && D_ > 0.0001) {
+  
+    initReflexxes(x_dot_max, y_dot_max, x_dot_dot_max, y_dot_dot_max);
+
+    theta_prev_ = theta;
+    
+    initialized_ = true;
+  } 
+
+  else {
+    std::cout<<"\nThe 2 points are the same\n";
+  }
+
+}
 
 
 
@@ -188,9 +218,9 @@ void BezierCurve::initReflexxes(const double x_dot_max, const double y_dot_max, 
   // Get initial and maximum velocity of Bezier parameter 
   double u_dot_0    = (D_*D_ > C_*C_) ? fabs(y_init_v_ / D_) : fabs(x_init_v_ / C_);
   double u_dot_max  = getUDotMax(u_dot_0);
-  if(print_) {
+  //if(print_) {
     std::cout<<"\nu_dot_0: "<<u_dot_0<<" u_dot_max: "<<u_dot_max;
-  }
+  //}
 
   // Set the position and velocity Reflexxes variables
   reflexxesData_.inputParameters->CurrentPositionVector->VecData[0]     = 0.;
@@ -215,10 +245,10 @@ void BezierCurve::initReflexxes(const double x_dot_max, const double y_dot_max, 
   reflexxesData_.inputParameters->TargetVelocityVector->VecData[0] = reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
   
 
-  if(print_) {
+  //if(print_) {
     printReflexxesInfo();
-    std::cin.get();
-  }
+    //std::cin.get();
+  //}
 
 
   reflexxesData_.resultValue = 0;
@@ -226,11 +256,8 @@ void BezierCurve::initReflexxes(const double x_dot_max, const double y_dot_max, 
 } // End initReflexxes
 
 
-
-
-/** Initialize the control points of the Bezier curve */
 void BezierCurve::initControlPoints() {
-  ramp_msgs::MotionState C0, C1, C2, p0, p1, p2;
+  ramp_msgs::MotionState C0, p0, p1, p2;
 
   // Set segment points
   p0 = segment_points_.at(0);
@@ -239,33 +266,59 @@ void BezierCurve::initControlPoints() {
 
   // Set orientation of the two segments
   double theta_s1 = utility_.findAngleFromAToB(p0.positions, p1.positions);
-  double theta_s2 = utility_.findAngleFromAToB(p1.positions, p2.positions);
-
-  // Control Point 1 is easy - set that now
-  C1 = segment_points_.at(1);
-  C1.positions.at(2) = theta_s1;
-
 
   /** Positions */
   C0.positions.push_back( (1-lambda_)*p0.positions.at(0) + lambda_*p1.positions.at(0) );
   C0.positions.push_back( (1-lambda_)*p0.positions.at(1) + lambda_*p1.positions.at(1) );
   C0.positions.push_back(theta_s1);
 
+  initControlPoints(C0);
+
+}
+
+
+
+
+
+
+/** Initialize the control points of the Bezier curve */
+void BezierCurve::initControlPoints(const ramp_msgs::MotionState start) {
+  ramp_msgs::MotionState C0, C1, C2, p0, p1, p2;
+
+
+  // Set segment points
+  p0 = segment_points_.at(0);
+  p1 = segment_points_.at(1);
+  p2 = segment_points_.at(2);
+
+  // Set orientation of the two segments
+  double theta_s1 = utility_.findAngleFromAToB( p0.positions, 
+                                                p1.positions);
+  double theta_s2 = utility_.findAngleFromAToB( p1.positions, 
+                                                p2.positions);
+
+  // Control point 0 is passed in
+  // Control Point 1 is the 2nd segment point
+  C0 = start;
+  C1 = segment_points_.at(1);
+  C1.positions.at(2) = theta_s1;
+
+  /** Set 3rd control point */
   // s1 = segment distance between first two control points
   double s1 = sqrt( pow(C1.positions.at(0) - C0.positions.at(0), 2) +
                     pow(C1.positions.at(1) - C0.positions.at(1), 2) );
 
-  // Get third control point
+  // Get x,y positions of the 3rd control point
   double x = C1.positions.at(0) + s1*cos(theta_s2);
   double y = C1.positions.at(1) + s1*sin(theta_s2);
 
   // Length of second segment
-  double d2 = sqrt( pow(p2.positions.at(0) - p1.positions.at(0), 2) +
+  double l2 = sqrt( pow(p2.positions.at(0) - p1.positions.at(0), 2) +
                     pow(p2.positions.at(1) - p1.positions.at(1), 2) );
 
   // If s1 is greater than entire 2nd segment,
   // set 3rd control point to end of 2nd segment
-  if(s1 > d2) {
+  if(s1 > l2) {
     C2.positions.push_back(p2.positions.at(0));  
     C2.positions.push_back(p2.positions.at(1));
   }
@@ -276,16 +329,19 @@ void BezierCurve::initControlPoints() {
   C2.positions.push_back(theta_s2);
 
 
-  /** Velocities */
-  C0.velocities.push_back(x_init_v_);
-  C0.velocities.push_back(y_init_v_);
-  C0.velocities.push_back(0);
+  /** C0 Velocities */
+  if(C0.velocities.size() == 0) {
+    C0.velocities.push_back(x_init_v_);
+    C0.velocities.push_back(y_init_v_);
+    C0.velocities.push_back(0);
+  }
+  /** C0 Accelerations */
+  if(C0.accelerations.size() == 0) {
+    C0.accelerations.push_back(0);
+    C0.accelerations.push_back(0);
+    C0.accelerations.push_back(0);
+  }
 
-
-  /** Accelerations */
-  C0.accelerations.push_back(0);
-  C0.accelerations.push_back(0);
-  C0.accelerations.push_back(0);
 
 
   // Push on all the points
@@ -359,9 +415,9 @@ void BezierCurve::calculateConstants() {
   calculateT_min();
   calculateR_min();
   
-  if(print_) {
+  //if(print_) {
     std::cout<<"\nA: "<<A_<<" B: "<<B_<<" C: "<<C_<<" D: "<<D_<<"\n";
-  }
+  //}
 }
 
 

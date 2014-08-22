@@ -1,7 +1,6 @@
 trajectory_msgs/JointTrajectory trajectory
-uint16[] index_knot_points
-float32 resolution_rate
+uint16[] i_knotPoints
+float32 resolutionRate
 
 bool feasible
 float32 fitness
-

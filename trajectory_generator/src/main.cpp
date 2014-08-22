@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
 
     /** Get a trajectory */
     
-    /*ramp_msgs::TrajectoryRequest tr;
+    /*ramp_msgs::RampTrajectoryRequest tr;
     tr.request.path = p;
     
     mobileBase.trajectoryRequest(tr.request, tr.response);
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
     /** Publish the Population */
 
     /*ros::Publisher pub = n.advertise<ramp_msgs::Population>("population", 1000);
-    ros::Publisher pub_trj = n.advertise<ramp_msgs::Trajectory>("bestTrajec", 1000);
+    ros::Publisher pub_trj = n.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
     
     // Make a Population
     ramp_msgs::Population pop;

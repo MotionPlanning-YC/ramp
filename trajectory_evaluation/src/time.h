@@ -1,7 +1,7 @@
 #ifndef TIME_H
 #define TIME_H
 #include "utility.h"
-#include "ramp_msgs/Trajectory.h"
+#include "ramp_msgs/RampTrajectory.h"
 
 class Time {
   public:
@@ -9,7 +9,7 @@ class Time {
 
     const double perform();
 
-    ramp_msgs::Trajectory trajectory_;
+    ramp_msgs::RampTrajectory trajectory_;
     ramp_msgs::MotionState goal_;
 
     Utility utility_;

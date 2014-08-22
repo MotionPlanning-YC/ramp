@@ -26,7 +26,7 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const {
   ros::Duration d(5);
   
   // Predict the obstacle's trajectory
-  ramp_msgs::Trajectory ob_trajectory = getPredictedTrajectory(obstacle_); 
+  ramp_msgs::RampTrajectory ob_trajectory = getPredictedTrajectory(obstacle_); 
   
   // Query for collision
   CollisionDetection::QueryResult q = query(ob_trajectory);
@@ -63,7 +63,7 @@ void CollisionDetection::setOb_T_w_b(int id) {
  * This method returns true if there is collision between trajectory_ and the obstacle's trajectory, false otherwise 
  * The robots are treated as circles for simple collision detection
  */
-const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::Trajectory ob_trajectory) const {
+const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::RampTrajectory ob_trajectory) const {
   //std::cout<<"\nQuery on "<<utility.toString(trajectory_)<<" \n*******and*******\n"<<utility.toString(ob_trajectory);
   CollisionDetection::QueryResult result;
 
@@ -163,8 +163,8 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
 
 /** This method returns the predicted trajectory for an obstacle for the future duration d 
  * TODO: Remove Duration parameter and make the predicted trajectory be computed until robot reaches bounds of environment */
-const ramp_msgs::Trajectory CollisionDetection::getPredictedTrajectory(const ramp_msgs::Obstacle ob) const {
-  ramp_msgs::Trajectory result;
+const ramp_msgs::RampTrajectory CollisionDetection::getPredictedTrajectory(const ramp_msgs::Obstacle ob) const {
+  ramp_msgs::RampTrajectory result;
 
   // First, identify which type of trajectory it is
   // translations only, self-rotation, translation and self-rotation, or global rotation
