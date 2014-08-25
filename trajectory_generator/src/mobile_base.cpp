@@ -420,7 +420,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
 
       else if(curveStart_.positions.size() > 0) {
-        std::cout<<"\nIn else if\n";
+        //std::cout<<"\nIn else if\n";
 
         //TODO: lambda
         bc.init(segment_points, curveStart_,
@@ -568,6 +568,7 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce() {
   resultValue_ = reflexxesData_.rml->RMLPosition(*reflexxesData_.inputParameters, reflexxesData_.outputParameters, reflexxesData_.flags);
   //if(print_) {
     //printReflexxesSpinInfo();
+    //std::cout<<"\n";
   //}
   
 
@@ -687,14 +688,14 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   }
 
   // Print curves
-  //if(print_) {
+  if(print_) {
     for(int c=0;c<curves.size();c++) {
       std::cout<<"\nCurve "<<c<<": ";
       for(int p=0;p<curves.at(c).points_.size();p++) {
         std::cout<<"\n"<<utility_.toString(curves.at(c).points_.at(p));
       }
     }
-  //}
+  }
   
 
   // Push 0 onto knot point indices
@@ -783,6 +784,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
             res.trajectory.trajectory.points.push_back(rotate_points.at(p));
           } // end for
 
+
           setSelectionVector();
           resultValue_ = 0;
         } // end if rotate
@@ -790,8 +792,10 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
       // Set target to next knot point
       setTarget(path_.points.at(i_kp_).motionState);
-      //std::cout<<"\nPrev KP: "<<utility_.toString(prevKP_)<<"\n";
-      //std::cout<<"\nTarget: "<<utility_.toString(path_.points.at(i_kp_).motionState)<<"\n";
+      if(print_) {
+        std::cout<<"\nPrev KP: "<<utility_.toString(prevKP_)<<"\n";
+        std::cout<<"\nTarget: "<<utility_.toString(path_.points.at(i_kp_).motionState)<<"\n";
+      }
 
 
 
@@ -806,24 +810,18 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
       // Once we reached the target, we set that the latest point is a knotpoint
       res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
-      
     } // end else
-
-
-
 
     // Set previous knot point
     prevKP_ = res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size() - 1);
 
     //std::cout<<"\nReached target at \n"<<utility_.toString(prevKP_)<<"\n";
-    //std::cin.get();
   } // end for
 
-  
   // Lastly, set newPath in case the path changed
   res.newPath = path_;
+
   //std::cout<<"\nReturning: "<<utility_.toString(res.trajectory)<<"\n";
-  //std::cin.get();
   return true;
 } // End trajectoryRequest callback
 

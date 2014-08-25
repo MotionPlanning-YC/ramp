@@ -8,7 +8,7 @@
 class RampTrajectory {
   public:
     
-    RampTrajectory(const float resRate=1.f/10.f, unsigned int id=0);
+    explicit RampTrajectory(const float resRate=1.f/10.f, unsigned int id=0);
     RampTrajectory(const ramp_msgs::RampTrajectory msg);
     ~RampTrajectory() {}
     

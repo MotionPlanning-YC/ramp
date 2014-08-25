@@ -218,9 +218,9 @@ void BezierCurve::initReflexxes(const double x_dot_max, const double y_dot_max, 
   // Get initial and maximum velocity of Bezier parameter 
   double u_dot_0    = (D_*D_ > C_*C_) ? fabs(y_init_v_ / D_) : fabs(x_init_v_ / C_);
   double u_dot_max  = getUDotMax(u_dot_0);
-  //if(print_) {
+  if(print_) {
     std::cout<<"\nu_dot_0: "<<u_dot_0<<" u_dot_max: "<<u_dot_max;
-  //}
+  }
 
   // Set the position and velocity Reflexxes variables
   reflexxesData_.inputParameters->CurrentPositionVector->VecData[0]     = 0.;
@@ -245,10 +245,10 @@ void BezierCurve::initReflexxes(const double x_dot_max, const double y_dot_max, 
   reflexxesData_.inputParameters->TargetVelocityVector->VecData[0] = reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
   
 
-  //if(print_) {
+  if(print_) {
     printReflexxesInfo();
-    //std::cin.get();
-  //}
+    std::cin.get();
+  }
 
 
   reflexxesData_.resultValue = 0;
@@ -415,9 +415,9 @@ void BezierCurve::calculateConstants() {
   calculateT_min();
   calculateR_min();
   
-  //if(print_) {
+  if(print_) {
     std::cout<<"\nA: "<<A_<<" B: "<<B_<<" C: "<<C_<<" D: "<<D_<<"\n";
-  //}
+  }
 }
 
 

@@ -49,8 +49,17 @@ const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
     
     return true;
   }
-  
-  return false;
+  else {
+    changed_ = true;
+
+    trajectories_ = new_pop;
+    paths_.clear();
+    for(uint8_t i=0;i<new_pop.size();i++) {
+      paths_.push_back(new_pop.at(i).path_);
+    }
+
+    return true;
+  }
 }
 
 

@@ -625,7 +625,7 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trgt_
 
   RampTrajectory transition;
   transition.msg_  = tr.response.trajectory;
-  transition.path_        = tr.response.newPath;
+  transition.path_ = tr.response.newPath;
 
   
   std::cout<<"\nTrajectory to change: "<<transition.toString()<<"\n";
@@ -641,19 +641,34 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trgt_
 const RampTrajectory Planner::getTrajectoryWithCurve(const RampTrajectory trgt_traj) {
   RampTrajectory result = getTransitionTrajectory(trgt_traj);
 
+  // Set the cycle time and latest point's time
+  ros::Duration t_cycle   = result.msg_.trajectory.points.at(1).time_from_start - 
+                            result.msg_.trajectory.points.at(0).time_from_start;
+  ros::Duration t_latest  = result.msg_.trajectory.points.at(
+                            result.msg_.trajectory.points.size()-1).time_from_start 
+                            + t_cycle;
 
   // Keep a counter for the knot points
   int c_kp=2;
 
   // Start at the bezier curve in trgt_traj and push on the rest of the trajectory to result
+  // todo: i should be + 1
   for(uint16_t i=trgt_traj.msg_.i_knotPoints.at(1); i<trgt_traj.msg_.trajectory.points.size(); i++) {
-    result.msg_.trajectory.points.push_back( trgt_traj.msg_.trajectory.points.at(i) );
+    trajectory_msgs::JointTrajectoryPoint temp = trgt_traj.msg_.trajectory.points.at(i);
+
+    // Set proper time
+    temp.time_from_start = t_latest;
+    t_latest += t_cycle;
+    
+    // Push on new point
+    result.msg_.trajectory.points.push_back( temp );
    
+    // If knot point, push on the index
     if( i == trgt_traj.msg_.i_knotPoints.at(c_kp) ) {
-      result.msg_.i_knotPoints.push_back(i);
+      result.msg_.i_knotPoints.push_back(result.msg_.trajectory.points.size()-1);
       c_kp++;
     }
-  }
+  } // end for
 
   return result;
 }
@@ -1102,10 +1117,23 @@ void Planner::sendPopulation() {
   h_control_->sendPopulation(msg);
 }
 
+void Planner::displayTrajectory(const ramp_msgs::RampTrajectory traj) const {
+  ramp_msgs::Population pop;
+  pop.population.push_back(traj);
+  h_control_->sendPopulation(pop);
+}
 
 
+
+/** Returns true if traj's fitness is better than the best fitness */
 const bool Planner::compareSwitchToBest(const RampTrajectory traj) const {
   double bestFitness = bestTrajec_.msg_.fitness;
+  //std::cout<<"\nBest: "<<bestTrajec_.toString();
+  //std::cout<<"\nbestTrajec's last point: "<<utility_.toString(bestTrajec_.msg_.trajectory.points.at(
+    //                  bestTrajec_.msg_.trajectory.points.size()-1 ));
+  std::cout<<"\ntraj's last point: "<<utility_.toString(traj.msg_.trajectory.points.at(
+                      traj.msg_.trajectory.points.size()-1 ));
+  std::cout<<"\nbestTrajec.fitness: "<<bestTrajec_.msg_.fitness;
   std::cout<<"\ntraj.fitness: "<<traj.msg_.fitness<<" bestFitness: "<<bestFitness;
   std::cout<<"\nc_pc: "<<c_pc_;
   std::cout<<"\n(generationsPerCC_ - c_pc_) * planningCycle_.toSec(): "<<(generationsPerCC_ - c_pc_) * planningCycle_.toSec();
@@ -1115,7 +1143,7 @@ const bool Planner::compareSwitchToBest(const RampTrajectory traj) const {
   // delta t = time until next control cycle occurs = time until startPlanning
   bestFitness -= (generationsPerCC_ - c_pc_) * planningCycle_.toSec();
 
-  return (traj.msg_.fitness < bestFitness);
+  return (traj.msg_.fitness > bestFitness);
 }
 
 
@@ -1139,46 +1167,49 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
   }
 
 
-  // If the fitness is close to the best trajectory's fitness
-  /*if(cc_started_ && trajec.id_ != bestTrajec_.id_ &&
+  // If the fitness is close to the best resulttory's fitness
+  if(cc_started_ && result.id_ != bestTrajec_.id_ &&
       (result.msg_.fitness > bestTrajec_.msg_.fitness ||
       fabs(result.msg_.fitness - bestTrajec_.msg_.fitness) < 5) ) 
   {
-    std::cout<<"\nTrajectory being evaluated: "<<trajec.path_.toString();
-    std::cout<<"\nTrajectory being evaluated is close to best fitness";
-    std::cout<<"\ntrajec id: "<<trajec.id_<<" trajec_.fitness: "<<result.msg_.fitness;
-    std::cout<<"\nbestTrajec.id: "<<bestTrajec_.id_<<" bestTrajec_.fitness: "<<bestTrajec_.msg_.fitness;
+    std::cout<<"\n==============================\n";
+    std::cout<<"\ntrajectory being evaluated: "<<result.path_.toString();
+    std::cout<<"\ntrajectory being evaluated is close to best fitness";
+    std::cout<<"\nresult id: "<<result.id_<<" bestTrajec_.id: "<<bestTrajec_.id_;
+    std::cout<<"\nresult_.fitness: "<<result.msg_.fitness<<" bestTrajec__.fitness: "<<bestTrajec_.msg_.fitness;
     stopForDebugging();
-    std::cout<<"\nPress Enter to continue\n";
-    std::cin.get();
+    std::cout<<"\n==============================\n";
 
     // Get transition trajectory
     RampTrajectory temp = getTrajectoryWithCurve(trajec);
 
-    std::cout<<"\n\n\nbestTrajec: "<<bestTrajec_.toString();
+    std::cout<<"\n\n\nTransition trajectory: "<<temp.toString();
+    std::cout<<"\n***** Displaying trajectory with curve! *****\n";
+    displayTrajectory(temp.msg_);
+
 
     ramp_msgs::EvaluationRequest er_switch = buildEvaluationRequest(temp);
     
     // Do the evaluation and set the fitness and feasibility member_switchs
     if(requestEvaluation(er_switch)) {
-      temp.msg_.fitness    = temp.msg_.fitness;
-      temp.msg_.feasible   = temp.msg_.feasible;
+      temp.msg_.fitness    = er_switch.response.fitness;
+      temp.msg_.feasible   = er_switch.response.feasible;
       temp.timeUntilCollision_  = er_switch.response.time_until_collision;
-      //std::cout<<"\nEvaluation Request Time Until Collision: "<<er_switch.response.time_until_collision;
     }
     else {
       // TODO: some error handling
     }
-    std::cout<<"\n\n\nTransition trajectory: "<<temp.toString();
-   
+
     // If the trajectory including the curve to switch is more fit than 
     // the best trajectory, return it
     if(compareSwitchToBest(temp)) {
-      std::cout<<"\ncompareSwitchToBest: true";
+      std::cout<<"\ncompareSwitchToBest: true\n";
+      std::cin.get();
       return temp;
     }
-    std::cout<<"\ncompareSwitchToBest: false";
-  } // end if */
+    std::cout<<"\ncompareSwitchToBest: false\n";
+    std::cin.get();
+  } // end if 
 
   return result;
 } // End evaluateTrajectory
@@ -1190,10 +1221,19 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
  * It also sete i_best_prev_
  **/
 void Planner::evaluatePopulation() {
+  std::cout<<"\nbest id: "<<population_.getBestID()<<"\n";
+  std::cout<<"\npopulation.size(): "<<population_.size()<<"\n";
+  if(population_.getBestID() > -1) {
+    population_.replace(population_.getBestID(), 
+        evaluateTrajectory(population_.get(population_.getBestID())));
+    bestTrajec_ = population_.get(population_.getBestID()); 
+  }
   
   // Go through each trajectory in the population and evaluate it
   for(unsigned int i=0;i<population_.size();i++) {
-    population_.replace(i, evaluateTrajectory(population_.get(i)));
+    if(i != bestTrajec_.id_) {
+      population_.replace(i, evaluateTrajectory(population_.get(i)));
+    }
   } // end for
 
   i_best_prev_ = population_.getBestID();

@@ -16,7 +16,7 @@ Change::Change	change.h	/^    Change(const ramp_msgs::Path p);$/;"	p	class:Chang
 Change::path_	change.h	/^    ramp_msgs::Path path_;$/;"	m	class:Change	access:public
 Change::perform	change.cpp	/^const ramp_msgs::Path Change::perform() {$/;"	f	class:Change	signature:()
 Change::perform	change.h	/^    const ramp_msgs::Path perform();$/;"	p	class:Change	access:public	signature:()
-Change::u	change.h	/^    Utility u;$/;"	m	class:Change	access:public
+Change::utility	change.h	/^    Utility utility;$/;"	m	class:Change	access:private
 Crossover	crossover.cpp	/^Crossover::Crossover(const ramp_msgs::Path p1, const ramp_msgs::Path p2) : path1_(p1), path2_(p2) {} $/;"	f	class:Crossover	signature:(const ramp_msgs::Path p1, const ramp_msgs::Path p2)
 Crossover	crossover.h	/^    Crossover() {}$/;"	f	class:Crossover	access:public	signature:()
 Crossover	crossover.h	/^    Crossover(const ramp_msgs::Path p1, const ramp_msgs::Path p2);$/;"	p	class:Crossover	access:public	signature:(const ramp_msgs::Path p1, const ramp_msgs::Path p2)
@@ -50,6 +50,7 @@ Insert::Insert	insert.h	/^    Insert(const ramp_msgs::Path p); $/;"	p	class:Inse
 Insert::path_	insert.h	/^    ramp_msgs::Path path_;$/;"	m	class:Insert	access:public
 Insert::perform	insert.cpp	/^const ramp_msgs::Path Insert::perform() {$/;"	f	class:Insert	signature:()
 Insert::perform	insert.h	/^    const ramp_msgs::Path perform();$/;"	p	class:Insert	access:public	signature:()
+Insert::utility	insert.h	/^    Utility utility;$/;"	m	class:Insert	access:private
 MODIFIER_H	modifier.h	2;"	d
 Modifier	modifier.cpp	/^Modifier::Modifier(ramp_msgs::ModificationRequest::Request& req) : mod_req(req) {}$/;"	f	class:Modifier	signature:(ramp_msgs::ModificationRequest::Request& req)
 Modifier	modifier.h	/^    Modifier(ramp_msgs::ModificationRequest::Request& req);$/;"	p	class:Modifier	access:public	signature:(ramp_msgs::ModificationRequest::Request& req)
@@ -64,7 +65,9 @@ Modifier::mod_req	modifier.h	/^    ramp_msgs::ModificationRequest::Request mod_r
 Modifier::perform	modifier.cpp	/^std::vector<ramp_msgs::Path> Modifier::perform() {$/;"	f	class:Modifier	signature:()
 Modifier::perform	modifier.h	/^    std::vector<ramp_msgs::Path> perform();$/;"	p	class:Modifier	access:public	signature:()
 Modifier::swap	modifier.h	/^    Swap swap; $/;"	m	class:Modifier	access:public
+Modifier::u	modifier.h	/^    Utility u;$/;"	m	class:Modifier	access:public
 Modifier::~Modifier	modifier.h	/^    ~Modifier() {}$/;"	f	class:Modifier	access:public	signature:()
+PI	utility.h	11;"	d
 SWAP_H	swap.h	2;"	d
 Swap	swap.cpp	/^Swap::Swap(const ramp_msgs::Path p) : path_(p) {}$/;"	f	class:Swap	signature:(const ramp_msgs::Path p)
 Swap	swap.h	/^    Swap() {} $/;"	f	class:Swap	access:public	signature:()
@@ -77,17 +80,46 @@ Swap::path_	swap.h	/^    ramp_msgs::Path path_; $/;"	m	class:Swap	access:public
 Swap::perform	swap.cpp	/^const ramp_msgs::Path Swap::perform() {$/;"	f	class:Swap	signature:()
 Swap::perform	swap.h	/^    const ramp_msgs::Path perform();$/;"	p	class:Swap	access:public	signature:()
 UTILITY_H	utility.h	2;"	d
+Utility	utility.cpp	/^Utility::Utility() {$/;"	f	class:Utility	signature:()
+Utility	utility.h	/^    Utility();$/;"	p	class:Utility	access:public	signature:()
 Utility	utility.h	/^class Utility {$/;"	c
+Utility::Utility	utility.cpp	/^Utility::Utility() {$/;"	f	class:Utility	signature:()
+Utility::Utility	utility.h	/^    Utility();$/;"	p	class:Utility	access:public	signature:()
+Utility::standardRanges_	utility.h	/^    std::vector<ramp_msgs::Range> standardRanges_;$/;"	m	class:Utility	access:public
 Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Configuration c) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Configuration c) const
 Utility::toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
 Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Configuration c) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Configuration c) const
 Utility::toString	utility.h	/^    const std::string toString(const ramp_msgs::Path p) const;    $/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path p) const
+at	utility.cpp	/^      result<<", "<<path.points.at(i).motionState.positions.at(k);$/;"	p	file:	signature:(k)
+at	utility.cpp	/^    result<<", "<<c.K.at(k);$/;"	p	file:	signature:(k)
 chg	modifier.h	/^    Change chg;$/;"	m	class:Modifier	access:public
+clear	change.cpp	/^    path_.points.at(i_knotPoint).motionState.positions.clear();$/;"	p	file:	signature:()
+cout	main.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
+cout	main.cpp	/^  std::cout<<"\\nSpinning...\\n";$/;"	m	class:std	file:
 cross	modifier.h	/^    Crossover cross;$/;"	m	class:Modifier	access:public
 del	modifier.h	/^    Delete del;$/;"	m	class:Modifier	access:public
+erase	delete.cpp	/^    path_.points.erase(path_.points.begin()+i_knotPoint);$/;"	p	file:	signature:(path_.points.begin()+i_knotPoint)
+handle	main.cpp	/^  ros::NodeHandle handle;$/;"	l
 handleRequest	main.cpp	/^bool handleRequest(ramp_msgs::ModificationRequest::Request& req,$/;"	f	signature:(ramp_msgs::ModificationRequest::Request& req, ramp_msgs::ModificationRequest::Response& res)
+i	utility.cpp	/^    result<<"\\n  "<<i<<": (";$/;"	l
+i_knotPoint	change.cpp	/^    unsigned int i_knotPoint = rand() % (path_.points.size()-2) + 1;$/;"	l
+i_knotPoint	delete.cpp	/^    unsigned int i_knotPoint = rand() % (path_.points.size()-2) + 1; $/;"	l
+i_knotPoint1	crossover.cpp	/^  unsigned int i_knotPoint1 = rand() % (path1_.points.size()-1); $/;"	l
+i_knotPoint1	insert.cpp	/^  unsigned int i_knotPoint1 = rand() % path_.points.size(); $/;"	l
+i_knotPoint1	swap.cpp	/^    unsigned int i_knotPoint1 = rand() % (path_.points.size()-2) + 1;$/;"	l
+i_knotPoint2	crossover.cpp	/^  unsigned int i_knotPoint2 = rand() % (path2_.points.size()-1); $/;"	l
+i_knotPoint2	insert.cpp	/^  unsigned int i_knotPoint2 = (i_knotPoint1 == path_.points.size()-1) ? i_knotPoint1-1 : i_knotPoint1+1;$/;"	l
+i_knotPoint2	swap.cpp	/^    unsigned int i_knotPoint2; $/;"	l
 in	modifier.h	/^    Insert in;$/;"	m	class:Modifier	access:public
+init	main.cpp	/^  ros::init(argc, argv, "path_modification");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+insert	insert.cpp	/^  path_.points.insert(path_.points.begin()+i_knotPoint2, kp);$/;"	p	file:	signature:(path_.points.begin()+i_knotPoint2, kp)
+kp	insert.cpp	/^  ramp_msgs::KnotPoint kp;$/;"	l
 main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
+max	change.cpp	/^      double  max = utility.standardRanges_.at(i).max;$/;"	l
+max	insert.cpp	/^    double  max = utility.standardRanges_.at(i).max;$/;"	l
+min	change.cpp	/^      double  min = utility.standardRanges_.at(i).min;$/;"	l
+min	insert.cpp	/^    double  min = utility.standardRanges_.at(i).min;$/;"	l
+mod	main.cpp	/^  Modifier mod(req);$/;"	p	file:	signature:(req)
 mod_req	modifier.h	/^    ramp_msgs::ModificationRequest::Request mod_req;$/;"	m	class:Modifier	access:public
 path1_	crossover.h	/^    ramp_msgs::Path path1_;$/;"	m	class:Crossover	access:public
 path2_	crossover.h	/^    ramp_msgs::Path path2_;$/;"	m	class:Crossover	access:public
@@ -107,10 +139,45 @@ perform	modifier.cpp	/^std::vector<ramp_msgs::Path> Modifier::perform() {$/;"	f	
 perform	modifier.h	/^    std::vector<ramp_msgs::Path> perform();$/;"	p	class:Modifier	access:public	signature:()
 perform	swap.cpp	/^const ramp_msgs::Path Swap::perform() {$/;"	f	class:Swap	signature:()
 perform	swap.h	/^    const ramp_msgs::Path perform();$/;"	p	class:Swap	access:public	signature:()
+push_back	change.cpp	/^      path_.points.at(i_knotPoint).motionState.positions.push_back(temp);$/;"	p	file:	signature:(temp)
+push_back	crossover.cpp	/^    r1.points.push_back(path1_.points.at(i));$/;"	p	file:	signature:(path1_.points.at(i))
+push_back	crossover.cpp	/^    r1.points.push_back(path2_.points.at(i));$/;"	p	file:	signature:(path2_.points.at(i))
+push_back	crossover.cpp	/^    r2.points.push_back(path1_.points.at(i));$/;"	p	file:	signature:(path1_.points.at(i))
+push_back	crossover.cpp	/^    r2.points.push_back(path2_.points.at(i));$/;"	p	file:	signature:(path2_.points.at(i))
+push_back	crossover.cpp	/^  result.push_back(r1);$/;"	p	file:	signature:(r1)
+push_back	crossover.cpp	/^  result.push_back(r2);$/;"	p	file:	signature:(r2)
+push_back	insert.cpp	/^      kp.motionState.velocities.push_back(path_.points.at(i_knotPoint1).motionState.velocities.at(i));$/;"	p	file:	signature:(path_.points.at(i_knotPoint1).motionState.velocities.at(i))
+push_back	insert.cpp	/^      kp.motionState.velocities.push_back(path_.points.at(i_knotPoint2).motionState.velocities.at(i));$/;"	p	file:	signature:(path_.points.at(i_knotPoint2).motionState.velocities.at(i))
+push_back	insert.cpp	/^    kp.motionState.positions.push_back(temp);$/;"	p	file:	signature:(temp)
+push_back	modifier.cpp	/^    result.push_back(chg.perform());$/;"	p	file:	signature:(chg.perform())
+push_back	modifier.cpp	/^    result.push_back(del.perform());$/;"	p	file:	signature:(del.perform())
+push_back	modifier.cpp	/^    result.push_back(in.perform());$/;"	p	file:	signature:(in.perform())
+push_back	modifier.cpp	/^    result.push_back(swap.perform());$/;"	p	file:	signature:(swap.perform())
+push_back	utility.cpp	/^    standardRanges_.push_back(temp);$/;"	p	file:	signature:(temp)
+r1	crossover.cpp	/^  ramp_msgs::Path r1;$/;"	l
+r2	crossover.cpp	/^  ramp_msgs::Path r2;$/;"	l
+result	crossover.cpp	/^  std::vector<ramp_msgs::Path> result;$/;"	l
+result	modifier.cpp	/^  std::vector<ramp_msgs::Path> result;$/;"	l
+result	utility.cpp	/^  std::ostringstream result;$/;"	l
+ros::init	main.cpp	/^  ros::init(argc, argv, "path_modification");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+ros::spin	main.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
+service	main.cpp	/^  ros::ServiceServer service = handle.advertiseService("path_modification", handleRequest); $/;"	l
+spin	main.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
+standardRanges_	utility.h	/^    std::vector<ramp_msgs::Range> standardRanges_;$/;"	m	class:Utility	access:public
+std::cout	main.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
+std::cout	main.cpp	/^  std::cout<<"\\nSpinning...\\n";$/;"	m	class:std	file:
+swap	insert.cpp	/^    unsigned int swap = i_knotPoint1;$/;"	l
 swap	modifier.h	/^    Swap swap; $/;"	m	class:Modifier	access:public
+temp	change.cpp	/^      float temp = (min == 0 && max == 0) ? 0 :      $/;"	l
+temp	insert.cpp	/^    float   temp = (min == 0 && max == 0) ? 0 :      $/;"	l
+temp	swap.cpp	/^    std::vector<double> temp = path_.points.at(i_knotPoint1).motionState.positions;$/;"	l
+temp	utility.cpp	/^    ramp_msgs::Range temp;$/;"	l
 toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Configuration c) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Configuration c) const
 toString	utility.cpp	/^const std::string Utility::toString(const ramp_msgs::Path path) const {$/;"	f	class:Utility	signature:(const ramp_msgs::Path path) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Configuration c) const;$/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Configuration c) const
 toString	utility.h	/^    const std::string toString(const ramp_msgs::Path p) const;    $/;"	p	class:Utility	access:public	signature:(const ramp_msgs::Path p) const
-u	change.h	/^    Utility u;$/;"	m	class:Change	access:public
+u	main.cpp	/^Utility u;$/;"	v
+u	modifier.h	/^    Utility u;$/;"	m	class:Modifier	access:public
+utility	change.h	/^    Utility utility;$/;"	m	class:Change	access:private
+utility	insert.h	/^    Utility utility;$/;"	m	class:Insert	access:private
 ~Modifier	modifier.h	/^    ~Modifier() {}$/;"	f	class:Modifier	access:public	signature:()

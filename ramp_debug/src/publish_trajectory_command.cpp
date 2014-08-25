@@ -26,9 +26,9 @@ int main(int argc, char** argv) {
   c1.motionState.positions.push_back(0);
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(0.5); // 0
-  c2.motionState.positions.push_back(3.); // 0
-  c2.motionState.positions.push_back(0);
+  c2.motionState.positions.push_back(1.41775); // 0
+  c2.motionState.positions.push_back(0.591744); // 0
+  c2.motionState.positions.push_back(-2.64308);
 
 
   ramp_msgs::KnotPoint c3;
@@ -90,27 +90,15 @@ int main(int argc, char** argv) {
   ramp_msgs::Path p;
   p.points.push_back(c1);
   p.points.push_back(c2);
-  p.points.push_back(c3);
-  //p.points.push_back(c4);
+  //p.points.push_back(c3);
+  p.points.push_back(c4);
   //p.points.push_back(c5);
   
-
-  ramp_msgs::MotionState curveStart;
-  curveStart.positions.push_back(0.25);
-  curveStart.positions.push_back(1.5);
-  curveStart.positions.push_back(1.40565);
-  curveStart.velocities.push_back(0);
-  curveStart.velocities.push_back(0.33);
-  curveStart.velocities.push_back(0);
-  curveStart.accelerations.push_back(0);
-  curveStart.accelerations.push_back(0);
-  curveStart.accelerations.push_back(0);
 
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
   tr.request.type = PARTIAL_BEZIER;
   tr.request.print = true;
-  tr.request.curve_start = curveStart;
 
 
   std::cout<<"\nPress Enter to request and send the trajectory\n";
