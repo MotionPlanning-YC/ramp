@@ -6,7 +6,6 @@
 #include "ramp_trajectory.h"
 #include "evaluation_request_handler.h"
 #include "trajectory_request_handler.h"
-#include "ramp_msgs/Update.h"
 #include "nav_msgs/Odometry.h"
 #include "modifier.h"
 #include "population.h"

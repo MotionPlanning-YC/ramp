@@ -1,11 +1,11 @@
 #ifndef COLLISION_DETECTION
 #define COLLISION_DETECTION
 #include "utility.h"
-#include "ramp_msgs/ObstacleList.h"
 #include "ramp_msgs/Population.h"
 #include "motion_type.h"
 #include "tf/transform_datatypes.h"
 #include "ramp_msgs/TrajectoryRequest.h"
+#include "ramp_msgs/Obstacle.h"
 #include "trajectory_request_handler.h"
 
 

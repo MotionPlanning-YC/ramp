@@ -27,17 +27,3 @@ const std::string Utility::toString(const ramp_msgs::Path path) const {
   return result.str();
 }
 
-
-const std::string Utility::toString(const ramp_msgs::Configuration c) const {
-  std::ostringstream result;
-
-  result<<"\n  (";
-
-  result<<c.K.at(0);
-  for(unsigned int k=1;k<c.K.size();k++) {
-    result<<", "<<c.K.at(k);
-  }
-  result<<")";
-
-  return result.str();
-}

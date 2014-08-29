@@ -1,10 +1,7 @@
 #include <iostream>
 #include "ros/ros.h"
 #include "nav_msgs/Odometry.h"
-#include "ramp_msgs/ObstacleList.h"
-#include "ir_object.h"
 #include "tf/transform_datatypes.h"
-#include "ramp_msgs/Update.h"
 #include "obstacle.h"
 
 
@@ -20,7 +17,7 @@ void updateOtherRobotCb(const nav_msgs::Odometry& o) {
 
 
 /** Prepare the object list by adding on all of the objects */
-const ramp_msgs::ObstacleList prepareList() {
+/*const ramp_msgs::ObstacleList prepareList() {
   ramp_msgs::ObstacleList list;
 
   //Other Robot
@@ -29,7 +26,7 @@ const ramp_msgs::ObstacleList prepareList() {
   //Misc objects...
 
   return list;
-} //End prepareList
+} //End prepareList*/
 
 
 

@@ -10,7 +10,6 @@
 #include "geometry_msgs/Twist.h"
 #include "tf/transform_datatypes.h"
 #include "ramp_msgs/MotionState.h"
-#include "ramp_msgs/Configuration.h"
 #include <math.h>
 
 class MobileRobot {

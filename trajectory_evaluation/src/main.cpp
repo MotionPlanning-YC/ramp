@@ -1,9 +1,8 @@
 #include <iostream>
 #include "ros/ros.h"
 #include "evaluate.h"
-#include "ramp_msgs/Update.h"
-#include "ramp_msgs/ObstacleList.h"
 #include "tf/transform_datatypes.h"
+#include "ramp_msgs/Obstacle.h"
 
 Evaluate ev;
 CollisionDetection cd;

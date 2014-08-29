@@ -5,7 +5,7 @@
 #include <vector>
 #include "ramp_msgs/TrajectoryRequest.h"
 #include "ramp_msgs/Path.h"
-#include "ramp_msgs/Configuration.h"
+#include "ramp_msgs/Range.h"
 
 
 #define PI 3.14159f
@@ -35,14 +35,12 @@ class Utility {
     
     const float displaceAngle(const float a1, float a2) const;
     
-    const ramp_msgs::Configuration getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const;
     const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint> configs) const;
 
 
     const std::string toString(const ramp_msgs::RampTrajectory traj) const;
     const std::string toString(const ramp_msgs::Path p) const;
     const std::string toString(const ramp_msgs::KnotPoint kp) const;
-    const std::string toString(const ramp_msgs::Configuration c) const;
     const std::string toString(const ramp_msgs::MotionState mp) const;
 };
 

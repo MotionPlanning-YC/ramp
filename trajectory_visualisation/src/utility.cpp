@@ -103,19 +103,6 @@ const float Utility::displaceAngle(const float a1, float a2) const {
 
 
 
-const ramp_msgs::Configuration Utility::getConfigurationFromPoint(const trajectory_msgs::JointTrajectoryPoint p) const {
-  ramp_msgs::Configuration result; 
-
-  result.ranges = ranges_;
-
-  for(unsigned int i=0;i<3;i++) {
-    result.K.push_back(p.positions.at(i));
-  }
-
-  return result;
-}
-
-
 const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> configs) const {
   ramp_msgs::Path result;
 
@@ -221,16 +208,6 @@ const std::string Utility::toString(const ramp_msgs::KnotPoint kp) const {
   result<<"\nConfiguration: "<<toString(kp.motionState);
   result<<", Stop time: "<<kp.stopTime;
 
-  return result.str();
-}
-
-const std::string Utility::toString(const ramp_msgs::Configuration c) const {
-  std::ostringstream result;
-  result<<"(";
-  for(unsigned int i=0;i<c.K.size()-1;i++) {
-    result<<c.K.at(i)<<", ";
-  }
-  result<<c.K.at(c.K.size()-1)<<")";
   return result.str();
 }
 

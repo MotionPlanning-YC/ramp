@@ -17,7 +17,7 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 
-add_executable(viewPredicted src/viewPredicted.cpp src/configuration.cpp src/range.cpp src/utility.cpp src/trajectory_request_handler.cpp)
+add_executable(viewPredicted src/viewPredicted.cpp src/utility.cpp src/trajectory_request_handler.cpp)
 set_target_properties(viewPredicted PROPERTIES COMPILE_FLAGS -std=c++0x)
 target_link_libraries(viewPredicted ${catkin_LIBRARIES})
 add_dependencies(viewPredicted ramp_msgs_generate_messages_cpp)

@@ -23,7 +23,7 @@ include_directories(${catkin_INCLUDE_DIRS})
 
 
 ## Declare a cpp executable
-add_executable(${PROJECT_NAME} src/main.cpp src/obstacle.cpp src/ir_object.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/obstacle.cpp)
 
 
 ## Specify libraries to link a library or executable target against
