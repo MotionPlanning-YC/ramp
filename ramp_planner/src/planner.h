@@ -87,12 +87,15 @@ class Planner {
     
     // Initialization 
     void initPopulation();
-    void init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r, const int population_size, const bool sub_populations);
+    void init(const uint8_t i, const ros::NodeHandle& h, 
+              const MotionState s, const MotionState g, 
+              const std::vector<Range> r, const int population_size, 
+              const bool sub_populations);
     
     // Send the best trajectory to the control package
     void sendBest();
     
-    //  Send the whole population to the trajectory viewer
+    // Send the whole population to the trajectory viewer
     void sendPopulation();
     void displayTrajectory(const ramp_msgs::RampTrajectory traj) const;
 
@@ -107,8 +110,10 @@ class Planner {
 
     // Request information from other packages
     // Cannot make the request srvs const because they have no serialize/deserialize
-    bool requestTrajectory(ramp_msgs::TrajectoryRequest& tr);
-    bool requestEvaluation(ramp_msgs::EvaluationRequest& er);
+    const RampTrajectory requestTrajectory(ramp_msgs::TrajectoryRequest& tr, const int id=-1);
+    const RampTrajectory requestTrajectory(const Path p, const int id=-1);
+    const RampTrajectory requestEvaluation(ramp_msgs::EvaluationRequest& er);
+    const RampTrajectory requestEvaluation(const RampTrajectory traj);
 
 
     // Update the population 

@@ -1,4 +1,5 @@
 trajectory_msgs/JointTrajectory trajectory
+uint16 id
 uint16[] i_knotPoints
 float32 resolutionRate
 

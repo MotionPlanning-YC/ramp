@@ -100,7 +100,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
         //std::cout<<"\nPoints in collision: ("<<p_i.positions.at(0)<<", "<<p_i.positions.at(1)<<") and ";
         //std::cout<<"("<<p_ob.positions.at(0)<<", "<<p_ob.positions.at(1)<<"), dist: "<<dist<<" i: "<<i<<" j: "<<j;
         result.collision_ = true;
-        result.time_until_collision_ = p_i.time_from_start.toSec();
+        result.timeUntilCollision_ = p_i.time_from_start.toSec();
         j = i+1;
         i = trajectory_.trajectory.points.size();
       } // end if

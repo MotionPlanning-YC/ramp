@@ -12,12 +12,11 @@ class RampTrajectory {
     RampTrajectory(const ramp_msgs::RampTrajectory msg);
     ~RampTrajectory() {}
     
-    unsigned int          id_;
     ramp_msgs::RampTrajectory msg_;
-    Path                  path_;
-    Path                  bezierPath_;
-    int                   subPopulation_;
-    float                 timeUntilCollision_;
+    Path                      path_;
+    Path                      bezierPath_;
+    int                       subPopulation_;
+    float                     timeUntilCollision_;
 
 
     const bool           equal(const RampTrajectory& other)  const;
@@ -35,27 +34,6 @@ class RampTrajectory {
     const trajectory_msgs::JointTrajectoryPoint getPointAtTime(const float t)       const;
   private:
     Utility utility_;
-};
-
-
-
-/** Create a struct to implement < comparison between two RampTrajectories */
-struct RampTrajectoryCompare {
-
-  // Returns true if rt1 < rt2, or less "fit" than rt2
-  bool operator()(const RampTrajectory& rt1, const RampTrajectory& rt2) const {
-    
-    // First check for feasible vs. infeasible
-    if(!rt1.msg_.feasible && rt2.msg_.feasible) {
-      return true;
-    }
-    else if(rt1.msg_.feasible && !rt2.msg_.feasible) {
-      return false;
-    }
-
-    // Return true if rt1 has a smaller fitness value than rt2
-    return rt1.msg_.fitness < rt2.msg_.fitness;
-  } 
 };
 
 #endif

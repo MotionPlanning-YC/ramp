@@ -341,7 +341,13 @@ const int Population::getBestID() {
   changed_ = false;
 
   return i_best_; 
-} //End findBest 
+} //End getBestID
+
+
+
+const RampTrajectory Population::getBest() {
+  return trajectories_.at(getBestID());
+}
 
 
 
@@ -448,7 +454,7 @@ const std::string Population::toString() const {
       result<<"\n\nSub-Population "<<i<<":";
 
       for(unsigned int j=0;j<subPopulations_.at(i).trajectories_.size();j++) {
-        result<<"\n\nTrajectory "<<subPopulations_.at(i).trajectories_.at(j).id_<<": "<<subPopulations_.at(i).trajectories_.at(j).path_.toString();
+        result<<"\n\nTrajectory "<<subPopulations_.at(i).trajectories_.at(j).msg_.id<<": "<<subPopulations_.at(i).trajectories_.at(j).path_.toString();
       }
     }
   }

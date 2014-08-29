@@ -54,7 +54,7 @@ Path::Path(const ramp_msgs::Path p) {
 Path::~Path() {}
 
 
-void Path::Add(const KnotPoint kp) {
+void Path::addBeforeGoal(const KnotPoint kp) {
   if(all_.size() > 0) {
     all_.insert(all_.end()-1, kp);
   }
@@ -65,9 +65,9 @@ void Path::Add(const KnotPoint kp) {
 
 
 /** This method inserts the motion state ms into the path at location path_size-1 */
-void Path::Add(const MotionState ms) {
+void Path::addBeforeGoal(const MotionState ms) {
   KnotPoint kp(ms);
-  Add(kp);
+  addBeforeGoal(kp);
 }
 
 const unsigned int Path::size() const { return all_.size(); }

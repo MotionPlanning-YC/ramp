@@ -21,8 +21,8 @@ class Path {
     
     
     //Methods
-    void Add(const KnotPoint kp);
-    void Add(const MotionState kp);
+    void addBeforeGoal(const KnotPoint kp);
+    void addBeforeGoal(const MotionState kp);
     const unsigned int size() const;
     const ramp_msgs::Path buildPathMsg() const; 
     const std::string toString() const;

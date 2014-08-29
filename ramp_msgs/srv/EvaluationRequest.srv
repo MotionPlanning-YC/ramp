@@ -6,4 +6,4 @@ MotionState goal
 
 float32 fitness
 bool feasible
-float32 time_until_collision
+float32 timeUntilCollision

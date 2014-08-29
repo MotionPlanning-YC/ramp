@@ -1,6 +1,7 @@
 #include "ramp_trajectory.h"
 
-RampTrajectory::RampTrajectory(const float resRate, unsigned int id) : id_(id), timeUntilCollision_(9999.f)  {
+RampTrajectory::RampTrajectory(const float resRate, unsigned int id) : timeUntilCollision_(9999.f)  {
+  msg_.id = id;
   msg_.feasible = true;
   msg_.fitness = -1;  
   msg_.resolutionRate = resRate;
@@ -10,7 +11,7 @@ RampTrajectory::RampTrajectory(const ramp_msgs::RampTrajectory msg) : msg_(msg),
 
 
 const bool RampTrajectory::equal(const RampTrajectory& other) const {
-  return id_ == other.id_;
+  return msg_.id == other.msg_.id;
 }
 
 
@@ -33,11 +34,13 @@ const Path RampTrajectory::getPath() const {
 
 /** Time is in seconds */
 const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const float t) const {
-  if( (t/msg_.resolutionRate) > msg_.trajectory.points.size() ) {
+  double resolutionRate = msg_.trajectory.points.at(1).time_from_start.toSec() -
+                          msg_.trajectory.points.at(0).time_from_start.toSec();
+  if( (t/resolutionRate) > msg_.trajectory.points.size() ) {
     return msg_.trajectory.points.at( msg_.trajectory.points.size()-1 );
   }
 
-  return msg_.trajectory.points.at( (t / msg_.resolutionRate) );
+  return msg_.trajectory.points.at( (t / resolutionRate) );
 }
 
 
@@ -86,7 +89,7 @@ const RampTrajectory RampTrajectory::clone() const {
 const std::string RampTrajectory::fitnessFeasibleToString() const {
   std::ostringstream result;
  
-  result<<"\nTrajectory ID: "<<id_;
+  result<<"\nTrajectory ID: "<<msg_.id;
   result<<"\n Number of knot points: "<<msg_.i_knotPoints.size(); 
   result<<"\n Path: "<<path_.toString();
   result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<msg_.feasible<<" Collision Time: "<<timeUntilCollision_;
@@ -97,7 +100,7 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
 const std::string RampTrajectory::toString() const {
   std::ostringstream result;
   
-  result<<"\nTrajectory ID: "<<id_<<"\n"<<utility_.toString(msg_);
+  result<<"\nTrajectory ID: "<<msg_.id<<"\n"<<utility_.toString(msg_);
   result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<msg_.feasible<<" Collision Time: "<<timeUntilCollision_;
   
   return result.str();
