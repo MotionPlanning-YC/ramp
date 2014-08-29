@@ -29,17 +29,17 @@ void initDOF(const std::vector<double> dof_min, const std::vector<double> dof_ma
 // Initializes global start and goal variables
 void initStartGoal(const std::vector<float> s, const std::vector<float> g) {
   for(unsigned int i=0;i<s.size();i++) {
-    start.positions_.push_back(s.at(i));
-    goal.positions_.push_back(g.at(i));
+    start.msg_.positions.push_back(s.at(i));
+    goal.msg_.positions.push_back(g.at(i));
 
-    start.velocities_.push_back(0);
-    goal.velocities_.push_back(0);
+    start.msg_.velocities.push_back(0);
+    goal.msg_.velocities.push_back(0);
 
-    start.accelerations_.push_back(0);
-    goal.accelerations_.push_back(0);
+    start.msg_.accelerations.push_back(0);
+    goal.msg_.accelerations.push_back(0);
 
-    start.jerks_.push_back(0);
-    goal.jerks_.push_back(0);
+    start.msg_.jerks.push_back(0);
+    goal.msg_.jerks.push_back(0);
   }
 } // End initStartGoal
 

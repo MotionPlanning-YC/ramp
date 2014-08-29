@@ -38,29 +38,21 @@ void Population::replace(const uint8_t i, const RampTrajectory trajec) {
   changed_ = true;
 }
 
-const bool Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
-  if(new_pop.size() == trajectories_.size()) {
-    changed_ = true;
 
-    trajectories_ = new_pop;
-    for(uint8_t i=0;i<new_pop.size();i++) {
-      paths_.at(i) = new_pop.at(i).path_;
-    }
-    
-    return true;
+
+void Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
+  
+  // Set trajectories vector
+  trajectories_ = new_pop;
+
+  // Set paths vector
+  paths_.clear();
+  for(uint8_t i=0;i<new_pop.size();i++) {
+    paths_.push_back(new_pop.at(i).path_);
   }
-  else {
-    changed_ = true;
 
-    trajectories_ = new_pop;
-    paths_.clear();
-    for(uint8_t i=0;i<new_pop.size();i++) {
-      paths_.push_back(new_pop.at(i).path_);
-    }
-
-    return true;
-  }
-}
+  changed_ = true;
+} // End replaceAll
 
 
 
@@ -216,8 +208,8 @@ const bool Population::canReplace(const RampTrajectory rt, const int i) const {
     RampTrajectory temp = trajectories_.at(i);
 
     //std::cout<<"\nsubPopulations.size(): "<<subPopulations_.size();
-    //std::cout<<"\ntemp.subPopulation: "<<temp.subPopulation_<<"\n";
-    Population p = subPopulations_.at(temp.subPopulation_);
+    //std::cout<<"\ntemp.i_subPopulation: "<<temp.msg_.i_subPopulation<<"\n";
+    Population p = subPopulations_.at(temp.msg_.i_subPopulation);
 
     if(p.trajectories_.size() < 2) {
       //std::cout<<"\nSub-Population size < 2, returning false\n";
@@ -383,7 +375,7 @@ const std::vector<Population> Population::createSubPopulations(const double delt
 
   // Get the number of sub-pops for delta_theta
   int num = ceil((2*PI) / delta_theta);
-  
+ 
   // Create the sub-populations
   for(uint8_t i=0;i<num;i++) {
     Population sub(maxSize_, true);
@@ -404,7 +396,7 @@ const std::vector<Population> Population::createSubPopulations(const double delt
     for(uint8_t sp=0;sp<num;sp++) {
       if(departure_direction < delta_theta*(sp+1)) {
         subPopulations_.at(sp).add(trajectories_.at(i));
-        trajectories_.at(i).subPopulation_ = sp;
+        trajectories_.at(i).msg_.i_subPopulation = sp;
         sp = num;
       }
     } // end inner loop

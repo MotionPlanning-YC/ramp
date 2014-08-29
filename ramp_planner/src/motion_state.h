@@ -10,15 +10,9 @@ class MotionState {
     MotionState(const ramp_msgs::MotionState ms);
     MotionState(const trajectory_msgs::JointTrajectoryPoint p);
 
-    /***** Data Members *****/
-    // Motion vectors
-    std::vector<double> positions_;
-    std::vector<double> velocities_;
-    std::vector<double> accelerations_;
-    std::vector<double> jerks_;
 
-    // Time
-    double time_;
+    /***** Data Members *****/
+    ramp_msgs::MotionState msg_;
 
     /***** Methods *****/
     const double  comparePosition(const MotionState& ms, 
@@ -37,7 +31,6 @@ class MotionState {
     const double      normJerk() const;
     
     
-    const   ramp_msgs::MotionState buildMotionStateMsg() const;
     const   std::string toString() const;
 
     

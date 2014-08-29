@@ -1,41 +1,25 @@
 #include "motion_state.h"
 
-MotionState::MotionState() : mobile_base_k_(2) {}
+MotionState::MotionState() : mobile_base_k_(2) {
+  msg_.time = -1;
+}
 
 
 MotionState::MotionState(const trajectory_msgs::JointTrajectoryPoint p) : mobile_base_k_(2) {
   for(unsigned int i=0;i<p.positions.size();i++) {
-    positions_.push_back(p.positions.at(i));
+    msg_.positions.push_back(p.positions.at(i));
   }
   
   for(unsigned int i=0;i<p.velocities.size();i++) {
-    velocities_.push_back(p.velocities.at(i));
+    msg_.velocities.push_back(p.velocities.at(i));
   }
   
   for(unsigned int i=0;i<p.accelerations.size();i++) {
-    accelerations_.push_back(p.accelerations.at(i));
+    msg_.accelerations.push_back(p.accelerations.at(i));
   }
 }
 
-MotionState::MotionState(const ramp_msgs::MotionState ms) : mobile_base_k_(2) {
-  for(unsigned int i=0;i<ms.positions.size();i++) {
-    positions_.push_back(ms.positions.at(i));
-  }
-  
-  for(unsigned int i=0;i<ms.velocities.size();i++) {
-    velocities_.push_back(ms.velocities.at(i));
-  }
-  
-  for(unsigned int i=0;i<ms.accelerations.size();i++) {
-    accelerations_.push_back(ms.accelerations.at(i));
-  }
-  
-  for(unsigned int i=0;i<ms.jerks.size();i++) {
-    jerks_.push_back(ms.jerks.at(i));
-  }
-
-  time_ = ms.time;
-}
+MotionState::MotionState(const ramp_msgs::MotionState ms) : msg_(ms), mobile_base_k_(2) {}
 
 
 
@@ -50,16 +34,16 @@ const double MotionState::comparePosition(const MotionState& c, const bool base_
   double result = 0; 
 
   // For each DOF, sum the (X2-X1)^2
-  for(unsigned int i=0;i<positions_.size();i++) {
+  for(unsigned int i=0;i<msg_.positions.size();i++) {
     // If we are not taking base theta into account, skip i
     if(i == mobile_base_k_ && !base_theta) {}
 
     // Else if we are considering base theta, use utility_ function
     else if(i == mobile_base_k_) {
-      result += pow(utility_.displaceAngle(c.positions_.at(i), positions_.at(i)), 2);
+      result += pow(utility_.displaceAngle(c.msg_.positions.at(i), msg_.positions.at(i)), 2);
     }
     else {
-      result += pow(c.positions_.at(i) - positions_.at(i), 2);
+      result += pow(c.msg_.positions.at(i) - msg_.positions.at(i), 2);
     }
   }
 
@@ -74,7 +58,7 @@ const double MotionState::comparePosition(const MotionState& c, const bool base_
 /** This method returns the new position vector of the Configuration given some transformation matrix */
 tf::Vector3 MotionState::transformBasePosition(const tf::Transform t) {
 
-  tf::Vector3 p(positions_.at(0), positions_.at(1), 0);
+  tf::Vector3 p(msg_.positions.at(0), msg_.positions.at(1), 0);
   tf::Vector3 result = t * p;
 
   return result;
@@ -89,11 +73,11 @@ void MotionState::transformBase(const tf::Transform t) {
 
   // Get the new position
   tf::Vector3 p = transformBasePosition(t);
-  positions_.at(0) = p.getX();
-  positions_.at(1) = p.getY();
+  msg_.positions.at(0) = p.getX();
+  msg_.positions.at(1) = p.getY();
   
   // Get the new orientation
-  positions_.at(2) = utility_.displaceAngle(positions_.at(2), tf::getYaw(t.getRotation()));
+  msg_.positions.at(2) = utility_.displaceAngle(msg_.positions.at(2), tf::getYaw(t.getRotation()));
 } //End transformBase
 
 
@@ -104,27 +88,27 @@ void MotionState::transformBase(const tf::Transform t) {
 const MotionState MotionState::add(const MotionState m) const {
   MotionState result = *this;
 
-  for(int i=0;i<positions_.size() && i<m.positions_.size();i++) {
+  for(int i=0;i<msg_.positions.size() && i<m.msg_.positions.size();i++) {
     if(i != mobile_base_k_) {
-      result.positions_.at(i) += m.positions_.at(i);
+      result.msg_.positions.at(i) += m.msg_.positions.at(i);
     }
     else {
-      result.positions_.at(i) = utility_.displaceAngle(positions_.at(i), m.positions_.at(i));
+      result.msg_.positions.at(i) = utility_.displaceAngle(msg_.positions.at(i), m.msg_.positions.at(i));
     }
   }
 
   /** Separate loops because it's not guaranteed that every MS will have
    * same # of each vector */
-  for(int i=0;i<velocities_.size() && i<m.velocities_.size();i++) {
-    result.velocities_.at(i) += m.velocities_.at(i);
+  for(int i=0;i<msg_.velocities.size() && i<m.msg_.velocities.size();i++) {
+    result.msg_.velocities.at(i) += m.msg_.velocities.at(i);
   }
 
-  for(int i=0;i<accelerations_.size() && i<m.accelerations_.size();i++) {
-    result.accelerations_.at(i) += m.accelerations_.at(i);
+  for(int i=0;i<msg_.accelerations.size() && i<m.msg_.accelerations.size();i++) {
+    result.msg_.accelerations.at(i) += m.msg_.accelerations.at(i);
   }
 
-  for(int i=0;i<jerks_.size() && i<m.jerks_.size();i++) {
-    result.jerks_.at(i) += m.jerks_.at(i);
+  for(int i=0;i<msg_.jerks.size() && i<m.msg_.jerks.size();i++) {
+    result.msg_.jerks.at(i) += m.msg_.jerks.at(i);
   }
 
   return result;
@@ -137,27 +121,27 @@ const MotionState MotionState::add(const MotionState m) const {
 const MotionState MotionState::subtract(const MotionState m) const {
   MotionState result = *this;
 
-  for(int i=0;i<positions_.size() && i<m.positions_.size();i++) {
+  for(int i=0;i<msg_.positions.size() && i<m.msg_.positions.size();i++) {
     if(i != mobile_base_k_) {
-      result.positions_.at(i) -= m.positions_.at(i);
+      result.msg_.positions.at(i) -= m.msg_.positions.at(i);
     }
     else {
-      result.positions_.at(i) = utility_.displaceAngle(positions_.at(i), -m.positions_.at(i));
+      result.msg_.positions.at(i) = utility_.displaceAngle(msg_.positions.at(i), -m.msg_.positions.at(i));
     }
   }
 
   /** Separate loops because it's not guaranteed that every MS will have
    * same # of each vector */
-  for(int i=0;i<velocities_.size() && i<m.velocities_.size();i++) {
-    result.velocities_.at(i) -= m.velocities_.at(i);
+  for(int i=0;i<msg_.velocities.size() && i<m.msg_.velocities.size();i++) {
+    result.msg_.velocities.at(i) -= m.msg_.velocities.at(i);
   }
 
-  for(int i=0;i<accelerations_.size() && i<m.accelerations_.size();i++) {
-    result.accelerations_.at(i) -= m.accelerations_.at(i);
+  for(int i=0;i<msg_.accelerations.size() && i<m.msg_.accelerations.size();i++) {
+    result.msg_.accelerations.at(i) -= m.msg_.accelerations.at(i);
   }
 
-  for(int i=0;i<jerks_.size() && i<m.jerks_.size();i++) {
-    result.jerks_.at(i) -= m.jerks_.at(i);
+  for(int i=0;i<msg_.jerks.size() && i<m.msg_.jerks.size();i++) {
+    result.msg_.jerks.at(i) -= m.msg_.jerks.at(i);
   }
 
   return result;
@@ -171,20 +155,20 @@ const MotionState MotionState::subtract(const MotionState m) const {
 const MotionState MotionState::multiply(const int num) const {
   MotionState result = *this;
 
-  for(int i=0;i<positions_.size();i++) {
-    result.positions_.at(i) *= num;
+  for(int i=0;i<msg_.positions.size();i++) {
+    result.msg_.positions.at(i) *= num;
   }
   
-  for(int i=0;i<velocities_.size();i++) {
-    result.velocities_.at(i) *= num;
+  for(int i=0;i<msg_.velocities.size();i++) {
+    result.msg_.velocities.at(i) *= num;
   }
 
-  for(int i=0;i<accelerations_.size();i++) {
-    result.accelerations_.at(i) *= num;
+  for(int i=0;i<msg_.accelerations.size();i++) {
+    result.msg_.accelerations.at(i) *= num;
   }
 
-  for(int i=0;i<jerks_.size();i++) {
-    result.jerks_.at(i) *= num;
+  for(int i=0;i<msg_.jerks.size();i++) {
+    result.msg_.jerks.at(i) *= num;
   }
 
   return result;
@@ -198,20 +182,20 @@ const MotionState MotionState::multiply(const int num) const {
 const MotionState MotionState::divide(const int num) const {
   MotionState result = *this;
 
-  for(int i=0;i<positions_.size();i++) {
-      result.positions_.at(i) /= num;
+  for(int i=0;i<msg_.positions.size();i++) {
+      result.msg_.positions.at(i) /= num;
   }
   
-  for(int i=0;i<velocities_.size();i++) {
-      result.velocities_.at(i) /= num;
+  for(int i=0;i<msg_.velocities.size();i++) {
+      result.msg_.velocities.at(i) /= num;
   }
 
-  for(int i=0;i<accelerations_.size();i++) {
-      result.accelerations_.at(i) /= num;
+  for(int i=0;i<msg_.accelerations.size();i++) {
+      result.msg_.accelerations.at(i) /= num;
   }
 
-  for(int i=0;i<jerks_.size();i++) {
-      result.jerks_.at(i) /= num;
+  for(int i=0;i<msg_.jerks.size();i++) {
+      result.msg_.jerks.at(i) /= num;
   }
 
   return result;
@@ -222,20 +206,20 @@ const MotionState MotionState::divide(const int num) const {
 const MotionState MotionState::abs() const {
   MotionState result = *this;
 
-  for(unsigned int i=0;i<positions_.size();i++) {
-    result.positions_.at(i) = fabs(result.positions_.at(i));
+  for(unsigned int i=0;i<msg_.positions.size();i++) {
+    result.msg_.positions.at(i) = fabs(result.msg_.positions.at(i));
   }
 
-  for(unsigned int i=0;i<velocities_.size();i++) {
-    result.velocities_.at(i) = fabs(result.velocities_.at(i));
+  for(unsigned int i=0;i<msg_.velocities.size();i++) {
+    result.msg_.velocities.at(i) = fabs(result.msg_.velocities.at(i));
   }
 
-  for(unsigned int i=0;i<accelerations_.size();i++) {
-    result.accelerations_.at(i) = fabs(result.accelerations_.at(i));
+  for(unsigned int i=0;i<msg_.accelerations.size();i++) {
+    result.msg_.accelerations.at(i) = fabs(result.msg_.accelerations.at(i));
   }
   
-  for(unsigned int i=0;i<jerks_.size();i++) {
-    result.jerks_.at(i) = fabs(result.jerks_.at(i));
+  for(unsigned int i=0;i<msg_.jerks.size();i++) {
+    result.msg_.jerks.at(i) = fabs(result.msg_.jerks.at(i));
   }
 
   return result;
@@ -246,8 +230,8 @@ const MotionState MotionState::abs() const {
 const double MotionState::normPosition() const {
   double result = 0;
 
-  for(uint16_t i=0;i<positions_.size();i++) {
-    result += pow(positions_.at(i), 2);
+  for(uint16_t i=0;i<msg_.positions.size();i++) {
+    result += pow(msg_.positions.at(i), 2);
   }
 
   result = sqrt(result);
@@ -259,8 +243,8 @@ const double MotionState::normPosition() const {
 const double MotionState::normVelocity() const {
   double result = 0;
 
-  for(uint16_t i=0;i<velocities_.size();i++) {
-    result += pow(velocities_.at(i), 2);
+  for(uint16_t i=0;i<msg_.velocities.size();i++) {
+    result += pow(msg_.velocities.at(i), 2);
   }
 
   result = sqrt(result);
@@ -272,8 +256,8 @@ const double MotionState::normVelocity() const {
 const double MotionState::normAcceleration() const {
   double result = 0;
 
-  for(uint16_t i=0;i<accelerations_.size();i++) {
-    result += pow(accelerations_.at(i), 2);
+  for(uint16_t i=0;i<msg_.accelerations.size();i++) {
+    result += pow(msg_.accelerations.at(i), 2);
   }
 
   result = sqrt(result);
@@ -286,8 +270,8 @@ const double MotionState::normAcceleration() const {
 const double MotionState::normJerk() const {
   double result = 0;
 
-  for(uint16_t i=0;i<jerks_.size();i++) {
-    result += pow(jerks_.at(i), 2);
+  for(uint16_t i=0;i<msg_.jerks.size();i++) {
+    result += pow(msg_.jerks.at(i), 2);
   }
 
   result = sqrt(result);
@@ -312,78 +296,52 @@ const double MotionState::norm() const {
 
 
 
-const ramp_msgs::MotionState MotionState::buildMotionStateMsg() const {
-  ramp_msgs::MotionState result;
-
-  for(unsigned int i=0;i<positions_.size();i++) {
-    result.positions.push_back(positions_.at(i));
-  }
-
-  for(unsigned int i=0;i<velocities_.size();i++) {
-    result.velocities.push_back(velocities_.at(i));
-  }
-
-  for(unsigned int i=0;i<accelerations_.size();i++) {
-    result.accelerations.push_back(accelerations_.at(i));
-  }
-
-  for(unsigned int i=0;i<jerks_.size();i++) {
-    result.jerks.push_back(jerks_.at(i));
-  }
-
-  result.time = time_;
-  
-  return result;
-}
-
-
-
 const std::string MotionState::toString() const {
   std::ostringstream result;
   
-  //Positions
-  if(positions_.size() == 0) {
+  //msg_.positions
+  if(msg_.positions.size() == 0) {
     result<<"\np: []";
   }
   else {
-    result<<"\np: ["<<positions_.at(0);
-    for(unsigned int i=1;i<positions_.size();i++) {
-      result<<", "<<positions_.at(i);
+    result<<"\np: ["<<msg_.positions.at(0);
+    for(unsigned int i=1;i<msg_.positions.size();i++) {
+      result<<", "<<msg_.positions.at(i);
     }
     result<<"]";
   }
 
-  //Velocities
-  if(velocities_.size() == 0) {
+  //msg_.velocities
+  if(msg_.velocities.size() == 0) {
     result<<"\nv: []";
   }
   else {
-    result<<"\nv: ["<<velocities_.at(0);
-    for(unsigned int i=1;i<velocities_.size();i++) {
-      result<<", "<<velocities_.at(i);
+    result<<"\nv: ["<<msg_.velocities.at(0);
+    for(unsigned int i=1;i<msg_.velocities.size();i++) {
+      result<<", "<<msg_.velocities.at(i);
     }
     result<<"]";
   }
 
-  //Accelerations
-  if(accelerations_.size() > 0) {
-    result<<"\na: ["<<accelerations_.at(0);
-    for(unsigned int i=1;i<accelerations_.size();i++) {
-      result<<", "<<accelerations_.at(i);
+  //msg_.accelerations
+  if(msg_.accelerations.size() > 0) {
+    result<<"\na: ["<<msg_.accelerations.at(0);
+    for(unsigned int i=1;i<msg_.accelerations.size();i++) {
+      result<<", "<<msg_.accelerations.at(i);
     }
     result<<"]";
   }
 
-  // Jerks
-  if(jerks_.size() > 0) {
-    result<<"\nj: ["<<jerks_.at(0);
-    for(unsigned int i=1;i<jerks_.size();i++) {
-      result<<", "<<jerks_.at(i);
+  // msg_.jerks
+  if(msg_.jerks.size() > 0) {
+    result<<"\nj: ["<<msg_.jerks.at(0);
+    for(unsigned int i=1;i<msg_.jerks.size();i++) {
+      result<<", "<<msg_.jerks.at(i);
     }
     result<<"]";
   }
 
-  result<<"\nTime: "<<time_;
+  result<<"\n: "<<msg_.time;
   result<<"\n----\n";
 
   return result.str();

@@ -1,13 +1,14 @@
 #include "ramp_trajectory.h"
 
-RampTrajectory::RampTrajectory(const float resRate, unsigned int id) : timeUntilCollision_(9999.f)  {
+RampTrajectory::RampTrajectory(const float resRate, unsigned int id) {
   msg_.id = id;
   msg_.feasible = true;
   msg_.fitness = -1;  
+  msg_.t_firstCollision = 9999.f;
   msg_.resolutionRate = resRate;
 }
 
-RampTrajectory::RampTrajectory(const ramp_msgs::RampTrajectory msg) : msg_(msg), timeUntilCollision_(9999.0f) {}
+RampTrajectory::RampTrajectory(const ramp_msgs::RampTrajectory msg) : msg_(msg) {}
 
 
 const bool RampTrajectory::equal(const RampTrajectory& other) const {
@@ -92,7 +93,7 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
   result<<"\nTrajectory ID: "<<msg_.id;
   result<<"\n Number of knot points: "<<msg_.i_knotPoints.size(); 
   result<<"\n Path: "<<path_.toString();
-  result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<msg_.feasible<<" Collision Time: "<<timeUntilCollision_;
+  result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
 
   return result.str();
 }
@@ -101,7 +102,7 @@ const std::string RampTrajectory::toString() const {
   std::ostringstream result;
   
   result<<"\nTrajectory ID: "<<msg_.id<<"\n"<<utility_.toString(msg_);
-  result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<msg_.feasible<<" Collision Time: "<<timeUntilCollision_;
+  result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
   
   return result.str();
 }

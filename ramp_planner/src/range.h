@@ -6,15 +6,13 @@ class Range {
   public:
     Range();
     Range(const float min, const float max);
-    Range(ramp_msgs::Range r);
+    Range(const ramp_msgs::Range r);
     ~Range();
 
-    float min_;
-    float max_;
+    ramp_msgs::Range msg_;
 
     /** This method returns a random value in the range */
     const float random() const;
-    const ramp_msgs::Range buildRangeMsg() const;
     const std::string toString() const;
 
 };

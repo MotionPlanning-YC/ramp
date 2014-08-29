@@ -13,10 +13,8 @@ KnotPoint::KnotPoint(const ramp_msgs::KnotPoint kp) {
 const ramp_msgs::KnotPoint KnotPoint::buildKnotPointMsg() const {
   ramp_msgs::KnotPoint result;
 
-  result.motionState = motionState_.buildMotionStateMsg();
+  result.motionState = motionState_.msg_;
   result.stopTime = stopTime_;
-  //std::cout<<"\nstop_time_: "<<stop_time_;
-  //std::cout<<"\nresult.stop_time: "<<result.stop_time<<"\n";
 
   return result;
 }
@@ -26,7 +24,7 @@ const std::string KnotPoint::toString() const {
   std::ostringstream result;
   
   result<<"Configuration: "<<motionState_.toString();
-  result<<" Stop time: "<<stopTime_;
+  result<<" Stop time: "<<stopTime_<<"\n";
 
   return result.str(); 
 }

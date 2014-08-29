@@ -16,11 +16,11 @@ class CollisionDetection {
   
     /** Struct to hold information about a query */
     struct QueryResult {
-      QueryResult() : collision_(false), timeUntilCollision_(9999.0f), 
-                      i_obstacle(-1) {}
+      QueryResult() : collision_(false), t_firstCollision_(9999.0f), 
+                      i_obstacle_(-1) {}
       bool  collision_;
-      float timeUntilCollision_;
-      int   i_obstacle;
+      float t_firstCollision_;
+      int   i_obstacle_;
     };  // End QueryResult
 
 

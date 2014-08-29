@@ -30,12 +30,12 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   // Else, set collision to false
   else {
     qr.collision_ = 0;
-    qr.timeUntilCollision_ = 9999.0f; 
+    qr.t_firstCollision_ = 9999.0f; 
   }
 
   // Set response
   res.feasible = !qr.collision_;
-  res.timeUntilCollision = qr.timeUntilCollision_;
+  res.t_firstCollision = qr.t_firstCollision_;
 
   // Do fitness
   res.fitness = ev.performFitness(qr);
@@ -144,7 +144,7 @@ int main(int argc, char** argv) {
   CollisionDetection::QueryResult qr = cd.query(t2);
   std::cout<<"\nqr.collision: "<<qr.collision_;
   std::cout<<"\nqr.i_obstacle: "<<qr.i_obstacle;
-  std::cout<<"\nqr.timeUntilCollision: "<<qr.timeUntilCollision_;
+  std::cout<<"\nqr.t_firstCollision: "<<qr.t_firstCollision_;
   t1.feasible = !qr.collision_;*/
   //t1.feasible = 1;
   

@@ -60,7 +60,16 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const doubl
   } 
 
   else {
-    std::cout<<"\nThe 2 points are the same\n";
+    std::cout<<"\nThe 2 points are the same:\n";
+    std::cout<<"\nSegment points: ";
+    for(int i=0;segment_points_.size();i++) {
+      std::cout<<"\n"<<i<<": "<<utility_.toString(segment_points_.at(i));
+    }
+    std::cout<<"\nControl points: ";
+    for(int i=0;control_points_.size();i++) {
+      std::cout<<"\n"<<i<<": "<<utility_.toString(control_points_.at(i));
+    }
+    std::cout<<"\n";
   }
 }
   
@@ -90,6 +99,16 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const ramp_
 
   else {
     std::cout<<"\nThe 2 points are the same\n";
+    std::cout<<"\nC: "<<C_<<" D: "<<D_;
+    std::cout<<"\ncontrol points size: "<<control_points_.size();
+    for(int i=0;control_points_.size();i++) {
+      std::cout<<"\n"<<i<<": "<<utility_.toString(control_points_.at(i));
+    }
+    std::cout<<"\nSegment points: ";
+    for(int i=0;segment_points_.size();i++) {
+      std::cout<<"\n"<<i<<": "<<utility_.toString(segment_points_.at(i))<<"\n";
+    }
+    std::cout<<"\nLeaving else\n";
   }
 
 }
@@ -98,12 +117,23 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const ramp_
 
 void BezierCurve::printReflexxesInfo() const {
   
-  std::cout<<"\n\nreflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]: "<<reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0];
-  std::cout<<"\nreflexxesData_.inputParameters->MaxVelocityVector->VecData[0]: "<<reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
-  std::cout<<"\n\nreflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0]: "<<reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0];
-  std::cout<<"\nreflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]: "<<reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0];
-  std::cout<<"\n\nreflexxesData_.inputParameters->TargetPositionVector->VecData[0]: "<<reflexxesData_.inputParameters->TargetPositionVector->VecData[0]<<"\n";
-  std::cout<<"\nreflexxesData_.inputParameters->TargetVelocityVector->VecData[0]: "<<reflexxesData_.inputParameters->TargetVelocityVector->VecData[0]<<"\n";
+  std::cout<<"\n\nreflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]: "<<
+    reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0];
+
+  std::cout<<"\nreflexxesData_.inputParameters->MaxVelocityVector->VecData[0]: "<<
+    reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
+
+  std::cout<<"\n\nreflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0]: "<<
+    reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0];
+
+  std::cout<<"\nreflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]: "<<
+    reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0];
+
+  std::cout<<"\n\nreflexxesData_.inputParameters->TargetPositionVector->VecData[0]: "<<
+    reflexxesData_.inputParameters->TargetPositionVector->VecData[0]<<"\n";
+
+  std::cout<<"\nreflexxesData_.inputParameters->TargetVelocityVector->VecData[0]: "<<
+    reflexxesData_.inputParameters->TargetVelocityVector->VecData[0]<<"\n";
 }
 
 

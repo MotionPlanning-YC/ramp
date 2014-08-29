@@ -18,7 +18,7 @@ class Population {
     const int             getBestID();
     void                  clear();
     void                  replace(const uint8_t i, const RampTrajectory trajec);
-    const bool            replaceAll(const std::vector<RampTrajectory> new_pop);
+    void                  replaceAll(const std::vector<RampTrajectory> new_pop);
     const RampTrajectory  get(const unsigned int i);
     const int             getMinFitness() const;
     const bool            feasibleExists() const;

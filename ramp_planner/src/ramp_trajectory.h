@@ -15,8 +15,6 @@ class RampTrajectory {
     ramp_msgs::RampTrajectory msg_;
     Path                      path_;
     Path                      bezierPath_;
-    int                       subPopulation_;
-    float                     timeUntilCollision_;
 
 
     const bool           equal(const RampTrajectory& other)  const;
