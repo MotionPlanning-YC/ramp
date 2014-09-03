@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(6), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(2.f), generationsBeforeCC_(30), cc_started_(false), subPopulations_(false), c_pc_(0), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
+Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(6), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(2.f), generationsBeforeCC_(30), cc_started_(false), subPopulations_(false), c_pc_(0), transThreshold_(5.), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false) 
 {
   controlCycle_ = ros::Duration(1.f / 2.f);
   planningCycle_ = ros::Duration(1.f / 20.f);
@@ -42,10 +42,10 @@ Planner::~Planner() {
  ********************** Methods **********************
  *****************************************************/
 
-/** This method initializes the T_base_w_ transform object */
+/** This method initializes the T_w_odom_ transform object */
 void Planner::setT_base_w(std::vector<double> base_pos) {
-  T_base_w_.setRotation(tf::createQuaternionFromYaw(base_pos.at(2)));
-  T_base_w_.setOrigin(  tf::Vector3(base_pos.at(0), base_pos.at(1), 0));
+  T_w_odom_.setRotation(tf::createQuaternionFromYaw(base_pos.at(2)));
+  T_w_odom_.setOrigin(  tf::Vector3(base_pos.at(0), base_pos.at(1), 0));
 } // End setT_base_w
 
 
@@ -97,7 +97,7 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
   }
 
   // Transform configuration from odometry to world coordinates
-  latestUpdate_.transformBase(T_base_w_);
+  latestUpdate_.transformBase(T_w_odom_);
 
   // Set proper velocity values
   latestUpdate_.msg_.velocities.at(0) = msg.velocities.at(0) * 
@@ -345,10 +345,12 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
       unsigned int throwaway=1;
 
       // For each knot point,
-      for(unsigned int i_kp=1;i_kp<population_.get(i).msg_.i_knotPoints.size();i_kp++) {
+      // Start at 2 because that is the end of the first bezier curve
+      for(unsigned int i_kp=2;i_kp<population_.get(i).msg_.i_knotPoints.size();i_kp++) {
        
         // Get the knot point 
-        trajectory_msgs::JointTrajectoryPoint point = population_.get(i).msg_.trajectory.points.at( population_.get(i).msg_.i_knotPoints.at(i_kp));
+        trajectory_msgs::JointTrajectoryPoint point = population_.get(i).msg_.trajectory.points.at( 
+                                                        population_.get(i).msg_.i_knotPoints.at(i_kp));
         // std::cout<<"\npoint["<<i<<"].time_from_start:"<<point.time_from_start;
 
         // Compare the durations
@@ -1157,7 +1159,7 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
   // If the fitness is close to the best resulttory's fitness
   if(cc_started_ && result.msg_.id != bestTrajec_.msg_.id &&
       (result.msg_.fitness > bestTrajec_.msg_.fitness ||
-      fabs(result.msg_.fitness - bestTrajec_.msg_.fitness) < 5) ) 
+      fabs(result.msg_.fitness - bestTrajec_.msg_.fitness) < transThreshold_) ) 
   {
 
 

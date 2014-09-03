@@ -2,8 +2,6 @@
 
 
 
-
-
 /** Constructor */
 MobileBase::MobileBase() {
   reflexxesData_.rml = 0;
@@ -375,8 +373,10 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
   std::vector<BezierCurve> result;
 
   // Check that all of the points are different
-  if(utility_.positionDistance(p.points.at(0).motionState.positions, p.points.at(1).motionState.positions) > 0.01 &&
-     utility_.positionDistance(p.points.at(1).motionState.positions, p.points.at(2).motionState.positions) > 0.01 ) 
+  if(utility_.positionDistance(p.points.at(0).motionState.positions, 
+        p.points.at(1).motionState.positions) > 0.01 &&
+     utility_.positionDistance(p.points.at(1).motionState.positions, 
+       p.points.at(2).motionState.positions) > 0.01 ) 
   {
     ramp_msgs::Path p_copy = p;
 
@@ -720,7 +720,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     /** Bezier */
     // If its a Bezier curve traj, and we're at a Bezier point
     // all points between first and last are bezier point
-    // TODO: straight-line segments between beziers
     if( (type_ == ALL_BEZIER && i_kp_ > 1 && i_kp_ < path_.points.size()-1) ||
         (type_ == PARTIAL_BEZIER && i_kp_ > 1 && i_kp_ < 3) ||
         (type_ == TRANSITION && i_kp_ == 1) ) 
@@ -739,6 +738,12 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
                           res.trajectory.trajectory.points.size() - 1 );
         } // end if knot point
       } // end for
+
+      // If the first curve, set the time
+      /*if(c == 1) {
+        res.t_nextKnotPoint = res.trajectory.trajectory.points.at(
+                                 res.trajectory.trajectory.points.size()-1).time_from_start;
+      }*/
       c++;
     } // end if bezier
 

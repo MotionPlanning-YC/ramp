@@ -13,15 +13,15 @@ public:
   BezierCurve();
   ~BezierCurve();
   
-  void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max);
-  void init(const std::vector<ramp_msgs::MotionState> sp, const ramp_msgs::MotionState curveStart, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max);
+  void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max, double u_0=0.);
+  void init(const std::vector<ramp_msgs::MotionState> sp, const ramp_msgs::MotionState curveStart, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max, double u_0=0);
 
   const std::vector<ramp_msgs::MotionState> generateCurve();
   
 
   double A_, B_, C_, D_       ;
-  double t_min_               ;
   double R_min_               ;
+  double t_R_min_             ;
   double lambda_              ;
   std::vector<ramp_msgs::MotionState> segment_points_ ;
   std::vector<ramp_msgs::MotionState> control_points_ ;
@@ -51,7 +51,7 @@ private:
 
   void calculateConstants() ;
   void calculateABCD()      ;
-  void calculateT_min()     ;
+  void calculateT_R_min()     ;
   void calculateR_min()     ;
 
   const bool finalStateReached() const;

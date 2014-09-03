@@ -66,7 +66,7 @@ class Planner {
 
     // Transformation of the initial pose of the robot 
     // We use this to transform the odometry updates into world CS
-    tf::Transform T_base_w_;
+    tf::Transform T_w_odom_;
    
     
     // Robot ID
@@ -240,7 +240,10 @@ class Planner {
     bool                subPopulations_;
     
     // Number of planning cycles since last control cycle
-    int c_pc_;
+    int                 c_pc_;
+
+    // Threshold for getting transition trajectory
+    double              transThreshold_;
 
     // Handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;

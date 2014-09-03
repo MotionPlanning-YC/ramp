@@ -36,7 +36,7 @@ void BezierCurve::dealloc() {
 } 
 
 
-void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max) {
+void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max, double u_0) {
   segment_points_ = sp;
   lambda_         = lambda;
   x_init_v_       = x_dot_0;
@@ -75,7 +75,7 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const doubl
   
 
 //TODO: Test throughly
-void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const ramp_msgs::MotionState curveStart, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max) {
+void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const ramp_msgs::MotionState curveStart, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max, double u_0) {
   segment_points_ = sp;
   x_init_v_       = x_dot_0;
   y_init_v_       = y_dot_0;
@@ -110,8 +110,7 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const ramp_
     }
     std::cout<<"\nLeaving else\n";
   }
-
-}
+} // End init
 
 
 
@@ -422,8 +421,8 @@ void BezierCurve::calculateABCD() {
 /** Calculate the minimum radius along the curve */
 void BezierCurve::calculateR_min() {
 
-  double numerator_term_one   = ((A_*A_) + (B_*B_)) * (t_min_*t_min_);
-  double numerator_term_two   = 2 * ((A_*C_)+(B_*D_)) * t_min_;
+  double numerator_term_one   = ((A_*A_) + (B_*B_)) * (t_R_min_*t_R_min_);
+  double numerator_term_two   = 2 * ((A_*C_)+(B_*D_)) * t_R_min_;
   double numerator_term_three = (C_*C_) + (D_*D_);
   double numerator            = pow(numerator_term_one + numerator_term_two + numerator_term_three, 3); 
 
@@ -434,15 +433,15 @@ void BezierCurve::calculateR_min() {
 
 
 /** Calculate time when minimum radius occurs along the curve */
-void BezierCurve::calculateT_min() {
-  t_min_ = -((A_*C_) + (B_*D_)) / ((A_*A_) + (B_*B_));
+void BezierCurve::calculateT_R_min() {
+  t_R_min_ = -((A_*C_) + (B_*D_)) / ((A_*A_) + (B_*B_));
 }
 
 
 /** Calculate A,B,C,D, minimum radius, and time of minimum radius */
 void BezierCurve::calculateConstants() {
   calculateABCD();
-  calculateT_min();
+  calculateT_R_min();
   calculateR_min();
   
   if(print_) {

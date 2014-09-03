@@ -15,6 +15,7 @@ class RampTrajectory {
     ramp_msgs::RampTrajectory msg_;
     Path                      path_;
     Path                      bezierPath_;
+    ros::Duration             t_nextKnotPoint_;
 
 
     const bool           equal(const RampTrajectory& other)  const;

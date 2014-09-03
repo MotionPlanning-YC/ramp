@@ -2,6 +2,7 @@ ramp_msgs/Path path
 MotionState curve_start
 uint8 resolutionRate
 int8 type 
+bool startBezier
 bool print
 
 ---
