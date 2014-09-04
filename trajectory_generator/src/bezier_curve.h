@@ -12,15 +12,15 @@ public:
 
   BezierCurve();
   ~BezierCurve();
-  
+ 
   // TODO: Is init the start of curve or start of segment?
   void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const ramp_msgs::MotionState initState, const ramp_msgs::MotionState max, double u_0=0.);
-  
+ 
   void init(const std::vector<ramp_msgs::MotionState> sp, const ramp_msgs::MotionState curveStart, const double theta, const ramp_msgs::MotionState initState, const ramp_msgs::MotionState max, double u_0=0.);
-  
+ 
 
   const std::vector<ramp_msgs::MotionState> generateCurve();
-  
+ 
 
   double A_, B_, C_, D_       ;
   double R_min_               ;

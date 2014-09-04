@@ -42,7 +42,6 @@ void BezierCurve::init(const std::vector<ramp_msgs::MotionState> sp, const doubl
   segment_points_ = sp;
   lambda_         = lambda;
   theta_prev_     = theta;
-
   u_0_            = u_0;
 
 
@@ -247,6 +246,11 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const {
 
 /** This method initializes the necessary Reflexxes variables */
 void BezierCurve::initReflexxes() {
+  std::cout<<"\nIn initReflexxes\n";
+  std::cout<<"\nms_init.v.size(): "<<ms_init_.velocities.size();
+  std::cout<<"\nms_max.v.size(): "<<ms_max_.velocities.size();
+  std::cout<<"\nms_max.a.size(): "<<ms_max_.accelerations.size()<<"\n";
+
   // Set some variables for readability
   double x_dot_0        = ms_init_.velocities.at(0);
   double y_dot_0        = ms_init_.velocities.at(1);
@@ -254,6 +258,7 @@ void BezierCurve::initReflexxes() {
   double y_dot_max      = ms_max_.velocities.at(1);
   double x_dot_dot_max  = ms_max_.accelerations.at(0);
   double y_dot_dot_max  = ms_max_.accelerations.at(1);
+  std::cout<<"\nAfter setting variables\n";
 
   // Initialize Reflexxes variables
   reflexxesData_.rml              = new ReflexxesAPI( 1, CYCLE_TIME_IN_SECONDS );
