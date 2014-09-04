@@ -88,6 +88,8 @@ void MobileBase::initReflexxes() {
 void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
   std::cout<<"\nRequest received: "<<utility_.toString(req)<<"\n";
 
+  bezierStart = req.startBezier;
+
   // Store the path
   path_ = req.path;
 
@@ -295,6 +297,9 @@ const ramp_msgs::MotionState MobileBase::getInitialState(const std::vector<ramp_
     result.velocities.at(0) = findVelocity(0, s);
     result.velocities.at(1) = result.velocities.at(0) * slope;
   }
+
+  result.accelerations.push_back(0);
+  result.accelerations.push_back(0);
   
 
   return result;
@@ -381,7 +386,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     ramp_msgs::Path p_copy = p;
 
     // Set the index of which knot point to stop at
-    int stop = type_ == PARTIAL_BEZIER ? stop = 2 : p_copy.points.size()-1;
+    int stop = type_ == PARTIAL_BEZIER ?  stop = 2 : 
+                                          p_copy.points.size()-1;
 
     //std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
     for(uint8_t i=1;i<stop;i++) {
@@ -404,40 +410,47 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       
       double theta = utility_.findAngleFromAToB(segment_points.at(0).positions, segment_points.at(1).positions);
 
+      // If we are starting with a curve
       // For transition trajectories, the segment points are the 
       // control points, so we have all the info now
-      if(type_ == TRANSITION) {
-        bc.init(segment_points, 0, theta, 
-            segment_points.at(0).velocities.at(0),
-            segment_points.at(0).velocities.at(1),
-            segment_points.at(0).accelerations.at(0),
-            segment_points.at(0).accelerations.at(1),
-            reflexxesData_.inputParameters->MaxVelocityVector->VecData[0],
-            reflexxesData_.inputParameters->MaxVelocityVector->VecData[1],
-            reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
-            reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);      
+      if(type_ == TRANSITION || bezierStart) {
+        std::cout<<"\nIn if transition or bezierStart\n";
+
+        ramp_msgs::MotionState init, max;
+        
+
+        max.velocities.push_back(reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]);
+        max.velocities.push_back(reflexxesData_.inputParameters->MaxVelocityVector->VecData[1]);
+        max.velocities.push_back(reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]);
+        max.velocities.push_back(reflexxesData_.inputParameters->MaxVelocityVector->VecData[1]);
+        
+
+        bc.init(segment_points, 0, theta, segment_points.at(0), max, 0.5);      
       }
 
-
+      // If the start of the curve was specified
       else if(curveStart_.positions.size() > 0) {
-        //std::cout<<"\nIn else if\n";
+        std::cout<<"\nIn else if curveStart specified\n";
+        if(curveStart_.accelerations.size() == 0) {
+          ROS_ERROR("Curve start has no acceleration values");
+        }
+
+        ramp_msgs::MotionState max;
+        max.velocities.push_back(reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]);
+        max.velocities.push_back(reflexxesData_.inputParameters->MaxVelocityVector->VecData[1]);
+        max.accelerations.push_back(reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]);
+        max.accelerations.push_back(reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
 
         //TODO: lambda
         bc.init(segment_points, curveStart_,
               curveStart_.positions.at(2), 
-              curveStart_.velocities.at(0),
-              curveStart_.velocities.at(1),
-              0, 0, // initial accelerations = 0
-              reflexxesData_.inputParameters->MaxVelocityVector->VecData[0],
-              reflexxesData_.inputParameters->MaxVelocityVector->VecData[1],
-              reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
-              reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
-
-      }
+              curveStart_, max);
+      } // end else if curve start specified
 
       
-      // Else if not a transition trajectory,
+      // If a "normal" bezier trajectory,
       else {
+        std::cout<<"\nIn else a normal trajectory\n";
 
         // Get lambda value for segment points
         double lambda = getControlPointLambda(segment_points);
@@ -462,16 +475,23 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         ramp_msgs::MotionState initState = 
                                 getInitialState(segment_points);
 
+        ramp_msgs::MotionState max;
 
-        bc.init(segment_points, lambda, theta, 
-              initState.velocities.at(0), 
-              initState.velocities.at(1), 
-              0, 0, // initial accelerations = 0
-              reflexxesData_.inputParameters->MaxVelocityVector->VecData[0],
+        max.velocities.push_back(reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]);
+        max.velocities.push_back(reflexxesData_.inputParameters->MaxVelocityVector->VecData[1]);
+        max.accelerations.push_back(reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]);
+        max.accelerations.push_back(reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
+
+
+        bc.init(segment_points, lambda, theta, initState, max);
+              //initState.velocities.at(0), 
+              //initState.velocities.at(1), 
+              //0, 0, // initial accelerations = 0
+              /*reflexxesData_.inputParameters->MaxVelocityVector->VecData[0],
               reflexxesData_.inputParameters->MaxVelocityVector->VecData[1],
               reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0],
-              reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
-      } // end else
+              reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);*/
+      } // end else "normal" trajectory
 
 
       // Generate the curve
@@ -686,6 +706,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     if(print_)
       std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
   }
+  std::cin.get();
 
   // Print curves
   if(print_) {
@@ -706,7 +727,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Go through every knotpoint in the path
   // (or until timeCutoff has been reached)
   for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) {
-    //std::cout<<"\ni_kp: "<<(int)i_kp_<<"\n";
+    std::cout<<"\ni_kp: "<<(int)i_kp_<<"\n";
     resultValue_ = 0;
       
     // Push the initial state onto trajectory
@@ -721,10 +742,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     // If its a Bezier curve traj, and we're at a Bezier point
     // all points between first and last are bezier point
     if( (type_ == ALL_BEZIER && i_kp_ > 1 && i_kp_ < path_.points.size()-1) ||
-        (type_ == PARTIAL_BEZIER && i_kp_ > 1 && i_kp_ < 3) ||
-        (type_ == TRANSITION && i_kp_ == 1) ) 
+        (type_ == PARTIAL_BEZIER && i_kp_ > 1 && i_kp_ < 3 && !bezierStart) ||
+        (type_ == TRANSITION && i_kp_ == 1) ||
+        (bezierStart && i_kp_ == 1) ) 
     {
-      //std::cout<<"\nIn if\n";
+      std::cout<<"\nIn if\n";
 
 
       // Insert all points on the curves into the trajectory
@@ -749,7 +771,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
 
     /** Straight Line Segment */
-    // Else if not bezier or 1st/last segment with bezier
+    // Else if straight-line segment
     else {
       //std::cout<<"\nIn else\n";
 
@@ -815,7 +837,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
       // Once we reached the target, we set that the latest point is a knotpoint
       res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
-    } // end else
+    } // end else straight-line segment
 
     // Set previous knot point
     prevKP_ = res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size() - 1);

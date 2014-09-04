@@ -70,6 +70,8 @@ private:
   Utility utility_;
 
 
+  bool bezierStart;
+
 
   /***** Methods *****/
   // Initialize everything

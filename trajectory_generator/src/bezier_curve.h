@@ -13,8 +13,11 @@ public:
   BezierCurve();
   ~BezierCurve();
   
-  void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max, double u_0=0.);
-  void init(const std::vector<ramp_msgs::MotionState> sp, const ramp_msgs::MotionState curveStart, const double theta, const double x_dot_0, const double y_dot_0, const double x_dot_dot_0, const double y_dot_dot_0, const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max, double u_0=0);
+  // TODO: Is init the start of curve or start of segment?
+  void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const ramp_msgs::MotionState initState, const ramp_msgs::MotionState max, double u_0=0.);
+  
+  void init(const std::vector<ramp_msgs::MotionState> sp, const ramp_msgs::MotionState curveStart, const double theta, const ramp_msgs::MotionState initState, const ramp_msgs::MotionState max, double u_0=0.);
+  
 
   const std::vector<ramp_msgs::MotionState> generateCurve();
   
@@ -37,9 +40,9 @@ private:
   ReflexxesData reflexxesData_      ;
   bool          initialized_        ;
   bool          deallocated_        ;
-  double        x_init_v_, y_init_v_;
-  double        x_init_a_, y_init_a_;
-  double        x_dot_max_, y_dot_max_;
+  ramp_msgs::MotionState ms_init_;
+  ramp_msgs::MotionState ms_max_;
+
 
   // Variables to manually track some motion info
   double        x_prev_, y_prev_;
@@ -47,7 +50,9 @@ private:
   double        theta_prev_             ;
   double        theta_dot_prev_         ;
 
-  void initReflexxes(const double x_dot_max, const double y_dot_max, const double x_dot_dot_max, const double y_dot_dot_max)    ;
+  double u_0_;
+
+  void initReflexxes()    ;
 
   void calculateConstants() ;
   void calculateABCD()      ;
