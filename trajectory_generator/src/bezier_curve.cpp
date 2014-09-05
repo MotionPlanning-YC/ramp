@@ -41,6 +41,7 @@ void BezierCurve::init(const BezierInitializer bi) {
   segment_points_ = bi.sp;
   lambda_         = bi.lambda;
   theta_prev_     = bi.theta;
+  u_0_            = bi.u;
   
   ms_init_ = bi.initState;
   ms_max_  = bi.maxState;
@@ -312,9 +313,9 @@ void BezierCurve::initReflexxes() {
   double u_dot_0    = (D_*D_ > C_*C_) ? fabs(y_dot_0 / D_) : fabs(x_dot_0 / C_);
   
   // ***** Testing ***** //
-  /*u_dot_0 = x_dot_0 / (A_*u_0_ + C_);
+  u_dot_0 = x_dot_0 / (A_*u_0_ + C_);
   std::cout<<"\nx_dot_0: "<<x_dot_0<<" u_0_: "<<u_0_;
-  std::cout<<"\nRe-calculated u_dot_0: "<<u_dot_0;*/
+  std::cout<<"\nRe-calculated u_dot_0: "<<u_dot_0;
   // ******************* //
 
   double u_dot_max  = getUDotMax(u_dot_0);
