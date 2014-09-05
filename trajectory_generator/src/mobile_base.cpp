@@ -475,7 +475,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         //TODO: lambda
         bc.init(segment_points, curveStart_,
               curveStart_.positions.at(2), 
-              curveStart_, max);
+              curveStart_, max, 0.5);
       } // end else if curve start specified
 
       
@@ -510,13 +510,24 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
         ramp_msgs::MotionState max;
 
-        max.velocities.push_back(reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]);
-        max.velocities.push_back(reflexxesData_.inputParameters->MaxVelocityVector->VecData[1]);
-        max.accelerations.push_back(reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]);
-        max.accelerations.push_back(reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
+        max.velocities.push_back(
+            reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]);
+        max.velocities.push_back(
+            reflexxesData_.inputParameters->MaxVelocityVector->VecData[1]);
+        max.accelerations.push_back(
+            reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]);
+        max.accelerations.push_back(
+            reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
 
+        BezierInitializer b;
+        b.sp = segment_points;
+        b.lambda = lambda;
+        b.theta = theta;
+        b.initState = initState;
+        b.maxState = max;
 
-        bc.init(segment_points, lambda, theta, initState, max);
+        bc.init(b);
+        //bc.init(segment_points, lambda, theta, initState, max);
               //initState.velocities.at(0), 
               //initState.velocities.at(1), 
               //0, 0, // initial accelerations = 0

@@ -6,14 +6,23 @@
 
 #define CYCLE_TIME_IN_SECONDS 0.1
 
+struct BezierInitializer {
+  std::vector<ramp_msgs::MotionState> sp;
+  ramp_msgs::MotionState initState;
+  ramp_msgs::MotionState maxState;
+  double lambda;
+  double theta;
+};
+
 class BezierCurve {
 
 public:
 
   BezierCurve();
   ~BezierCurve();
+
+  void init(const BezierInitializer bi);
  
-  // TODO: Is init the start of curve or start of segment?
   void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const ramp_msgs::MotionState initState, const ramp_msgs::MotionState max, double u_0=0.);
  
   void init(const std::vector<ramp_msgs::MotionState> sp, const ramp_msgs::MotionState curveStart, const double theta, const ramp_msgs::MotionState initState, const ramp_msgs::MotionState max, double u_0=0.);
