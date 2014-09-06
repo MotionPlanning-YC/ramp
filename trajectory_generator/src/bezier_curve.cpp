@@ -310,10 +310,10 @@ void BezierCurve::initReflexxes() {
 
 
   // Get initial and maximum velocity of Bezier parameter 
-  double u_dot_0    = (D_*D_ > C_*C_) ? fabs(y_dot_0 / D_) : fabs(x_dot_0 / C_);
+  double u_dot_0    = (D_*D_ > C_*C_) ? fabs(y_dot_0 / (B_*u_0_ + D_)) : fabs(x_dot_0 / (A_*u_0_ + C_));
   
   // ***** Testing ***** //
-  u_dot_0 = x_dot_0 / (A_*u_0_ + C_);
+  //u_dot_0 = x_dot_0 / (A_*u_0_ + C_);
   std::cout<<"\nx_dot_0: "<<x_dot_0<<" u_0_: "<<u_0_;
   std::cout<<"\nRe-calculated u_dot_0: "<<u_dot_0;
   // ******************* //

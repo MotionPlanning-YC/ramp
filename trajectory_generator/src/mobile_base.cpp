@@ -460,7 +460,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         b.u = 0.5;
 
         //****bc.init(segment_points, 0, theta, segment_points.at(0), max, 0.5);      
-        bc.init(segment_points, initState, theta, curveStart, max, 0.5);
+        //bc.init(segment_points, initState, theta, curveStart, max, 0.5);
+        bc.init(b);
       }
 
       // If the start of the curve was specified
