@@ -314,7 +314,7 @@ void BezierCurve::initReflexxes() {
   
   // ***** Testing ***** //
   //u_dot_0 = x_dot_0 / (A_*u_0_ + C_);
-  std::cout<<"\nx_dot_0: "<<x_dot_0<<" u_0_: "<<u_0_;
+  std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0<<" u_0_: "<<u_0_;
   std::cout<<"\nRe-calculated u_dot_0: "<<u_dot_0;
   // ******************* //
 
