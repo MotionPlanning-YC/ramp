@@ -5,6 +5,7 @@
 #include "utility.h"
 #include "ramp_msgs/TrajectoryRequest.h"
 #include "ramp_msgs/Population.h"
+#include "ramp_msgs/BezierInfo.h"
 
 Utility u;
 
@@ -96,11 +97,42 @@ int main(int argc, char** argv) {
   //p.points.push_back(c5);
   
 
+  ramp_msgs::BezierInfo bi;
+  ramp_msgs::MotionState cp0;
+  cp0.positions.push_back(0.25);
+  cp0.positions.push_back(1.);
+  cp0.positions.push_back(1.32582);
+  cp0.velocities.push_back(0);
+  cp0.velocities.push_back(0.33);
+  cp0.velocities.push_back(0);
+  cp0.accelerations.push_back(0);
+  cp0.accelerations.push_back(0);
+  cp0.accelerations.push_back(0);
+  
+  bi.controlPoints.push_back(cp0);
+  
+  ramp_msgs::MotionState sp0;
+  sp0.positions.push_back(0.);
+  sp0.positions.push_back(0.);
+  sp0.positions.push_back(0.);
+  sp0.velocities.push_back(0);
+  sp0.velocities.push_back(0.);
+  sp0.velocities.push_back(0);
+  sp0.accelerations.push_back(0);
+  sp0.accelerations.push_back(0);
+  sp0.accelerations.push_back(0);
+  
+  bi.segmentPoints.push_back(sp0);
+  bi.segmentPoints.push_back(p.points.at(1).motionState);
+  bi.segmentPoints.push_back(p.points.at(2).motionState);
+ 
+
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
   tr.request.type = PARTIAL_BEZIER;
   tr.request.startBezier = true;
   tr.request.print = true;
+  tr.request.bezierInfo = bi;
 
 
   std::cout<<"\nPress Enter to request and send the trajectory\n";

@@ -9,7 +9,8 @@
 struct BezierInitializer {
   // Normal
   std::vector<ramp_msgs::MotionState> sp;
-  ramp_msgs::MotionState initState;
+  std::vector<ramp_msgs::MotionState> cp;
+  ramp_msgs::MotionState cp_0;
   ramp_msgs::MotionState maxState;
   double lambda;
   double theta;
@@ -20,6 +21,10 @@ struct BezierInitializer {
 
   // Make a constructor to set flags
   BezierInitializer() : lambda(-1), theta(-99), u(0) {}
+  BezierInitializer(const ramp_msgs::BezierInfo bi) {
+    sp = bi.segmentPoints;
+    cp = bi.controlPoints;
+  }
 };
 
 class BezierCurve {
@@ -86,6 +91,8 @@ private:
   const double getUDotMax(const double u_dot_0) const;
 
   void printReflexxesInfo() const;
+
+  const ramp_msgs::MotionState getMS(const double u) const;
 
 };
 

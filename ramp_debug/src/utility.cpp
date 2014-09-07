@@ -260,6 +260,26 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
 }
 
 
+
+const std::string Utility::toString(const ramp_msgs::BezierInfo bi) const {
+  std::ostringstream result;
+
+  result<<"\nSegment points:";
+  for(uint8_t i=0;i<bi.segmentPoints.size();i++) {
+    result<<"\n"<<i<<": "<<toString(bi.segmentPoints.at(i));
+  }
+
+  result<<"\nControl points:";
+  for(uint8_t i=0;i<bi.controlPoints.size();i++) {
+    result<<"\n"<<i<<": "<<toString(bi.controlPoints.at(i));
+  }
+
+  result<<"\nStarting motion state: "<<toString(bi.ms_start);
+
+  return result.str();
+}
+
+
 const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const {
   std::ostringstream result;
 
@@ -283,6 +303,11 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);
   
     result<<"\n"<<toString(p);
+  }
+
+  result<<"\nCurves: ";
+  for(uint8_t i=0;i<traj.curves.size();i++) {
+    result<<"\n"<<i<<": "<<toString(traj.curves.at(i));
   }
 
   return result.str();

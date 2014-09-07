@@ -43,10 +43,15 @@ void BezierCurve::init(const BezierInitializer bi) {
   theta_prev_     = bi.theta;
   u_0_            = bi.u;
   
-  ms_init_ = bi.initState;
+  ms_init_ = bi.cp_0;
   ms_max_  = bi.maxState;
 
-  initControlPoints();
+  if(ms_init_.positions.size() > 0) {
+    initControlPoints(ms_init_);
+  }
+  else {
+    initControlPoints();
+  }
   calculateConstants();
 
   // If both C and D == 0, the first two points are the same
@@ -457,6 +462,10 @@ void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
   
 
   if(print_) {
+    std::cout<<"\nSegment Points:";
+    for(int i=0;i<segment_points_.size();i++) {
+      std::cout<<"\n"<<utility_.toString(segment_points_.at(i));
+    }
     std::cout<<"\nControl Points:";
     for(int i=0;i<control_points_.size();i++) {
       std::cout<<"\n"<<utility_.toString(control_points_.at(i));

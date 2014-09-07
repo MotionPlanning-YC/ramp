@@ -1,6 +1,7 @@
 uint16 id
 trajectory_msgs/JointTrajectory trajectory
 uint16[] i_knotPoints
+ramp_msgs/BezierInfo[] curves
 float32 resolutionRate
 
 bool feasible

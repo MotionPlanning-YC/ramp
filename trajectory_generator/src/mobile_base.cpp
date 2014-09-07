@@ -416,7 +416,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // If we are starting with a curve
       // For transition trajectories, the segment points are the 
       // control points, so we have all the info now
-      if(type_ == TRANSITION || bezierStart) {
+      if(bezierStart) {
         std::cout<<"\nIn if transition or bezierStart\n";
 
         ramp_msgs::MotionState init, max;
@@ -431,37 +431,34 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         max.accelerations.push_back(
             reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
 
-        ramp_msgs::MotionState curveStart = segment_points.at(0);
-        ramp_msgs::MotionState initState;
-        initState.positions.push_back(0.25);
-        initState.positions.push_back(1.);
-        initState.positions.push_back(1.32582);
-        initState.velocities.push_back(0);
-        initState.velocities.push_back(0.33);
-        initState.velocities.push_back(0);
-        initState.accelerations.push_back(0);
-        initState.accelerations.push_back(0);
-        initState.accelerations.push_back(0);
+
+        //ramp_msgs::MotionState curveStart = req_.bezierInfo.ms_cp0;
+
+        // When starting with a bezier, 
+        // the initial point is always the first control point
+        //ramp_msgs::MotionState initState = curveStart;
         
-        /***** TESTING *****/
-        // Add the segment
-        if(bezierStart) {
-          segment_points.at(0).positions.at(0) = 0;
-          segment_points.at(0).positions.at(1) = 0;
-          segment_points.at(0).velocities.at(0) = 0;
-          segment_points.at(0).velocities.at(1) = 0;
+
+        /*if(req_.bezierInfo.ms_sp0.positions.size() > 0) {
+          std::cout<<"\nIn if, ms_sp0: "<<utility_.toString(
+              req_.bezierInfo.ms_sp0);
+          segment_points.at(0) = req_.bezierInfo.ms_sp0;
         }
+        else {
+          std::cout<<"\nNo bezierInfo specified\n";
+          std::cout<<"\nreq_.bezierInfo.ms_sp0.positions.size(): "<<req_.bezierInfo.ms_sp0.positions.size();
+        }*/
 
         BezierInitializer b;
         b.sp = segment_points;
         b.lambda = 0;
-        b.initState = initState;
+        //b.cp_0 = initState;
         b.maxState = max;
         b.theta = theta;
-        b.u = 0.;
+        b.u = 0.5;
 
         bc.init(b);
-      }
+      } // end if bezierStart
 
       // If the start of the curve was specified
       else if(curveStart_.positions.size() > 0) {
@@ -488,6 +485,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       } // end else if curve start specified
 
       
+
       // If a "normal" bezier trajectory,
       else {
         std::cout<<"\nIn else a normal trajectory\n";
@@ -533,7 +531,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         b.sp = segment_points;
         b.lambda = lambda;
         b.theta = theta;
-        b.initState = initState;
+        b.cp_0 = initState;
         b.maxState = max;
 
         bc.init(b);
@@ -562,6 +560,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
           p.points.erase(p.points.begin()+1);
           p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
         }
+        
 
         // Push back the curve
         result.push_back(bc);
@@ -735,6 +734,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   
   // Initialize with request
   init(req);
+  req_ = req;
 
   // Set start time
   t_started_ = ros::Time::now();
@@ -812,6 +812,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         res.t_nextKnotPoint = res.trajectory.trajectory.points.at(
                                  res.trajectory.trajectory.points.size()-1).time_from_start;
       }*/
+      ramp_msgs::BezierInfo bi;
+      bi.segmentPoints = curves.at(c).segment_points_;
+      bi.controlPoints = curves.at(c).control_points_;
+      res.trajectory.curves.push_back(bi);
+
       c++;
     } // end if bezier
 

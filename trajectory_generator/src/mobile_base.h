@@ -72,6 +72,8 @@ private:
 
   bool bezierStart;
 
+  ramp_msgs::TrajectoryRequest::Request req_;
+
 
   /***** Methods *****/
   // Initialize everything

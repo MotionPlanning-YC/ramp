@@ -4,6 +4,7 @@ uint8 resolutionRate
 int8 type 
 bool startBezier
 bool print
+ramp_msgs/BezierInfo bezierInfo
 
 ---
 
