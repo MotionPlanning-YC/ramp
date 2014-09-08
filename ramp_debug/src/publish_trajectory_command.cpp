@@ -23,9 +23,9 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(0.5468); //0.5468
-  c1.motionState.positions.push_back(1.5237); //1.5237
-  c1.motionState.positions.push_back(0.188478); //0.188478
+  c1.motionState.positions.push_back(0.); //0.5468
+  c1.motionState.positions.push_back(0.); //1.5237
+  c1.motionState.positions.push_back(0.); //0.188478
   
   ramp_msgs::KnotPoint c2;
   c2.motionState.positions.push_back(0.5); // 0.5
@@ -51,9 +51,9 @@ int main(int argc, char** argv) {
   
 
   // Velocities
-  c1.motionState.velocities.push_back(0.115952);  //.115952
-  c1.motionState.velocities.push_back(0.0167614); //.0167614
-  c1.motionState.velocities.push_back(-0.886569); //-.886569
+  c1.motionState.velocities.push_back(0.);  //.115952
+  c1.motionState.velocities.push_back(0.); //.0167614
+  c1.motionState.velocities.push_back(-0.); //-.886569
  
   c2.motionState.velocities.push_back(0.);
   c2.motionState.velocities.push_back(0.);
@@ -73,8 +73,8 @@ int main(int argc, char** argv) {
 
 
   // Accelerations
-  c1.motionState.accelerations.push_back(0.011033); //.011033
-  c1.motionState.accelerations.push_back(-0.105006);  //-.105006
+  c1.motionState.accelerations.push_back(0.); //.011033
+  c1.motionState.accelerations.push_back(-0.);  //-.105006
   c1.motionState.accelerations.push_back(0.);
 
   c2.motionState.accelerations.push_back(0.);
@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
   //p.points.push_back(c5);
   
 
-  ramp_msgs::BezierInfo bi;
+  /*ramp_msgs::BezierInfo bi;
   ramp_msgs::MotionState cp0;
   cp0.positions.push_back(0.25);
   cp0.positions.push_back(1.);
@@ -124,15 +124,20 @@ int main(int argc, char** argv) {
   
   bi.segmentPoints.push_back(sp0);
   bi.segmentPoints.push_back(p.points.at(1).motionState);
-  bi.segmentPoints.push_back(p.points.at(2).motionState);
+  bi.segmentPoints.push_back(p.points.at(2).motionState);*/
  
+  // Make BezierInfo from Path
+  ramp_msgs::BezierInfo bi;
+  bi.segmentPoints.push_back(p.points.at(0).motionState);
+  bi.segmentPoints.push_back(p.points.at(1).motionState);
+  bi.segmentPoints.push_back(p.points.at(2).motionState);
 
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
   tr.request.type = PARTIAL_BEZIER;
-  tr.request.startBezier = true;
+  //tr.request.startBezier = true;
   tr.request.print = true;
-  tr.request.bezierInfo = bi;
+  //tr.request.bezierInfo = bi;
 
 
   std::cout<<"\nPress Enter to request and send the trajectory\n";

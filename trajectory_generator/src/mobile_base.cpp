@@ -449,7 +449,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
           std::cout<<"\nreq_.bezierInfo.ms_sp0.positions.size(): "<<req_.bezierInfo.ms_sp0.positions.size();
         }*/
 
-        BezierInitializer b;
+        /*BezierInitializer b;
         b.sp = segment_points;
         b.lambda = 0;
         //b.cp_0 = initState;
@@ -457,7 +457,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         b.theta = theta;
         b.u = 0.5;
 
-        bc.init(b);
+        bc.init(b);*/
       } // end if bezierStart
 
       // If the start of the curve was specified
@@ -493,48 +493,24 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         // Get lambda value for segment points
         double lambda = getControlPointLambda(segment_points);
 
-        // Find the slope
-        double ryse = segment_points.at(1).positions.at(1) - 
-                        segment_points.at(0).positions.at(1);
-        double run  = segment_points.at(1).positions.at(0) - 
-                        segment_points.at(0).positions.at(0);
-        double slope  = (run != 0) ? ryse / run : ryse;
-        if(print_) {
-          std::cout<<"\nryse: "<<ryse<<" run: "<<run<<"\n";
-          std::cout<<"\nslope: "<<slope;
-        }
-
-
-
-        // Segment 1 size
-        double s = lambda * 
-               utility_.positionDistance(segment_points.at(0).positions,
-                                         segment_points.at(1).positions);
-
-        // Inital state of curve (first control point)
-        ramp_msgs::MotionState initState = 
-                                getInitialState(segment_points);
-
-        ramp_msgs::MotionState max;
-
-        max.velocities.push_back(
+        ramp_msgs::MotionState ms_maxVA;
+        ms_maxVA.velocities.push_back(
             reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]);
-        max.velocities.push_back(
+        ms_maxVA.velocities.push_back(
             reflexxesData_.inputParameters->MaxVelocityVector->VecData[1]);
-        max.accelerations.push_back(
+        ms_maxVA.accelerations.push_back(
             reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]);
-        max.accelerations.push_back(
+        ms_maxVA.accelerations.push_back(
             reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
 
         // TODO: Make a method to return a BezierInitializer
-        BezierInitializer b;
-        b.sp = segment_points;
-        b.lambda = lambda;
-        b.theta = theta;
-        b.cp_0 = initState;
-        b.maxState = max;
+        ramp_msgs::BezierInfo bi;
+        bi.segmentPoints = segment_points;
+        bi.lambda = lambda;
+        bi.ms_maxVA = ms_maxVA;
+        bi.ms_initialVA = getInitialState(segment_points);
 
-        bc.init(b);
+        bc.init(bi);
       } // end else "normal" trajectory
 
 

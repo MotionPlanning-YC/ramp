@@ -6,26 +6,6 @@
 
 #define CYCLE_TIME_IN_SECONDS 0.1
 
-struct BezierInitializer {
-  // Normal
-  std::vector<ramp_msgs::MotionState> sp;
-  std::vector<ramp_msgs::MotionState> cp;
-  ramp_msgs::MotionState cp_0;
-  ramp_msgs::MotionState maxState;
-  double lambda;
-  double theta;
-
-  // Sub-curve
-  double u;
-
-
-  // Make a constructor to set flags
-  BezierInitializer() : lambda(-1), theta(-99), u(0) {}
-  BezierInitializer(const ramp_msgs::BezierInfo bi) {
-    sp = bi.segmentPoints;
-    cp = bi.controlPoints;
-  }
-};
 
 class BezierCurve {
 
@@ -34,7 +14,7 @@ public:
   BezierCurve();
   ~BezierCurve();
 
-  void init(const BezierInitializer bi);
+  void init(const ramp_msgs::BezierInfo bi);
  
   void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const ramp_msgs::MotionState initState, const ramp_msgs::MotionState max, double u_0=0.);
  

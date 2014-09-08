@@ -274,7 +274,9 @@ const std::string Utility::toString(const ramp_msgs::BezierInfo bi) const {
     result<<"\n"<<i<<": "<<toString(bi.controlPoints.at(i));
   }
 
-  result<<"\nStarting motion state: "<<toString(bi.ms_start);
+
+  result<<"\nInitial motion state: "<<toString(bi.ms_initialVA);
+  result<<"\nMax motion state: "<<toString(bi.ms_maxVA);
 
   return result.str();
 }

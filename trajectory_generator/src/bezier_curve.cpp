@@ -37,14 +37,15 @@ void BezierCurve::dealloc() {
 
 
 
-void BezierCurve::init(const BezierInitializer bi) {
-  segment_points_ = bi.sp;
+void BezierCurve::init(const ramp_msgs::BezierInfo bi) {
+  segment_points_ = bi.segmentPoints;
   lambda_         = bi.lambda;
-  theta_prev_     = bi.theta;
-  u_0_            = bi.u;
+  theta_prev_     = utility_.findAngleFromAToB(
+                                  segment_points_.at(0).positions, 
+                                  segment_points_.at(1).positions);
   
-  ms_init_ = bi.cp_0;
-  ms_max_  = bi.maxState;
+  ms_max_  = bi.ms_maxVA;
+  ms_init_ = bi.ms_initialVA;
 
   if(ms_init_.positions.size() > 0) {
     initControlPoints(ms_init_);
@@ -377,7 +378,8 @@ void BezierCurve::initControlPoints() {
   p1 = segment_points_.at(1);
 
   // Set orientation of the two segments
-  double theta_s1 = utility_.findAngleFromAToB(p0.positions, p1.positions);
+  double theta_s1 = utility_.findAngleFromAToB( p0.positions, 
+                                                p1.positions);
 
   /** Positions */
   C0.positions.push_back( (1-lambda_)*p0.positions.at(0) + lambda_*p1.positions.at(0) );
