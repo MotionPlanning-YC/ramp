@@ -227,84 +227,6 @@ void MobileBase::insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ram
 
 
 
-/** Returns an approximation of the ith DOF's velocity at the end of a segment with length s 
- *  Assumes constant acceleration */
-const double MobileBase::findVelocity(const uint8_t i, const double s) const {
-  // s = s_0 + v_0*t + 1/2*a*t^2
-  
-  // Use 2/3 of max acceleration
-  double a = (2.*reflexxesData_.inputParameters->MaxAccelerationVector->VecData[i]/3.);
-
-  // Use the current velocities as initial
-  double v_0 = reflexxesData_.inputParameters->CurrentPositionVector->VecData[i];
-
-  double radicand = (2*a*s) + pow(v_0, 2);
-  double v = sqrt(radicand);
-  
-  //double t = (v - v_0) / a;
-
-  // Check for bounds
-  if(v > reflexxesData_.inputParameters->MaxVelocityVector->VecData[i]) {
-    v = reflexxesData_.inputParameters->MaxVelocityVector->VecData[i];
-  }
-  if(v < -reflexxesData_.inputParameters->MaxVelocityVector->VecData[i]) {
-    v = -reflexxesData_.inputParameters->MaxVelocityVector->VecData[i];
-  }
-
-  return v;
-} // End findVelocity
-
-
-  
-
-/** Returns the initial motion state of the curve given the segment points */
-// TODO: Put position, acceleration in here too?
-const ramp_msgs::MotionState MobileBase::getInitialState(const std::vector<ramp_msgs::MotionState> segment_points) const {
-  ramp_msgs::MotionState result;
-  for(uint8_t i=0;i<3;i++) {
-    result.velocities.push_back(0);
-  }
-  
-
-  // Get lambda value for segment points
-  double lambda = getControlPointLambda(segment_points);
-
-  // Find the slope
-  double ryse = segment_points.at(1).positions.at(1) - segment_points.at(0).positions.at(1);
-  double run  = segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0);
-  double slope  = (run != 0) ? ryse / run : ryse;
-  if(print_) {
-    std::cout<<"\nryse: "<<ryse<<" run: "<<run;
-    std::cout<<"\nslope: "<<slope<<"\n";
-  }
-
-  // Segment 1 size
-  double s = lambda * utility_.positionDistance(segment_points.at(0).positions, segment_points.at(1).positions);
-
-
-  // If change in y is greater
-  if( (slope >= 1)  ||
-      (slope == -1 && run < 0) ||
-      (slope < -1) ) 
-  {
-    result.velocities.at(1) = findVelocity(1, s);
-    result.velocities.at(0) = result.velocities.at(0) / slope;  
-  }
-  // if slope == -1 && ryse < 0
-  // if slope < 0
-  // else
-  else {
-    result.velocities.at(0) = findVelocity(0, s);
-    result.velocities.at(1) = result.velocities.at(0) * slope;
-  }
-
-  result.accelerations.push_back(0);
-  result.accelerations.push_back(0);
-  
-
-  return result;
-} // End getInitialState
-
 
 /** Tests if a lambda value will have Bezier equations that are defined */
 const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segment_points, const double lambda) const {
@@ -371,6 +293,24 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
 } // End getControlPointLambda
 
 
+const ramp_msgs::MotionState MobileBase::getMaxMS() const {
+  ramp_msgs::MotionState result;
+
+  result.velocities.push_back(
+      reflexxesData_.inputParameters->
+      MaxVelocityVector->VecData[0]);
+  result.velocities.push_back(
+      reflexxesData_.inputParameters->
+      MaxVelocityVector->VecData[1]);
+  result.accelerations.push_back(
+      reflexxesData_.inputParameters->
+      MaxAccelerationVector->VecData[0]);
+  result.accelerations.push_back(
+      reflexxesData_.inputParameters->
+      MaxAccelerationVector->VecData[1]);
+
+  return result;
+}
 
 
 /** */
@@ -398,10 +338,11 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       bc.print_ = print_;
 
       // Set segment points
-      std::vector<ramp_msgs::MotionState> segment_points;
-      segment_points.push_back(p_copy.points.at(i-1).motionState);
+      std::vector<ramp_msgs::MotionState> segment_points = 
+        req_.bezierInfo.segmentPoints;
+      /*segment_points.push_back(p_copy.points.at(i-1).motionState);
       segment_points.push_back(p_copy.points.at(i).motionState);
-      segment_points.push_back(p_copy.points.at(i+1).motionState);
+      segment_points.push_back(p_copy.points.at(i+1).motionState);*/
 
       if(print_) {
         std::cout<<"\nSegment points: ";
@@ -419,17 +360,9 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       if(bezierStart) {
         std::cout<<"\nIn if transition or bezierStart\n";
 
-        ramp_msgs::MotionState init, max;
         
-
-        max.velocities.push_back(
-            reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]);
-        max.velocities.push_back(
-            reflexxesData_.inputParameters->MaxVelocityVector->VecData[1]);
-        max.accelerations.push_back(
-            reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]);
-        max.accelerations.push_back(
-            reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
+        ramp_msgs::MotionState ms_maxVA = getMaxMS();
+        
 
 
         //ramp_msgs::MotionState curveStart = req_.bezierInfo.ms_cp0;
@@ -449,15 +382,15 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
           std::cout<<"\nreq_.bezierInfo.ms_sp0.positions.size(): "<<req_.bezierInfo.ms_sp0.positions.size();
         }*/
 
-        /*BezierInitializer b;
-        b.sp = segment_points;
-        b.lambda = 0;
-        //b.cp_0 = initState;
-        b.maxState = max;
-        b.theta = theta;
-        b.u = 0.5;
+        // TODO: Make a method to return a BezierInitializer
+        ramp_msgs::BezierInfo bi;
+        bi.segmentPoints = segment_points;
+        bi.controlPoints = req_.bezierInfo.controlPoints;
+        bi.ms_maxVA = ms_maxVA;
+        bi.u_0 = 0.25;
+        bi.ms_begin = p_copy.points.at(0).motionState;
 
-        bc.init(b);*/
+        bc.init(bi);
       } // end if bezierStart
 
       // If the start of the curve was specified
@@ -467,21 +400,13 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
           ROS_ERROR("Curve start has no acceleration values");
         }
 
-        ramp_msgs::MotionState max;
-        max.velocities.push_back(
-            reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]);
-        max.velocities.push_back(
-            reflexxesData_.inputParameters->MaxVelocityVector->VecData[1]);
-        max.accelerations.push_back(
-            reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]);
-        max.accelerations.push_back(
-            reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
+        ramp_msgs::MotionState max = getMaxMS();
 
 
         //TODO: lambda
-        bc.init(segment_points, curveStart_,
+        /*bc.init(segment_points, curveStart_,
               curveStart_.positions.at(2), 
-              curveStart_, max, 0.5);
+              curveStart_, max, 0.5);*/
       } // end else if curve start specified
 
       
@@ -493,22 +418,13 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         // Get lambda value for segment points
         double lambda = getControlPointLambda(segment_points);
 
-        ramp_msgs::MotionState ms_maxVA;
-        ms_maxVA.velocities.push_back(
-            reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]);
-        ms_maxVA.velocities.push_back(
-            reflexxesData_.inputParameters->MaxVelocityVector->VecData[1]);
-        ms_maxVA.accelerations.push_back(
-            reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]);
-        ms_maxVA.accelerations.push_back(
-            reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1]);
+        ramp_msgs::MotionState ms_maxVA = getMaxMS();
 
         // TODO: Make a method to return a BezierInitializer
         ramp_msgs::BezierInfo bi;
         bi.segmentPoints = segment_points;
         bi.lambda = lambda;
         bi.ms_maxVA = ms_maxVA;
-        bi.ms_initialVA = getInitialState(segment_points);
 
         bc.init(bi);
       } // end else "normal" trajectory
@@ -520,10 +436,14 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // If the curve was valid,
       if(bc.points_.size() > 0) {
         
-        // Replace the knot point with the first and last points on the curve
-        // The first point is control point c0 with v and a information, 
-        // The last point is control point c2 with v and a information,
-        // If it's a transition, the first point on curve is the first point that's already there
+        // Replace the knot point with the first and 
+        //  last points on the curve
+        // The first point is control point c0 with v 
+        //  and a information, 
+        // The last point is control point c2 with v 
+        //  and a information,
+        // If it's a transition, the first point on curve 
+        //  is the first point that's already there
         if(type_ != TRANSITION) {
           p.points.erase(p.points.begin()+i);
           p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(0)));
@@ -789,8 +709,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
                                  res.trajectory.trajectory.points.size()-1).time_from_start;
       }*/
       ramp_msgs::BezierInfo bi;
-      bi.segmentPoints = curves.at(c).segment_points_;
-      bi.controlPoints = curves.at(c).control_points_;
+      bi.segmentPoints = curves.at(c).segmentPoints_;
+      bi.controlPoints = curves.at(c).controlPoints_;
       res.trajectory.curves.push_back(bi);
 
       c++;

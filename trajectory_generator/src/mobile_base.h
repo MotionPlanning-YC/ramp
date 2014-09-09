@@ -28,8 +28,7 @@ public:
 
   // Get Bezier curves over the path
   const std::vector<BezierCurve> bezier(ramp_msgs::Path& p, const bool only_curve);
-  
-  const double findVelocity(const uint8_t i, const double s) const;
+
 
   TrajectoryType type_;
   bool print_;
@@ -88,9 +87,6 @@ private:
   // Initialize variables just after receiving a service request
   void setInitialMotion();
   
-  // Approximate initial state of a Bezier curve
-  const ramp_msgs::MotionState getInitialState(const std::vector<ramp_msgs::MotionState> segment_points) const;
-
 
   // Insert a point to the back of the trajectory
   // and set Reflexxes to reflect the new state
@@ -124,6 +120,7 @@ private:
   // Print Current and Next vectors
   void printReflexxesSpinInfo() const;
 
+  const ramp_msgs::MotionState getMaxMS() const;
 };
 
 #endif 

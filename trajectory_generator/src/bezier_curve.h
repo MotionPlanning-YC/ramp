@@ -16,9 +16,6 @@ public:
 
   void init(const ramp_msgs::BezierInfo bi);
  
-  void init(const std::vector<ramp_msgs::MotionState> sp, const double lambda, const double theta, const ramp_msgs::MotionState initState, const ramp_msgs::MotionState max, double u_0=0.);
- 
-  void init(const std::vector<ramp_msgs::MotionState> sp, const ramp_msgs::MotionState curveStart, const double theta, const ramp_msgs::MotionState initState, const ramp_msgs::MotionState max, double u_0=0.);
  
 
   const std::vector<ramp_msgs::MotionState> generateCurve();
@@ -28,8 +25,8 @@ public:
   double R_min_               ;
   double t_R_min_             ;
   double lambda_              ;
-  std::vector<ramp_msgs::MotionState> segment_points_ ;
-  std::vector<ramp_msgs::MotionState> control_points_ ;
+  std::vector<ramp_msgs::MotionState> segmentPoints_ ;
+  std::vector<ramp_msgs::MotionState> controlPoints_ ;
   std::vector<ramp_msgs::MotionState> points_         ;
 
   void initControlPoints();
@@ -44,6 +41,7 @@ private:
   bool          deallocated_        ;
   ramp_msgs::MotionState ms_init_;
   ramp_msgs::MotionState ms_max_;
+  ramp_msgs::MotionState ms_begin_;
 
 
   // Variables to manually track some motion info
@@ -67,13 +65,18 @@ private:
 
   void dealloc();
 
-  const bool satisfiesConstraints(const double u_dot_max, const double u_x, const double u_y) const;
+
+  const bool satisfiesConstraints(const double u_dot, const double u_x, const double u_y) const;
   const double getUDotMax(const double u_dot_0) const;
+  const double getUDotInitial() const;
 
   void printReflexxesInfo() const;
 
   const ramp_msgs::MotionState getMS(const double u) const;
 
+  // Approximate initial state of a Bezier curve
+  const ramp_msgs::MotionState getInitialState();
+  const double findVelocity(const uint8_t i, const double s) const;
 };
 
 #endif
