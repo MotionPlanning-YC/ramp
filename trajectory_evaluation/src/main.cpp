@@ -39,7 +39,7 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   // Do fitness
   res.fitness = ev.performFitness(qr);
 
-  std::cout<<"\nSending back: Feasible = "<<res.fitness<<", Fitness = "<<res.fitness<<"\n";
+  //std::cout<<"\nSending back: Feasible = "<<res.fitness<<", Fitness = "<<res.fitness<<"\n";
   
   return true;
 } //End handleRequest

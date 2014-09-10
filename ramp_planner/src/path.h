@@ -21,6 +21,7 @@ class Path {
     
     
     //Methods
+    const KnotPoint at(const uint8_t i) const;
     void addBeforeGoal(const KnotPoint kp);
     void addBeforeGoal(const MotionState kp);
     const unsigned int size() const;

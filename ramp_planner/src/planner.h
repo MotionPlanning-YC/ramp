@@ -145,6 +145,10 @@ class Planner {
     std::vector<MotionState> SP_LU_diffs_;
     const MotionState findAverageDiff();
   
+
+    // Debugging variables
+    bool modifications_;
+    bool evaluations_;
   private:
     /** These are (mostly) utility members that are only used by Planner and should not be used by other classes */
 
@@ -174,7 +178,8 @@ class Planner {
 
     // Msg building methods
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
-              const Path path ) const           ;
+              const Path path, const bool bezierExists=false,
+              const ramp_msgs::BezierInfo* curve=0 ) const           ;
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(
               const RampTrajectory trajec)      ;
 
@@ -191,6 +196,7 @@ class Planner {
 
 
     const std::vector<RampTrajectory> getTrajectories(const std::vector<Path> p);
+    const std::vector<RampTrajectory> getTrajectories(std::vector<ramp_msgs::TrajectoryRequest> tr);
     void updatePathsStart(const MotionState s);
 
     const bool compareSwitchToBest(const RampTrajectory traj) const;

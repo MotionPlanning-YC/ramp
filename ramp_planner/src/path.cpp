@@ -54,6 +54,12 @@ Path::Path(const ramp_msgs::Path p) {
 Path::~Path() {}
 
 
+
+const KnotPoint Path::at(const uint8_t i) const {
+  return all_.at(i);
+}
+
+
 void Path::addBeforeGoal(const KnotPoint kp) {
   if(all_.size() > 0) {
     all_.insert(all_.end()-1, kp);

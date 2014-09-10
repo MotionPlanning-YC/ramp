@@ -86,7 +86,7 @@ void MobileBase::initReflexxes() {
 /** Initialize class object with a request */
 // TODO: change 3 booleans to 1 enum
 void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
-  std::cout<<"\nRequest received: "<<utility_.toString(req)<<"\n";
+  //std::cout<<"\nRequest received: "<<utility_.toString(req)<<"\n";
 
   bezierStart = req.startBezier;
 
@@ -358,7 +358,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // For transition trajectories, the segment points are the 
       // control points, so we have all the info now
       if(bezierStart) {
-        std::cout<<"\nIn if transition or bezierStart\n";
+        //std::cout<<"\nIn if transition or bezierStart\n";
 
         
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
@@ -395,7 +395,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
       // If the start of the curve was specified
       else if(curveStart_.positions.size() > 0) {
-        std::cout<<"\nIn else if curveStart specified\n";
+        //std::cout<<"\nIn else if curveStart specified\n";
         if(curveStart_.accelerations.size() == 0) {
           ROS_ERROR("Curve start has no acceleration values");
         }
@@ -413,7 +413,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
       // If a "normal" bezier trajectory,
       else {
-        std::cout<<"\nIn else a normal trajectory\n";
+        //std::cout<<"\nIn else a normal trajectory\n";
 
         // Get lambda value for segment points
         double lambda = getControlPointLambda(segment_points);
@@ -647,8 +647,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     curves = bezier(path_, type_ == TRANSITION);
     if(print_)
       std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
-  }
-  std::cin.get();
+  } // end if curves
 
   // Print curves
   if(print_) {
@@ -669,7 +668,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Go through every knotpoint in the path
   // (or until timeCutoff has been reached)
   for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) {
-    std::cout<<"\ni_kp: "<<(int)i_kp_<<"\n";
+    //std::cout<<"\ni_kp: "<<(int)i_kp_<<"\n";
     resultValue_ = 0;
       
     // Push the initial state onto trajectory
@@ -688,7 +687,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         (type_ == TRANSITION && i_kp_ == 1) ||
         (bezierStart && i_kp_ == 1) ) 
     {
-      std::cout<<"\nIn if\n";
+      //std::cout<<"\nIn if\n";
 
 
       // Insert all points on the curves into the trajectory

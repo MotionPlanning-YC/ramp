@@ -149,7 +149,7 @@ const double BezierCurve::findVelocity(const uint8_t i, const double s) const {
 
 
 const ramp_msgs::MotionState BezierCurve::getInitialState() {
-  std::cout<<"\nIn getInitialState\n";
+  //std::cout<<"\nIn getInitialState\n";
 
   ramp_msgs::MotionState result;
   for(uint8_t i=0;i<3;i++) {
@@ -296,7 +296,6 @@ const double BezierCurve::getUDotInitial() const {
   
   double u_dot_0_x = fabs(x_dot_0 / (A_*u_0_+C_));
   double u_dot_0_y = fabs(y_dot_0 / (B_*u_0_+D_));
-  std::cout<<"\nu_dot_0_x: "<<u_dot_0_x<<" u_dot_0_y: "<<u_dot_0_y;
 
   // If x is greater
   if(u_dot_0_x > u_dot_0_y) {
@@ -354,7 +353,6 @@ void BezierCurve::initReflexxes() {
 
   // Get initial and maximum velocity of Bezier parameter 
   double u_dot_0 = getUDotInitial(); 
-  std::cout<<"\nRecalculated u_dot_0: "<<u_dot_0;
   
 
   double u_dot_max  = getUDotMax(u_dot_0);
@@ -392,7 +390,7 @@ void BezierCurve::initReflexxes() {
 
   if(print_) {
     printReflexxesInfo();
-    std::cin.get();
+    //std::cin.get();
   }
 
 
@@ -432,7 +430,6 @@ void BezierCurve::initControlPoints() {
 void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
   ramp_msgs::MotionState C0, C1, C2, p0, p1, p2;
 
-  std::cout<<"\ncp_0: "<<utility_.toString(cp_0);
 
   // Set segment points
   p0 = segmentPoints_.at(0);

@@ -308,6 +308,28 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
 
 
 
+const std::string Utility::toString(const ramp_msgs::BezierInfo bi) const {
+std::ostringstream result;
+
+  result<<"\nSegment Points: ";
+  for(uint8_t i=0;i<bi.segmentPoints.size();i++) {
+    result<<"\n"<<toString(bi.segmentPoints.at(i));
+  }
+
+  result<<"\nControl Points: ";
+  for(uint8_t i=0;i<bi.controlPoints.size();i++) {
+    result<<"\n"<<toString(bi.controlPoints.at(i));
+  }
+
+  result<<"\nms_maxVA: "<<toString(bi.ms_maxVA);
+  result<<"\nms_initialVA: "<<toString(bi.ms_initialVA);
+  result<<"\nms_begin: "<<toString(bi.ms_begin);
+
+  return result.str();
+}
+
+
+
 const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request tr) const {
   std::ostringstream result;
 
@@ -327,6 +349,8 @@ const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request 
     case TRANSITION:
       result<<"Transition";
   }
+
+  result<<"\nBezier Info: "<<toString(tr.bezierInfo);
   
   result<<"\n";
 

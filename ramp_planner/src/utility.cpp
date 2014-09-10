@@ -248,6 +248,27 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
 
   return result.str();
 }
+    
+
+const std::string Utility::toString(const ramp_msgs::BezierInfo bi) const {
+  std::ostringstream result;
+
+  result<<"\nSegment Points: ";
+  for(uint8_t i=0;i<bi.segmentPoints.size();i++) {
+    result<<"\n"<<toString(bi.segmentPoints.at(i));
+  }
+
+  result<<"\nControl Points: ";
+  for(uint8_t i=0;i<bi.controlPoints.size();i++) {
+    result<<"\n"<<toString(bi.controlPoints.at(i));
+  }
+
+  result<<"\nms_maxVA: "<<toString(bi.ms_maxVA);
+  result<<"\nms_initialVA: "<<toString(bi.ms_initialVA);
+  result<<"\nms_begin: "<<toString(bi.ms_begin);
+
+  return result.str();
+}
 
 
 const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const {
@@ -267,7 +288,8 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
 
 
   result<<"\n Points:";
-  for(unsigned int i=0;i<traj.trajectory.points.size();i++) {
+  for(unsigned int i=0;i<10;i++) {
+  //for(unsigned int i=0;i<traj.trajectory.points.size();i++) {
     result<<"\n\n   Point "<<i<<":";
     
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);

@@ -10,6 +10,8 @@ MotionState         start, goal;
 std::vector<Range>  ranges;
 int                 population_size;
 bool                sub_populations;
+bool                modifications;
+bool                evaluations;
 
 
 
@@ -108,6 +110,16 @@ void loadParameters(const ros::NodeHandle handle) {
     handle.getParam("ramp/sub_populations", sub_populations);
     std::cout<<"\nsub_populations: "<<sub_populations;
   }
+  
+  if(handle.hasParam("ramp/modifications")) {
+    handle.getParam("ramp/modifications", modifications);
+    std::cout<<"\nmodifications: "<<modifications;
+  }
+  
+  if(handle.hasParam("ramp/evaluations")) {
+    handle.getParam("ramp/evaluations", evaluations);
+    std::cout<<"\nevaluations: "<<evaluations;
+  }
 
   std::cout<<"\n------- Done loading parameters -------\n";
     std::cout<<"\nID: "<<id;
@@ -142,6 +154,8 @@ int main(int argc, char** argv) {
  
   /** Initialize the Planner's handlers */ 
   my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations); 
+  my_planner.modifications_ = modifications;
+  my_planner.evaluations_   = evaluations;
 
   std::cout<<"\nStart: "<<my_planner.start_.toString();
   std::cout<<"\nGoal: "<<my_planner.goal_.toString();
