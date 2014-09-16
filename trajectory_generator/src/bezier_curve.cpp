@@ -37,17 +37,26 @@ void BezierCurve::dealloc() {
 
 
 
-void BezierCurve::init(const ramp_msgs::BezierInfo bi) {
-  segmentPoints_ = bi.segmentPoints;
+void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionState ms_current) {
+  segmentPoints_  = bi.segmentPoints;
   lambda_         = bi.lambda;
   theta_prev_     = utility_.findAngleFromAToB(
                                   segmentPoints_.at(0).positions, 
                                   segmentPoints_.at(1).positions);
-  
-  ms_max_  = bi.ms_maxVA;
-  ms_init_ = getInitialState();
+ 
+  ms_max_     = bi.ms_maxVA;
+  ms_current_ = ms_current;
+
+  if(bi.ms_initialVA.velocities.size() > 0) {
+    ms_init_ = bi.ms_initialVA;
+  }
+  else {
+    ms_init_ = getInitialState();
+  }
+  std::cout<<"\nAfter setting initial state\n";
 
   u_0_ = bi.u_0;
+  u_dot_0_ = bi.u_dot_0; 
 
   if(bi.controlPoints.size() > 0) {
     initControlPoints(bi.controlPoints.at(0));
@@ -55,16 +64,27 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi) {
   else {
     initControlPoints();
   }
+  std::cout<<"\nAfter setting control points\n";
+
   calculateConstants();
 
   // Set where the robot begins the curve
   if(bi.ms_begin.positions.size() > 0) {
+    std::cout<<"\nSetting ms_begin to bi.ms_begin\n";
+    std::cout<<utility_.toString(bi.ms_begin);
     ms_begin_ = bi.ms_begin;
   }
   else {
+    std::cout<<"\nSetting ms_begin to first control point\n";
     ms_begin_ = controlPoints_.at(0);
   }
-
+  std::cout<<"\nAfter setting ms_begin_\n";
+  x_prev_         = ms_begin_.positions.at(0);
+  y_prev_         = ms_begin_.positions.at(1);
+  x_dot_prev_ = ms_begin_.velocities.at(0);
+  y_dot_prev_ = ms_begin_.velocities.at(1);
+  theta_prev_ = ms_begin_.positions.at(2);
+  theta_dot_prev_ = ms_begin_.velocities.at(2);
 
 
   // If both C and D == 0, the first two points are the same
@@ -121,17 +141,17 @@ void BezierCurve::printReflexxesInfo() const {
 
 const double BezierCurve::findVelocity(const uint8_t i, const double s) const {
   // s = s_0 + v_0*t + 1/2*a*t^2
+  // t = (v - v_0) / a;
   
   // Use 2/3 of max acceleration
   double a = (2.*ms_max_.accelerations.at(i)/3.);
 
-  // Use the current velocities as initial
-  double v_0 = ms_max_.velocities.at(i);
+  // Use the current velocity as initial
+  double v_0 = ms_current_.velocities.size() > 0 ?
+                ms_current_.velocities.at(i) : 0;
 
   double radicand = (2*a*s) + pow(v_0, 2);
   double v = sqrt(radicand);
-  
-  //double t = (v - v_0) / a;
 
   // Check for bounds
   if(v > ms_max_.velocities.at(i)) {
@@ -223,8 +243,10 @@ const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_
 
 
 const double BezierCurve::getUDotMax(const double u_dot_0) const {
+  //std::cout<<"\n\n***** Calculating u_dot_max *****\n";
   double x_dot_max = ms_max_.accelerations.at(0);
   double y_dot_max = ms_max_.accelerations.at(1);
+  //std::cout<<"\nx_dot_max: "<<x_dot_max<<" y_dot_max: "<<y_dot_max;
 
   // Initialize variables
   double u_dot_max;
@@ -239,6 +261,19 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const {
     std::cout<<"\nu_dot_max_x: "<<u_dot_max_x<<" u_dot_max_y: "<<u_dot_max_y;
   }
 
+  // Set a greater and lesser value
+  double greater, lesser;
+  if(u_dot_max_x > u_dot_max_y) {
+    greater = u_dot_max_x;
+    lesser = u_dot_max_y;
+  }
+  else {
+    greater = u_dot_max_y;
+    lesser = u_dot_max_x;
+  }
+
+
+  /** Set u_dot_max*/
 
   // If both are zero
   if(u_dot_max_x == 0 && u_dot_max_y == 0) {
@@ -246,38 +281,17 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const {
     u_dot_max = 0;
   }
 
-  // If x is greater
-  else if ( u_dot_max_x > u_dot_max_y ) {
-
-    // If x satisfies motion constraints
-    if(satisfiesConstraints(u_dot_max_x, u_x, u_y) && u_dot_max_x != 0) {
-      u_dot_max = u_dot_max_x;
-    }
-
-    // else, test y
-    else if(satisfiesConstraints(u_dot_max_y, u_x, u_y) && u_dot_max_y != 0) {
-      u_dot_max = u_dot_max_y;
-    }
-
-    // else, set it to initial u_dot
-    // TODO: Something else?
-    else {  
-      u_dot_max = u_dot_0;
-    }
-  } // end if x is greater
-
-  // If y is greater, test it against constraints 
-  else if(satisfiesConstraints(u_dot_max_y, u_x, u_y) && u_dot_max_y != 0) {
-      u_dot_max = u_dot_max_y;
+  // Test greater
+  else if(satisfiesConstraints(greater, u_x, u_y)) {
+    u_dot_max = greater;
   }
 
-  // If y is greater and does not satisfy constraints, test x
-  else if(satisfiesConstraints(u_dot_max_x, u_x, u_y) && u_dot_max_x != 0) {
-    u_dot_max = u_dot_max_x;
+  // If greater too large, test lesser
+  else if(satisfiesConstraints(lesser, u_x, u_y)) {
+    u_dot_max = lesser;    
   }
 
-  // Else, set u_dot_max to initial u_dot
-  // TODO: Something else?
+  // Else, set it to initial u_dot
   else {
     u_dot_max = u_dot_0;
   }
@@ -291,34 +305,46 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const {
 
 
 const double BezierCurve::getUDotInitial() const {
-  double x_dot_0        = ms_begin_.velocities.at(0);
-  double y_dot_0        = ms_begin_.velocities.at(1);
+  std::cout<<"\n***** Calculating u_dot_0 *****\n";
+  std::cout<<"\nms_begin: "<<utility_.toString(ms_begin_);
+  std::cout<<"\nms_initVA: "<<utility_.toString(ms_init_);
+  double x_dot_0        = (ms_begin_.velocities.size() > 0) ? ms_begin_.velocities.at(0)      : 
+                            ms_init_.velocities.at(0);
+  double y_dot_0        = (ms_begin_.velocities.size() > 0) ? ms_begin_.velocities.at(1)      : 
+                            ms_init_.velocities.at(1);
+  std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
+  std::cout<<"\nu_0: "<<u_0_<<" u_dot_0: "<<u_dot_0_;
   
   double u_dot_0_x = fabs(x_dot_0 / (A_*u_0_+C_));
   double u_dot_0_y = fabs(y_dot_0 / (B_*u_0_+D_));
+  std::cout<<"\nu_dot_0_x: "<<u_dot_0_x;
+  std::cout<<"\nu_dot_0_y: "<<u_dot_0_y;
 
-  // If x is greater
+  // Set a greater and lesser value
+  double greater, lesser;
   if(u_dot_0_x > u_dot_0_y) {
-    if(satisfiesConstraints(u_dot_0_x, u_0_, u_0_)) {
-      return u_dot_0_x;
-    }
-    else if(satisfiesConstraints(u_dot_0_y, u_0_, u_0_)) {
-      return u_dot_0_y;
-    }
-    else {
-      ROS_ERROR("Neither u_dot_0 values satisfy constraints");
-      return 0;
-    } 
+    greater = u_dot_0_x;
+    lesser = u_dot_0_y;
+  }
+  else {
+    greater = u_dot_0_y;
+    lesser = u_dot_0_x;
   }
 
-  // Else if y is greater
-  else if(satisfiesConstraints(u_dot_0_y, u_0_, u_0_)) {
-    return u_dot_0_y;
+  // If both are zero
+  if(u_dot_0_x == 0 && u_dot_0_y == 0) {
+    ROS_ERROR("u_dot_0_x == 0 && u_dot_0_y == 0");
+    return 0;
   }
 
-  // Else if y is not greater and does not satisfy constraints, test x
-  else if(satisfiesConstraints(u_dot_0_x, u_0_, u_0_)) {
-    return u_dot_0_x;
+  // Test greater
+  else if(satisfiesConstraints(greater, u_0_, u_0_)) {
+    return greater;
+  }
+
+  // If greater too large, test lesser
+  else if(satisfiesConstraints(lesser, u_0_, u_0_)) {
+    return lesser;    
   }
 
   else {
@@ -331,11 +357,9 @@ const double BezierCurve::getUDotInitial() const {
 
 /** This method initializes the necessary Reflexxes variables */
 void BezierCurve::initReflexxes() {
-  //std::cout<<"\nIn initReflexxes\n";
+  std::cout<<"\nIn initReflexxes\n";
 
   // Set some variables for readability
-  //double x_dot_0        = ms_init_.velocities.at(0);
-  //double y_dot_0        = ms_init_.velocities.at(1);
   double x_dot_0        = ms_begin_.velocities.at(0);
   double y_dot_0        = ms_begin_.velocities.at(1);
   double x_dot_max      = ms_max_.velocities.at(0);
@@ -353,6 +377,12 @@ void BezierCurve::initReflexxes() {
 
   // Get initial and maximum velocity of Bezier parameter 
   double u_dot_0 = getUDotInitial(); 
+  if(u_dot_0_ != 0) {
+    u_dot_0 = u_dot_0_;
+  }
+  else {
+    u_dot_0_ = u_dot_0;
+  }
   
 
   double u_dot_max  = getUDotMax(u_dot_0);
@@ -364,8 +394,10 @@ void BezierCurve::initReflexxes() {
 
   // Set the position and velocity Reflexxes variables
   reflexxesData_.inputParameters->CurrentPositionVector->VecData[0]     = u_0_;
-  reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]     = u_dot_0;
+  reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]     = u_dot_0_;
   reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]         = u_dot_max;
+  std::cout<<"\nreflexxesData_.inputParameters->CurrentPositionVector->VecData[0]:"<<reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];
+  std::cout<<"\nreflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]:"<<reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0];
 
   // Set u max acceleration
   // We don't actually use this, but it's necessary for Reflexxes to work
@@ -390,12 +422,12 @@ void BezierCurve::initReflexxes() {
 
   if(print_) {
     printReflexxesInfo();
-    //std::cin.get();
+    std::cin.get();
   }
 
 
   reflexxesData_.resultValue = 0;
-  //std::cout<<"\nLeaving initReflexxes\n";
+  std::cout<<"\nLeaving initReflexxes\n";
 } // End initReflexxes
 
 
@@ -495,7 +527,7 @@ void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
   controlPoints_.push_back(C2);
   
 
-  if(print_) {
+  //if(print_) {
     std::cout<<"\nSegment Points:";
     for(int i=0;i<segmentPoints_.size();i++) {
       std::cout<<"\n"<<utility_.toString(segmentPoints_.at(i));
@@ -504,7 +536,7 @@ void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
     for(int i=0;i<controlPoints_.size();i++) {
       std::cout<<"\n"<<utility_.toString(controlPoints_.at(i));
     }
-  }
+  //}
 } // End initControlPoints
 
 
@@ -564,20 +596,23 @@ void BezierCurve::calculateConstants() {
   calculateT_R_min();
   calculateR_min();
   
-  if(print_) {
+  //if(print_) {
     std::cout<<"\nA: "<<A_<<" B: "<<B_<<" C: "<<C_<<" D: "<<D_<<"\n";
-  }
+  //}
 }
 
 
 
 /** Generate all the motion states on the curve */
 const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve() {
+  std::cout<<"\nIn generateCurve\n";
   if(initialized_) {
 
     reflexxesData_.resultValue = 0;
    
     points_.push_back(ms_begin_);
+    std::cout<<"\nCurrent Position: "<<reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];
+    std::cout<<"\nCurrent Velocity: "<<reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]<<"\n";
 
     while(!finalStateReached()) {
       points_.push_back(spinOnce());
@@ -586,6 +621,7 @@ const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve() {
     dealloc();
   }
 
+  std::cout<<"\nLeaving generateCurve\n";
   return points_;
 } // End generateCurve
 
@@ -630,7 +666,6 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   double y_dot = (x_dot*(B_*u+D_)) / (A_*u+C_);
   double theta_dot      = (theta - theta_prev_) / CYCLE_TIME_IN_SECONDS;
 
-
   // Acceleration
   double x_dot_dot = (x_dot - x_dot_prev_) / CYCLE_TIME_IN_SECONDS;
   double y_dot_dot = (y_dot - y_dot_prev_) / CYCLE_TIME_IN_SECONDS;
@@ -648,9 +683,9 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   theta_dot_prev_ = theta_dot;
   
   if(print_) {
-    std::cout<<"\nu: "<<u<<" u_dot: "<<u_dot<<" u_dot_dot: "<<u_dot_dot;
-    std::cout<<"\nx: "<<x<<"     y: "<<y;
-    std::cout<<"\nx_dot: "<<x_dot<<" y_dot: "<<y_dot;
+    std::cout<<"\n\nu: "<<u<<" u_dot: "<<u_dot<<" u_dot_dot: "<<u_dot_dot;
+    std::cout<<"\nx: "<<x<<"           y: "<<y;
+    std::cout<<"\nx_dot: "<<x_dot<<"      y_dot: "<<y_dot;
     std::cout<<"\nx_dot_dot: "<<x_dot_dot<<" y_dot_dot: "<<y_dot_dot;
   }
 

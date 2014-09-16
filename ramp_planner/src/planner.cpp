@@ -161,6 +161,7 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   result.request.resolutionRate = resolutionRate_;
   result.request.type           = PARTIAL_BEZIER;
 
+  // If it's the first time the trajectory is planned
   if(!bezierExists) {
 
     if(path.size() >= 3) {
@@ -171,6 +172,28 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   }
   else {
     result.request.bezierInfo = *curve; 
+
+    // If the curve has been entered
+    if( fabs(startPlanning_.msg_.velocities.at(2)) > 0.0001) {
+      std::cout<<"\n***** Curve has begun! *****";
+      std::cout<<"\nstartPlanning: "<<startPlanning_.toString();
+      std::cout<<"\nu: "<<result.request.bezierInfo.u_0;
+      //std::cout<<"\nAdding "<<controlCycle_.toSec() / (curve->numOfPoints * 0.1);    
+      std::cout<<"\nAdding "<<curve->u_dot_0 / (1 / controlCycle_.toSec());    
+      //result.request.bezierInfo.u_0 += controlCycle_.toSec() / (curve->numOfPoints * 0.1);
+      result.request.bezierInfo.u_0 += curve->u_dot_0 / (1 / controlCycle_.toSec());
+      std::cout<<"\nu: "<<result.request.bezierInfo.u_0;
+
+      result.request.bezierInfo.u_dot_0 = curve->u_dot_0;
+
+      result.request.curve_start = startPlanning_.msg_;
+      result.request.startBezier = true;
+
+    } 
+    else {
+      std::cout<<"\nCurve not started, theta_dot: "<<startPlanning_.msg_.velocities.at(2);
+    }
+
   }
 
   return result;
@@ -1061,7 +1084,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     // Set m_cc_ and startPlanning
     // The motion state that we should reach by the next control cycle
     m_cc_ = bestTrajec_.getPointAtTime(controlCycle_.toSec());
-    std::cout<<"\nm_cc: "<<m_cc_.toString();
+    //std::cout<<"\nm_cc: "<<m_cc_.toString();
     std::cout<<"\nbestTrajec: "<<bestTrajec_.toString();
     startPlanning_ = m_cc_;
     

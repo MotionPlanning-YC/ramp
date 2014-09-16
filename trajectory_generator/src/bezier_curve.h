@@ -14,7 +14,7 @@ public:
   BezierCurve();
   ~BezierCurve();
 
-  void init(const ramp_msgs::BezierInfo bi);
+  void init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionState ms_current);
  
  
 
@@ -33,16 +33,19 @@ public:
   void initControlPoints(const ramp_msgs::MotionState start);
   bool print_;
 
+  ramp_msgs::MotionState ms_init_;
+  ramp_msgs::MotionState ms_max_;
+  ramp_msgs::MotionState ms_begin_;
+  ramp_msgs::MotionState ms_current_;
+
+
+  double u_0_, u_dot_0_;
 private:
 
   Utility       utility_            ;
   ReflexxesData reflexxesData_      ;
   bool          initialized_        ;
   bool          deallocated_        ;
-  ramp_msgs::MotionState ms_init_;
-  ramp_msgs::MotionState ms_max_;
-  ramp_msgs::MotionState ms_begin_;
-
 
   // Variables to manually track some motion info
   double        x_prev_, y_prev_;
@@ -50,7 +53,6 @@ private:
   double        theta_prev_             ;
   double        theta_dot_prev_         ;
 
-  double u_0_;
 
   void initReflexxes()    ;
 

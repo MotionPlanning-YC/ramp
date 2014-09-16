@@ -321,6 +321,8 @@ std::ostringstream result;
     result<<"\n"<<toString(bi.controlPoints.at(i));
   }
 
+  result<<"\nTotal number of points: "<<bi.numOfPoints;
+
   result<<"\nms_maxVA: "<<toString(bi.ms_maxVA);
   result<<"\nms_initialVA: "<<toString(bi.ms_initialVA);
   result<<"\nms_begin: "<<toString(bi.ms_begin);

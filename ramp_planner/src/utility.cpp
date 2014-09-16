@@ -263,6 +263,8 @@ const std::string Utility::toString(const ramp_msgs::BezierInfo bi) const {
     result<<"\n"<<toString(bi.controlPoints.at(i));
   }
 
+  result<<"\nTotal number of points: "<<bi.numOfPoints;
+
   result<<"\nms_maxVA: "<<toString(bi.ms_maxVA);
   result<<"\nms_initialVA: "<<toString(bi.ms_initialVA);
   result<<"\nms_begin: "<<toString(bi.ms_begin);
@@ -288,7 +290,7 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
 
 
   result<<"\n Points:";
-  for(unsigned int i=0;i<10;i++) {
+  for(unsigned int i=0;i<7;i++) {
   //for(unsigned int i=0;i<traj.trajectory.points.size();i++) {
     result<<"\n\n   Point "<<i<<":";
     
