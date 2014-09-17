@@ -12,6 +12,7 @@ class KnotPoint {
     KnotPoint(const ramp_msgs::KnotPoint kp);
     ~KnotPoint() {}
 
+    // TODO: Make data member msg_
     // Data Members
     MotionState motionState_;
     unsigned int stopTime_;

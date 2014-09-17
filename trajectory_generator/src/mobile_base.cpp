@@ -89,8 +89,8 @@ void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
   //std::cout<<"\nRequest received: "<<utility_.toString(req)<<"\n";
 
   bezierStart = req.startBezier;
-  if(req.bezierInfo.u_0 > 0)
-    std::cout<<"\nBezier Info passed in: "<<utility_.toString(req.bezierInfo);
+  //if(req.bezierInfo.u_0 > 0)
+    //std::cout<<"\nBezier Info passed in: "<<utility_.toString(req.bezierInfo);
 
   // Store the path
   path_ = req.path;
@@ -335,7 +335,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     // Go through the path's knot points
     //std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
     for(uint8_t i=1;i<stop;i++) {
-      std::cout<<"\n---i: "<<(int)i<<"---\n";
+      //std::cout<<"\n---i: "<<(int)i<<"---\n";
       BezierCurve bc;
       bc.print_ = print_;
 
@@ -415,7 +415,6 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
       // Generate the curve
       bc.generateCurve();
-      std::cout<<"\nAfter generateCurve\n";
 
       // If the curve was valid,
       if(bc.points_.size() > 0) {
@@ -679,20 +678,15 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         (type_ == TRANSITION && i_kp_ == 1) ||
         (bezierStart && i_kp_ == 1) ) 
     {
-      std::cout<<"\nIn if\n";
+      //std::cout<<"\nIn if\n";
 
-
-      std::cout<<"\nBefore for\n";
-      std::cout<<"\ncurves.size(): "<<curves.size()<<"\n";
-      std::cout<<"\nc: "<<(int)c<<"\n";
-      std::cout<<"\ncurves.at("<<(int)c<<".points.size()-1: "<<curves.at(c).points_.size()<<"\n";
       // Insert all points on the curves into the trajectory
-      for(uint32_t p=1;p<curves.at(c).points_.size()-1;p++) {
+      for(uint32_t p=1;p<curves.at(c).points_.size();p++) {
         insertPoint(curves.at(c).points_.at(p), res);
 
         // If it's the first or last point on the curve, 
         // push the index to knot point vector
-        if(p==curves.at(c).points_.size()-2) {
+        if(p==curves.at(c).points_.size()-1) {
           res.trajectory.i_knotPoints.push_back(
                           res.trajectory.trajectory.points.size() - 1 );
         } // end if knot point

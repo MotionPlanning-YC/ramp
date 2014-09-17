@@ -53,7 +53,6 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
   else {
     ms_init_ = getInitialState();
   }
-  std::cout<<"\nAfter setting initial state\n";
 
   u_0_ = bi.u_0;
   u_dot_0_ = bi.u_dot_0; 
@@ -64,21 +63,17 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
   else {
     initControlPoints();
   }
-  std::cout<<"\nAfter setting control points\n";
 
   calculateConstants();
 
   // Set where the robot begins the curve
   if(bi.ms_begin.positions.size() > 0) {
-    std::cout<<"\nSetting ms_begin to bi.ms_begin\n";
     std::cout<<utility_.toString(bi.ms_begin);
     ms_begin_ = bi.ms_begin;
   }
   else {
-    std::cout<<"\nSetting ms_begin to first control point\n";
     ms_begin_ = controlPoints_.at(0);
   }
-  std::cout<<"\nAfter setting ms_begin_\n";
   x_prev_         = ms_begin_.positions.at(0);
   y_prev_         = ms_begin_.positions.at(1);
   x_dot_prev_ = ms_begin_.velocities.at(0);
@@ -305,20 +300,23 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const {
 
 
 const double BezierCurve::getUDotInitial() const {
-  std::cout<<"\n***** Calculating u_dot_0 *****\n";
-  std::cout<<"\nms_begin: "<<utility_.toString(ms_begin_);
-  std::cout<<"\nms_initVA: "<<utility_.toString(ms_init_);
-  double x_dot_0        = (ms_begin_.velocities.size() > 0) ? ms_begin_.velocities.at(0)      : 
-                            ms_init_.velocities.at(0);
-  double y_dot_0        = (ms_begin_.velocities.size() > 0) ? ms_begin_.velocities.at(1)      : 
-                            ms_init_.velocities.at(1);
-  std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
-  std::cout<<"\nu_0: "<<u_0_<<" u_dot_0: "<<u_dot_0_;
+  if(print_) {
+    std::cout<<"\n***** Calculating u_dot_0 *****\n";
+    std::cout<<"\nms_begin: "<<utility_.toString(ms_begin_);
+    std::cout<<"\nms_initVA: "<<utility_.toString(ms_init_);
+  }
+  double x_dot_0 = (ms_begin_.velocities.size() > 0) ?  ms_begin_.velocities.at(0) : 
+                                                        ms_init_.velocities.at(0);
+  double y_dot_0 = (ms_begin_.velocities.size() > 0) ?  ms_begin_.velocities.at(1) : 
+                                                        ms_init_.velocities.at(1);
   
   double u_dot_0_x = fabs(x_dot_0 / (A_*u_0_+C_));
   double u_dot_0_y = fabs(y_dot_0 / (B_*u_0_+D_));
-  std::cout<<"\nu_dot_0_x: "<<u_dot_0_x;
-  std::cout<<"\nu_dot_0_y: "<<u_dot_0_y;
+  if(print_) {
+    std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
+    std::cout<<"\nu_0: "<<u_0_<<" u_dot_0: "<<u_dot_0_;
+    std::cout<<"\nu_dot_0_x: "<<u_dot_0_x<<" u_dot_0_y: "<<u_dot_0_y;
+  }
 
   // Set a greater and lesser value
   double greater, lesser;
@@ -357,7 +355,7 @@ const double BezierCurve::getUDotInitial() const {
 
 /** This method initializes the necessary Reflexxes variables */
 void BezierCurve::initReflexxes() {
-  std::cout<<"\nIn initReflexxes\n";
+  //std::cout<<"\nIn initReflexxes\n";
 
   // Set some variables for readability
   double x_dot_0        = ms_begin_.velocities.at(0);
@@ -427,7 +425,7 @@ void BezierCurve::initReflexxes() {
 
 
   reflexxesData_.resultValue = 0;
-  std::cout<<"\nLeaving initReflexxes\n";
+  //std::cout<<"\nLeaving initReflexxes\n";
 } // End initReflexxes
 
 
@@ -527,7 +525,7 @@ void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
   controlPoints_.push_back(C2);
   
 
-  //if(print_) {
+  if(print_) {
     std::cout<<"\nSegment Points:";
     for(int i=0;i<segmentPoints_.size();i++) {
       std::cout<<"\n"<<utility_.toString(segmentPoints_.at(i));
@@ -536,7 +534,7 @@ void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
     for(int i=0;i<controlPoints_.size();i++) {
       std::cout<<"\n"<<utility_.toString(controlPoints_.at(i));
     }
-  //}
+  }
 } // End initControlPoints
 
 
@@ -596,16 +594,16 @@ void BezierCurve::calculateConstants() {
   calculateT_R_min();
   calculateR_min();
   
-  //if(print_) {
+  if(print_) {
     std::cout<<"\nA: "<<A_<<" B: "<<B_<<" C: "<<C_<<" D: "<<D_<<"\n";
-  //}
+  }
 }
 
 
 
 /** Generate all the motion states on the curve */
 const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve() {
-  std::cout<<"\nIn generateCurve\n";
+  //std::cout<<"\nIn generateCurve\n";
   if(initialized_) {
 
     reflexxesData_.resultValue = 0;
@@ -621,7 +619,7 @@ const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve() {
     dealloc();
   }
 
-  std::cout<<"\nLeaving generateCurve\n";
+  //std::cout<<"\nLeaving generateCurve\n";
   return points_;
 } // End generateCurve
 
