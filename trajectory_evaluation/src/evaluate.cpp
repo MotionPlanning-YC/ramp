@@ -36,16 +36,18 @@ const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) 
   // Negate because for this criterion, shorter values are better
   time_.trajectory_ = trajectory_;
   time_.goal_       = goal_;
-  //std::cout<<"\nTime: "<<time_.perform();
-  result += (time_.perform()) * -1;
+  std::cout<<"\nTime: "<<time_.perform();
+  std::cout<<"\n1.0 / time.perform: "<<(1.0/time_.perform());
+  result += (1.0 / time_.perform());
+  std::cout<<"\nresult: "<<result;
 
 
   // Set values for euclidean distace and add to result
   // Negate because for this criterion, shorter values are better
-  eucDist_.trajectory_  = trajectory_;
-  eucDist_.goal_        = goal_; 
+  //eucDist_.trajectory_  = trajectory_;
+  //eucDist_.goal_        = goal_; 
   //std::cout<<"\nEuclid Dist: "<<eucDist_.perform();
-  result += (2*eucDist_.perform()) * -1;
+  //result += (1.0 / eucDist_.perform());
 
   
   // If the trajectory is infeasible
@@ -53,9 +55,9 @@ const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) 
 
     // Add the Penalty for being infeasible
     if (feasible.t_firstCollision_ == 0) 
-      result += (Q*Q)*-1;
+      result += (1.0 / (Q*Q));
     else    
-      result += (Q / feasible.t_firstCollision_) * -1;
+      result += (1.0 / (Q / feasible.t_firstCollision_));
   }
   
   return result;

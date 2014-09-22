@@ -175,6 +175,7 @@ int main(int argc, char** argv) {
   
   
   std::cout<<"\n\nExiting Normally\n";
+  ros::shutdown();
   return 0;
 }
 

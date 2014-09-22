@@ -15,7 +15,7 @@ class Population {
     /* Methods */
     const unsigned int    size() const;
     const int             add(const RampTrajectory rt);
-    const int             getBestID();
+    const int             getBestIndex();
     void                  clear();
     void                  replace(const uint8_t i, const RampTrajectory trajec);
     void                  replaceAll(const std::vector<RampTrajectory> new_pop);
@@ -40,9 +40,9 @@ class Population {
     /** Data Members */
     std::vector<Path>           paths_;
     unsigned int                maxSize_;
+    int                         i_best_;
     
   private:
-    int                         i_best_;
     std::vector<RampTrajectory> trajectories_;
     bool                        changed_;
     std::vector<Population>     subPopulations_;

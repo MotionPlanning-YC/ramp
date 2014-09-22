@@ -207,6 +207,7 @@ i	utility.cpp	/^    result<<"\\n   "<<i<<":";$/;"	l
 i	utility.cpp	/^    result<<"\\n\\n   Point "<<i<<":";$/;"	l
 i_obstacle_	collision_detection.h	/^      int   i_obstacle_;$/;"	m	struct:CollisionDetection::QueryResult	access:public
 i_segments_	evaluate.h	/^    std::vector<unsigned int> i_segments_;$/;"	m	class:Evaluate	access:public
+i_stop	collision_detection.cpp	/^  int i_stop = trajectory_$/;"	l
 id	collision_detection.h	/^    int                   id;$/;"	m	class:CollisionDetection	access:public
 id	main.cpp	/^  int id;$/;"	l
 index	utility.cpp	/^    unsigned int index = traj.i_knotPoints.at(i);$/;"	l
@@ -235,6 +236,7 @@ perform	collision_detection.cpp	/^const CollisionDetection::QueryResult Collisio
 perform	collision_detection.h	/^    const QueryResult           perform() const;$/;"	p	class:CollisionDetection	access:public	signature:() const
 perform	euclidean_distance.cpp	/^const double EuclideanDistance::perform() {$/;"	f	class:EuclideanDistance	signature:()
 perform	euclidean_distance.h	/^    const double perform();$/;"	p	class:EuclideanDistance	access:public	signature:()
+perform	evaluate.cpp	/^  std::cout<<"\\nTime: "<<time_.perform();$/;"	p	file:	signature:()
 perform	time.cpp	/^const double Time::perform() {$/;"	f	class:Time	signature:()
 perform	time.h	/^    const double perform();$/;"	p	class:Time	access:public	signature:()
 performFitness	evaluate.cpp	/^const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) {$/;"	f	class:Evaluate	signature:(CollisionDetection::QueryResult feasible)
@@ -264,7 +266,6 @@ q	collision_detection.cpp	/^  CollisionDetection::QueryResult q = query(ob_traje
 qr	main.cpp	/^  CollisionDetection::QueryResult qr;$/;"	l
 query	collision_detection.cpp	/^const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::RampTrajectory ob_trajectory) const {$/;"	f	class:CollisionDetection	signature:(const ramp_msgs::RampTrajectory ob_trajectory) const
 query	collision_detection.h	/^    const QueryResult           query(const ramp_msgs::RampTrajectory ob_trajectory) const;$/;"	p	class:CollisionDetection	access:public	signature:(const ramp_msgs::RampTrajectory ob_trajectory) const
-radius	collision_detection.cpp	/^  float radius = 0.4f;$/;"	l
 received_ob	main.cpp	/^bool received_ob = false;$/;"	v
 request	trajectory_request_handler.cpp	/^const bool TrajectoryRequestHandler::request(ramp_msgs::TrajectoryRequest& tr) {$/;"	f	class:TrajectoryRequestHandler	signature:(ramp_msgs::TrajectoryRequest& tr)
 request	trajectory_request_handler.h	/^    const bool request(ramp_msgs::TrajectoryRequest& tr);$/;"	p	class:TrajectoryRequestHandler	access:public	signature:(ramp_msgs::TrajectoryRequest& tr)
@@ -274,6 +275,7 @@ result	collision_detection.cpp	/^  ramp_msgs::Path result;$/;"	l
 result	collision_detection.cpp	/^  ramp_msgs::RampTrajectory result;$/;"	l
 result	euclidean_distance.cpp	/^  double result=0;$/;"	l
 result	evaluate.cpp	/^  double result=0;$/;"	l
+result	evaluate.cpp	/^  std::cout<<"\\nresult: "<<result;$/;"	l
 result	time.cpp	/^  double result = 0.;$/;"	l
 result	utility.cpp	/^  double result;$/;"	l
 result	utility.cpp	/^  double result=0;$/;"	l

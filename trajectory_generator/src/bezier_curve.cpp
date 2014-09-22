@@ -54,8 +54,11 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
     ms_init_ = getInitialState();
   }
 
-  u_0_ = bi.u_0;
-  u_dot_0_ = bi.u_dot_0; 
+  std::cout<<"\nbi.u_0: "<<bi.u_0;
+  std::cout<<"\nbi.u_dot_0: "<<bi.u_dot_0;
+
+  u_0_      = bi.u_0;
+  u_dot_0_  = bi.u_dot_0; 
 
   if(bi.controlPoints.size() > 0) {
     initControlPoints(bi.controlPoints.at(0));
@@ -76,9 +79,9 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
   }
   x_prev_         = ms_begin_.positions.at(0);
   y_prev_         = ms_begin_.positions.at(1);
-  x_dot_prev_ = ms_begin_.velocities.at(0);
-  y_dot_prev_ = ms_begin_.velocities.at(1);
-  theta_prev_ = ms_begin_.positions.at(2);
+  x_dot_prev_     = ms_begin_.velocities.at(0);
+  y_dot_prev_     = ms_begin_.velocities.at(1);
+  theta_prev_     = ms_begin_.positions.at(2);
   theta_dot_prev_ = ms_begin_.velocities.at(2);
 
 
@@ -134,7 +137,7 @@ void BezierCurve::printReflexxesInfo() const {
 
 
 
-const double BezierCurve::findVelocity(const uint8_t i, const double s) const {
+const double BezierCurve::findVelocity(const uint8_t i, const double l, const double slope) const {
   // s = s_0 + v_0*t + 1/2*a*t^2
   // t = (v - v_0) / a;
   
@@ -144,9 +147,15 @@ const double BezierCurve::findVelocity(const uint8_t i, const double s) const {
   // Use the current velocity as initial
   double v_0 = ms_current_.velocities.size() > 0 ?
                 ms_current_.velocities.at(i) : 0;
+  std::cout<<"\nms_current: "<<utility_.toString(ms_current_);
+  std::cout<<"\nv_0: "<<v_0;
 
-  double radicand = (2*a*s) + pow(v_0, 2);
+  double radicand = (2*a*l) + pow(v_0, 2);
   double v = sqrt(radicand);
+
+  std::cout<<"\na: "<<a<<" s: "<<l;
+  std::cout<<"\nradicand: "<<radicand;
+  std::cout<<"\nv: "<<v;
 
   // Check for bounds
   if(v > ms_max_.velocities.at(i)) {
@@ -154,6 +163,10 @@ const double BezierCurve::findVelocity(const uint8_t i, const double s) const {
   }
   if(v < -ms_max_.velocities.at(i)) {
     v = -ms_max_.velocities.at(i);
+  }
+
+  if(slope < 0 && v > 0) {
+    v *= -1;
   }
 
   return v;
@@ -177,13 +190,13 @@ const ramp_msgs::MotionState BezierCurve::getInitialState() {
   double run  = segmentPoints_.at(1).positions.at(0) - 
                 segmentPoints_.at(0).positions.at(0);
   double slope  = (run != 0) ? ryse / run : ryse;
-  if(print_) {
+  //if(print_) {
     std::cout<<"\nryse: "<<ryse<<" run: "<<run;
     std::cout<<"\nslope: "<<slope<<"\n";
-  }
+  //}
   
   // Segment 1 size
-  double s = lambda_ * utility_.positionDistance(
+  double l = lambda_ * utility_.positionDistance(
       segmentPoints_.at(0).positions, 
       segmentPoints_.at(1).positions);
 
@@ -193,14 +206,14 @@ const ramp_msgs::MotionState BezierCurve::getInitialState() {
       (slope == -1 && run < 0) ||
       (slope < -1) ) 
   {
-    result.velocities.at(1) = findVelocity(1, s);
+    result.velocities.at(1) = findVelocity(1, l, ryse);
     result.velocities.at(0) = result.velocities.at(1) / slope;  
   }
   // if slope == -1 && ryse < 0
   // if slope < 0
   // else
   else {
-    result.velocities.at(0) = findVelocity(0, s);
+    result.velocities.at(0) = findVelocity(0, l, run);
     result.velocities.at(1) = result.velocities.at(0) * slope;
   }
 

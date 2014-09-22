@@ -277,7 +277,7 @@ const int Population::add(const RampTrajectory rt) {
   if(subPopulations_.size() > 0) {
     // Go through each sub-population and find best
     for(uint8_t i=0;i<subPopulations_.size();i++) {
-      subPopulations_.at(i).getBestID();
+      subPopulations_.at(i).getBestIndex();
     }
   }
  
@@ -308,8 +308,9 @@ const int Population::add(const RampTrajectory rt) {
 
 
 /** Returns the fittest trajectory and sets i_best_ */
-const int Population::getBestID() {
-  //std::cout<<"\nIn findBest\n";
+const int Population::getBestIndex() {
+  std::cout<<"\nIn findBest\n";
+  std::cout<<"\ni_best_: "<<i_best_;
   
   // If population has not changed since last
   // findBest call, return without searching
@@ -332,13 +333,14 @@ const int Population::getBestID() {
   // Set changed 
   changed_ = false;
 
+  std::cout<<"\nReturning "<<i_best_;
   return i_best_; 
-} //End getBestID
+} //End getBestIndex
 
 
 
 const RampTrajectory Population::getBest() {
-  return trajectories_.at(getBestID());
+  return trajectories_.at(getBestIndex());
 }
 
 
@@ -356,7 +358,7 @@ const std::vector<RampTrajectory> Population::getBestFromSubPops() {
   else {
     for(uint8_t i=0;i<subPopulations_.size();i++) {
       if(subPopulations_.at(i).size() > 0) {
-        int i_best = subPopulations_.at(i).getBestID(); 
+        int i_best = subPopulations_.at(i).getBestIndex(); 
         result.push_back(subPopulations_.at(i).get(i_best));
       }
     }
@@ -405,7 +407,7 @@ const std::vector<Population> Population::createSubPopulations(const double delt
 
   // Go through each sub-population and find best
   for(uint8_t i=0;i<subPopulations_.size();i++) {
-    subPopulations_.at(i).getBestID();
+    subPopulations_.at(i).getBestIndex();
   }
 
   //std::cout<<"\n***********Leaving createSubPopulations***********\n";

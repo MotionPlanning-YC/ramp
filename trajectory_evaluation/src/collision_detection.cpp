@@ -74,16 +74,21 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       std::cout<<"\nObstacle 0 has no trajectory!\n";
   }*/
   
+  // If there is more than 1 segment, do checks until the end of Bezier curve
+  // which will be 3rd knot point (current state, start of curve, end of curve)
+  int i_stop = trajectory_.i_knotPoints.size() > 2 ?  trajectory_.i_knotPoints.at(2):
+                                                      trajectory_.i_knotPoints.at(1);
   // For every 3 points, check circle detection
   float radius = 0.4f;
-  for(unsigned int i=0;i<trajectory_.trajectory.points.size();i+=3) {
+  for(unsigned int i=0;i<i_stop;i+=3) {
     
     // Get the ith point on the trajectory
     trajectory_msgs::JointTrajectoryPoint p_i = trajectory_.trajectory.points.at(i);
 
+
     // ***Test position i for collision against some points on obstacle's trajectory***
     // Obstacle trajectory should already be in world coordinates!
-    for(int j = (i>10 ? i-1 : 0) ;j<i+10 && j<ob_trajectory.trajectory.points.size();j++) {
+    for(int j = (i>5 ? i-1 : 0) ;j<i+5 && j<ob_trajectory.trajectory.points.size();j++) {
 
       // Get the jth point of the obstacle's trajectory
       trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
