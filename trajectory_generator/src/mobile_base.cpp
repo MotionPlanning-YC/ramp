@@ -340,22 +340,21 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
   std::vector<BezierCurve> result;
 
   // Check that all of the points are different
-  if(utility_.positionDistance(p.points.at(0).motionState.positions, 
-        p.points.at(1).motionState.positions) > 0.01 &&
-     utility_.positionDistance(p.points.at(1).motionState.positions, 
-       p.points.at(2).motionState.positions) > 0.01 ) 
+  if(utility_.positionDistance(req_.bezierInfo.segmentPoints.at(0).positions, 
+        req_.bezierInfo.segmentPoints.at(1).positions) > 0.01 &&
+      (utility_.positionDistance(req_.bezierInfo.segmentPoints.at(1).positions, 
+        req_.bezierInfo.segmentPoints.at(2).positions) > 0.01) )
   {
 
     ramp_msgs::Path p_copy = p;
 
     // Set the index of which knot point to stop at
-    int stop = type_ == PARTIAL_BEZIER ?  stop = 2 : 
-                                          p_copy.points.size()-1;
+    int stop = 2; 
 
     // Go through the path's knot points
-    //std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
+    std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
     for(uint8_t i=1;i<stop;i++) {
-      //std::cout<<"\n---i: "<<(int)i<<"---\n";
+      std::cout<<"\n---i: "<<(int)i<<"---\n";
       BezierCurve bc;
       bc.print_ = print_;
 
@@ -388,24 +387,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
         bc.init(bi, path_.points.at(0).motionState);
       } // end if bezierStart
-
-      // If the start of the curve was specified
-      else if(curveStart_.positions.size() > 0) {
-        std::cout<<"\nIn else if curveStart specified\n";
-        if(curveStart_.accelerations.size() == 0) {
-          ROS_ERROR("Curve start has no acceleration values");
-        }
-
-        ramp_msgs::MotionState max = getMaxMS();
-
-
-        //TODO: lambda
-        /*bc.init(segment_points, curveStart_,
-              curveStart_.positions.at(2), 
-              curveStart_, max, 0.5);*/
-      } // end else if curve start specified
-
       
+
 
       // If a "normal" bezier trajectory,
       else {
@@ -432,13 +415,25 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
       // If the curve was valid,
       if(bc.points_.size() > 0) {
+        std::cout<<"\nReplacing knot points, bc.points.size(): "<<bc.points_.size();
+        std::cout<<"\nRemoving knot point: "<<utility_.toString(p.points.at(i).motionState);
 
+        // If we started with a Bezier
         if(bezierStart) {
+          std::cout<<"\nPath before removing: "<<utility_.toString(p);
+          std::cout<<"\ni: "<<(int)i;
           p.points.erase(p.points.begin()+i);
+          // If a transition, remove the next knot point as well
+          //if(type_ == TRANSITION) {
+            //std::cout<<"\nRemoving knot point: "<<utility_.toString(p.points.at(i).motionState);
+            //p.points.erase(p.points.begin()+i);
+          //}
+          std::cout<<"\nInserting bc.points_.at(size()-1): "<<utility_.toString(bc.points_.at(bc.points_.size()-1));
           p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
         }
         
-        // Replace the knot point with the first and 
+        // Else we are starting with a straight-line
+        // Replace the next knot point with the first and 
         //  last points on the curve
         // The first point is control point c0 with v 
         //  and a information, 
@@ -447,19 +442,11 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         // If it's a transition, the first point on curve 
         //  is the first point that's already there
         else if(type_ != TRANSITION) {
-          std::cout<<"\nReplacing knot points, bc.points.size(): "<<bc.points_.size();
-          std::cout<<"\nbc.points_.at(0): "<<utility_.toString(bc.points_.at(0));
-          std::cout<<"\nbc.points_.at(size()-1): "<<utility_.toString(bc.points_.at(bc.points_.size()-1));
+          std::cout<<"\nInserting bc.points_.at(0): "<<utility_.toString(bc.points_.at(0));
+          std::cout<<"\nInserting bc.points_.at(size()-1): "<<utility_.toString(bc.points_.at(bc.points_.size()-1));
           p.points.erase(p.points.begin()+i);
           p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(0)));
           p.points.insert(p.points.begin()+i+1, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
-        }
- 
-        // Else if it's transition, replace the 2nd knot point with the last control point
-        else if (bc.points_.size() > 0) {
-          //std::cout<<"\nErasing point "<<utility_.toString(p.points.at(1))<<"\n";
-          p.points.erase(p.points.begin()+1);
-          p.points.insert(p.points.begin()+i, utility_.getKnotPoint(bc.points_.at(bc.points_.size()-1)));
         }
         
 
@@ -511,16 +498,22 @@ void MobileBase::printReflexxesSpinInfo() const {
                 reflexxesData_.outputParameters->NewPositionVector->VecData[0];
   std::cout<<"\nreflexxesData_.outputParameters->NewPositionVector->VecData[1]: "<<
                 reflexxesData_.outputParameters->NewPositionVector->VecData[1];
+  std::cout<<"\nreflexxesData_.outputParameters->NewPositionVector->VecData[2]: "<<
+                reflexxesData_.outputParameters->NewPositionVector->VecData[2];
   
-  std::cout<<"\nreflexxesData_.outputParameters->NewVelocityVector->VecData[0]: "<<
+  std::cout<<"\n\nreflexxesData_.outputParameters->NewVelocityVector->VecData[0]: "<<
                 reflexxesData_.outputParameters->NewVelocityVector->VecData[0];
   std::cout<<"\nreflexxesData_.outputParameters->NewVelocityVector->VecData[1]: "<<
                 reflexxesData_.outputParameters->NewVelocityVector->VecData[1];
+  std::cout<<"\nreflexxesData_.outputParameters->NewVelocityVector->VecData[2]: "<<
+                reflexxesData_.outputParameters->NewVelocityVector->VecData[2];
   
-  std::cout<<"\nreflexxesData_.outputParameters->NewAccelerationVector->VecData[0]: "<<
+  std::cout<<"\n\nreflexxesData_.outputParameters->NewAccelerationVector->VecData[0]: "<<
                 reflexxesData_.outputParameters->NewAccelerationVector->VecData[0];
   std::cout<<"\nreflexxesData_.outputParameters->NewAccelerationVector->VecData[1]: "<<
                 reflexxesData_.outputParameters->NewAccelerationVector->VecData[1];
+  std::cout<<"\nreflexxesData_.outputParameters->NewAccelerationVector->VecData[2]: "<<
+                reflexxesData_.outputParameters->NewAccelerationVector->VecData[2];
 
 } // End printReflexxesInfo
 
@@ -532,10 +525,11 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce() {
 
   // Calling the Reflexxes OTG algorithm
   resultValue_ = reflexxesData_.rml->RMLPosition(*reflexxesData_.inputParameters, reflexxesData_.outputParameters, reflexxesData_.flags);
-  //if(print_) {
-    //printReflexxesSpinInfo();
-    //std::cout<<"\n";
-  //}
+  /*if(print_) {
+    printReflexxesSpinInfo();
+    std::cout<<"\n";
+    std::cin.get();
+  }*/
   
 
   /** Build the JointTrajectoryPoint object that will be used to build the trajectory */

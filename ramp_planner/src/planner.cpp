@@ -1019,10 +1019,10 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
 
   // At generation x, insert a straight-line trajectory to the goal
-  //if(generation_ == 30) {
-    //seedPopulationLine();
+  if(generation_ == 30) {
+    seedPopulationLine();
     //std::cout<<"\nPop: "<<population_.fitnessFeasibleToString();
-  //}
+  }
 
 
 
@@ -1112,7 +1112,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     // Set m_cc_ and startPlanning
     // The motion state that we should reach by the next control cycle
     m_cc_ = bestTrajec_.getPointAtTime(controlCycle_.toSec());
-    //std::cout<<"\nm_cc: "<<m_cc_.toString();
+    std::cout<<"\nm_cc: "<<m_cc_.toString();
     startPlanning_ = m_cc_;
     
     // After m_cc_ and startPlanning are set, update the population
@@ -1324,15 +1324,16 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
  **/
 void Planner::evaluatePopulation() {
   //std::cout<<"\nIn evaluatePopulation********\n";
-  if(population_.getBestIndex() > -1) {
-    population_.replace(population_.getBestIndex(), 
-        evaluateTrajectory(population_.get(population_.getBestIndex())));
-    bestTrajec_ = population_.get(population_.getBestIndex()); 
+  int i_best = population_.getBestIndex();
+  if(i_best > -1) {
+    population_.replace(i_best, 
+        evaluateTrajectory(population_.get(i_best)));
+    bestTrajec_ = population_.get(i_best); 
   }
   
   // Go through each trajectory in the population and evaluate it
   for(unsigned int i=0;i<population_.size();i++) {
-    if(i != population_.getBestIndex()) {
+    if(i != i_best) {
       population_.replace(i, evaluateTrajectory(population_.get(i)));
     }
   } // end for

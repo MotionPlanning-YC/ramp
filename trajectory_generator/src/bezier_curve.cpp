@@ -54,6 +54,7 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
     ms_init_ = getInitialState();
   }
 
+  std::cout<<"\nlambda: "<<lambda_;
   std::cout<<"\nbi.u_0: "<<bi.u_0;
   std::cout<<"\nbi.u_dot_0: "<<bi.u_dot_0;
 
@@ -177,7 +178,7 @@ const double BezierCurve::findVelocity(const uint8_t i, const double l, const do
 
 
 const ramp_msgs::MotionState BezierCurve::getInitialState() {
-  //std::cout<<"\nIn getInitialState\n";
+  std::cout<<"\nIn getInitialState\n";
 
   ramp_msgs::MotionState result;
   for(uint8_t i=0;i<3;i++) {
@@ -190,10 +191,10 @@ const ramp_msgs::MotionState BezierCurve::getInitialState() {
   double run  = segmentPoints_.at(1).positions.at(0) - 
                 segmentPoints_.at(0).positions.at(0);
   double slope  = (run != 0) ? ryse / run : ryse;
-  //if(print_) {
+  if(print_) {
     std::cout<<"\nryse: "<<ryse<<" run: "<<run;
     std::cout<<"\nslope: "<<slope<<"\n";
-  //}
+  }
   
   // Segment 1 size
   double l = lambda_ * utility_.positionDistance(
@@ -252,16 +253,16 @@ const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_
 
 const double BezierCurve::getUDotMax(const double u_dot_0) const {
   //std::cout<<"\n\n***** Calculating u_dot_max *****\n";
-  double x_dot_max = ms_max_.accelerations.at(0);
-  double y_dot_max = ms_max_.accelerations.at(1);
+  double x_dot_max = ms_max_.velocities.at(0);
+  double y_dot_max = ms_max_.velocities.at(1);
   //std::cout<<"\nx_dot_max: "<<x_dot_max<<" y_dot_max: "<<y_dot_max;
 
   // Initialize variables
   double u_dot_max;
   double u_x = ( fabs(A_+C_) > fabs(C_) ) ? 1 : 0;
   double u_y = ( fabs(B_+D_) > fabs(D_) ) ? 1 : 0;
-  double u_dot_max_y = B_*u_y + D_ == 0 ? 0 : fabs(x_dot_max / (B_*u_y+D_));
   double u_dot_max_x = A_*u_x + C_ == 0 ? 0 : fabs(y_dot_max / (A_*u_x+C_));
+  double u_dot_max_y = B_*u_y + D_ == 0 ? 0 : fabs(x_dot_max / (B_*u_y+D_));
 
 
   if(print_) {
