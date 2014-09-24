@@ -67,6 +67,7 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
   else {
     initControlPoints();
   }
+  std::cout<<"\nAfter initControlPoints\n";
 
   calculateConstants();
 
@@ -178,7 +179,7 @@ const double BezierCurve::findVelocity(const uint8_t i, const double l, const do
 
 
 const ramp_msgs::MotionState BezierCurve::getInitialState() {
-  std::cout<<"\nIn getInitialState\n";
+  //std::cout<<"\nIn getInitialState\n";
 
   ramp_msgs::MotionState result;
   for(uint8_t i=0;i<3;i++) {
@@ -446,7 +447,7 @@ void BezierCurve::initReflexxes() {
 
 /** Initialize control points 
  *  Sets the first control point and then calls overloaded initControlPoints */
-void BezierCurve::initControlPoints() {
+/*void BezierCurve::initControlPoints() {
   ramp_msgs::MotionState C0, p0, p1;
 
   // Set segment points
@@ -457,14 +458,107 @@ void BezierCurve::initControlPoints() {
   double theta_s1 = utility_.findAngleFromAToB( p0.positions, 
                                                 p1.positions);
 
-  /** Positions */
+  // Positions 
   C0.positions.push_back( (1-lambda_)*p0.positions.at(0) + lambda_*p1.positions.at(0) );
   C0.positions.push_back( (1-lambda_)*p0.positions.at(1) + lambda_*p1.positions.at(1) );
   C0.positions.push_back(theta_s1);
 
   initControlPoints(C0);
-} // End initControlPoints
+} // End initControlPoints*/
 
+
+
+
+
+/** Initialize control points 
+ *  Sets the first control point and then calls overloaded initControlPoints */
+void BezierCurve::initControlPoints() {
+
+  double l_s1 = utility_.positionDistance(segmentPoints_.at(1).positions, segmentPoints_.at(0).positions);
+  double l_s2 = utility_.positionDistance(segmentPoints_.at(2).positions, segmentPoints_.at(1).positions);
+  std::cout<<"\nl_s1: "<<l_s1<<" l_s2: "<<l_s2;
+
+  if(l_s1 < l_s2) {
+    std::cout<<"\nl_s1 < l_s2";
+
+    ramp_msgs::MotionState C0, p0, p1;
+
+    // Set segment points
+    p0 = segmentPoints_.at(0);
+    p1 = segmentPoints_.at(1);
+
+    // Set orientation of the two segments
+    double theta_s1 = utility_.findAngleFromAToB( p0.positions, 
+                                                  p1.positions);
+
+    /** Positions */
+    C0.positions.push_back( (1-lambda_)*p0.positions.at(0) + lambda_*p1.positions.at(0) );
+    C0.positions.push_back( (1-lambda_)*p0.positions.at(1) + lambda_*p1.positions.at(1) );
+    C0.positions.push_back(theta_s1);
+
+    initControlPoints(C0);
+  }
+
+  // Else just set all points in here
+  else {
+    std::cout<<"\nl_s1 >= l_s2\n";
+    ramp_msgs::MotionState C0, C1, C2, p0, p1, p2;
+
+    // Set segment points
+    p0 = segmentPoints_.at(0);
+    p1 = segmentPoints_.at(1);
+    p2 = segmentPoints_.at(2);
+
+    // Set orientation of the two segments
+    double theta_s1 = utility_.findAngleFromAToB( p0.positions, 
+                                                  p1.positions);
+    double theta_s2 = utility_.findAngleFromAToB( p1.positions, 
+                                                  p2.positions);
+
+    /** Positions */
+    C2.positions.push_back( (1-lambda_)*p1.positions.at(0) + lambda_*p2.positions.at(0) );
+    C2.positions.push_back( (1-lambda_)*p1.positions.at(1) + lambda_*p2.positions.at(1) );
+    C2.positions.push_back(theta_s2);
+    
+    // Control point 0 is passed in
+    // Control Point 1 is the 2nd segment point
+    C1 = segmentPoints_.at(1);
+    C1.positions.at(2) = theta_s1;
+
+    // Get x,y positions of the 3rd control point
+    double l_c = utility_.positionDistance(p1.positions, C2.positions);
+    double x = p1.positions.at(0) - l_c*cos(theta_s1);
+    double y = p1.positions.at(1) - l_c*sin(theta_s1);
+
+
+    C0.positions.push_back(x);  
+    C0.positions.push_back(y);
+    C0.positions.push_back(theta_s1);
+
+
+    /** C0 Velocities */
+    if(C0.velocities.size() == 0) {
+      C0.velocities.push_back(ms_init_.velocities.at(0));
+      C0.velocities.push_back(ms_init_.velocities.at(1));
+      C0.velocities.push_back(0);
+    }
+
+    /** C0 Accelerations */
+    if(C0.accelerations.size() == 0) {
+      C0.accelerations.push_back(0);
+      C0.accelerations.push_back(0);
+      C0.accelerations.push_back(0);
+    }
+
+
+
+    // Push on all the points
+    controlPoints_.push_back(C0);
+    controlPoints_.push_back(C1);
+    controlPoints_.push_back(C2);
+    
+  } // end else
+} // End initControlPoints
 
 
 
@@ -539,7 +633,7 @@ void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
   controlPoints_.push_back(C2);
   
 
-  if(print_) {
+  //if(print_) {
     std::cout<<"\nSegment Points:";
     for(int i=0;i<segmentPoints_.size();i++) {
       std::cout<<"\n"<<utility_.toString(segmentPoints_.at(i));
@@ -548,7 +642,7 @@ void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
     for(int i=0;i<controlPoints_.size();i++) {
       std::cout<<"\n"<<utility_.toString(controlPoints_.at(i));
     }
-  }
+  //}
 } // End initControlPoints
 
 

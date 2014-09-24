@@ -309,8 +309,7 @@ const int Population::add(const RampTrajectory rt) {
 
 /** Returns the fittest trajectory and sets i_best_ */
 const int Population::getBestIndex() {
-  std::cout<<"\nIn findBest\n";
-  std::cout<<"\ni_best_: "<<i_best_;
+  //std::cout<<"\nIn findBest\n";
   
   // If population has not changed since last
   // findBest call, return without searching
@@ -333,7 +332,7 @@ const int Population::getBestIndex() {
   // Set changed 
   changed_ = false;
 
-  std::cout<<"\nReturning "<<i_best_;
+  //std::cout<<"\nReturning "<<i_best_;
   return i_best_; 
 } //End getBestIndex
 

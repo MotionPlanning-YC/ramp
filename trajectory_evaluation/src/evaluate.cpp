@@ -36,10 +36,7 @@ const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) 
   // Negate because for this criterion, shorter values are better
   time_.trajectory_ = trajectory_;
   time_.goal_       = goal_;
-  std::cout<<"\nTime: "<<time_.perform();
-  std::cout<<"\n1.0 / time.perform: "<<(1.0/time_.perform());
   result += (1.0 / time_.perform());
-  std::cout<<"\nresult: "<<result;
 
 
   // Set values for euclidean distace and add to result

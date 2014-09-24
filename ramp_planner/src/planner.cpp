@@ -46,8 +46,8 @@ Planner::~Planner() {
  * its time_from_start is <= the Duration argument
  * */
 void Planner::adaptPaths(MotionState start, ros::Duration dur) {
-   //std::cout<<"\nUpdating start to: "<<start.toString();
-   std::cout<<"\ndur: "<<dur<<"\n";
+  //std::cout<<"\nUpdating start to: "<<start.toString();
+  //std::cout<<"\ndur: "<<dur<<"\n";
 
   if(dur.toSec() > 0) {
 
@@ -121,21 +121,14 @@ void Planner::adaptPopulation(ros::Duration d) {
   // For each path, get a trajectory
   for(unsigned int i=0;i<population_.paths_.size();i++) {
     //std::cout<<"\nPopulation member "<<i<<"'s Bezier path: "<<population_.get(i).bezierPath_.toString()<<"\n";
-
-    // Build a TrajectoryRequest 
-    ramp_msgs::TrajectoryRequest msg_request = 
-      buildTrajectoryRequest(population_.paths_.at(i));
-
-    // Set the start of the Bezier curve
-    msg_request.request.curve_start = 
-      population_.get(i).bezierPath_.all_.at(1).motionState_.msg_;
+    std::cout<<"\ni: "<<(int)i;
 
     ramp_msgs::TrajectoryRequest tr;
 
     if(population_.get(i).msg_.curves.size() > 0) {
       // Check if done with current curve
       if(population_.get(i).msg_.curves.at(0).u_0 > 0.9) {
-        //std::cout<<"\nu_0 > 0.99: u="<<population_.get(i).msg_.curves.at(0).u_0<<"\n";
+        std::cout<<"\n******* u_0 > 0.99: u="<<population_.get(i).msg_.curves.at(0).u_0<<" *******\n";
 
         // Create a new path to have the previous KP?
         Path p = population_.paths_.at(i);
@@ -150,7 +143,7 @@ void Planner::adaptPopulation(ros::Duration d) {
         //std::cout<<"\nAfter building request, bezierInfo: "<<utility_.toString(tr.request.bezierInfo);
       }
       else {
-        tr = buildTrajectoryRequest(population_.paths_.at(i), true, &population_.get(i).msg_.curves.at(0));
+        tr = buildTrajectoryRequest(population_.paths_.at(i), true, &population_.get(i).msg_.curves.at(0), i);
       }
     }
     else {
@@ -179,7 +172,7 @@ void Planner::adaptPopulation(ros::Duration d) {
 /** Build a TrajectoryRequest srv 
  *  type = 0 if all straight-lines, 1 if bezier, 2 if partial bezier, 3 for transition
  * */
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path, const bool bezierExists, const ramp_msgs::BezierInfo* curve) const {
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path, const bool bezierExists, const ramp_msgs::BezierInfo* curve, const int id) {
   ramp_msgs::TrajectoryRequest result;
 
   result.request.path           = path.buildPathMsg();
@@ -196,22 +189,23 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
       }
     }
     else {
-      result.request.bezierInfo = *curve; 
+      result.request.bezierInfo = *curve;
 
       // If the curve has been entered
-      if( fabs(startPlanning_.msg_.velocities.at(2)) > 0.0001) {
+      if( id == population_.getBestIndex() && (result.request.bezierInfo.u_0 > 0 ||
+            fabs(startPlanning_.msg_.velocities.at(2)) > 0.0001) ) {
         //std::cout<<"\n***** Curve has begun! *****";
         //std::cout<<"\nstartPlanning: "<<startPlanning_.toString();
         //std::cout<<"\nu: "<<result.request.bezierInfo.u_0;
         //std::cout<<"\nAdding "<<controlCycle_.toSec() / (curve->numOfPoints * 0.1);    
         //std::cout<<"\nAdding "<<curve->u_dot_0 / (1 / controlCycle_.toSec());    
-        //result.request.bezierInfo.u_0 += controlCycle_.toSec() / (curve->numOfPoints * 0.1);
         result.request.bezierInfo.u_0 += curve->u_dot_0 / (1 / controlCycle_.toSec());
-        std::cout<<"\nu: "<<result.request.bezierInfo.u_0;
+        if(result.request.bezierInfo.u_0 > 0.99) {
+          result.request.bezierInfo.u_0 = 0.99;
+        }
 
         result.request.bezierInfo.u_dot_0 = curve->u_dot_0;
-
-        result.request.curve_start = startPlanning_.msg_;
+        result.request.bezierInfo.ms_begin = startPlanning_.msg_;
         result.request.startBezier = true;
 
       }
@@ -1019,10 +1013,10 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
 
   // At generation x, insert a straight-line trajectory to the goal
-  if(generation_ == 30) {
-    seedPopulationLine();
+  //if(generation_ == 30) {
+    //seedPopulationLine();
     //std::cout<<"\nPop: "<<population_.fitnessFeasibleToString();
-  }
+  //}
 
 
 
@@ -1413,6 +1407,7 @@ const MotionState Planner::findAverageDiff() {
 
   std::cout<<"\nSeeding population\n";
   seedPopulation();
+  seedPopulationLine();
   i_best_prev_ = population_.getBestIndex();
   std::cout<<"\nPopulation seeded!\n";
   std::cout<<"\n"<<population_.fitnessFeasibleToString()<<"\n";

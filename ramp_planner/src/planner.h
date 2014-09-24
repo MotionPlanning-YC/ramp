@@ -179,7 +179,7 @@ class Planner {
     // Msg building methods
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
               const Path path, const bool bezierExists=false,
-              const ramp_msgs::BezierInfo* curve=0 ) const           ;
+              const ramp_msgs::BezierInfo* curve=0, const int id=0 );
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(
               const RampTrajectory trajec)      ;
 
