@@ -178,8 +178,11 @@ class Planner {
 
     // Msg building methods
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
-              const Path path, const bool bezierExists=false,
-              const ramp_msgs::BezierInfo* curve=0, const int id=0 );
+              const Path path, const std::vector<ramp_msgs::BezierInfo> curves,
+              const int id=0);
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
+              const Path path, const int id=0);
+
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(
               const RampTrajectory trajec)      ;
 
@@ -203,6 +206,8 @@ class Planner {
 
     void stopForDebugging();
     void restartAfterDebugging();
+
+    const bool estimateIfOnCurve() const;
 
     /***** Data members *****/
 
@@ -264,6 +269,8 @@ class Planner {
 
     // Stop things for debugging
     bool stop_;
+
+    uint16_t num_controlCycles_;
 };
 
 #endif

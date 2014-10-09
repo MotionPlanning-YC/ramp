@@ -52,7 +52,7 @@ window
 corobot
 (		  
   name "r0"
-  pose [ 0 0 0 80 ] 
+  pose [ 0 0 0 80.9 ] 
   #pose [ 1 1 0 0 ] 
 
   #size [1 1 0.5]

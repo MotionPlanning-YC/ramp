@@ -32,6 +32,13 @@ class RampTrajectory {
     const std::string    toString()                          const;
 
     const trajectory_msgs::JointTrajectoryPoint getPointAtTime(const float t)       const;
+
+
+    const int getIndexFirstTurn() const;
+    const int getIndexFirstTurn(const uint16_t start) const;
+    const int getIndexStartOfCurve() const;
+    const double getTimeFirstTurn() const;
+    const double getTimeFirstTurn(const uint16_t start) const;
   private:
     Utility utility_;
 };

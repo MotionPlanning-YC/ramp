@@ -69,8 +69,9 @@ private:
 
 
   const bool satisfiesConstraints(const double u_dot, const double u_x, const double u_y) const;
-  const double getUDotMax(const double u_dot_0) const;
   const double getUDotInitial() const;
+  const double getUDotMax(const double u_dot_0) const;
+  const double getUDotDotMax(const double u_dot_max) const;
 
   void printReflexxesInfo() const;
 

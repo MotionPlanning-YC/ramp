@@ -326,6 +326,7 @@ std::ostringstream result;
   result<<"\nms_maxVA: "<<toString(bi.ms_maxVA);
   result<<"\nms_initialVA: "<<toString(bi.ms_initialVA);
   result<<"\nms_begin: "<<toString(bi.ms_begin);
+  result<<"\nlambda: "<<bi.lambda;
   result<<"\nu_0: "<<bi.u_0<<" u_dot_0: "<<bi.u_dot_0;
 
   return result.str();
@@ -353,7 +354,9 @@ const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request 
       result<<"Transition";
   }
 
-  result<<"\nBezier Info: "<<toString(tr.bezierInfo);
+  for(uint8_t i=0;i<tr.bezierInfo.size();i++) {
+    result<<"\n Curve "<<(int)i<<"\n"<<toString(tr.bezierInfo.at(i));
+  }
   
   result<<"\n";
 

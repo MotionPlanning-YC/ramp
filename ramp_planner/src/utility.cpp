@@ -268,6 +268,9 @@ const std::string Utility::toString(const ramp_msgs::BezierInfo bi) const {
   result<<"\nms_maxVA: "<<toString(bi.ms_maxVA);
   result<<"\nms_initialVA: "<<toString(bi.ms_initialVA);
   result<<"\nms_begin: "<<toString(bi.ms_begin);
+  result<<"\nlambda: "<<bi.lambda;
+  result<<"\nu_0: "<<bi.u_0;
+  result<<"\nu_dot_0: "<<bi.u_dot_0;
 
   return result.str();
 }
@@ -298,6 +301,12 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
   
     result<<"\n"<<toString(p);
   }
+
+
+  for(uint8_t i=0;i<traj.curves.size();i++) {
+    result<<"\n Curve "<<(int)i<<"\n"<<toString(traj.curves.at(i));
+  }
+
 
   return result.str();
 }

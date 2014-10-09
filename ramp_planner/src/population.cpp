@@ -16,7 +16,7 @@ void Population::clear() {
 
 
 /** This method returns the trajectory at index i */
-const RampTrajectory Population::get(const unsigned int i) {
+RampTrajectory& Population::get(const unsigned int i) {
   return trajectories_.at(i);
 } // End get
 
@@ -309,7 +309,7 @@ const int Population::add(const RampTrajectory rt) {
 
 /** Returns the fittest trajectory and sets i_best_ */
 const int Population::getBestIndex() {
-  //std::cout<<"\nIn findBest\n";
+  //std::cout<<"\nIn getBestIndex\n";
   
   // If population has not changed since last
   // findBest call, return without searching
@@ -441,6 +441,8 @@ const std::string Population::fitnessFeasibleToString() const {
 const std::string Population::toString() const {
   std::ostringstream result;
 
+  result<<"Best ID: "<<i_best_;
+
   // If sub-populations exist, print those
   if(subPopulations_.size() > 0) {
     for(unsigned int i=0;i<subPopulations_.size();i++) {
@@ -455,8 +457,8 @@ const std::string Population::toString() const {
   // Otherwise, print population as a whole
   else {
     for(unsigned int i=0;i<trajectories_.size();i++) {
-      result<<"\nTrajectory "<<i<<": "<<paths_.at(i).toString();
-      //result<<"\nTrajectory "<<i<<": "<<trajectories_.at(i).toString();
+      //result<<"\nTrajectory "<<i<<": "<<paths_.at(i).toString();
+      result<<"\nTrajectory "<<i<<": "<<trajectories_.at(i).toString();
     }
   }
 

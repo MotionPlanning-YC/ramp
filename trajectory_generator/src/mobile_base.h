@@ -62,9 +62,6 @@ private:
   // Previous knot point - used for straight line trajectories
   trajectory_msgs::JointTrajectoryPoint prevKP_;
 
-  // Curve start
-  ramp_msgs::MotionState curveStart_;
-
   // Utility
   Utility utility_;
 
@@ -121,6 +118,8 @@ private:
   void printReflexxesSpinInfo() const;
 
   const ramp_msgs::MotionState getMaxMS() const;
+
+  const std::vector<uint8_t> getCurveKPs(const std::vector<BezierCurve> curves) const;
 };
 
 #endif 

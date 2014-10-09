@@ -108,3 +108,65 @@ const std::string RampTrajectory::toString() const {
 }
 
 
+/** Returns the first index with non-zero angular velocity, -1 if no angular v */
+const int RampTrajectory::getIndexFirstTurn() const {
+
+  for(uint16_t i=0;i<msg_.trajectory.points.size();i++) {
+    if( fabs(msg_.trajectory.points.at(i).velocities.at(2)) > 0.01) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+
+const int RampTrajectory::getIndexStartOfCurve() const {
+  for(uint16_t i=6;i>0;i--) {
+    if(fabs( msg_.trajectory.points.at(i).positions.at(2) ) < 0.0001) {
+      return i;
+    }
+  }
+
+  return 6;
+}
+
+/** Returns the first index with non-zero angular velocity, -1 if no angular v */
+const int RampTrajectory::getIndexFirstTurn(const uint16_t start) const {
+
+  for(uint16_t i=start;i<msg_.trajectory.points.size();i++) {
+    if( fabs(msg_.trajectory.points.at(i).velocities.at(2)) > 0.01) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+
+/** Returns the first index with non-zero angular velocity, -1 if no angular v */
+const double RampTrajectory::getTimeFirstTurn() const {
+
+  int i = getIndexFirstTurn();
+  
+  if(i > -1) {
+    return msg_.trajectory.points.at(i).time_from_start.toSec();
+  }
+  
+  return -1;
+}
+
+
+
+/** Returns the first index with non-zero angular velocity, -1 if no angular v */
+const double RampTrajectory::getTimeFirstTurn(const uint16_t start) const {
+
+  int i = getIndexFirstTurn(start);
+  
+  if(i > -1) {
+    return msg_.trajectory.points.at(i).time_from_start.toSec();
+  }
+  
+  return -1;
+}
+
