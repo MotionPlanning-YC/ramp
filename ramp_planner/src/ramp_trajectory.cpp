@@ -111,12 +111,12 @@ const std::string RampTrajectory::toString() const {
 /** Returns the first index with non-zero angular velocity, -1 if no angular v */
 const int RampTrajectory::getIndexFirstTurn() const {
 
-  for(uint16_t i=0;i<msg_.trajectory.points.size();i++) {
-    if( fabs(msg_.trajectory.points.at(i).velocities.at(2)) > 0.01) {
+  for(uint16_t i=0;i<msg_.trajectory.points.size()-1;i++) {
+    if( fabs(msg_.trajectory.points.at(i).velocities.at(2)) > 0.01 &&
+        fabs(msg_.trajectory.points.at(i+1).velocities.at(2))) {
       return i;
     }
   }
-
   return -1;
 }
 

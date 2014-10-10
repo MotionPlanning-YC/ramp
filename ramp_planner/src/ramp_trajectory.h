@@ -39,6 +39,7 @@ class RampTrajectory {
     const int getIndexStartOfCurve() const;
     const double getTimeFirstTurn() const;
     const double getTimeFirstTurn(const uint16_t start) const;
+    const double getTimeTurning(const uint16_t start) const;
   private:
     Utility utility_;
 };

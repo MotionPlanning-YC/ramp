@@ -823,7 +823,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
         // Get rotation if needed
         double trajec_size = res.trajectory.trajectory.points.size();
-        
+
         trajectory_msgs::JointTrajectoryPoint last = 
               res.trajectory.trajectory.points.at(trajec_size-1);
 
