@@ -987,7 +987,7 @@ const std::vector<RampTrajectory> Planner::modifyTrajec() {
 void Planner::modification() {
 
   // Modify 1 or more trajectories
-  /*std::vector<RampTrajectory> mod_trajec = modifyTrajec();
+  std::vector<RampTrajectory> mod_trajec = modifyTrajec();
   
 
   // Evaluate and add the modified trajectories to the population
@@ -1008,7 +1008,7 @@ void Planner::modification() {
     if(subPopulations_ && index >= 0) {
        population_.createSubPopulations();
     }
-  } // end for*/
+  } // end for
 
     
   // Evaluate entire population
@@ -1098,17 +1098,17 @@ void Planner::updatePathsStart(const MotionState s) {
 
 
 void Planner::planningCycleCallback(const ros::TimerEvent&) {
-  //std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
+  std::cout<<"\nPlanning cycle occurring, generation = "<<generation_<<"\n";
   
   //std::cout<<"\nAfter generation "<<generation_<<", population: "<<population_.fitnessFeasibleToString();
   //std::cout<<"\nBest: "<<bestTrajec_.toString();
 
 
   // At generation x, insert a straight-line trajectory to the goal
-  if(generation_ == 30) {
-    seedPopulationLine();
+  //if(generation_ == 30) {
+    //seedPopulationLine();
     //std::cout<<"\nPop: "<<population_.fitnessFeasibleToString();
-  }
+  //}
 
 
 
@@ -1141,9 +1141,9 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     if(modifications_) {
       modification();
     }
-    //else {
-      //std::cout<<"\nModifications not enabled";
-    //}
+    else {
+      std::cout<<"\nModifications not enabled";
+    }
     //std::cout<<"\nAfter modification\n";
 
 
@@ -1164,9 +1164,9 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     c_pc_++;
   
     // Send the new population to the trajectory viewer
-    //sendPopulation();
+    sendPopulation();
   
-    //std::cout<<"\nGeneration "<<generation_-1<<" Completed";
+    std::cout<<"\nGeneration "<<generation_-1<<" Completed";
   } // end if c_pc<genPerCC
 } // End planningCycleCallback
 
@@ -1522,31 +1522,26 @@ const MotionState Planner::findAverageDiff() {
   
 
 
-  std::cout<<"\nSeeding population\n";
-  seedPopulation();
-  //seedPopulationLine();
-  i_best_prev_ = population_.getBestIndex();
-  std::cout<<"\nPopulation seeded!\n";
-  std::cout<<"\n"<<population_.fitnessFeasibleToString()<<"\n";
+  if(seedPopulation_) {
+    std::cout<<"\nSeeding population\n";
+    seedPopulation();
+    i_best_prev_ = population_.getBestIndex();
+    std::cout<<"\nPopulation seeded!\n";
+    std::cout<<"\n"<<population_.fitnessFeasibleToString()<<"\n";
+    // Evaluate after seeding
+    bestTrajec_ = evaluateAndObtainBest();
+    
 
-  std::cout<<"\nBezier paths:";
-  for(int i=0;i<population_.size();i++) {
-    std::cout<<"\nBezier path "<<i<<": "<<population_.get(i).bezierPath_.toString();
+    sendPopulation();
+    std::cout<<"\nPopulation seeded! Press enter to continue\n";
+    std::cin.get();
   }
 
-  // Evaluate after seeding
-  bestTrajec_ = evaluateAndObtainBest();
 
+  // Create sub-pops if enabled
   if(subPopulations_) {
     population_.createSubPopulations();
   }
-
-  sendPopulation();
-  
-  std::cout<<"\nCurve info: "<<utility_.toString(population_.get(0).msg_.curves.at(0));
-  std::cout<<"\nCurve info: "<<utility_.toString(population_.get(1).msg_.curves.at(0));
-  std::cout<<"\nPopulation seeded! Press enter to continue\n";
-  std::cin.get();
 
 
   
@@ -1561,8 +1556,8 @@ const MotionState Planner::findAverageDiff() {
   std::cout<<"\n***************Starting Control Cycle*****************\n";
   // Start the control cycle timer
   std::cout<<"\n********Robot "<<id_<<": Starting Control Cycle********\n";
-  controlCycleTimer_.start();
-  imminentCollisionTimer_.start();
+  //controlCycleTimer_.start();
+  //imminentCollisionTimer_.start();
   
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise

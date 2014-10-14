@@ -149,6 +149,8 @@ class Planner {
     // Debugging variables
     bool modifications_;
     bool evaluations_;
+    bool seedPopulation_;
+    
   private:
     /** These are (mostly) utility members that are only used by Planner and should not be used by other classes */
 
@@ -215,7 +217,7 @@ class Planner {
     Utility             utility_; 
 
     // Size of population
-    unsigned int  populationSize_;
+    unsigned int        populationSize_;
 
     // Generation counter
     unsigned int        generation_;

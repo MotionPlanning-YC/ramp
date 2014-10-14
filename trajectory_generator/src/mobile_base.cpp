@@ -368,8 +368,40 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
     // Set the index of which knot point to stop at
     //int stop = (req_.type == TRANSITION) ? 3 : 2; 
-    int stop = req_.bezierInfo.size()+1; 
+    int stop = req_.bezierInfo.size()+1;
     std::cout<<"\nstop: "<<stop;
+
+
+    bool differentPoint = utility_.positionDistance(req_.bezierInfo.at(0).segmentPoints.at(0).positions, 
+            req_.bezierInfo.at(0).segmentPoints.at(1).positions) > 0.01;
+    int inc = 2;
+    while(!differentPoint && inc < p_copy.points.size()) {
+      std::cout<<"\nPoints 0 and 1 are the same";
+      std::cout<<"\nPath: "<<utility_.toString(p)<<"\n";
+      std::cout<<"\nSegment point 0: "<<utility_.toString(req_.bezierInfo.at(0).segmentPoints.at(0));
+      std::cout<<"\nSegment point 1: "<<utility_.toString(req_.bezierInfo.at(0).segmentPoints.at(1))<<"\n";
+      req_.bezierInfo.at(0).segmentPoints.at(1) = p_copy.points.at(inc).motionState;
+      differentPoint = utility_.positionDistance(req_.bezierInfo.at(0).segmentPoints.at(0).positions, 
+            req_.bezierInfo.at(0).segmentPoints.at(1).positions) > 0.01;
+      //std::cin.get();
+      inc++;
+    }
+
+    differentPoint = utility_.positionDistance(req_.bezierInfo.at(0).segmentPoints.at(1).positions, 
+            req_.bezierInfo.at(0).segmentPoints.at(2).positions) > 0.01;
+    inc = 3;
+    while(!differentPoint && inc < p_copy.points.size()) {
+      std::cout<<"\nPoints 1 and 2 are the same";
+      std::cout<<"\nPath: "<<utility_.toString(p);
+      std::cout<<"\nSegment point 1: "<<utility_.toString(req_.bezierInfo.at(0).segmentPoints.at(1));
+      std::cout<<"\nSegment point 2: "<<utility_.toString(req_.bezierInfo.at(0).segmentPoints.at(2))<<"\n";
+      req_.bezierInfo.at(0).segmentPoints.at(2) = p_copy.points.at(3).motionState;
+      //std::cin.get();
+      differentPoint = utility_.positionDistance(req_.bezierInfo.at(0).segmentPoints.at(1).positions, 
+            req_.bezierInfo.at(0).segmentPoints.at(2).positions) > 0.01;
+      inc++;
+    }
+
 
     // Go through the path's knot points
     //std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
@@ -487,7 +519,6 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         ROS_WARN("Two of the three segment points for Bezier curve are too close");
         type_ = ALL_STRAIGHT_SEGMENTS;
         p.points.erase(p.points.begin()+2);
-        // TODO: If all_bezier path, check each set of knot points
       }
   } // end for
 

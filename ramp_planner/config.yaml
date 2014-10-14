@@ -1,7 +1,9 @@
-population_size: 2
+population_size: 5
 
 sub_populations: false
 
-modifications: false
+modifications: true
 
 evaluations: false
+
+seed_population: false

@@ -12,6 +12,7 @@ int                 population_size;
 bool                sub_populations;
 bool                modifications;
 bool                evaluations;
+bool                seedPopulation;
 
 
 
@@ -120,6 +121,11 @@ void loadParameters(const ros::NodeHandle handle) {
     handle.getParam("ramp/evaluations", evaluations);
     std::cout<<"\nevaluations: "<<evaluations;
   }
+  
+  if(handle.hasParam("ramp/seed_population")) {
+    handle.getParam("ramp/seed_population", seedPopulation);
+    std::cout<<"\nseed_population: "<<seedPopulation;
+  }
 
   std::cout<<"\n------- Done loading parameters -------\n";
     std::cout<<"\nID: "<<id;
@@ -154,8 +160,9 @@ int main(int argc, char** argv) {
  
   /** Initialize the Planner's handlers */ 
   my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations); 
-  my_planner.modifications_ = modifications;
-  my_planner.evaluations_   = evaluations;
+  my_planner.modifications_   = modifications;
+  my_planner.evaluations_     = evaluations;
+  my_planner.seedPopulation_  = seedPopulation;
 
   std::cout<<"\nStart: "<<my_planner.start_.toString();
   std::cout<<"\nGoal: "<<my_planner.goal_.toString();

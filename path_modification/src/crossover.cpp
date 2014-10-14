@@ -10,7 +10,7 @@ const std::vector<ramp_msgs::Path> Crossover::perform() {
   unsigned int i_knotPoint1 = rand() % (path1_.points.size()-1); 
   unsigned int i_knotPoint2 = rand() % (path2_.points.size()-1); 
 
-  //std::cout<<"\nCrossing paths at path 1:"<<i_knotPoint1<<" and path 2:"<<i_knotPoint2<<"\n";
+  std::cout<<"\nCrossing paths at path 1:"<<i_knotPoint1<<" and path 2:"<<i_knotPoint2<<"\n";
 
   ramp_msgs::Path r1;
   //Push on the first part of the first path

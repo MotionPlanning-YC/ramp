@@ -62,6 +62,7 @@ const std::string Modifier::getOperator() const {
 
 /** This method generates the random paths to use for the modification operator passed in as op argument */
 const std::vector<int> Modifier::getTargets(const std::string op, const Population pop) {
+  std::cout<<"\nIn targets\n";
   std::vector<int> result;
 
   // Get random path(s) to modify
@@ -82,8 +83,7 @@ const std::vector<int> Modifier::getTargets(const std::string op, const Populati
   } // end if crossover 
 
 
-
-
+  std::cout<<"\nLeaving targets\n";
   return result;
 } // End getTargets
 
@@ -96,13 +96,16 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest(const Po
   ramp_msgs::ModificationRequest result;
 
   result.request.op = getOperator();
-  //std::cout<<"\nOperator: "<<result.request.op<<"\n";
+  std::cout<<"\nOperator: "<<result.request.op<<"\n";
 
   // Push the target paths onto the modification request
   std::vector<int> targets = getTargets(result.request.op, pop);
   for(unsigned int i=0;i<targets.size();i++) {
-    //std::cout<<"\nTarget path "<<i<<" index: "<<targets.at(i);
-    //std::cout<<"\nPath "<<targets.at(i)<<" size: "<<paths_.at(targets.at(i)).size()<<"\n";
+    std::cout<<"\nTarget index: "<<targets.at(i);
+    std::cout<<"\nPath "<<targets.at(i)<<" size: "<<pop.paths_.at(targets.at(i)).size()<<"\n";
+    if(pop.paths_.at(targets.at(i)).size() == 0) {
+      std::cout<<"\nPop: "<<pop.toString()<<"\n";
+    }
     result.request.paths.push_back(pop.paths_.at(targets.at(i)).buildPathMsg());
   }
 
@@ -118,7 +121,8 @@ const std::vector<Path> Modifier::perform(const Population pop) {
  
   // Build a modification request srv 
   ramp_msgs::ModificationRequest mr = buildModificationRequest(pop); 
-
+  std::cout<<"\nDone building ModificationRequest\n";
+  
 
   // Check if the operation changes the path
   if(mr.request.op == "stop") {
@@ -128,6 +132,7 @@ const std::vector<Path> Modifier::perform(const Population pop) {
   }
 
   else {
+    std::cout<<"\nIn else\n";
 
     // If the request was successful
     if(h_mod_req_->request(mr)) {
@@ -140,6 +145,6 @@ const std::vector<Path> Modifier::perform(const Population pop) {
     } // end inner if 
   } // end if operator != stop
 
-
+  std::cout<<"\nLeaving perform\n";
   return result;
 }
