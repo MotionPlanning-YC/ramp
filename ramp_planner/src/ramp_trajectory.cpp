@@ -11,8 +11,12 @@ RampTrajectory::RampTrajectory(const float resRate, unsigned int id) {
 RampTrajectory::RampTrajectory(const ramp_msgs::RampTrajectory msg) : msg_(msg) {}
 
 
-const bool RampTrajectory::equal(const RampTrajectory& other) const {
-  return msg_.id == other.msg_.id;
+const bool RampTrajectory::equals(const RampTrajectory& other) const {
+  if(msg_.id == other.msg_.id) {
+    return true;
+  }
+
+  return path_.equals(other.path_);
 }
 
 
@@ -51,9 +55,14 @@ const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const
 /** Returns the direction of the trajectory, i.e. the
 * orientation the base needs to move on the trajectory */
 const double RampTrajectory::getDirection() const {
-  trajectory_msgs::JointTrajectoryPoint a = msg_.trajectory.points.at(0);
-  trajectory_msgs::JointTrajectoryPoint b = msg_.trajectory.points.at(msg_.i_knotPoints.at(1));
+  std::cout<<"\nIn getDirection\n";
+  std::vector<double> a = path_.start_.motionState_.msg_.positions;
 
+  std::vector<double> b = path_.all_.at(1).motionState_.msg_.positions;
+
+    //msg_.trajectory.points.at(msg_.i_knotPoints.at(2)) :
+    //msg_.trajectory.points.at(msg_.i_knotPoints.at(1)) ;
+  std::cout<<"\nLeaving getDirection\n";
   return utility_.findAngleFromAToB(a, b);
 }
 

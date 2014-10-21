@@ -21,6 +21,7 @@ class Population {
     void                  replaceAll(const std::vector<RampTrajectory> new_pop);
     RampTrajectory&  get(const unsigned int i);
     const int             getMinFitness() const;
+    const bool            contains(const RampTrajectory rt) const;
     const bool            feasibleExists() const;
     const bool            infeasibleExists() const;
     const bool            replacementPossible(const RampTrajectory rt) const;

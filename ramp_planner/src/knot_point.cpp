@@ -9,6 +9,17 @@ KnotPoint::KnotPoint(const ramp_msgs::KnotPoint kp) {
   stopTime_ = kp.stopTime;
 }
 
+const bool KnotPoint::equals(const KnotPoint& kp) const {
+  if(!motionState_.equals(kp.motionState_)) {
+    return false;
+  }
+  if(stopTime_ != kp.stopTime_) {
+    return false;
+  }
+
+  return true;
+}
+
 
 const ramp_msgs::KnotPoint KnotPoint::buildKnotPointMsg() const {
   ramp_msgs::KnotPoint result;

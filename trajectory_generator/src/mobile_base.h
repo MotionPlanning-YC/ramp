@@ -100,7 +100,7 @@ private:
 
 
   // Use Reflexxes to generate a rotation trajectory
-  const std::vector<trajectory_msgs::JointTrajectoryPoint> rotate(const double start, const double goal);
+  const std::vector<trajectory_msgs::JointTrajectoryPoint> rotate(const double start, const double goal, const double start_v, const double start_a);
 
   // Set the Selection Vector for rotation
   void setSelectionVectorRotation();

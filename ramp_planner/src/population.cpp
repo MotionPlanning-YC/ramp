@@ -82,6 +82,17 @@ const int Population::getMinFitness() const {
 
 
 
+const bool Population::contains(const RampTrajectory rt) const {
+  for(uint8_t i=0;i<size();i++) {
+    if(trajectories_.at(i).equals(rt)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
 
 
 
@@ -220,7 +231,7 @@ const bool Population::canReplace(const RampTrajectory rt, const int i) const {
     //std::cout<<"\np.i_best_: "<<p.i_best_<<"\n";
 
     // if i is the best in trajectory i's sub-population
-    if(temp.equal( p.trajectories_.at(p.i_best_) )) {
+    if(temp.equals( p.trajectories_.at(p.i_best_) )) {
       ///std::cout<<"\ntemp == best in sub-population, returning false\n";
       return false;
     }
@@ -273,30 +284,31 @@ const int Population::getReplacementID(const RampTrajectory rt) const {
 const int Population::add(const RampTrajectory rt) {
   changed_ = true;
 
-
-  if(subPopulations_.size() > 0) {
-    // Go through each sub-population and find best
-    for(uint8_t i=0;i<subPopulations_.size();i++) {
-      subPopulations_.at(i).getBestIndex();
+  if(!contains(rt)) {
+    if(subPopulations_.size() > 0) {
+      // Go through each sub-population and find best
+      for(uint8_t i=0;i<subPopulations_.size();i++) {
+        subPopulations_.at(i).getBestIndex();
+      }
     }
-  }
- 
-  // If it's a sub-population or
-  // If it's not full, simply push back
-  if(isSubPopulation_ || trajectories_.size() < maxSize_) {
-    trajectories_.push_back (rt);  
-    paths_.push_back        (rt.path_);
-    return trajectories_.size()-1;
-  } 
+   
+    // If it's a sub-population or
+    // If it's not full, simply push back
+    if(isSubPopulation_ || trajectories_.size() < maxSize_) {
+      trajectories_.push_back (rt);  
+      paths_.push_back        (rt.path_);
+      return trajectories_.size()-1;
+    } 
 
-  // If full, replace a trajectory
-  else if(replacementPossible(rt)) {
+    // If full, replace a trajectory
+    else if(replacementPossible(rt)) {
 
 
-    int i = getReplacementID(rt);
+      int i = getReplacementID(rt);
 
-    replace(i, rt);
-    return i;
+      replace(i, rt);
+      return i;
+    }
   }
 
 

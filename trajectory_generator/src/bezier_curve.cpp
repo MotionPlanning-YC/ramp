@@ -83,7 +83,7 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
 
 
   // If both C and D == 0, the first two points are the same
-  if(fabs(C_) > 0.0001 && fabs(D_) > 0.0001) {
+  if(fabs(C_) > 0.0001 || fabs(D_) > 0.0001) {
   
     initReflexxes();
     
@@ -92,6 +92,8 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
 
   else {
     std::cout<<"\nThe 2 points are the same:\n";
+    std::cout<<"\nC_: "<<C_<<" D_: "<<D_;
+    std::cout<<"\nfabs(C): "<<fabs(C_)<<" fabs(D): "<<fabs(D_);
     std::cout<<"\nSegment points: ";
     for(int i=0;segmentPoints_.size();i++) {
       std::cout<<"\n"<<i<<": "<<utility_.toString(segmentPoints_.at(i));
@@ -323,6 +325,12 @@ const double BezierCurve::getUDotInitial() const {
   
   double u_dot_0_x = fabs(x_dot_0 / (A_*u_0_+C_));
   double u_dot_0_y = fabs(y_dot_0 / (B_*u_0_+D_));
+  if(isnan(u_dot_0_x)) {
+    u_dot_0_x = -9999;
+  }
+  if(isnan(u_dot_0_y)) {
+    u_dot_0_y = -9999;
+  }
   if(print_) {
     std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
     std::cout<<"\nu_0: "<<u_0_<<" u_dot_0: "<<u_dot_0_;

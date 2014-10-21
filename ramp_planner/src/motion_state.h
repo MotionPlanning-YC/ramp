@@ -33,7 +33,7 @@ class MotionState {
     
     const   std::string toString() const;
 
-    
+    const bool equals(const MotionState& ms) const;   
 
   private:
     

@@ -54,6 +54,20 @@ Path::Path(const ramp_msgs::Path p) {
 Path::~Path() {}
 
 
+const bool Path::equals(const Path& p) const {
+
+  if(size() != p.size()) {
+    return false;
+  }
+
+  for(uint8_t i=0;i<size();i++) {
+    if(!all_.at(i).equals(p.all_.at(i))) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 const KnotPoint Path::at(const uint8_t i) const {
   return all_.at(i);
