@@ -12,6 +12,7 @@
 #include "ramp_msgs/Path.h"
 #include <tf/transform_datatypes.h>
 #include <ros/console.h>
+#include "reflexxes_data.h"
 
 #define PI 3.14159f
 
@@ -19,7 +20,8 @@ enum TrajectoryType {
   ALL_STRAIGHT_SEGMENTS = 0,
   ALL_BEZIER            = 1,
   PARTIAL_BEZIER        = 2,
-  TRANSITION            = 3
+  TRANSITION            = 3,
+  PREDICT               = 4
 };
 
 

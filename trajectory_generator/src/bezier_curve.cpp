@@ -68,7 +68,7 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
 
   // Set ms_begin
   if(bi.ms_begin.positions.size() > 0) {
-    std::cout<<"ms_begin passed in: "<<utility_.toString(bi.ms_begin);
+    //std::cout<<"ms_begin passed in: "<<utility_.toString(bi.ms_begin);
     ms_begin_ = bi.ms_begin;
   }
   else {
@@ -464,14 +464,14 @@ void BezierCurve::initReflexxes() {
 /** Initialize control points 
  *  Sets the first control point and then calls overloaded initControlPoints */
 void BezierCurve::initControlPoints() {
-  std::cout<<"\nIn initControlPoints 0\n";
+  //std::cout<<"\nIn initControlPoints 0\n";
 
   double l_s1 = utility_.positionDistance(segmentPoints_.at(1).positions, segmentPoints_.at(0).positions);
   double l_s2 = utility_.positionDistance(segmentPoints_.at(2).positions, segmentPoints_.at(1).positions);
-  std::cout<<"\nl_s1: "<<l_s1<<" l_s2: "<<l_s2;
+  //std::cout<<"\nl_s1: "<<l_s1<<" l_s2: "<<l_s2;
 
   if(l_s1 < l_s2) {
-    std::cout<<"\nIn if\n";
+    //std::cout<<"\nIn if\n";
 
     ramp_msgs::MotionState C0, p0, p1;
 
@@ -493,7 +493,7 @@ void BezierCurve::initControlPoints() {
 
   // Else just set all points in here
   else {
-    std::cout<<"\nIn else\n";
+    //std::cout<<"\nIn else\n";
 
     // Adjust lambda
     lambda_ = 1 - lambda_;
@@ -568,7 +568,7 @@ void BezierCurve::initControlPoints() {
 
 /** Initialize the control points of the Bezier curve given the first one */
 void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
-  std::cout<<"\nIn initControlPoints 1\n";
+  //std::cout<<"\nIn initControlPoints 1\n";
   ramp_msgs::MotionState C0, C1, C2, p0, p1, p2;
 
 
@@ -636,7 +636,7 @@ void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
   controlPoints_.push_back(C2);
   
 
-  //if(print_) {
+  if(print_) {
     std::cout<<"\nSegment Points:";
     for(int i=0;i<segmentPoints_.size();i++) {
       std::cout<<"\n"<<utility_.toString(segmentPoints_.at(i));
@@ -645,7 +645,7 @@ void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
     for(int i=0;i<controlPoints_.size();i++) {
       std::cout<<"\n"<<utility_.toString(controlPoints_.at(i));
     }
-  //}
+  }
 } // End initControlPoints
 
 
@@ -705,9 +705,9 @@ void BezierCurve::calculateConstants() {
   calculateT_R_min();
   calculateR_min();
   
-  //if(print_) {
+  if(print_) {
     std::cout<<"\nA: "<<A_<<" B: "<<B_<<" C: "<<C_<<" D: "<<D_<<"\n";
-  //}
+  }
 }
 
 

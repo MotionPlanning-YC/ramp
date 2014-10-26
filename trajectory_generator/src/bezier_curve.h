@@ -2,7 +2,6 @@
 #define BEZIER_CURVE
 
 #include "utility.h"
-#include "reflexxes_data.h"
 
 #define CYCLE_TIME_IN_SECONDS 0.1
 

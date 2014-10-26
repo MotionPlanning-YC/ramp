@@ -181,6 +181,7 @@ const ramp_msgs::RampTrajectory CollisionDetection::getPredictedTrajectory(const
     tr.request.path = getObstaclePath(ob, motion_type);
     tr.request.resolutionRate = 5;
 
+  std::cout<<"\nGetting prediction trajectory\n";
   // Get trajectory
   if(h_traj_req_->request(tr)) {
     result = tr.response.trajectory;

@@ -158,14 +158,14 @@ void TrajectoryView::drawPopulation() {
       }
       
       // Else, if either are in collision, red
-      //else {
+      else {
         //pen = QPen( QColor(255,0,0,150) );
-      //}
+      }
 
       // If the best trajectory, set to red
       // Used for single robot traj viewing
       if(t == i) {
-        pen = QPen( QColor(255,0,0,150) );
+        pen = QPen( QColor(0,0,0,150) );
       }
 
 

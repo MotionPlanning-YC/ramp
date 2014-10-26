@@ -43,22 +43,26 @@ const MotionType findMotionType(const ramp_msgs::Obstacle ob) {
   // normally 0.0066 when idle
   if(mag_linear_t >= 0.15 && mag_angular_t < 0.1) {
     result = MotionType::Translation;
+    //std::cout<<"\nMotion type = Translation\n";
   }
 
   // Self-Rotation
   // normally 0.053 when idle
   else if(mag_linear_t < 0.15 && mag_angular_t >= 0.1) {
     result = MotionType::Rotation;
+    //std::cout<<"\nMotion Type = Rotation\n";
   }
 
   // Either translation+self-rotation or global rotation
   else if(mag_linear_t >= 0.15 && mag_angular_t >= 0.1) {
     result = MotionType::TranslationAndRotation;
+    //std::cout<<"\nMotion Type = TranslationAndRotation\n";
   } //end else if
 
   // Else, there is no motion
   else {
     result = MotionType::None;
+    //std::cout<<"\nMotion Type = None\n";
   }
 
   return result;
@@ -80,6 +84,10 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
   start.motionState.positions.push_back(ob.odom_t.pose.pose.position.y);
   start.motionState.positions.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
 
+  start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.x);
+  start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.y);
+  start.motionState.velocities.push_back(ob.odom_t.twist.twist.angular.z);
+
   // Push the first point onto the path
   path.push_back(start);
 
@@ -90,9 +98,14 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
     // Create the Goal Knotpoint
     ramp_msgs::KnotPoint goal;
 
+    double theta = start.motionState.positions.at(2);
+    double delta_x = cos(theta)*ob.odom_t.twist.twist.linear.x;
+    double delta_y = sin(theta)*ob.odom_t.twist.twist.linear.x;
+   
+
     // Get the goal position in the base frame
-    tf::Vector3 ob_goal_b(start.motionState.positions.at(0) + (ob.odom_t.twist.twist.linear.x * predictionTime_.toSec()), 
-                          start.motionState.positions.at(1) + (ob.odom_t.twist.twist.linear.y * predictionTime_.toSec()),
+    tf::Vector3 ob_goal_b(start.motionState.positions.at(0) + (delta_x * predictionTime_.toSec()), 
+                          start.motionState.positions.at(1) + (delta_y * predictionTime_.toSec()),
                           0);
 
     // Convert the goal position to world coordinates
@@ -116,50 +129,6 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
     tf::vector3MsgToTF(ob.odom_t.twist.twist.linear, v_linear);
     tf::vector3MsgToTF(ob.odom_t.twist.twist.angular, v_angular);
 
-    // Find magnitudes of velocity vectors and radius r
-    float v = sqrt( tf::tfDot(v_linear, v_linear)   );
-    float w = sqrt( tf::tfDot(v_angular, v_angular) );
-    float r = v / w;
-    //std::cout<<"\nv: "<<v<<" w: "<<w<<" r: "<<r;
-
-    // Find the angle from base origin to robot position for polar coordinates
-    tf::Vector3 a(0, 0, 0);
-    tf::Vector3 b(ob.odom_t.pose.pose.position.x, ob.odom_t.pose.pose.position.y, 0);
-    float polar_theta_r = utility.findAngleFromAToB(a, b);
-
-    // Find the radius from base origin to robot position for polar coordinates
-    float polar_r_r = sqrt(pow(start.motionState.positions.at(0),2) + pow(start.motionState.positions.at(1), 2));
-    
-    //std::cout<<"\npolar_theta_r: "<<polar_theta_r;
-    //std::cout<<"\npolar_r_r: "<<polar_r_r;
-
-    // Generate intermediate points for circlular motion
-    for(float i=0.25f;i<predictionTime_.toSec();i+=0.25f) {
-
-      // Create new knot point for the path
-      ramp_msgs::KnotPoint temp;
-
-      // Get the polar coordinates theta value in base frame 
-      float theta_prime_r = utility.displaceAngle(polar_theta_r, w*i);
-
-      // Convert from polar to cartesian in base frame
-      float x_prime_r = polar_r_r * cos(theta_prime_r);
-      float y_prime_r = polar_r_r * sin(theta_prime_r);
-      float theta_r = utility.displaceAngle(start.motionState.positions.at(2), w*i);
-      //std::cout<<"\nx_prime_r: "<<x_prime_r<<" y_prime_r: "<<y_prime_r<<" theta_r: "<<theta_r;
-
-      // Now convert position in base frame to world coordinates
-      tf::Vector3 p_r(x_prime_r, y_prime_r, 0);
-      tf::Vector3 p_w = T_w_b * p_r;
-
-      // Push the values onto temp
-      temp.motionState.positions.push_back(p_w.getX());
-      temp.motionState.positions.push_back(p_w.getY());
-      temp.motionState.positions.push_back(utility.displaceAngle(theta_r, tf::getYaw(T_w_b.getRotation())));
-      
-      // Push temp onto path
-      path.push_back(temp);
-    } // end for
   } // end else if
   
 
@@ -167,7 +136,7 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
 
   // If rotation
   // Since our robot models are circles, rotation is the same as no movement
-  else if(mt == MotionType::Rotation || mt == MotionType::None) {
+  else if(mt == MotionType::Rotation) {
     
     // Create the Goal Knotpoint
     ramp_msgs::KnotPoint goal;
@@ -184,12 +153,17 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
   } // end if self-rotation, none
 
 
+
+  else if(mt == MotionType::None) {
+  }
+
+
   // Convert the starting point to world coordinates
-  tf::Vector3 start_w(start.motionState.positions.at(0), start.motionState.positions.at(1), 0);
+  /*tf::Vector3 start_w(start.motionState.positions.at(0), start.motionState.positions.at(1), 0);
   start_w = T_w_b * start_w;
   path.at(0).motionState.positions.at(0) = start_w.getX();
   path.at(0).motionState.positions.at(1) = start_w.getY();
-  path.at(0).motionState.positions.at(2) = utility.displaceAngle(start.motionState.positions.at(2), tf::getYaw(T_w_b.getRotation()));
+  path.at(0).motionState.positions.at(2) = utility.displaceAngle(start.motionState.positions.at(2), tf::getYaw(T_w_b.getRotation()));*/
 
 
   result = utility.getPath(path);
@@ -215,6 +189,7 @@ const ramp_msgs::RampTrajectory getPredictedTrajectory(const ramp_msgs::Obstacle
   ramp_msgs::TrajectoryRequest tr;
     tr.request.path = getObstaclePath(ob, motion_type);
     tr.request.resolutionRate = 5;
+    tr.request.type = PREDICT;
 
   // Get trajectory
   if(h_traj_req_->request(tr)) {
@@ -233,20 +208,6 @@ void odometryCallback(const nav_msgs::Odometry& msg) {
   obstacle.odom_t = msg;
 
   odom_recv = true;
-  
-  MotionType motion_type = findMotionType(obstacle);
-  if(motion_type == MotionType::Translation) {
-    std::cout<<"\nmotion_type == Translation";
-  }
-  else if(motion_type == MotionType::Rotation) {
-    std::cout<<"\nmotion_type == Rotation";
-  }
-  else if(motion_type == MotionType::TranslationAndRotation) {
-    std::cout<<"\nmotion_type == Translation + Rotation";
-  }
-  else if(motion_type == MotionType::None) {
-    std::cout<<"\nmotion_type == None";
-  }
 }
 
 
@@ -263,6 +224,8 @@ void getAndSendTrajectory() {
     pop.best_id  = 0;
     pop.robot_id = 1;
 
+    std::cout<<"\nPublishing population\n";
+    std::cout<<"\nTrajec size: "<<t.trajectory.points.size();
     pub_population.publish(pop);
   }
 }
@@ -287,15 +250,14 @@ int main(int argc, char** argv) {
   h_traj_req_ = new TrajectoryRequestHandler(handle);
 
   pub_population = handle.advertise<ramp_msgs::Population>("population", 1000);
-  sub_odometry = handle.subscribe("odometry", 1000, odometryCallback);
-  
+  sub_odometry = handle.subscribe("odom", 1000, odometryCallback);
+ 
 
   T_w_b.setOrigin(tf::Vector3(0, 0, 0));
   T_w_b.setRotation(tf::createQuaternionFromYaw(0));
 
-  ros::Rate r(1);
+  ros::Rate r(10);
   std::cout<<"\nWaiting for obstacle's odometry to be published..\n";
-//  fakeOdom();
   while(ros::ok()) {
     ros::spinOnce();
     getAndSendTrajectory();

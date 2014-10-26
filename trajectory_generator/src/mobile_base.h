@@ -3,7 +3,6 @@
 
 #include "ramp_msgs/TrajectoryRequest.h"
 #include "tf/transform_datatypes.h"
-#include "reflexxes_data.h"
 #include "bezier_curve.h"
 #include "utility.h"
 
@@ -38,9 +37,6 @@ private:
 
   // Store the time it started
   ros::Time t_started_;
-  
-  // Flag for result
-  int resultValue_;
 
 
 
@@ -112,7 +108,7 @@ private:
   const bool lambdaOkay(const std::vector<ramp_msgs::MotionState> segment_points, const double lambda) const;
 
   // Build a JointTrajectoryPoint from Reflexxes data
-  const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const ReflexxesData Data_);
+  const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const ReflexxesData data);
 
   // Print Current and Next vectors
   void printReflexxesSpinInfo() const;

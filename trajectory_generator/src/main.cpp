@@ -2,6 +2,9 @@
 #include <iostream>
 #include <stdlib.h>
 #include "mobile_base.h"
+#include "prediction.h"
+#include "line.h"
+#include "circle.h"
 #include "ros/ros.h"
 
 #include "bezier_curve.h"
@@ -10,6 +13,25 @@
 Utility u;
 
 
+
+bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
+                      ramp_msgs::TrajectoryRequest::Response& res) 
+{
+  std::cout<<"\nReceived request: "<<u.toString(req);
+  
+  if(req.type != PREDICT) {
+    MobileBase mobileBase;
+    mobileBase.trajectoryRequest(req, res);
+  }
+  else if(req.path.points.size() > 0) {
+    //std::cout<<"\nIn prediction\n";
+    Prediction prediction;
+    prediction.trajectoryRequest(req, res);
+  }
+    
+  std::cout<<"\nSending back: "<<u.toString(res.trajectory);
+  return true;
+}
 
 // Main function
 int main(int argc, char** argv) {
@@ -22,7 +44,8 @@ int main(int argc, char** argv) {
   MobileBase mobileBase;
 
   // Declare the service that gives a path and returns a trajectory
-  ros::ServiceServer service = n.advertiseService("trajectory_generator", &MobileBase::trajectoryRequest, &mobileBase);
+  //ros::ServiceServer service = n.advertiseService("trajectory_generator", &MobileBase::trajectoryRequest, &mobileBase);
+  ros::ServiceServer service = n.advertiseService("trajectory_generator", requestCallback);
 
 
 
@@ -97,19 +120,19 @@ int main(int argc, char** argv) {
 
 
     /** Get a trajectory */
-    
+ 
     /*ramp_msgs::RampTrajectoryRequest tr;
     tr.request.path = p;
-    
+ 
     mobileBase.trajectoryRequest(tr.request, tr.response);
-    
+ 
     std::cout<<"\nTrajectory: "<<u.toString(tr.response.trajectory);*/
 
     /** Publish the Population */
 
     /*ros::Publisher pub = n.advertise<ramp_msgs::Population>("population", 1000);
     ros::Publisher pub_trj = n.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
-    
+ 
     // Make a Population
     ramp_msgs::Population pop;
     pop.population.push_back(tr.response.trajectory);

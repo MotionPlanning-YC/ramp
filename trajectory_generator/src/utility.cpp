@@ -352,6 +352,9 @@ const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request 
       break;
     case TRANSITION:
       result<<"Transition";
+      break;
+    case PREDICT:
+      result<<"Prediction";
   }
 
   for(uint8_t i=0;i<tr.bezierInfo.size();i++) {
