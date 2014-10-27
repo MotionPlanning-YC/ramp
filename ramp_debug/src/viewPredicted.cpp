@@ -83,10 +83,19 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
   start.motionState.positions.push_back(ob.odom_t.pose.pose.position.x);
   start.motionState.positions.push_back(ob.odom_t.pose.pose.position.y);
   start.motionState.positions.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
+  std::cout<<"\nodom.x: "<<ob.odom_t.pose.pose.position.x;
+  std::cout<<"\nodom.y: "<<ob.odom_t.pose.pose.position.y;
 
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.x);
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.y);
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.angular.z);
+
+  tf::Vector3 v_st(start.motionState.positions.at(0), start.motionState.positions.at(1), 0); 
+  
+  tf::Vector3 v_st_tf = T_w_b * v_st;
+  std::cout<<"\nv_st.x: "<<v_st.getX()<<" v_st.y: "<<v_st.getY()<<" v_st_tf.x: "<<v_st_tf.getX()<<" v_st_tf.y: "<<v_st_tf.getY();
+  start.motionState.positions.at(0) = v_st_tf.getX();
+  start.motionState.positions.at(1) = v_st_tf.getY();
 
   // Push the first point onto the path
   path.push_back(start);
@@ -101,6 +110,7 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
     double theta = start.motionState.positions.at(2);
     double delta_x = cos(theta)*ob.odom_t.twist.twist.linear.x;
     double delta_y = sin(theta)*ob.odom_t.twist.twist.linear.x;
+    std::cout<<"\ntheta: "<<theta<<" delta_x: "<<delta_x<<" delta_y: "<<delta_y;
    
 
     // Get the goal position in the base frame
@@ -109,11 +119,13 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
                           0);
 
     // Convert the goal position to world coordinates
-    tf::Vector3 goal_w = T_w_b * ob_goal_b;
+    //tf::Vector3 goal_w = T_w_b * ob_goal_b;
     
     // Push on the world coordinates
-    goal.motionState.positions.push_back(goal_w.getX());
-    goal.motionState.positions.push_back(goal_w.getY());
+    //goal.motionState.positions.push_back(goal_w.getX());
+    //goal.motionState.positions.push_back(goal_w.getY());
+    goal.motionState.positions.push_back(ob_goal_b.getX());
+    goal.motionState.positions.push_back(ob_goal_b.getY());
     goal.motionState.positions.push_back(start.motionState.positions.at(2));
     
     // Push goal onto the path
@@ -139,7 +151,7 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
   else if(mt == MotionType::Rotation) {
     
     // Create the Goal Knotpoint
-    ramp_msgs::KnotPoint goal;
+    /*ramp_msgs::KnotPoint goal;
     tf::Vector3 ob_goal(start.motionState.positions.at(0), start.motionState.positions.at(1), 0);
     tf::Vector3 goal_w = T_w_b * ob_goal;
 
@@ -149,7 +161,7 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
     goal.motionState.positions.push_back(goal_w.getY());
     goal.motionState.positions.push_back(start.motionState.positions.at(2));
 
-    path.push_back(goal);
+    path.push_back(goal);*/
   } // end if self-rotation, none
 
 
@@ -253,7 +265,7 @@ int main(int argc, char** argv) {
   sub_odometry = handle.subscribe("odom", 1000, odometryCallback);
  
 
-  T_w_b.setOrigin(tf::Vector3(0, 0, 0));
+  T_w_b.setOrigin(tf::Vector3(0, 1, 0));
   T_w_b.setRotation(tf::createQuaternionFromYaw(0));
 
   ros::Rate r(10);

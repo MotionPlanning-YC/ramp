@@ -32,6 +32,7 @@ private:
   const bool finalStateReached();
   
   ramp_msgs::MotionState start_;
+  ramp_msgs::MotionState center_;
   double r_, v_, w_;
   double t;
 };

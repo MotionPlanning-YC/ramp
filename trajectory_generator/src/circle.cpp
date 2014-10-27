@@ -4,6 +4,7 @@ Circle::Circle() {
   reflexxesData_.rml = 0;
   reflexxesData_.inputParameters = 0;
   reflexxesData_.outputParameters = 0;
+  
 }
 
 Circle::~Circle() {
@@ -37,6 +38,20 @@ void Circle::init(const ramp_msgs::MotionState s) {
   r_ = v_ / w_;
   std::cout<<"\nw: "<<w_<<" v: "<<v_<<" r: "<<r_;
 
+
+  std::vector<double> zero;
+  zero.push_back(0); zero.push_back(0);
+  double theta = utility_.findAngleFromAToB(zero, s.positions);
+  std::cout<<"\ntheta: "<<theta;
+  
+  center_.positions.push_back(s.positions.at(0) + r_*cos(theta));
+  center_.positions.push_back(s.positions.at(1) + r_*sin(theta));
+  std::cout<<"\nr_*cos(theta): "<<r_*cos(theta);
+  std::cout<<"\nr_*sin(theta): "<<r_*sin(theta);
+  std::cout<<"\ncenter: ("<<center_.positions.at(0)<<", "<<center_.positions.at(1)<<")";
+
+  double startingTheta = utility_.findAngleFromAToB(center_.positions, start_.positions);
+  std::cout<<"\nstartingTheta: "<<startingTheta;
 
   initReflexxes();
   std::cout<<"\nLeaving init\n";
@@ -74,9 +89,15 @@ void Circle::initReflexxes() {
 const ramp_msgs::MotionState Circle::buildMotionState(const ReflexxesData data) {
   ramp_msgs::MotionState result;
 
-  // v = w*r
-  double theta = utility_.displaceAngle(start_.positions.at(2), 
+  std::vector<double> zero;
+  zero.push_back(0); zero.push_back(0);
+  double startingTheta = utility_.findAngleFromAToB(center_.positions, start_.positions);
+  double s_theta = utility_.findAngleFromAToB(zero, start_.positions);
+  double theta = utility_.displaceAngle(startingTheta, 
       data.outputParameters->NewPositionVector->VecData[0]);
+  //double theta = utility_.displaceAngle(start_.positions.at(2), 
+    //data.outputParameters->NewPositionVector->VecData[0]);
+
   //x^2 + y^2 = (w*r)^2
   //x = sqrt( (w*r)^2 - y^2 )
   double x = r_*cos(theta);
@@ -85,9 +106,11 @@ const ramp_msgs::MotionState Circle::buildMotionState(const ReflexxesData data) 
   double y_dot = v_*sin(theta);
 
   std::cout<<"\ntheta: "<<theta<<" (x,y): ("<<x<<","<<y<<")";
+  std::cout<<"\nx+center_.positions.at(0): "<<x+center_.positions.at(0);
+  std::cout<<"\ny+center_.positions.at(1): "<<y+center_.positions.at(1);
 
-  result.positions.push_back(x);
-  result.positions.push_back(y);
+  result.positions.push_back(x+center_.positions.at(0));
+  result.positions.push_back(y+center_.positions.at(1));
   result.positions.push_back(theta);
 
   result.velocities.push_back(x_dot);
