@@ -43,11 +43,14 @@ void Circle::init(const ramp_msgs::MotionState s) {
   zero.push_back(0); zero.push_back(0);
   double theta = utility_.findAngleFromAToB(zero, s.positions);
   std::cout<<"\ntheta: "<<theta;
+
+  double t = utility_.displaceAngle(theta, start_.positions.at(2));
+  std::cout<<"\nt: "<<t;
   
-  center_.positions.push_back(s.positions.at(0) + r_*cos(theta));
-  center_.positions.push_back(s.positions.at(1) + r_*sin(theta));
-  std::cout<<"\nr_*cos(theta): "<<r_*cos(theta);
-  std::cout<<"\nr_*sin(theta): "<<r_*sin(theta);
+  center_.positions.push_back(s.positions.at(0) + r_*cos(t));
+  center_.positions.push_back(s.positions.at(1) + r_*sin(t));
+  std::cout<<"\nr_*cos(t): "<<r_*cos(t);
+  std::cout<<"\nr_*sin(t): "<<r_*sin(t);
   std::cout<<"\ncenter: ("<<center_.positions.at(0)<<", "<<center_.positions.at(1)<<")";
 
   double startingTheta = utility_.findAngleFromAToB(center_.positions, start_.positions);
@@ -97,21 +100,28 @@ const ramp_msgs::MotionState Circle::buildMotionState(const ReflexxesData data) 
       data.outputParameters->NewPositionVector->VecData[0]);
   //double theta = utility_.displaceAngle(start_.positions.at(2), 
     //data.outputParameters->NewPositionVector->VecData[0]);
+    //
+  
 
   //x^2 + y^2 = (w*r)^2
   //x = sqrt( (w*r)^2 - y^2 )
   double x = r_*cos(theta);
   double y = r_*sin(theta);
-  double x_dot = v_*cos(theta);
-  double y_dot = v_*sin(theta);
-
-  std::cout<<"\ntheta: "<<theta<<" (x,y): ("<<x<<","<<y<<")";
-  std::cout<<"\nx+center_.positions.at(0): "<<x+center_.positions.at(0);
-  std::cout<<"\ny+center_.positions.at(1): "<<y+center_.positions.at(1);
-
   result.positions.push_back(x+center_.positions.at(0));
   result.positions.push_back(y+center_.positions.at(1));
   result.positions.push_back(theta);
+
+  
+  
+  double phi = data.outputParameters->NewPositionVector->VecData[0];
+  double t = utility_.findAngleFromAToB(zero, result.positions);
+  
+  double x_dot = v_*cos(phi)*cos(t);
+  double y_dot = v_*cos(phi)*sin(t);
+
+  /*std::cout<<"\ntheta: "<<theta<<" (x,y): ("<<x<<","<<y<<")";
+  std::cout<<"\nx+center_.positions.at(0): "<<x+center_.positions.at(0);
+  std::cout<<"\ny+center_.positions.at(1): "<<y+center_.positions.at(1);*/
 
   result.velocities.push_back(x_dot);
   result.velocities.push_back(y_dot);
@@ -156,13 +166,13 @@ const std::vector<ramp_msgs::MotionState> Circle::generatePoints() {
   std::cout<<"\nIn generatePoints\n";
   std::vector<ramp_msgs::MotionState> result;
 
+
+  result.push_back(start_);
+  timeFromStart_ += ros::Duration(CYCLE_TIME_IN_SECONDS);
+
   reflexxesData_.resultValue = 0;
 
   while(!finalStateReached()) {
-    /*std::cout<<"\nPosition: "<<reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];
-    std::cout<<"\nVelocity: "<<reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0];
-    std::cout<<"\nTarget Pos: "<<reflexxesData_.inputParameters->TargetPositionVector->VecData[0];
-    std::cout<<"\nTarget Vel: "<<reflexxesData_.inputParameters->TargetVelocityVector->VecData[0];*/
     result.push_back(spinOnce());
   }
 

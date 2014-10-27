@@ -83,19 +83,28 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
   start.motionState.positions.push_back(ob.odom_t.pose.pose.position.x);
   start.motionState.positions.push_back(ob.odom_t.pose.pose.position.y);
   start.motionState.positions.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
-  std::cout<<"\nodom.x: "<<ob.odom_t.pose.pose.position.x;
-  std::cout<<"\nodom.y: "<<ob.odom_t.pose.pose.position.y;
+  std::cout<<"\nodom.pose.x: "<<ob.odom_t.pose.pose.position.x;
+  std::cout<<"\nodom.pose.y: "<<ob.odom_t.pose.pose.position.y;
+  std::cout<<"\nodom.twist.theta: "<<ob.odom_t.twist.twist.angular.z;
 
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.x);
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.y);
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.angular.z);
 
-  tf::Vector3 v_st(start.motionState.positions.at(0), start.motionState.positions.at(1), 0); 
+  tf::Vector3 p_st(start.motionState.positions.at(0), start.motionState.positions.at(1), 0); 
+  tf::Vector3 p_st_tf = T_w_b * p_st;
+  std::cout<<"\np_st.x: "<<p_st.getX()<<" p_st.y: "<<p_st.getY()<<" p_st_tf.x: "<<p_st_tf.getX()<<" p_st_tf.y: "<<p_st_tf.getY();
+  start.motionState.positions.at(0) = p_st_tf.getX();
+  start.motionState.positions.at(1) = p_st_tf.getY();
   
-  tf::Vector3 v_st_tf = T_w_b * v_st;
-  std::cout<<"\nv_st.x: "<<v_st.getX()<<" v_st.y: "<<v_st.getY()<<" v_st_tf.x: "<<v_st_tf.getX()<<" v_st_tf.y: "<<v_st_tf.getY();
-  start.motionState.positions.at(0) = v_st_tf.getX();
-  start.motionState.positions.at(1) = v_st_tf.getY();
+  
+  std::vector<double> zero; zero.push_back(0); zero.push_back(0); 
+  double teta = utility.findAngleFromAToB(zero, start.motionState.positions);
+  double phi = start.motionState.positions.at(2);
+  double v = start.motionState.velocities.at(0);
+  std::cout<<"\nteta: "<<teta<<" phi: "<<phi<<" v: "<<v;
+  start.motionState.velocities.at(0) = v*cos(phi)*cos(teta);
+  start.motionState.velocities.at(1) = v*cos(phi)*sin(teta);
 
   // Push the first point onto the path
   path.push_back(start);

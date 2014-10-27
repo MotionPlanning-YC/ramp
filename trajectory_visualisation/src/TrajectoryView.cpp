@@ -168,14 +168,15 @@ void TrajectoryView::drawPopulation() {
         pen = QPen( QColor(0,0,0,150) );
       }
 
+      int radius = metersToPixels(0.5, true);
 
       if(points.size() == 1) {
         std::vector<float> p;
         p.push_back(points.at(0).positions.at(0));
         p.push_back(points.at(0).positions.at(1));
 
-        this->scene()->addEllipse(metersToPixels(p.at(0), true),
-                                    metersToPixels(p.at(1), false),
+        this->scene()->addEllipse(metersToPixels(p.at(0), true)-(radius/2),
+                                    metersToPixels(p.at(1), false)+(radius/2),
                                     metersToPixels(0.55f, true), metersToPixels(0.55f, false), pen);
       } //end if 1 point
 
@@ -185,10 +186,9 @@ void TrajectoryView::drawPopulation() {
 
           // If the first point
           if(j == 0) {
-            int radius = metersToPixels(0.5, true);
             // Draw a circle
-            this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true),
-                                      metersToPixels(points.at(j).positions.at(1), false),
+            this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true)-(radius/2),
+                                      metersToPixels(points.at(j).positions.at(1), false)+(radius/2),
                                       metersToPixels(0.55, true), metersToPixels(0.55, false));
                                       
           }
