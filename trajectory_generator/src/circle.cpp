@@ -44,13 +44,19 @@ void Circle::init(const ramp_msgs::MotionState s) {
   double theta = utility_.findAngleFromAToB(zero, s.positions);
   std::cout<<"\ntheta: "<<theta;
 
-  double t = utility_.displaceAngle(theta, start_.positions.at(2));
+  // Center issue Might have something to do with t
+  double t = utility_.displaceAngle(theta, -start_.positions.at(2));
   std::cout<<"\nt: "<<t;
   
-  center_.positions.push_back(s.positions.at(0) + r_*cos(t));
-  center_.positions.push_back(s.positions.at(1) + r_*sin(t));
-  std::cout<<"\nr_*cos(t): "<<r_*cos(t);
-  std::cout<<"\nr_*sin(t): "<<r_*sin(t);
+  double angle = utility_.displaceAngle(PI/2, -start_.positions.at(2));
+  std::cout<<"\nangle: "<<angle;
+
+   
+
+  center_.positions.push_back(s.positions.at(0) - r_*cos(angle));
+  center_.positions.push_back(s.positions.at(1) + r_*sin(angle));
+  std::cout<<"\nr_*cos(angle): "<<r_*cos(angle);
+  std::cout<<"\nr_*sin(angle): "<<r_*sin(angle);
   std::cout<<"\ncenter: ("<<center_.positions.at(0)<<", "<<center_.positions.at(1)<<")";
 
   double startingTheta = utility_.findAngleFromAToB(center_.positions, start_.positions);
@@ -71,20 +77,20 @@ void Circle::initReflexxes() {
   reflexxesData_.outputParameters = new RMLPositionOutputParameters( 1 );
 
   reflexxesData_.inputParameters->CurrentPositionVector->VecData[0] = 0;
-  reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0] = start_.velocities.at(2);
+  reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0] = fabs(w_); //start_.velocities.at(2);
   reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0] = 1;
-  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = start_.velocities.at(2);
+  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = fabs(w_); //start_.velocities.at(2);
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 1;
 
   reflexxesData_.inputParameters->TargetPositionVector->VecData[0] = 2*PI;
-  reflexxesData_.inputParameters->TargetVelocityVector->VecData[0] = w_;
+  reflexxesData_.inputParameters->TargetVelocityVector->VecData[0] = fabs(w_);
 
   reflexxesData_.inputParameters->SelectionVector->VecData[0] = true;
 
   reflexxesData_.resultValue = 0;
  
-  //std::cout<<"\nTarget Pos: "<<reflexxesData_.inputParameters->TargetPositionVector->VecData[0];
-  //std::cout<<"\nTarget Vel: "<<reflexxesData_.inputParameters->TargetVelocityVector->VecData[0];
+  std::cout<<"\nTarget Pos: "<<reflexxesData_.inputParameters->TargetPositionVector->VecData[0];
+  std::cout<<"\nTarget Vel: "<<reflexxesData_.inputParameters->TargetVelocityVector->VecData[0];
   std::cout<<"\nLeaving initReflexxes\n";
 }
 
@@ -96,8 +102,17 @@ const ramp_msgs::MotionState Circle::buildMotionState(const ReflexxesData data) 
   zero.push_back(0); zero.push_back(0);
   double startingTheta = utility_.findAngleFromAToB(center_.positions, start_.positions);
   double s_theta = utility_.findAngleFromAToB(zero, start_.positions);
-  double theta = utility_.displaceAngle(startingTheta, 
-      data.outputParameters->NewPositionVector->VecData[0]);
+
+  double theta;
+  if(w_ > 0) {
+    theta = utility_.displaceAngle(startingTheta, 
+        data.outputParameters->NewPositionVector->VecData[0]);
+  }
+  else {
+    //std::cout<<"\ndata.outputParameters->NewPositionVector->VecData[0]: "<<data.outputParameters->NewPositionVector->VecData[0];
+    theta = utility_.displaceAngle(startingTheta, 
+        -data.outputParameters->NewPositionVector->VecData[0]);
+  }
   //double theta = utility_.displaceAngle(start_.positions.at(2), 
     //data.outputParameters->NewPositionVector->VecData[0]);
     //
@@ -149,6 +164,7 @@ const ramp_msgs::MotionState Circle::spinOnce() {
 
   /** Build the JointTrajectoryPoint object that will be used to build the trajectory */
   ramp_msgs::MotionState result = buildMotionState(reflexxesData_);
+  //std::cout<<"\nresult: "<<utility_.toString(result);
 
 
   // The input of the next iteration is the output of this one

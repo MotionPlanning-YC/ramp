@@ -103,8 +103,8 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
   double phi = start.motionState.positions.at(2);
   double v = start.motionState.velocities.at(0);
   std::cout<<"\nteta: "<<teta<<" phi: "<<phi<<" v: "<<v;
-  start.motionState.velocities.at(0) = v*cos(phi)*cos(teta);
-  start.motionState.velocities.at(1) = v*cos(phi)*sin(teta);
+  start.motionState.velocities.at(0) = v*cos(teta);
+  start.motionState.velocities.at(1) = v*sin(teta);
 
   // Push the first point onto the path
   path.push_back(start);

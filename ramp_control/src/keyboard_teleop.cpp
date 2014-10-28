@@ -13,6 +13,8 @@
 #define KEYCODE_D 0x73
 #define KEYCODE_Q 0x71
 #define KEYCODE_E 0x64
+#define KEYCODE_Z 0x7a
+#define KEYCODE_X 0x78
 
 int kfd = 0;
 struct termios cooked, raw;
@@ -88,6 +90,27 @@ int main(int argc, char** argv) {
       case KEYCODE_Q:
         std::cout<<"\nc = UP-LEFT\n";
         twist.linear.x = 0.33;
+        twist.angular.z = 0.3;
+
+        break;
+
+      case KEYCODE_E:
+        std::cout<<"\nc = UP-RIGHT\n";
+        twist.linear.x = 0.33;
+        twist.angular.z = -0.3;
+
+        break;
+
+      case KEYCODE_Z:
+        std::cout<<"\nc = DOWN-LEFT\n";
+        twist.linear.x = -0.33;
+        twist.angular.z = 0.3;
+
+        break;
+
+      case KEYCODE_X:
+        std::cout<<"\nc = DOWN-RIGHT\n";
+        twist.linear.x = -0.33;
         twist.angular.z = 0.3;
 
         break;
