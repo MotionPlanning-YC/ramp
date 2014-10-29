@@ -141,50 +141,7 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
     path.push_back(goal);
   } // end if translation
 
-  // If translation and rotation
-  else if(mt == MotionType::TranslationAndRotation) {
 
-    // Find the linear and angular velocity vectors
-    tf::Vector3 v_linear;
-    tf::Vector3 v_angular;
-    tf::vector3MsgToTF(ob.odom_t.twist.twist.linear, v_linear);
-    tf::vector3MsgToTF(ob.odom_t.twist.twist.angular, v_angular);
-
-  } // end else if
-  
-
-
-
-  // If rotation
-  // Since our robot models are circles, rotation is the same as no movement
-  else if(mt == MotionType::Rotation) {
-    
-    // Create the Goal Knotpoint
-    /*ramp_msgs::KnotPoint goal;
-    tf::Vector3 ob_goal(start.motionState.positions.at(0), start.motionState.positions.at(1), 0);
-    tf::Vector3 goal_w = T_w_b * ob_goal;
-
-    
-    // Push on the world coordinates
-    goal.motionState.positions.push_back(goal_w.getX());
-    goal.motionState.positions.push_back(goal_w.getY());
-    goal.motionState.positions.push_back(start.motionState.positions.at(2));
-
-    path.push_back(goal);*/
-  } // end if self-rotation, none
-
-
-
-  else if(mt == MotionType::None) {
-  }
-
-
-  // Convert the starting point to world coordinates
-  /*tf::Vector3 start_w(start.motionState.positions.at(0), start.motionState.positions.at(1), 0);
-  start_w = T_w_b * start_w;
-  path.at(0).motionState.positions.at(0) = start_w.getX();
-  path.at(0).motionState.positions.at(1) = start_w.getY();
-  path.at(0).motionState.positions.at(2) = utility.displaceAngle(start.motionState.positions.at(2), tf::getYaw(T_w_b.getRotation()));*/
 
 
   result = utility.getPath(path);

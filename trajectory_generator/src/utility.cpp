@@ -13,6 +13,13 @@ const double Utility::positionDistance(const std::vector<double> a, const std::v
 
 
 
+const double Utility::findAngleToVector(const std::vector<double> p) const {
+  std::vector<double> zero;
+  zero.push_back(0); zero.push_back(0);
+
+  return findAngleFromAToB(zero, p);
+}
+
 
 const double Utility::findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const {
   std::vector<double> c;

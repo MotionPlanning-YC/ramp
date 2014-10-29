@@ -34,6 +34,7 @@ class Utility {
     const double findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;
     const double findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const;
     const double findAngleFromAToB(const double x_prev, const double y_prev, const double x, const double y) const;
+    const double findAngleToVector(const std::vector<double> p) const;
     
     const double findDistanceBetweenAngles(const double a1, const double a2) const;
     

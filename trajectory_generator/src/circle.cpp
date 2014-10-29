@@ -39,28 +39,22 @@ void Circle::init(const ramp_msgs::MotionState s) {
   std::cout<<"\nw: "<<w_<<" v: "<<v_<<" r: "<<r_;
 
 
-  std::vector<double> zero;
-  zero.push_back(0); zero.push_back(0);
-  double theta = utility_.findAngleFromAToB(zero, s.positions);
+  double theta = utility_.findAngleToVector(s.positions);
   std::cout<<"\ntheta: "<<theta;
-
-  // Center issue Might have something to do with t
-  double t = utility_.displaceAngle(theta, -start_.positions.at(2));
-  std::cout<<"\nt: "<<t;
   
-  double angle = utility_.displaceAngle(PI/2, -start_.positions.at(2));
-  std::cout<<"\nangle: "<<angle;
+  double angleToCenter = utility_.displaceAngle(PI/2, -start_.positions.at(2));
+  std::cout<<"\nangleToCenter: "<<angleToCenter;
 
-   
+  if(utility_.findAngleToVector(start_.velocities) < 0) {
+    r_ *= -1;
+  }
 
-  center_.positions.push_back(s.positions.at(0) - r_*cos(angle));
-  center_.positions.push_back(s.positions.at(1) + r_*sin(angle));
-  std::cout<<"\nr_*cos(angle): "<<r_*cos(angle);
-  std::cout<<"\nr_*sin(angle): "<<r_*sin(angle);
+  center_.positions.push_back(s.positions.at(0) - r_*cos(angleToCenter));
+  center_.positions.push_back(s.positions.at(1) + r_*sin(angleToCenter));
+  std::cout<<"\nr_*cos(angleToCenter): "<<r_*cos(angleToCenter);
+  std::cout<<"\nr_*sin(angleToCenter): "<<r_*sin(angleToCenter);
   std::cout<<"\ncenter: ("<<center_.positions.at(0)<<", "<<center_.positions.at(1)<<")";
 
-  double startingTheta = utility_.findAngleFromAToB(center_.positions, start_.positions);
-  std::cout<<"\nstartingTheta: "<<startingTheta;
 
   initReflexxes();
   std::cout<<"\nLeaving init\n";
@@ -98,45 +92,47 @@ void Circle::initReflexxes() {
 const ramp_msgs::MotionState Circle::buildMotionState(const ReflexxesData data) {
   ramp_msgs::MotionState result;
 
-  std::vector<double> zero;
-  zero.push_back(0); zero.push_back(0);
-  double startingTheta = utility_.findAngleFromAToB(center_.positions, start_.positions);
-  double s_theta = utility_.findAngleFromAToB(zero, start_.positions);
+  double initCircleTheta = utility_.findAngleFromAToB(center_.positions, start_.positions);
 
-  double theta;
+  
+
+  double circleTheta, orientation;
+  // Find the orientation around the circle
   if(w_ > 0) {
-    theta = utility_.displaceAngle(startingTheta, 
+    circleTheta = utility_.displaceAngle(initCircleTheta, 
+        data.outputParameters->NewPositionVector->VecData[0]);
+    
+    orientation = utility_.displaceAngle(start_.positions.at(2),
         data.outputParameters->NewPositionVector->VecData[0]);
   }
   else {
     //std::cout<<"\ndata.outputParameters->NewPositionVector->VecData[0]: "<<data.outputParameters->NewPositionVector->VecData[0];
-    theta = utility_.displaceAngle(startingTheta, 
+    circleTheta = utility_.displaceAngle(initCircleTheta, 
+        -data.outputParameters->NewPositionVector->VecData[0]);
+    
+    orientation = utility_.displaceAngle(start_.positions.at(2),
         -data.outputParameters->NewPositionVector->VecData[0]);
   }
-  //double theta = utility_.displaceAngle(start_.positions.at(2), 
-    //data.outputParameters->NewPositionVector->VecData[0]);
-    //
-  
 
   //x^2 + y^2 = (w*r)^2
   //x = sqrt( (w*r)^2 - y^2 )
-  double x = r_*cos(theta);
-  double y = r_*sin(theta);
+  double x = fabs(r_)*cos(circleTheta);
+  double y = fabs(r_)*sin(circleTheta);
   result.positions.push_back(x+center_.positions.at(0));
   result.positions.push_back(y+center_.positions.at(1));
-  result.positions.push_back(theta);
+  result.positions.push_back(orientation);
+
+  std::cout<<"\ntheta: "<<circleTheta<<" (x,y): ("<<x<<","<<y<<")";
+  std::cout<<"\nx+center_.positions.at(0): "<<x+center_.positions.at(0);
+  std::cout<<"\ny+center_.positions.at(1): "<<y+center_.positions.at(1);
 
   
   
   double phi = data.outputParameters->NewPositionVector->VecData[0];
-  double t = utility_.findAngleFromAToB(zero, result.positions);
+  double theta = utility_.findAngleToVector(result.positions);
   
-  double x_dot = v_*cos(phi)*cos(t);
-  double y_dot = v_*cos(phi)*sin(t);
-
-  /*std::cout<<"\ntheta: "<<theta<<" (x,y): ("<<x<<","<<y<<")";
-  std::cout<<"\nx+center_.positions.at(0): "<<x+center_.positions.at(0);
-  std::cout<<"\ny+center_.positions.at(1): "<<y+center_.positions.at(1);*/
+  double x_dot = v_*cos(phi)*cos(theta);
+  double y_dot = v_*cos(phi)*sin(theta);
 
   result.velocities.push_back(x_dot);
   result.velocities.push_back(y_dot);

@@ -140,24 +140,28 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
 
   // Translation only
   // normally 0.0066 when idle
-  if(mag_linear_t >= 0.1 && mag_angular_t < 0.15) {
+  if(mag_linear_t >= 0.15 && mag_angular_t < 0.1) {
     result = MotionType::Translation;
+    //std::cout<<"\nMotion type = Translation\n";
   }
 
   // Self-Rotation
   // normally 0.053 when idle
   else if(mag_linear_t < 0.15 && mag_angular_t >= 0.1) {
     result = MotionType::Rotation;
+    //std::cout<<"\nMotion Type = Rotation\n";
   }
 
   // Either translation+self-rotation or global rotation
-  //else if(mag_linear_t >= 0.15 && mag_angular_t >= 0.1) {
-    //result = MotionType::TranslationAndRotation;
-  //} //end else if
+  else if(mag_linear_t >= 0.15 && mag_angular_t >= 0.1) {
+    result = MotionType::TranslationAndRotation;
+    //std::cout<<"\nMotion Type = TranslationAndRotation\n";
+  } //end else if
 
   // Else, there is no motion
   else {
     result = MotionType::None;
+    //std::cout<<"\nMotion Type = None\n";
   }
 
   return result;
@@ -241,64 +245,6 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
     // Push goal onto the path
     path.push_back(goal);
   } // end if translation
-
-
-  /********* This block is not in use currently *********/
-  /********* Will use for future non-robot obstacles *********/
-  // If translation and rotation
-  /*else if(mt == MotionType::TranslationAndRotation) {
-
-    // Find the linear and angular velocity vectors
-    tf::Vector3 v_linear;
-    tf::Vector3 v_angular;
-    tf::vector3MsgToTF(ob.odom_t.twist.twist.linear, v_linear);
-    tf::vector3MsgToTF(ob.odom_t.twist.twist.angular, v_angular);
-
-    // Find magnitudes of velocity vectors and radius r
-    float v = sqrt( tf::tfDot(v_linear, v_linear)   );
-    float w = sqrt( tf::tfDot(v_angular, v_angular) );
-    //std::cout<<"\nv: "<<v<<" w: "<<w<<" r: "<<r;
-
-    // Find the angle from base origin to robot position for polar coordinates
-    tf::Vector3 a(0, 0, 0);
-    tf::Vector3 b(ob.odom_t.pose.pose.position.x, ob.odom_t.pose.pose.position.y, 0);
-    float polar_theta_r = utility.findAngleFromAToB(a, b);
-
-    // Find the radius from base origin to robot position for polar coordinates
-    float polar_r_r = sqrt(pow(start.motionState.positions.at(0),2) + pow(start.motionState.positions.at(1), 2));
-    
-    //std::cout<<"\npolar_theta_r: "<<polar_theta_r;
-    //std::cout<<"\npolar_r_r: "<<polar_r_r;
-
-    // Generate intermediate points for circlular motion
-    for(float i=0.25f;i<predictionTime_.toSec();i+=0.25f) {
-
-      // Create new knot point for the path
-      ramp_msgs::KnotPoint temp;
-
-      // Get the polar coordinates theta value in base frame 
-      float theta_prime_r = utility.displaceAngle(polar_theta_r, w*i);
-
-      // Convert from polar to cartesian in base frame
-      float x_prime_r = polar_r_r * cos(theta_prime_r);
-      float y_prime_r = polar_r_r * sin(theta_prime_r);
-      float theta_r = utility.displaceAngle(start.motionState.positions.at(2), w*i);
-      //std::cout<<"\nx_prime_r: "<<x_prime_r<<" y_prime_r: "<<y_prime_r<<" theta_r: "<<theta_r;
-
-      // Now convert position in base frame to world coordinates
-      tf::Vector3 p_r(x_prime_r, y_prime_r, 0);
-      tf::Vector3 p_w = ob_T_w_b_ * p_r;
-
-      // Push the values onto temp
-      temp.motionState.positions.push_back(p_w.getX());
-      temp.motionState.positions.push_back(p_w.getY());
-      temp.motionState.positions.push_back(utility.displaceAngle(theta_r, tf::getYaw(ob_T_w_b_.getRotation())));
-      
-      // Push temp onto path
-      path.push_back(temp);
-    } // end for
-  } // end else if*/
-  
 
 
 

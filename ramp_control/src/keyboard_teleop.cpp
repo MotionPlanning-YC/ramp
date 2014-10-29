@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
       case KEYCODE_X:
         std::cout<<"\nc = DOWN-RIGHT\n";
         twist.linear.x = -0.33;
-        twist.angular.z = 0.3;
+        twist.angular.z = -0.3;
 
         break;
 
