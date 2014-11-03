@@ -27,6 +27,15 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const {
   
   // Predict the obstacle's trajectory
   ramp_msgs::RampTrajectory ob_trajectory = getPredictedTrajectory(obstacle_); 
+
+
+  /*ramp_msgs::Population pop;
+  pop.best_id  = 0;
+  pop.robot_id = 1;
+  pop.population.push_back(ob_trajectory);
+  pub_population.publish(pop);*/
+
+
   
   // Query for collision
   CollisionDetection::QueryResult q = query(ob_trajectory);
@@ -41,6 +50,7 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const {
 
 
 
+//TODO: Get this from parameters...
 /** Transformation matrix of obstacle robot from base frame to world frame*/
 void CollisionDetection::setOb_T_w_b(int id) {
 
@@ -59,6 +69,22 @@ void CollisionDetection::setOb_T_w_b(int id) {
 
 
 
+
+const int getIndexOb(const ramp_msgs::RampTrajectory ob_trajectory, const uint16_t i) {
+
+  int j;
+  if(ob_trajectory.trajectory.points.size() == 1) {
+    return 0; 
+  }
+
+  else if(i < 5) {
+    return 0;
+  }
+
+
+
+}
+
 /** 
  * This method returns true if there is collision between trajectory_ and the obstacle's trajectory, false otherwise 
  * The robots are treated as circles for simple collision detection
@@ -67,20 +93,22 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   //std::cout<<"\nQuery on "<<utility.toString(trajectory_)<<" \n*******and*******\n"<<utility.toString(ob_trajectory);
   CollisionDetection::QueryResult result;
 
+  std::cout<<"\nob_trajectory size: "<<ob_trajectory.trajectory.points.size();
   /*if(ob_trajectory.trajectory.points.size() <= 2) {
     if(id == 0)
-      std::cout<<"\nObstacle 1 has no trajectory!\n";
+      std::cout<<"\nRobot 1 has no trajectory!\n";
     else  
-      std::cout<<"\nObstacle 0 has no trajectory!\n";
+      std::cout<<"\nRobot 0 has no trajectory!\n";
   }*/
   
   // If there is more than 1 segment, do checks until the end of Bezier curve
   // which will be 3rd knot point (current state, start of curve, end of curve)
   int i_stop = trajectory_.i_knotPoints.size() > 2 ?  trajectory_.i_knotPoints.at(2):
                                                       trajectory_.i_knotPoints.at(1);
+  //std::cout<<"\nobstable trajectory size: "<<ob_trajectory.trajectory.points.size();
   // For every 3 points, check circle detection
   float radius = 0.4f;
-  for(unsigned int i=0;i<i_stop;i+=3) {
+  for(uint16_t i=0;i<i_stop;i+=2) {
     
     // Get the ith point on the trajectory
     trajectory_msgs::JointTrajectoryPoint p_i = trajectory_.trajectory.points.at(i);
@@ -88,7 +116,8 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
 
     // ***Test position i for collision against some points on obstacle's trajectory***
     // Obstacle trajectory should already be in world coordinates!
-    for(int j = (i>5 ? i-1 : 0) ;j<i+5 && j<ob_trajectory.trajectory.points.size();j++) {
+    for(uint16_t j = (ob_trajectory.trajectory.points.size() == 1 || i<=5) ? 0 : i-1 ;j<i+5 && j<ob_trajectory.trajectory.points.size();j++) {
+     
 
       // Get the jth point of the obstacle's trajectory
       trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
@@ -96,6 +125,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // Get the distance between the centers
       float dist = sqrt( pow(p_i.positions.at(0) - p_ob.positions.at(0),2) + pow(p_i.positions.at(1) - p_ob.positions.at(1),2) );
 
+      //std::cout<<"\nRobot id: "<<id<<" - Comparing trajectory point: ("<<p_i.positions.at(0)<<","<<p_i.positions.at(1)<<") and obstacle point: ("<<p_ob.positions.at(0)<<","<<p_ob.positions.at(1)<<") - dist = "<<dist;
       
         
 
@@ -184,8 +214,9 @@ const ramp_msgs::RampTrajectory CollisionDetection::getPredictedTrajectory(const
   ramp_msgs::TrajectoryRequest tr;
     tr.request.path = getObstaclePath(ob, motion_type);
     tr.request.resolutionRate = 5;
+    tr.request.type = 4;  // Prediction
 
-  std::cout<<"\nGetting prediction trajectory\n";
+
   // Get trajectory
   if(h_traj_req_->request(tr)) {
     result = tr.response.trajectory;
@@ -209,11 +240,47 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
 
   std::vector<ramp_msgs::KnotPoint> path;
 
+  //std::cout<<"\nObstacle odometry passed in:\nPosition: ("<<ob.odom_t.pose.pose.position.x<<", "<<ob.odom_t.pose.pose.position.y<<", "<<tf::getYaw(ob.odom_t.pose.pose.orientation)<<")";
+
+  //std::cout<<"\nVelocity: ("<<ob.odom_t.twist.twist.linear.x<<", "<<ob.odom_t.twist.twist.linear.y<<", "<<ob.odom_t.twist.twist.angular.z<<")";
+
+
   // Create and initialize the first point in the path
   ramp_msgs::KnotPoint start;
   start.motionState.positions.push_back(ob.odom_t.pose.pose.position.x);
   start.motionState.positions.push_back(ob.odom_t.pose.pose.position.y);
   start.motionState.positions.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
+
+  start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.x);
+  start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.y);
+  start.motionState.velocities.push_back(ob.odom_t.twist.twist.angular.z);
+
+  tf::Vector3 p_st(start.motionState.positions.at(0), start.motionState.positions.at(1), 0); 
+  tf::Vector3 p_st_tf = ob_T_w_b_ * p_st;
+  //std::cout<<"\np_st.x: "<<p_st.getX()<<" p_st.y: "<<p_st.getY()<<" p_st_tf.x: "<<p_st_tf.getX()<<" p_st_tf.y: "<<p_st_tf.getY();
+  start.motionState.positions.at(0) = p_st_tf.getX();
+  start.motionState.positions.at(1) = p_st_tf.getY();
+  start.motionState.positions.at(2) = utility.displaceAngle(
+      tf::getYaw(ob_T_w_b_.getRotation()), start.motionState.positions.at(2));
+  
+
+  
+  std::vector<double> zero; zero.push_back(0); zero.push_back(0); 
+  double teta = utility.findAngleFromAToB(zero, start.motionState.positions);
+  double phi = start.motionState.positions.at(2);
+  double v = start.motionState.velocities.at(0);
+  /*std::cout<<"\nteta: "<<teta<<" phi: "<<phi<<" v: "<<v;
+  std::cout<<"\nv*cos(teta): "<<v*cos(teta);
+  std::cout<<"\nv*sin(teta): "<<v*sin(teta);*/
+  start.motionState.velocities.at(0) = v*cos(phi);
+  start.motionState.velocities.at(1) = v*sin(phi);
+
+
+
+  if(v < 0) {
+    start.motionState.positions.at(2) = utility.displaceAngle(start.motionState.positions.at(2), PI);
+  }
+
 
   // Push the first point onto the path
   path.push_back(start);
@@ -225,60 +292,32 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
     // Create the Goal Knotpoint
     ramp_msgs::KnotPoint goal;
 
+
+    double theta = start.motionState.positions.at(2);
+    double delta_x = cos(phi)*ob.odom_t.twist.twist.linear.x;
+    double delta_y = sin(phi)*ob.odom_t.twist.twist.linear.x;
+    //std::cout<<"\ntheta: "<<theta<<" delta_x: "<<delta_x<<" delta_y: "<<delta_y<<"\n";
+   
+
     // Get the goal position in the base frame
-    tf::Vector3 ob_goal_b(start.motionState.positions.at(0) + (ob.odom_t.twist.twist.linear.x * predictionTime_.toSec()), 
-                          start.motionState.positions.at(1) + (ob.odom_t.twist.twist.linear.y * predictionTime_.toSec()),
+    tf::Vector3 ob_goal_b(start.motionState.positions.at(0) + (delta_x * predictionTime_.toSec()), 
+                          start.motionState.positions.at(1) + (delta_y * predictionTime_.toSec()),
                           0);
 
-    // Convert the goal position to world coordinates
-    tf::Vector3 goal_w = ob_T_w_b_ * ob_goal_b;
-    
-    // Push on the world coordinates
-    goal.motionState.positions.push_back(goal_w.getX());
-    goal.motionState.positions.push_back(goal_w.getY());
+    goal.motionState.positions.push_back(ob_goal_b.getX());
+    goal.motionState.positions.push_back(ob_goal_b.getY());
     goal.motionState.positions.push_back(start.motionState.positions.at(2));
+    goal.motionState.velocities.push_back(start.motionState.velocities.at(0));
+    goal.motionState.velocities.push_back(start.motionState.velocities.at(1));
+    goal.motionState.velocities.push_back(start.motionState.velocities.at(2));
 
-    goal.motionState.velocities.push_back(0);
-    goal.motionState.velocities.push_back(0);
-    goal.motionState.velocities.push_back(0);
-    
+
     // Push goal onto the path
     path.push_back(goal);
   } // end if translation
 
 
-
-  // If rotation
-  // Since our robot models are circles, rotation is the same as no movement
-  else if(mt == MotionType::Rotation || mt == MotionType::None) {
-    
-    // Create the Goal Knotpoint
-    ramp_msgs::KnotPoint goal;
-    tf::Vector3 ob_goal(start.motionState.positions.at(0), start.motionState.positions.at(1), 0);
-    tf::Vector3 goal_w = ob_T_w_b_ * ob_goal;
-
-    
-    // Push on the world coordinates
-    goal.motionState.positions.push_back(goal_w.getX());
-    goal.motionState.positions.push_back(goal_w.getY());
-    goal.motionState.positions.push_back(start.motionState.positions.at(2));
-
-    goal.motionState.velocities.push_back(0);
-    goal.motionState.velocities.push_back(0);
-    goal.motionState.velocities.push_back(0);
-
-    path.push_back(goal);
-  } // end if self-rotation, none
-
-
-  // Convert the starting point to world coordinates
-  tf::Vector3 start_w(start.motionState.positions.at(0), start.motionState.positions.at(1), 0);
-  start_w = ob_T_w_b_ * start_w;
-  path.at(0).motionState.positions.at(0) = start_w.getX();
-  path.at(0).motionState.positions.at(1) = start_w.getY();
-  path.at(0).motionState.positions.at(2) = utility.displaceAngle(start.motionState.positions.at(2), tf::getYaw(ob_T_w_b_.getRotation()));
-
-
+  //std::cout<<"\nPath: "<<utility.toString(utility.getPath(path));
   result = utility.getPath(path);
   return result; 
 }

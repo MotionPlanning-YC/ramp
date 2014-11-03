@@ -86,7 +86,7 @@ void TrajectoryView::size_changed()
 void TrajectoryView::population(const ramp_msgs::Population& msg)
 // Update the population and called the drawing function
 {
-  std::cout<<"\n\nReceived Population!";
+  std::cout<<"\n\nReceived Population from robot "<<msg.robot_id<<"\n";
 
   populations_.clear();
   populations_.push_back(msg);
@@ -159,14 +159,14 @@ void TrajectoryView::drawPopulation() {
       
       // Else, if either are in collision, red
       else {
-        //pen = QPen( QColor(255,0,0,150) );
+        pen = QPen( QColor(255,0,0,150) );
       }
 
       // If the best trajectory, set to red
       // Used for single robot traj viewing
-      if(t == i) {
+      /*if(t == i) {
         pen = QPen( QColor(0,0,0,150) );
-      }
+      }*/
 
       int radius = metersToPixels(0.5, true);
 

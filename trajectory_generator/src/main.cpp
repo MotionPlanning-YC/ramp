@@ -17,19 +17,18 @@ Utility u;
 bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
                       ramp_msgs::TrajectoryRequest::Response& res) 
 {
-  std::cout<<"\nReceived request: "<<u.toString(req);
+  //std::cout<<"\nReceived request: "<<u.toString(req);
   
   if(req.type != PREDICT) {
     MobileBase mobileBase;
     mobileBase.trajectoryRequest(req, res);
   }
   else if(req.path.points.size() > 0) {
-    //std::cout<<"\nIn prediction\n";
     Prediction prediction;
     prediction.trajectoryRequest(req, res);
   }
     
-  std::cout<<"\nSending back: "<<u.toString(res.trajectory);
+  //std::cout<<"\nSending back: "<<u.toString(res.trajectory);
   return true;
 }
 
@@ -56,7 +55,7 @@ int main(int argc, char** argv) {
   b.push_back(1);
   b.push_back(0.5);
 
-  std::cout<<"\nDifference: "<<u.findAngleFromAToB(a,b)<<"\n";
+  //std::cout<<"\nDifference: "<<u.findAngleFromAToB(a,b)<<"\n";
 
   /*********************************************************************/
   /********************* Testing Bezier ********************************/

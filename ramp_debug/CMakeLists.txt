@@ -53,3 +53,10 @@ add_executable(evaluation_test src/evaluation_test.cpp src/utility.cpp)
 set_target_properties(evaluation_test PROPERTIES COMPILE_FLAGS -std=c++0x)
 target_link_libraries(evaluation_test ${catkin_LIBRARIES})
 add_dependencies(evaluation_test ramp_msgs_generate_messages_cpp)
+
+
+add_executable(testCollision src/test_collision.cpp src/utility.cpp)
+set_target_properties(testCollision PROPERTIES COMPILE_FLAGS -std=c++0x)
+target_link_libraries(testCollision ${catkin_LIBRARIES})
+add_dependencies(testCollision ramp_msgs_generate_messages_cpp)
+

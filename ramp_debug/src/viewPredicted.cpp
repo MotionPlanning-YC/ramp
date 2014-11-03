@@ -96,15 +96,26 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
   std::cout<<"\np_st.x: "<<p_st.getX()<<" p_st.y: "<<p_st.getY()<<" p_st_tf.x: "<<p_st_tf.getX()<<" p_st_tf.y: "<<p_st_tf.getY();
   start.motionState.positions.at(0) = p_st_tf.getX();
   start.motionState.positions.at(1) = p_st_tf.getY();
+
   
   
-  std::vector<double> zero; zero.push_back(0); zero.push_back(0); 
-  double teta = utility.findAngleFromAToB(zero, start.motionState.positions);
+  
+ 
+  std::cout<<"\nBefore changing velocities, start: "<<utility.toString(start);
+  double teta = utility.findAngleToVector(start.motionState.positions);
   double phi = start.motionState.positions.at(2);
   double v = start.motionState.velocities.at(0);
   std::cout<<"\nteta: "<<teta<<" phi: "<<phi<<" v: "<<v;
-  start.motionState.velocities.at(0) = v*cos(teta);
-  start.motionState.velocities.at(1) = v*sin(teta);
+  std::cout<<"\nsin(teta): "<<sin(teta)<<" cos(teta): "<<cos(teta);
+  std::cout<<"\ncos("<<phi<<"): "<<cos(phi)<<" sin(phi): "<<sin(phi);
+  start.motionState.velocities.at(0) = v*cos(phi);
+  start.motionState.velocities.at(1) = v*sin(phi);
+  std::cout<<"\nAfter changing, start: "<<utility.toString(start);
+
+
+  if(v < 0) {
+    start.motionState.positions.at(2) = utility.displaceAngle(start.motionState.positions.at(2), PI);
+  }
 
   // Push the first point onto the path
   path.push_back(start);
@@ -117,8 +128,8 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
     ramp_msgs::KnotPoint goal;
 
     double theta = start.motionState.positions.at(2);
-    double delta_x = cos(theta)*ob.odom_t.twist.twist.linear.x;
-    double delta_y = sin(theta)*ob.odom_t.twist.twist.linear.x;
+    double delta_x = cos(phi)*ob.odom_t.twist.twist.linear.x;
+    double delta_y = sin(phi)*ob.odom_t.twist.twist.linear.x;
     std::cout<<"\ntheta: "<<theta<<" delta_x: "<<delta_x<<" delta_y: "<<delta_y;
    
 
@@ -136,6 +147,14 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
     goal.motionState.positions.push_back(ob_goal_b.getX());
     goal.motionState.positions.push_back(ob_goal_b.getY());
     goal.motionState.positions.push_back(start.motionState.positions.at(2));
+
+
+    goal.motionState.velocities.push_back(start.motionState.velocities.at(0));
+    goal.motionState.velocities.push_back(start.motionState.velocities.at(1));
+    goal.motionState.velocities.push_back(start.motionState.velocities.at(2));
+
+
+    std::cout<<"\nGoal: "<<utility.toString(goal);
     
     // Push goal onto the path
     path.push_back(goal);

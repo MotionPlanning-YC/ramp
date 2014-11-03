@@ -16,7 +16,7 @@
 
 
 <!-- Trajectory Visualization -->
-<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> 
+<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> 
 
 
 
@@ -64,13 +64,13 @@
 <!-- Evaluation -->
 
 <group ns="$(arg robot_0_name)">
-  <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen">
+  <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen" >
     <param name="robot_id" type="int" value="0" />
   </node>
 </group> 
 
 <group ns="$(arg robot_1_name)">
-  <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation"> 
+  <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" > 
     <param name="robot_id" type="int" value="1" />
   </node>
 </group> 

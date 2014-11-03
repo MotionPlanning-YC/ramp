@@ -148,10 +148,12 @@ int main(int argc, char** argv) {
 
 
   std::cout<<"\n************** Trajectory 1: ****************";
+  std::cout<<"\nFeasible: "<<er1.response.feasible;
   std::cout<<"\nFitness: "<<er1.response.fitness;
   std::cout<<"\n*********************************************";
   
   std::cout<<"\n************** Trajectory 2: ****************";
+  std::cout<<"\nFeasible: "<<er2.response.feasible;
   std::cout<<"\nFitness: "<<er2.response.fitness;
   std::cout<<"\n*********************************************";
   

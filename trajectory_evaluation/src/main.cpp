@@ -51,6 +51,15 @@ void obstacleCb(const ramp_msgs::Obstacle& ol) {
 } //End objectCb
 
 
+void temp_odomCb(const nav_msgs::Odometry& msg) {
+  ramp_msgs::Obstacle ob;
+  ob.odom_t     = msg;
+  cd.obstacle_  = ob;
+
+  received_ob = true;
+}
+
+
 int main(int argc, char** argv) {
 
   ros::init(argc, argv, "trajectory_evaluation");
@@ -61,10 +70,12 @@ int main(int argc, char** argv) {
   std::cout<<"\nTrajectory Evaluation id: "<<cd.id;
   cd.init(handle);
 
-  std::cout<<"\nAfter init\n";
-  
+ 
   ros::ServiceServer service    = handle.advertiseService("trajectory_evaluation", handleRequest);
   ros::Subscriber sub_obj_list  = handle.subscribe("object_list", 1000, obstacleCb);
+  ros::Subscriber sub_ob_odom  = handle.subscribe("odom", 1000, temp_odomCb);
+
+  //cd.pub_population = handle.advertise<ramp_msgs::Population>("/robot_1/population", 1000);
 
   /** ***Testing*** */
 
@@ -77,7 +88,7 @@ int main(int argc, char** argv) {
   c1.ranges = u.ranges_;
   kp1.configuration = c1;
   kp1.stop_time = 0;
-  
+ 
   ramp_msgs::KnotPoint kp2;
   ramp_msgs::Configuration c2;
   c2.K.push_back(1);
@@ -99,7 +110,7 @@ int main(int argc, char** argv) {
 
   cd.h_traj_req_->request(tr);
   ramp_msgs::Trajectory t1 = tr.response.trajectory;
-  
+ 
   std::cout<<"\nt1: "<<u.toString(t1);
 
   //ramp_msgs::Trajectory t1_ob = cd.transformT_ob(t1);

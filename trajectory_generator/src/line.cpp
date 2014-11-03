@@ -6,6 +6,7 @@ Line::Line() {
   reflexxesData_.rml = 0;
   reflexxesData_.inputParameters = 0;
   reflexxesData_.outputParameters = 0;
+  timeCutoff_ = ros::Duration(3.5);
 }
 
 Line::~Line() {
@@ -88,14 +89,16 @@ const ramp_msgs::MotionState Line::buildMotionState(const ReflexxesData data)
   result.time = timeFromStart_.toSec();
   timeFromStart_ += ros::Duration(CYCLE_TIME_IN_SECONDS);
 
+  //std::cout<<"\nresult: "<<utility_.toString(result)<<"\n";
   return result;
 }
 
 
 
 const bool Line::finalStateReached() {
-  return (reflexxesData_.resultValue == 
-          ReflexxesAPI::RML_FINAL_STATE_REACHED);
+  //return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
+  return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED ||
+      (timeFromStart_ >= timeCutoff_));
 }
 
   
@@ -119,9 +122,11 @@ const std::vector<ramp_msgs::MotionState> Line::generatePoints() {
 void Line::init(const ramp_msgs::MotionState start, 
                 const ramp_msgs::MotionState goal) 
 {
-  std::cout<<"\nIn init, start: "<<utility_.toString(start);
+  //std::cout<<"\nIn init, start: "<<utility_.toString(start);
   start_  = start;
   goal_   = goal;
+  
+  timeCutoff_ = ros::Duration(35);
 
   initReflexxes();
   setReflexxesCurrent();
@@ -151,14 +156,14 @@ void Line::initReflexxes() {
 
   // Set up the motion constraints (max velocity, acceleration and jerk)
   // Maximum velocity   
-  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0] = 0.33;
-  reflexxesData_.inputParameters->MaxVelocityVector->VecData[1] = 0.33;
-  reflexxesData_.inputParameters->MaxVelocityVector->VecData[2] = PI/4;
+  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0] = fabs(start_.velocities.at(0));
+  reflexxesData_.inputParameters->MaxVelocityVector->VecData[1] = fabs(start_.velocities.at(1));
+  reflexxesData_.inputParameters->MaxVelocityVector->VecData[2] = fabs(start_.velocities.at(2));
   
 
   // Maximum acceleration
-  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 1.;
-  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1] = 1.;
+  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 0.66;
+  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1] = 0.66;
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[2] = PI/4;
   
 
@@ -226,10 +231,19 @@ void Line::setReflexxesTarget() {
     
     // Velocity, if specified
     if(goal_.velocities.size() > 0) {
-      reflexxesData_.inputParameters->TargetVelocityVector->VecData[i] =
-       goal_.velocities.at(i);
+      if(goal_.velocities.at(i) == 0) {
+        reflexxesData_.inputParameters->TargetVelocityVector->VecData[i] =
+            0.00000000000000001;
+        reflexxesData_.inputParameters->MaxVelocityVector->VecData[i] =
+            0.00000000000000001;
+      }
+      else {
+        reflexxesData_.inputParameters->TargetVelocityVector->VecData[i] =
+            goal_.velocities.at(i);
+      }
     }
   } // end for 
+
 } // End setReflexxesTarget
 
 

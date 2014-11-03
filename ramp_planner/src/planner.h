@@ -273,6 +273,8 @@ class Planner {
     bool stop_;
 
     uint16_t num_controlCycles_;
+
+    uint16_t num_switches_;
 };
 
 #endif

@@ -8,7 +8,7 @@
 Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(6), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(2.f), generationsBeforeCC_(25), cc_started_(false), subPopulations_(false), c_pc_(0), transThreshold_(1/10.), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false), num_controlCycles_(0) 
 {
   controlCycle_ = ros::Duration(1.f / 2.f);
-  planningCycle_ = ros::Duration(1.f / 20.f);
+  planningCycle_ = ros::Duration(1.f / 10.f);
   imminentCollisionCycle_ = ros::Duration(1.f / 25.f);
   generationsPerCC_ = controlCycle_.toSec() / planningCycle_.toSec();
 }
@@ -1234,13 +1234,6 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
 
     sendPopulation();
 
-    /*stopForDebugging();
-    std::cout<<"\nDisplaying population after adapting for control cycle "<<num_controlCycles_;
-    std::cout<<"\nPress Enter to continue\n";
-    std::cin.get();
-    restartAfterDebugging();*/
-    //std::cout<<"\nbestTrajec after adapting: "<<bestTrajec_.toString()<<"\n";
-
     
     if(subPopulations_) {
       //std::cout<<"\n**********Creating sub-populations in CC***********\n";
@@ -1258,7 +1251,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   }
 
   num_controlCycles_++;
-  //std::cout<<"\n************* Control cycle complete *************\n";
+  std::cout<<"\n************* Control cycle complete *************\n";
 } // End controlCycleCallback
 
 
@@ -1341,24 +1334,13 @@ void Planner::displayTrajectory(const ramp_msgs::RampTrajectory traj) const {
 /** Returns true if traj's fitness is better than the best fitness */
 const bool Planner::compareSwitchToBest(const RampTrajectory traj) const {
   double bestFitness = bestTrajec_.msg_.fitness;
-  /*std::cout<<"\nBest: "<<bestTrajec_.path_.toString();
-  std::cout<<"\nbestTrajec's last point: "<<utility_.toString(bestTrajec_.msg_.trajectory.points.at(
-                      bestTrajec_.msg_.trajectory.points.size()-1 ));
-  std::cout<<"\ntraj's last point: "<<utility_.toString(traj.msg_.trajectory.points.at(
-                      traj.msg_.trajectory.points.size()-1 ));*/
-  /*std::cout<<"\nbestTrajec.fitness: "<<bestTrajec_.msg_.fitness;
-  std::cout<<"\ntraj.fitness: "<<traj.msg_.fitness<<" bestFitness: "<<bestFitness;
-  std::cout<<"\nc_pc: "<<c_pc_<<" (generationsPerCC_ - c_pc_) * planningCycle_.toSec(): "<<(generationsPerCC_ - c_pc_) * planningCycle_.toSec();*/
 
+  // fitness = 1/time so time = 1/fitness
   double t = 1. / bestFitness;
   double t_new = t + ((generationsPerCC_ - c_pc_) * planningCycle_.toSec());
-  double fit_new = 1. / t_new;
-  //std::cout<<"\nt: "<<t<<" t_new: "<<t_new<<" fit_new: "<<fit_new;
 
-  //if(bestTrajec_.bezierPath_.size() - bestTrajec_.path_.size() == 1) {
+  // Best fitness adjusted for t_new
   bestFitness = 1. / t_new;
-  //}
-  //std::cout<<"\nFINAL: traj.fitness: "<<traj.msg_.fitness<<" bestFitness: "<<bestFitness;
 
   return (traj.msg_.fitness > bestFitness);
 }
@@ -1424,39 +1406,18 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
       // If the trajectory including the curve to switch is more fit than 
       // the best trajectory, return it
       if(compareSwitchToBest(T_new)) {
-        /*std::cout<<"\ncompareSwitchToBest: TRUE\n";
-        std::cout<<"\n==============================\n";
-        std::cout<<"\ntrajectory being evaluated: "<<T_new.path_.toString();
-        std::cout<<"\ntrajectory being evaluated is close to best fitness";
-        std::cout<<"\nT_new id: "<<T_new.msg_.id<<" bestTrajec_.id: "<<bestTrajec_.msg_.id;
-        std::cout<<"\nT_new_.fitness: "<<T_new.msg_.fitness<<" bestTrajec__.fitness: "<<bestTrajec_.msg_.fitness;
-        std::cout<<"\n==============================\n";*/
-
-        /*std::cout<<"\n\n\nT_new trajectory: "<<T_new.toString();
-        std::cout<<"\n***** Displaying trajectory with curve! *****\n";
-        displayTrajectory(T_new.msg_);
-
-        stopForDebugging();
-        std::cin.get();
-        restartAfterDebugging();*/
 
         result = T_new;
         result.bezierPath_ = trajec.bezierPath_;
         result.path_ = trajec.path_;
 
-        //std::cout<<"\ngenerationsPerCC: "<<generationsPerCC_<<" c_pc: "<<c_pc_<<" planningCycle: "<<planningCycle_.toSec();
-        result.msg_.curves.at(0).u_0 += result.msg_.curves.at(0).u_dot_0 * (generationsPerCC_ - c_pc_) * planningCycle_.toSec();
-        /*std::cout<<"\n\n\nT_new trajectory: "<<result.toString();
-        std::cout<<"\nCurve 0 u_0: "<<result.msg_.curves.at(0).u_0;
-        std::cout<<"\nCurve 0 u_dot_0: "<<result.msg_.curves.at(0).u_dot_0;*/
-      }
-      //else
-        //std::cout<<"\ncompareSwitchToBest: false\n";
-    } // end if 
-    //else {
-      //std::cout<<"\n** Orientation is less than 5 degrees, no transition necessary **\n";
-    //}
-  } // end if 5 degrees*/
+        result.msg_.curves.at(0).u_0 += 
+          result.msg_.curves.at(0).u_dot_0 * (generationsPerCC_ - c_pc_) * planningCycle_.toSec();
+
+        num_switches_++;
+      } // end if switching
+    } // end if switch traj needed 
+  } // end if fitness close enough to compute switch
 
   //std::cout<<"\nxxxxx Leaving evaluateTrajectory xxxxx\n";
   return result;
@@ -1627,5 +1588,6 @@ const MotionState Planner::findAverageDiff() {
   //std::cout<<"\nFinal population: ";
   //std::cout<<"\n"<<pathsToString(); 
   
+  std::cout<<"\nNumber of trajectory switches: "<<num_switches_;
   std::cout<<"\nLeaving go\n";
 } // End go

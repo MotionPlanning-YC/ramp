@@ -4,7 +4,7 @@ Circle::Circle() {
   reflexxesData_.rml = 0;
   reflexxesData_.inputParameters = 0;
   reflexxesData_.outputParameters = 0;
-  
+  timeCutoff_ = ros::Duration(3.5);
 }
 
 Circle::~Circle() {
@@ -24,56 +24,60 @@ Circle::~Circle() {
 
 
 const bool Circle::finalStateReached() {
-  return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
+  //return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
+  return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED ||
+      (timeFromStart_ >= timeCutoff_));
 }
 
 void Circle::init(const ramp_msgs::MotionState s) {
-  std::cout<<"\nIn init\n";
+  //std::cout<<"\nIn init\n";
   start_ = s;
-  std::cout<<"\nstart: "<<utility_.toString(start_)<<"\n";
+  //std::cout<<"\nstart: "<<utility_.toString(start_)<<"\n";
   
   //v=wr
   w_ = s.velocities.at(2);
   v_ = sqrt( pow(s.velocities.at(0),2) + pow(s.velocities.at(1),2) );
   r_ = v_ / w_;
-  std::cout<<"\nw: "<<w_<<" v: "<<v_<<" r: "<<r_;
+  //std::cout<<"\nw: "<<w_<<" v: "<<v_<<" r: "<<r_;
 
 
+  // Theta = angle to the position vector
   double theta = utility_.findAngleToVector(s.positions);
-  std::cout<<"\ntheta: "<<theta;
+  //std::cout<<"\ntheta: "<<theta;
   
-  double angleToCenter = utility_.displaceAngle(PI/2, -start_.positions.at(2));
-  std::cout<<"\nangleToCenter: "<<angleToCenter;
+  // Angle from start to the center of the circle
+  double alpha = PI/2 - start_.positions.at(2);
+  //std::cout<<"\nalpha: "<<alpha;
 
-  if(utility_.findAngleToVector(start_.velocities) < 0) {
-    r_ *= -1;
-  }
+  center_.positions.push_back(s.positions.at(0) - r_*cos(alpha));
+  center_.positions.push_back(s.positions.at(1) + r_*sin(alpha));
+  /*std::cout<<"\nr_*cos(alpha): "<<r_*cos(alpha);
+  std::cout<<"\nr_*sin(alpha): "<<r_*sin(alpha);
+  std::cout<<"\ncenter: ("<<center_.positions.at(0)<<", "<<center_.positions.at(1)<<")";*/
 
-  center_.positions.push_back(s.positions.at(0) - r_*cos(angleToCenter));
-  center_.positions.push_back(s.positions.at(1) + r_*sin(angleToCenter));
-  std::cout<<"\nr_*cos(angleToCenter): "<<r_*cos(angleToCenter);
-  std::cout<<"\nr_*sin(angleToCenter): "<<r_*sin(angleToCenter);
-  std::cout<<"\ncenter: ("<<center_.positions.at(0)<<", "<<center_.positions.at(1)<<")";
+  // This is always -alpha, why?
+  initCircleTheta_ = utility_.findAngleFromAToB(center_.positions, start_.positions);
 
-
+  timeCutoff_ = ros::Duration(35);
   initReflexxes();
-  std::cout<<"\nLeaving init\n";
+  //std::cout<<"\nLeaving init\n";
 }
 
 
 
 void Circle::initReflexxes() {
-  std::cout<<"\nIn initReflexxes\n";
+  //std::cout<<"\nIn initReflexxes\n";
 
   // Initialize Reflexxes variables
   reflexxesData_.rml              = new ReflexxesAPI( 1, CYCLE_TIME_IN_SECONDS );
   reflexxesData_.inputParameters  = new RMLPositionInputParameters( 1 );
   reflexxesData_.outputParameters = new RMLPositionOutputParameters( 1 );
+  
 
   reflexxesData_.inputParameters->CurrentPositionVector->VecData[0] = 0;
-  reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0] = fabs(w_); //start_.velocities.at(2);
-  reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0] = 1;
-  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = fabs(w_); //start_.velocities.at(2);
+  reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0] = fabs(w_);
+  reflexxesData_.inputParameters->CurrentAccelerationVector->VecData[0] = 0;
+  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = fabs(w_);
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 1;
 
   reflexxesData_.inputParameters->TargetPositionVector->VecData[0] = 2*PI;
@@ -83,23 +87,24 @@ void Circle::initReflexxes() {
 
   reflexxesData_.resultValue = 0;
  
+  /*std::cout<<"\nCurrent Pos: "<<reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];
+  std::cout<<"\nCurrent Vel: "<<reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0];
   std::cout<<"\nTarget Pos: "<<reflexxesData_.inputParameters->TargetPositionVector->VecData[0];
-  std::cout<<"\nTarget Vel: "<<reflexxesData_.inputParameters->TargetVelocityVector->VecData[0];
-  std::cout<<"\nLeaving initReflexxes\n";
+  std::cout<<"\nTarget Vel: "<<reflexxesData_.inputParameters->TargetVelocityVector->VecData[0];*/
+  //std::cout<<"\nLeaving initReflexxes\n";
 }
 
 
+// TODO: Acceleration
 const ramp_msgs::MotionState Circle::buildMotionState(const ReflexxesData data) {
   ramp_msgs::MotionState result;
-
-  double initCircleTheta = utility_.findAngleFromAToB(center_.positions, start_.positions);
 
   
 
   double circleTheta, orientation;
   // Find the orientation around the circle
   if(w_ > 0) {
-    circleTheta = utility_.displaceAngle(initCircleTheta, 
+    circleTheta = utility_.displaceAngle(initCircleTheta_, 
         data.outputParameters->NewPositionVector->VecData[0]);
     
     orientation = utility_.displaceAngle(start_.positions.at(2),
@@ -107,7 +112,7 @@ const ramp_msgs::MotionState Circle::buildMotionState(const ReflexxesData data) 
   }
   else {
     //std::cout<<"\ndata.outputParameters->NewPositionVector->VecData[0]: "<<data.outputParameters->NewPositionVector->VecData[0];
-    circleTheta = utility_.displaceAngle(initCircleTheta, 
+    circleTheta = utility_.displaceAngle(initCircleTheta_, 
         -data.outputParameters->NewPositionVector->VecData[0]);
     
     orientation = utility_.displaceAngle(start_.positions.at(2),
@@ -122,22 +127,23 @@ const ramp_msgs::MotionState Circle::buildMotionState(const ReflexxesData data) 
   result.positions.push_back(y+center_.positions.at(1));
   result.positions.push_back(orientation);
 
-  std::cout<<"\ntheta: "<<circleTheta<<" (x,y): ("<<x<<","<<y<<")";
+  /*std::cout<<"\ntheta: "<<circleTheta<<" (x,y): ("<<x<<","<<y<<")";
   std::cout<<"\nx+center_.positions.at(0): "<<x+center_.positions.at(0);
-  std::cout<<"\ny+center_.positions.at(1): "<<y+center_.positions.at(1);
+  std::cout<<"\ny+center_.positions.at(1): "<<y+center_.positions.at(1);*/
 
   
   
   double phi = data.outputParameters->NewPositionVector->VecData[0];
   double theta = utility_.findAngleToVector(result.positions);
   
-  double x_dot = v_*cos(phi)*cos(theta);
-  double y_dot = v_*cos(phi)*sin(theta);
+  double x_dot = v_*cos(phi)*sin(theta);
+  double y_dot = v_*cos(phi)*cos(theta);
 
   result.velocities.push_back(x_dot);
   result.velocities.push_back(y_dot);
   result.velocities.push_back(data.inputParameters->CurrentVelocityVector->VecData[0]);
 
+  // TODO: Compute acceleration properly
   result.accelerations.push_back(0);
   result.accelerations.push_back(0);
   result.accelerations.push_back(0);
@@ -175,7 +181,7 @@ const ramp_msgs::MotionState Circle::spinOnce() {
 }
 
 const std::vector<ramp_msgs::MotionState> Circle::generatePoints() {
-  std::cout<<"\nIn generatePoints\n";
+  //std::cout<<"\nIn generatePoints\n";
   std::vector<ramp_msgs::MotionState> result;
 
 

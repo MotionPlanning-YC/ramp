@@ -15,6 +15,7 @@ public:
 private:
   ReflexxesData reflexxesData_;
   ros::Duration timeFromStart_;
+  ros::Duration timeCutoff_;
   Utility utility_;
 
   void initReflexxes();
@@ -35,6 +36,7 @@ private:
   ramp_msgs::MotionState center_;
   double r_, v_, w_;
   double t;
+  double initCircleTheta_;
 };
 
 #endif

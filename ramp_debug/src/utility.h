@@ -36,6 +36,8 @@ class Utility {
     const double findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const;
     const double findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const;
     const float findAngleFromAToB(const tf::Vector3 a, const tf::Vector3 b) const;    
+    const double findAngleToVector(const std::vector<double> p) const;
+
     
     const double findDistanceBetweenAngles(const double a1, const double a2) const;
     

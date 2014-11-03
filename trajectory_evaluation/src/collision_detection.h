@@ -43,6 +43,7 @@ class CollisionDetection {
     ros::Duration         predictionTime_;
   
 
+    ros::Publisher pub_population;
 
   private:
 

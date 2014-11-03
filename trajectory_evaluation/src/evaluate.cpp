@@ -29,22 +29,13 @@ void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request& req) {
 /** This method computes the fitness of the trajectory_ member */
 //TODO: Automate the weights for each evaluation criteria
 const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) {
-  double result=0;
-
+  double result=0, denom=0;
 
   // Set values for time and add to result
   // Negate because for this criterion, shorter values are better
   time_.trajectory_ = trajectory_;
   time_.goal_       = goal_;
-  result += (1.0 / time_.perform());
-
-
-  // Set values for euclidean distace and add to result
-  // Negate because for this criterion, shorter values are better
-  //eucDist_.trajectory_  = trajectory_;
-  //eucDist_.goal_        = goal_; 
-  //std::cout<<"\nEuclid Dist: "<<eucDist_.perform();
-  //result += (1.0 / eucDist_.perform());
+  denom += time_.perform();
 
   
   // If the trajectory is infeasible
@@ -52,10 +43,12 @@ const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) 
 
     // Add the Penalty for being infeasible
     if (feasible.t_firstCollision_ == 0) 
-      result += (1.0 / (Q*Q));
+      denom += (Q*Q);
     else    
-      result += (1.0 / (Q / feasible.t_firstCollision_));
+      denom += (Q / feasible.t_firstCollision_);
   }
+
+  result += (1. / denom);
   
   return result;
 } //End performFitness

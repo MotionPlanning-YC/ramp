@@ -86,7 +86,7 @@ void MobileBase::initReflexxes() {
 /** Initialize class object with a request */
 // TODO: change 3 booleans to 1 enum
 void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
-  std::cout<<"\nRequest received: "<<utility_.toString(req)<<"\n";
+  //std::cout<<"\nRequest received: "<<utility_.toString(req)<<"\n";
 
   bezierStart = req.startBezier;
   //if(req.bezierInfo.u_0 > 0)
@@ -114,7 +114,9 @@ void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
   t_started_ = ros::Time::now();
 
   // Set the time to cutoff generating points
-  timeCutoff_ = ros::Duration(3.5);
+  // Mostly for catching any small bugs that
+  // make Reflexxes unable to find goal
+  timeCutoff_ = ros::Duration(35);
  
   if(type_ == ALL_STRAIGHT_SEGMENTS)
     print_ = true;
@@ -306,18 +308,11 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
   // Start transition trajectories right away,
   // otherwise, try to go straight for a while
   double lambda = type_ == TRANSITION ? 0. : 0.5;
-  std::cout<<"\nlambda: "<<lambda;
+  //std::cout<<"\nlambda: "<<lambda;
 
   double min_lambda = (path_.points.at(0).motionState.positions.at(0) - segment_points.at(0).positions.at(0)) 
                       / (segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0));
-  std::cout<<"\nmin_lambda: "<<min_lambda;
   if(min_lambda > 1) {
-    std::cout<<"\nsegment_points.size(): "<<segment_points.size()<<"\n";
-    std::cout<<"\npath.points.at(0): "<<utility_.toString(path_.points.at(0).motionState);
-    std::cout<<"\nSegments: ";
-    for(int i=0;i<segment_points.size();i++) {
-      std::cout<<"\n"<<utility_.toString(segment_points.at(i));
-    }
     
     ROS_ERROR("Minimum lambda: %f", min_lambda);
     ROS_ERROR("Minimum lambda > 1");
@@ -773,7 +768,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Go through every knotpoint in the path
   // (or until timeCutoff has been reached)
   for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) {
-    std::cout<<"\ni_kp: "<<(int)i_kp_<<"\n";
+    //std::cout<<"\ni_kp: "<<(int)i_kp_<<"\n";
     reflexxesData_.resultValue = 0;
 
     // Push the initial state onto trajectory
@@ -798,7 +793,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         //(c < curves.size()))
       )
     {
-      std::cout<<"\nIn if\n";
+      //std::cout<<"\nIn if\n";
       //std::cout<<"\ncurves.at("<<(int)c<<").size(): "<<curves.at(c).points_.size();
 
       // Insert all points on the curves into the trajectory
@@ -835,7 +830,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     /** Straight Line Segment */
     // Else if straight-line segment
     else {
-      std::cout<<"\nIn else\n";
+      //std::cout<<"\nIn else\n";
 
       // Get rotation if needed
       double trajec_size = res.trajectory.trajectory.points.size();
@@ -846,13 +841,13 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       trajectory_msgs::JointTrajectoryPoint next_knot = 
             utility_.getTrajectoryPoint(path_.points.at(i_kp_).motionState);
       
-        std::cout<<"\nlast: "<<utility_.toString(last);
+        /*std::cout<<"\nlast: "<<utility_.toString(last);
         std::cout<<"\nnext_knot: "<<utility_.toString(next_knot);
         std::cout<<"\nutility_.findAngleFromAToB(last, next_knot): "<<
                         utility_.findAngleFromAToB(last, next_knot);
         std::cout<<"\nutility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)): "<<
                       utility_.findDistanceBetweenAngles(last.positions.at(2), 
-                                utility_.findAngleFromAToB(last, next_knot))<<"\n";
+                                utility_.findAngleFromAToB(last, next_knot))<<"\n";*/
 
       if(!finalStateReached()) {
 
@@ -865,7 +860,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
             rotate(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot),
                     last.velocities.at(2), last.accelerations.at(2));
           
-          std::cout<<"\nrotate points size: "<<rotate_points.size()<<"\n";
+          //std::cout<<"\nrotate points size: "<<rotate_points.size()<<"\n";
           
           for(uint16_t p=0;p<rotate_points.size();p++) {
             res.trajectory.trajectory.points.push_back(rotate_points.at(p));
@@ -892,25 +887,25 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       while (!finalStateReached()) {
 
         trajectory_msgs::JointTrajectoryPoint p = spinOnce();
-        std::cout<<"\np: "<<utility_.toString(p)<<"\n";
+        //std::cout<<"\np: "<<utility_.toString(p)<<"\n";
 
         // Compute the motion state at t+1 and save it in the trajectory
         res.trajectory.trajectory.points.push_back(p);
       } // end while
 
-      std::cout<<"\nReached target: "<<utility_.toString(path_.points.at(i_kp_).motionState);
-      std::cout<<"\nAt state: "<<utility_.toString(res.trajectory.trajectory.points.at(
-                                  res.trajectory.trajectory.points.size()-1));
+      //std::cout<<"\nReached target: "<<utility_.toString(path_.points.at(i_kp_).motionState);
+      //std::cout<<"\nAt state: "<<utility_.toString(res.trajectory.trajectory.points.at(
+                                  //res.trajectory.trajectory.points.size()-1));
 
       // Once we reached the target, we set that the latest point is a knotpoint
       res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
     } // end else straight-line segment
 
-    std::cout<<"\nOutside while\n";
+    //std::cout<<"\nOutside while\n";
     // Set previous knot point
     prevKP_ = res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size() - 1);
   } // end for
-  std::cout<<"\nOutside for\n";
+  //std::cout<<"\nOutside for\n";
 
   // Lastly, set newPath in case the path changed
   res.newPath = path_;
@@ -924,7 +919,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
 /** This performs a rotation using Reflexxes */
 const std::vector<trajectory_msgs::JointTrajectoryPoint> MobileBase::rotate(const double start, const double goal, const double start_v, const double start_a) {
-  std::cout<<"\nIn rotate\n";
+  //std::cout<<"\nIn rotate\n";
   std::cout<<"\nstart: "<<start<<" goal: "<<goal<<" start_v: "<<start_v<<" start_a: "<<start_a<<"\n";
   std::vector<trajectory_msgs::JointTrajectoryPoint> result;
 
@@ -956,7 +951,7 @@ const std::vector<trajectory_msgs::JointTrajectoryPoint> MobileBase::rotate(cons
   }
   reflexxesData_.inputParameters->CurrentPositionVector->VecData[2] = result.at(result.size()-1).positions.at(2);
 
-  std::cout<<"\nLeaving rotate\n";
+  //std::cout<<"\nLeaving rotate\n";
   return result;
 } // End rotate
 
@@ -965,9 +960,8 @@ const std::vector<trajectory_msgs::JointTrajectoryPoint> MobileBase::rotate(cons
 
 // Returns true if the target has been reached
 bool MobileBase::finalStateReached() {
-  return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
-  //return (resultValue_ == ReflexxesAPI::RML_FINAL_STATE_REACHED);
-  //return ((resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED) || (timeFromStart_ >= timeCutoff_));
+  //return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
+  return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED || (timeFromStart_ >= timeCutoff_));
 } // End finalStateReached
 
 

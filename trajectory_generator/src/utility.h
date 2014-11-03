@@ -43,6 +43,7 @@ class Utility {
     const double getEuclideanDist(const std::vector<double> a, std::vector<double> b) const;
 
     const uint8_t getQuadrant(const double angle) const;
+    const uint8_t getQuadrantOfVector(const std::vector<double> v) const;
 
     const ramp_msgs::Path getPath(const std::vector<ramp_msgs::MotionState> mps) const;
     const ramp_msgs::Path getPath(const std::vector<ramp_msgs::KnotPoint>   kps) const;

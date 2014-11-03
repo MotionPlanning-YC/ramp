@@ -2,6 +2,29 @@
 
 Utility::Utility() {}
 
+const uint8_t Utility::getQuadrant(const double angle) const {
+  if(angle >= 0 && angle < PI/2) {
+    return 1;
+  }
+  else if(angle >= PI/2 && angle < PI) {
+    return 2;
+  }
+  else if(angle >= -PI && angle < -PI/2) {
+    return 3;
+  }
+  else if(angle >= -PI/2 && angle < 0) {
+    return 4;
+  }
+
+  return 0;
+}
+
+
+const uint8_t Utility::getQuadrantOfVector(const std::vector<double> v) const {
+  return getQuadrant( findAngleToVector(v) );
+}
+
+
 
 /** This method returns the Euclidean distance between two position vectors */
 const double Utility::positionDistance(const std::vector<double> a, const std::vector<double> b) const {

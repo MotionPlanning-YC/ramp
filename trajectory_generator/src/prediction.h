@@ -21,20 +21,6 @@ private:
 
   void init(const ramp_msgs::TrajectoryRequest::Request req);
 
-  void setInitialMotion();
-  void setTarget(const ramp_msgs::MotionState ms);
-  void setSelectionVector();
-
-  // Execute one iteration of the Reflexxes control function
-  const trajectory_msgs::JointTrajectoryPoint spinOnce();
-
-  // Returns true if the target has been reached
-  bool finalStateReached();
-
-  void initReflexxes();
-  ros::Time t_started_;
-  ros::Duration timeFromStart_;
-  ReflexxesData reflexxesData_;
   Utility utility_;
 };
 

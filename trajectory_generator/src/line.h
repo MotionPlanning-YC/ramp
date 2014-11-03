@@ -19,6 +19,7 @@ private:
   ReflexxesData reflexxesData_;
   ramp_msgs::MotionState start_, goal_;
   ros::Duration timeFromStart_;
+  ros::Duration timeCutoff_;
   Utility utility_;
 
   const ramp_msgs::MotionState buildMotionState(const ReflexxesData data);
