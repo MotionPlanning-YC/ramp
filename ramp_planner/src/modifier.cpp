@@ -56,6 +56,7 @@ const std::string Modifier::getOperator() const {
       break;
   }
 
+ 
   return result;
 } // End getOperator
 
@@ -86,6 +87,7 @@ const std::vector<int> Modifier::getTargets(const std::string op, const Populati
   //std::cout<<"\nLeaving targets\n";
   return result;
 } // End getTargets
+
 
 
 /** 

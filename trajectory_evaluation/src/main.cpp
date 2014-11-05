@@ -51,13 +51,13 @@ void obstacleCb(const ramp_msgs::Obstacle& ol) {
 } //End objectCb
 
 
-void temp_odomCb(const nav_msgs::Odometry& msg) {
+/*void temp_odomCb(const nav_msgs::Odometry& msg) {
   ramp_msgs::Obstacle ob;
   ob.odom_t     = msg;
   cd.obstacle_  = ob;
 
   received_ob = true;
-}
+}*/
 
 
 int main(int argc, char** argv) {
@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
  
   ros::ServiceServer service    = handle.advertiseService("trajectory_evaluation", handleRequest);
   ros::Subscriber sub_obj_list  = handle.subscribe("object_list", 1000, obstacleCb);
-  ros::Subscriber sub_ob_odom  = handle.subscribe("odom", 1000, temp_odomCb);
+  //ros::Subscriber sub_ob_odom  = handle.subscribe("odom", 1000, temp_odomCb);
 
   //cd.pub_population = handle.advertise<ramp_msgs::Population>("/robot_1/population", 1000);
 

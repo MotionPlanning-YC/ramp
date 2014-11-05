@@ -211,6 +211,8 @@ class Planner {
 
     const bool estimateIfOnCurve() const;
 
+    void restartControlCycle();
+
     /***** Data members *****/
 
     // Utility instance

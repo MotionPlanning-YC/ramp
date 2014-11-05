@@ -17,9 +17,6 @@
 <!-- Trajectory Evaluation -->
 <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen" />
 
-<!-- Trajectory Visualization -->
-<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> 
-
 
 <!-- Planner -->
 <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" /> 
@@ -31,5 +28,9 @@
   <remap from="odometry" to="odom" />
   <param name="simulation" value="true" />
 </node>
+
+
+<!-- Trajectory Visualization -->
+<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> 
 
 </launch>

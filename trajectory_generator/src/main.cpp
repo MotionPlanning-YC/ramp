@@ -17,7 +17,7 @@ Utility u;
 bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
                       ramp_msgs::TrajectoryRequest::Response& res) 
 {
-  //std::cout<<"\nReceived request: "<<u.toString(req);
+  std::cout<<"\nReceived request: "<<u.toString(req);
   
   if(req.type != PREDICT) {
     MobileBase mobileBase;

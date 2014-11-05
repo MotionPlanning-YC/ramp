@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(6), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(2.f), generationsBeforeCC_(25), cc_started_(false), subPopulations_(false), c_pc_(0), transThreshold_(1/10.), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false), num_controlCycles_(0) 
+Planner::Planner() : resolutionRate_(1.f / 10.f), populationSize_(6), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(3.f), generationsBeforeCC_(25), cc_started_(false), subPopulations_(false), c_pc_(0), transThreshold_(1/10.), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), stop_(false), num_controlCycles_(0) 
 {
   controlCycle_ = ros::Duration(1.f / 2.f);
   planningCycle_ = ros::Duration(1.f / 10.f);
@@ -38,6 +38,10 @@ Planner::~Planner() {
 
 
 
+void Planner::restartControlCycle() {
+  controlCycleTimer_.stop();
+  controlCycleTimer_.start();
+}
 
 
 /** 
@@ -1121,10 +1125,10 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
 
   // At generation x, insert a straight-line trajectory to the goal
-  //if(generation_ == 30) {
+  if(generation_ == 150) {
     //seedPopulationLine();
     //std::cout<<"\nPop: "<<population_.fitnessFeasibleToString();
-  //}
+  }
 
 
 
@@ -1229,7 +1233,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
     
     // After m_cc_ and startPlanning are set, update the population
     adaptPopulation(controlCycle_);
-    //std::cout<<"\n\n***** After adapting, pop: "<<population_.toString()<<"\n\n*****\n\n";
+    std::cout<<"\n\n***** After adapting, pop: "<<population_.toString()<<"\n\n*****\n\n";
     bestTrajec_ = evaluateAndObtainBest();
 
     sendPopulation();
@@ -1357,14 +1361,22 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
   //std::cout<<"\nresult.fitness: "<<result.msg_.fitness<<" bestTrajec.fitness: "<<bestTrajec_.msg_.fitness;
   //std::cout<<"\ntrajec.id: "<<trajec.msg_.id<<" bestTrajec.id: "<<bestTrajec_.msg_.id;
 
+  tf::Vector3 v_linear(start_.msg_.velocities.at(0), start_.msg_.velocities.at(1), 0);
+  double mag_linear = sqrt(tf::tfDot(v_linear, v_linear));
+  double mag_angular = start_.msg_.velocities.at(2);
+ 
+  //std::cout<<"\nmag_linear: "<<mag_linear;
+  //std::cout<<"\nmag_angular: "<<mag_angular;
 
-
-  // If the fitness is close to the best resulttory's fitness
-  if(cc_started_ && result.msg_.id != bestTrajec_.msg_.id &&
+  // If the fitness is close to the best result trajectory's fitness
+  // and its not the best traj
+  // and it is not just rotating 
+ if(cc_started_ && result.msg_.id != bestTrajec_.msg_.id && mag_linear > 0.0001 && 
       (result.msg_.fitness > bestTrajec_.msg_.fitness ||
       fabs(result.msg_.fitness - bestTrajec_.msg_.fitness) < transThreshold_) ) 
   {
     //std::cout<<"\nIn close enough to compute curve\n";
+    //std::cout<<"\nmag_linear: "<<mag_linear;
 
     double theta_current = start_.msg_.positions.at(2);
 
@@ -1388,9 +1400,9 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
                               trajec.msg_.i_knotPoints.at(1)) ); 
       //std::cout<<"\ntheta to move: "<<theta_to_move<<"\n";
     }
-    /*std::cout<<"\ntrajec: "<<trajec.toString();
-    std::cout<<"\ntheta_current: "<<theta_current<<" theta_to_move: "<<theta_to_move;
-    std::cout<<"\nDifference: "<<utility_.findDistanceBetweenAngles(theta_current, theta_to_move)<<"\n";*/
+    //std::cout<<"\ntrajec: "<<trajec.toString();
+    //std::cout<<"\ntheta_current: "<<theta_current<<" theta_to_move: "<<theta_to_move;
+    //std::cout<<"\nDifference: "<<utility_.findDistanceBetweenAngles(theta_current, theta_to_move)<<"\n";
     
 
     // If less than 5 degrees
@@ -1406,6 +1418,7 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
       // If the trajectory including the curve to switch is more fit than 
       // the best trajectory, return it
       if(compareSwitchToBest(T_new)) {
+        //std::cout<<"\n************ Switching Trajectories **************\n";
 
         result = T_new;
         result.bezierPath_ = trajec.bezierPath_;
@@ -1415,6 +1428,8 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec) {
           result.msg_.curves.at(0).u_dot_0 * (generationsPerCC_ - c_pc_) * planningCycle_.toSec();
 
         num_switches_++;
+
+        restartControlCycle();
       } // end if switching
     } // end if switch traj needed 
   } // end if fitness close enough to compute switch
@@ -1524,8 +1539,7 @@ const MotionState Planner::findAverageDiff() {
 
   if(seedPopulation_) {
     std::cout<<"\nSeeding population\n";
-    //seedPopulation();
-    seedPopulationLine();
+    seedPopulation();
     i_best_prev_ = population_.getBestIndex();
     std::cout<<"\nPopulation seeded!\n";
     std::cout<<"\n"<<population_.fitnessFeasibleToString()<<"\n";

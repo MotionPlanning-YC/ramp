@@ -15,10 +15,6 @@
 <node name="path_modification" pkg="path_modification" type="path_modification" />
 
 
-<!-- Trajectory Visualization -->
-<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> 
-
-
 
 <!-- Planners -->
 
@@ -100,5 +96,11 @@
   <remap from="/robot_0/odom" to="/robot_0/odometry" />
   <remap from="/robot_1/odom" to="/robot_1/odometry" />
 </node>
+
+
+
+<!-- Trajectory Visualization -->
+<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> 
+
 
 </launch>

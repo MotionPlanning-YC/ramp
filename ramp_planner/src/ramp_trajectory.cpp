@@ -110,7 +110,7 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
 const std::string RampTrajectory::toString() const {
   std::ostringstream result;
   
-  result<<"\nTrajectory ID: "<<msg_.id<<"\n"<<utility_.toString(msg_);
+  result<<"\nTrajectory ID: "<<msg_.id<<"\nPath: "<<utility_.toString(msg_);
   result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
   
   return result.str();

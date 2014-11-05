@@ -731,11 +731,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
   // Use Bezier curves to smooth path
   if(type_ != ALL_STRAIGHT_SEGMENTS) {
-    if(print_ || bezierStart) 
-      std::cout<<"\nPath before Bezier: "<<utility_.toString(path_)<<"\n";
+    //if(print_ || bezierStart) 
+      //std::cout<<"\nPath before Bezier: "<<utility_.toString(path_)<<"\n";
     curves = bezier(path_, type_ == TRANSITION);
-    if(print_ || bezierStart)
-      std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
+    //if(print_ || bezierStart)
+      //std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
 
 
     // Currently adding 0 for both because 
@@ -785,13 +785,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     // all points between first and last are bezier point
     //std::cout<<"\nc: "<<c<<" i_cs.size(): "<<i_cs.size()<<"\n";
     //std::cout<<"\ncurves.size(): "<<curves.size()<<"\n";
-    if( (c < i_cs.size() && path_.points.size() > 2 && i_kp_ == i_cs.at(c)+1)
-        /*((type_ == ALL_BEZIER && i_kp_ > 1 && i_kp_ < path_.points.size()-1) ||
-        (type_ == PARTIAL_BEZIER && i_kp_ > 1 && i_kp_ < 3 && !bezierStart) ||
-        (type_ == TRANSITION && i_kp_ == 1) ||
-        (bezierStart && i_kp_ == 1) ||*/
-        //(c < curves.size()))
-      )
+    if( (c < i_cs.size() && path_.points.size() > 2 && i_kp_ == i_cs.at(c)+1))
     {
       //std::cout<<"\nIn if\n";
       //std::cout<<"\ncurves.at("<<(int)c<<").size(): "<<curves.at(c).points_.size();
@@ -895,7 +889,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
       //std::cout<<"\nReached target: "<<utility_.toString(path_.points.at(i_kp_).motionState);
       //std::cout<<"\nAt state: "<<utility_.toString(res.trajectory.trajectory.points.at(
-                                  //res.trajectory.trajectory.points.size()-1));
+                                  //res.trajectory.trajectory.points.size()-1))<<"\n";
 
       // Once we reached the target, we set that the latest point is a knotpoint
       res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
