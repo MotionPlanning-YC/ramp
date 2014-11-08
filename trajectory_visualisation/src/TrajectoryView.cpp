@@ -88,10 +88,10 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
 {
   std::cout<<"\n\nReceived Population from robot "<<msg.robot_id<<"\n";
 
-  //populations_.clear();
-  //populations_.push_back(msg);
+  populations_.clear();
+  populations_.push_back(msg);
 
-  if(populations_.size() < 2) {
+  /*if(populations_.size() < 2) {
     populations_.push_back(msg);
   }
 
@@ -104,7 +104,7 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
       populations_.erase(populations_.begin()+1);
       populations_.insert(populations_.begin()+1, msg);
     }
-  }
+  }*/
 
   drawPopulation();
 }
@@ -164,9 +164,9 @@ void TrajectoryView::drawPopulation() {
 
       // If the best trajectory, set to red
       // Used for single robot traj viewing
-      /*if(t == i) {
-        pen = QPen( QColor(0,0,0,150) );
-      }*/
+      if(t == i) {
+        pen = QPen( QColor(255,0,0,150) );
+      }
 
       int radius = metersToPixels(0.5, true);
 

@@ -89,7 +89,7 @@ class Planner {
     void init(const uint8_t i, const ros::NodeHandle& h, 
               const MotionState s, const MotionState g, 
               const std::vector<Range> r, const int population_size, 
-              const bool sub_populations);
+              const bool sub_populations, const int gens_before_cc=0);
     
     // Send the best trajectory to the control package
     void sendBest();
@@ -99,9 +99,9 @@ class Planner {
     void displayTrajectory(const ramp_msgs::RampTrajectory traj) const;
 
     // Evaluate the population 
-    const RampTrajectory  evaluateTrajectory(RampTrajectory trajec);
-    void                  evaluatePopulation();
-    const RampTrajectory  evaluateAndObtainBest();
+    const RampTrajectory  evaluateTrajectory(RampTrajectory trajec, const bool computeSwitch=true);
+    void                  evaluatePopulation(Population& pop, const bool computeSwitch=true);
+    const RampTrajectory  evaluateAndObtainBest(Population& pop);
     
     // Modify trajectory or path
     const std::vector<Path> modifyPath();
@@ -213,6 +213,9 @@ class Planner {
 
     void restartControlCycle();
 
+    const std::vector<Path> getRandomPaths(const MotionState init, const MotionState goal);
+    const Population randomPopulation(const MotionState init, const MotionState goal);
+
     /***** Data members *****/
 
     // Utility instance
@@ -275,7 +278,6 @@ class Planner {
     bool stop_;
 
     uint16_t num_controlCycles_;
-
     uint16_t num_switches_;
 };
 

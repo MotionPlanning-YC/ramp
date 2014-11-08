@@ -102,7 +102,7 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
   result<<"\nTrajectory ID: "<<msg_.id;
   result<<"\n Number of knot points: "<<msg_.i_knotPoints.size(); 
   result<<"\n Path: "<<path_.toString();
-  result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
+  result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<(bool)msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
 
   return result.str();
 }
@@ -111,7 +111,7 @@ const std::string RampTrajectory::toString() const {
   std::ostringstream result;
   
   result<<"\nTrajectory ID: "<<msg_.id<<"\nPath: "<<utility_.toString(msg_);
-  result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
+  result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<(bool)msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
   
   return result.str();
 }

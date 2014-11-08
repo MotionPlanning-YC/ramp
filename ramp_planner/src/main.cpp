@@ -9,6 +9,7 @@ int 				        id;
 MotionState         start, goal;
 std::vector<Range>  ranges;
 int                 population_size;
+int                 gensBeforeCC;
 bool                sub_populations;
 bool                modifications;
 bool                evaluations;
@@ -126,6 +127,11 @@ void loadParameters(const ros::NodeHandle handle) {
     handle.getParam("ramp/seed_population", seedPopulation);
     std::cout<<"\nseed_population: "<<seedPopulation;
   }
+  
+  if(handle.hasParam("ramp/gens_before_control_cycle")) {
+    handle.getParam("ramp/gens_before_control_cycle", gensBeforeCC);
+    std::cout<<"\ngens_before_control_cycle: "<<gensBeforeCC;
+  }
 
   std::cout<<"\n------- Done loading parameters -------\n";
     std::cout<<"\nID: "<<id;
@@ -159,7 +165,7 @@ int main(int argc, char** argv) {
 
  
   /** Initialize the Planner's handlers */ 
-  my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations); 
+  my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, gensBeforeCC); 
   my_planner.modifications_   = modifications;
   my_planner.evaluations_     = evaluations;
   my_planner.seedPopulation_  = seedPopulation;

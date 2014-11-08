@@ -14,6 +14,7 @@ bool received_ob = false;
 bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
                    ramp_msgs::EvaluationRequest::Response& res) 
 {
+  
 
   //std::cout<<"\nEvaluating trajectory: \n"<<u.toString(req.trajectory);
   ev.setRequest(req);
@@ -28,6 +29,7 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   }
   // Else, set collision to false
   else {
+    //ROS_INFO("No obstacles sensed");
     qr.collision_ = 0;
     qr.t_firstCollision_ = 9999.0f; 
   }
@@ -39,7 +41,7 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   // Do fitness
   res.fitness = ev.performFitness(qr);
 
-  //std::cout<<"\nSending back: Feasible = "<<res.fitness<<", Fitness = "<<res.fitness<<"\n";
+  //ROS_INFO("\nSending back: Feasible = %d, Fitness = %f", res.feasible, res.fitness);
   return true;
 } //End handleRequest
 

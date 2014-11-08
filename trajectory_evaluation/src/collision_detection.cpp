@@ -93,7 +93,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   //std::cout<<"\nQuery on "<<utility.toString(trajectory_)<<" \n*******and*******\n"<<utility.toString(ob_trajectory);
   CollisionDetection::QueryResult result;
 
-  std::cout<<"\nob_trajectory size: "<<ob_trajectory.trajectory.points.size();
+  std::cout<<"\nob_trajerctory size: "<<ob_trajectory.trajectory.points.size();
   /*if(ob_trajectory.trajectory.points.size() <= 2) {
     if(id == 0)
       std::cout<<"\nRobot 1 has no trajectory!\n";
@@ -132,8 +132,8 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // If the distance between the two centers is less than the sum of the two radii, 
       // there is collision
       if( dist <= radius*2 ) {
-        //std::cout<<"\nPoints in collision: ("<<p_i.positions.at(0)<<", "<<p_i.positions.at(1)<<") and ";
-        //std::cout<<"("<<p_ob.positions.at(0)<<", "<<p_ob.positions.at(1)<<"), dist: "<<dist<<" i: "<<i<<" j: "<<j;
+        std::cout<<"\nPoints in collision: ("<<p_i.positions.at(0)<<", "<<p_i.positions.at(1)<<") and ";
+        std::cout<<"("<<p_ob.positions.at(0)<<", "<<p_ob.positions.at(1)<<"), dist: "<<dist<<" i: "<<i<<" j: "<<j;
         result.collision_ = true;
         result.t_firstCollision_ = p_i.time_from_start.toSec();
         j = i+1;

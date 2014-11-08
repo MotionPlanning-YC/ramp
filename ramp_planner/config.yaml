@@ -2,8 +2,10 @@ population_size: 2
 
 sub_populations: false 
 
-modifications: true 
+modifications: false 
 
 evaluations: false
 
-seed_population: true
+seed_population: false 
+
+gens_before_control_cycle: 0
