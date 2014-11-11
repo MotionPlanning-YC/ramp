@@ -832,7 +832,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       trajectory_msgs::JointTrajectoryPoint last = 
             res.trajectory.trajectory.points.at(trajec_size-1);
 
-      trajectory_msgs::JointTrajectoryPoint next_knot = 
+      trajectory_msgs::JointTrajectoryPoint next_knot =
             utility_.getTrajectoryPoint(path_.points.at(i_kp_).motionState);
       
         /*std::cout<<"\nlast: "<<utility_.toString(last);
@@ -843,7 +843,10 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
                       utility_.findDistanceBetweenAngles(last.positions.at(2), 
                                 utility_.findAngleFromAToB(last, next_knot))<<"\n";*/
 
-      if(!finalStateReached()) {
+      // Check for transition because the robot should not rotate
+      // if it overshoots the goal.
+      // It may be good to check for overshooting with any trajectory
+      if(!finalStateReached() && req.type != TRANSITION) {
 
         // If we need to rotate towards the next knot point
         // 0.05 radians = 3 degrees
@@ -867,7 +870,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
           prevKP_ = res.trajectory.trajectory.points.at(
               res.trajectory.trajectory.points.size() - 1);
         } // end if rotate
-      } // end if final state is already reached
+      } // end if final state is not already reached
 
 
       setTarget(path_.points.at(i_kp_).motionState);
@@ -878,7 +881,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
 
       // We go to the next knotpoint only once we reach this one
-      while (!finalStateReached()) {
+      while (!finalStateReached() && req.type != TRANSITION) {
 
         trajectory_msgs::JointTrajectoryPoint p = spinOnce();
         //std::cout<<"\np: "<<utility_.toString(p)<<"\n";
@@ -955,7 +958,9 @@ const std::vector<trajectory_msgs::JointTrajectoryPoint> MobileBase::rotate(cons
 // Returns true if the target has been reached
 bool MobileBase::finalStateReached() {
   //return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
-  return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED || (timeFromStart_ >= timeCutoff_));
+  
+  return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED ||  
+      (timeFromStart_ >= timeCutoff_));
 } // End finalStateReached
 
 

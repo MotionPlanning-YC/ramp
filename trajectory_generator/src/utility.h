@@ -30,6 +30,7 @@ class Utility {
     Utility();
     
     const double positionDistance(const std::vector<double> a, const std::vector<double> b) const;
+    const double positionDistance(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;
 
     const double findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;
     const double findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const;

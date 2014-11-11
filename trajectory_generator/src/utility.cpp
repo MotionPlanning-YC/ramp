@@ -34,7 +34,17 @@ const double Utility::positionDistance(const std::vector<double> a, const std::v
   return sqrt( pow(d_x,2) + pow(d_y,2) );
 } // End euclideanDistance
 
+const double Utility::positionDistance(const trajectory_msgs::JointTrajectoryPoint point_a, const trajectory_msgs::JointTrajectoryPoint point_b) const {
+  std::vector<double> a,b;
 
+  a.push_back(point_a.positions.at(0));
+  a.push_back(point_a.positions.at(1));
+
+  b.push_back(point_b.positions.at(0));
+  b.push_back(point_b.positions.at(1));
+
+  return positionDistance(a,b);
+}
 
 const double Utility::findAngleToVector(const std::vector<double> p) const {
   std::vector<double> zero;

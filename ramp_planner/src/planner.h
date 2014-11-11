@@ -100,8 +100,8 @@ class Planner {
 
     // Evaluate the population 
     const RampTrajectory  evaluateTrajectory(RampTrajectory trajec, const bool computeSwitch=true);
-    void                  evaluatePopulation(Population& pop, const bool computeSwitch=true);
-    const RampTrajectory  evaluateAndObtainBest(Population& pop);
+    const Population      evaluatePopulation(Population pop, const bool computeSwitch=true);
+    const RampTrajectory  evaluateAndObtainBest(Population pop);
     
     // Modify trajectory or path
     const std::vector<Path> modifyPath();
@@ -166,10 +166,6 @@ class Planner {
     // Returns a unique id for a RampTrajectory 
     unsigned int getIRT();
 
-    // Adjust the trajectory so that the robot does not
-    // completely stop to change to it
-    void gradualTrajectory(RampTrajectory& t);
-
     // Modification procedure
     void modification();
 
@@ -190,7 +186,7 @@ class Planner {
 
     // Misc
     const bool checkOrientation()                           const ; 
-    const void randomizeMSPositions(MotionState& ms)        const ;
+    const MotionState randomizeMSPositions(MotionState ms)        const ;
           void checkTrajChange()                                  ;
           void seedPopulation()                                   ;
           void seedPopulationLine()                               ;
