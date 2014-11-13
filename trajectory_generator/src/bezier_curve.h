@@ -80,6 +80,10 @@ private:
   // Approximate initial state of a Bezier curve
   const ramp_msgs::MotionState getInitialState();
   const double findVelocity(const uint8_t i, const double l, const double slope) const;
+
+
+  // TODO: Make const
+  const ramp_msgs::MotionState buildMotionState(const ReflexxesData data);
 };
 
 #endif

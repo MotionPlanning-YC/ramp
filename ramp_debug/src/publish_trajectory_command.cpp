@@ -34,8 +34,8 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(0.5); //0.121988
-  c1.motionState.positions.push_back(3.); //0.37455
+  c1.motionState.positions.push_back(0.121988); //0.121988
+  c1.motionState.positions.push_back(0.37455); //0.37455
   c1.motionState.positions.push_back(1.27062); //1.27062
 
   ramp_msgs::KnotPoint c2;
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
   c4.motionState.accelerations.push_back(0.);
   
   ramp_msgs::Path p;
-  p.points.push_back(zero);
+  //p.points.push_back(zero);
   p.points.push_back(c1);
   //p.points.push_back(c2);
   p.points.push_back(c3);
