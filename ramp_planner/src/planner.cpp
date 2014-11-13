@@ -39,6 +39,7 @@ Planner::~Planner() {
 
 
 void Planner::restartControlCycle() {
+  ROS_INFO("Restarting Control Cycles");
   controlCycleTimer_.stop();
   controlCycleTimer_.start();
 }
@@ -1431,7 +1432,7 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec, const bo
         fabs(result.msg_.fitness - bestFitness) < transThreshold_) ) 
     {
       std::cout<<"\nIn close enough to compute curve\n";
-      std::cout<<"\nfabs(result.msg_.fitness - bestFitness): "<<fabs(result.msg_.fitness - bestFitness);
+      std::cout<<"\ntransThresh: "<<transThreshold_<<" fabs(result.msg_.fitness - bestFitness): "<<fabs(result.msg_.fitness - bestFitness);
 
       double theta_current = start_.msg_.positions.at(2);
 

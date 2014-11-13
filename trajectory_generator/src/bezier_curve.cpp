@@ -1,7 +1,7 @@
 #include "bezier_curve.h"
 
 
-BezierCurve::BezierCurve() : initialized_(false), deallocated_(false) {
+BezierCurve::BezierCurve() : initialized_(false), deallocated_(false), reachedVMax_(false) {
   reflexxesData_.rml = 0;
   reflexxesData_.inputParameters  = 0;
   reflexxesData_.outputParameters = 0;
@@ -440,12 +440,44 @@ void BezierCurve::initReflexxes() {
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 
     getUDotDotMax(u_dot_max);
 
+  double t_diffUDotMax = (u_dot_max - u_dot_0_) / reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0];
+  std::cout<<"\nt_diffUDotMax: "<<t_diffUDotMax<<" 0.1 - fabs(t_diffUDotMax): "<<0.1 - fabs(t_diffUDotMax);
+
+  // Position gained 
+  double p_v0 = u_dot_0_ * fabs(t_diffUDotMax);
+  double p_v1 = u_dot_max * (0.1 - fabs(t_diffUDotMax));
+  std::cout<<"\np_v0: "<<p_v0<<" p_v1: "<<p_v1<<" p_v0+p_v1: "<<p_v0+p_v1;
+
+  double t1 = -u_dot_max + sqrt( pow(u_dot_max,2) + 2);
+  double t2 = -u_dot_max - sqrt( pow(u_dot_max,2) + 2);
+  std::cout<<"\nt1: "<<t1<<" t2: "<<t2;
+
+  // modf returns fractional part and stores int in 2nd arg
+  double integer, value = 1./u_dot_max;
+  double dec = modf(value, &integer);
+  std::cout<<"\nvalue: "<<value<<" dec: "<<dec;
   
+  double value_stripped = (int)(value * 10);
+  double p_maxv = (u_dot_max*CYCLE_TIME_IN_SECONDS) * value_stripped;
+  std::cout<<"\nvalue_stripped: "<<value_stripped;
+  std::cout<<"\np_maxv: "<<p_maxv;
+
+  double adjustment = 1 - dec;
+
+  printf("\n");
+  ROS_INFO("Expected time: %f fmod(1., u_dot_max): %f u_dot_max - (int)u_dot_max: %f", 1./u_dot_max, fmod(1., u_dot_max), u_dot_max - (int)u_dot_max);
+  ROS_INFO("Target = %f", 1. - (fmod(1., u_dot_max)));
+  ROS_INFO("Time to reach max u_dot: %f ", (u_dot_max - u_dot_0_) / reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]);
+  
+  std::cout<<"\nu_dot_max - u_dot_0: "<<(u_dot_max - u_dot_0_)<<" t_diffUDotMax: "<<t_diffUDotMax<<" floor: "<<floor(fabs(t_diffUDotMax));
   // Set targets
-  reflexxesData_.inputParameters->TargetPositionVector->VecData[0] = 1;
+  // We subtract 1 mod u_dot_max to prevent overshooting the target position
+  // For some reason, Reflexxes will not stop when it hits the target p/v perfectly
+  // subtracting a very small amount seems to fix this
+  reflexxesData_.inputParameters->TargetPositionVector->VecData[0] = p_maxv;// - fabs(t_diffUDotMax) - (fmod(1., u_dot_max)) - 0.000001;
   reflexxesData_.inputParameters->TargetVelocityVector->VecData[0] = 
     reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
-  
+ 
 
   if(print_) {
     printReflexxesInfo();
@@ -754,6 +786,7 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
                                   reflexxesData_.outputParameters, 
                                   reflexxesData_.flags );
   
+  
   // Set variables to make equations more readable
   double u          = reflexxesData_.outputParameters->NewPositionVector->VecData[0];
   double u_dot      = reflexxesData_.outputParameters->NewVelocityVector->VecData[0];
@@ -813,11 +846,34 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   result.accelerations.push_back(y_dot_dot);
   result.accelerations.push_back(theta_dot_dot);
   
+
+
+  if(!reachedVMax_)
+  {
+
+    double a = reflexxesData_.inputParameters->MaxVelocityVector->VecData[0] * CYCLE_TIME_IN_SECONDS;
+    double b = reflexxesData_.outputParameters->NewPositionVector->VecData[0] - 
+                  reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];
+
+    std::cout<<"\na: "<<a<<" b: "<<b<<" a-b: "<<a-b;
+    std::cout<<"\nCurrent Target: "<<reflexxesData_.inputParameters->TargetPositionVector->VecData[0];
+    reflexxesData_.inputParameters->TargetPositionVector->VecData[0] -= (a-b);
+    std::cout<<"\nNew Target: "<<reflexxesData_.inputParameters->TargetPositionVector->VecData[0];
+
+    reachedVMax_ = (reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0] == 
+      reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]);
+
+    if(reachedVMax_)
+      reflexxesData_.inputParameters->TargetPositionVector->VecData[0] -= 0.000001;
+  }
+
+  // TODO: May need to subtract 0.0000001 from target position in case Reflexxes won't stop once
+  // it hits the target perfectly
+
   // Set current vectors to the output 
   *reflexxesData_.inputParameters->CurrentPositionVector = *reflexxesData_.outputParameters->NewPositionVector;
   *reflexxesData_.inputParameters->CurrentVelocityVector = *reflexxesData_.outputParameters->NewVelocityVector;
   *reflexxesData_.inputParameters->CurrentAccelerationVector = *reflexxesData_.outputParameters->NewAccelerationVector;
-
 
   return result;
 } // End spinOnce

@@ -45,6 +45,7 @@ private:
   ReflexxesData reflexxesData_      ;
   bool          initialized_        ;
   bool          deallocated_        ;
+  bool          reachedVMax_        ;
 
   // Variables to manually track some motion info
   double        x_prev_, y_prev_;

@@ -86,6 +86,7 @@ void MobileBase::initReflexxes() {
 /** Initialize class object with a request */
 // TODO: change 3 booleans to 1 enum
 void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
+  //ROS_INFO("Entered MobileBase::init");
   //std::cout<<"\nRequest received: "<<utility_.toString(req)<<"\n";
 
   bezierStart = req.startBezier;
@@ -120,7 +121,8 @@ void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
  
   if(type_ == ALL_STRAIGHT_SEGMENTS)
     print_ = true;
-  //std::cout<<"\nLeaving init\n";
+  
+  //ROS_INFO("Leaving MobileBase::init");
 } // End init
 
 
@@ -363,6 +365,8 @@ const ramp_msgs::MotionState MobileBase::getMaxMS() const {
 
 /** */
 const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool only_curve) {
+  ROS_INFO("Entered MobileBase::bezier");
+
   std::vector<BezierCurve> result;
 
   ramp_msgs::Path p_copy = p;
@@ -373,8 +377,10 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
   //std::cout<<"\nstop: "<<stop;
 
 
+  std::cout<<"\nBefore differentPoint\n";
   bool differentPoint = utility_.positionDistance(req_.bezierInfo.at(0).segmentPoints.at(0).positions, 
           req_.bezierInfo.at(0).segmentPoints.at(1).positions) > 0.01;
+  std::cout<<"\nAfter differentPoint\n";
   int inc = 2;
   while(!differentPoint && inc < p_copy.points.size()) {
     /*std::cout<<"\nPoints 0 and 1 are the same";
@@ -527,7 +533,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     }
   }
 
-  //std::cout<<"\nLeaving bezier\n";
+  ROS_INFO("Leaving MobileBase::bezier");
   return result;
 } // End bezier
 
@@ -731,11 +737,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
   // Use Bezier curves to smooth path
   if(type_ != ALL_STRAIGHT_SEGMENTS) {
-    //if(print_ || bezierStart) 
-      //std::cout<<"\nPath before Bezier: "<<utility_.toString(path_)<<"\n";
+    if(print_ || bezierStart) 
+      std::cout<<"\nPath before Bezier: "<<utility_.toString(path_)<<"\n";
     curves = bezier(path_, type_ == TRANSITION);
-    //if(print_ || bezierStart)
-      //std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
+    if(print_ || bezierStart)
+      std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
 
 
     // Currently adding 0 for both because 
@@ -879,29 +885,33 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         std::cout<<"\nTarget: "<<utility_.toString(path_.points.at(i_kp_).motionState)<<"\n";
       }
 
+      if(req.type != TRANSITION || utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, path_.points.at(i_kp_).motionState.positions) > 0.01)
+      {
+      
 
-      // We go to the next knotpoint only once we reach this one
-      while (!finalStateReached() && req.type != TRANSITION) {
+        // We go to the next knotpoint only once we reach this one
+        while (!finalStateReached()) {
 
-        trajectory_msgs::JointTrajectoryPoint p = spinOnce();
-        //std::cout<<"\np: "<<utility_.toString(p)<<"\n";
+          trajectory_msgs::JointTrajectoryPoint p = spinOnce();
+          //std::cout<<"\np: "<<utility_.toString(p)<<"\n";
 
-        // Compute the motion state at t+1 and save it in the trajectory
-        res.trajectory.trajectory.points.push_back(p);
-      } // end while
+          // Compute the motion state at t+1 and save it in the trajectory
+          res.trajectory.trajectory.points.push_back(p);
+        } // end while
 
-      //std::cout<<"\nReached target: "<<utility_.toString(path_.points.at(i_kp_).motionState);
-      //std::cout<<"\nAt state: "<<utility_.toString(res.trajectory.trajectory.points.at(
-                                  //res.trajectory.trajectory.points.size()-1))<<"\n";
+        //std::cout<<"\nReached target: "<<utility_.toString(path_.points.at(i_kp_).motionState);
+        //std::cout<<"\nAt state: "<<utility_.toString(res.trajectory.trajectory.points.at(
+                                    //res.trajectory.trajectory.points.size()-1))<<"\n";
 
-      // Once we reached the target, we set that the latest point is a knotpoint
-      res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
-    } // end else straight-line segment
+        // Once we reached the target, we set that the latest point is a knotpoint
+        res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
+      } // end else straight-line segment
+    } // end if
 
     //std::cout<<"\nOutside while\n";
     // Set previous knot point
     prevKP_ = res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size() - 1);
-  } // end for
+  } // end for each knot point (outer-most loop)
   //std::cout<<"\nOutside for\n";
 
   // Lastly, set newPath in case the path changed
