@@ -11,6 +11,7 @@
 
 
 #define PI 3.14159f
+#define CYCLE_TIME_IN_SECONDS 0.1
 
 class Utility {
   public:

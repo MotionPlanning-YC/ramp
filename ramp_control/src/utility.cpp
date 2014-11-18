@@ -159,6 +159,8 @@ const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
   }
   result<<"]";
 
+  result<<"\n time: "<<mp.time;
+
   return result.str();
 }
 

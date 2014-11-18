@@ -67,7 +67,7 @@ class MobileRobot {
     const bool                  checkImminentCollision() const;
     const bool                  checkOrientation(const int i, const bool simulation) const;
     const ramp_msgs::RampTrajectory getRotationTrajectory() const;
-    const std::vector<float>    computeAcceleration() const;
+    const std::vector<double>    computeAcceleration() const;
     
     
     /** Data Members **/
@@ -86,6 +86,7 @@ class MobileRobot {
     TrajectoryRequestHandler* h_traj_req_;
     ramp_msgs::MotionState    prev_motion_state_; 
     ros::Time                 prev_t_;
+    ros::Duration             t_immiColl_;
 };
 
 #endif

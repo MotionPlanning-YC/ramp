@@ -2,7 +2,7 @@
 uint16 numOfPoints
 ramp_msgs/MotionState[] segmentPoints
 ramp_msgs/MotionState[] controlPoints
-float64 lambda
+float64 l
 ramp_msgs/MotionState ms_maxVA
 ramp_msgs/MotionState ms_initialVA
 float32 u_0

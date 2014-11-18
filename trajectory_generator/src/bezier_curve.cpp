@@ -39,7 +39,7 @@ void BezierCurve::dealloc() {
 
 void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionState ms_current) {
   segmentPoints_  = bi.segmentPoints;
-  lambda_         = bi.lambda;
+  l_         = bi.l;
   theta_prev_     = utility_.findAngleFromAToB(
                                   segmentPoints_.at(0).positions, 
                                   segmentPoints_.at(1).positions);
@@ -196,7 +196,7 @@ const ramp_msgs::MotionState BezierCurve::getInitialState() {
   }
   
   // Segment 1 size
-  double l = lambda_ * utility_.positionDistance(
+  double l = l_ * utility_.positionDistance(
       segmentPoints_.at(0).positions, 
       segmentPoints_.at(1).positions);
 
@@ -443,17 +443,14 @@ void BezierCurve::initReflexxes() {
   // modf returns fractional part and stores int in 2nd arg
   double integer, value = 1./u_dot_max;
   double dec = modf(value, &integer);
-  std::cout<<"\nvalue: "<<value<<" dec: "<<dec;
   
   double num_cycles = (int)(value * 10);
   double p_maxv = (u_dot_max*CYCLE_TIME_IN_SECONDS) * num_cycles;
-  std::cout<<"\nnum_cycles: "<<num_cycles;
-  std::cout<<"\np_maxv: "<<p_maxv;
 
-  printf("\n");
+  /*printf("\n");
   ROS_INFO("Expected time: %f fmod(1., u_dot_max): %f u_dot_max - (int)u_dot_max: %f", 1./u_dot_max, fmod(1., u_dot_max), u_dot_max - (int)u_dot_max);
   ROS_INFO("Target = %f", 1. - (fmod(1., u_dot_max)));
-  ROS_INFO("Time to reach max u_dot: %f ", (u_dot_max - u_dot_0_) / reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]);
+  ROS_INFO("Time to reach max u_dot: %f ", (u_dot_max - u_dot_0_) / reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]);*/
   
   // Set targets
   // We subtract 1 mod u_dot_max to prevent overshooting the target position
@@ -501,8 +498,8 @@ void BezierCurve::initControlPoints() {
                                                   p1.positions);
 
     /** Positions */
-    C0.positions.push_back( (1-lambda_)*p0.positions.at(0) + lambda_*p1.positions.at(0) );
-    C0.positions.push_back( (1-lambda_)*p0.positions.at(1) + lambda_*p1.positions.at(1) );
+    C0.positions.push_back( (1-l_)*p0.positions.at(0) + l_*p1.positions.at(0) );
+    C0.positions.push_back( (1-l_)*p0.positions.at(1) + l_*p1.positions.at(1) );
     C0.positions.push_back(theta_s1);
 
     initControlPoints(C0);
@@ -512,8 +509,8 @@ void BezierCurve::initControlPoints() {
   else {
     //std::cout<<"\nIn else\n";
 
-    // Adjust lambda
-    lambda_ = 1 - lambda_;
+    // Adjust l
+    l_ = 1 - l_;
 
     
     ramp_msgs::MotionState C0, C1, C2, p0, p1, p2;
@@ -530,8 +527,8 @@ void BezierCurve::initControlPoints() {
                                                   p2.positions);
 
     /** Positions */
-    C2.positions.push_back( (1-lambda_)*p1.positions.at(0) + lambda_*p2.positions.at(0) );
-    C2.positions.push_back( (1-lambda_)*p1.positions.at(1) + lambda_*p2.positions.at(1) );
+    C2.positions.push_back( (1-l_)*p1.positions.at(0) + l_*p2.positions.at(0) );
+    C2.positions.push_back( (1-l_)*p1.positions.at(1) + l_*p2.positions.at(1) );
     C2.positions.push_back(theta_s2);
     
     // Control point 0 is passed in
@@ -827,6 +824,7 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
 /** Call Reflexxes once and return the next motion state */
 // TODO: Clean up?
 const ramp_msgs::MotionState BezierCurve::spinOnce() {
+  ROS_INFO("In BezierCurve::spinOnce()");
   ramp_msgs::MotionState result;
 
 
@@ -837,24 +835,48 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
                                   reflexxesData_.flags );
   
   // Check if the max velocity has been reached
+  // If not, adjust the target position based on how far we've moved
   if(!reachedVMax_)
   {
-    double a = reflexxesData_.inputParameters->MaxVelocityVector->VecData[0] * CYCLE_TIME_IN_SECONDS;
+    std::cout<<"\nAdjusting target position\n";
+    double a = reflexxesData_.inputParameters->MaxVelocityVector->VecData[0] * 
+                  CYCLE_TIME_IN_SECONDS;
     double b = reflexxesData_.outputParameters->NewPositionVector->VecData[0] - 
                   reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];
 
-    ROS_INFO("a: %f b: %f a-b: %f", a, b, a-b);
-    ROS_INFO("Current Target: %f", reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
+    if(print_) {
+      ROS_INFO("a: %f b: %f a-b: %f", a, b, a-b);
+      ROS_INFO("Current Target: %f", 
+          reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
+    }
     reflexxesData_.inputParameters->TargetPositionVector->VecData[0] -= (a-b);
-    ROS_INFO("New Target: %f", reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
+    
+    if(print_) {
+      ROS_INFO("New Target: %f", 
+          reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
+    }
 
-    reachedVMax_ = (reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0] == 
-      reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]);
+    // Current vs max or new vs max?
+    reachedVMax_ = (fabs(reflexxesData_.outputParameters->NewVelocityVector->VecData[0] - 
+      reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]) < 0.0001);
+    
+    std::cout<<"\nreflexxesData_.outputParameters->NewVelocityVector->VecData[0]: "<<
+      reflexxesData_.outputParameters->NewVelocityVector->VecData[0];
+    std::cout<<"\nreflexxesData_.inputParameters->MaxVelocityVector->VecData[0]: "<<
+      reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
+    std::cout<<"\nDifference: "<<(fabs(reflexxesData_.outputParameters->NewVelocityVector->VecData[0] - reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]));
+    std::cout<<"\nreachedVMax: "<<reachedVMax_;
 
     if(reachedVMax_) {
       reflexxesData_.inputParameters->TargetPositionVector->VecData[0] -= 0.000001;
     }
-  }
+
+    // Call Reflexxes after adjusting in case we are currently at the new target
+    reflexxesData_.resultValue = reflexxesData_.rml->RMLPosition( 
+                                 *reflexxesData_.inputParameters, 
+                                  reflexxesData_.outputParameters, 
+                                  reflexxesData_.flags );
+  } // end if adjusting target position
 
   // Build the new motion state
   result = buildMotionState(reflexxesData_);
@@ -864,5 +886,6 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   *reflexxesData_.inputParameters->CurrentVelocityVector = *reflexxesData_.outputParameters->NewVelocityVector;
   *reflexxesData_.inputParameters->CurrentAccelerationVector = *reflexxesData_.outputParameters->NewAccelerationVector;
 
+  ROS_INFO("Exiting BezierCurve::spinOnce()");
   return result;
 } // End spinOnce

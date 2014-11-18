@@ -17,7 +17,7 @@ Utility u;
 bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
                       ramp_msgs::TrajectoryRequest::Response& res) 
 {
-  std::cout<<"\nReceived request: "<<u.toString(req);
+  ROS_INFO("Received request: %s", u.toString(req).c_str());
   
   if(req.type != PREDICT) {
     MobileBase mobileBase;

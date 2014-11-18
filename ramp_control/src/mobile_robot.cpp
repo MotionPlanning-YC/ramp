@@ -110,11 +110,11 @@ void MobileRobot::turn(const float speed, const float angle) const {
 }
 
 
-const std::vector<float> MobileRobot::computeAcceleration() const {
-  std::vector<float> result;
+const std::vector<double> MobileRobot::computeAcceleration() const {
+  std::vector<double> result;
 
   for(unsigned int i=0;i<k_dof_;i++) {
-    float a = (motion_state_.velocities.at(i) - prev_motion_state_.velocities.at(i)) 
+    double a = (motion_state_.velocities.at(i) - prev_motion_state_.velocities.at(i)) 
               / (ros::Time::now() - prev_t_).toSec();
     result.push_back(a);
   }
@@ -145,10 +145,12 @@ void MobileRobot::updateState(const nav_msgs::Odometry& msg) {
 
   // Odometry does not have acceleration info, but
   // it would be pushed on here
-  std::vector<float> a = computeAcceleration();
+  std::vector<double> a = computeAcceleration();
   for(unsigned int i=0;i<a.size();i++) {
     motion_state_.accelerations.push_back(a.at(i));
   }
+
+  motion_state_.time = num_traveled_ * CYCLE_TIME_IN_SECONDS;
     
   prev_t_ = ros::Time::now();
 } // End updateState
@@ -162,7 +164,44 @@ void MobileRobot::updatePublishTimer(const ros::TimerEvent&) {
     
   if (pub_update_) {
       pub_update_.publish(motion_state_);
+      ROS_INFO("Motion state: %s", utility_.toString(motion_state_).c_str());
   }
+  ramp_msgs::MotionState latestUpdate_ = motion_state_;
+  if(trajectory_.trajectory.points.size() > 1) {
+    tf::Transform T;
+    T.setOrigin(tf::Vector3(0,0,0));
+    T.setRotation( tf::createQuaternionFromYaw(0.519146) );
+
+    tf::Vector3 ms(motion_state_.positions.at(0), motion_state_.positions.at(1), motion_state_.positions.at(2));
+    tf::Vector3 lu = T * ms;
+    std::cout<<"\nlu: ("<<lu.getX()<<", "<<lu.getY()<<")";
+
+
+    //double phi = utility_.displaceAngle(0., motion_state_.positions.at(2));
+    double phi = utility_.displaceAngle(0.519146, motion_state_.positions.at(2));
+    latestUpdate_.positions.at(0) = motion_state_.positions.at(0)*cos(phi) - motion_state_.positions.at(1)*sin(phi);
+    latestUpdate_.positions.at(1) = motion_state_.positions.at(0)*sin(phi) + motion_state_.positions.at(1)*cos(phi); 
+    latestUpdate_.positions.at(2) = utility_.displaceAngle(trajectory_.trajectory.points.at(0).positions.at(2), motion_state_.positions.at(2));
+
+    // Set proper velocity values
+    latestUpdate_.velocities.at(0) = motion_state_.velocities.at(0) * 
+                                          cos(trajectory_.trajectory.points.at(num_traveled_).positions.at(2));
+    latestUpdate_.velocities.at(1) = motion_state_.velocities.at(0) * 
+                                          sin(trajectory_.trajectory.points.at(num_traveled_).positions.at(2));
+    latestUpdate_.velocities.at(0) = motion_state_.velocities.at(0) * 
+                                          cos(phi);
+    latestUpdate_.velocities.at(1) = motion_state_.velocities.at(0) * 
+                                          sin(phi);
+
+    // Set proper acceleration values
+    latestUpdate_.accelerations.at(0) = motion_state_.accelerations.at(0) * 
+                                             cos(trajectory_.trajectory.points.at(num_traveled_).positions.at(2));
+    latestUpdate_.accelerations.at(1) = motion_state_.accelerations.at(0) * 
+                                             sin(trajectory_.trajectory.points.at(num_traveled_).positions.at(2));
+    ROS_INFO("Transformed: %s", utility_.toString(latestUpdate_).c_str());
+    std::cout<<"\n";
+  }
+
 } // End updatePublishTimer
 
 
@@ -179,6 +218,7 @@ void MobileRobot::updateTrajectory(const ramp_msgs::RampTrajectory msg) {
   trajectory_     = msg;
   num_prev_       = num_;
   num_            = trajectory_.trajectory.points.size();
+  t_immiColl_     = ros::Duration(0);
   
   // Update vectors for speeds and times
   calculateSpeedsAndTime();
@@ -222,7 +262,7 @@ void MobileRobot::calculateSpeedsAndTime () {
     end_times.push_back(start_time + next.time_from_start);
   } 
   
-  //printVectors();
+  printVectors();
 } // End calculateSpeedsAndTime
 
 
@@ -335,13 +375,16 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
     
 
     // Force a stop until there is no imminent collision
+    ros::Time t_startIC = ros::Time::now();
     while(checkImminentCollision()) {
       ros::spinOnce();
     }
+    t_immiColl_ += ros::Time::now() - t_startIC; 
+    //std::cout<<"\nt_immiColl: "<<t_immiColl_;
 
     
     // Move to the next point
-    ros::Time g_time = end_times.at(num_traveled_);
+    ros::Time g_time = end_times.at(num_traveled_) + t_immiColl_;
     while(ros::ok() && ros::Time::now() < g_time) {
     
       twist_.linear.x   = speeds_linear_.at(num_traveled_);

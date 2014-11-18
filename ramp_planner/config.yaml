@@ -8,4 +8,4 @@ evaluations: false
 
 seed_population: false 
 
-gens_before_control_cycle: 0
+gens_before_control_cycle: 10

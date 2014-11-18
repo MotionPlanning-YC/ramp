@@ -23,7 +23,7 @@ public:
   double A_, B_, C_, D_       ;
   double R_min_               ;
   double t_R_min_             ;
-  double lambda_              ;
+  double l_                   ;
   std::vector<ramp_msgs::MotionState> segmentPoints_ ;
   std::vector<ramp_msgs::MotionState> controlPoints_ ;
   std::vector<ramp_msgs::MotionState> points_         ;

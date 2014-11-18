@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
   ramp_msgs::KnotPoint zero;
   zero.motionState.positions.push_back(0);
   zero.motionState.positions.push_back(0);
-  zero.motionState.positions.push_back(0);
+  zero.motionState.positions.push_back(0.519146);
   zero.motionState.velocities.push_back(0);
   zero.motionState.velocities.push_back(0);
   zero.motionState.velocities.push_back(0);
@@ -34,9 +34,9 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(0.121988); //0.121988
-  c1.motionState.positions.push_back(0.37455); //0.37455
-  c1.motionState.positions.push_back(1.27062); //1.27062
+  c1.motionState.positions.push_back(0.045); //0.121988
+  c1.motionState.positions.push_back(0.0385073); //0.37455
+  c1.motionState.positions.push_back(0.519146); //1.27062
 
   ramp_msgs::KnotPoint c2;
   c2.motionState.positions.push_back(0.732189); // 0.5
@@ -92,8 +92,8 @@ int main(int argc, char** argv) {
   c4.motionState.accelerations.push_back(0.);
   
   ramp_msgs::Path p;
-  //p.points.push_back(zero);
-  p.points.push_back(c1);
+  p.points.push_back(zero);
+  //p.points.push_back(c1);
   //p.points.push_back(c2);
   p.points.push_back(c3);
   p.points.push_back(c4);
@@ -240,7 +240,7 @@ int main(int argc, char** argv) {
   // u
   bi.u_0 = 0.;
   bi.u_dot_0 = 0.;
-  bi.lambda = 0.;
+  bi.l = 0.;
 
   bi.numOfPoints = 0;
 
@@ -327,7 +327,7 @@ int main(int argc, char** argv) {
   bi2.ms_maxVA = ms_maxVA2;
   
   //bi.ms_begin = p.points.at(0).motionState;
-  bi2.lambda = 0.5;
+  bi2.l = 0.5;
 
 
   /**************************************************/
@@ -347,7 +347,6 @@ int main(int argc, char** argv) {
   tr.request.startBezier = false;
   tr.request.print = true;
   tr.request.bezierInfo = curves;
-
 
   std::cout<<"\nPress Enter to request and send the trajectory\n";
   std::cin.get();

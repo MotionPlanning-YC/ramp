@@ -51,7 +51,8 @@ void MobileBase::initReflexxes() {
 
   
   // Use time synchronization so the robot drives in a straight line towards goal 
-  reflexxesData_.flags.SynchronizationBehavior = RMLPositionFlags::ONLY_TIME_SYNCHRONIZATION;
+  //reflexxesData_.flags.SynchronizationBehavior = RMLPositionFlags::ONLY_TIME_SYNCHRONIZATION;
+  reflexxesData_.flags.SynchronizationBehavior = RMLPositionFlags::PHASE_SYNCHRONIZATION_IF_POSSIBLE;
 
 
   // Set up the motion constraints (max velocity, acceleration and jerk)
@@ -377,10 +378,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
   //std::cout<<"\nstop: "<<stop;
 
 
-  std::cout<<"\nBefore differentPoint\n";
   bool differentPoint = utility_.positionDistance(req_.bezierInfo.at(0).segmentPoints.at(0).positions, 
           req_.bezierInfo.at(0).segmentPoints.at(1).positions) > 0.01;
-  std::cout<<"\nAfter differentPoint\n";
   int inc = 2;
   while(!differentPoint && inc < p_copy.points.size()) {
     /*std::cout<<"\nPoints 0 and 1 are the same";
@@ -419,7 +418,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
 
   // Go through the path's knot points
-  //std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
+  std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
   for(uint8_t i=1;i<stop;i++) {
 
     // Check that all of the points are different
@@ -473,7 +472,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         // Get lambda value for segment points
         //double lambda = (req_.bezierInfo.at(i-1).lambda > 0) ?  req_.bezierInfo.at(i-1).lambda :
           //                                              getControlPointLambda(segment_points);
-        double lambda = (req_.bezierInfo.at(i-1).controlPoints.size() > 0) ?  req_.bezierInfo.at(i-1).lambda :
+        double lambda = (req_.bezierInfo.at(i-1).controlPoints.size() > 0) ?  req_.bezierInfo.at(i-1).l :
                                                         getControlPointLambda(segment_points);
 
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
@@ -481,7 +480,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         // TODO: Make a method to return a BezierInitializer
         ramp_msgs::BezierInfo bi;
         bi.segmentPoints  = segment_points;
-        bi.lambda         = lambda;
+        bi.l              = lambda;
         bi.ms_maxVA       = ms_maxVA;
         //bi.ms_begin       = path_.points.at(0).motionState;
 
@@ -533,7 +532,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     }
   }
 
-  ROS_INFO("Leaving MobileBase::bezier");
+  //ROS_INFO("Leaving MobileBase::bezier");
   return result;
 } // End bezier
 
@@ -645,10 +644,16 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
     else if(i == 2) {
       
       // If straight-line paths, make theta be towards next knot point
-      double theta = utility_.findAngleFromAToB( prevKP_.positions.at(0),
+      double theta = utility_.findAngleFromAToB( data.inputParameters->CurrentPositionVector->VecData[0],
+                                                 data.inputParameters->CurrentPositionVector->VecData[1],
+                                                 data.outputParameters->NewPositionVector->VecData[0],
+                                                 data.outputParameters->NewPositionVector->VecData[1]);
+      
+      // If straight-line paths, make theta be towards next knot point
+      /*double theta = utility_.findAngleFromAToB( prevKP_.positions.at(0),
                                                  prevKP_.positions.at(1),
                                   data.inputParameters->TargetPositionVector->VecData[0],
-                                  data.inputParameters->TargetPositionVector->VecData[1]);
+                                  data.inputParameters->TargetPositionVector->VecData[1]);*/
 
       // Get angular velocity
       double w = (theta - data.inputParameters->CurrentPositionVector->VecData[2]) / 
@@ -737,11 +742,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
   // Use Bezier curves to smooth path
   if(type_ != ALL_STRAIGHT_SEGMENTS) {
-    if(print_ || bezierStart) 
-      std::cout<<"\nPath before Bezier: "<<utility_.toString(path_)<<"\n";
+    //if(print_ || bezierStart) 
+      //std::cout<<"\nPath before Bezier: "<<utility_.toString(path_)<<"\n";
     curves = bezier(path_, type_ == TRANSITION);
-    if(print_ || bezierStart)
-      std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
+    //if(print_ || bezierStart)
+      //std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
 
 
     // Currently adding 0 for both because 
@@ -751,9 +756,9 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       std::cout<<"\ni_cs["<<i<<"]: "<<(int)i_cs.at(i);
     }*/
   } // end if curves
-  else {
-    std::cout<<"\nALL_STRAIGHT_SEGMENTS, no Bezier\n";
-  }
+  //else {
+  //  std::cout<<"\nALL_STRAIGHT_SEGMENTS, no Bezier\n";
+  //}
 
   // Print curves
   if(print_) {
@@ -804,7 +809,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         // If it's the first or last point on the curve, 
         // push the index to knot point vector
         if(p==curves.at(c).points_.size()-1 ||
-            (c > 0 && p == 0) ) {
+            (c > 0 && p == 1) ) {
           res.trajectory.i_knotPoints.push_back(
                           res.trajectory.trajectory.points.size() - 1 );
         } // end if knot point
@@ -820,7 +825,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       bi.numOfPoints    = curves.at(c).points_.size();
       bi.u_0            = req_.bezierInfo.at(c).u_0;
       bi.u_dot_0        = curves.at(c).u_dot_0_;
-      bi.lambda         = curves.at(c).lambda_;
+      bi.l              = curves.at(c).l_;
       res.trajectory.curves.push_back(bi);
 
       c++;
@@ -841,13 +846,15 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       trajectory_msgs::JointTrajectoryPoint next_knot =
             utility_.getTrajectoryPoint(path_.points.at(i_kp_).motionState);
       
-        /*std::cout<<"\nlast: "<<utility_.toString(last);
+      if(print_) {  
+        std::cout<<"\nlast: "<<utility_.toString(last);
         std::cout<<"\nnext_knot: "<<utility_.toString(next_knot);
         std::cout<<"\nutility_.findAngleFromAToB(last, next_knot): "<<
                         utility_.findAngleFromAToB(last, next_knot);
         std::cout<<"\nutility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)): "<<
                       utility_.findDistanceBetweenAngles(last.positions.at(2), 
-                                utility_.findAngleFromAToB(last, next_knot))<<"\n";*/
+                                utility_.findAngleFromAToB(last, next_knot))<<"\n";
+      }
 
       // Check for transition because the robot should not rotate
       // if it overshoots the goal.
@@ -857,13 +864,13 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         // If we need to rotate towards the next knot point
         // 0.05 radians = 3 degrees
         if(fabs(utility_.findDistanceBetweenAngles(last.positions.at(2), 
-                utility_.findAngleFromAToB(last, next_knot))) > 0.05) 
+                utility_.findAngleFromAToB(last, next_knot))) > 0.025) 
         {
           std::vector<trajectory_msgs::JointTrajectoryPoint> rotate_points = 
             rotate(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot),
                     last.velocities.at(2), last.accelerations.at(2));
           
-          //std::cout<<"\nrotate points size: "<<rotate_points.size()<<"\n";
+          std::cout<<"\nrotate points size: "<<rotate_points.size()<<"\n";
           
           for(uint16_t p=0;p<rotate_points.size();p++) {
             res.trajectory.trajectory.points.push_back(rotate_points.at(p));
