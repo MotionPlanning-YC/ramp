@@ -9,10 +9,9 @@
 float x, y, theta;
 
 void odometryCallback(const nav_msgs::Odometry& msg) {
-  theta = tf::getYaw(msg.pose.pose.orientation);
-  std::cout<<"\nTheta: "<<theta;
-  x = msg.pose.pose.position.x;
-
+//  theta = tf::getYaw(msg.pose.pose.orientation);
+//  std::cout<<"\nTheta: "<<theta;
+//  x = msg.pose.pose.position.x;
 }
 
 int main(int argc, char** argv) {
@@ -23,26 +22,27 @@ int main(int argc, char** argv) {
   ros::Subscriber sub_odom = handle.subscribe("odom", 1000, odometryCallback); 
 
   geometry_msgs::Twist t;
-  t.linear.x = 0.5f;
+  t.linear.x = 0.38f;
   t.linear.y = 0.f;
   t.linear.z = 0.f;
   t.angular.x = 0.f;
   t.angular.y = 0.f;
-  t.angular.z = 0.7854f;
+  t.angular.z = 0.f;
 
-  
   std::cout<<"\nPress Enter to publish the twist message\n";
   std::cin.get();
 
   x = 0.f;
   theta = 0.f;
   ros::Rate r(50);
-  while(ros::ok() && x < 5) {
+  ros::Time end = ros::Time::now() + ros::Duration(1);
+  while(ros::ok() && ros::Time::now() < end) {
     pub_twist.publish(t);
     r.sleep();
     ros::spinOnce();
-    std::cout<<"\nx: "<<x;
   }
+
+  std::cout<<ros::Time::now();
 
   std::cout<<"\nExiting Normally\n";
   return 0;

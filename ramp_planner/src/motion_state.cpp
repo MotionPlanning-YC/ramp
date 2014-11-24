@@ -385,7 +385,7 @@ const std::string MotionState::toString() const {
     result<<"]";
   }
 
-  result<<"\n: "<<msg_.time;
+  result<<"\nTime from start: "<<msg_.time;
   result<<"\n----\n";
 
   return result.str();

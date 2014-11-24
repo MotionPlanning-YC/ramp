@@ -84,14 +84,12 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
 
   // If both C and D == 0, the first two points are the same
   if(fabs(C_) > 0.0001 || fabs(D_) > 0.0001) {
-  
     initReflexxes();
-    
     initialized_ = true;
   } 
 
   else {
-    std::cout<<"\nThe 2 points are the same:\n";
+    std::cout<<"\nThe first 2 points are the same:\n";
     std::cout<<"\nC_: "<<C_<<" D_: "<<D_;
     std::cout<<"\nfabs(C): "<<fabs(C_)<<" fabs(D): "<<fabs(D_);
     std::cout<<"\nSegment points: ";
@@ -568,11 +566,11 @@ void BezierCurve::initControlPoints() {
     controlPoints_.push_back(C1);
     controlPoints_.push_back(C2);
     
-    std::cout<<"\nControl Points:";
+    /*std::cout<<"\nControl Points:";
     for(int i=0;i<controlPoints_.size();i++) {
       std::cout<<"\n"<<utility_.toString(controlPoints_.at(i));
     }
-    std::cout<<"\n";
+    std::cout<<"\n";*/
   } // end else
 } // End initControlPoints
 
@@ -735,7 +733,6 @@ const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve() {
    
     // TODO: Check for normal trajectory when halfway through
     points_.push_back(ms_begin_);
-    //points_.push_back(controlPoints_.at(0));
 
     while(!finalStateReached()) {
       points_.push_back(spinOnce());
@@ -821,10 +818,15 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
 
 
 
+const ReflexxesData BezierCurve::adjustTargets(const ReflexxesData data) const {
+  
+}
+
+
 /** Call Reflexxes once and return the next motion state */
 // TODO: Clean up?
 const ramp_msgs::MotionState BezierCurve::spinOnce() {
-  ROS_INFO("In BezierCurve::spinOnce()");
+  //ROS_INFO("In BezierCurve::spinOnce()");
   ramp_msgs::MotionState result;
 
 
@@ -838,7 +840,7 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   // If not, adjust the target position based on how far we've moved
   if(!reachedVMax_)
   {
-    std::cout<<"\nAdjusting target position\n";
+    //ROS_INFO("Adjusting target position");
     double a = reflexxesData_.inputParameters->MaxVelocityVector->VecData[0] * 
                   CYCLE_TIME_IN_SECONDS;
     double b = reflexxesData_.outputParameters->NewPositionVector->VecData[0] - 
@@ -849,24 +851,18 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
       ROS_INFO("Current Target: %f", 
           reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
     }
+
+    // Adjust target position
     reflexxesData_.inputParameters->TargetPositionVector->VecData[0] -= (a-b);
     
     if(print_) {
-      ROS_INFO("New Target: %f", 
-          reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
+      ROS_INFO("New Target: %f", reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
     }
 
-    // Current vs max or new vs max?
+    // Check the new velocity to see if we're at the target
     reachedVMax_ = (fabs(reflexxesData_.outputParameters->NewVelocityVector->VecData[0] - 
       reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]) < 0.0001);
     
-    std::cout<<"\nreflexxesData_.outputParameters->NewVelocityVector->VecData[0]: "<<
-      reflexxesData_.outputParameters->NewVelocityVector->VecData[0];
-    std::cout<<"\nreflexxesData_.inputParameters->MaxVelocityVector->VecData[0]: "<<
-      reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
-    std::cout<<"\nDifference: "<<(fabs(reflexxesData_.outputParameters->NewVelocityVector->VecData[0] - reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]));
-    std::cout<<"\nreachedVMax: "<<reachedVMax_;
-
     if(reachedVMax_) {
       reflexxesData_.inputParameters->TargetPositionVector->VecData[0] -= 0.000001;
     }
@@ -886,6 +882,6 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   *reflexxesData_.inputParameters->CurrentVelocityVector = *reflexxesData_.outputParameters->NewVelocityVector;
   *reflexxesData_.inputParameters->CurrentAccelerationVector = *reflexxesData_.outputParameters->NewAccelerationVector;
 
-  ROS_INFO("Exiting BezierCurve::spinOnce()");
+  //ROS_INFO("Exiting BezierCurve::spinOnce()");
   return result;
 } // End spinOnce

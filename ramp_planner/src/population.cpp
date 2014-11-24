@@ -284,7 +284,6 @@ const int Population::getReplacementID(const RampTrajectory rt) const {
 const int Population::add(const RampTrajectory rt) {
   changed_ = true;
 
-  if(!contains(rt)) {
     if(subPopulations_.size() > 0) {
       // Go through each sub-population and find best
       for(uint8_t i=0;i<subPopulations_.size();i++) {
@@ -301,7 +300,7 @@ const int Population::add(const RampTrajectory rt) {
     } 
 
     // If full, replace a trajectory
-    else if(replacementPossible(rt)) {
+    else if(!contains(rt) && replacementPossible(rt)) {
 
 
       int i = getReplacementID(rt);
@@ -309,7 +308,6 @@ const int Population::add(const RampTrajectory rt) {
       replace(i, rt);
       return i;
     }
-  }
 
 
   //std::cout<<"\nAdd not possible, returning -1\n";

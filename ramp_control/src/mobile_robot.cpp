@@ -164,44 +164,8 @@ void MobileRobot::updatePublishTimer(const ros::TimerEvent&) {
     
   if (pub_update_) {
       pub_update_.publish(motion_state_);
-      ROS_INFO("Motion state: %s", utility_.toString(motion_state_).c_str());
+      //ROS_INFO("Motion state: %s", utility_.toString(motion_state_).c_str());
   }
-  ramp_msgs::MotionState latestUpdate_ = motion_state_;
-  if(trajectory_.trajectory.points.size() > 1) {
-    tf::Transform T;
-    T.setOrigin(tf::Vector3(0,0,0));
-    T.setRotation( tf::createQuaternionFromYaw(0.519146) );
-
-    tf::Vector3 ms(motion_state_.positions.at(0), motion_state_.positions.at(1), motion_state_.positions.at(2));
-    tf::Vector3 lu = T * ms;
-    std::cout<<"\nlu: ("<<lu.getX()<<", "<<lu.getY()<<")";
-
-
-    //double phi = utility_.displaceAngle(0., motion_state_.positions.at(2));
-    double phi = utility_.displaceAngle(0.519146, motion_state_.positions.at(2));
-    latestUpdate_.positions.at(0) = motion_state_.positions.at(0)*cos(phi) - motion_state_.positions.at(1)*sin(phi);
-    latestUpdate_.positions.at(1) = motion_state_.positions.at(0)*sin(phi) + motion_state_.positions.at(1)*cos(phi); 
-    latestUpdate_.positions.at(2) = utility_.displaceAngle(trajectory_.trajectory.points.at(0).positions.at(2), motion_state_.positions.at(2));
-
-    // Set proper velocity values
-    latestUpdate_.velocities.at(0) = motion_state_.velocities.at(0) * 
-                                          cos(trajectory_.trajectory.points.at(num_traveled_).positions.at(2));
-    latestUpdate_.velocities.at(1) = motion_state_.velocities.at(0) * 
-                                          sin(trajectory_.trajectory.points.at(num_traveled_).positions.at(2));
-    latestUpdate_.velocities.at(0) = motion_state_.velocities.at(0) * 
-                                          cos(phi);
-    latestUpdate_.velocities.at(1) = motion_state_.velocities.at(0) * 
-                                          sin(phi);
-
-    // Set proper acceleration values
-    latestUpdate_.accelerations.at(0) = motion_state_.accelerations.at(0) * 
-                                             cos(trajectory_.trajectory.points.at(num_traveled_).positions.at(2));
-    latestUpdate_.accelerations.at(1) = motion_state_.accelerations.at(0) * 
-                                             sin(trajectory_.trajectory.points.at(num_traveled_).positions.at(2));
-    ROS_INFO("Transformed: %s", utility_.toString(latestUpdate_).c_str());
-    std::cout<<"\n";
-  }
-
 } // End updatePublishTimer
 
 
@@ -262,7 +226,7 @@ void MobileRobot::calculateSpeedsAndTime () {
     end_times.push_back(start_time + next.time_from_start);
   } 
   
-  printVectors();
+  //printVectors();
 } // End calculateSpeedsAndTime
 
 
@@ -317,50 +281,6 @@ const bool MobileRobot::checkImminentCollision() const {
 
 
 
-/** 
- * Returns true if the robot has orientation to move 
- * from point i to point i+1
- **/
-const bool MobileRobot::checkOrientation(const int i, const bool simulation) const {
-  //std::cout<<"\nIn checkOrientation";
-  
-  // Find which knot point is next
-  int kp;
-  for(kp=0;kp<trajectory_.i_knotPoints.size();kp++) {
-    //std::cout<<"\ntrajectory_.i_knotPoints.at(kp): "<<trajectory_.i_knotPoints.at(kp);
-    if(i < trajectory_.i_knotPoints.at(kp)) {
-      kp = trajectory_.i_knotPoints.at(kp);
-      break;
-    }
-  }
-  /*std::cout<<"\ni: "<<i<<" kp: "<<kp;
-  std::cout<<"\n"<<utility_.toString(trajectory_.trajectory.points.at(i));
-  std::cout<<"\n"<<utility_.toString(trajectory_.trajectory.points.at(kp));*/
-
-  float t_or = utility_.findAngleFromAToB(trajectory_.trajectory.points.at(i),
-                                          trajectory_.trajectory.points.at(kp));
-
-  float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
-  float diff = fabs(utility_.findDistanceBetweenAngles(actual_theta, t_or));
-
-  /*std::cout<<"\nactual_theta: "<<actual_theta;
-  std::cout<<"\norientations_.at("<<i<<"): "<<orientations_.at(i)<<"\n";
-  std::cout<<"\ndiff: "<<diff;*/
-  
-  if(t_or == 0 && utility_.planarDistance(trajectory_.trajectory.points.at(i).positions, trajectory_.trajectory.points.at(kp).positions) < 0.01) {
-    return true;
-  }
-
-  else if( (!simulation && diff > PI/12) || (simulation && diff > PI/24) ) {
-    return false;
-  }
-
-  return true;
-} // End checkOrientation
-
-
-
-
 
 /** This method moves the robot along trajectory_ */
 void MobileRobot::moveOnTrajectory(bool simulation) {
@@ -370,9 +290,9 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
 
   // Execute the trajectory
   while( (num_traveled_+1) < num_) { 
-    //std::cout<<"\nnum_traveled: "<<num_traveled_<<"\n";
+    //ROS_INFO("num_traveled_: %i", num_traveled_);
     restart_ = false;
-    
+ 
 
     // Force a stop until there is no imminent collision
     ros::Time t_startIC = ros::Time::now();
@@ -383,9 +303,14 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
     //std::cout<<"\nt_immiColl: "<<t_immiColl_;
 
     
+    // If a new trajectory was received, restart the outer while 
+    if(restart_) {
+      continue;
+    }
+    
     // Move to the next point
     ros::Time g_time = end_times.at(num_traveled_) + t_immiColl_;
-    while(ros::ok() && ros::Time::now() < g_time) {
+    while(ros::ok() && ros::Time::now() < g_time && !restart_ && !checkImminentCollision()) {
     
       twist_.linear.x   = speeds_linear_.at(num_traveled_);
       twist_.angular.z  = speeds_angular_.at(num_traveled_);
@@ -423,15 +348,15 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
       
       // Spin to check for updates
       ros::spinOnce();
-
-      // Check if a new trajectory has been received before we reach next point
-      if(restart_) {
-        break;
-      }
-    } // end while (move to the next point
+    } // end while (move to the next point)
     
     // If a new trajectory was received, restart the outer while 
     if(restart_) {
+      if(checkImminentCollision()) { 
+        twist_.linear.x   = 0;
+        twist_.angular.z  = 0;
+        sendTwist();
+      }
       continue;
     }
 

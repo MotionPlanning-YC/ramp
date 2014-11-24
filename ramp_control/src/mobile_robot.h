@@ -45,7 +45,7 @@ class MobileRobot {
     ros::Subscriber                   sub_odometry_;
     ramp_msgs::MotionState            motion_state_; 
     geometry_msgs::Twist              velocity_;
-    ramp_msgs::RampTrajectory             trajectory_;
+    ramp_msgs::RampTrajectory         trajectory_;
     ros::Timer                        timer_;
     double                            initial_theta_;
 
@@ -65,9 +65,7 @@ class MobileRobot {
     void                        calculateSpeedsAndTime();
     void                        printVectors() const;
     const bool                  checkImminentCollision() const;
-    const bool                  checkOrientation(const int i, const bool simulation) const;
-    const ramp_msgs::RampTrajectory getRotationTrajectory() const;
-    const std::vector<double>    computeAcceleration() const;
+    const std::vector<double>   computeAcceleration() const;
     
     
     /** Data Members **/

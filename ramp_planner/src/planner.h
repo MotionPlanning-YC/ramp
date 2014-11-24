@@ -189,7 +189,7 @@ class Planner {
     const MotionState randomizeMSPositions(MotionState ms)        const ;
           void checkTrajChange()                                  ;
           void seedPopulation()                                   ;
-          void seedPopulationLine()                               ;
+          void seedPopulationTwo()                               ;
 
     const RampTrajectory  getTransitionTrajectory(const RampTrajectory trgt_traj)     ;
     const RampTrajectory  getTrajectoryWithCurve(const RampTrajectory trgt_traj);
@@ -204,6 +204,7 @@ class Planner {
 
     void stopForDebugging();
     void restartAfterDebugging();
+    void pause();
 
     const bool estimateIfOnCurve() const;
 
@@ -275,6 +276,8 @@ class Planner {
 
     uint16_t num_controlCycles_;
     uint16_t num_switches_;
+
+    ros::Time t_start_;
 };
 
 #endif

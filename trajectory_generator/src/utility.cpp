@@ -296,11 +296,13 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
   result<<")";
 
   //Velocities
-  result<<"\n       Velocities: ("<<p.velocities.at(0);
-  for(unsigned int k=1;k<p.velocities.size();k++) {
-    result<<", "<<p.velocities.at(k);
+  if(p.velocities.size() > 0) {
+    result<<"\n       Velocities: ("<<p.velocities.at(0);
+    for(unsigned int k=1;k<p.velocities.size();k++) {
+      result<<", "<<p.velocities.at(k);
+    }
+    result<<")";
   }
-  result<<")";
   
   //Accelerations
   if(p.accelerations.size() > 0) {

@@ -84,6 +84,8 @@ private:
 
   // TODO: Make const
   const ramp_msgs::MotionState buildMotionState(const ReflexxesData data);
+
+  const ReflexxesData adjustTargets(const ReflexxesData data) const;
 };
 
 #endif
