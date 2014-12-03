@@ -90,6 +90,13 @@ void Path::addBeforeGoal(const MotionState ms) {
   addBeforeGoal(kp);
 }
 
+
+void Path::changeStart(const MotionState ms) {
+  KnotPoint kp(ms);
+  all_.insert(all_.begin(), kp);
+  start_ = kp;
+}
+
 const unsigned int Path::size() const { return all_.size(); }
 
 

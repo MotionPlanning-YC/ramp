@@ -13,6 +13,8 @@ struct ReflexxesData {
   RMLPositionFlags flags;
   unsigned int NUMBER_OF_DOFS;
   int resultValue;
+
+  const ReflexxesData clone() {return *this;}
 };
 
 #endif

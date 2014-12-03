@@ -39,7 +39,7 @@ void BezierCurve::dealloc() {
 
 void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionState ms_current) {
   segmentPoints_  = bi.segmentPoints;
-  l_         = bi.l;
+  l_              = bi.l;
   theta_prev_     = utility_.findAngleFromAToB(
                                   segmentPoints_.at(0).positions, 
                                   segmentPoints_.at(1).positions);
@@ -68,10 +68,11 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
 
   // Set ms_begin
   if(bi.ms_begin.positions.size() > 0) {
-    //std::cout<<"ms_begin passed in: "<<utility_.toString(bi.ms_begin);
+    std::cout<<"ms_begin passed in: "<<utility_.toString(bi.ms_begin);
     ms_begin_ = bi.ms_begin;
   }
   else {
+    std::cout<<"\nSetting ms_begin to control point 0:"<<utility_.toString(controlPoints_.at(0));
     ms_begin_ = controlPoints_.at(0);
   }
   x_prev_         = ms_begin_.positions.at(0);
@@ -236,14 +237,14 @@ const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_
   
   // Square them in case they are negative 
   // Add .0001 because I was getting 0.33 > 0.33
-  if( pow( (A_*u_x+C_)*u_dot,2) > pow((ms_max_.velocities.at(0))+0.0001,2) ||
-      pow( (B_*u_y+D_)*u_dot,2) > pow((ms_max_.velocities.at(1))+0.0001,2) )
+  if( pow( (A_*u_x+C_)*u_dot,2) > pow((ms_max_.velocities.at(0))+0.000001,2) ||
+      pow( (B_*u_y+D_)*u_dot,2) > pow((ms_max_.velocities.at(1))+0.000001,2) )
   {
     return false;
   }
 
   return true;
-}
+} // End satisfiesConstraints
 
 
 
@@ -438,22 +439,24 @@ void BezierCurve::initReflexxes() {
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 
     getUDotDotMax(u_dot_max);
 
-  // modf returns fractional part and stores int in 2nd arg
-  double integer, value = 1./u_dot_max;
-  double dec = modf(value, &integer);
+  // # of u_dot_max's to reach 1
+  // Round it off the nearest tenth
+  double num_uDotMax = 1./u_dot_max;
+  float num_uDotMaxRounded = round(num_uDotMax*10) / 10;
   
-  double num_cycles = (int)(value * 10);
-  double p_maxv = (u_dot_max*CYCLE_TIME_IN_SECONDS) * num_cycles;
+  // # of cycles to reach 1
+  // num_cycles should be an int, but C++ was giving me the incorrect value as an int
+  // e.g. 1.9 / 0.1 = 18 instead of 19
+  float num_cycles = (int)(num_uDotMax / CYCLE_TIME_IN_SECONDS);
 
-  /*printf("\n");
-  ROS_INFO("Expected time: %f fmod(1., u_dot_max): %f u_dot_max - (int)u_dot_max: %f", 1./u_dot_max, fmod(1., u_dot_max), u_dot_max - (int)u_dot_max);
-  ROS_INFO("Target = %f", 1. - (fmod(1., u_dot_max)));
-  ROS_INFO("Time to reach max u_dot: %f ", (u_dot_max - u_dot_0_) / reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0]);*/
+  // Position if moving at max velocity
+  double p_maxv = u_dot_max*CYCLE_TIME_IN_SECONDS * num_cycles;
+
+  printf("\n");
+  ROS_INFO("num_udotmax: %f num_cycles: %f p_maxv: %f", num_uDotMax, num_cycles, p_maxv);
   
+ 
   // Set targets
-  // We subtract 1 mod u_dot_max to prevent overshooting the target position
-  // For some reason, Reflexxes will not stop when it hits the target p/v perfectly
-  // subtracting a very small amount seems to fix this
   reflexxesData_.inputParameters->TargetPositionVector->VecData[0] = p_maxv;
   reflexxesData_.inputParameters->TargetVelocityVector->VecData[0] = 
     reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
@@ -731,7 +734,7 @@ const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve() {
 
     reflexxesData_.resultValue = 0;
    
-    // TODO: Check for normal trajectory when halfway through
+    // Push on beginning point
     points_.push_back(ms_begin_);
 
     while(!finalStateReached()) {
@@ -770,6 +773,8 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
   double y      = (pow((1-u),2) * Y0) + ((2*u)*(1-u)*Y1) + (pow(u,2)*Y2);
   double theta  = utility_.findAngleFromAToB(x_prev_, y_prev_, x, y);
 
+  double x2      = (pow((1-0),2) * X0) + ((2*0)*(1-0)*X1) + (pow(0,2)*X2);
+  double y2      = (pow((1-0),2) * Y0) + ((2*0)*(1-0)*Y1) + (pow(0,2)*Y2);
   
   // Velocity
   double x_dot = ((A_*u) + C_)*u_dot;
@@ -819,7 +824,7 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
 
 
 const ReflexxesData BezierCurve::adjustTargets(const ReflexxesData data) const {
-  
+ 
 }
 
 

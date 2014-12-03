@@ -226,7 +226,7 @@ void MobileRobot::calculateSpeedsAndTime () {
     end_times.push_back(start_time + next.time_from_start);
   } 
   
-  //printVectors();
+  printVectors();
 } // End calculateSpeedsAndTime
 
 

@@ -17,6 +17,8 @@ MotionState::MotionState(const trajectory_msgs::JointTrajectoryPoint p) : mobile
   for(unsigned int i=0;i<p.accelerations.size();i++) {
     msg_.accelerations.push_back(p.accelerations.at(i));
   }
+
+  msg_.time = p.time_from_start.toSec();
 }
 
 MotionState::MotionState(const ramp_msgs::MotionState ms) : msg_(ms), mobile_base_k_(2) {}
