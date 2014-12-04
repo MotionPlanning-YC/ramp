@@ -55,14 +55,14 @@ const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const
 /** Returns the direction of the trajectory, i.e. the
 * orientation the base needs to move on the trajectory */
 const double RampTrajectory::getDirection() const {
-  std::cout<<"\nIn getDirection\n";
+  //std::cout<<"\nIn getDirection\n";
   std::vector<double> a = path_.start_.motionState_.msg_.positions;
 
   std::vector<double> b = path_.all_.at(1).motionState_.msg_.positions;
 
     //msg_.trajectory.points.at(msg_.i_knotPoints.at(2)) :
     //msg_.trajectory.points.at(msg_.i_knotPoints.at(1)) ;
-  std::cout<<"\nLeaving getDirection\n";
+  //std::cout<<"\nLeaving getDirection\n";
   return utility_.findAngleFromAToB(a, b);
 }
 
@@ -88,6 +88,26 @@ const RampTrajectory RampTrajectory::getStraightSegment(uint8_t i) const {
   } 
 
   return *this;
+}
+
+
+// Inclusive
+const RampTrajectory RampTrajectory::getSubTrajectory(const float t) const {
+  //ROS_INFO("t: %f", t);
+  ramp_msgs::RampTrajectory rt;
+
+  uint8_t i_kp = 0;
+  for(float i=0.f;i<=t+0.000001;i+=0.1f) { // TODO: i+=cycle_time
+    rt.trajectory.points.push_back(msg_.trajectory.points.at(i*10.));  // todo: i*1/cycle_time
+    if(msg_.i_knotPoints.at(i_kp) == (i*10)) {
+      rt.i_knotPoints.push_back(i*10);
+      i_kp++;
+    }
+  }
+
+  RampTrajectory result(rt);
+
+  return result;
 }
 
 

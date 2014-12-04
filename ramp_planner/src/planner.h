@@ -278,6 +278,9 @@ class Planner {
     uint16_t num_switches_;
 
     ros::Time t_start_;
+
+
+    RampTrajectory movingOn_;
 };
 
 #endif

@@ -32,6 +32,7 @@ class RampTrajectory {
 
     const trajectory_msgs::JointTrajectoryPoint getPointAtTime(const float t)       const;
 
+    const RampTrajectory getSubTrajectory(const float t) const;
 
     const int getIndexFirstTurn() const;
     const int getIndexFirstTurn(const uint16_t start) const;

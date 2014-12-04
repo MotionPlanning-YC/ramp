@@ -485,6 +485,8 @@ void BezierCurve::initControlPoints() {
   double l_s2 = utility_.positionDistance(segmentPoints_.at(2).positions, segmentPoints_.at(1).positions);
   //std::cout<<"\nl_s1: "<<l_s1<<" l_s2: "<<l_s2;
 
+  // If 1st segment's length is smaller than 2nd segment's length
+  // Compute first control point and call overloaded method
   if(l_s1 < l_s2) {
     //std::cout<<"\nIn if\n";
 
@@ -823,9 +825,9 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
 
 
 
-const ReflexxesData BezierCurve::adjustTargets(const ReflexxesData data) const {
+//const ReflexxesData BezierCurve::adjustTargets(const ReflexxesData data) const {
  
-}
+//}
 
 
 /** Call Reflexxes once and return the next motion state */

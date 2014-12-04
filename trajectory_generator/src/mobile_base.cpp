@@ -50,16 +50,9 @@ void MobileBase::initReflexxes() {
 
 
   
-  // Use time synchronization so the robot drives in a straight line towards goal 
-  //reflexxesData_.flags.SynchronizationBehavior = RMLPositionFlags::ONLY_TIME_SYNCHRONIZATION;
-  reflexxesData_.flags.SynchronizationBehavior = RMLPositionFlags::PHASE_SYNCHRONIZATION_IF_POSSIBLE;
-  if(reflexxesData_.flags.SynchronizationBehavior == RMLPositionFlags::PHASE_SYNCHRONIZATION_IF_POSSIBLE
-      || reflexxesData_.flags.SynchronizationBehavior == RMLPositionFlags::ONLY_PHASE_SYNCHRONIZATION) {
-    std::cout<<"\nPhase synched!\n";
-  }
-  else {
-    std::cout<<"\nNot phase synched\n";
-  }
+  // Phase sync makes the orientation correct to drive in a straight line
+  reflexxesData_.flags.SynchronizationBehavior = 
+    RMLPositionFlags::PHASE_SYNCHRONIZATION_IF_POSSIBLE;
 
 
   // Set up the motion constraints (max velocity, acceleration and jerk)
@@ -244,7 +237,7 @@ void MobileBase::insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ram
 
 /** Tests if a lambda value will have Bezier equations that are defined */
 const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segment_points, const double lambda) const {
-  ROS_INFO("In lambdaOkay, lambda: %f", lambda);
+  //ROS_INFO("In lambdaOkay, lambda: %f", lambda);
   ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;
 
   p0 = segment_points.at(0);
@@ -258,7 +251,7 @@ const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segm
   // Can use x or y...here we use x
   double min_lambda = (path_.points.at(0).motionState.positions.at(0) - segment_points.at(0).positions.at(0)) 
                       / (segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0));
-  ROS_INFO("min_lambda in lambdaOkay: %f", min_lambda); 
+  //ROS_INFO("min_lambda in lambdaOkay: %f", min_lambda); 
 
   // TODO: Check for v
   if(lambda < min_lambda) {
@@ -298,7 +291,7 @@ const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segm
   if(X1.positions.at(0) == ( (X0.positions.at(0) + X2.positions.at(0)) / 2. ) &&
       X1.positions.at(1) == ( (X0.positions.at(1) + X2.positions.at(1)) / 2. )) 
   {
-    ROS_INFO("%f not okay", lambda);
+    //ROS_INFO("%f not okay", lambda);
     return false;
   }
   
@@ -314,7 +307,7 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
   
   double l_s1 = utility_.positionDistance(segment_points.at(1).positions, segment_points.at(0).positions);
   double l_s2 = utility_.positionDistance(segment_points.at(2).positions, segment_points.at(1).positions);
-  std::cout<<"\nl_s1: "<<l_s1<<" l_s2: "<<l_s2;
+  //std::cout<<"\nl_s1: "<<l_s1<<" l_s2: "<<l_s2;
 
   // Start transition trajectories right away,
   // otherwise, try to go straight for a while
@@ -322,7 +315,7 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
 
   double min_lambda = (path_.points.at(0).motionState.positions.at(0) - segment_points.at(0).positions.at(0)) 
                       / (segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0));
-  ROS_INFO("min_lambda: %f", min_lambda);
+  //ROS_INFO("min_lambda: %f", min_lambda);
 
   if(min_lambda > 1) {
     
@@ -345,7 +338,7 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
       lambda = 0.9;
     }
   }
-  std::cout<<"\nlambda final: "<<lambda;
+  //ROS_INFO("lambda final: %f", lambda);
 
   return lambda;
 } // End getControlPointLambda
@@ -514,7 +507,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
   if(type_ != ALL_STRAIGHT_SEGMENTS) {
 
     if(type_ == TRANSITION) {
-      std::cout<<"\nIn if type == TRANSITION";
+      //std::cout<<"\nIn if type == TRANSITION";
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
       p.points.erase(p.points.begin()+2);
       p.points.insert(p.points.begin()+2, 
@@ -523,8 +516,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
     // If we are switching and have more than 1 curve
     else if(bezierStart && req_.bezierInfo.size() > 1) {
-      std::cout<<"\nIn first if\n";
-      std::cout<<"\np.points.size(): "<<p.points.size();
+      //std::cout<<"\nIn first if\n";
+      //std::cout<<"\np.points.size(): "<<p.points.size();
       
       // Insert the 1st curve's last CP after the 1st KP
       p.points.insert( p.points.begin()+1, 
@@ -541,7 +534,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
     // If already moving on curve
     else if(bezierStart) {
-      std::cout<<"\nIn else if\n";
+      //std::cout<<"\nIn else if\n";
       p.points.erase( p.points.begin() + 1 );
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
     }
@@ -765,17 +758,17 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
   // Use Bezier curves to smooth path
   if(type_ != ALL_STRAIGHT_SEGMENTS) {
-    std::cout<<"\nPath before Bezier: "<<utility_.toString(path_)<<"\n";
+    //std::cout<<"\nPath before Bezier: "<<utility_.toString(path_)<<"\n";
     curves = bezier(path_, type_ == TRANSITION);
-    std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
+    //std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
 
 
     // Currently adding 0 for both because 
     i_cs = getCurveKPs(curves);
-    std::cout<<"\nCurve indices: ";
+    /*std::cout<<"\nCurve indices: ";
     for(int i=0;i<i_cs.size();i++) {
       std::cout<<"\ni_cs["<<i<<"]: "<<(int)i_cs.at(i);
-    }
+    }*/
   } // end if curves
   //else {
   //  std::cout<<"\nALL_STRAIGHT_SEGMENTS, no Bezier\n";
@@ -800,7 +793,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Go through every knotpoint in the path
   // (or until timeCutoff has been reached)
   for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) {
-    std::cout<<"\ni_kp: "<<(int)i_kp_<<"\n";
+    //std::cout<<"\ni_kp: "<<(int)i_kp_<<"\n";
     reflexxesData_.resultValue = 0;
 
     // Push the initial state onto trajectory
@@ -819,7 +812,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     //std::cout<<"\ncurves.size(): "<<curves.size()<<"\n";
     if( (c < i_cs.size() && path_.points.size() > 2 && i_kp_ == i_cs.at(c)+1))
     {
-      ROS_INFO("At Bezier Curve %i", c);
+      //ROS_INFO("At Bezier Curve %i", c);
       //std::cout<<"\ncurves.at("<<(int)c<<").size(): "<<curves.at(c).points_.size();
 
       // Insert all points on the curves into the trajectory
@@ -856,7 +849,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     /** Straight Line Segment */
     // Else if straight-line segment
     else {
-      std::cout<<"\nIn else\n";
+      //std::cout<<"\nIn else\n";
 
       // Get rotation if needed
       double trajec_size = res.trajectory.trajectory.points.size();

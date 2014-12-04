@@ -17,7 +17,7 @@ Utility u;
 bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
                       ramp_msgs::TrajectoryRequest::Response& res) 
 {
-  ROS_INFO("Received request: %s", u.toString(req).c_str());
+  //ROS_INFO("Received request: %s", u.toString(req).c_str());
   
   if(req.type != PREDICT) {
     MobileBase mobileBase;
@@ -43,7 +43,6 @@ int main(int argc, char** argv) {
   MobileBase mobileBase;
 
   // Declare the service that gives a path and returns a trajectory
-  //ros::ServiceServer service = n.advertiseService("trajectory_generator", &MobileBase::trajectoryRequest, &mobileBase);
   ros::ServiceServer service = n.advertiseService("trajectory_generator", requestCallback);
 
 

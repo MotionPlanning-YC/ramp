@@ -178,7 +178,7 @@ void MobileRobot::updateTrajectory(const ramp_msgs::RampTrajectory msg) {
   
   // Update data members
   restart_        = true;
-  num_traveled_   = 0;
+  num_traveled_   = 1;
   trajectory_     = msg;
   num_prev_       = num_;
   num_            = trajectory_.trajectory.points.size();
@@ -226,7 +226,7 @@ void MobileRobot::calculateSpeedsAndTime () {
     end_times.push_back(start_time + next.time_from_start);
   } 
   
-  printVectors();
+  //printVectors();
 } // End calculateSpeedsAndTime
 
 
@@ -290,7 +290,8 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
 
   // Execute the trajectory
   while( (num_traveled_+1) < num_) { 
-    //ROS_INFO("num_traveled_: %i", num_traveled_);
+    ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
+    ROS_INFO("At state: %s", utility_.toString(motion_state_).c_str());
     restart_ = false;
  
 
@@ -310,7 +311,7 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
     
     // Move to the next point
     ros::Time g_time = end_times.at(num_traveled_) + t_immiColl_;
-    while(ros::ok() && ros::Time::now() < g_time && !restart_ && !checkImminentCollision()) {
+    while(ros::ok() && ros::Time::now() < g_time && !checkImminentCollision()) {
     
       twist_.linear.x   = speeds_linear_.at(num_traveled_);
       twist_.angular.z  = speeds_angular_.at(num_traveled_);

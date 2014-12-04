@@ -39,14 +39,14 @@ Planner::~Planner() {
 
 void Planner::restartControlCycle() {
   ROS_INFO("Restarting Control Cycle");
-  std::cout<<"\nBefore restarting, pop: "<<population_.toString();
   controlCycleTimer_.stop();
   c_pc_ = 0;
   bestTrajec_ = population_.getBest();
+  movingOn_ = bestTrajec_.getSubTrajectory(controlCycle_.toSec());
   startPlanning_ = bestTrajec_.getPointAtTime(controlCycle_.toSec());
   adaptPopulation(controlCycle_);
   population_ = evaluatePopulation(population_);
-  std::cout<<"\nAfter restarting, pop: "<<population_.toString();
+  ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
   sendPopulation();
   //std::cin.get();
   controlCycleTimer_.start();
@@ -137,7 +137,7 @@ const Population Planner::randomPopulation(const MotionState init, const MotionS
  * its time_from_start is <= the Duration argument
  * */
 void Planner::adaptPaths(MotionState start, ros::Duration dur) {
-  std::cout<<"\n======= Adapting Paths =======\n";
+  //std::cout<<"\n======= Adapting Paths =======\n";
   
   //std::cout<<"\nUpdating start to: "<<start.toString();
   //std::cout<<"\ndur: "<<dur<<"\n";
@@ -146,7 +146,7 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
 
     // For each trajectory
     for(uint8_t i=0;i<population_.size();i++) {
-      std::cout<<"\nPath: "<<population_.get(i).getPath().toString();
+      //std::cout<<"\nPath: "<<population_.get(i).getPath().toString();
 
       // Track how many knot points we get rid of
       // Set to 1 to always remove starting position
@@ -170,7 +170,7 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
         }
       } // end inner for
 
-      std::cout<<"\nthrowaway: "<<throwaway;
+      //std::cout<<"\nthrowaway: "<<throwaway;
 
       // If the whole path has been passed, adjust throwaway so that 
       //  we are left with a path that is: {new_start_, goal_}
@@ -189,7 +189,7 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
 
       // Set start_ to be the new starting configuration of the path
       population_.paths_.at(i).start_ = start;
-      std::cout<<"\nAfter adapting Path: "<<population_.paths_.at(i).toString();
+      //std::cout<<"\nAfter adapting Path: "<<population_.paths_.at(i).toString();
     } // end outer for
   } // end if
 } // End adaptPaths
@@ -232,9 +232,9 @@ const bool Planner::estimateIfOnCurve() const {
 /** This method updates the population with the current configuration 
  *  The duration is used to determine which knot points still remain in the trajectory */
 void Planner::adaptPopulation(ros::Duration d) {
-  std::cout<<"\n******* Adapting Population *******\n";
-  std::cout<<"\nstartPlanning: "<<startPlanning_.toString();
-
+  //std::cout<<"\n******* Adapting Population *******\n";
+  //std::cout<<"\nstartPlanning: "<<startPlanning_.toString();
+  
  
   // ***** TODO: PREDICT DURATION *****
   // Update the paths with the new starting configuration
@@ -246,37 +246,37 @@ void Planner::adaptPopulation(ros::Duration d) {
   // For each path, get a trajectory
   for(unsigned int i=0;i<population_.paths_.size();i++) {
     //std::cout<<"\nPopulation member "<<i<<"'s Bezier path: "<<population_.get(i).bezierPath_.toString()<<"\n";
-    std::cout<<"\ni: "<<(int)i;
+    //std::cout<<"\ni: "<<(int)i;
 
     ramp_msgs::TrajectoryRequest tr;
 
     // If the trajectory has a curve
     if(population_.get(i).msg_.curves.size() > 0) {
-      std::cout<<"\nIn if trajectory has curve\n";
+      //std::cout<<"\nIn if trajectory has curve\n";
 
       // Set curve
       ramp_msgs::BezierInfo curve = population_.get(i).msg_.curves.at(0); 
-      std::cout<<"\nSet curve to: "<<utility_.toString(curve)<<"\n";
+      //std::cout<<"\nSet curve to: "<<utility_.toString(curve)<<"\n";
       
       // If moving on this curve, update u, u_dot_0
       if( i == population_.getBestIndex() && 
             (curve.u_0 > 0 ||
              estimateIfOnCurve()))
       {
-        std::cout<<"\nIn if moving on curve\n";
+        //std::cout<<"\nIn if moving on curve\n";
         if(curve.u_0 == 0) {
-          std::cout<<"\nIf curve.u_0 == 0";
+          //std::cout<<"\nIf curve.u_0 == 0";
           double t=0;
 
           // If already on curve
           if( fabs(startPlanning_.msg_.velocities.at(2)) > 0.0001) {
-            std::cout<<"\nAlready on curve\n";
+            //std::cout<<"\nAlready on curve\n";
             t = controlCycle_.toSec() - (bestTrajec_.getTimeFirstTurn()-0.1);
             curve.u_0 += t * population_.get(i).msg_.curves.at(0).u_dot_0;
           }
         }
         else {
-          std::cout<<"\ncurve u_0 > 0";
+          //std::cout<<"\ncurve u_0 > 0";
           curve.u_0 += 
             population_.get(i).msg_.curves.at(0).u_dot_0 * controlCycle_.toSec();
         }
@@ -284,18 +284,18 @@ void Planner::adaptPopulation(ros::Duration d) {
         population_.get(i).msg_.curves.at(0) = curve;
       }
       else {
-        std::cout<<"\nNot moving on curve\n";
+        //std::cout<<"\nNot moving on curve\n";
       }
 
       // Check if done with current curve
       if(population_.get(i).msg_.curves.at(0).u_0 > 0.99) {
-        std::cout<<"\nDone with curve, u_0: "<<population_.get(i).msg_.curves.at(0).u_0<<"\n";
+        //std::cout<<"\nDone with curve, u_0: "<<population_.get(i).msg_.curves.at(0).u_0<<"\n";
         
         // If we were using 2 curves 
         if(population_.get(i).msg_.curves.size() > 1) {
-          std::cout<<"\n2 curves\n";
+          /*std::cout<<"\n2 curves\n";
           std::cout<<"\nPath: "<<population_.paths_.at(i).toString();
-          std::cout<<"\nTrue Path: "<<population_.get(i).getPath().toString();
+          std::cout<<"\nTrue Path: "<<population_.get(i).getPath().toString();*/
           double t_firstCurve = population_.get(i).msg_.curves.at(0).numOfPoints / 10.;
           double t_between = population_.get(i).msg_.trajectory.points.at(
                               population_.get(i).msg_.i_knotPoints.at(3)).time_from_start.toSec() - t_firstCurve;
@@ -306,7 +306,7 @@ void Planner::adaptPopulation(ros::Duration d) {
               t_onSecond * population_.get(i).msg_.curves.at(1).u_dot_0;
           }
 
-          ROS_INFO("t_onSecond: %f t_between: %f u_dot_0: %f u_0: %f", t_onSecond, t_between, population_.get(i).msg_.curves.at(1).u_dot_0, population_.get(i).msg_.curves.at(1).u_0 );
+          //ROS_INFO("t_onSecond: %f t_between: %f u_dot_0: %f u_0: %f", t_onSecond, t_between, population_.get(i).msg_.curves.at(1).u_dot_0, population_.get(i).msg_.curves.at(1).u_0 );
 
           // Done with 1st curve so erase it
           population_.get(i).msg_.curves.erase(
@@ -315,7 +315,7 @@ void Planner::adaptPopulation(ros::Duration d) {
         }
 
         else {
-          std::cout<<"\n1 curve\n";
+          //std::cout<<"\n1 curve\n";
           
           // Create a new path to have the previous KP?
           Path p = population_.paths_.at(i);
@@ -331,12 +331,12 @@ void Planner::adaptPopulation(ros::Duration d) {
         }
       }
       else {
-        std::cout<<"\nNot done with curve";
+        //std::cout<<"\nNot done with curve";
         tr = buildTrajectoryRequest(population_.paths_.at(i), population_.get(i).msg_.curves, i);
       }
     } // end if trajectory has curve
     else {
-      std::cout<<"\nTrajectory has no curve";
+      //std::cout<<"\nTrajectory has no curve";
       tr = buildTrajectoryRequest(population_.paths_.at(i));
     }
 
@@ -352,6 +352,7 @@ void Planner::adaptPopulation(ros::Duration d) {
 
   // Replace the population's trajectories_ with the updated trajectories
   population_.replaceAll(updatedTrajecs);
+  ROS_INFO("Done adapting, pop now: %s", population_.toString().c_str());
 
   //std::cout<<"\nLeaving adaptPopulation\n";
 } // End adaptPopulation
@@ -390,13 +391,13 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
           (result.request.bezierInfo.at(0).u_0 > 0 ||
             estimateIfOnCurve()) )
       {
-        std::cout<<"\nstartBezier: true\n";
+        //std::cout<<"\nstartBezier: true\n";
         result.request.startBezier = true;
       }
       // Set u_0=0. Not sure why, but sometimes u_0 was > 0 but not moving on curve
       // Maybe previously moving on curve, but switched to new curve
       else {
-        std::cout<<"\nCurve not entered\n";
+        //std::cout<<"\nCurve not entered\n";
         result.request.bezierInfo.at(0).u_0 = 0;
       }
     } // end else
@@ -834,8 +835,14 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trgt_
   std::cout<<"\ntrgt_traj Path: "<<trgt_traj.path_.toString()<<"\n";
   std::cout<<"\ntrgt_traj Bezier Path: "<<trgt_traj.bezierPath_.toString()<<"\n";
 
+  ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
+  double t = (c_pc_+1)*planningCycle_.toSec();// + planningCycle_.toSec();
+  std::cout<<"\nt: "<<t<<" PC time: "<<planningCycle_.toSec();
+  ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
+  MotionState ms_startSwitch = movingOn_.getPointAtTime(t);
+  ROS_INFO("ms_startSwitch: %s", ms_startSwitch.toString().c_str());
   std::vector<MotionState> segment_points;
-  segment_points.push_back(latestUpdate_);
+  segment_points.push_back(ms_startSwitch);
   segment_points.push_back(startPlanning_);
   std::cout<<"\nlatestUpdate: "<<latestUpdate_.toString();
   std::cout<<"\nstartPlanning: "<<startPlanning_.toString();
@@ -856,16 +863,16 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trgt_
   //std::cout<<"\nbestTrajec: "<<bestTrajec_.toString();
 
   Path p(segment_points);
-  std::cout<<"\nPath to change trajectories: "<<p.toString()<<"\n";
+  //std::cout<<"\nPath to change trajectories: "<<p.toString()<<"\n";
 
   ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
   tr.request.type = TRANSITION;
   tr.request.print = false; 
-  tr.request.startBezier = true;
+  tr.request.startBezier = false;
 
   //std::cout<<"\nRequesting trajectory in getTransitionTrajectory\n";
   RampTrajectory transition = requestTrajectory(tr);
-  std::cout<<"\ntransition: "<<transition.toString();
+  //std::cout<<"\ntransition: "<<transition.toString();
 
   //std::cout<<"\nLeaving getTransitionTrajectory()\n";
   return transition;
@@ -903,20 +910,20 @@ const RampTrajectory Planner::getTrajectoryWithCurve(const RampTrajectory trgt_t
 
   // Keep a counter for the knot points
   int c_kp = trgt_traj.path_.size() < 3 ? 1 : 2;
-  std::cout<<"\nc_kp: "<<c_kp;
-  std::cout<<"\ntrgt path: "<<trgt_traj.toString();
+  //std::cout<<"\nc_kp: "<<c_kp;
+  //std::cout<<"\ntrgt path: "<<trgt_traj.toString();
 
   // Check if there's rotation at the beginning, if so increment c_kp
   // TODO: Better way of doing this
   if(utility_.positionDistance( trgt_traj.msg_.trajectory.points.at(0).positions,
         trgt_traj.msg_.trajectory.points.at( trgt_traj.msg_.i_knotPoints.at(1)).positions ) < 0.1)
   {
-    std::cout<<"\nIncrementing c_kp";
+    //std::cout<<"\nIncrementing c_kp";
     c_kp++;
   }
-  std::cout<<"\nc_kp: "<<c_kp;
-  std::cout<<"\ntrgt_traj.msg_.i_knotPoints.at(c_kp): "<<trgt_traj.msg_.i_knotPoints.at(c_kp);
-  std::cout<<"\nMS at c_kp: "<<utility_.toString(trgt_traj.msg_.trajectory.points.at( trgt_traj.msg_.i_knotPoints.at(c_kp)));
+  //std::cout<<"\nc_kp: "<<c_kp;
+  //std::cout<<"\ntrgt_traj.msg_.i_knotPoints.at(c_kp): "<<trgt_traj.msg_.i_knotPoints.at(c_kp);
+  //std::cout<<"\nMS at c_kp: "<<utility_.toString(trgt_traj.msg_.trajectory.points.at( trgt_traj.msg_.i_knotPoints.at(c_kp)));
 
   // Start at the bezier curve in trgt_traj and 
   // push on the rest of the trajectory to result
@@ -936,7 +943,7 @@ const RampTrajectory Planner::getTrajectoryWithCurve(const RampTrajectory trgt_t
     // If knot point, push on the index
     // and push the point onto the trajectory's path
     if( i == trgt_traj.msg_.i_knotPoints.at(c_kp) ) {
-      std::cout<<"\ni: "<<(int)i<<" trgt_traj.msg_.i_knotPoints.at("<<c_kp<<"): "<<trgt_traj.msg_.i_knotPoints.at(c_kp);
+      //std::cout<<"\ni: "<<(int)i<<" trgt_traj.msg_.i_knotPoints.at("<<c_kp<<"): "<<trgt_traj.msg_.i_knotPoints.at(c_kp);
       result.msg_.i_knotPoints.push_back(result.msg_.trajectory.points.size()-1);
       KnotPoint kp(result.msg_.trajectory.points.at(
             result.msg_.trajectory.points.size()-1));
@@ -1249,13 +1256,13 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     std::cout<<"\nBest: "<<bestTrajec_.toString();
     std::cout<<"\nPress Enter to continue\n";
     std::cin.get();*/
-    std::cout<<"\n ========== Re-evaluating =========\n";
+    //std::cout<<"\n ========== Re-evaluating =========\n";
     population_ = evaluatePopulation(population_);
     //bestTrajec_ = population_.getBest();
     restartControlCycle();
     //sendBest();
     sendPopulation();
-    ROS_INFO("Final new pop: %s", population_.toString().c_str());
+    //ROS_INFO("Final new pop: %s", population_.toString().c_str());
     //std::cin.get();
     //restartAfterDebugging();
   }
@@ -1338,12 +1345,14 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   std::cout<<"\nControl Cycle "<<num_controlCycles_<<"\n";
   
 
-  //std::cout<<"\nstartPlanning: "<<startPlanning_.toString();
-  //std::cout<<"\nlatestUpdate: "<<latestUpdate_.toString()<<"\n";
+  std::cout<<"\nstartPlanning: "<<startPlanning_.toString();
+  std::cout<<"\nlatestUpdate: "<<latestUpdate_.toString()<<"\n";
   //****SP_LU_diffs_.push_back(startPlanning_.subtract(latestUpdate_));
 
   // Send the best trajectory 
   sendBest();
+  movingOn_ = bestTrajec_.getSubTrajectory(controlCycle_.toSec());
+  ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
   
   // Update start
   start_ = latestUpdate_;
@@ -1359,7 +1368,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   startPlanning_ = m_cc_;
   //std::cout<<"\nNew startPlanning: "<<startPlanning_.toString()<<"l: "<<l<<"\n";
   
-  std::cout<<"\nBefore adapting, pop is: "<<population_.toString();
+  //std::cout<<"\nBefore adapting, pop is: "<<population_.toString();
 
   // After m_cc_ and startPlanning are set, update the population
   adaptPopulation(controlCycle_);
@@ -1367,7 +1376,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   
   sendPopulation();
   
-  std::cout<<"\n\n***** After adapting, pop: "<<population_.toString()<<"\n\n*****\n\n";
+  //std::cout<<"\n\n***** After adapting, pop: "<<population_.toString()<<"\n\n*****\n\n";
 
   
   if(subPopulations_) {
@@ -1486,8 +1495,8 @@ const bool Planner::compareSwitchToBest(const RampTrajectory traj) const {
 /** This method evaluates one trajectory.
  *  Eventually, we should be able to evaluate only specific segments along the trajectory  */
 const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec, const bool computeSwitch) {
-  ROS_INFO("xxxxx In evaluateTrajectory xxxxx");
-  ROS_INFO("trajec: %s", trajec.toString().c_str());
+  //ROS_INFO("xxxxx In evaluateTrajectory xxxxx");
+  //ROS_INFO("trajec: %s", trajec.toString().c_str());
 
   RampTrajectory result = requestEvaluation(trajec);
   //std::cout<<"\nresult.fitness: "<<result.msg_.fitness<<" bestTrajec.fitness: "<<bestTrajec_.msg_.fitness;
@@ -1498,10 +1507,10 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec, const bo
     double mag_linear = sqrt(tf::tfDot(v_linear, v_linear));
     double mag_angular = start_.msg_.velocities.at(2);
    
-    ROS_INFO("v: %f w: %f", mag_linear, mag_angular);
+    //ROS_INFO("v: %f w: %f", mag_linear, mag_angular);
     
     double bestFitness = bestTrajec_.msg_.fitness;
-    ROS_INFO("bestFitness: %f", bestFitness);
+    //ROS_INFO("bestFitness: %f", bestFitness);
 
     // If the fitness is close to the best result trajectory's fitness
     // and its not the best traj
@@ -1510,7 +1519,7 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec, const bo
         (result.msg_.fitness > bestFitness ||
         fabs(result.msg_.fitness - bestFitness) < transThreshold_) ) 
     {
-      ROS_INFO("Close enough to compute a switching curve");
+      //ROS_INFO("Close enough to compute a switching curve");
       //std::cout<<"\nlatestUpdate: "<<latestUpdate_.toString();
 
       double theta_current = latestUpdate_.msg_.positions.at(2);
@@ -1525,11 +1534,11 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec, const bo
                                    trajec.msg_.trajectory.points.at(
                                      trajec.msg_.i_knotPoints.at(kp)).positions)) < 0.0001)
       {
-        std::cout<<"\nIn if positions are the same\n";
+        //std::cout<<"\nIn if positions are the same\n";
         theta_to_move = trajec.msg_.trajectory.points.at(0).positions.at(2);
       }
       else {
-        std::cout<<"\nIn else positions are not the same\n";
+        //std::cout<<"\nIn else positions are not the same\n";
         theta_to_move = utility_.findAngleFromAToB(
                               trajec.msg_.trajectory.points.at(0), 
                               trajec.msg_.trajectory.points.at(
@@ -1541,24 +1550,24 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec, const bo
 
       // If greater than 90 degrees
       if(fabs(utility_.findDistanceBetweenAngles(theta_current, theta_to_move)) > PI/2) {
-        ROS_INFO("Orientation change > PI/2 - Too much for a switch - adding penalty");
+        //ROS_INFO("Orientation change > PI/2 - Too much for a switch - adding penalty");
         result.msg_.fitness = 0;
       }
 
       // If greater than 5 degrees
       else if(fabs(utility_.findDistanceBetweenAngles(theta_current, theta_to_move)) > 0.017) {
-        std::cout<<"\nOrientation needs to change\n";
+        //std::cout<<"\nOrientation needs to change\n";
         //std::cout<<"\nBest trajec: "<<bestTrajec_.toString()<<"\n";
 
         // Get transition trajectory
         RampTrajectory T_new = getTrajectoryWithCurve(trajec);
         T_new = requestEvaluation(T_new);
-        std::cout<<"\nT_new: "<<T_new.toString()<<"\n";
+        //std::cout<<"\nT_new: "<<T_new.toString()<<"\n";
 
         // If the trajectory including the curve to switch is more fit than 
         // the best trajectory, return it
         if(compareSwitchToBest(T_new)) {
-          std::cout<<"\n************ Switching Trajectories **************\n";
+          //std::cout<<"\n************ Switching Trajectories **************\n";
 
           result = T_new;
           result.bezierPath_ = trajec.bezierPath_;
@@ -1570,33 +1579,33 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec, const bo
           bestTrajec_ = result;
           sendBest(); 
 
-          displayTrajectory(T_new.msg_);
+          //displayTrajectory(T_new.msg_);
           ROS_INFO("Displaying T_new: %s", T_new.toString().c_str());
-          ROS_INFO("Latest update: %s", latestUpdate_.toString().c_str());
+          //ROS_INFO("Latest update: %s", latestUpdate_.toString().c_str());
           std::cout<<"\nPress Enter to continue\n";
           std::cin.get();
 
           num_switches_++;
         } // end if switching
         else {
-          ROS_INFO("compareSwitchToBest: false");
+          //ROS_INFO("compareSwitchToBest: false");
         }
       } // end if switch traj needed 
 
       // Else, no switch necessary
       else {
-        ROS_DEBUG("No switching trajectory being computed because the orientation is within 5 degrees of current orientation");
+        //ROS_DEBUG("No switching trajectory being computed because the orientation is within 5 degrees of current orientation");
       }
     } // end if fitness close enough to compute switch
     else {
-      std::cout<<"\nFitness not within "<<transThreshold_<<"\n";
+      //std::cout<<"\nFitness not within "<<transThreshold_<<"\n";
     }
   } // end if computeSwitch
   else {
-    std::cout<<"\ncomputeSwitch: False\n";
+    //std::cout<<"\ncomputeSwitch: False\n";
   }
 
-  ROS_INFO("xxxxx Leaving evaluateTrajectory xxxxx");
+  //ROS_INFO("xxxxx Leaving evaluateTrajectory xxxxx");
   return result;
 } // End evaluateTrajectory
 
@@ -1608,8 +1617,8 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec, const bo
  * It also sete i_best_prev_
  **/
 const Population Planner::evaluatePopulation(Population pop, const bool computeSwitch) {
-  std::cout<<"\n********* In evaluatePopulation *********\n";
-  ROS_INFO("computeSwitch: %s", computeSwitch ? "true" : "false");
+  //std::cout<<"\n********* In evaluatePopulation *********\n";
+  //ROS_INFO("computeSwitch: %s", computeSwitch ? "true" : "false");
   //std::cout<<"\nPopulation: "<<pop.toString();
   Population result = pop;
   
@@ -1617,7 +1626,7 @@ const Population Planner::evaluatePopulation(Population pop, const bool computeS
   //std::cout<<"\ni_best: "<<i_best;
   
   if(i_best > -1) {
-    std::cout<<"\nEvaluating best: ";
+    //std::cout<<"\nEvaluating best: ";
     result.replace(i_best, 
         evaluateTrajectory(result.get(i_best), computeSwitch));
     bestTrajec_ = result.get(i_best); 
@@ -1718,6 +1727,8 @@ const MotionState Planner::findAverageDiff() {
     std::cout<<"\n** Pop **:"<<population_.toString();
     // Evaluate after seeding
     bestTrajec_ = evaluateAndObtainBest(population_);
+    movingOn_ = bestTrajec_.getSubTrajectory(controlCycle_.toSec());
+    ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
     
 
     sendPopulation();
