@@ -29,9 +29,9 @@ class MobileRobot {
 
     void moveOnTrajectory(bool simulation);
     void moveOnTrajectoryRot(const ramp_msgs::RampTrajectory traj, bool simulation);
-    void updateState(const nav_msgs::Odometry& msg);
+    void odomCb(const nav_msgs::Odometry& msg);
     void updateTrajectory(const ramp_msgs::RampTrajectory msg); 
-    void updatePublishTimer(const ros::TimerEvent&);
+    void updateCallback(const ros::TimerEvent&);
     void sendTwist(const geometry_msgs::Twist twist) const;
     void controlCycle(geometry_msgs::Twist twist, ros::Time end_time, ros::Rate r);
 
@@ -67,13 +67,14 @@ class MobileRobot {
     const bool                  checkImminentCollision() const;
     const std::vector<double>   computeAcceleration() const;
     
+    void                        accountForAcceleration();
+    
     
     /** Data Members **/
 
     Utility                   utility_;
     bool                      restart_;
     int                       num_;
-    int                       num_prev_;
     int                       num_traveled_;
     const unsigned int        k_dof_;
     std::vector<ros::Time>    end_times; 

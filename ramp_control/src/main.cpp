@@ -30,11 +30,11 @@ void init_advertisers_subscribers(MobileRobot& robot, ros::NodeHandle& handle, b
   }
  
   // Subscribers
-  robot.sub_odometry_ = handle.subscribe(MobileRobot::TOPIC_STR_ODOMETRY, 1000, &MobileRobot::updateState, &robot);
+  robot.sub_odometry_ = handle.subscribe(MobileRobot::TOPIC_STR_ODOMETRY, 1000, &MobileRobot::odomCb, &robot);
   
   // Timers
   // 15 Hz seems to be the fastest possible while avoiding nan errors
-  robot.timer_ = handle.createTimer(ros::Duration(1.f / 15.f), &MobileRobot::updatePublishTimer, &robot);
+  robot.timer_ = handle.createTimer(ros::Duration(1.f / 15.f), &MobileRobot::updateCallback, &robot);
 } // End init_advertisers_subscribers
 
 
@@ -54,7 +54,6 @@ int main(int argc, char** argv) {
   bool sim=false;
   handle.param("ramp_control/simulation", sim, false);
   std::cout<<"\nsim: "<<sim<<"\n";
- 
  
 
   // Initialize publishers and subscribers
