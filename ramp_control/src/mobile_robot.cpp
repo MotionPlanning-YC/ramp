@@ -217,7 +217,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   ros::Time start_time = ros::Time::now();
 
   // Set the # of inner cycles and the cycle time
-  int num_inner_cycles=2;
+  int num_inner_cycles=3;
   double t_cycle = ( trajectory_.trajectory.points.at(1).time_from_start - 
                         trajectory_.trajectory.points.at(0).time_from_start ).toSec();
   double t_inner_cycle = t_cycle / num_inner_cycles;
@@ -252,7 +252,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   // Increase num to reflect inner cycles
   num_ = (num_-1)*num_inner_cycles;
 
-  printVectors();
+  //printVectors();
 } // End calculateSpeedsAndTime
 
 
