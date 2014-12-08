@@ -137,7 +137,7 @@ const Population Planner::randomPopulation(const MotionState init, const MotionS
  * its time_from_start is <= the Duration argument
  * */
 void Planner::adaptPaths(MotionState start, ros::Duration dur) {
-  //std::cout<<"\n======= Adapting Paths =======\n";
+  std::cout<<"\n======= Adapting Paths =======\n";
   
   //std::cout<<"\nUpdating start to: "<<start.toString();
   //std::cout<<"\ndur: "<<dur<<"\n";
@@ -146,7 +146,8 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
 
     // For each trajectory
     for(uint8_t i=0;i<population_.size();i++) {
-      //std::cout<<"\nPath: "<<population_.get(i).getPath().toString();
+      std::cout<<"\nPath: "<<population_.paths_.at(i).toString();
+      std::cout<<"\nPath: "<<population_.get(i).getPath().toString();
 
       // Track how many knot points we get rid of
       // Set to 1 to always remove starting position
@@ -155,6 +156,9 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
       // For each knot point,
       // Start at 2 because that is the end of the first bezier curve
       for(uint8_t i_kp=1;i_kp<population_.get(i).msg_.i_knotPoints.size();i_kp++) {
+        if(i_kp == 1 && population_.get(i).msg_.curves.size() > 1) {
+          i_kp = 2;
+        }
        
         // Get the knot point 
         trajectory_msgs::JointTrajectoryPoint point = population_.get(i).msg_.trajectory.points.at( 
@@ -162,7 +166,8 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
         //std::cout<<"\nKnot point "<<(int)i_kp<<": "<<utility_.toString(point);
 
         // Compare the durations
-        if( dur > point.time_from_start) {
+        if( dur.toSec() > (point.time_from_start.toSec()+0.000001)) {
+          std::cout<<"\ndur.toSec(): "<<dur.toSec()<<" kp time: "<<point.time_from_start.toSec()+0.000001;
           throwaway++;
         }
         else {
@@ -170,12 +175,17 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
         }
       } // end inner for
 
-      //std::cout<<"\nthrowaway: "<<throwaway;
+      std::cout<<"\nthrowaway: "<<throwaway;
 
       // If the whole path has been passed, adjust throwaway so that 
       //  we are left with a path that is: {new_start_, goal_}
       if( throwaway >= population_.paths_.at(i).size() ) { 
         throwaway = population_.paths_.at(i).size()-1;
+      }
+
+      // Print the knot points being removed
+      for(int c=0;c<throwaway;c++) {
+        std::cout<<"\nRemoving point: "<<(*(population_.paths_.at(i).all_.begin()+c)).toString();
       }
       
       //std::cout<<"\nErasing "<<population_.paths_.at(i).all_.at(0).toString();
@@ -189,7 +199,7 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
 
       // Set start_ to be the new starting configuration of the path
       population_.paths_.at(i).start_ = start;
-      //std::cout<<"\nAfter adapting Path: "<<population_.paths_.at(i).toString();
+      std::cout<<"\nAfter adapting Path: "<<population_.paths_.at(i).toString();
     } // end outer for
   } // end if
 } // End adaptPaths
@@ -199,18 +209,19 @@ void Planner::adaptPaths(MotionState start, ros::Duration dur) {
 
 const bool Planner::estimateIfOnCurve() const {
 
-  int i_startPlanning = (controlCycle_.toSec() * 10);
+  int i_startPlanning = (controlCycle_.toSec() * 10)+1;
   //std::cout<<"\ni_startPlanning: "<<i_startPlanning;
   //std::cout<<"\nbestTrajec.getIndexFirstTurn(): "<<bestTrajec_.getIndexFirstTurn()<<"\n";
 
   if(bestTrajec_.getIndexFirstTurn() <= (i_startPlanning+1)) {
-    //std::cout<<"\nxxIn if\n";
+    std::cout<<"\nxxIn if\n";
     for(uint8_t i=i_startPlanning+1;i<i_startPlanning+6;i++) {
       MotionState temp = bestTrajec_.msg_.trajectory.points.at(i);
+      std::cout<<"\ntemp: "<<temp.toString();
       double v_linear = sqrt( pow(temp.msg_.velocities.at(0),2) + 
                               pow(temp.msg_.velocities.at(1),2) );
       double v_angular = temp.msg_.velocities.at(2);
-      //std::cout<<"\ni: "<<(int)i<<" v_linear: "<<v_linear<<" v_angular: "<<v_angular;
+      std::cout<<"\ni: "<<(int)i<<" v_linear: "<<v_linear<<" v_angular: "<<v_angular;
 
       if(v_linear < 0.0001 || fabs(v_angular) < 0.0001) {
         return false;
@@ -1579,11 +1590,11 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec, const bo
           bestTrajec_ = result;
           sendBest(); 
 
-          //displayTrajectory(T_new.msg_);
+          displayTrajectory(T_new.msg_);
           ROS_INFO("Displaying T_new: %s", T_new.toString().c_str());
           //ROS_INFO("Latest update: %s", latestUpdate_.toString().c_str());
-          std::cout<<"\nPress Enter to continue\n";
-          std::cin.get();
+          //std::cout<<"\nPress Enter to continue\n";
+          //std::cin.get();
 
           num_switches_++;
         } // end if switching

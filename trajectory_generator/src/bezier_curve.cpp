@@ -398,7 +398,7 @@ const double BezierCurve::getUDotDotMax(const double u_dot_max) const {
 
 /** This method initializes the necessary Reflexxes variables */
 void BezierCurve::initReflexxes() {
-  //std::cout<<"\nIn initReflexxes\n";
+  std::cout<<"\nIn initReflexxes\n";
 
   // Set some variables for readability
   double x_dot_0        = ms_begin_.velocities.at(0);

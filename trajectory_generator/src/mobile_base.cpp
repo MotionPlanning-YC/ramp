@@ -657,17 +657,11 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
     // Else if we're at orientation dof
     else if(i == 2) {
       
-      // If straight-line paths, make theta be towards next knot point
+      // If straight-line paths, make theta be towards next point
       double theta = utility_.findAngleFromAToB( data.inputParameters->CurrentPositionVector->VecData[0],
                                                  data.inputParameters->CurrentPositionVector->VecData[1],
                                                  data.outputParameters->NewPositionVector->VecData[0],
                                                  data.outputParameters->NewPositionVector->VecData[1]);
-      
-      // If straight-line paths, make theta be towards next knot point
-      /*double theta = utility_.findAngleFromAToB( prevKP_.positions.at(0),
-                                                 prevKP_.positions.at(1),
-                                  data.inputParameters->TargetPositionVector->VecData[0],
-                                  data.inputParameters->TargetPositionVector->VecData[1]);*/
 
       // Get angular velocity
       double w = (theta - data.inputParameters->CurrentPositionVector->VecData[2]) / 
