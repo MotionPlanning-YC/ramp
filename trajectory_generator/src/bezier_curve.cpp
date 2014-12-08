@@ -66,6 +66,8 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
 
   calculateConstants();
 
+  std::cout<<"\nms_begin: "<<utility_.toString(bi.ms_begin);
+
   // Set ms_begin
   if(bi.ms_begin.positions.size() > 0) {
     std::cout<<"ms_begin passed in: "<<utility_.toString(bi.ms_begin);

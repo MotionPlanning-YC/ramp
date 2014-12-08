@@ -28,7 +28,7 @@ bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
     prediction.trajectoryRequest(req, res);
   }
     
-  //std::cout<<"\nSending back: "<<u.toString(res.trajectory);
+  std::cout<<"\nSending back: "<<u.toString(res.trajectory);
   return true;
 }
 

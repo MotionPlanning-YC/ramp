@@ -428,7 +428,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
           req_.bezierInfo.at(i-1).segmentPoints.at(2).positions) > 0.01) )
     {
 
-      //std::cout<<"\n---i: "<<(int)i<<"---\n";
+      std::cout<<"\n---i: "<<(int)i<<"---\n";
       BezierCurve bc;
       bc.print_ = print_;
 
@@ -445,7 +445,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // TODO: Change bezierStart to check u>0
       //if(bezierStart && i==1) {
       if(req_.bezierInfo.at(0).u_0 > 0 && i==1) {
-        //std::cout<<"\nIn if transition or bezierStart\n";
+        std::cout<<"\nIn if transition or bezierStart\n";
         
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
         
@@ -461,7 +461,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         bi.ms_maxVA       = ms_maxVA;
         bi.u_0            = req_.bezierInfo.at(i-1).u_0;
         bi.u_dot_0        = req_.bezierInfo.at(i-1).u_dot_0;
-        //bi.ms_begin       = p_copy.points.at(0).motionState;
+        bi.ms_begin       = p_copy.points.at(0).motionState;
         bi.l              = lambda;
 
         bc.init(bi, path_.points.at(0).motionState);
