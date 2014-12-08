@@ -316,7 +316,7 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
 
 
   // Execute the trajectory
-  while( (num_traveled_+1) < num_) { 
+  while( (num_traveled_+1) < num_) {
     //ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
     //ROS_INFO("At state: %s", utility_.toString(motion_state_).c_str());
     restart_ = false;

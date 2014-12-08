@@ -274,20 +274,20 @@ void Planner::adaptPopulation(ros::Duration d) {
             (curve.u_0 > 0 ||
              estimateIfOnCurve()))
       {
-        //std::cout<<"\nIn if moving on curve\n";
+        std::cout<<"\nIn if moving on curve\n";
         if(curve.u_0 == 0) {
-          //std::cout<<"\nIf curve.u_0 == 0";
+          std::cout<<"\nIf curve.u_0 == 0";
           double t=0;
 
           // If already on curve
           if( fabs(startPlanning_.msg_.velocities.at(2)) > 0.0001) {
-            //std::cout<<"\nAlready on curve\n";
+            std::cout<<"\nAlready on curve\n";
             t = controlCycle_.toSec() - (bestTrajec_.getTimeFirstTurn()-0.1);
             curve.u_0 += t * population_.get(i).msg_.curves.at(0).u_dot_0;
           }
         }
         else {
-          //std::cout<<"\ncurve u_0 > 0";
+          std::cout<<"\ncurve u_0 > 0: "<<curve.u_0;
           curve.u_0 += 
             population_.get(i).msg_.curves.at(0).u_dot_0 * controlCycle_.toSec();
         }
@@ -295,29 +295,29 @@ void Planner::adaptPopulation(ros::Duration d) {
         population_.get(i).msg_.curves.at(0) = curve;
       }
       else {
-        //std::cout<<"\nNot moving on curve\n";
+        std::cout<<"\nNot moving on curve\n";
       }
 
       // Check if done with current curve
       if(population_.get(i).msg_.curves.at(0).u_0 > 0.99) {
-        //std::cout<<"\nDone with curve, u_0: "<<population_.get(i).msg_.curves.at(0).u_0<<"\n";
+        std::cout<<"\nDone with curve, u_0: "<<population_.get(i).msg_.curves.at(0).u_0<<"\n";
         
         // If we were using 2 curves 
         if(population_.get(i).msg_.curves.size() > 1) {
-          /*std::cout<<"\n2 curves\n";
+          std::cout<<"\n2 curves\n";
           std::cout<<"\nPath: "<<population_.paths_.at(i).toString();
-          std::cout<<"\nTrue Path: "<<population_.get(i).getPath().toString();*/
+          std::cout<<"\nTrue Path: "<<population_.get(i).getPath().toString();
           double t_firstCurve = population_.get(i).msg_.curves.at(0).numOfPoints / 10.;
-          double t_between = population_.get(i).msg_.trajectory.points.at(
+          double t_betweenCurves = population_.get(i).msg_.trajectory.points.at(
                               population_.get(i).msg_.i_knotPoints.at(3)).time_from_start.toSec() - t_firstCurve;
-          double t_onSecond = controlCycle_.toSec() - (t_firstCurve+t_between);
+          double t_onSecond = controlCycle_.toSec() - (t_firstCurve+t_betweenCurves);
           
           if(t_onSecond > 0) { 
             population_.get(i).msg_.curves.at(1).u_0 += 
               t_onSecond * population_.get(i).msg_.curves.at(1).u_dot_0;
           }
 
-          //ROS_INFO("t_onSecond: %f t_between: %f u_dot_0: %f u_0: %f", t_onSecond, t_between, population_.get(i).msg_.curves.at(1).u_dot_0, population_.get(i).msg_.curves.at(1).u_0 );
+          ROS_INFO("t_onSecond: %f t_betweenCurves: %f u_dot_0: %f u_0: %f", t_onSecond, t_betweenCurves, population_.get(i).msg_.curves.at(1).u_dot_0, population_.get(i).msg_.curves.at(1).u_0 );
 
           // Done with 1st curve so erase it
           population_.get(i).msg_.curves.erase(
@@ -402,13 +402,13 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
           (result.request.bezierInfo.at(0).u_0 > 0 ||
             estimateIfOnCurve()) )
       {
-        //std::cout<<"\nstartBezier: true\n";
+        std::cout<<"\nstartBezier: true\n";
         result.request.startBezier = true;
       }
       // Set u_0=0. Not sure why, but sometimes u_0 was > 0 but not moving on curve
       // Maybe previously moving on curve, but switched to new curve
       else {
-        //std::cout<<"\nCurve not entered\n";
+        std::cout<<"\nCurve not entered\n";
         result.request.bezierInfo.at(0).u_0 = 0;
       }
     } // end else
