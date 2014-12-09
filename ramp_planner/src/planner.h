@@ -213,6 +213,9 @@ class Planner {
     const std::vector<Path> getRandomPaths(const MotionState init, const MotionState goal);
     const Population randomPopulation(const MotionState init, const MotionState goal);
 
+
+    void doControlCycle();
+
     /***** Data members *****/
 
     // Utility instance

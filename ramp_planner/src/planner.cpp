@@ -37,20 +37,14 @@ Planner::~Planner() {
 }
 
 
+/** Explicitly restart the control cycles 
+ *  Need to call doControlCycle because the timers first iteration is not now */
 void Planner::restartControlCycle() {
   ROS_INFO("Restarting Control Cycle");
   controlCycleTimer_.stop();
-  c_pc_ = 0;
-  bestTrajec_ = population_.getBest();
-  movingOn_ = bestTrajec_.getSubTrajectory(controlCycle_.toSec());
-  startPlanning_ = bestTrajec_.getPointAtTime(controlCycle_.toSec());
-  adaptPopulation(controlCycle_);
-  population_ = evaluatePopulation(population_);
-  ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
-  sendPopulation();
-  //std::cin.get();
+  doControlCycle();
   controlCycleTimer_.start();
-}
+} // End restartControlCycle
 
 
 const std::vector<Path> Planner::getRandomPaths(const MotionState init, const MotionState goal) {
@@ -742,7 +736,7 @@ void Planner::seedPopulationTwo() {
 const bool Planner::checkOrientation() const {
   //std::cout<<"\nEntering checkOrientation\n";
   
-  float actual_theta = start_.msg_.positions.at(2);
+  float actual_theta = latestUpdate_.msg_.positions.at(2);
   //std::cout<<"\nactual_theta: "<<actual_theta;
   //std::cout<<"\norientations_.at("<<i<<"): "<<orientations_.at(i)<<"\n";
   
@@ -771,7 +765,7 @@ void Planner::setMi() {
   
   // Need to set m_delta
   // motion difference from previous CC to next CC
-  MotionState delta_m = m_cc_.subtract(start_);
+  MotionState delta_m = m_cc_.subtract(latestUpdate_);
   //std::cout<<"\nDelta_m: "<<delta_m.toString();
 
   // Divide delta_m by num_pc to get the motion difference for each PC
@@ -782,7 +776,7 @@ void Planner::setMi() {
   // Each m_i will be start + (delta_m_inc * i)
   for(int i=0;i<generationsPerCC_;i++) {
     MotionState temp = delta_m_inc.multiply(i+1);
-    MotionState m = start_.add(temp);
+    MotionState m = latestUpdate_.add(temp);
 
     m_i.push_back(m);
 
@@ -838,7 +832,7 @@ const std::vector<RampTrajectory> Planner::getTrajectories(std::vector<ramp_msgs
  *  and evaluates the population
  **/
 void Planner::initPopulation() { 
-  population_ = randomPopulation(start_, goal_);
+  population_ = randomPopulation(latestUpdate_, goal_);
   bestTrajec_ = population_.getBest();
 } // End init_population
 
@@ -1201,7 +1195,7 @@ const MotionState Planner::predictStartPlanning() const {
 
   // If the orientation is not satisfied, 
   if(!checkOrientation()) {
-    result = start_;
+    result = latestUpdate_;
     //d = ros::Duration(0);
   }
   else {
@@ -1254,7 +1248,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     //std::cout<<"\nPop: "<<population_.fitnessFeasibleToString();
   }
 
-  tf::Vector3 v_linear(start_.msg_.velocities.at(0), start_.msg_.velocities.at(1), 0);
+  tf::Vector3 v_linear(latestUpdate_.msg_.velocities.at(0), latestUpdate_.msg_.velocities.at(1), 0);
   double mag_linear = sqrt(tf::tfDot(v_linear, v_linear));
   //if(generation_ > 0 && generation_ % 25 == 0) {
   //if(mag_linear > 0 && cc_started_ && c_pc_ == generationsPerCC_/2) {
@@ -1284,6 +1278,9 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     //ROS_INFO("Final new pop: %s", population_.toString().c_str());
     //std::cin.get();
     //restartAfterDebugging();
+  }
+  else {
+    ROS_INFO("mag_linear: %f cc_started_: %s generation_: %i", mag_linear, cc_started_ ? "true" : "false", generation_);
   }
 
 
@@ -1356,6 +1353,38 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
 
 
+
+/** This methed runs the tasks needed to do a control cycle */
+void Planner::doControlCycle() {
+  
+  // Send the best trajectory and set movingOn
+  sendBest();
+  movingOn_ = bestTrajec_.getSubTrajectory(controlCycle_.toSec());
+
+  // Reset planning cycle count
+  c_pc_ = 0;
+
+  // The motion state that we should reach by the next control cycle
+  m_cc_ = bestTrajec_.getPointAtTime(controlCycle_.toSec());
+  startPlanning_ = m_cc_;
+
+  // After m_cc_ and startPlanning are set, adapt the population
+  adaptPopulation(controlCycle_);
+  bestTrajec_ = evaluateAndObtainBest(population_);
+  
+  // Create sub-populations if enabled
+  if(subPopulations_) {
+    population_.createSubPopulations();
+  }
+  
+  // Send the population to trajectory_visualization
+  sendPopulation();
+} // End doControlCycle
+
+
+
+
+
 /** This method updates the population based on the latest 
  *  configuration of the robot, re-evaluates the population,
  *  and sends a new (and better) trajectory for the robot to move along */
@@ -1366,44 +1395,14 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
 
   std::cout<<"\nstartPlanning: "<<startPlanning_.toString();
   std::cout<<"\nlatestUpdate: "<<latestUpdate_.toString()<<"\n";
+  
+  // Uncertainty code
   //****SP_LU_diffs_.push_back(startPlanning_.subtract(latestUpdate_));
-
-  // Send the best trajectory 
-  sendBest();
-  movingOn_ = bestTrajec_.getSubTrajectory(controlCycle_.toSec());
-  ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
   
-  // Update start
-  start_ = latestUpdate_;
+  // Do the control cycle
+  doControlCycle();
 
-  // Reset planning cycle count
-  c_pc_ = 0;
-
-
-  //std::cout<<"\nbestTrajec.size(): "<<bestTrajec_.msg_.trajectory.points.size()<<"\n";
-  // Set m_cc_ and startPlanning
-  // The motion state that we should reach by the next control cycle
-  m_cc_ = bestTrajec_.getPointAtTime(controlCycle_.toSec());
-  startPlanning_ = m_cc_;
-  //std::cout<<"\nNew startPlanning: "<<startPlanning_.toString()<<"l: "<<l<<"\n";
-  
-  //std::cout<<"\nBefore adapting, pop is: "<<population_.toString();
-
-  // After m_cc_ and startPlanning are set, update the population
-  adaptPopulation(controlCycle_);
-  bestTrajec_ = evaluateAndObtainBest(population_);
-  
-  sendPopulation();
-  
-  //std::cout<<"\n\n***** After adapting, pop: "<<population_.toString()<<"\n\n*****\n\n";
-
-  
-  if(subPopulations_) {
-    //std::cout<<"\n**********Creating sub-populations in CC***********\n";
-    population_.createSubPopulations();
-    //std::cout<<"\nDone creating sub-pops in CC\n";
-  }
-
+  // Uncertainty code
   // Build m_i
   //*****setMi();
   
@@ -1522,9 +1521,9 @@ const RampTrajectory Planner::evaluateTrajectory(RampTrajectory trajec, const bo
   //std::cout<<"\ntrajec.id: "<<trajec.msg_.id<<" bestTrajec.id: "<<bestTrajec_.msg_.id;
 
   if(computeSwitch) {
-    tf::Vector3 v_linear(start_.msg_.velocities.at(0), start_.msg_.velocities.at(1), 0);
+    tf::Vector3 v_linear(latestUpdate_.msg_.velocities.at(0), latestUpdate_.msg_.velocities.at(1), 0);
     double mag_linear = sqrt(tf::tfDot(v_linear, v_linear));
-    double mag_angular = start_.msg_.velocities.at(2);
+    double mag_angular = latestUpdate_.msg_.velocities.at(2);
    
     //ROS_INFO("v: %f w: %f", mag_linear, mag_angular);
     
