@@ -206,7 +206,7 @@ class Planner {
     void restartAfterDebugging();
     void pause();
 
-    const bool estimateIfOnCurve() const;
+    const bool estimateIfOnCurve(const MotionState ms, const ramp_msgs::BezierInfo curve) const;
 
     void restartControlCycle();
 
@@ -215,6 +215,7 @@ class Planner {
 
 
     void doControlCycle();
+    const std::vector< std::vector<ramp_msgs::BezierInfo> > adaptCurves();
 
     /***** Data members *****/
 

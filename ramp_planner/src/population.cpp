@@ -467,7 +467,7 @@ const std::string Population::toString() const {
   // Otherwise, print population as a whole
   else {
     for(unsigned int i=0;i<trajectories_.size();i++) {
-      //result<<"\nTrajectory "<<i<<": "<<paths_.at(i).toString();
+      //ROS_INFO("Population::toString i: %i", (int)i);
       result<<"\nTrajectory "<<i<<": "<<trajectories_.at(i).toString();
     }
   }

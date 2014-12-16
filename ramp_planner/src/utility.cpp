@@ -269,8 +269,8 @@ const std::string Utility::toString(const ramp_msgs::BezierInfo bi) const {
   result<<"\nms_initialVA: "<<toString(bi.ms_initialVA);
   result<<"\nms_begin: "<<toString(bi.ms_begin);
   result<<"\nl: "<<bi.l;
-  result<<"\nu_0: "<<bi.u_0;
-  result<<"\nu_dot_0: "<<bi.u_dot_0;
+  result<<"\nu_0: "<<bi.u_0<<" u_dot_0: "<<bi.u_dot_0;
+  result<<"\nu_target: "<<bi.u_target;
 
   return result.str();
 }
@@ -281,15 +281,19 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
 
   result<<"\n Knot Points:";
 
+  //ROS_INFO("traj.i_knotpoints.size(): %i", (int)traj.i_knotPoints.size());
   for(unsigned int i=0;i<traj.i_knotPoints.size();i++) {
+    //ROS_INFO("KP: %i", (int)i);
     
     result<<"\n   "<<i<<":";
     
     unsigned int index = traj.i_knotPoints.at(i);
+    //ROS_INFO("index: %i, traj.points.size(): %i", (int)index, (int)traj.trajectory.points.size());
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);
     
     result<<"\n       "<<toString(p);
   }
+  //ROS_INFO("Done with knot points");
 
 
   result<<"\n Points:";
@@ -297,18 +301,22 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
   //for(unsigned int i=0;i<7;i++) {
   for(unsigned int i=0;i<25 && i<traj.trajectory.points.size();i++) {
   //for(unsigned int i=0;i<traj.trajectory.points.size();i++) {
+    //ROS_INFO("i: %i", (int)i);
     result<<"\n\n   Point "<<i<<":";
     
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);
   
     result<<"\n"<<toString(p);
   }
+  //ROS_INFO("Done with points");
 
 
   for(uint8_t i=0;i<traj.curves.size();i++) {
+    //ROS_INFO("curve %i", (int)i);
     result<<"\n Curve "<<(int)i<<"\n"<<toString(traj.curves.at(i));
   }
 
+  //ROS_INFO("Done with curves");
 
   return result.str();
 }

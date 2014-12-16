@@ -296,13 +296,11 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
   result<<")";
 
   //Velocities
-  if(p.velocities.size() > 0) {
-    result<<"\n       Velocities: ("<<p.velocities.at(0);
-    for(unsigned int k=1;k<p.velocities.size();k++) {
-      result<<", "<<p.velocities.at(k);
-    }
-    result<<")";
+  result<<"\n       Velocities: ("<<p.velocities.at(0);
+  for(unsigned int k=1;k<p.velocities.size();k++) {
+    result<<", "<<p.velocities.at(k);
   }
+  result<<")";
   
   //Accelerations
   if(p.accelerations.size() > 0) {
@@ -370,6 +368,7 @@ std::ostringstream result;
   result<<"\nms_begin: "<<toString(bi.ms_begin);
   result<<"\nl: "<<bi.l;
   result<<"\nu_0: "<<bi.u_0<<" u_dot_0: "<<bi.u_dot_0;
+  result<<"\nu_target: "<<bi.u_target;
 
   return result.str();
 }

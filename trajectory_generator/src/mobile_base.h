@@ -35,6 +35,9 @@ private:
 
   void initReflexxes();
 
+
+  const bool checkGoal();
+
   // Store the time it started
   ros::Time t_started_;
 
@@ -92,7 +95,7 @@ private:
   const trajectory_msgs::JointTrajectoryPoint spinOnce();
 
   // Returns true if the target has been reached
-  bool finalStateReached();
+  bool finalStateReached() const;
 
 
   // Use Reflexxes to generate a rotation trajectory

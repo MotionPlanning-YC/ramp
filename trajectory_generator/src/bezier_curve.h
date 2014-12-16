@@ -38,7 +38,7 @@ public:
   ramp_msgs::MotionState ms_current_;
 
 
-  double u_0_, u_dot_0_;
+  double u_0_, u_dot_0_, u_target_;
 private:
 
   Utility       utility_            ;
