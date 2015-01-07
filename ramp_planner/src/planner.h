@@ -89,7 +89,8 @@ class Planner {
     void init(const uint8_t i, const ros::NodeHandle& h, 
               const MotionState s, const MotionState g, 
               const std::vector<Range> r, const int population_size, 
-              const bool sub_populations, const int gens_before_cc=0);
+              const bool sub_populations, const int gens_before_cc=0,
+              const double t_fixed_cc=2.);
     
     // Send the best trajectory to the control package
     void sendBest();
@@ -206,12 +207,16 @@ class Planner {
     void restartAfterDebugging();
     void pause();
 
-    const bool estimateIfOnCurve(const MotionState ms, const ramp_msgs::BezierInfo curve) const;
+    // 1 if before, 2 if on curve, 3 if past curve 
+    const int estimateIfOnCurve(const MotionState ms, 
+                                const ramp_msgs::BezierInfo curve) const;
 
-    void restartControlCycle();
+    void restartControlCycle(const double t=2.0);
 
-    const std::vector<Path> getRandomPaths(const MotionState init, const MotionState goal);
-    const Population randomPopulation(const MotionState init, const MotionState goal);
+    const std::vector<Path> getRandomPaths( const MotionState init, 
+                                            const MotionState goal);
+    const Population randomPopulation(const MotionState init, 
+                                      const MotionState goal);
 
 
     void doControlCycle();
@@ -285,6 +290,8 @@ class Planner {
 
 
     RampTrajectory movingOn_;
+
+    double t_fixed_cc_;
 };
 
 #endif

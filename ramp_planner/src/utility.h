@@ -5,6 +5,7 @@
 #include <queue>
 #include <sstream>
 #include <math.h>
+#include <limits>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>

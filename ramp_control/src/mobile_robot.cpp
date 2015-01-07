@@ -216,6 +216,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   // Get the starting time
   ros::Time start_time = ros::Time::now();
 
+
   // Set the # of inner cycles and the cycle time
   int num_inner_cycles=3;
   double t_cycle = ( trajectory_.trajectory.points.at(1).time_from_start - 
@@ -230,9 +231,9 @@ void MobileRobot::calculateSpeedsAndTime () {
     //std::cout<<"\nPoint "<<i;
 
     // Get how much each DOF increases per inner cycle
-    double xInc = next.accelerations.at(0) * (t_inner_cycle);
-    double yInc = next.accelerations.at(1) * (t_inner_cycle);
-    double wInc = next.accelerations.at(2) *t_inner_cycle;
+    double xInc = next.accelerations.at(0) * t_inner_cycle;
+    double yInc = next.accelerations.at(1) * t_inner_cycle;
+    double wInc = next.accelerations.at(2) * t_inner_cycle;
 
     // Set the values for the inner cycles
     for(int j=0;j<num_inner_cycles;j++) {
@@ -246,8 +247,8 @@ void MobileRobot::calculateSpeedsAndTime () {
       speeds_linear_.push_back  ( sqrt(pow(vx,2) + pow(vy,2) )) ;
       speeds_angular_.push_back ( w )                           ;
       end_times.push_back       (ros::Time(t))                  ;
-    }
-  } 
+    } // end inner cycle for
+  }   // end all points for
 
   // Increase num to reflect inner cycles
   num_ = (num_-1)*num_inner_cycles;

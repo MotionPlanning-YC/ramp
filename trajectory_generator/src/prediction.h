@@ -5,7 +5,6 @@
 #include "utility.h"
 
 
-#define CYCLE_TIME_IN_SECONDS 0.1
 
 
 class Prediction {

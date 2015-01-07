@@ -9,3 +9,5 @@ evaluations: false
 seed_population: true 
 
 gens_before_control_cycle: 0
+
+control_cycle_rate: 2

@@ -14,6 +14,7 @@ bool                sub_populations;
 bool                modifications;
 bool                evaluations;
 bool                seedPopulation;
+double              t_cc_rate;
 
 
 
@@ -131,6 +132,11 @@ void loadParameters(const ros::NodeHandle handle) {
   if(handle.hasParam("ramp/gens_before_control_cycle")) {
     handle.getParam("ramp/gens_before_control_cycle", gensBeforeCC);
     std::cout<<"\ngens_before_control_cycle: "<<gensBeforeCC;
+  }
+  
+  if(handle.hasParam("ramp/control_cycle_rate")) {
+    handle.getParam("ramp/control_cycle_rate", t_cc_rate);
+    ROS_INFO("t_cc_rate: %f", t_cc_rate);
   }
 
   std::cout<<"\n------- Done loading parameters -------\n";

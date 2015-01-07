@@ -9,10 +9,6 @@
 
 
 
-#define CYCLE_TIME_IN_SECONDS 0.1
-
-
-
 
 class MobileBase {
 
@@ -40,8 +36,6 @@ private:
 
   // Store the time it started
   ros::Time t_started_;
-
-
 
   // Reflexxes variables 
   ReflexxesData reflexxesData_;
@@ -119,6 +113,8 @@ private:
   const ramp_msgs::MotionState getMaxMS() const;
 
   const std::vector<uint8_t> getCurveKPs(const std::vector<BezierCurve> curves) const;
+
+  const bool lastPointClosest(const ramp_msgs::RampTrajectory traj) const;
 };
 
 #endif 

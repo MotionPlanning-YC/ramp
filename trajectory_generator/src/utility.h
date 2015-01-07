@@ -16,6 +16,8 @@
 
 #define PI 3.14159f
 
+#define CYCLE_TIME_IN_SECONDS 0.1
+
 enum TrajectoryType {
   ALL_STRAIGHT_SEGMENTS = 0,
   ALL_BEZIER            = 1,
@@ -41,6 +43,7 @@ class Utility {
     
     const double displaceAngle(const double a1, double a2) const;
     
+    const double getEuclideanDist(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const;
     const double getEuclideanDist(const std::vector<double> a, std::vector<double> b) const;
 
     const uint8_t getQuadrant(const double angle) const;
