@@ -86,11 +86,15 @@ class Planner {
     
     // Initialization 
     void initPopulation();
-    void init(const uint8_t i, const ros::NodeHandle& h, 
-              const MotionState s, const MotionState g, 
-              const std::vector<Range> r, const int population_size, 
-              const bool sub_populations, const int gens_before_cc=0,
-              const double t_fixed_cc=2.);
+    void init(const uint8_t             i,                
+              const ros::NodeHandle&    h, 
+              const MotionState         s,                
+              const MotionState         g, 
+              const std::vector<Range>  r,                
+              const int                 population_size, 
+              const bool                sub_populations,  
+              const int                 gens_before_cc=0,
+              const double              t_fixed_cc=2.);
     
     // Send the best trajectory to the control package
     void sendBest();
@@ -163,6 +167,8 @@ class Planner {
     
     // Updates the paths in P(t) so we can get new trajectories
     void adaptPaths(MotionState start, ros::Duration dur);
+    void adaptCurves();
+    //const std::vector< std::vector<ramp_msgs::BezierInfo> > adaptCurves();
 
     // Returns a unique id for a RampTrajectory 
     unsigned int getIRT();
@@ -186,16 +192,16 @@ class Planner {
               const RampTrajectory trajec)      ;
 
     // Misc
-    const bool checkOrientation()                           const ; 
+    const bool checkOrientation()                                 const ; 
     const MotionState randomizeMSPositions(MotionState ms)        const ;
-          void checkTrajChange()                                  ;
-          void seedPopulation()                                   ;
-          void seedPopulationTwo()                               ;
+          void checkTrajChange()                                        ;
+          void seedPopulation()                                         ;
+          void seedPopulationTwo()                                      ;
 
-    const RampTrajectory  getTransitionTrajectory(const RampTrajectory trgt_traj)     ;
-    const RampTrajectory  getTrajectoryWithCurve(const RampTrajectory trgt_traj);
+    const RampTrajectory  getTransitionTrajectory(const RampTrajectory current, const RampTrajectory trgt_traj)    ;
     const MotionState     predictStartPlanning() const  ;
 
+    const std::vector<RampTrajectory> switchTrajectory(const RampTrajectory from, const RampTrajectory to) ;
 
     const std::vector<RampTrajectory> getTrajectories(const std::vector<Path> p);
     const std::vector<RampTrajectory> getTrajectories(std::vector<ramp_msgs::TrajectoryRequest> tr);
@@ -220,7 +226,8 @@ class Planner {
 
 
     void doControlCycle();
-    const std::vector< std::vector<ramp_msgs::BezierInfo> > adaptCurves();
+
+    const uint8_t getIndexStartPathAdapting(const RampTrajectory t) const;
 
     /***** Data members *****/
 

@@ -229,9 +229,17 @@ void MobileRobot::calculateSpeedsAndTime () {
     trajectory_msgs::JointTrajectoryPoint current = trajectory_.trajectory.points.at(i);
     trajectory_msgs::JointTrajectoryPoint next    = trajectory_.trajectory.points.at(i+1);
     //std::cout<<"\nPoint "<<i;
+    
+    speeds_linear_.push_back( sqrt( pow(current.velocities.at(0),2)
+                                  + pow(current.velocities.at(1),2) ));
+
+    speeds_angular_.push_back( current.velocities.at(2) ); 
+
+    end_times.push_back(start_time + next.time_from_start);
+  }
 
     // Get how much each DOF increases per inner cycle
-    double xInc = next.accelerations.at(0) * t_inner_cycle;
+    /*double xInc = next.accelerations.at(0) * t_inner_cycle;
     double yInc = next.accelerations.at(1) * t_inner_cycle;
     double wInc = next.accelerations.at(2) * t_inner_cycle;
 
@@ -251,7 +259,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   }   // end all points for
 
   // Increase num to reflect inner cycles
-  num_ = (num_-1)*num_inner_cycles;
+  //num_ = (num_-1)*num_inner_cycles;*/
 
   //printVectors();
 } // End calculateSpeedsAndTime

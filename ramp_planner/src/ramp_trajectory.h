@@ -16,30 +16,18 @@ class RampTrajectory {
     Path                      path_;
     Path                      bezierPath_;
     ramp_msgs::MotionState    ms_prevSP_;
+    ramp_msgs::RampTrajectory transitionTraj_;
 
-
+    const RampTrajectory clone()                              const;
     const bool           equals(const RampTrajectory& other)  const;
-    const Path           getPath()                           const;
+    const Path           getPath()                            const;
+    const double         getDirection()                       const;
+    const std::string    fitnessFeasibleToString()            const;
+    const std::string    toString()                           const;
+    const RampTrajectory getSubTrajectory(const float t)      const;
 
-    const double         getDirection() const;
-    
-    const RampTrajectory getStraightSegment(uint8_t i) const;
+    const trajectory_msgs::JointTrajectoryPoint getPointAtTime(const float t) const;
 
-    const RampTrajectory clone() const;
-    
-    const std::string    fitnessFeasibleToString()           const;
-    const std::string    toString()                          const;
-
-    const trajectory_msgs::JointTrajectoryPoint getPointAtTime(const float t)       const;
-
-    const RampTrajectory getSubTrajectory(const float t) const;
-
-    const int getIndexFirstTurn() const;
-    const int getIndexFirstTurn(const uint16_t start) const;
-    const int getIndexStartOfCurve() const;
-    const double getTimeFirstTurn() const;
-    const double getTimeFirstTurn(const uint16_t start) const;
-    const double getTimeTurning(const uint16_t start) const;
   private:
     Utility utility_;
 };
