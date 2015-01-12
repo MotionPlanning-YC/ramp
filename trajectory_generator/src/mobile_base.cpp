@@ -559,7 +559,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     }
 
     // If already moving on curve
-    else if(bezierStart || req_.bezierInfo.at(0).u_0 > 0) {
+    else if(req_.bezierInfo.at(0).u_0 > 0) {
       ROS_INFO("In else if bezierStart");
       // Commented out when gen == 23 for the switch. at CC after restart, it was removing 1,1 and 3.5,2
       //ROS_INFO("Erasing: %s", utility_.toString( *(p.points.begin()+2) ).c_str());

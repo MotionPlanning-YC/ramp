@@ -166,8 +166,8 @@ class Planner {
     void initStartGoal(const MotionState s, const MotionState g);
     
     // Updates the paths in P(t) so we can get new trajectories
-    void adaptPaths(MotionState start, ros::Duration dur);
-    void adaptCurves();
+    const std::vector<Path> adaptPaths(MotionState start, ros::Duration dur);
+    const std::vector<ramp_msgs::BezierInfo> adaptCurves();
     //const std::vector< std::vector<ramp_msgs::BezierInfo> > adaptCurves();
 
     // Returns a unique id for a RampTrajectory 

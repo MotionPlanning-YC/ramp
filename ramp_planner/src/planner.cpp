@@ -250,6 +250,7 @@ const int Planner::estimateIfOnCurve(const MotionState ms, const ramp_msgs::Bezi
   
   bool xSlope = (curve.segmentPoints.at(1).positions.at(0) - curve.segmentPoints.at(0).positions.at(0) > 0);
   bool ySlope = (curve.segmentPoints.at(1).positions.at(1) - curve.segmentPoints.at(0).positions.at(1) > 0);
+  ROS_INFO("xSlope: %s ySlope: %s", xSlope ? "True" : "False", ySlope ? "True" : "False");
 
   double x = ms.msg_.positions.at(0);
   double y = ms.msg_.positions.at(1);
@@ -275,7 +276,7 @@ const int Planner::estimateIfOnCurve(const MotionState ms, const ramp_msgs::Bezi
   } 
   else if(x_good && y_good)
   {
-    ROS_INFO("Returning true");
+    ROS_INFO("Returning 2 (on curve)");
     return 2;
   } 
   else if(x_scaled > curve.u_target && y_scaled > curve.u_target) {
@@ -291,11 +292,13 @@ const int Planner::estimateIfOnCurve(const MotionState ms, const ramp_msgs::Bezi
 
 
 
-void Planner::adaptCurves() {
+const std::vector<ramp_msgs::BezierInfo> Planner::adaptCurves() {
+  ROS_INFO("In adaptCurves");
   std::vector<ramp_msgs::BezierInfo> result;
   ramp_msgs::BezierInfo blank;
 
   for(uint16_t i=0;i<population_.size();i++) {
+    ROS_INFO("Curve %i", (int)i);
     
     // If the trajectory has a curve
     if(population_.get(i).msg_.curves.size() > 0) {
@@ -314,7 +317,7 @@ void Planner::adaptCurves() {
 
         // if u_0==0 then estimateIfOnCurve returned 2 - already on curve
         if(curve.u_0 == 0) {
-          //ROS_INFO("In if curve.u_0==0");
+          ROS_INFO("In if curve.u_0==0");
 
           // Get the time at the end of the curve
           double t_s0 = population_.get(i).msg_.trajectory.points.at(
@@ -370,15 +373,25 @@ void Planner::adaptCurves() {
           //tr = buildTrajectoryRequest(population_.paths_.at(i));
         } // end else 1 curve
       } // end if done with 1st curve
+      else {
+        ROS_INFO("Not done with curve");
+      }
 
+      ROS_INFO("Curve after adapting: %s", utility_.toString(curve).c_str());
+      //population_.get(i).msg_.curves.at(0) = curve;
       result.push_back(curve);
     } // end if trajectory has curve
 
     // Else if there is no curve, push on a blank one
     else {
+      ROS_INFO("No curve");
       result.push_back(blank);
+      //population_.get(i).msg_.curves.at(0) = blank;
     } // end else no curve
   } // end for
+
+
+  return result;
 } // End adaptCurves
 
 
@@ -394,106 +407,22 @@ void Planner::adaptPopulation(ros::Duration d) {
  
   // Update the paths with the new starting configuration
   adaptPaths(startPlanning_, d);
+  std::vector<ramp_msgs::BezierInfo> curves = adaptCurves();
+  
 
   // Create the vector to hold updated trajectories
   std::vector<RampTrajectory> updatedTrajecs;
 
   // For each path, get a trajectory
-  for(unsigned int i=0;i<population_.paths_.size();i++) {
-    //std::cout<<"\nPopulation member "<<i<<"'s Bezier path: "<<population_.get(i).bezierPath_.toString()<<"\n";
-    std::cout<<"\ni: "<<(int)i;
+  for(uint16_t i=0;i<population_.paths_.size();i++) {
+    ROS_INFO("Getting trajectory %i", (int)i);
 
-    ramp_msgs::TrajectoryRequest tr;
+    ROS_INFO("curves.size(): %i", (int)population_.get(i).msg_.curves.size());
+    population_.get(i).msg_.curves.clear();
+    population_.get(i).msg_.curves.push_back(curves.at(i));
 
-    // If the trajectory has a curve
-    if(population_.get(i).msg_.curves.size() > 0) {
-      std::cout<<"\nIn if trajectory has curve\n";
-
-      // Set curve
-      ramp_msgs::BezierInfo curve = population_.get(i).msg_.curves.at(0); 
-      std::cout<<"\nSet curve to: "<<utility_.toString(curve)<<"\n";
-      
-      // If moving on this curve, update u, u_dot_0
-      if( i == population_.getBestIndex() && 
-            (curve.u_0 > 0 ||
-             estimateIfOnCurve(startPlanning_, curve) == 2))
-      {
-        std::cout<<"\nIn if moving on curve\n";
-
-        // if u_0==0 then estimateIfOnCurve returned 2 - already on curve
-        if(curve.u_0 == 0) {
-          //ROS_INFO("In if curve.u_0==0");
-
-          // Get the time at the end of the curve
-          double t_s0 = population_.get(i).msg_.trajectory.points.at(
-              population_.get(i).msg_.i_knotPoints.at(1)).time_from_start.toSec();
-          //ROS_INFO("t_s0: %f", t_s0);
-          
-          // t = the time spent moving on the curve
-          double t = controlCycle_.toSec() - t_s0;
-
-          //ROS_INFO("Adding %f", (t*curve.u_dot_0));
-          curve.u_0 += t * population_.get(i).msg_.curves.at(0).u_dot_0;
-        } // end if already on curve
-
-        // Else, u_0 > 0
-        else {
-          ROS_INFO("curve.u_0 > 0: %f curve.u_dot_0: %f", curve.u_0, curve.u_dot_0);
-          curve.u_0 += 
-            population_.get(i).msg_.curves.at(0).u_dot_0 * controlCycle_.toSec();
-        }
-
-        // Set the new ms_begin
-        curve.ms_begin = startPlanning_.msg_;
-
-        // Set the updated curve
-        population_.get(i).msg_.curves.at(0) = curve;
-      } // end if moving on curve
-
-      else {
-        ROS_INFO("Not moving on curve");
-      }
-
-      ROS_INFO("Checking if done with curve");
-
-      // Check if done with current curve
-      if(estimateIfOnCurve(startPlanning_, curve) == 3 || curve.u_0 > curve.u_target) {
-        ROS_INFO("Done with curve, u_0: %f", curve.u_0);
-
-        // If we were using 2 curves
-        if(population_.get(i).msg_.curves.size() > 1) {
-          ROS_INFO("In if using 2 curves");
-
-          // Then we should start the next curve
-          population_.get(i).msg_.curves.at(1).u_0 += 0.000001; 
-          population_.get(i).msg_.curves.at(1).ms_begin = population_.paths_.at(i).start_.motionState_.msg_;
-
-          // Done with 1st curve so erase it
-          population_.get(i).msg_.curves.erase(
-              population_.get(i).msg_.curves.begin() );
-          tr = buildTrajectoryRequest(population_.paths_.at(i), population_.get(i).msg_.curves);
-        } // end if using 2 curves
-
-        // Else if we only have 1 curve
-        else {
-          ROS_INFO("In else done with curve and only have 1 curve");
-
-          // Do not include curve because we are making a new curve
-          // to replace the last one
-          tr = buildTrajectoryRequest(population_.paths_.at(i));
-        } // end else 1 curve
-      } // end if done with 1st curve
-      else {
-        std::cout<<"\nNot done with curve";
-        tr = buildTrajectoryRequest(population_.paths_.at(i), population_.get(i).msg_.curves, i);
-      }
-    } // end if trajectory has curve
-    else {
-      std::cout<<"\nTrajectory has no curve";
-      tr = buildTrajectoryRequest(population_.paths_.at(i));
-    }
-
-
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(population_.paths_.at(i),
+        population_.get(i).msg_.curves);
 
     /* Get the trajectory */
     std::cout<<"\nRequest trajectory in adaptPopuation\n";
@@ -530,10 +459,15 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   result.request.resolutionRate = resolutionRate_;
   result.request.type           = PARTIAL_BEZIER;
 
+  if(curves.size() == 0) {
+    ROS_ERROR("In buildTrajectoryRequest: curves.size() == 0");
+  }
+
   if(path.size() > 2) {
     ROS_INFO("In if path.size() > 2)");
-    // If it's the first time the trajectory is planned
-    if(curves.size() == 0) {
+
+    // If it's the first time getting a curve 
+    if(curves.size() == 0 || curves.at(0).segmentPoints.size() == 0) {
       if(path.size() >= 3) {
         ROS_INFO("In if path.size() >= 3");
         ramp_msgs::BezierInfo temp;
@@ -777,8 +711,8 @@ void Planner::seedPopulation() {
 
   std::vector<KnotPoint> all;
   all.push_back(start_);
-  all.push_back(kp);
-  all.push_back(kp1);
+  //all.push_back(kp);
+  //all.push_back(kp1);
   all.push_back(goal_);
 
   Path p1(all);
@@ -806,7 +740,7 @@ void Planner::seedPopulation() {
 
   std::vector<Path> paths;
   paths.push_back(p1);
-  paths.push_back(p1);
+  paths.push_back(p2);
   /************************************/
 
   /**** Get trajectories ****/  
@@ -1420,7 +1354,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
   double mag_linear = sqrt(tf::tfDot(v_linear, v_linear));
   //if(generation_ > 0 && generation_ % 25 == 0) {
   //if(mag_linear > 0 && cc_started_ && c_pc_ == generationsPerCC_/2) {
-  /*if(mag_linear > 0 && cc_started_ && generation_ == 25) {
+  if(mag_linear > 0 && cc_started_ && generation_ == 25) {
     ROS_INFO("generationsPerCC_: %i", generationsPerCC_);
     ROS_INFO("Creating random population at c_pc: %i", c_pc_);
     seedPopulationTwo();
@@ -1431,7 +1365,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     }
     else if(i == 1) {
       bestTrajec_ = population_.get(0);
-    }*/
+    }
     /*stopForDebugging();
     sendPopulation();
     std::cout<<"\n*************** New population: "<<population_.toString()<<"\n";
@@ -1439,7 +1373,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     std::cout<<"\nPress Enter to continue\n";
     std::cin.get();*/
     //std::cout<<"\n ========== Re-evaluating =========\n";
-    /*population_ = evaluatePopulation(population_);
+    population_ = evaluatePopulation(population_);
 
     int i_kp = bestTrajec_.transitionTraj_.i_knotPoints.size()-1;
     double t = bestTrajec_.msg_.trajectory.points.at(
@@ -1458,7 +1392,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
   }
   else {
     ROS_INFO("mag_linear: %f cc_started_: %s generation_: %i", mag_linear, cc_started_ ? "true" : "false", generation_);
-  }*/
+  }
 
 
   // Make sure not too many PC occur before next CC
