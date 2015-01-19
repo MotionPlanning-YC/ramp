@@ -62,6 +62,9 @@ private:
   bool bezierStart;
 
   ramp_msgs::TrajectoryRequest::Request req_;
+  
+  // Hold the curve indices
+  std::vector<uint8_t> i_cs;
 
 
   /***** Methods *****/

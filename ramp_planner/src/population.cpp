@@ -16,7 +16,7 @@ void Population::clear() {
 
 
 /** This method returns the trajectory at index i */
-RampTrajectory& Population::get(const unsigned int i) {
+const RampTrajectory Population::get(const unsigned int i) const {
   return trajectories_.at(i);
 } // End get
 
@@ -287,7 +287,7 @@ const int Population::add(const RampTrajectory rt) {
     if(subPopulations_.size() > 0) {
       // Go through each sub-population and find best
       for(uint8_t i=0;i<subPopulations_.size();i++) {
-        subPopulations_.at(i).getBestIndex();
+        subPopulations_.at(i).findBestIndex();
       }
     }
    
@@ -316,17 +316,21 @@ const int Population::add(const RampTrajectory rt) {
 } //End add
 
 
+const int Population::getBestIndex() const {
+  return i_best_;
+}
+
 
 /** Returns the fittest trajectory and sets i_best_ */
-const int Population::getBestIndex() {
-  //std::cout<<"\nIn getBestIndex\n";
+const int Population::findBestIndex() {
+  //std::cout<<"\nIn findBestIndex\n";
   
   // If population has not changed since last
   // findBest call, return without searching
   if(!changed_) {
     return i_best_;
   }
-  
+ 
   // Find the index of the trajectory with the highest fitness value
   unsigned int i_max = 0;
   for(unsigned int i=1;i<trajectories_.size();i++) {
@@ -344,11 +348,14 @@ const int Population::getBestIndex() {
 
   //std::cout<<"\nReturning "<<i_best_;
   return i_best_; 
-} //End getBestIndex
+} //End findBestIndex
 
 
 
 const RampTrajectory Population::getBest() {
+  if(i_best_ == -1 || changed_) {
+    findBestIndex();
+  }
   return trajectories_.at(getBestIndex());
 }
 
@@ -367,7 +374,7 @@ const std::vector<RampTrajectory> Population::getBestFromSubPops() {
   else {
     for(uint8_t i=0;i<subPopulations_.size();i++) {
       if(subPopulations_.at(i).size() > 0) {
-        int i_best = subPopulations_.at(i).getBestIndex(); 
+        int i_best = subPopulations_.at(i).findBestIndex(); 
         result.push_back(subPopulations_.at(i).get(i_best));
       }
     }
@@ -416,7 +423,7 @@ const std::vector<Population> Population::createSubPopulations(const double delt
 
   // Go through each sub-population and find best
   for(uint8_t i=0;i<subPopulations_.size();i++) {
-    subPopulations_.at(i).getBestIndex();
+    subPopulations_.at(i).findBestIndex();
   }
 
   //std::cout<<"\n***********Leaving createSubPopulations***********\n";

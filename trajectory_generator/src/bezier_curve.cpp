@@ -108,6 +108,23 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
 }
 
 
+/** Determines if a curve violates angular motion constraints */
+const bool BezierCurve::verify() const {
+  ROS_INFO("In BezierCurve::verify()");
+
+  double v_max = 0.4666;
+  double w_max = 3*PI/4;
+
+  double x_dot = (A_*t_R_min_ + C_)*getUDotMax(u_dot_0_);
+  double y_dot = (B_*t_R_min_ + D_)*getUDotMax(u_dot_0_);
+  double v_rmin = sqrt(pow(x_dot,2) + pow(y_dot,2));
+  double w_rmin = v_rmin / R_min_;
+  ROS_INFO("w_rmin: %f v_rmin: %f R_min: %f t_R_min: %f x_dot: %f y_dot: %f", w_rmin, v_rmin, R_min_, t_R_min_, x_dot, y_dot);
+
+  ROS_INFO("w_rmin <= w_max: %s", w_rmin <= w_max ? "True" : "False");
+
+  return ( (t_R_min_ >= 0 && t_R_min_ <= 1) && (w_rmin <= w_max) );
+}
 
 
 void BezierCurve::printReflexxesInfo() const {
@@ -232,7 +249,7 @@ const ramp_msgs::MotionState BezierCurve::getInitialState() {
  *  given a u value - they may be different when testing for u_dot_max */
 const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_x, const double u_y) const {
   if(print_) {
-    std::cout<<"\nTesting constraints for "<<u_dot;
+    std::cout<<"\n\nTesting constraints for "<<u_dot;
     std::cout<<"\n(A_*u_x+C_)*u_dot: "<<(A_*u_x+C_)*u_dot<<" x_dot_max: "<<ms_max_.velocities.at(0);
     std::cout<<"\n(B_*u_y+D_)*u_dot: "<<(B_*u_y+D_)*u_dot<<" y_dot_max: "<<ms_max_.velocities.at(1);
   }
@@ -709,12 +726,23 @@ void BezierCurve::calculateR_min() {
   double denominator          = pow((B_*C_) - (A_*D_), 2);
  
   R_min_                      = sqrt( numerator / denominator );
+  ROS_INFO("t_R_min_: %f R_min: %f", t_R_min_, R_min_);
 }
 
 
 /** Calculate time when minimum radius occurs along the curve */
 void BezierCurve::calculateT_R_min() {
-  t_R_min_ = -((A_*C_) + (B_*D_)) / ((A_*A_) + (B_*B_));
+  if(fabs(A_) < 0.000001 && fabs(B_) < 0.000001) {
+    ROS_INFO("Both A_ and B_ are 0 - setting t_R_min_ to -1");
+    t_R_min_ = -1.;
+  }
+  else {
+    double numerator = -((A_*C_) + (B_*D_));
+    double denominator = ((A_*A_) + (B_*B_));
+    ROS_INFO("numerator: %f denominator: %f", numerator, denominator);
+    t_R_min_ = -((A_*C_) + (B_*D_)) / ((A_*A_) + (B_*B_));
+    t_R_min_ = numerator / denominator;
+  }
 }
 
 
@@ -723,17 +751,16 @@ void BezierCurve::calculateConstants() {
   calculateABCD();
   calculateT_R_min();
   calculateR_min();
-  
-  if(print_) {
-    std::cout<<"\nA: "<<A_<<" B: "<<B_<<" C: "<<C_<<" D: "<<D_<<"\n";
-  }
+  ROS_INFO("A: %f B: %f C: %f D: %f", A_, B_, C_, D_);
 }
 
 
 
 /** Generate all the motion states on the curve */
 const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve() {
-  //std::cout<<"\nIn generateCurve\n";
+  ROS_INFO("Entered BezierCurve::generateCurve()");
+  printReflexxesInfo();
+
   if(initialized_) {
 
     reflexxesData_.resultValue = 0;
@@ -750,9 +777,32 @@ const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve() {
     dealloc();
   }
 
-  if(print_) {
-    std::cout<<"\nLeaving generateCurve\n";
+  // Check the first two points
+  /*if( utility_.positionDistance( ms_begin_.positions, points_.at(1).positions ) < 0.01 ) {
+    ROS_INFO("First two points are the same");
+    //ms_begin_ = points_.at(1);
+    points_.erase(points_.begin()+1, points_.begin()+2);
+  
+    double theta = utility_.findAngleFromAToB( points_.at(0).positions,
+                                               points_.at(1).positions );
+    points_.at(1).velocities.at(2)    = (theta - points_.at(0).positions.at(2)) / CYCLE_TIME_IN_SECONDS;
+  }*/
+
+  // Find the time of minimum v
+  int i_min = 0;
+  for(uint16_t i=1;i<points_.size();i++) {
+    double v_min = sqrt( pow(points_.at(i_min).velocities.at(0), 2) + pow(points_.at(i_min).velocities.at(1), 2) );
+    double v_i = sqrt( pow(points_.at(i).velocities.at(0), 2) + pow(points_.at(i).velocities.at(1), 2) );
+
+    if(v_i < v_min) {
+      i_min = (int)i;
+    }
+
   }
+
+  ROS_INFO("Minimum v occurs at point %i and is %f", i_min, sqrt( pow(points_.at(i_min).velocities.at(0), 2) + pow(points_.at(i_min).velocities.at(1), 2) ));
+
+  ROS_INFO("Exiting BezierCurve::generateCurve()");
   return points_;
 } // End generateCurve
 
@@ -772,6 +822,10 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
   double Y0         = controlPoints_.at(0).positions.at(1);
   double Y1         = controlPoints_.at(1).positions.at(1);
   double Y2         = controlPoints_.at(2).positions.at(1);
+
+  t_R_min_ = u;
+  calculateR_min();
+  ROS_INFO("R at u=%f: %f", u, R_min_);
 
   /** Create new point */
   // Position
@@ -803,13 +857,13 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
   theta_prev_     = theta;
   theta_dot_prev_ = theta_dot;
   
-  if(print_) {
+  //if(print_) {
     printf("\n");
     ROS_INFO("u: %f u_dot: %f u_dot_dot: %f", u, u_dot, u_dot_dot);
     ROS_INFO("x: %f             y: %f", x, y);
     ROS_INFO("x_dot: %f         y_dot: %f", x_dot, y_dot);
     ROS_INFO("x_dot_dot: %f     y_dot_dot: %f", x_dot_dot, y_dot_dot);
-  }
+  //}
 
   // Push values onto MotionState
   result.positions.push_back(x);
@@ -851,7 +905,7 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
   // If not, adjust the target position based on how far we've moved
   if(!reachedVMax_)
   {
-    //ROS_INFO("Adjusting target position");
+    //ROS_INFO("Adjusting target position"*/;
     double a = reflexxesData_.inputParameters->MaxVelocityVector->VecData[0] * 
                   CYCLE_TIME_IN_SECONDS;
     double b = reflexxesData_.outputParameters->NewPositionVector->VecData[0] - 

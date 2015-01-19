@@ -367,7 +367,7 @@ std::ostringstream result;
   result<<"\nms_initialVA: "<<toString(bi.ms_initialVA);
   result<<"\nms_begin: "<<toString(bi.ms_begin);
   result<<"\nl: "<<bi.l;
-  result<<"\nu_0: "<<bi.u_0<<" u_dot_0: "<<bi.u_dot_0;
+  result<<"\nu_0: "<<bi.u_0<<" u_dot_0: "<<bi.u_dot_0<<" u_target: "<<bi.u_target;
 
   return result.str();
 }

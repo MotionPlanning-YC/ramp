@@ -15,11 +15,12 @@ class Population {
     /* Methods */
     const unsigned int    size() const;
     const int             add(const RampTrajectory rt);
-    const int             getBestIndex();
+    const int             getBestIndex() const;
+    const int             findBestIndex();
     void                  clear();
     void                  replace(const uint8_t i, const RampTrajectory trajec);
     void                  replaceAll(const std::vector<RampTrajectory> new_pop);
-    RampTrajectory&  get(const unsigned int i);
+    const RampTrajectory  get(const unsigned int i) const;
     const int             getMinFitness() const;
     const bool            contains(const RampTrajectory rt) const;
     const bool            feasibleExists() const;

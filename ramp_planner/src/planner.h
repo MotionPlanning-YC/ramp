@@ -106,7 +106,6 @@ class Planner {
     // Evaluate the population 
     const RampTrajectory  evaluateTrajectory(RampTrajectory trajec, const bool computeSwitch=true);
     const Population      evaluatePopulation(Population pop, const bool computeSwitch=true);
-    const RampTrajectory  evaluateAndObtainBest(Population pop);
     
     // Modify trajectory or path
     const std::vector<Path> modifyPath();
@@ -121,7 +120,7 @@ class Planner {
 
 
     // Update the population 
-    void adaptPopulation(ros::Duration d);
+    const Population adaptPopulation(const Population pop, const MotionState ms, const ros::Duration d);
 
     // Display all of the paths
     const std::string pathsToString() const;
@@ -166,9 +165,11 @@ class Planner {
     void initStartGoal(const MotionState s, const MotionState g);
     
     // Updates the paths in P(t) so we can get new trajectories
-    const std::vector<Path> adaptPaths(MotionState start, ros::Duration dur);
-    const std::vector<ramp_msgs::BezierInfo> adaptCurves();
-    //const std::vector< std::vector<ramp_msgs::BezierInfo> > adaptCurves();
+    const uint8_t getNumThrowawayPoints(const RampTrajectory traj, const ros::Duration dur) const;
+    const std::vector<Path> adaptPaths(MotionState start, ros::Duration dur) const;
+    const std::vector<ramp_msgs::BezierInfo> adaptCurves(const Population pop) const;
+    const double updateCurvePos(const RampTrajectory traj) const;
+    const ramp_msgs::BezierInfo handleCurveEnd(const RampTrajectory traj) const;
 
     // Returns a unique id for a RampTrajectory 
     unsigned int getIRT();
@@ -184,9 +185,9 @@ class Planner {
     // Msg building methods
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
               const Path path, const std::vector<ramp_msgs::BezierInfo> curves,
-              const int id=0);
+              const int id=0) const;
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
-              const Path path, const int id=0);
+              const Path path, const int id=0) const;
 
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(
               const RampTrajectory trajec)      ;
@@ -212,6 +213,8 @@ class Planner {
     void stopForDebugging();
     void restartAfterDebugging();
     void pause();
+
+    const std::vector<double> getScaledXY(const MotionState ms, const ramp_msgs::BezierInfo curve) const;
 
     // 1 if before, 2 if on curve, 3 if past curve 
     const int estimateIfOnCurve(const MotionState ms, 

@@ -59,7 +59,7 @@ void MobileBase::initReflexxes() {
   // Maximum velocity   
   reflexxesData_.inputParameters->MaxVelocityVector->VecData[0] = 0.33;
   reflexxesData_.inputParameters->MaxVelocityVector->VecData[1] = 0.33;
-  reflexxesData_.inputParameters->MaxVelocityVector->VecData[2] = PI/4;
+  reflexxesData_.inputParameters->MaxVelocityVector->VecData[2] = 3*PI/4;
   
 
   // Maximum acceleration
@@ -134,7 +134,11 @@ void MobileBase::setTarget(const ramp_msgs::MotionState ms) {
     if(ms.velocities.size() > 0) {
       reflexxesData_.inputParameters->TargetVelocityVector->VecData[i] = ms.velocities.at(i);
     }
-  }  
+  }
+  
+  // Phase sync makes the orientation correct to drive in a straight line
+  reflexxesData_.flags.SynchronizationBehavior = 
+    RMLPositionFlags::PHASE_SYNCHRONIZATION_IF_POSSIBLE;
 } // End setTarget
 
 
@@ -338,7 +342,7 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
       lambda = 0.9;
     }
   }
-  //ROS_INFO("lambda final: %f", lambda);
+  ROS_INFO("lambda final: %f", lambda);
 
   return lambda;
 } // End getControlPointLambda
@@ -490,19 +494,24 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       } // end else "normal" trajectory
 
 
-      // Generate the curve
-      bc.generateCurve();
-
-      // If the curve was valid,
-      if(bc.points_.size() > 0) {
+      // Verify the curve
+      if(bc.verify()) {
+        ROS_INFO("Curve is verified, generating points");
+        // Generate the curve
+        bc.generateCurve();
         result.push_back(bc);
-      } // end if valid curve 
+      }
+      else {
+        type_ = ALL_STRAIGHT_SEGMENTS;
+      }
     } // end if
     else {
       ROS_WARN("Two of the three segment points for Bezier curve are too close");
       type_ = ALL_STRAIGHT_SEGMENTS;
     }
   } // end for
+
+  ROS_INFO("Outside of for");
 
   if(type_ != ALL_STRAIGHT_SEGMENTS) {
 
@@ -515,7 +524,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     }
 
     // If we are switching and have more than 1 curve
-    else if(bezierStart && req_.bezierInfo.size() > 1) {
+    else if(req_.bezierInfo.size() > 1) {
       //std::cout<<"\nIn first if\n";
       //std::cout<<"\np.points.size(): "<<p.points.size();
       
@@ -595,7 +604,9 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
 /** Print Reflexxes input and output for the latest call */
 void MobileBase::printReflexxesSpinInfo() const {
-  std::cout<<"\n\nCalled reflexxes with input:";
+  std::cout<<"\n\n*****************************************************************************";
+  std::cout<<"\nCalled reflexxes with input:";
+  
   std::cout<<"\nreflexxesData_.inputParameters->CurrentPositionVector->VecData[0]: "<<
                 reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];
   std::cout<<"\nreflexxesData_.inputParameters->CurrentPositionVector->VecData[1]: "<<
@@ -640,8 +651,9 @@ void MobileBase::printReflexxesSpinInfo() const {
   std::cout<<"\nreflexxesData_.outputParameters->NewAccelerationVector->VecData[2]: "<<
                 reflexxesData_.outputParameters->NewAccelerationVector->VecData[2];
 
-  std::cout<<"\nResult value: "<<reflexxesData_.resultValue;
+  std::cout<<"\n\nResult value: "<<reflexxesData_.resultValue;
   std::cout<<"\nFinalStateReached: "<<finalStateReached();
+  std::cout<<"\n*****************************************************************************";
 } // End printReflexxesInfo
 
 
@@ -678,6 +690,9 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce() {
 const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const ReflexxesData data) {
   trajectory_msgs::JointTrajectoryPoint point;
 
+
+
+
   for(unsigned int i=0;i<reflexxesData_.NUMBER_OF_DOFS;i++) {
       
     // If Reflexxes has not been called yet
@@ -708,8 +723,8 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
                                                  data.outputParameters->NewPositionVector->VecData[0],
                                                  data.outputParameters->NewPositionVector->VecData[1]);
 
-      //printReflexxesSpinInfo();
-      ROS_INFO("theta: %f", theta);
+
+      //ROS_INFO("theta: %f", theta);
       // Get angular velocity
       double w = (theta - data.inputParameters->CurrentPositionVector->VecData[2]) / 
                   CYCLE_TIME_IN_SECONDS;
@@ -752,11 +767,11 @@ const std::vector<uint8_t> MobileBase::getCurveKPs(const std::vector<BezierCurve
   std::vector<uint8_t> result;
   
   for(uint8_t i_c=0; i_c < curves.size(); i_c++) {
-    std::cout<<"\ni_c: "<<(int)i_c<<"\n";
-    ROS_INFO("curves.at(%i): %s", (int)i_c, utility_.toString(curves.at(i_c).points_.at(0)).c_str());
+    //ROS_INFO("curves.at(%i): %s", (int)i_c, utility_.toString(curves.at(i_c).points_.at(0)).c_str());
+    
     for(uint8_t i_kp=0;i_kp < path_.points.size();i_kp++) {
-      std::cout<<"\ni_kp: "<<(int)i_kp<<"\n";
-      ROS_INFO("path.poinst.at(%i): %s", (int)i_kp, utility_.toString(path_.points.at(i_kp).motionState).c_str());
+      //ROS_INFO("path.poinst.at(%i): %s", (int)i_kp, utility_.toString(path_.points.at(i_kp).motionState).c_str());
+      
       if(utility_.positionDistance(curves.at(i_c).points_.at(0).positions,
                                    path_.points.at(i_kp).motionState.positions) < 0.0001)
       {
@@ -788,8 +803,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Initialize with request
   init(req);
   req_ = req;
-  
-  std::vector<uint8_t> i_cs;
 
   // Set start time
   t_started_ = ros::Time::now();
@@ -801,21 +814,22 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
   // Use Bezier curves to smooth path
   if(type_ != ALL_STRAIGHT_SEGMENTS) {
-    std::cout<<"\nPath before Bezier: "<<utility_.toString(path_)<<"\n";
+    ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
     curves = bezier(path_, type_ == TRANSITION);
-    std::cout<<"\n*******************Path after Bezier: "<<utility_.toString(path_)<<"\n";
+    ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
 
 
     // Currently adding 0 for both because 
     i_cs = getCurveKPs(curves);
-    std::cout<<"\nCurve indices: ";
+    /*ROS_INFO("Curve indices: ");
     for(int i=0;i<i_cs.size();i++) {
-      std::cout<<"\ni_cs["<<i<<"]: "<<(int)i_cs.at(i);
-    }
+      ROS_INFO("i_cs[%i]: ", (int)i_cs.at(i));
+    }*/
   } // end if curves
-  //else {
-  //  std::cout<<"\nALL_STRAIGHT_SEGMENTS, no Bezier\n";
-  //}
+
+  if(curves.size() == 0) {
+    type_ = ALL_STRAIGHT_SEGMENTS;
+  }
 
   // Print curves
   /*if(print_) {
@@ -836,7 +850,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Go through every knotpoint in the path
   // (or until timeCutoff has been reached)
   for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) {
-    std::cout<<"\ni_kp: "<<(int)i_kp_<<"\n";
+    ROS_INFO("i_kp_: %i", (int)i_kp_);
     reflexxesData_.resultValue = 0;
 
     // Push the initial state onto trajectory
@@ -900,7 +914,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     /** Straight Line Segment */
     // Else if straight-line segment
     else {
-      std::cout<<"\nIn else\n";
+      ROS_INFO("In else");
 
       // Get rotation if needed
       double trajec_size = res.trajectory.trajectory.points.size();
@@ -913,19 +927,19 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       
       if(print_) {
         ROS_INFO("=== Orientation Information ===");
-        std::cout<<"\nlast: "<<utility_.toString(last)<<"\n";
-        std::cout<<"\nnext_knot: "<<utility_.toString(next_knot)<<"\n";
-        std::cout<<"\nutility_.findAngleFromAToB(last, next_knot): "<<
-                        utility_.findAngleFromAToB(last, next_knot);
-        std::cout<<"\nutility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)): "<<
-                      utility_.findDistanceBetweenAngles(last.positions.at(2), 
-                                utility_.findAngleFromAToB(last, next_knot))<<"\n";
+        ROS_INFO("last: %s", utility_.toString(last).c_str());
+        ROS_INFO("next_knot: %s", utility_.toString(next_knot).c_str());
+        ROS_INFO("utility_.findAngleFromAToB(last, next_knot): %f", utility_.findAngleFromAToB(last, next_knot));
+        ROS_INFO("utility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)): %f",
+                    utility_.findDistanceBetweenAngles(last.positions.at(2), 
+                            utility_.findAngleFromAToB(last, next_knot)));
       }
+
 
       // Check for transition because the robot should not rotate
       // if it overshoots the goal.
       // It may be good to check for overshooting with any trajectory
-      if(!checkGoal() && req.type != TRANSITION) {
+      if(!checkGoal()) {
 
         // If we need to rotate towards the next knot point
         // 0.0872664 = 5 degrees
@@ -948,23 +962,42 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
           prevKP_ = res.trajectory.trajectory.points.at(
               res.trajectory.trajectory.points.size() - 1);
         } // end if rotate
+        else {
+          ROS_INFO("No rotation needed");
+        }
       } // end if final state is not already reached
+      else {
+        ROS_INFO("Check goal returns true");
+      }
 
 
       setTarget(path_.points.at(i_kp_).motionState);
-      if(print_) {
-        std::cout<<"\nPrev KP: "<<utility_.toString(prevKP_)<<"\n";
-        std::cout<<"\nTarget: "<<utility_.toString(path_.points.at(i_kp_).motionState)<<"\n";
-      }
-
-      if(utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, path_.points.at(i_kp_).motionState.positions) > 0.01)
+      ROS_INFO("Prev KP: %s", utility_.toString(prevKP_).c_str());
+      ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());
+      
+      // Check they are not the same point
+      if(utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, 
+            path_.points.at(i_kp_).motionState.positions) > 0.01)
       {
-        std::cout<<"\nPushing on points b/c dist: "<<utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, path_.points.at(i_kp_).motionState.positions);
+        //ROS_INFO("Pushing on points b/c dist: %f", utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, 
+              //path_.points.at(i_kp_).motionState.positions));
+              
         // We go to the next knotpoint only once we reach this one
         while (!finalStateReached()) {
 
           trajectory_msgs::JointTrajectoryPoint p = spinOnce();
           //std::cout<<"\np: "<<utility_.toString(p)<<"\n";
+          
+          // Check for correct orientation
+          /*trajectory_msgs::JointTrajectoryPoint last = res.trajectory.trajectory.points.at(
+              res.trajectory.trajectory.points.size()-1);
+          ROS_INFO("Checking orientation difference: %f", fabs(utility_.findDistanceBetweenAngles(p.positions.at(2), last.positions.at(2))));
+          if( fabs(utility_.findDistanceBetweenAngles(p.positions.at(2), last.positions.at(2))) > 0.0087266) { //.5 degrees
+            p.positions.at(2) = last.positions.at(2);
+            p.velocities.at(2) = 0.;
+            p.accelerations.at(2) = 0.;
+          }*/
+
 
           // Compute the motion state at t+1 and save it in the trajectory
           res.trajectory.trajectory.points.push_back(p);
@@ -976,24 +1009,31 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
         // Once we reached the target, we set that the latest point is a knotpoint
         res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
-      } // end else straight-line segment
+      } // end if different points
+
+      // Else if there's only 2 points and the current point and next knot point are the same
+      // It was a path with the same point
+      else if(req.path.points.size() == 2) {
+        ROS_INFO("Last position and next know point are the same position, path size == 2");
+        res.trajectory.trajectory.points.push_back(res.trajectory.trajectory.points.at(0));
+      }
+      else {
+        ROS_INFO("Last position and next know point are the same position, path size > 2");
+      }
     } // end if
 
     // Set previous knot point
     prevKP_ = res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size() - 1);
   } // end for each knot point (outer-most loop)
-  //std::cout<<"\nOutside for\n";
   
 
   // Now that we're done, check to see if the last point was too far
-  if(!lastPointClosest(res.trajectory)) {
-    ROS_INFO("In !lastPointClosest");
-
+  if(res.trajectory.trajectory.points.size() > 2 && !lastPointClosest(res.trajectory)) {
+    
     res.trajectory.trajectory.points.pop_back();
     res.trajectory.i_knotPoints.at(res.trajectory.i_knotPoints.size()-1) =
      res.trajectory.trajectory.points.size()-1; 
-    
-  }
+  } // end if last point is too far
 
   // Lastly, set newPath in case the path changed
   res.newPath = path_;
@@ -1067,7 +1107,7 @@ const bool MobileBase::checkGoal() {
 
 
 const bool MobileBase::lastPointClosest(const ramp_msgs::RampTrajectory traj) const {
-  ROS_INFO("In lastPointClosest");
+  //ROS_INFO("In lastPointClosest");
   
   std::vector<double> target_p, target_v; 
   target_p.push_back(reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
@@ -1078,25 +1118,25 @@ const bool MobileBase::lastPointClosest(const ramp_msgs::RampTrajectory traj) co
   target_v.push_back(reflexxesData_.inputParameters->TargetVelocityVector->VecData[1]);
   target_v.push_back(reflexxesData_.inputParameters->TargetVelocityVector->VecData[2]);
 
-  ROS_INFO("After setting targets");
+  //ROS_INFO("After setting targets");
 
-  ROS_INFO("traj size: %i", (int)traj.trajectory.points.size());
+  //ROS_INFO("traj size: %i", (int)traj.trajectory.points.size());
   trajectory_msgs::JointTrajectoryPoint last = traj.trajectory.points.at(traj.trajectory.points.size()-1);
   trajectory_msgs::JointTrajectoryPoint next_to_last = 
     traj.trajectory.points.at(traj.trajectory.points.size()-2);
 
-  ROS_INFO("Done setting last and next_to_last");
-  ROS_INFO("last.positions size(): %i target_p.size: %i", (int)last.positions.size(), (int)target_p.size());
+  //ROS_INFO("Done setting last and next_to_last");
+  //ROS_INFO("last.positions size(): %i target_p.size: %i", (int)last.positions.size(), (int)target_p.size());
  
   double dist_last_p = utility_.getEuclideanDist(last.positions, target_p);
   double dist_next_p = utility_.getEuclideanDist(next_to_last.positions, target_p);
 
-  ROS_INFO("dist_last_p: %f dist_next_p: %f", dist_last_p, dist_next_p);
+  //ROS_INFO("dist_last_p: %f dist_next_p: %f", dist_last_p, dist_next_p);
  
   double dist_last_v = utility_.getEuclideanDist(last.velocities, target_v);
   double dist_next_v = utility_.getEuclideanDist(next_to_last.velocities, target_v);
   
-  ROS_INFO("dist_last_v: %f dist_next_v: %f", dist_last_v, dist_next_v);
+  //ROS_INFO("dist_last_v: %f dist_next_v: %f", dist_last_v, dist_next_v);
 
   double dist_last = dist_last_p + dist_last_v;
   double dist_next = dist_next_p + dist_next_v;

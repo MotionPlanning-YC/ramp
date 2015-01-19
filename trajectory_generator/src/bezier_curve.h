@@ -16,14 +16,16 @@ public:
  
 
   const std::vector<ramp_msgs::MotionState> generateCurve();
+
+  const bool verify() const;
  
 
   double A_, B_, C_, D_       ;
   double R_min_               ;
   double t_R_min_             ;
   double l_                   ;
-  std::vector<ramp_msgs::MotionState> segmentPoints_ ;
-  std::vector<ramp_msgs::MotionState> controlPoints_ ;
+  std::vector<ramp_msgs::MotionState> segmentPoints_  ;
+  std::vector<ramp_msgs::MotionState> controlPoints_  ;
   std::vector<ramp_msgs::MotionState> points_         ;
 
   void initControlPoints();
