@@ -185,7 +185,9 @@ void MobileRobot::updateTrajectory(const ramp_msgs::RampTrajectory msg) {
   t_immiColl_     = ros::Duration(0);
   
   // Update vectors for speeds and times
-  calculateSpeedsAndTime();
+  if(msg.trajectory.points.size() > 1) {
+    calculateSpeedsAndTime();
+  }
 } // End updateTrajectory
 
 
@@ -230,6 +232,8 @@ void MobileRobot::calculateSpeedsAndTime () {
     trajectory_msgs::JointTrajectoryPoint next    = trajectory_.trajectory.points.at(i+1);
     //std::cout<<"\nPoint "<<i;
     
+    // If not taking acceleration into account, uncomment this 
+    // and comment out from double xInc to num_ =
     speeds_linear_.push_back( sqrt( pow(current.velocities.at(0),2)
                                   + pow(current.velocities.at(1),2) ));
 
@@ -259,7 +263,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   }   // end all points for
 
   // Increase num to reflect inner cycles
-  //num_ = (num_-1)*num_inner_cycles;*/
+  num_ = (num_-1)*num_inner_cycles;*/
 
   //printVectors();
 } // End calculateSpeedsAndTime

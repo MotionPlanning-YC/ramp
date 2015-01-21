@@ -203,6 +203,8 @@ class Planner {
     const MotionState     predictStartPlanning() const  ;
 
     const std::vector<RampTrajectory> switchTrajectory(const RampTrajectory from, const RampTrajectory to) ;
+    const RampTrajectory computeFullSwitch(const RampTrajectory from, const RampTrajectory to) ;
+    const bool checkIfSwitchCurveNecessary(const RampTrajectory from, const RampTrajectory to) const;
 
     const std::vector<RampTrajectory> getTrajectories(const std::vector<Path> p);
     const std::vector<RampTrajectory> getTrajectories(std::vector<ramp_msgs::TrajectoryRequest> tr);

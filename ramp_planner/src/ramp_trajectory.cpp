@@ -41,10 +41,10 @@ const Path RampTrajectory::getPath() const {
 const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const float t) const {
   //ROS_INFO("In RampTrajectory::getPointAtTime");
   
-  double resolutionRate = msg_.trajectory.points.at(1).time_from_start.toSec() -
+  float resolutionRate = msg_.trajectory.points.at(1).time_from_start.toSec() -
                           msg_.trajectory.points.at(0).time_from_start.toSec();
   int i = ceil((t/resolutionRate));
-  //ROS_INFO("t: %f resolutionRate: %f i: %i", t, resolutionRate, i);
+  ROS_INFO("t: %f resolutionRate: %f i: %i", t, resolutionRate, i);
 
   if( i > msg_.trajectory.points.size() ) {
     return msg_.trajectory.points.at( msg_.trajectory.points.size()-1 );
