@@ -321,7 +321,6 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
   std::ostringstream result;
 
   result<<"\n Knot Points:";
-
   for(unsigned int i=0;i<traj.i_knotPoints.size();i++) {
     
     result<<"\n   "<<i<<":";

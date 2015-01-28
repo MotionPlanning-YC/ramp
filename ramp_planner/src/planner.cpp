@@ -1479,39 +1479,6 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
   //std::cout<<"\nBest: "<<bestTrajec_.toString();
 
 
-  // At generation x, insert a straight-line trajectory to the goal
-  if(generation_ == 150) {
-    //seedPopulationTwo();
-    //std::cout<<"\nPop: "<<population_.fitnessFeasibleToString();
-  }
-
-  tf::Vector3 v_linear( latestUpdate_.msg_.velocities.at(0), 
-                        latestUpdate_.msg_.velocities.at(1), 0);
-  double mag_linear = sqrt(tf::tfDot(v_linear, v_linear));
-  //if(generation_ > 0 && generation_ % 25 == 0) {
-  //if(mag_linear > 0 && cc_started_ && c_pc_ == generationsPerCC_/2) {
-  if(mag_linear > 0 && cc_started_ && generation_ == 24) {
-    ROS_INFO("generationsPerCC_: %i", generationsPerCC_);
-    ROS_INFO("Creating random population at c_pc: %i", c_pc_);
-    seedPopulationTwo();
-    //population_ = randomPopulation(startPlanning_, goal_);
-    int i = population_.findBestIndex();
-    if(i == 0) {
-      bestTrajec_ = population_.get(1);
-    }
-    else if(i == 1) {
-      bestTrajec_ = population_.get(0);
-    }
-    
-    ROS_INFO("Evaluating the random population");
-    population_ = evaluatePopulation(population_);
-    ROS_INFO("After evaluating random population");
-  }
-  else {
-    ROS_INFO("mag_linear: %f cc_started_: %s generation_: %i", mag_linear, cc_started_ ? "true" : "false", generation_);
-  }
-
-
   // Make sure not too many PC occur before next CC
   if(c_pc_ < generationsPerCC_ || !cc_started_) {
 
@@ -1536,19 +1503,13 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
     
     // Call modification
-    if(generation_ == 24 || modifications_) {
+    if(modifications_) {
       ROS_INFO("Doing modification");
-      ModificationResult mod;
-      if(modifications_)
-      mod = modification();
+      ModificationResult mod = modification();
       ROS_INFO("After modification");
 
-      if( generation_ == 24 || mod.i_modified_.size() > 0) {
+      if(mod.i_modified_.size() > 0) {
         ROS_INFO("In checking for switches block");
-
-        mod.popNew_ = population_;
-        mod.i_modified_.push_back(0);
-        mod.i_modified_.push_back(1);
         ROS_INFO("mod.popNew.size(): %i", (int)mod.popNew_.size());
         ROS_INFO("mod.i_modified.size(): %i", (int)mod.i_modified_.size());
 
@@ -1561,12 +1522,13 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
         } // end for
         ROS_INFO("i_mostPromising: %i", (int)i_mostPromising);
 
+
+        // Check if most promising is within fitness range of computing a switch
         tf::Vector3 v_linear( latestUpdate_.msg_.velocities.at(0),
                               latestUpdate_.msg_.velocities.at(1), 0);
         double mag_linear   = sqrt(tf::tfDot(v_linear, v_linear));
         double bestFitness  = bestTrajec_.msg_.fitness;
         double f            = mod.popNew_.get(i_mostPromising).msg_.fitness;
-        // Check if most promising is within fitness range of computing a switch
         if( cc_started_         &&
             mag_linear > 0.0001 &&
             (f > bestFitness || fabs(f - bestFitness) < transThreshold_) )
@@ -1590,7 +1552,6 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
             double t = bestTrajec_.msg_.trajectory.points.at(
                 bestTrajec_.msg_.i_knotPoints.at(i_kp)).time_from_start.toSec();
             restartControlCycle(t);
-            //sendBest();
             sendPopulation();
 
             num_switches_++;
@@ -1603,25 +1564,11 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     
 
  
+    // Finish up
     // t=t+1
     generation_++;
-    
-    if( (generation_-1) % 10 == 0) {
-      std::cout<<"\nPlanning cycle "<<generation_-1<<" complete\n";
-    }
-
     c_pc_++;
-  
-    // Taking out because we create sub-pops after modifying 
-    /*if(subPopulations_) {
-      std::cout<<"\nCreating sub-pops in PC\n";
-      population_.createSubPopulations();
-      std::cout<<"\nDone creating sup-pops in PC\n";
-    }*/
-    
-    // Send the new population to the trajectory viewer
     sendPopulation();
-    //std::cout<<"\nAfter sending pop\n";
   
     ROS_INFO("Generation %i completed", (generation_-1));
   } // end if c_pc<genPerCC

@@ -32,14 +32,14 @@ int main(int argc, char** argv) {
   // Build a Path
   ramp_msgs::KnotPoint c1;
   
-  c1.motionState.positions.push_back(0.809429); // 0.70455
-  c1.motionState.positions.push_back(0.614665); // 0.4026
-  c1.motionState.positions.push_back(1.11095); // 0.519013
+  c1.motionState.positions.push_back(0.5); // 0.70455
+  c1.motionState.positions.push_back(3.); // 0.4026
+  c1.motionState.positions.push_back(2.21431); // 0.519013
 
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(1.); // 0.70455
-  c2.motionState.positions.push_back(1.); // 0.4026
-  c2.motionState.positions.push_back(1.41282); // 0.519146
+  c2.motionState.positions.push_back(1.05539); // 0.70455
+  c2.motionState.positions.push_back(2.12247); // 0.4026
+  c2.motionState.positions.push_back(2.16519); // 0.519146
 
 
   ramp_msgs::KnotPoint c3;
@@ -55,17 +55,17 @@ int main(int argc, char** argv) {
 
   
   // Velocities
-  c1.motionState.velocities.push_back(0.163205);  //.151426
-  c1.motionState.velocities.push_back(0.33); //-.297903
-  c1.motionState.velocities.push_back(0.322615); //-.118126
+  c1.motionState.velocities.push_back(0.);  //.151426
+  c1.motionState.velocities.push_back(0.); //-.297903
+  c1.motionState.velocities.push_back(0.); //-.118126
  
-  /*c2.motionState.velocities.push_back(0.);
   c2.motionState.velocities.push_back(0.);
-  c2.motionState.velocities.push_back(0.);*/
+  c2.motionState.velocities.push_back(0.);
+  c2.motionState.velocities.push_back(0.);
 
-  c3.motionState.velocities.push_back(0.055);
-  c3.motionState.velocities.push_back(0.33);
-  c3.motionState.velocities.push_back(-1.62185);
+  c3.motionState.velocities.push_back(0.);
+  c3.motionState.velocities.push_back(0.);
+  c3.motionState.velocities.push_back(0.);
 
   c4.motionState.velocities.push_back(0);
   c4.motionState.velocities.push_back(0);
@@ -73,9 +73,9 @@ int main(int argc, char** argv) {
  
 
   // Accelerations
-  c1.motionState.accelerations.push_back(0.); //.0114877
+  /*c1.motionState.accelerations.push_back(0.); //.0114877
   c1.motionState.accelerations.push_back(0.);  //-.10465
-  c1.motionState.accelerations.push_back(0.); //.0746295
+  c1.motionState.accelerations.push_back(0.);*/ //.0746295
 
   /*c2.motionState.accelerations.push_back(0.);
   c2.motionState.accelerations.push_back(0.);
@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
   c4.motionState.accelerations.push_back(0.);
   
   ramp_msgs::Path p;
-  //p.points.push_back(zero);
+  p.points.push_back(zero);
   p.points.push_back(c1);
   p.points.push_back(c2);
   //p.points.push_back(c3);
@@ -105,9 +105,9 @@ int main(int argc, char** argv) {
   ramp_msgs::BezierInfo bi;
   
   ramp_msgs::MotionState sp0;
-  //sp0 = p.points.at(0).motionState;
+  sp0 = p.points.at(0).motionState;
   
-  sp0.positions.push_back(0.70455);
+  /*sp0.positions.push_back(0.70455);
   sp0.positions.push_back(0.4026);
   sp0.positions.push_back(0.519146);
 
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
 
   sp0.accelerations.push_back(0);
   sp0.accelerations.push_back(0);
-  sp0.accelerations.push_back(0);
+  sp0.accelerations.push_back(0);*/
 
   
   ramp_msgs::MotionState sp1;
@@ -194,9 +194,9 @@ int main(int argc, char** argv) {
   cp2.positions.push_back(0.380506);
   
   // *** Push on the Control points ***
-  bi.controlPoints.push_back(cp0);
+  /*bi.controlPoints.push_back(cp0);
   bi.controlPoints.push_back(cp1);
-  bi.controlPoints.push_back(cp2);
+  bi.controlPoints.push_back(cp2);*/
 
 
   /** Why 0 initial velocity? **/
@@ -230,18 +230,18 @@ int main(int argc, char** argv) {
   ms_begin.accelerations.push_back(0.);
   ms_begin.accelerations.push_back(0.);
 
-  bi.ms_begin = ms_begin;
-  bi.ms_initialVA = ms_initVA;
-  bi.ms_maxVA = ms_maxVA;
+  //bi.ms_begin = ms_begin;
+  //bi.ms_initialVA = ms_initVA;
+  //bi.ms_maxVA = ms_maxVA;
  
 
   // u
-  bi.u_0 = 0.000001;
-  bi.u_target = 0.990444;
-  bi.u_dot_0 = 0.394567;
-  bi.l = 0.3;
+  bi.u_0 = 0.;
+  bi.u_target = 0.;
+  bi.u_dot_0 = 0.;
+  bi.l = 0.;
 
-  bi.numOfPoints = 27;
+  bi.numOfPoints = 0.;
 
 
   /**************************************************/

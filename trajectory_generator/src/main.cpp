@@ -18,7 +18,7 @@ bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
                       ramp_msgs::TrajectoryRequest::Response& res) 
 {
   ROS_INFO("Request Received: %s", u.toString(req).c_str());
-  
+
   if(req.type != PREDICT) {
     MobileBase mobileBase;
     mobileBase.trajectoryRequest(req, res);
@@ -27,8 +27,8 @@ bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
     Prediction prediction;
     prediction.trajectoryRequest(req, res);
   }
-    
-  std::cout<<"\nSending back: "<<u.toString(res.trajectory);
+
+  ROS_INFO("Sending back: %s", u.toString(res.trajectory).c_str());
   return true;
 }
 
