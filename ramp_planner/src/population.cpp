@@ -340,6 +340,7 @@ const int Population::findBestIndex() {
   } //end for
 
 
+ 
   // Set i_best_
   i_best_ = i_max;
 

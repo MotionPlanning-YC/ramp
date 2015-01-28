@@ -61,9 +61,4 @@ target_link_libraries(testCollision ${catkin_LIBRARIES})
 add_dependencies(testCollision ramp_msgs_generate_messages_cpp)
 
 
-add_executable(test_time src/test_time.cpp)
-set_target_properties(test_time PROPERTIES COMPILE_FLAGS -std=c++0x)
-target_link_libraries(test_time ${catkin_LIBRARIES})
-add_dependencies(test_time ramp_msgs_generate_messages_cpp)
-
 
