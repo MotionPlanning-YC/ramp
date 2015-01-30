@@ -326,5 +326,7 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
     result<<"\n"<<i<<": "<<toString(traj.curves.at(i));
   }
 
+  result<<"\ni_curveEnd: "<<(int)traj.i_curveEnd<<"\n";
+
   return result.str();
 }
