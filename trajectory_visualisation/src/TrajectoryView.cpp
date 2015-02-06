@@ -88,10 +88,10 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
 {
   std::cout<<"\n\nReceived Population from robot "<<msg.robot_id<<"\n";
 
-  populations_.clear();
-  populations_.push_back(msg);
+  //populations_.clear();
+  //populations_.push_back(msg);
 
-  /*if(populations_.size() < 2) {
+  if(populations_.size() < 2) {
     populations_.push_back(msg);
   }
 
@@ -104,7 +104,7 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
       populations_.erase(populations_.begin()+1);
       populations_.insert(populations_.begin()+1, msg);
     }
-  }*/
+  }
 
   drawPopulation();
 }
@@ -117,6 +117,8 @@ void TrajectoryView::drawPopulation() {
 
   // Initialize a QPen object 
   QPen pen = QPen( QColor(0,0,0,150) ); 
+  QPen pen1 = QPen( QColor(0,255,0,150) ); 
+  QPen pen2 = QPen( QColor(0,0,255,150) ); 
   
   /* Draw some grid lines */
     this->scene()->addLine(0, metersToPixels(3.5, false), width_-20, metersToPixels(3.5, false), pen);
@@ -186,11 +188,17 @@ void TrajectoryView::drawPopulation() {
 
           // If the first point
           if(j == 0) {
+            if(populations_.at(p).robot_id == 0)
             // Draw a circle
             this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true)-(radius/2),
                                       metersToPixels(points.at(j).positions.at(1), false)+(radius/2),
-                                      metersToPixels(0.55, true), metersToPixels(0.55, false));
+                                      metersToPixels(0.55, true), metersToPixels(0.55, false), pen1);
                                       
+            else
+            // Draw a circle
+            this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true)-(radius/2),
+                                      metersToPixels(points.at(j).positions.at(1), false)+(radius/2),
+                                      metersToPixels(0.55, true), metersToPixels(0.55, false), pen2);
           }
 
           // Draw a line to the next point

@@ -32,7 +32,7 @@ private:
   void initReflexxes();
 
 
-  const bool checkGoal();
+  const bool checkTarget();
 
   // Store the time it started
   ros::Time t_started_;

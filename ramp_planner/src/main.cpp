@@ -179,8 +179,9 @@ int main(int argc, char** argv) {
   std::cout<<"\nStart: "<<my_planner.start_.toString();
   std::cout<<"\nGoal: "<<my_planner.goal_.toString();
   
-  
-
+ 
+ 
+ 
   /******* Start the planner *******/
   std::cout<<"\nPress Enter to start the planner\n";
   std::cin.get(); 

@@ -54,15 +54,17 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const {
 /** Transformation matrix of obstacle robot from base frame to world frame*/
 void CollisionDetection::setOb_T_w_b(int id) {
 
+  // robot 1 needs robot 0's pose
   if(id == 1) {
-    tf::Vector3 pos(3.5f, 2.f, 0);
+    tf::Vector3 pos(0., 0., 0);
     ob_T_w_b_.setOrigin(pos);
-    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(PI));
+    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(PI/4));
   }
 
+  // robot 0 needs robot 1's pose
   else {
-    tf::Vector3 pos(0.f, 2.f, 0.f);
-    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(0));
+    tf::Vector3 pos(3.5f, 3.5f, 0.f);
+    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(-3*PI/4));
     ob_T_w_b_.setOrigin(pos);
   }
 } // End setOb_T_w_b
@@ -92,6 +94,7 @@ const int getIndexOb(const ramp_msgs::RampTrajectory ob_trajectory, const uint16
 const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::RampTrajectory ob_trajectory) const {
   //std::cout<<"\nQuery on "<<utility.toString(trajectory_)<<" \n*******and*******\n"<<utility.toString(ob_trajectory);
   CollisionDetection::QueryResult result;
+  uint8_t t_checkColl = 5;
 
   std::cout<<"\nob_trajerctory size: "<<ob_trajectory.trajectory.points.size();
   /*if(ob_trajectory.trajectory.points.size() <= 2) {
@@ -106,9 +109,9 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   int i_stop = trajectory_.i_knotPoints.size() > 2 ?  trajectory_.i_knotPoints.at(2):
                                                       trajectory_.i_knotPoints.at(1);
   //std::cout<<"\nobstable trajectory size: "<<ob_trajectory.trajectory.points.size();
-  // For every 3 points, check circle detection
+  // For every point, check circle detection on a subset of the obstacle's trajectory
   float radius = 0.4f;
-  for(uint16_t i=0;i<i_stop;i+=2) {
+  for(uint16_t i=0;i<i_stop;i++) {
     
     // Get the ith point on the trajectory
     trajectory_msgs::JointTrajectoryPoint p_i = trajectory_.trajectory.points.at(i);
@@ -116,7 +119,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
 
     // ***Test position i for collision against some points on obstacle's trajectory***
     // Obstacle trajectory should already be in world coordinates!
-    for(uint16_t j = (ob_trajectory.trajectory.points.size() == 1 || i<=5) ? 0 : i-1 ;j<i+5 && j<ob_trajectory.trajectory.points.size();j++) {
+    for(uint16_t j = (ob_trajectory.trajectory.points.size() == 1 || i<=t_checkColl) ? 0 : i-t_checkColl ;j<i+t_checkColl && j<ob_trajectory.trajectory.points.size();j++) {
      
 
       // Get the jth point of the obstacle's trajectory
@@ -170,7 +173,7 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
 
   // Translation only
   // normally 0.0066 when idle
-  if(mag_linear_t >= 0.15 && mag_angular_t < 0.1) {
+  if(mag_linear_t >= 0.0001 && mag_angular_t < 0.1) {
     result = MotionType::Translation;
     //std::cout<<"\nMotion type = Translation\n";
   }
@@ -269,9 +272,6 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
   double teta = utility.findAngleFromAToB(zero, start.motionState.positions);
   double phi = start.motionState.positions.at(2);
   double v = start.motionState.velocities.at(0);
-  /*std::cout<<"\nteta: "<<teta<<" phi: "<<phi<<" v: "<<v;
-  std::cout<<"\nv*cos(teta): "<<v*cos(teta);
-  std::cout<<"\nv*sin(teta): "<<v*sin(teta);*/
   start.motionState.velocities.at(0) = v*cos(phi);
   start.motionState.velocities.at(1) = v*sin(phi);
 

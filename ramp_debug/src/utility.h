@@ -21,7 +21,7 @@ enum TrajectoryType {
   ALL_BEZIER            = 1,
   PARTIAL_BEZIER        = 2,
   TRANSITION            = 3,
-  PREDICT               = 4
+  PREDICTION            = 4
 };
 
 

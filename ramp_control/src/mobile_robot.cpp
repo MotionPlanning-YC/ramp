@@ -231,7 +231,7 @@ void MobileRobot::calculateSpeedsAndTime () {
     trajectory_msgs::JointTrajectoryPoint current = trajectory_.trajectory.points.at(i);
     trajectory_msgs::JointTrajectoryPoint next    = trajectory_.trajectory.points.at(i+1);
     //std::cout<<"\nPoint "<<i;
-    
+
     // If not taking acceleration into account, uncomment this 
     // and comment out from double xInc to num_ =
     speeds_linear_.push_back( sqrt( pow(current.velocities.at(0),2)

@@ -282,8 +282,11 @@ int main(int argc, char** argv) {
   std::cout<<"\n"<<u.displaceAngle(PI/2, 6*PI/4);
   std::cout<<"\n"<<u.displaceAngle(PI/2, 7*PI/4);*/
 
-  std::cout<<"\nSpinning...\n";
-  ros::spin();
+
+  ros::AsyncSpinner spinner(8);
+  std::cout<<"\nWaiting for requests...\n";
+  spinner.start();
+  ros::waitForShutdown();
 
 
   std::cout<<"\nExiting Normally\n";

@@ -160,6 +160,7 @@ class Planner {
     bool evaluations_;
     bool seedPopulation_;
     
+    const double                              updateCurvePos(const RampTrajectory traj) const;
   private:
     /** These are (mostly) utility members that are only used by Planner and should not be used by other classes */
 
@@ -174,7 +175,6 @@ class Planner {
     const std::vector<Path>                   adaptPaths( MotionState start, 
                                                           ros::Duration dur) const;
     const std::vector<ramp_msgs::BezierInfo>  adaptCurves(const Population pop) const;
-    const double                              updateCurvePos(const RampTrajectory traj) const;
     const ramp_msgs::BezierInfo               handleCurveEnd(const RampTrajectory traj) const;
 
     // Returns a unique id for a RampTrajectory 

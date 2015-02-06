@@ -36,7 +36,7 @@
   <include file="$(find ramp_launch)/launch/planner_parameters.launch" />
   <rosparam file="$(find ramp_launch)/launch/config/robot_1.yaml" command="load" ns="robot_info/" />
   
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" /> 
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen"/> 
 </group> 
 
 
@@ -60,7 +60,7 @@
 <!-- Evaluation -->
 
 <group ns="$(arg robot_0_name)">
-  <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen" >
+  <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="log" >
     <param name="robot_id" type="int" value="0" />
   </node>
 </group> 
@@ -79,20 +79,20 @@
 
 <group ns="$(arg robot_0_name)" >
   <node name="ramp_control" pkg="ramp_control" type="ramp_control" /> 
-    <param name="orientation" type="double" value="3.14159" />
+    <param name="orientation" type="double" value="0.785" />
     <param name="ramp_control/simulation" value="true" />
 </group> 
 
 
 <group ns="$(arg robot_1_name)"> 
   <node name="ramp_control" pkg="ramp_control" type="ramp_control" /> 
-    <param name="orientation" type="double" value="0" />
+    <param name="orientation" type="double" value="-2.356" />
     <param name="ramp_control/simulation" value="true" />
 </group> 
 
 
 <!-- Simulation -->
-<node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/world/test1.world" >
+<node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/world/test3.world" >
   <remap from="/robot_0/odom" to="/robot_0/odometry" />
   <remap from="/robot_1/odom" to="/robot_1/odometry" />
 </node>
@@ -100,7 +100,7 @@
 
 
 <!-- Trajectory Visualization -->
-<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> 
+<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="log" /> 
 
 
 </launch>
