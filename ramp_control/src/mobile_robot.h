@@ -80,6 +80,7 @@ class MobileRobot {
     std::vector<ros::Time>    end_times; 
     std::vector<double>       speeds_linear_;
     std::vector<double>       speeds_angular_;
+    std::vector<double>       orientations_;
 
     geometry_msgs::Twist      twist_;
     TrajectoryRequestHandler* h_traj_req_;

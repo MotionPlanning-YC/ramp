@@ -15,6 +15,8 @@ void Population::clear() {
 }
 
 
+const std::vector<RampTrajectory> Population::getTrajectories() const {return trajectories_;}
+
 /** This method returns the trajectory at index i */
 const RampTrajectory Population::get(const unsigned int i) const {
   return trajectories_.at(i);

@@ -25,6 +25,29 @@ MotionState::MotionState(const ramp_msgs::MotionState ms) : msg_(ms), mobile_bas
 
 
 
+
+const MotionState MotionState::zero(const uint8_t size) const {
+  MotionState result;
+
+  for(uint8_t i=0;i<size;i++) {
+    result.msg_.positions.push_back(0);
+  }
+
+  for(uint8_t i=0;i<size;i++) {
+    result.msg_.velocities.push_back(0);
+  }
+
+  for(uint8_t i=0;i<size;i++) {
+    result.msg_.accelerations.push_back(0);
+  }
+
+  for(uint8_t i=0;i<size;i++) {
+    result.msg_.jerks.push_back(0);
+  }
+
+  return result;
+}
+
 const bool MotionState::equals(const MotionState& ms) const {
   if(msg_.positions.size() != ms.msg_.positions.size()) {
     return false;
@@ -67,6 +90,12 @@ const bool MotionState::equals(const MotionState& ms) const {
   }
 
   return true;
+}
+
+
+void MotionState::setEqual(const MotionState ms) {
+  msg_ = ms.msg_; 
+  mobile_base_k_ = ms.mobile_base_k_;
 }
 
 
@@ -165,6 +194,8 @@ const MotionState MotionState::add(const MotionState m) const {
 
 /** */
 const MotionState MotionState::subtract(const MotionState m) const {
+  ROS_INFO("In MotionState::subtract");
+
   MotionState result = *this;
 
   for(int i=0;i<msg_.positions.size() && i<m.msg_.positions.size();i++) {
@@ -178,7 +209,7 @@ const MotionState MotionState::subtract(const MotionState m) const {
 
   /** Separate loops because it's not guaranteed that every MS will have
    * same # of each vector */
-  for(int i=0;i<msg_.velocities.size() && i<m.msg_.velocities.size();i++) {
+  /*for(int i=0;i<msg_.velocities.size() && i<m.msg_.velocities.size();i++) {
     result.msg_.velocities.at(i) -= m.msg_.velocities.at(i);
   }
 
@@ -188,8 +219,9 @@ const MotionState MotionState::subtract(const MotionState m) const {
 
   for(int i=0;i<msg_.jerks.size() && i<m.msg_.jerks.size();i++) {
     result.msg_.jerks.at(i) -= m.msg_.jerks.at(i);
-  }
+  }*/
 
+  ROS_INFO("Exiting MotionState::subtract");
   return result;
 } // End subtract
 

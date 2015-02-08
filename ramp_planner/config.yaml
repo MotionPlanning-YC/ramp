@@ -1,13 +1,13 @@
-population_size: 10
+population_size: 2
 
-sub_populations: true
+sub_populations: false 
 
-modifications: true 
+modifications: false 
 
 evaluations: true
 
-seed_population: false 
+seed_population: true 
 
-gens_before_control_cycle: 5
+gens_before_control_cycle: 0
 
 control_cycle_rate: 2

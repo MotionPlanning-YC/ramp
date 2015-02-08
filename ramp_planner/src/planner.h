@@ -125,7 +125,9 @@ class Planner {
 
 
     // Update the population 
-    const Population adaptPopulation(const Population pop, const MotionState ms, const ros::Duration d);
+    const Population adaptPopulation( const Population pop, 
+                                      const MotionState ms, 
+                                      const ros::Duration d );
 
     // Display all of the paths
     const std::string pathsToString() const;
@@ -144,7 +146,7 @@ class Planner {
 
     // Each element is the target motion state 
     // for each of i planning cycles
-    std::vector<MotionState> m_i;
+    std::vector<MotionState> m_i_;
     
 
 
@@ -160,7 +162,7 @@ class Planner {
     bool evaluations_;
     bool seedPopulation_;
     
-    const double                              updateCurvePos(const RampTrajectory traj) const;
+    const double updateCurvePos(const RampTrajectory traj) const;
   private:
     /** These are (mostly) utility members that are only used by Planner and should not be used by other classes */
 
@@ -205,8 +207,9 @@ class Planner {
           void seedPopulation()                                         ;
           void seedPopulationTwo()                                      ;
 
-    const RampTrajectory  getTransitionTrajectory(const RampTrajectory current, const RampTrajectory trgt_traj)    ;
-    const MotionState     predictStartPlanning() const  ;
+    const RampTrajectory  getTransitionTrajectory(const RampTrajectory current, 
+                                                  const RampTrajectory trgt_traj);
+    const MotionState     predictStartPlanning() const;
 
 
 
@@ -222,6 +225,8 @@ class Planner {
 
 
 
+    const RampTrajectory replanTrajec(const RampTrajectory trajec, const MotionState ms_start);
+    const std::vector<RampTrajectory> replanTrajecs(const std::vector<RampTrajectory> trajecs, const MotionState ms_start);
     const std::vector<RampTrajectory> getTrajectories(const std::vector<Path> p);
     const std::vector<RampTrajectory> getTrajectories(std::vector<ramp_msgs::TrajectoryRequest> tr);
     void updatePathsStart(const MotionState s);
@@ -322,10 +327,14 @@ class Planner {
 
     ros::Time t_start_;
 
+    ros::Time t_prevCC_, t_prevPC_;
 
     RampTrajectory movingOn_;
 
     double t_fixed_cc_;
+
+
+    MotionState totalDiff_;
 };
 
 #endif

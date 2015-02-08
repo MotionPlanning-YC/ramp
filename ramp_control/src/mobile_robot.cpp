@@ -188,6 +188,9 @@ void MobileRobot::updateTrajectory(const ramp_msgs::RampTrajectory msg) {
   if(msg.trajectory.points.size() > 1) {
     calculateSpeedsAndTime();
   }
+
+  //if(trajectory_.trajectory.points.size() > 2)
+  //ROS_INFO("Moving on: %s", utility_.toString(trajectory_).c_str());
 } // End updateTrajectory
 
 
@@ -213,6 +216,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   speeds_linear_.clear();
   speeds_angular_.clear();
   end_times.clear();
+  orientations_.clear();
   
 
   // Get the starting time
@@ -240,6 +244,8 @@ void MobileRobot::calculateSpeedsAndTime () {
     speeds_angular_.push_back( current.velocities.at(2) ); 
 
     end_times.push_back(start_time + next.time_from_start);
+
+    orientations_.push_back( utility_.findAngleFromAToB(current.positions, next.positions) ); 
   }
 
     // Get how much each DOF increases per inner cycle
@@ -265,7 +271,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   // Increase num to reflect inner cycles
   num_ = (num_-1)*num_inner_cycles;*/
 
-  //printVectors();
+  printVectors();
 } // End calculateSpeedsAndTime
 
 
@@ -306,6 +312,13 @@ void MobileRobot::printVectors() const {
     std::cout<<end_times.at(i)<<", ";
   }
   std::cout<<end_times.at(end_times.size()-1)<<"]";
+
+  std::cout<<"\norientations_ size: "<<orientations_.size();
+  std::cout<<"\norientations_: [";
+  for(unsigned int i=0;i<orientations_.size()-1;i++) {
+    std::cout<<orientations_.at(i)<<", ";
+  }
+  std::cout<<orientations_.at(orientations_.size()-1)<<"]";
 } // End printVectors
 
 
@@ -327,11 +340,10 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
   restart_ = false;
   ros::Rate r(20);
 
-
   // Execute the trajectory
   while( (num_traveled_+1) < num_) {
-    //ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
-    //ROS_INFO("At state: %s", utility_.toString(motion_state_).c_str());
+    ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
+    ROS_INFO("At state: %s", utility_.toString(motion_state_).c_str());
     restart_ = false;
  
 
@@ -362,16 +374,16 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
         // When driving straight, adjust the angular speed 
         // to maintain orientation
         // TODO: Works with Bezier curve?
-        /*if(fabs(twist_.linear.x) > 0.0f) {
+        if(fabs(twist_.linear.x) > 0.0f) {
           
-          //std::cout<<"\ninitial_theta_: "<<initial_theta_;
+          std::cout<<"\ninitial_theta_: "<<initial_theta_;
           float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
           float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
-          //std::cout<<"\nactual theta: "<<actual_theta;
-          //std::cout<<"\norientations_.at("<<num_traveled_<<"): "<<orientations_.at(num_traveled_);
-          //std::cout<<"\ndist: "<<dist;
+          std::cout<<"\nactual theta: "<<actual_theta;
+          std::cout<<"\norientations_.at("<<num_traveled_<<"): "<<orientations_.at(num_traveled_);
+          std::cout<<"\ndist: "<<dist;
           twist_.angular.z = dist/2;
-        }*/
+        }
       //}
     
       //std::cout<<"\ntwist_linear: "<<twist_.linear.x;

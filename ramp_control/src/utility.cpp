@@ -47,6 +47,8 @@ const double Utility::findAngleFromAToB(const trajectory_msgs::JointTrajectoryPo
 const double Utility::findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const {
   double result;
 
+  //std::cout<<"\na: ["<<a.at(0)<<", "<<a.at(1)<<"] b: ["<<b.at(0)<<", "<<b.at(1)<<"]";
+
   // Find the distances in x,y directions and Euclidean distance
   double d_x = b.at(0) - a.at(0);
   double d_y = b.at(1) - a.at(1);
@@ -56,7 +58,7 @@ const double Utility::findAngleFromAToB(const std::vector<double> a, const std::
   // Set the result to the starting orientation if one is provided
   // Or to 0 if no starting orientation is provided
   // TODO: Make the comparison proportionate to size of space
-  if(euc_dist <= 0.0001) {
+  if(euc_dist <= 0.000001) {
     result = 0;
   }
 
@@ -75,6 +77,7 @@ const double Utility::findAngleFromAToB(const std::vector<double> a, const std::
     result = asin(d_y / euc_dist); 
   }
 
+  //std::cout<<"\nresult: "<<result;
   return result;
 } //End findAngleFromAToB
 

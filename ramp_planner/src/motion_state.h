@@ -33,7 +33,11 @@ class MotionState {
     
     const   std::string toString() const;
 
-    const bool equals(const MotionState& ms) const;   
+    const bool equals(const MotionState& ms) const;
+
+    const MotionState zero(const uint8_t size) const;
+
+    void setEqual(const MotionState ms);
 
   private:
     
