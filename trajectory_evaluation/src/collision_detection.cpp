@@ -12,6 +12,7 @@ CollisionDetection::~CollisionDetection() {
 
 void CollisionDetection::init(ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler((const ros::NodeHandle&)h);
+  //pub_population = h.advertise<ramp_msgs::Population>("population", 1000);
   setOb_T_w_b(id);
 }
 
@@ -56,15 +57,15 @@ void CollisionDetection::setOb_T_w_b(int id) {
 
   // robot 1 needs robot 0's pose
   if(id == 1) {
-    tf::Vector3 pos(0., 0., 0);
+    tf::Vector3 pos(0., 1.5, 0);
     ob_T_w_b_.setOrigin(pos);
-    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(PI/4));
+    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(0));
   }
 
   // robot 0 needs robot 1's pose
   else {
-    tf::Vector3 pos(3.5f, 3.5f, 0.f);
-    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(-3*PI/4));
+    tf::Vector3 pos(1.5f, 3.5f, 0.f);
+    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(-PI/4));
     ob_T_w_b_.setOrigin(pos);
   }
 } // End setOb_T_w_b
@@ -96,7 +97,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   CollisionDetection::QueryResult result;
   uint8_t t_checkColl = 5;
 
-  std::cout<<"\nob_trajerctory size: "<<ob_trajectory.trajectory.points.size();
+  std::cout<<"\nob_trajectory size: "<<ob_trajectory.trajectory.points.size();
   /*if(ob_trajectory.trajectory.points.size() <= 2) {
     if(id == 0)
       std::cout<<"\nRobot 1 has no trajectory!\n";
@@ -104,13 +105,24 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       std::cout<<"\nRobot 0 has no trajectory!\n";
   }*/
   
-  // If there is more than 1 segment, do checks until the end of Bezier curve
-  // which will be 3rd knot point (current state, start of curve, end of curve)
-  int i_stop = trajectory_.i_knotPoints.size() > 2 ?  trajectory_.i_knotPoints.at(2):
-                                                      trajectory_.i_knotPoints.at(1);
+  int i_stop;
+  if(trajectory_.i_knotPoints.size() == 0) {
+    i_stop = 0;
+  }
+  else if(trajectory_.i_knotPoints.size() == 1) {
+    i_stop = 1;
+  }
+  else if(trajectory_.i_knotPoints.size() <= 2) {
+    i_stop = trajectory_.i_knotPoints.at(1);
+  }
+  else {
+    i_stop = trajectory_.i_knotPoints.at(2);
+  }
+  
+  
   //std::cout<<"\nobstable trajectory size: "<<ob_trajectory.trajectory.points.size();
   // For every point, check circle detection on a subset of the obstacle's trajectory
-  float radius = 0.4f;
+  float radius = 0.275f;
   for(uint16_t i=0;i<i_stop;i++) {
     
     // Get the ith point on the trajectory
@@ -139,8 +151,8 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
         std::cout<<"("<<p_ob.positions.at(0)<<", "<<p_ob.positions.at(1)<<"), dist: "<<dist<<" i: "<<i<<" j: "<<j;
         result.collision_ = true;
         result.t_firstCollision_ = p_i.time_from_start.toSec();
-        j = i+1;
-        i = trajectory_.trajectory.points.size();
+        j = i+t_checkColl;
+        i = i_stop;
       } // end if
     } // end for
   } // end for
@@ -216,7 +228,6 @@ const ramp_msgs::RampTrajectory CollisionDetection::getPredictedTrajectory(const
   // Now build a Trajectory Request 
   ramp_msgs::TrajectoryRequest tr;
     tr.request.path = getObstaclePath(ob, motion_type);
-    tr.request.resolutionRate = 5;
     tr.request.type = 4;  // Prediction
 
 
@@ -224,6 +235,12 @@ const ramp_msgs::RampTrajectory CollisionDetection::getPredictedTrajectory(const
   if(h_traj_req_->request(tr)) {
     result = tr.response.trajectory;
   }
+
+  /*ramp_msgs::Population pop;
+  pop.population.push_back(result);
+  pop.best_id = 0;
+  pop.robot_id = 2;
+  pub_population.publish(pop);*/
 
   return result;
 } // End getPredictedTrajectory

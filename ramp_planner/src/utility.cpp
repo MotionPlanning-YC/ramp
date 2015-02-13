@@ -60,8 +60,10 @@ const double Utility::findAngleFromAToB(const std::vector<double> a, const std::
   // Find the distances in x,y directions and Euclidean distance
   double d_x = b.at(0) - a.at(0);
   double d_y = b.at(1) - a.at(1);
-  double euc_dist = sqrt( pow(d_x,2) + pow(d_y,2) );
+
+  result = atan(d_y / d_x);
   
+  /*double euc_dist = sqrt( pow(d_x,2) + pow(d_y,2) );
   // If the positions are the same,
   // Set the result to the starting orientation if one is provided
   // Or to 0 if no starting orientation is provided
@@ -82,7 +84,7 @@ const double Utility::findAngleFromAToB(const std::vector<double> a, const std::
   // If b is in the 4th quadrant, d_y<=0 & d_x>=0
   else {
     result = asin(d_y / euc_dist); 
-  }
+  }*/
 
   return result;
 } // End findAngleFromAToB
@@ -231,18 +233,22 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
   result<<")";
 
   //Velocities
-  result<<"\n       Velocities: ("<<p.velocities.at(0);
-  for(unsigned int k=1;k<p.velocities.size();k++) {
-    result<<", "<<p.velocities.at(k);
+  if(p.velocities.size() > 0) {
+    result<<"\n       Velocities: ("<<p.velocities.at(0);
+    for(unsigned int k=1;k<p.velocities.size();k++) {
+      result<<", "<<p.velocities.at(k);
+    }
+    result<<")";
   }
-  result<<")";
   
   //Accelerations
-  result<<"\n       Accelerations: ("<<p.accelerations.at(0);
-  for(unsigned int k=1;k<p.accelerations.size();k++) {
-    result<<", "<<p.accelerations.at(k);
+  if(p.accelerations.size() > 0) {
+    result<<"\n       Accelerations: ("<<p.accelerations.at(0);
+    for(unsigned int k=1;k<p.accelerations.size();k++) {
+      result<<", "<<p.accelerations.at(k);
+    }
+    result<<")";
   }
-  result<<")";
   
   result<<"\n Time From Start: "<<p.time_from_start;
 
@@ -281,14 +287,18 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
 
   result<<"\n Knot Points:";
 
-  //ROS_INFO("traj.i_knotpoints.size(): %i", (int)traj.i_knotPoints.size());
+  ROS_INFO("traj.i_knotpoints.size(): %i", (int)traj.i_knotPoints.size());
   for(unsigned int i=0;i<traj.i_knotPoints.size();i++) {
-    //ROS_INFO("KP: %i", (int)i);
+    ROS_INFO("KP: %i", (int)i);
     
     result<<"\n   "<<i<<":";
     
     unsigned int index = traj.i_knotPoints.at(i);
-    //ROS_INFO("index: %i, traj.points.size(): %i", (int)index, (int)traj.trajectory.points.size());
+    if(index > traj.trajectory.points.size()-1) {
+      ROS_ERROR("index: %i, traj.points.size(): %i", 
+          (int)index, 
+          (int)traj.trajectory.points.size());
+    }
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);
     
     result<<"\n       "<<toString(p);

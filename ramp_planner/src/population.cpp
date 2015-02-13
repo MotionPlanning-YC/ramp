@@ -23,6 +23,15 @@ const RampTrajectory Population::get(const unsigned int i) const {
 } // End get
 
 
+/** Returns -1 if it cannot find the id */
+const int Population::getIndexFromId(const uint16_t id) const {
+  for(uint16_t i=0;i<trajectories_.size();i++) {
+    if(trajectories_.at(i).msg_.id == id)
+      return i;
+  }
+
+  return -1;
+}
 
 
 

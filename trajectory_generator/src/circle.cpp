@@ -24,9 +24,9 @@ Circle::~Circle() {
 
 
 const bool Circle::finalStateReached() {
-  return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
-  //return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED ||
-    //  (timeFromStart_ >= timeCutoff_));
+  //return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
+  return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED ||
+      (timeFromStart_ >= timeCutoff_));
 }
 
 void Circle::init(const ramp_msgs::MotionState s) {
@@ -58,7 +58,7 @@ void Circle::init(const ramp_msgs::MotionState s) {
   // This is always -alpha, why?
   initCircleTheta_ = utility_.findAngleFromAToB(center_.positions, start_.positions);
 
-  timeCutoff_ = ros::Duration(35);
+  timeCutoff_ = ros::Duration(10);
   initReflexxes();
   //std::cout<<"\nLeaving init\n";
 }
@@ -86,12 +86,6 @@ void Circle::initReflexxes() {
   reflexxesData_.inputParameters->SelectionVector->VecData[0] = true;
 
   reflexxesData_.resultValue = 0;
- 
-  /*std::cout<<"\nCurrent Pos: "<<reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];
-  std::cout<<"\nCurrent Vel: "<<reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0];
-  std::cout<<"\nTarget Pos: "<<reflexxesData_.inputParameters->TargetPositionVector->VecData[0];
-  std::cout<<"\nTarget Vel: "<<reflexxesData_.inputParameters->TargetVelocityVector->VecData[0];*/
-  //std::cout<<"\nLeaving initReflexxes\n";
 }
 
 
@@ -166,8 +160,6 @@ const ramp_msgs::MotionState Circle::spinOnce() {
 
   /** Build the JointTrajectoryPoint object that will be used to build the trajectory */
   ramp_msgs::MotionState result = buildMotionState(reflexxesData_);
-  //std::cout<<"\nresult: "<<utility_.toString(result);
-
 
   // The input of the next iteration is the output of this one
   *reflexxesData_.inputParameters->CurrentPositionVector = 

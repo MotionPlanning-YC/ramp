@@ -99,7 +99,8 @@ class Planner {
               const int                 population_size, 
               const bool                sub_populations,  
               const int                 gens_before_cc=0,
-              const double              t_fixed_cc=2.);
+              const double              t_fixed_cc=2.,
+              const bool                errorReduction=0);
     
     // Send the best trajectory to the control package
     void sendBest();
@@ -193,7 +194,7 @@ class Planner {
     // Msg building methods
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
               const Path path, const std::vector<ramp_msgs::BezierInfo> curves,
-              const int id=0) const;
+              const int id=-1) const;
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
               const Path path, const int id=0) const;
 
@@ -225,6 +226,7 @@ class Planner {
 
 
 
+    const ramp_msgs::BezierInfo replanCurve(const RampTrajectory trajec, const MotionState ms_start) const;
     const RampTrajectory replanTrajec(const RampTrajectory trajec, const MotionState ms_start);
     const std::vector<RampTrajectory> replanTrajecs(const std::vector<RampTrajectory> trajecs, const MotionState ms_start);
     const std::vector<RampTrajectory> getTrajectories(const std::vector<Path> p);
@@ -335,6 +337,10 @@ class Planner {
 
 
     MotionState totalDiff_;
+    
+    Population pop_orig_;
+
+    bool errorReduction_;
 };
 
 #endif

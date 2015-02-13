@@ -21,6 +21,7 @@ class Population {
     void                  replace(const uint8_t i, const RampTrajectory trajec);
     void                  replaceAll(const std::vector<RampTrajectory> new_pop);
     const RampTrajectory  get(const unsigned int i) const;
+    const int             getIndexFromId(const uint16_t id) const;
     const std::vector<RampTrajectory> getTrajectories() const;
     const int             getMinFitness() const;
     const bool            contains(const RampTrajectory rt) const;

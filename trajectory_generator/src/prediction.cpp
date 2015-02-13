@@ -36,7 +36,7 @@ bool Prediction::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   }
 
   else if(fabs(req.path.points.at(0).motionState.velocities.at(2)) < 0.0001) {
-    //std::cout<<"\nIn straight line prediction\n";
+    //ROS_INFO("In straight line prediction");
     Line li;
 
 
@@ -45,28 +45,26 @@ bool Prediction::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   }
 
   else if(fabs(req.path.points.at(0).motionState.velocities.at(2)) > 0.0001 ) {
-    //std::cout<<"\nIn circle prediction\n";
-    //std::cout<<"\nPoints: "<<utility_.toString(req.path.points.at(0).motionState)<<"\n";
+    //ROS_INFO("In circle prediction");
     Circle ci;
     ci.init(req.path.points.at(0).motionState);
     traj = ci.generatePoints(); 
   }
   else {
+    //ROS_INFO("In else");
     traj.push_back(req.path.points.at(0).motionState);
   }
 
-    ramp_msgs::RampTrajectory rt;
-    for(int i=0;i<traj.size();i++) {
-      rt.trajectory.points.push_back(utility_.getTrajectoryPoint(traj.at(i)));
-    }
-    res.trajectory = rt;
-    res.trajectory.i_knotPoints.push_back(0);
-    res.trajectory.i_knotPoints.push_back(rt.trajectory.points.size()-1);
+  ramp_msgs::RampTrajectory rt;
+  for(int i=0;i<traj.size();i++) {
+    rt.trajectory.points.push_back(utility_.getTrajectoryPoint(traj.at(i)));
+  }
+  res.trajectory = rt;
+  res.trajectory.i_knotPoints.push_back(0);
+  res.trajectory.i_knotPoints.push_back(rt.trajectory.points.size()-1);
 
-    //for(int i=0;i<res.trajectory.i_knotPoints.size();i++) {
-      //std::cout<<"\nKnot Point ID: "<<res.trajectory.i_knotPoints.at(i);
-    //}
-  
+  //ROS_INFO("Predicted trajectory: %s", utility_.toString(rt).c_str());
+
 
   return true;
 }

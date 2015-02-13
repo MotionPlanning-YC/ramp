@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
   pub_obj = handle.advertise<ramp_msgs::Obstacle>("object_list", 1000);
 
   //Timers
-  ros::Timer timer = handle.createTimer(ros::Duration(1.f / 10.f), publishList);
+  ros::Timer timer = handle.createTimer(ros::Duration(1.f / 4.f), publishList);
    
 
   std::cout<<"\nSpinning\n";

@@ -10,16 +10,6 @@ Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) : Q(10000.f
 /** This method accepts an EvaluationRequest and sets the appropriate members for evaluation */
 void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request& req) {
   trajectory_ = req.trajectory;
-  goal_ = req.goal;
-  
-  /*Set the i_segments_ member*/
-  // First, clear
-  i_segments_.clear();
-
-  //Set the elements
-  for(unsigned int i=0;i<req.i_segments.size();i++) {
-    i_segments_.push_back(req.i_segments.at(i));
-  } 
 } //End setRequest
 
 
@@ -34,7 +24,6 @@ const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) 
   // Set values for time and add to result
   // Negate because for this criterion, shorter values are better
   time_.trajectory_ = trajectory_;
-  time_.goal_       = goal_;
   denom += time_.perform();
 
   

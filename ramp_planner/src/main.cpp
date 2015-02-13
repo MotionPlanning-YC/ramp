@@ -2,6 +2,7 @@
 #include "planner.h"
  
 
+Utility utility;
 
 
 Planner             my_planner; 
@@ -14,6 +15,7 @@ bool                sub_populations;
 bool                modifications;
 bool                evaluations;
 bool                seedPopulation;
+bool                errorReduction;
 double              t_cc_rate;
 
 
@@ -134,9 +136,14 @@ void loadParameters(const ros::NodeHandle handle) {
     std::cout<<"\ngens_before_control_cycle: "<<gensBeforeCC;
   }
   
-  if(handle.hasParam("ramp/control_cycle_rate")) {
-    handle.getParam("ramp/control_cycle_rate", t_cc_rate);
+  if(handle.hasParam("ramp/fixed_control_cycle_rate")) {
+    handle.getParam("ramp/fixed_control_cycle_rate", t_cc_rate);
     ROS_INFO("t_cc_rate: %f", t_cc_rate);
+  }
+  
+  if(handle.hasParam("ramp/error_reduction")) {
+    handle.getParam("ramp/error_reduction", errorReduction);
+    ROS_INFO("errorReduction: %s", errorReduction ? "True" : "False");
   }
 
   std::cout<<"\n------- Done loading parameters -------\n";
@@ -171,7 +178,7 @@ int main(int argc, char** argv) {
 
  
   /** Initialize the Planner's handlers */ 
-  my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, gensBeforeCC); 
+  my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, gensBeforeCC, t_cc_rate, errorReduction); 
   my_planner.modifications_   = modifications;
   my_planner.evaluations_     = evaluations;
   my_planner.seedPopulation_  = seedPopulation;
@@ -179,7 +186,6 @@ int main(int argc, char** argv) {
   std::cout<<"\nStart: "<<my_planner.start_.toString();
   std::cout<<"\nGoal: "<<my_planner.goal_.toString();
   
- 
  
  
   /******* Start the planner *******/

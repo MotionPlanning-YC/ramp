@@ -4,6 +4,7 @@
 #include "ramp_msgs/Path.h"
 #include "utility.h"
 #include "ramp_msgs/TrajectoryRequest.h"
+#include "ramp_msgs/EvaluationRequest.h"
 #include "ramp_msgs/Population.h"
 #include "ramp_msgs/BezierInfo.h"
 
@@ -16,6 +17,7 @@ int main(int argc, char** argv) {
   ros::Publisher pub_traj = handle.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
   ros::Publisher pub_pop = handle.advertise<ramp_msgs::Population>("population", 1000);
   ros::ServiceClient client_ = handle.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");
+  ros::ServiceClient client_eval = handle.serviceClient<ramp_msgs::EvaluationRequest>("trajectory_evaluation");
 
 
   ramp_msgs::KnotPoint zero;
@@ -31,37 +33,52 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(1.43989); // 0.70455
-  c1.motionState.positions.push_back(3.31706); // 0.4026
-  c1.motionState.positions.push_back(-1.79785); // 0.519146
+  c1.motionState.positions.push_back(3.5); // 0.70455
+  c1.motionState.positions.push_back(1.5); // 0.4026
+  c1.motionState.positions.push_back(-1.1651); // 0.519146
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(0.204649); // 0.70455
-  c2.motionState.positions.push_back(1.58088); // 0.4026
-  c2.motionState.positions.push_back(1.15025); // 0.519146
+  c2.motionState.positions.push_back(3.5); // 0.70455
+  c2.motionState.positions.push_back(1.5); // 0.4026
+  c2.motionState.positions.push_back(0); // 0.519146
 
 
   ramp_msgs::KnotPoint c3;
-  c3.motionState.positions.push_back(0.0144909); // 0.857146
-  c3.motionState.positions.push_back(2.27228); // 0.71115
-  c3.motionState.positions.push_back(-2.29674);  // 1.11151
+  c3.motionState.positions.push_back(2.2479); // 0.857146
+  c3.motionState.positions.push_back(1.36686); // 0.71115
+  c3.motionState.positions.push_back(0.7722);  // 1.11151
 
 
   ramp_msgs::KnotPoint c4;
-  c4.motionState.positions.push_back(2.56734);
-  c4.motionState.positions.push_back(0.592834);
-  c4.motionState.positions.push_back(2.88841);
+  c4.motionState.positions.push_back(0.854165);
+  c4.motionState.positions.push_back(2.97861);
+  c4.motionState.positions.push_back(0.288039);
 
 
   ramp_msgs::KnotPoint c5;
-  c5.motionState.positions.push_back(3.5);
-  c5.motionState.positions.push_back(3.5);
-  c5.motionState.positions.push_back(PI/4);
+  c5.motionState.positions.push_back(0.219097);
+  c5.motionState.positions.push_back(0.934402);
+  c5.motionState.positions.push_back(1.25361);
 
   ramp_msgs::KnotPoint c6;
-  c6.motionState.positions.push_back(0.139665);
-  c6.motionState.positions.push_back(2.6702);
-  c6.motionState.positions.push_back(1.90544);
+  c6.motionState.positions.push_back(1.86675);
+  c6.motionState.positions.push_back(0.248112);
+  c6.motionState.positions.push_back(2.69603);
+
+  ramp_msgs::KnotPoint c7;
+  c7.motionState.positions.push_back(0.854165);
+  c7.motionState.positions.push_back(2.97861);
+  c7.motionState.positions.push_back(0.288039);
+
+  ramp_msgs::KnotPoint c8;
+  c8.motionState.positions.push_back(0.219097);
+  c8.motionState.positions.push_back(0.934402);
+  c8.motionState.positions.push_back(1.25361);
+
+  ramp_msgs::KnotPoint c9;
+  c9.motionState.positions.push_back(3.5);
+  c9.motionState.positions.push_back(3.5);
+  c9.motionState.positions.push_back(PI/4);
 
   
   // Velocities
@@ -69,9 +86,9 @@ int main(int argc, char** argv) {
   c1.motionState.velocities.push_back(0.); //-.297903
   c1.motionState.velocities.push_back(0.); //-.118126
  
-  c2.motionState.velocities.push_back(0.102207);
-  c2.motionState.velocities.push_back(0.218168);
-  c2.motionState.velocities.push_back(-0.339301);
+  c2.motionState.velocities.push_back(0);  //.151426
+  c2.motionState.velocities.push_back(0.); //-.297903
+  c2.motionState.velocities.push_back(0.); //-.118126
 
   c3.motionState.velocities.push_back(0.);
   c3.motionState.velocities.push_back(0.);
@@ -95,9 +112,9 @@ int main(int argc, char** argv) {
   c1.motionState.accelerations.push_back(0.);  //-.10465
   c1.motionState.accelerations.push_back(0.); //.0746295
 
-  c2.motionState.accelerations.push_back(0.0542405);
-  c2.motionState.accelerations.push_back(-0.0860246);
-  c2.motionState.accelerations.push_back(-0.157239);
+  c2.motionState.accelerations.push_back(0.);
+  c2.motionState.accelerations.push_back(0.);
+  c2.motionState.accelerations.push_back(0.);
   
   /*c3.motionState.accelerations.push_back(0.);
   c3.motionState.accelerations.push_back(0.);
@@ -113,12 +130,15 @@ int main(int argc, char** argv) {
   
   ramp_msgs::Path p;
   //p.points.push_back(zero);
-  p.points.push_back(c1);
-  //p.points.push_back(c2);
+  p.points.push_back(c2);
+  p.points.push_back(c2);
   //p.points.push_back(c3);
   //p.points.push_back(c4);
-  p.points.push_back(c5);
+  //p.points.push_back(c5);
   //p.points.push_back(c6);
+  //p.points.push_back(c7);
+  //p.points.push_back(c8);
+  //p.points.push_back(c9);
   
 
   /***************************************************/
@@ -129,12 +149,12 @@ int main(int argc, char** argv) {
   ramp_msgs::BezierInfo bi;
   
   ramp_msgs::MotionState sp0;
-  //sp0 = p.points.at(0).motionState;
+  sp0 = p.points.at(0).motionState;
   //sp0 = zero.motionState;
   
-  sp0.positions.push_back(1.26555);
-  sp0.positions.push_back(1.26555);
-  sp0.positions.push_back(PI/4);
+ /* sp0.positions.push_back(0.639134);
+  sp0.positions.push_back(0.640992);
+  sp0.positions.push_back(0.814458);
 
   sp0.velocities.push_back(0.33);
   sp0.velocities.push_back(0.33);
@@ -142,20 +162,20 @@ int main(int argc, char** argv) {
 
   sp0.accelerations.push_back(0);
   sp0.accelerations.push_back(0);
-  sp0.accelerations.push_back(0);
+  sp0.accelerations.push_back(0);*/
 
   
   ramp_msgs::MotionState sp1;
-  //sp1 = p.points.at(1).motionState;
-  sp1 = p.points.at(0).motionState;
+  sp1 = p.points.at(1).motionState;
+  //sp1 = p.points.at(0).motionState;
   //sp1 = c2.motionState;
 
-  /*sp1.positions.push_back(0.103043);
-  sp1.positions.push_back(0.5775);
-  sp1.positions.push_back(1.41282);
+  /*sp1.positions.push_back(1.39389);
+  sp1.positions.push_back(1.39292);
+  sp1.positions.push_back(0.39449);
 
-  sp1.velocities.push_back(0.0525683);
-  sp1.velocities.push_back(0.33);
+  sp1.velocities.push_back(0.);
+  sp1.velocities.push_back(0.);
   sp1.velocities.push_back(0);
 
   sp1.accelerations.push_back(0);
@@ -164,7 +184,7 @@ int main(int argc, char** argv) {
 
   ramp_msgs::MotionState sp2;
   //sp2 = p.points.at(2).motionState;
-  sp2 = p.points.at(1).motionState;
+  //sp2 = p.points.at(1).motionState;
   //sp2 = c3.motionState;
 
   /*sp2.positions.push_back(0.857146);
@@ -189,12 +209,12 @@ int main(int argc, char** argv) {
   
   //ramp_msgs::MotionState cp0 = sp0;
   ramp_msgs::MotionState cp0;
-  cp0.positions.push_back(0.25);
-  cp0.positions.push_back(1.5);
-  cp0.positions.push_back(1.40565);
+  cp0.positions.push_back(1.74387);
+  cp0.positions.push_back(0.161549);
+  cp0.positions.push_back(0.0923775);
 
-  cp0.velocities.push_back(0.055);
   cp0.velocities.push_back(0.33);
+  cp0.velocities.push_back(0.0305716);
   cp0.velocities.push_back(0);
   
   cp0.accelerations.push_back(0);
@@ -202,7 +222,7 @@ int main(int argc, char** argv) {
   cp0.accelerations.push_back(0);
   
   ramp_msgs::MotionState cp1;
-  //cp1 = p.points.at(1).motionState;
+  cp1 = p.points.at(1).motionState;
   /*cp1.positions.push_back(0.0252633);
   cp1.positions.push_back(0.11055);
   cp1.positions.push_back(1.34613);
@@ -216,9 +236,9 @@ int main(int argc, char** argv) {
   cp1.accelerations.push_back(0);*/
 
   ramp_msgs::MotionState cp2;
-  cp2.positions.push_back(1.43316);
-  cp2.positions.push_back(1.17326);
-  cp2.positions.push_back(0.380506);
+  cp2.positions.push_back(1.93093);
+  cp2.positions.push_back(1.1254);
+  cp2.positions.push_back(2.66571);
   
   // *** Push on the Control points ***
   /*bi.controlPoints.push_back(cp0);
@@ -228,8 +248,8 @@ int main(int argc, char** argv) {
 
   /** Why 0 initial velocity? **/
   ramp_msgs::MotionState ms_initVA;
-  ms_initVA.velocities.push_back(0.055);
   ms_initVA.velocities.push_back(0.33);
+  ms_initVA.velocities.push_back(0.0305716);
   ms_initVA.velocities.push_back(0);
   ms_initVA.accelerations.push_back(0);
   ms_initVA.accelerations.push_back(0);
@@ -366,7 +386,7 @@ int main(int argc, char** argv) {
 
 
   std::vector<ramp_msgs::BezierInfo> curves;
-  curves.push_back(bi);
+  //curves.push_back(bi);
   //curves.push_back(bi2);
   
   ramp_msgs::TrajectoryRequest tr;
@@ -380,13 +400,20 @@ int main(int argc, char** argv) {
 
   // Get and publish trajectory
   if(client_.call(tr)) {
-    std::cout<<"\nSending Trajectory "<<u.toString(tr.response.trajectory);
+    std::cout<<"\nSending Trajectory "<<u.toString(tr.response.trajectory)<<"\n";
     pub_traj.publish(tr.response.trajectory);
   }
   else {
     std::cout<<"\nSome error getting trajectory\n";
   }
 
+
+  ramp_msgs::EvaluationRequest er;
+  er.request.trajectory = tr.response.trajectory;
+  
+  if(client_eval.call(er)) {
+    std::cout<<"\nEvaluated traj, fitness: "<<er.response.fitness;
+  }
 
 
   std::cout<<"\n\nPress Enter to Publish population\n";

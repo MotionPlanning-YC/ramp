@@ -122,12 +122,12 @@ const bool BezierCurve::verify() const {
   double y_dot = (B_*t_R_min_ + D_)*u_dot_max;
   double v_rmin = sqrt(pow(x_dot,2) + pow(y_dot,2));
   double w_rmin = v_rmin / R_min_;
-  /*ROS_INFO("x_dot: %f y_dot: %f", x_dot, y_dot);
+  ROS_INFO("x_dot: %f y_dot: %f", x_dot, y_dot);
   ROS_INFO("w_rmin: %f v_rmin: %f R_min: %f t_R_min: %f x_dot: %f y_dot: %f", w_rmin, v_rmin, R_min_, t_R_min_, x_dot, y_dot);
-  ROS_INFO("w_rmin <= w_max: %s", w_rmin <= w_max ? "True" : "False");*/
+  ROS_INFO("w_rmin <= w_max: %s", w_rmin <= w_max ? "True" : "False");
   
 
-  return ( (t_R_min_ >= 0 && t_R_min_ <= 1) && (w_rmin <= w_max) );
+  return ( l_ < 1. && (t_R_min_ >= 0 && t_R_min_ <= 1) && (w_rmin <= w_max) );
 }
 
 
@@ -666,16 +666,9 @@ void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
   controlPoints_.push_back(C1);
   controlPoints_.push_back(C2);
   
-
-  /*if(print_) {
-    std::cout<<"\nSegment Points:";
-    for(int i=0;i<segmentPoints_.size();i++) {
-      std::cout<<"\n"<<utility_.toString(segmentPoints_.at(i));
-    }
-    std::cout<<"\nControl Points:";
-    for(int i=0;i<controlPoints_.size();i++) {
-      std::cout<<"\n"<<utility_.toString(controlPoints_.at(i));
-    }
+  /*std::cout<<"\nControl Points:";
+  for(int i=0;i<controlPoints_.size();i++) {
+    std::cout<<"\n"<<utility_.toString(controlPoints_.at(i));
   }*/
 } // End initControlPoints
 
@@ -694,6 +687,8 @@ void BezierCurve::calculateABCD() {
   ramp_msgs::MotionState p1 = controlPoints_.at(1);
   ramp_msgs::MotionState p2 = controlPoints_.at(2);
 
+  // A = 2(X0-2X1+X2)
+  A_ = 2 * (p0.positions.at(0) - (2*p1.positions.at(0)) + p2.positions.at(0));
 
   // B = 2(Y0-2Y1+Y2)
   B_ = 2 * (p0.positions.at(1) - (2*p1.positions.at(1)) + p2.positions.at(1));
@@ -704,7 +699,7 @@ void BezierCurve::calculateABCD() {
   // D = 2(Y1-Y0)
   D_ = 2 * (p1.positions.at(1) - p0.positions.at(1));
 
-  //ROS_INFO("A: %f B: %f C: %f D: %f", A_, B_, C_, D_);
+  ROS_INFO("A: %f B: %f C: %f D: %f", A_, B_, C_, D_);
 }
 
 
@@ -721,7 +716,7 @@ void BezierCurve::calculateR_min() {
   double denominator          = pow((B_*C_) - (A_*D_), 2);
  
   R_min_                      = sqrt( numerator / denominator );
-  //ROS_INFO("t_R_min_: %f R_min: %f", t_R_min_, R_min_);
+  ROS_INFO("t_R_min_: %f R_min: %f", t_R_min_, R_min_);
 }
 
 
@@ -734,6 +729,7 @@ void BezierCurve::calculateT_R_min() {
   else {
     double numerator = -((A_*C_) + (B_*D_));
     double denominator = ((A_*A_) + (B_*B_));
+    ROS_INFO("numerator: %f denominator: %f", numerator, denominator);
     t_R_min_ = numerator / denominator;
   }
 }

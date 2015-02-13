@@ -5,6 +5,7 @@
 #include <queue>
 #include <sstream>
 #include <math.h>
+#include <limits>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -15,10 +16,18 @@
 
 #define PI 3.14159f
 
+enum TrajectoryType {
+  ALL_STRAIGHT_SEGMENTS = 0,
+  ALL_BEZIER            = 1,
+  PARTIAL_BEZIER        = 2,
+  TRANSITION            = 3
+};
+
 
 class Utility {
   public:
     Utility();
+
     
     const double positionDistance(const std::vector<double> a, const std::vector<double> b) const;
 
@@ -39,6 +48,7 @@ class Utility {
     const std::string toString(const ramp_msgs::MotionState mp) const;
     const std::string toString(const ramp_msgs::KnotPoint kp) const;
     const std::string toString(const ramp_msgs::Path path) const;
+    const std::string toString(const ramp_msgs::BezierInfo bi) const;
     const std::string toString(const ramp_msgs::RampTrajectory traj) const;
     const std::string toString(const trajectory_msgs::JointTrajectoryPoint p) const;
 };

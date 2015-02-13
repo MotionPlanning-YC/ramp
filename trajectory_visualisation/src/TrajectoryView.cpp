@@ -88,10 +88,10 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
 {
   std::cout<<"\n\nReceived Population from robot "<<msg.robot_id<<"\n";
 
-  populations_.clear();
-  populations_.push_back(msg);
+  //populations_.clear();
+  //populations_.push_back(msg);
 
-  /*if(populations_.size() < 2) {
+  if(populations_.size() < 2) {
     populations_.push_back(msg);
   }
 
@@ -104,7 +104,7 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
       populations_.erase(populations_.begin()+1);
       populations_.insert(populations_.begin()+1, msg);
     }
-  }*/
+  }
 
   drawPopulation();
 }
@@ -184,7 +184,7 @@ void TrajectoryView::drawPopulation() {
 
       else if (points.size() > 0) {
         // For each point in the trajectory
-        for(int j = 0 ; j < (points.size() -1 ) ; j++) {
+        for(int j = 0 ; j < (points.size() -2 ) ; j+=2) {
 
           // If the first point
           if(j == 0) {
@@ -204,8 +204,8 @@ void TrajectoryView::drawPopulation() {
           // Draw a line to the next point
           this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
                          metersToPixels(points.at(j).positions.at(1), false),
-                         metersToPixels(points.at(j+1).positions.at(0), true),
-                         metersToPixels(points.at(j+1).positions.at(1), false),
+                         metersToPixels(points.at(j+2).positions.at(0), true),
+                         metersToPixels(points.at(j+2).positions.at(1), false),
                          pen);
 
         } //end for each point in the trajectory

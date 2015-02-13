@@ -251,18 +251,22 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
   result<<")";
 
   //Velocities
-  result<<"\n       Velocities: ("<<p.velocities.at(0);
-  for(unsigned int k=1;k<p.velocities.size();k++) {
-    result<<", "<<p.velocities.at(k);
+  if(p.velocities.size() > 0) {
+    result<<"\n       Velocities: ("<<p.velocities.at(0);
+    for(unsigned int k=1;k<p.velocities.size();k++) {
+      result<<", "<<p.velocities.at(k);
+    }
+    result<<")";
   }
-  result<<")";
   
   //Accelerations
-  result<<"\n       Accelerations: ("<<p.accelerations.at(0);
-  for(unsigned int k=1;k<p.accelerations.size();k++) {
-    result<<", "<<p.accelerations.at(k);
+  if(p.accelerations.size() > 0) {
+    result<<"\n       Accelerations: ("<<p.accelerations.at(0);
+    for(unsigned int k=1;k<p.accelerations.size();k++) {
+      result<<", "<<p.accelerations.at(k);
+    }
+    result<<")";
   }
-  result<<")";
   
   result<<"\n Time From Start: "<<p.time_from_start;
 
@@ -302,7 +306,6 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
   result<<"\n Knot Points:";
 
   for(unsigned int i=0;i<traj.i_knotPoints.size();i++) {
-    
     result<<"\n   "<<i<<":";
     
     unsigned int index = traj.i_knotPoints.at(i);

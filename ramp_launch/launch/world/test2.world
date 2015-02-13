@@ -50,7 +50,7 @@ corobot
 (		  
   name "robot_0"
 
-  pose [ 2 3.5 0 -90 ] 
+  pose [ 0 1.5 0 0 ] 
 
   color "blue"
 )
@@ -58,7 +58,7 @@ corobot
 (		  
   name "robot_1"
 
-  pose [ 0 2 0 0 ] 
+  pose [ 1.5 3.5 0 -90 ] 
 
   color "red"
 )
