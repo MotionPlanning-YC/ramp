@@ -21,6 +21,8 @@ void CollisionDetection::init(ros::NodeHandle& h) {
 
 /** Returns true if trajectory_ is in collision with any of the objects */
 const CollisionDetection::QueryResult CollisionDetection::perform() const {
+  ROS_INFO("In CollisionDetection::perform()");
+
   CollisionDetection::QueryResult result;
 
   // Duration for predicting the object trajectories
@@ -46,6 +48,7 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const {
     result = q;
   }
 
+  ROS_INFO("Exiting CollisionDetection::perform()");
   return result;  
 } //End perform
 
@@ -93,11 +96,13 @@ const int getIndexOb(const ramp_msgs::RampTrajectory ob_trajectory, const uint16
  * The robots are treated as circles for simple collision detection
  */
 const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::RampTrajectory ob_trajectory) const {
-  //std::cout<<"\nQuery on "<<utility.toString(trajectory_)<<" \n*******and*******\n"<<utility.toString(ob_trajectory);
+  ROS_INFO("In CollisionDetection::query"); 
+  ROS_INFO("trajectory.points.size(): %i", (int)trajectory_.trajectory.points.size());
+  ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.trajectory.points.size());
+
   CollisionDetection::QueryResult result;
   uint8_t t_checkColl = 5;
 
-  std::cout<<"\nob_trajectory size: "<<ob_trajectory.trajectory.points.size();
   /*if(ob_trajectory.trajectory.points.size() <= 2) {
     if(id == 0)
       std::cout<<"\nRobot 1 has no trajectory!\n";
@@ -107,15 +112,19 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   
   int i_stop;
   if(trajectory_.i_knotPoints.size() == 0) {
+    ROS_INFO("i_stop=0");
     i_stop = 0;
   }
   else if(trajectory_.i_knotPoints.size() == 1) {
+    ROS_INFO("i_stop=1");
     i_stop = 1;
   }
   else if(trajectory_.i_knotPoints.size() <= 2) {
+    ROS_INFO("i_stop=kp 1");
     i_stop = trajectory_.i_knotPoints.at(1);
   }
   else {
+    ROS_INFO("i_stop=kp 2");
     i_stop = trajectory_.i_knotPoints.at(2);
   }
   
@@ -129,7 +138,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     trajectory_msgs::JointTrajectoryPoint p_i = trajectory_.trajectory.points.at(i);
 
 
-    // ***Test position i for collision against some points on obstacle's trajectory***
+    // *** Test position i for collision against some points on obstacle's trajectory ***
     // Obstacle trajectory should already be in world coordinates!
     for(uint16_t j = (ob_trajectory.trajectory.points.size() == 1 || i<=t_checkColl) ? 0 : i-t_checkColl ;j<i+t_checkColl && j<ob_trajectory.trajectory.points.size();j++) {
      
@@ -146,9 +155,16 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
 
       // If the distance between the two centers is less than the sum of the two radii, 
       // there is collision
-      if( dist <= radius*2 ) {
-        std::cout<<"\nPoints in collision: ("<<p_i.positions.at(0)<<", "<<p_i.positions.at(1)<<") and ";
-        std::cout<<"("<<p_ob.positions.at(0)<<", "<<p_ob.positions.at(1)<<"), dist: "<<dist<<" i: "<<i<<" j: "<<j;
+      if( dist <= radius*2 ) 
+      {
+        ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+            p_i.positions.at(0),
+            p_i.positions.at(1),
+            p_ob.positions.at(0),
+            p_ob.positions.at(1),
+            dist,
+            (int)i,
+            (int)j);
         result.collision_ = true;
         result.t_firstCollision_ = p_i.time_from_start.toSec();
         j = i+t_checkColl;
@@ -158,6 +174,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   } // end for
 
 
+  ROS_INFO("Exiting CollisionDetection::query");
   return result;
 } //End query
 

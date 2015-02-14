@@ -163,7 +163,7 @@ class Planner {
     bool evaluations_;
     bool seedPopulation_;
     
-    const double updateCurvePos(const RampTrajectory traj) const;
+    const double updateCurvePos(const RampTrajectory traj, const ros::Duration d) const;
   private:
     /** These are (mostly) utility members that are only used by Planner and should not be used by other classes */
 
@@ -175,9 +175,12 @@ class Planner {
     
     // Updates the paths in P(t) so we can get new trajectories
     const uint8_t getNumThrowawayPoints(const RampTrajectory traj, const ros::Duration dur) const;
-    const std::vector<Path>                   adaptPaths( MotionState start, 
-                                                          ros::Duration dur) const;
-    const std::vector<ramp_msgs::BezierInfo>  adaptCurves(const Population pop) const;
+    const std::vector<Path>                   adaptPaths( const Population pop,
+                                                          const MotionState start, 
+                                                          const ros::Duration dur) const;
+    const std::vector<ramp_msgs::BezierInfo>  adaptCurves(const Population pop,
+                                                          const MotionState ms,
+                                                          const ros::Duration d) const;
     const ramp_msgs::BezierInfo               handleCurveEnd(const RampTrajectory traj) const;
 
     // Returns a unique id for a RampTrajectory 

@@ -372,12 +372,12 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
       // When driving straight, adjust the angular speed 
       // to maintain orientation
       // TODO: Works with Bezier curve?
-      if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.0001f) {
+      /*if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.0001f) {
         
         float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
         float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
         twist_.angular.z = dist/2;
-      }
+      }*/
     
       //std::cout<<"\ntwist_linear: "<<twist_.linear.x;
       //std::cout<<"\ntwist_angular: "<<twist_.angular.z<<"\n";

@@ -35,12 +35,12 @@ int main(int argc, char** argv) {
   ramp_msgs::KnotPoint c1;
   c1.motionState.positions.push_back(3.5); // 0.70455
   c1.motionState.positions.push_back(1.5); // 0.4026
-  c1.motionState.positions.push_back(-1.1651); // 0.519146
+  c1.motionState.positions.push_back(0.051225); // 0.519146
   
   ramp_msgs::KnotPoint c2;
   c2.motionState.positions.push_back(3.5); // 0.70455
   c2.motionState.positions.push_back(1.5); // 0.4026
-  c2.motionState.positions.push_back(0); // 0.519146
+  c2.motionState.positions.push_back(0.051225); // 0.519146
 
 
   ramp_msgs::KnotPoint c3;

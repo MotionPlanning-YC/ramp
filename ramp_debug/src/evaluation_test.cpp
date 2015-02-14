@@ -134,12 +134,10 @@ int main(int argc, char** argv) {
   
   ramp_msgs::EvaluationRequest er1;
   er1.request.trajectory = traj1;
-  er1.request.goal = p1_kp2.motionState;
   
   
   ramp_msgs::EvaluationRequest er2;
   er2.request.trajectory = traj2;
-  er2.request.goal = p1_kp2.motionState;
 
 
   client_eval.call(er1);
