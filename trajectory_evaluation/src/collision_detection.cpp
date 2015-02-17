@@ -128,6 +128,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     i_stop = trajectory_.i_knotPoints.at(2);
   }
   
+  ROS_INFO("i_stop: %i", i_stop);
   
   //std::cout<<"\nobstable trajectory size: "<<ob_trajectory.trajectory.points.size();
   // For every point, check circle detection on a subset of the obstacle's trajectory
@@ -140,7 +141,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
 
     // *** Test position i for collision against some points on obstacle's trajectory ***
     // Obstacle trajectory should already be in world coordinates!
-    for(uint16_t j = (ob_trajectory.trajectory.points.size() == 1 || i<=t_checkColl) ? 0 : i-t_checkColl ;j<i+t_checkColl && j<ob_trajectory.trajectory.points.size();j++) {
+    for(uint16_t j = (ob_trajectory.trajectory.points.size() == 1 || i<=t_checkColl) ? 0 : i-t_checkColl ; j<i+t_checkColl && j<ob_trajectory.trajectory.points.size(); j++) {
      
 
       // Get the jth point of the obstacle's trajectory

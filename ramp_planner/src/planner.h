@@ -266,6 +266,7 @@ class Planner {
 
     const uint8_t getIndexStartPathAdapting(const RampTrajectory t) const;
 
+    const double getScaledRange(const double v, const double min, const double max) const;
     /***** Data members *****/
 
     // Utility instance

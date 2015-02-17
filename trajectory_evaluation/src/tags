@@ -64,6 +64,7 @@ Evaluate::Evaluate	evaluate.h	/^    Evaluate(const ramp_msgs::EvaluationRequest:
 Evaluate::Q	evaluate.h	/^    float Q;$/;"	m	class:Evaluate	access:public
 Evaluate::currentTheta_	evaluate.h	/^    double currentTheta_;$/;"	m	class:Evaluate	access:public
 Evaluate::eucDist_	evaluate.h	/^    EuclideanDistance eucDist_;$/;"	m	class:Evaluate	access:public
+Evaluate::orientation_	evaluate.h	/^    Orientation orientation_;$/;"	m	class:Evaluate	access:public
 Evaluate::performFitness	evaluate.cpp	/^const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) {$/;"	f	class:Evaluate	signature:(CollisionDetection::QueryResult feasible)
 Evaluate::performFitness	evaluate.h	/^    const double performFitness(CollisionDetection::QueryResult feasible);$/;"	p	class:Evaluate	access:public	signature:(CollisionDetection::QueryResult feasible)
 Evaluate::setRequest	evaluate.cpp	/^void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request req) {$/;"	f	class:Evaluate	signature:(const ramp_msgs::EvaluationRequest::Request req)
@@ -81,6 +82,15 @@ MotionType::Rotation	motion_type.h	/^  Rotation                    = 2,$/;"	m	cl
 MotionType::Translation	motion_type.h	/^  Translation                 = 1,$/;"	m	class:MotionType	access:private
 MotionType::TranslationAndRotation	motion_type.h	/^  TranslationAndRotation      = 3,$/;"	m	class:MotionType	access:private
 None	motion_type.h	/^  None                        = 0,$/;"	m	class:MotionType	access:private
+ORIENTATION_H	orientation.h	2;"	d
+Orientation	orientation.h	/^    Orientation() {}$/;"	f	class:Orientation	access:public	signature:()
+Orientation	orientation.h	/^class Orientation {$/;"	c
+Orientation::Orientation	orientation.h	/^    Orientation() {}$/;"	f	class:Orientation	access:public	signature:()
+Orientation::currentTheta_	orientation.h	/^    double currentTheta_;$/;"	m	class:Orientation	access:public
+Orientation::perform	orientation.cpp	/^const double Orientation::perform() {$/;"	f	class:Orientation	signature:()
+Orientation::perform	orientation.h	/^    const double perform();$/;"	p	class:Orientation	access:public	signature:()
+Orientation::trajectory_	orientation.h	/^    ramp_msgs::RampTrajectory trajectory_;$/;"	m	class:Orientation	access:public
+Orientation::utility_	orientation.h	/^    Utility utility_;$/;"	m	class:Orientation	access:public
 PARTIAL_BEZIER	utility.h	/^  PARTIAL_BEZIER        = 2,$/;"	e	enum:TrajectoryType
 PI	utility.h	17;"	d
 Q	evaluate.h	/^    float Q;$/;"	m	class:Evaluate	access:public
@@ -161,6 +171,7 @@ compilation_database_folder	.ycm_extra_conf.py	/^compilation_database_folder = '
 cout	main.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
 cout	main.cpp	/^  std::cout<<"\\nWaiting for requests...\\n";$/;"	m	class:std	file:
 currentTheta_	evaluate.h	/^    double currentTheta_;$/;"	m	class:Evaluate	access:public
+currentTheta_	orientation.h	/^    double currentTheta_;$/;"	m	class:Orientation	access:public
 d	utility.cpp	/^  std::vector<double> d;$/;"	l
 d_a	utility.cpp	/^  std::vector<double> d_a;$/;"	l
 d_b	utility.cpp	/^  std::vector<double> d_b;$/;"	l
@@ -168,7 +179,7 @@ d_x	utility.cpp	/^  double d_x = b.at(0) - a.at(0);$/;"	l
 d_y	utility.cpp	/^  double d_y = b.at(1) - a.at(1);$/;"	l
 database	.ycm_extra_conf.py	/^  database = None$/;"	v
 database	.ycm_extra_conf.py	/^  database = ycm_core.CompilationDatabase( compilation_database_folder )$/;"	v
-deltaTheta	evaluate.cpp	/^  double deltaTheta = utility_.findDistanceBetweenAngles(currentTheta_, thetaNec);$/;"	l
+deltaTheta	orientation.cpp	/^    double deltaTheta = utility_.findDistanceBetweenAngles(currentTheta_, thetaNec);$/;"	l
 delta_x	collision_detection.cpp	/^    double delta_x = cos(phi)*ob.odom_t.twist.twist.linear.x;$/;"	l
 delta_y	collision_detection.cpp	/^    double delta_y = sin(phi)*ob.odom_t.twist.twist.linear.x;$/;"	l
 denom	evaluate.cpp	/^  double result=0, denom=0;$/;"	l
@@ -220,18 +231,20 @@ init	collision_detection.cpp	/^void CollisionDetection::init(ros::NodeHandle& h)
 init	collision_detection.h	/^    void                        init(ros::NodeHandle& h);$/;"	p	class:CollisionDetection	access:public	signature:(ros::NodeHandle& h)
 init	main.cpp	/^  cd.init(handle);$/;"	p	file:	signature:(handle)
 init	main.cpp	/^  ros::init(argc, argv, "trajectory_evaluation");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
-j	collision_detection.cpp	/^        std::cout<<"("<<p_ob.positions.at(0)<<", "<<p_ob.positions.at(1)<<"), dist: "<<dist<<" i: "<<i<<" j: "<<j;$/;"	l
 j	collision_detection.cpp	/^  int j;$/;"	l
 kp	utility.cpp	/^    ramp_msgs::KnotPoint kp;$/;"	l
 mag_angular_t	collision_detection.cpp	/^  float mag_angular_t = sqrt( tf::tfDot(v_angular, v_angular) );$/;"	l
 mag_linear_t	collision_detection.cpp	/^  float mag_linear_t  = sqrt( tf::tfDot(v_linear, v_linear)   );$/;"	l
 main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
 motion_type	collision_detection.cpp	/^  MotionType motion_type = findMotionType(ob);$/;"	l
+normalize	orientation.cpp	/^    double normalize = PI;$/;"	l
+normalize	time.cpp	/^  double normalize = 50.;$/;"	l
 ob_T_w_b_	collision_detection.h	/^    tf::Transform         ob_T_w_b_;$/;"	m	class:CollisionDetection	access:public
 ob_goal_b	collision_detection.cpp	/^    tf::Vector3 ob_goal_b(start.motionState.positions.at(0) + (delta_x * predictionTime_.toSec()), $/;"	p	file:	signature:(start.motionState.positions.at(0) + (delta_x * predictionTime_.toSec()), start.motionState.positions.at(1) + (delta_y * predictionTime_.toSec()), 0)
 ob_trajectory	collision_detection.cpp	/^  ramp_msgs::RampTrajectory ob_trajectory = getPredictedTrajectory(obstacle_); $/;"	l
 obstacleCb	main.cpp	/^void obstacleCb(const ramp_msgs::Obstacle& ol) {$/;"	f	signature:(const ramp_msgs::Obstacle& ol)
 obstacle_	collision_detection.h	/^    ramp_msgs::Obstacle   obstacle_;$/;"	m	class:CollisionDetection	access:public
+orientation_	evaluate.h	/^    Orientation orientation_;$/;"	m	class:Evaluate	access:public
 p	utility.cpp	/^    trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);$/;"	l
 p	utility.cpp	/^    trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);$/;"	l
 p_i	collision_detection.cpp	/^    trajectory_msgs::JointTrajectoryPoint p_i = trajectory_.trajectory.points.at(i);$/;"	l
@@ -243,6 +256,8 @@ perform	collision_detection.cpp	/^const CollisionDetection::QueryResult Collisio
 perform	collision_detection.h	/^    const QueryResult           perform() const;$/;"	p	class:CollisionDetection	access:public	signature:() const
 perform	euclidean_distance.cpp	/^const double EuclideanDistance::perform() {$/;"	f	class:EuclideanDistance	signature:()
 perform	euclidean_distance.h	/^    const double perform();$/;"	p	class:EuclideanDistance	access:public	signature:()
+perform	orientation.cpp	/^const double Orientation::perform() {$/;"	f	class:Orientation	signature:()
+perform	orientation.h	/^    const double perform();$/;"	p	class:Orientation	access:public	signature:()
 perform	time.cpp	/^const double Time::perform() {$/;"	f	class:Time	signature:()
 perform	time.h	/^    const double perform();$/;"	p	class:Time	access:public	signature:()
 performFitness	evaluate.cpp	/^const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) {$/;"	f	class:Evaluate	signature:(CollisionDetection::QueryResult feasible)
@@ -289,6 +304,7 @@ result	collision_detection.cpp	/^  ramp_msgs::Path result;$/;"	l
 result	collision_detection.cpp	/^  ramp_msgs::RampTrajectory result;$/;"	l
 result	euclidean_distance.cpp	/^  double result=0;$/;"	l
 result	evaluate.cpp	/^  double result=0, denom=0;$/;"	l
+result	orientation.cpp	/^  double result = 0.;$/;"	l
 result	time.cpp	/^  double result = 0.;$/;"	l
 result	utility.cpp	/^  double result;$/;"	l
 result	utility.cpp	/^  double result=0;$/;"	l
@@ -303,7 +319,6 @@ setOrigin	collision_detection.cpp	/^    ob_T_w_b_.setOrigin(pos);$/;"	p	file:	si
 setRequest	evaluate.cpp	/^void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request req) {$/;"	f	class:Evaluate	signature:(const ramp_msgs::EvaluationRequest::Request req)
 setRequest	evaluate.h	/^    void setRequest(const ramp_msgs::EvaluationRequest::Request req);$/;"	p	class:Evaluate	access:public	signature:(const ramp_msgs::EvaluationRequest::Request req)
 setRequest	main.cpp	/^  ev.setRequest(req);$/;"	p	file:	signature:(req)
-size	collision_detection.cpp	/^  std::cout<<"\\nob_trajectory size: "<<ob_trajectory.trajectory.points.size();$/;"	p	file:	signature:()
 start	collision_detection.cpp	/^  ramp_msgs::KnotPoint start;$/;"	l
 start	main.cpp	/^  spinner.start();$/;"	p	file:	signature:()
 std::cout	main.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
@@ -315,7 +330,7 @@ teta	collision_detection.cpp	/^  double teta = utility.findAngleFromAToB(zero, s
 tf::vector3MsgToTF	collision_detection.cpp	/^  tf::vector3MsgToTF(ob.odom_t.twist.twist.angular, v_angular);$/;"	p	class:tf	file:	signature:(ob.odom_t.twist.twist.angular, v_angular)
 tf::vector3MsgToTF	collision_detection.cpp	/^  tf::vector3MsgToTF(ob.odom_t.twist.twist.linear, v_linear);$/;"	p	class:tf	file:	signature:(ob.odom_t.twist.twist.linear, v_linear)
 theta	collision_detection.cpp	/^    double theta = start.motionState.positions.at(2);$/;"	l
-thetaNec	evaluate.cpp	/^  double thetaNec = utility_.findAngleFromAToB(trajectory_.trajectory.points.at(0),$/;"	l
+thetaNec	orientation.cpp	/^    double thetaNec = utility_.findAngleFromAToB(trajectory_.trajectory.points.at(0),$/;"	l
 time_	evaluate.h	/^    Time time_;$/;"	m	class:Evaluate	access:public
 toString	main.cpp	/^  std::cout<<"\\nEvaluating trajectory: \\n"<<u.toString(req.trajectory);$/;"	p	file:	signature:(req.trajectory)
 toString	utility.cpp	/^    result<<"\\n       "<<toString(p);$/;"	p	file:	signature:(p)
@@ -344,11 +359,13 @@ tr	collision_detection.cpp	/^  ramp_msgs::TrajectoryRequest tr;$/;"	l
 trajectory_	collision_detection.h	/^    ramp_msgs::RampTrajectory trajectory_;$/;"	m	class:CollisionDetection	access:public
 trajectory_	euclidean_distance.h	/^    ramp_msgs::RampTrajectory trajectory_;$/;"	m	class:EuclideanDistance	access:public
 trajectory_	evaluate.h	/^    ramp_msgs::RampTrajectory trajectory_;$/;"	m	class:Evaluate	access:public
+trajectory_	orientation.h	/^    ramp_msgs::RampTrajectory trajectory_;$/;"	m	class:Orientation	access:public
 trajectory_	time.h	/^    ramp_msgs::RampTrajectory trajectory_;$/;"	m	class:Time	access:public
 u	main.cpp	/^Utility u;$/;"	v
 utility	collision_detection.h	/^    Utility                   utility;$/;"	m	class:CollisionDetection	access:private
 utility_	euclidean_distance.h	/^    Utility utility_;$/;"	m	class:EuclideanDistance	access:public
 utility_	evaluate.h	/^    Utility utility_;$/;"	m	class:Evaluate	access:private
+utility_	orientation.h	/^    Utility utility_;$/;"	m	class:Orientation	access:public
 utility_	time.h	/^    Utility utility_;$/;"	m	class:Time	access:public
 v	collision_detection.cpp	/^  double v = start.motionState.velocities.at(0);$/;"	l
 v_angular	collision_detection.cpp	/^  tf::Vector3 v_angular;$/;"	l

@@ -9,5 +9,9 @@ const double Time::perform() {
     result = trajectory_.trajectory.points.at( trajectory_.trajectory.points.size()-1 ).time_from_start.toSec();
   }
 
+  // Normalize the value based on timeCutoff in trajectory_generator
+  double normalize = 50.;
+  result /= normalize;
+
   return result;
 }

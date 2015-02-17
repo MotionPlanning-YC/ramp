@@ -33,14 +33,14 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(3.5); // 0.70455
+  c1.motionState.positions.push_back(1.26555); // 0.70455
   c1.motionState.positions.push_back(1.5); // 0.4026
-  c1.motionState.positions.push_back(0.051225); // 0.519146
+  c1.motionState.positions.push_back(0.); // 0.519146
   
   ramp_msgs::KnotPoint c2;
   c2.motionState.positions.push_back(3.5); // 0.70455
   c2.motionState.positions.push_back(1.5); // 0.4026
-  c2.motionState.positions.push_back(0.051225); // 0.519146
+  c2.motionState.positions.push_back(0.); // 0.519146
 
 
   ramp_msgs::KnotPoint c3;
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
 
   
   // Velocities
-  c1.motionState.velocities.push_back(0.);  //.151426
+  c1.motionState.velocities.push_back(0.33);  //.151426
   c1.motionState.velocities.push_back(0.); //-.297903
   c1.motionState.velocities.push_back(0.); //-.118126
  
@@ -130,7 +130,7 @@ int main(int argc, char** argv) {
   
   ramp_msgs::Path p;
   //p.points.push_back(zero);
-  p.points.push_back(c2);
+  p.points.push_back(c1);
   p.points.push_back(c2);
   //p.points.push_back(c3);
   //p.points.push_back(c4);
@@ -413,6 +413,7 @@ int main(int argc, char** argv) {
   
   if(client_eval.call(er)) {
     std::cout<<"\nEvaluated traj, fitness: "<<er.response.fitness;
+    std::cout<<"\nEvaluated traj, feasible: "<<er.response.feasible;
   }
 
 

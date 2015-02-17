@@ -256,25 +256,44 @@ const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionSt
 
 
 
+
 // TODO: Check for the 2nd segment as well?
 const std::vector<double> Planner::getScaledXY(const MotionState ms, const ramp_msgs::BezierInfo curve) const {
   std::vector<double> result;
 
-  bool xSlope = (curve.segmentPoints.at(1).positions.at(0) - curve.segmentPoints.at(0).positions.at(0) > 0);
+  bool xSlope = (curve.segmentPoints.at(2).positions.at(0) - curve.segmentPoints.at(1).positions.at(0) > 0);
   bool ySlope = (curve.segmentPoints.at(1).positions.at(1) - curve.segmentPoints.at(0).positions.at(1) > 0);
-  //ROS_INFO("xSlope: %s ySlope: %s", xSlope ? "True" : "False", ySlope ? "True" : "False");
+  ROS_INFO("xSlope: %s ySlope: %s", xSlope ? "True" : "False", ySlope ? "True" : "False");
 
   double x = ms.msg_.positions.at(0);
   double y = ms.msg_.positions.at(1);
+
+  double x_min = xSlope ? curve.controlPoints.at(1).positions.at(0) :
+                        curve.controlPoints.at(2).positions.at(0);
+
+  double x_max = xSlope ? curve.controlPoints.at(2).positions.at(0) :
+                        curve.controlPoints.at(1).positions.at(0);
+  double den = x_max - x_min;
+  double x_num = x - x_min;
+  double xAns = x_num / den;
+  //ROS_INFO("x_min: %f x_max: %f den: %f x_num: %f xAns: %f",
+      //x_min, x_max, den, x_num, xAns);
 
   double x_numerator = (xSlope  ? x - curve.controlPoints.at(0).positions.at(0)
                                 : curve.controlPoints.at(0).positions.at(0) - x);
   double y_numerator = (ySlope  ? y - curve.controlPoints.at(0).positions.at(1)
                                 : curve.controlPoints.at(0).positions.at(1) - y);
-  double denom = curve.controlPoints.at(2).positions.at(0) - curve.controlPoints.at(0).positions.at(0);
+  double denom_x = curve.controlPoints.at(2).positions.at(0) - curve.controlPoints.at(0).positions.at(0);
+  double denom_y = curve.controlPoints.at(2).positions.at(1) - curve.controlPoints.at(0).positions.at(1);
 
-  double x_scaled = x_numerator / denom;
-  double y_scaled = y_numerator / denom;
+  ROS_INFO("x_numerator: %f y_numerator: %f denom_x %f denom_y: %f",
+      x_numerator,
+      y_numerator,
+      denom_x,
+      denom_y);
+
+  double x_scaled = x_numerator / denom_x;
+  double y_scaled = y_numerator / denom_y;
 
   result.push_back(x_scaled);
   result.push_back(y_scaled);
@@ -290,32 +309,61 @@ const int Planner::estimateIfOnCurve(const MotionState ms, const ramp_msgs::Bezi
   ROS_INFO("ms: %s", ms.toString().c_str());
   ROS_INFO("curve: %s", utility_.toString(curve).c_str());
 
-  std::vector<double> scaled = getScaledXY(ms, curve);
-  double x_scaled = scaled.at(0);
-  double y_scaled = scaled.at(1);
+  double x = ms.msg_.positions.at(0);
+  double y = ms.msg_.positions.at(1);
 
-  ROS_INFO("x_scaled: %f y_scaled: %f", x_scaled, y_scaled);
+  bool xSlope     = (curve.segmentPoints.at(1).positions.at(0) - curve.segmentPoints.at(0).positions.at(0) > 0);
+  bool xSlopeTwo  = (curve.segmentPoints.at(2).positions.at(0) - curve.segmentPoints.at(1).positions.at(0) > 0);
+  bool ySlope     = (curve.segmentPoints.at(1).positions.at(1) - curve.segmentPoints.at(0).positions.at(1) > 0);
+  bool ySlopeTwo  = (curve.segmentPoints.at(2).positions.at(1) - curve.segmentPoints.at(1).positions.at(1) > 0);
+  
+  bool xSegOne =  xSlope ?  (x >= curve.controlPoints.at(0).positions.at(0)) &&
+                          (x <= curve.controlPoints.at(1).positions.at(0)) :
+                          (x <= curve.controlPoints.at(0).positions.at(0)) &&
+                          (x >= curve.controlPoints.at(1).positions.at(0));
+
+  bool xSegTwo =  xSlopeTwo ?  (x >= curve.controlPoints.at(1).positions.at(0)) &&
+                                (x <= curve.controlPoints.at(2).positions.at(0)) :
+                                (x <= curve.controlPoints.at(1).positions.at(0)) &&
+                                (x >= curve.controlPoints.at(2).positions.at(0));
+
+  
+  bool ySegOne =  ySlope ?  (y >= curve.controlPoints.at(0).positions.at(1)) &&
+                          (y <= curve.controlPoints.at(1).positions.at(1)) :
+                          (y <= curve.controlPoints.at(0).positions.at(1)) &&
+                          (y >= curve.controlPoints.at(1).positions.at(1));
+
+  bool ySegTwo =  ySlopeTwo ?  (y >= curve.controlPoints.at(1).positions.at(1)) &&
+                                (y <= curve.controlPoints.at(2).positions.at(1)) :
+                                (y <= curve.controlPoints.at(1).positions.at(1)) &&
+                                (y >= curve.controlPoints.at(2).positions.at(1));
 
 
-  bool x_good = (x_scaled >= 0. && x_scaled <= curve.u_target);
-  bool y_good = (y_scaled >= 0. && y_scaled <= curve.u_target);
+  //ROS_INFO("xSegOne: %s xSegTwo: %s ySegOne: %s ySegTwo: %s", xSegOne ? "True" : "False", xSegTwo ? "True" : "False", ySegOne ? "True" : "False", ySegTwo ? "True" : "False");
 
+  bool xGood = (xSegOne || xSegTwo);
+  bool yGood = (ySegOne || ySegTwo);
 
-  if(x_scaled < 0. && y_scaled < 0.) {
-    ROS_INFO("Returning 1 (before curve)");
-    return 1;  
-  } 
-  else if(x_good && y_good)
-  {
+  if(xGood && yGood) {
     ROS_INFO("Returning 2 (on curve)");
     return 2;
-  } 
-  else if(x_scaled > curve.u_target && y_scaled > curve.u_target) {
+  }
+  
+  // Check if past curve
+  bool xPast = xSlopeTwo ?  x > curve.controlPoints.at(2).positions.at(0) :
+                            x < curve.controlPoints.at(2).positions.at(0) ; 
+  // Check if past curve
+  bool yPast = xSlopeTwo ?  y > curve.controlPoints.at(2).positions.at(1) :
+                            y < curve.controlPoints.at(2).positions.at(1) ; 
+
+  ROS_INFO("xPast: %s yPast: %s", xPast ? "True" : "False", yPast ? "True" : "False");
+  if(xPast && yPast)
+  {
     ROS_INFO("Returning 3 (after curve)");
-    return 3;  
+    return 3;
   }
 
-
+  // Else, robot has not reached curve, return 1
   ROS_INFO("Returning 1");
   return 1;
 }
@@ -332,12 +380,15 @@ const ramp_msgs::BezierInfo Planner::handleCurveEnd(const RampTrajectory traj) c
   
   if(traj.msg_.curves.size() > 1) {
     result = traj.msg_.curves.at(1);
-    //ROS_INFO("Calling estimateIfOnCurve for second curve");
-    estimateIfOnCurve(startPlanning_, traj.msg_.curves.at(1));
-    std::vector<double> scaled = getScaledXY(startPlanning_, traj.msg_.curves.at(1));
-    
-    result.u_0 += (scaled.at(0) + scaled.at(1)) / 2.;
-    result.ms_begin = traj.path_.start_.motionState_.msg_;
+    ROS_INFO("Curve 0 has ended, new curve: %s", utility_.toString(result).c_str());
+    if(estimateIfOnCurve(startPlanning_, result) == 2) {
+      ROS_INFO("Adding .000001");
+      result.u_0 += 0.000001;
+      result.ms_begin = startPlanning_.msg_;
+    }
+    else {
+      result.u_0 += 0.;
+    }
   }
 
   // Else if there was only 1 curve, just return a blank one
@@ -507,7 +558,7 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
 // TODO: Clean up
 /** Build a TrajectoryRequest srv */
 const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path, const std::vector<ramp_msgs::BezierInfo> curves, const int id) const {
-  ROS_INFO("In buildTrajectoryRequest");
+  //ROS_INFO("In buildTrajectoryRequest");
   ramp_msgs::TrajectoryRequest result;
 
   result.request.path           = path.buildPathMsg();
@@ -546,7 +597,7 @@ pop_orig_.get(population_.getIndexFromId(id)).path_.all_.at(0).motionState_.toSt
   } // end if
 
 
-  ROS_INFO("Exiting Planner::buildTrajectoryRequest");
+  //ROS_INFO("Exiting Planner::buildTrajectoryRequest");
   return result;
 } // End buildTrajectoryRequest
 
@@ -1467,7 +1518,11 @@ const ModificationResult Planner::modification() {
     // If it was successfully added, push its index onto the result
     int index = population_.add(mod_trajec.at(i));
     if(index > -1) {
+      ROS_INFO("Trajectory added to population at index: %i", index);
       result.i_modified_.push_back(index);
+    }
+    else {
+      ROS_INFO("Trajectory not added to population");
     }
 
     // If sub-populations are being used and
@@ -1747,7 +1802,6 @@ void Planner::doControlCycle() {
   // Set gensPerCC based on CC time
   generationsPerCC_ = controlCycle_.toSec() / planningCycle_.toSec();
 
-  // TODO: set generationPerCC again each CC b/c of adaptive time
   // Send the best trajectory and set movingOn
   sendBest();
 
@@ -2069,7 +2123,7 @@ const MotionState Planner::findAverageDiff() {
   /*************************************************************/
 
   // Create trj
-  KnotPoint sp1;
+  /*KnotPoint sp1;
   sp1.motionState_.msg_.positions.push_back(1.5);
   sp1.motionState_.msg_.positions.push_back(3.5);
   sp1.motionState_.msg_.positions.push_back(-1.5708);
@@ -2155,7 +2209,14 @@ const MotionState Planner::findAverageDiff() {
   Population pop2 = adaptPopulation(pop, sp, controlCycle_);
   ROS_INFO("Pop now: %s", pop2.toString().c_str());
   
+  ROS_INFO("Press enter to adapt!");
   std::cin.get();
+
+  MotionState ms = pop2.getBest().getPointAtTime(controlCycle_.toSec());
+
+  Population p = adaptPopulation(pop2, ms, controlCycle_);
+  ROS_INFO("After adapting, pop2: %s", p.toString().c_str());
+  std::cin.get();*/
 
 
   /*************************************************************/

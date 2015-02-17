@@ -48,43 +48,59 @@ const MotionState MotionState::zero(const uint8_t size) const {
   return result;
 }
 
-const bool MotionState::equals(const MotionState& ms) const {
-  if(msg_.positions.size() != ms.msg_.positions.size()) {
+
+/** equals comparison */
+const bool MotionState::equals(const MotionState& ms) const 
+{
+  if(msg_.positions.size() != ms.msg_.positions.size()) 
+  {
     return false;
   }
   
-  if(msg_.velocities.size() != ms.msg_.velocities.size()) {
+  if(msg_.velocities.size() != ms.msg_.velocities.size()) 
+  {
     return false;
   }
   
-  if(msg_.accelerations.size() != ms.msg_.accelerations.size()) {
+  if(msg_.accelerations.size() != ms.msg_.accelerations.size()) 
+  {
     return false;
   }
 
-  if(msg_.jerks.size() != ms.msg_.jerks.size()) {
+  if(msg_.jerks.size() != ms.msg_.jerks.size()) 
+  {
     return false;
   }
 
-  for(uint8_t i_p=0;i_p<msg_.positions.size();i_p++) {
-    if(msg_.positions.at(i_p) != ms.msg_.positions.at(i_p)) {
+  double epsilon = 0.000001;
+  for(uint8_t i_p=0;i_p<msg_.positions.size();i_p++) 
+  {
+    if( fabs(msg_.positions.at(i_p) - ms.msg_.positions.at(i_p)) > epsilon ) 
+    {
       return false;
     }
   }
 
-  for(uint8_t i_p=0;i_p<msg_.velocities.size();i_p++) {
-    if(msg_.velocities.at(i_p) != ms.msg_.velocities.at(i_p)) {
+  for(uint8_t i_p=0;i_p<msg_.velocities.size();i_p++) 
+  {
+    if( fabs(msg_.velocities.at(i_p) - ms.msg_.velocities.at(i_p)) > epsilon ) 
+    {
       return false;
     }
   }
 
-  for(uint8_t i_p=0;i_p<msg_.accelerations.size();i_p++) {
-    if(msg_.accelerations.at(i_p) != ms.msg_.accelerations.at(i_p)) {
+  for(uint8_t i_p=0;i_p<msg_.accelerations.size();i_p++) 
+  {
+    if( fabs(msg_.accelerations.at(i_p) - ms.msg_.accelerations.at(i_p)) > epsilon ) 
+    {
       return false;
     }
   }
 
-  for(uint8_t i_p=0;i_p<msg_.jerks.size();i_p++) {
-    if(msg_.jerks.at(i_p) != ms.msg_.jerks.at(i_p)) {
+  for(uint8_t i_p=0;i_p<msg_.jerks.size();i_p++) 
+  {
+    if( fabs(msg_.jerks.at(i_p) - ms.msg_.jerks.at(i_p)) > epsilon ) 
+    {
       return false;
     }
   }

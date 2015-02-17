@@ -287,9 +287,7 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
 
   result<<"\n Knot Points:";
 
-  ROS_INFO("traj.i_knotpoints.size(): %i", (int)traj.i_knotPoints.size());
   for(unsigned int i=0;i<traj.i_knotPoints.size();i++) {
-    ROS_INFO("KP: %i", (int)i);
     
     result<<"\n   "<<i<<":";
     
@@ -303,7 +301,6 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
     
     result<<"\n       "<<toString(p);
   }
-  //ROS_INFO("Done with knot points");
 
 
   result<<"\n Points:";
@@ -311,24 +308,21 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
   //for(unsigned int i=0;i<7;i++) {
   for(unsigned int i=0;i<25 && i<traj.trajectory.points.size();i++) {
   //for(unsigned int i=0;i<traj.trajectory.points.size();i++) {
-    //ROS_INFO("i: %i", (int)i);
     result<<"\n\n   Point "<<i<<":";
     
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);
   
     result<<"\n"<<toString(p);
   }
-  //ROS_INFO("Done with points");
 
 
   for(uint8_t i=0;i<traj.curves.size();i++) {
-    //ROS_INFO("curve %i", (int)i);
     result<<"\n Curve "<<(int)i<<"\n"<<toString(traj.curves.at(i));
   }
 
   result<<"\ni_curveEnd: "<<(int)traj.i_curveEnd<<"\n";
 
-  //ROS_INFO("Done with curves");
+  result<<"\nFitness: "<<traj.fitness<<" Feasible: "<<traj.feasible<<" t_firstCollision: "<<traj.t_firstCollision;
 
   return result.str();
 }

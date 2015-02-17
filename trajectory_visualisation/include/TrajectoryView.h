@@ -45,6 +45,7 @@
 #include "ramp_msgs/Population.h"
 #include "utility.h"
 #include <vector>
+#include <ros/console.h>
 
 
 class TrajectoryView : public QGraphicsView

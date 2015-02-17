@@ -106,6 +106,13 @@ void TrajectoryView::population(const ramp_msgs::Population& msg)
     }
   }
 
+  if((unsigned int)msg.robot_id == 1) {
+    ROS_INFO("Displaying pop for robot 1:");
+    ROS_INFO("Best id: %i", msg.best_id);
+    for(int i=0;i<msg.population.size();i++) {
+      ROS_INFO("Trajectory %i: %s", i, u.toString(msg.population.at(i)).c_str());
+    }
+  }
   drawPopulation();
 }
 
@@ -134,6 +141,10 @@ void TrajectoryView::drawPopulation() {
     this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(3.5, false), pen);
   
 
+  double radius = 0.275;
+  int radiusPixels = metersToPixels(radius, true);
+
+  QPen penTraj;
   // For each population
   for(unsigned int p=0;p<populations_.size();p++) {
 
@@ -152,34 +163,32 @@ void TrajectoryView::drawPopulation() {
 
       // Green for robot 1 and feasible
       if(populations_.at(p).robot_id == 0 && populations_.at(p).population.at(t).feasible) {
-        pen = QPen( QColor(0, 255, 0, 255) );
+        penTraj = QPen( QColor(0, 255, 0, 255) );
       }
       // Blue for robot 2 and feasible
       else if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible) {
-        pen = QPen( QColor(0,0,255,255) );
+        penTraj = QPen( QColor(0,0,255,255) );
       }
       
       // Else, if either are in collision, red
       else {
-        pen = QPen( QColor(255,0,0,150) );
+        penTraj = QPen( QColor(255,0,0,150) );
       }
 
       // If the best trajectory, set to red
       // Used for single robot traj viewing
       if(t == i) {
-        pen = QPen( QColor(255,0,0,150) );
+        penTraj = QPen( QColor(255,0,0,150) );
       }
-
-      int radius = metersToPixels(0.5, true);
 
       if(points.size() == 1) {
         std::vector<float> p;
         p.push_back(points.at(0).positions.at(0));
         p.push_back(points.at(0).positions.at(1));
 
-        this->scene()->addEllipse(metersToPixels(p.at(0), true)-(radius/2),
-                                    metersToPixels(p.at(1), false)+(radius/2),
-                                    metersToPixels(0.55f, true), metersToPixels(0.55f, false), pen);
+        this->scene()->addEllipse(metersToPixels(p.at(0), true)-(radiusPixels/2),
+                                    metersToPixels(p.at(1), false)+(radiusPixels/2),
+                                    metersToPixels(0.275f, true), metersToPixels(0.275f, false), pen);
       } //end if 1 point
 
       else if (points.size() > 0) {
@@ -188,18 +197,21 @@ void TrajectoryView::drawPopulation() {
 
           // If the first point
           if(j == 0) {
-            if(populations_.at(p).robot_id == 0)
+            // Set pen color
+            if(populations_.at(p).robot_id == 0) 
+            {
+              pen = pen1;
+            }
+            else 
+            {
+              pen = pen2;
+            }
             // Draw a circle
-            this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true)-(radius/2),
-                                      metersToPixels(points.at(j).positions.at(1), false)+(radius/2),
-                                      metersToPixels(0.55, true), metersToPixels(0.55, false), pen1);
-                                      
-            else
-            // Draw a circle
-            this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true)-(radius/2),
-                                      metersToPixels(points.at(j).positions.at(1), false)+(radius/2),
-                                      metersToPixels(0.55, true), metersToPixels(0.55, false), pen2);
-          }
+            this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true)-(radiusPixels/2),
+                                      metersToPixels(points.at(j).positions.at(1), false)+(radiusPixels/2),
+                                      metersToPixels(radius, true), metersToPixels(radius, false), pen);
+            pen = penTraj;               
+          } // end if first point
 
           // Draw a line to the next point
           this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),

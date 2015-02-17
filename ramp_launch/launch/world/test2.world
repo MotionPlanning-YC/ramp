@@ -21,7 +21,7 @@ define corobot corobot_base
     z [0 0.222]
   )
   
-  size [0.5 0.5 0.5]
+  size [0.275 0.275 0.25]
 )
 
 define corobot_base position 
@@ -52,7 +52,7 @@ corobot
 
   pose [ 0 1.5 0 0 ] 
 
-  color "blue"
+  color "green"
 )
 corobot
 (		  
@@ -60,6 +60,6 @@ corobot
 
   pose [ 1.5 3.5 0 -90 ] 
 
-  color "red"
+  color "blue"
 )
 

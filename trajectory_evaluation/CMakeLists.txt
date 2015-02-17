@@ -27,7 +27,7 @@ set (CMAKE_CXX_FLAGS "-g")
 
 
 ## Declare a cpp executable
-add_executable(${PROJECT_NAME} src/main.cpp src/collision_detection.cpp src/euclidean_distance.cpp src/evaluate.cpp src/time.cpp src/trajectory_request_handler.cpp src/utility.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/collision_detection.cpp src/euclidean_distance.cpp src/evaluate.cpp src/orientation.cpp src/time.cpp src/trajectory_request_handler.cpp src/utility.cpp)
 
 # Add the -std argument to compile enum
 set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS -std=c++0x)

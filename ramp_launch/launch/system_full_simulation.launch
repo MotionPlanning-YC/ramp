@@ -25,7 +25,7 @@
   <include file="$(find ramp_launch)/launch/planner_parameters.launch" />
   <rosparam file="$(find ramp_launch)/launch/config/robot_0.yaml" command="load" ns="robot_info/" />
 
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner"/>
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" />
 </group> 
 
 
@@ -100,7 +100,7 @@
 
 
 <!-- Trajectory Visualization -->
-<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> 
+<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> 
 
 
 </launch>
