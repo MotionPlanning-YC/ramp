@@ -184,8 +184,18 @@ void MobileRobot::updateTrajectory(const ramp_msgs::RampTrajectory msg) {
   t_immiColl_     = ros::Duration(0);
   
   // Update vectors for speeds and times
-  if(msg.trajectory.points.size() > 1) {
+  if(trajectory_.trajectory.points.size() > 2) 
+  {
     calculateSpeedsAndTime();
+  }
+  else 
+  {
+    ROS_INFO("Stopping at state: %s", utility_.toString(motion_state_).c_str());
+    twist_.linear.x = 0;
+    twist_.angular.z = 0;
+    sendTwist();
+    sendTwist();
+    sendTwist();
   }
 
   //if(trajectory_.trajectory.points.size() > 2)
@@ -207,8 +217,7 @@ void MobileRobot::accountForAcceleration() {
 
 
 /** 
- * Calculate all the necessary values to move the robot: 
- * the linear and angular velocities as well as ending times
+ * Calculate all the necessary values to move the robot: the linear and angular velocities as well as ending times
  * This method sets the vectors speeds, orientations, and end_times
  **/
 void MobileRobot::calculateSpeedsAndTime () {
@@ -222,12 +231,6 @@ void MobileRobot::calculateSpeedsAndTime () {
   ros::Time start_time = ros::Time::now();
 
 
-  // Set the # of inner cycles and the cycle time
-  int num_inner_cycles=3;
-  double t_cycle = ( trajectory_.trajectory.points.at(1).time_from_start - 
-                        trajectory_.trajectory.points.at(0).time_from_start ).toSec();
-  double t_inner_cycle = t_cycle / num_inner_cycles;
-  
 
   // Go through all the points of the received trajectory
   for(int i=0;i<num_-1;i++) {
@@ -247,29 +250,6 @@ void MobileRobot::calculateSpeedsAndTime () {
     orientations_.push_back( utility_.findAngleFromAToB(current.positions, next.positions) ); 
   }
 
-    /* Manually implement acceleration */
-    // Get how much each DOF increases per inner cycle
-    /*double xInc = next.accelerations.at(0) * t_inner_cycle;
-    double yInc = next.accelerations.at(1) * t_inner_cycle;
-    double wInc = next.accelerations.at(2) * t_inner_cycle;
-
-    // Set the values for the inner cycles
-    for(int j=0;j<num_inner_cycles;j++) {
-      double vx = current.velocities.at(0) + (j*xInc);
-      double vy = current.velocities.at(1) + (j*yInc);
-      double w  = current.velocities.at(2) + (j*wInc);
-      double t  = start_time.toSec() + current.time_from_start.toSec() + (j*t_inner_cycle);
-      //ROS_INFO("vx: %f vy: %f w: %f t: %f", vx, vy, w, t);
-
-
-      speeds_linear_.push_back  ( sqrt(pow(vx,2) + pow(vy,2) )) ;
-      speeds_angular_.push_back ( w )                           ;
-      end_times.push_back       (ros::Time(t))                  ;
-    } // end inner cycle for
-  }   // end all points for
-
-  // Increase num to reflect inner cycles
-  num_ = (num_-1)*num_inner_cycles;*/
 
   //printVectors();
 } // End calculateSpeedsAndTime

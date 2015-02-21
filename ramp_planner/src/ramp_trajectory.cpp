@@ -119,8 +119,7 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
   std::ostringstream result;
  
   result<<"\nTrajectory ID: "<<msg_.id;
-  result<<"\n Number of knot points: "<<msg_.i_knotPoints.size(); 
-  result<<"\n Path: "<<path_.toString();
+  result<<"\n Path: "<<bezierPath_.toString();
   result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<(bool)msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
 
   return result.str();

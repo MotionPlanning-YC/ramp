@@ -14,7 +14,7 @@ bool received_ob = false;
 bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
                    ramp_msgs::EvaluationRequest::Response& res) 
 {
-  std::cout<<"\nEvaluating trajectory: \n"<<u.toString(req.trajectory);
+  ROS_INFO("Robot %i Evaluating trajectory: %s", cd.id, u.toString(req.trajectory).c_str());
 
   ev.setRequest(req);
   
@@ -40,7 +40,8 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   // Do fitness
   res.fitness = ev.performFitness(qr);
 
-  //ROS_INFO("\nSending back: Feasible = %d, Fitness = %f", res.feasible, res.fitness);
+  ROS_INFO("Robot %i Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", cd.id, res.fitness, res.fitness ?  
+      "True" : "False", res.t_firstCollision);
   return true;
 } //End handleRequest
 

@@ -10,8 +10,6 @@ MobileBase::MobileBase() {
 } 
 
 
-
-
 /** Destructor */
 MobileBase::~MobileBase() {
   if(reflexxesData_.rml != 0) {
@@ -65,7 +63,7 @@ void MobileBase::initReflexxes() {
   // Maximum acceleration
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 1.;
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1] = 1.;
-  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[2] = PI/4;
+  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[2] = PI;
   
 
   // As the maximum jerk values are not known, this is just to try

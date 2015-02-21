@@ -68,7 +68,7 @@ void CollisionDetection::setOb_T_w_b(int id) {
   // robot 0 needs robot 1's pose
   else {
     tf::Vector3 pos(1.5f, 3.5f, 0.f);
-    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(-PI/4));
+    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(-1.5708));
     ob_T_w_b_.setOrigin(pos);
   }
 } // End setOb_T_w_b
@@ -133,7 +133,8 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   //std::cout<<"\nobstable trajectory size: "<<ob_trajectory.trajectory.points.size();
   // For every point, check circle detection on a subset of the obstacle's trajectory
   float radius = 0.275f;
-  for(uint16_t i=0;i<i_stop;i++) {
+  for(uint16_t i=0;i<i_stop;i++) 
+  {
     
     // Get the ith point on the trajectory
     trajectory_msgs::JointTrajectoryPoint p_i = trajectory_.trajectory.points.at(i);
@@ -141,7 +142,8 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
 
     // *** Test position i for collision against some points on obstacle's trajectory ***
     // Obstacle trajectory should already be in world coordinates!
-    for(uint16_t j = (ob_trajectory.trajectory.points.size() == 1 || i<=t_checkColl) ? 0 : i-t_checkColl ; j<i+t_checkColl && j<ob_trajectory.trajectory.points.size(); j++) {
+    for(uint16_t j = (ob_trajectory.trajectory.points.size() == 1 || i<=t_checkColl) ? 0 : i-t_checkColl ; j<i+t_checkColl && j<ob_trajectory.trajectory.points.size(); j++) 
+    {
      
 
       // Get the jth point of the obstacle's trajectory

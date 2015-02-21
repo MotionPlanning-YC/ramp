@@ -161,8 +161,12 @@ void TrajectoryView::drawPopulation() {
       //std::cout<<"\nfeasible: "<<(int)populations_.at(p).population.at(i).feasible;
       //std::cout<<"\npoints[0]: ("<<points.at(0).positions.at(0)<<", "<<points.at(0).positions.at(1)<<")\n";
 
+      // If movingOn, set to black
+      if(t == populations_.at(p).population.size()-1) {
+        penTraj = QPen( QColor(0, 0, 0, 255) );
+      }
       // Green for robot 1 and feasible
-      if(populations_.at(p).robot_id == 0 && populations_.at(p).population.at(t).feasible) {
+      else if(populations_.at(p).robot_id == 0 && populations_.at(p).population.at(t).feasible) {
         penTraj = QPen( QColor(0, 255, 0, 255) );
       }
       // Blue for robot 2 and feasible
