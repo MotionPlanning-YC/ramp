@@ -798,7 +798,7 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
   // Velocity
   double x_dot = ((A_*u) + C_)*u_dot;
   double y_dot = (x_dot*(B_*u+D_)) / (A_*u+C_);
-  double theta_dot      = (theta - theta_prev_) / CYCLE_TIME_IN_SECONDS;
+  double theta_dot      = utility_.findDistanceBetweenAngles(theta,theta_prev_) / CYCLE_TIME_IN_SECONDS;
 
   // Acceleration
   double x_dot_dot = (x_dot - x_dot_prev_) / CYCLE_TIME_IN_SECONDS;

@@ -76,7 +76,7 @@ void CollisionDetection::setOb_T_w_b(int id) {
 
 
 
-const int getIndexOb(const ramp_msgs::RampTrajectory ob_trajectory, const uint16_t i) {
+/*const int getIndexOb(const ramp_msgs::RampTrajectory ob_trajectory, const uint16_t i) {
 
   int j;
   if(ob_trajectory.trajectory.points.size() == 1) {
@@ -89,7 +89,7 @@ const int getIndexOb(const ramp_msgs::RampTrajectory ob_trajectory, const uint16
 
 
 
-}
+}*/
 
 /** 
  * This method returns true if there is collision between trajectory_ and the obstacle's trajectory, false otherwise 

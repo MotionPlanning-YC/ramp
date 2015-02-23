@@ -205,7 +205,6 @@ class Planner {
               const RampTrajectory trajec)      ;
 
     // Misc
-    const bool checkOrientation()                                 const ; 
     const MotionState randomizeMSPositions(MotionState ms)        const ;
           void checkTrajChange()                                        ;
           void seedPopulation()                                         ;
@@ -236,7 +235,7 @@ class Planner {
     const std::vector<RampTrajectory> getTrajectories(std::vector<ramp_msgs::TrajectoryRequest> tr);
     void updatePathsStart(const MotionState s);
 
-    const bool compareSwitchToBest(const RampTrajectory traj) const;
+    const bool compareSwitchToBest(const RampTrajectory traj, const Population pop) const;
 
 
 
@@ -343,6 +342,8 @@ class Planner {
     MotionState totalDiff_;
     
     Population pop_orig_;
+
+    bool bestChangedAfterCC_;
 
     bool errorReduction_;
 };

@@ -1,6 +1,6 @@
 #include "orientation.h"
 
-Orientation::Orientation() : Q_(10000.) {}
+Orientation::Orientation() : Q_(1000. / (50.*PI)) {}
 
 
 const double Orientation::perform() {

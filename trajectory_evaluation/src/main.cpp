@@ -28,7 +28,7 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   }
   // Else, set collision to false
   else {
-    //ROS_INFO("No obstacles sensed");
+    ROS_INFO("No obstacles sensed");
     qr.collision_ = 0;
     qr.t_firstCollision_ = 9999.0f; 
   }

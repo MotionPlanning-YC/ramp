@@ -763,8 +763,8 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
 
       //ROS_INFO("theta: %f", theta);
       // Get angular velocity
-      double w = (theta - data.inputParameters->CurrentPositionVector->VecData[2]) / 
-                  CYCLE_TIME_IN_SECONDS;
+      double w = utility_.findDistanceBetweenAngles(theta, data.inputParameters->CurrentPositionVector->VecData[2]) /
+        CYCLE_TIME_IN_SECONDS;
 
       // Push on p,v,a
       // TODO: Manually keep acceleration?
