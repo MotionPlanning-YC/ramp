@@ -1,5 +1,6 @@
 RampTrajectory trajectory
 float64 currentTheta
+float64 t_start
 
 ---
 

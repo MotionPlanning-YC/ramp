@@ -1,9 +1,9 @@
 #include "evaluate.h"
 
-Evaluate::Evaluate() : Q(10000.f) {}
+Evaluate::Evaluate() : Q(1000.f) {}
 
 
-Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) : Q(10000.) {
+Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) : Q(1000.) {
   setRequest(req);
 }
 

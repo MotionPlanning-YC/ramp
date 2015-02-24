@@ -14,7 +14,7 @@ bool received_ob = false;
 bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
                    ramp_msgs::EvaluationRequest::Response& res) 
 {
-  ROS_INFO("Robot %i Evaluating trajectory: %s", cd.id, u.toString(req.trajectory).c_str());
+  ROS_INFO("Robot %i Evaluating trajectory: %s", cd.id_, u.toString(req.trajectory).c_str());
 
   ev.setRequest(req);
   
@@ -24,11 +24,11 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   // If there are obstacles, do collision detection
   if(received_ob) {
     cd.trajectory_  = req.trajectory;
+    cd.t_start_     = req.t_start;
     qr = cd.perform();
   }
   // Else, set collision to false
   else {
-    ROS_INFO("No obstacles sensed");
     qr.collision_ = 0;
     qr.t_firstCollision_ = 9999.0f; 
   }
@@ -40,7 +40,7 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   // Do fitness
   res.fitness = ev.performFitness(qr);
 
-  ROS_INFO("Robot %i Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", cd.id, res.fitness, res.fitness ?  
+  ROS_INFO("Robot %i Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", cd.id_, res.fitness, res.feasible ?  
       "True" : "False", res.t_firstCollision);
   return true;
 } //End handleRequest
@@ -68,8 +68,8 @@ int main(int argc, char** argv) {
   ros::NodeHandle handle;
 
   int id;
-  handle.getParam("trajectory_evaluation/robot_id", cd.id);
-  std::cout<<"\nTrajectory Evaluation id: "<<cd.id;
+  handle.getParam("trajectory_evaluation/robot_id", cd.id_);
+  std::cout<<"\nTrajectory Evaluation id: "<<cd.id_;
   cd.init(handle);
 
  

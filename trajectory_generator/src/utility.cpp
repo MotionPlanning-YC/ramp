@@ -126,6 +126,7 @@ const double Utility::findAngleFromAToB(const std::vector<double> a, const std::
 const double Utility::findDistanceBetweenAngles(const double a1, const double a2) const {
   double result;
   double difference = a2 - a1;
+  //ROS_INFO("a2: %f, a1: %f diff: %f", a2, a1, difference);
   
   // If difference > pi, the result should be in [-PI,0] range
   if(difference > PI) {

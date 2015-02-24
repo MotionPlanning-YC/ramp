@@ -33,20 +33,20 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(1.26555); // 0.70455
-  c1.motionState.positions.push_back(1.5); // 0.4026
-  c1.motionState.positions.push_back(0.); // 0.519146
+  c1.motionState.positions.push_back(1.5); // 0.70455
+  c1.motionState.positions.push_back(3.5); // 0.4026
+  c1.motionState.positions.push_back(-PI/2); // 0.519146
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(3.5); // 0.70455
-  c2.motionState.positions.push_back(1.5); // 0.4026
+  c2.motionState.positions.push_back(1.0); // 0.70455
+  c2.motionState.positions.push_back(2.5); // 0.4026
   c2.motionState.positions.push_back(0.); // 0.519146
 
 
   ramp_msgs::KnotPoint c3;
-  c3.motionState.positions.push_back(2.2479); // 0.857146
-  c3.motionState.positions.push_back(1.36686); // 0.71115
-  c3.motionState.positions.push_back(0.7722);  // 1.11151
+  c3.motionState.positions.push_back(1.5); // 0.857146
+  c3.motionState.positions.push_back(0.); // 0.71115
+  c3.motionState.positions.push_back(0.);  // 1.11151
 
 
   ramp_msgs::KnotPoint c4;
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
 
   
   // Velocities
-  c1.motionState.velocities.push_back(0.33);  //.151426
+  c1.motionState.velocities.push_back(0.);  //.151426
   c1.motionState.velocities.push_back(0.); //-.297903
   c1.motionState.velocities.push_back(0.); //-.118126
  
@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
   //p.points.push_back(zero);
   p.points.push_back(c1);
   p.points.push_back(c2);
-  //p.points.push_back(c3);
+  p.points.push_back(c3);
   //p.points.push_back(c4);
   //p.points.push_back(c5);
   //p.points.push_back(c6);
@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
   sp1.accelerations.push_back(0);*/
 
   ramp_msgs::MotionState sp2;
-  //sp2 = p.points.at(2).motionState;
+  sp2 = p.points.at(2).motionState;
   //sp2 = p.points.at(1).motionState;
   //sp2 = c3.motionState;
 
@@ -386,7 +386,7 @@ int main(int argc, char** argv) {
 
 
   std::vector<ramp_msgs::BezierInfo> curves;
-  //curves.push_back(bi);
+  curves.push_back(bi);
   //curves.push_back(bi2);
   
   ramp_msgs::TrajectoryRequest tr;

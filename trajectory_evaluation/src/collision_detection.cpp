@@ -13,7 +13,7 @@ CollisionDetection::~CollisionDetection() {
 void CollisionDetection::init(ros::NodeHandle& h) {
   h_traj_req_ = new TrajectoryRequestHandler((const ros::NodeHandle&)h);
   //pub_population = h.advertise<ramp_msgs::Population>("population", 1000);
-  setOb_T_w_b(id);
+  setOb_T_w_b(id_);
 }
 
 
@@ -101,7 +101,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.trajectory.points.size());
 
   CollisionDetection::QueryResult result;
-  uint8_t t_checkColl = 5;
+  uint8_t t_checkColl = 2;
 
   /*if(ob_trajectory.trajectory.points.size() <= 2) {
     if(id == 0)
@@ -110,7 +110,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       std::cout<<"\nRobot 0 has no trajectory!\n";
   }*/
   
-  int i_stop;
+  uint16_t i_stop;
   if(trajectory_.i_knotPoints.size() == 0) {
     ROS_INFO("i_stop=0");
     i_stop = 0;
@@ -142,7 +142,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
 
     // *** Test position i for collision against some points on obstacle's trajectory ***
     // Obstacle trajectory should already be in world coordinates!
-    for(uint16_t j = (ob_trajectory.trajectory.points.size() == 1 || i<=t_checkColl) ? 0 : i-t_checkColl ; j<i+t_checkColl && j<ob_trajectory.trajectory.points.size(); j++) 
+    for(int j = (ob_trajectory.trajectory.points.size() == 1 || i<=t_checkColl) ? 0 : i-t_checkColl ; j<(i+t_checkColl) && j<ob_trajectory.trajectory.points.size(); j++) 
     {
      
 
@@ -170,8 +170,8 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
             (int)j);
         result.collision_ = true;
         result.t_firstCollision_ = p_i.time_from_start.toSec();
-        j = i+t_checkColl;
         i = i_stop;
+        break;
       } // end if
     } // end for
   } // end for
@@ -285,7 +285,9 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
   //std::cout<<"\nVelocity: ("<<ob.odom_t.twist.twist.linear.x<<", "<<ob.odom_t.twist.twist.linear.y<<", "<<ob.odom_t.twist.twist.angular.z<<")";
 
 
-  // Create and initialize the first point in the path
+  /***********************************************************************
+   Create and initialize the first point in the path
+   ***********************************************************************/
   ramp_msgs::KnotPoint start;
   start.motionState.positions.push_back(ob.odom_t.pose.pose.position.x);
   start.motionState.positions.push_back(ob.odom_t.pose.pose.position.y);
@@ -295,32 +297,49 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.y);
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.angular.z);
 
+  /** Transform point based on the obstacle's odometry frame */
+  // Transform the position
   tf::Vector3 p_st(start.motionState.positions.at(0), start.motionState.positions.at(1), 0); 
   tf::Vector3 p_st_tf = ob_T_w_b_ * p_st;
-  //std::cout<<"\np_st.x: "<<p_st.getX()<<" p_st.y: "<<p_st.getY()<<" p_st_tf.x: "<<p_st_tf.getX()<<" p_st_tf.y: "<<p_st_tf.getY();
+  
   start.motionState.positions.at(0) = p_st_tf.getX();
   start.motionState.positions.at(1) = p_st_tf.getY();
-  start.motionState.positions.at(2) = utility.displaceAngle(
+  start.motionState.positions.at(2) = utility_.displaceAngle(
       tf::getYaw(ob_T_w_b_.getRotation()), start.motionState.positions.at(2));
   
-
   
+  // Transform the velocity
   std::vector<double> zero; zero.push_back(0); zero.push_back(0); 
-  double teta = utility.findAngleFromAToB(zero, start.motionState.positions);
+  double teta = utility_.findAngleFromAToB(zero, start.motionState.positions);
   double phi = start.motionState.positions.at(2);
   double v = start.motionState.velocities.at(0);
+
   start.motionState.velocities.at(0) = v*cos(phi);
   start.motionState.velocities.at(1) = v*sin(phi);
 
 
 
   if(v < 0) {
-    start.motionState.positions.at(2) = utility.displaceAngle(start.motionState.positions.at(2), PI);
+    start.motionState.positions.at(2) = utility_.displaceAngle(start.motionState.positions.at(2), PI);
   }
+  
+  /***********************************************************************
+   ***********************************************************************
+   ***********************************************************************/
 
+  ROS_INFO("Before adjusting, start: %s", utility_.toString(start.motionState).c_str());
+  ROS_INFO("t_start: %f", t_start_);
+
+  /** Adjust the position based on the starting time of the trajectory passed in */
+  start.motionState.positions.at(0) += start.motionState.velocities.at(0) * t_start_;
+  start.motionState.positions.at(1) += start.motionState.velocities.at(1) * t_start_;
+  start.motionState.positions.at(2) += start.motionState.velocities.at(2) * t_start_;
+
+  ROS_INFO("After adjusting, start: %s", utility_.toString(start.motionState).c_str());
 
   // Push the first point onto the path
   path.push_back(start);
+
 
   /** Find the ending configuration for the predicted trajectory based on motion type */
   // If translation
@@ -354,8 +373,8 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
   } // end if translation
 
 
-  //std::cout<<"\nPath: "<<utility.toString(utility.getPath(path));
-  result = utility.getPath(path);
+  //std::cout<<"\nPath: "<<utility_.toString(utility_.getPath(path));
+  result = utility_.getPath(path);
   return result; 
 }
 

@@ -36,7 +36,8 @@ class CollisionDetection {
 
 
     /***** Data Members ****/
-    int                   id;
+    int                   id_;
+    double                t_start_;
     tf::Transform         ob_T_w_b_;
     ramp_msgs::Obstacle   obstacle_;
     ramp_msgs::RampTrajectory trajectory_;
@@ -54,7 +55,7 @@ class CollisionDetection {
 
     /***** Data Members *****/
     TrajectoryRequestHandler* h_traj_req_;
-    Utility                   utility;
+    Utility                   utility_;
 };
 
 #endif
