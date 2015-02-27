@@ -44,14 +44,13 @@ const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const
   float resolutionRate = msg_.trajectory.points.at(1).time_from_start.toSec() -
                           msg_.trajectory.points.at(0).time_from_start.toSec();
   int i = ceil((t/resolutionRate));
-  ROS_INFO("t: %f resolutionRate: %f i: %i size: %i", 
+  /*ROS_INFO("t: %f resolutionRate: %f i: %i size: %i", 
       t, 
       resolutionRate, 
       i, 
-      (int)msg_.trajectory.points.size());
+      (int)msg_.trajectory.points.size());*/
 
   if( i >= msg_.trajectory.points.size() ) {
-    ROS_INFO("In getPointAtTime if");
     return msg_.trajectory.points.at( msg_.trajectory.points.size()-1 );
   }
 
@@ -81,12 +80,18 @@ const double RampTrajectory::getDirection() const {
 
 // Inclusive
 const RampTrajectory RampTrajectory::getSubTrajectory(const float t) const {
-  ROS_INFO("t: %f", t);
   ramp_msgs::RampTrajectory rt;
 
   double t_stop = t;
 
-  if( t > msg_.trajectory.points.at( msg_.trajectory.points.size()-1 ).time_from_start.toSec()) {
+  if(msg_.trajectory.points.size() < 1)
+  {
+    ROS_ERROR("msg_.trajectory.points.size == 0");
+    return clone();
+  }
+
+  if( t > msg_.trajectory.points.at( msg_.trajectory.points.size()-1 ).time_from_start.toSec()) 
+  {
     t_stop = msg_.trajectory.points.at( msg_.trajectory.points.size()-1 ).time_from_start.toSec();
   }
 
@@ -95,8 +100,7 @@ const RampTrajectory RampTrajectory::getSubTrajectory(const float t) const {
     uint16_t index = floor(i*10.) < msg_.trajectory.points.size() ? floor(i*10) : 
       msg_.trajectory.points.size()-1;
 
-    ROS_INFO("index: %i size: %i", (int)index, (int)msg_.trajectory.points.size());
-
+    ROS_INFO("index: %i size: %i", index, (int)msg_.trajectory.points.size());
     rt.trajectory.points.push_back(msg_.trajectory.points.at(index));  // todo: i*1/cycle_time
     if(msg_.i_knotPoints.at(i_kp) == index) {
       rt.i_knotPoints.push_back(index);

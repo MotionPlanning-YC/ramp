@@ -122,9 +122,10 @@ const bool BezierCurve::verify() const {
   double y_dot = (B_*t_R_min_ + D_)*u_dot_max;
   double v_rmin = sqrt(pow(x_dot,2) + pow(y_dot,2));
   double w_rmin = v_rmin / R_min_;
-  //ROS_INFO("x_dot: %f y_dot: %f", x_dot, y_dot);
-  //ROS_INFO("w_rmin: %f v_rmin: %f R_min: %f t_R_min: %f x_dot: %f y_dot: %f", w_rmin, v_rmin, R_min_, t_R_min_, x_dot, y_dot);
-  //ROS_INFO("w_rmin <= w_max: %s", w_rmin <= w_max ? "True" : "False");
+  ROS_INFO("x_dot: %f y_dot: %f", x_dot, y_dot);
+  ROS_INFO("w_rmin: %f v_rmin: %f R_min: %f t_R_min: %f x_dot: %f y_dot: %f", w_rmin, v_rmin, R_min_, t_R_min_, x_dot, y_dot);
+  ROS_INFO("w_rmin <= w_max: %s", w_rmin <= w_max ? "True" : "False");
+  ROS_INFO("l_: %f", l_);
   
 
   return ( l_ < 1. && (t_R_min_ >= 0 && t_R_min_ <= 1) && (w_rmin <= w_max) );
@@ -585,11 +586,11 @@ void BezierCurve::initControlPoints() {
     controlPoints_.push_back(C1);
     controlPoints_.push_back(C2);
     
-    /*std::cout<<"\nControl Points:";
+    std::cout<<"\nControl Points:";
     for(int i=0;i<controlPoints_.size();i++) {
       std::cout<<"\n"<<utility_.toString(controlPoints_.at(i));
     }
-    std::cout<<"\n";*/
+    std::cout<<"\n";
   } // end else
 } // End initControlPoints
 
@@ -666,10 +667,10 @@ void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
   controlPoints_.push_back(C1);
   controlPoints_.push_back(C2);
   
-  /*std::cout<<"\nControl Points:";
+  std::cout<<"\nControl Points:";
   for(int i=0;i<controlPoints_.size();i++) {
     std::cout<<"\n"<<utility_.toString(controlPoints_.at(i));
-  }*/
+  }
 } // End initControlPoints
 
 

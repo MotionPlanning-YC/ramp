@@ -10,7 +10,7 @@ Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalT
   stop_(false), num_controlCycles_(0) 
 {
   controlCycle_ = ros::Duration(2.f);
-  planningCycle_ = ros::Duration(1.f / 10.f);
+  planningCycle_ = ros::Duration(1.f / 2.f);
   imminentCollisionCycle_ = ros::Duration(1.f / 2.f);
   generationsPerCC_ = controlCycle_.toSec() / planningCycle_.toSec();
 }
@@ -358,7 +358,7 @@ const int Planner::estimateIfOnCurve(const MotionState ms, const ramp_msgs::Bezi
                             y < curve.controlPoints.at(2).positions.at(1) ; 
 
   ROS_INFO("xPast: %s yPast: %s", xPast ? "True" : "False", yPast ? "True" : "False");
-  if(xPast && yPast)
+  if(xPast || yPast)
   {
     ROS_INFO("Returning 3 (after curve)");
     return 3;
@@ -815,8 +815,8 @@ void Planner::seedPopulation() {
 
   std::vector<KnotPoint> all;
   all.push_back(start_);
-  all.push_back(kp);
-  all.push_back(kp1);
+  //all.push_back(kp);
+  //all.push_back(kp1);
   all.push_back(goal_);
 
   Path p1(all);
@@ -844,7 +844,7 @@ void Planner::seedPopulation() {
 
   std::vector<Path> paths;
   paths.push_back(p1);
-  paths.push_back(p1);
+  //paths.push_back(p1);
   /************************************/
 
   /**** Get trajectories ****/  
@@ -853,12 +853,13 @@ void Planner::seedPopulation() {
   
     // Make request
     RampTrajectory trajec = requestTrajectory(paths.at(i));
-    new_pop.push_back(evaluateTrajectory(trajec));
+    trajec = requestEvaluation(trajec);
+    ROS_INFO("Seede trajec: %s", trajec.toString().c_str());
+    population_.add(trajec); 
   
   } // end for
   /************************************/
 
-  population_.replaceAll(new_pop); 
 } // End seedPopulation
 
 
@@ -929,27 +930,15 @@ void Planner::setMi() {
   // Clear m_i
   m_i_.clear();
   
-  // Need to set m_delta
-  // motion difference from previous CC to next CC
-  MotionState delta_m = m_cc_.subtract(latestUpdate_);
-  ROS_INFO("mcc: %s\nlatestUpdate: %s", 
-      m_cc_.toString().c_str(), 
-      latestUpdate_.toString().c_str());
-  ROS_INFO("delta_m: %s", delta_m.toString().c_str());
-
-  // Divide delta_m by num_pc to get the motion difference for each PC
-  MotionState delta_m_inc = delta_m.divide(generationsPerCC_);
-  //std::cout<<"\nDelta_m / num_pc: "<<delta_m_inc.toString();
  
   // Set m_i
   // Each m_i will be start + (delta_m_inc * i)
   for(int i=0;i<generationsPerCC_;i++) {
-    MotionState temp = delta_m_inc.multiply(i+1);
-    MotionState m = latestUpdate_.add(temp);
+    MotionState temp = movingOn_.getPointAtTime(planningCycle_.toSec()*i);
+    
+    m_i_.push_back(temp);
 
-    m_i_.push_back(m);
-
-    ROS_INFO("m_i[%i]: %s", i, m.toString().c_str());
+    ROS_INFO("m_i[%i]: %s", i, temp.toString().c_str());
   } // end for
 
 
@@ -1156,15 +1145,21 @@ const RampTrajectory Planner::computeFullSwitch(const RampTrajectory from, const
 
     // Get transition trajectory
     std::vector<RampTrajectory> trajecs = switchTrajectory(from, to);
-    RampTrajectory T_new = trajecs.at(1);
 
-    // Evaluate T_new
-    ramp_msgs::EvaluationRequest er = buildEvaluationRequest(T_new);
-    er.request.t_start = planningCycle_.toSec();
-    T_new = requestEvaluation(er);
-    T_new.transitionTraj_ = trajecs.at(0).msg_;
+    // If a switch was possible
+    if(trajecs.size() > 0)
+    {
+      RampTrajectory T_new = trajecs.at(1);
 
-    result = T_new;
+      // Evaluate T_new
+      ramp_msgs::EvaluationRequest er = buildEvaluationRequest(T_new);
+      er.request.t_start = planningCycle_.toSec();
+      T_new = requestEvaluation(er);
+      T_new.transitionTraj_ = trajecs.at(0).msg_;
+
+      result = T_new;
+      result.transitionTraj_ = trajecs.at(0).msg_;
+    }
   } // end if curve needed
 
   // If no switch is necessary, return a blank trajectory
@@ -1184,6 +1179,10 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
 
     
   RampTrajectory switching = getTransitionTrajectory(from, to);
+  if(switching.msg_.trajectory.points.size() < 1) 
+  {
+    return result;
+  }
   RampTrajectory full = switching.clone();
   ROS_INFO("Switching trajectory: %s", switching.toString().c_str());
   
@@ -1318,13 +1317,19 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory curre
   // Using start of Bezier rather than segment endpoint ensures that
   // the trajectory will end at the start of the Bezier
   int i_goal = 1;
-  if(utility_.positionDistance( trgt_traj.path_.start_.motionState_.msg_.positions, trgt_traj.msg_.trajectory.points.at(trgt_traj.msg_.i_knotPoints.at(1)).positions ) < 0.1)
+  if(trgt_traj.msg_.i_knotPoints.size() == 1) 
+  {
+    i_goal = 0;
+  }
+  else if(trgt_traj.msg_.i_knotPoints.size() > 2 && 
+      utility_.positionDistance( trgt_traj.path_.start_.motionState_.msg_.positions, trgt_traj.msg_.trajectory.points.at(trgt_traj.msg_.i_knotPoints.at(1)).positions ) < 0.1)
   {
     i_goal = 2;
   }
+  ROS_INFO("i_goal: %i, trgt.knotpoints.size(): %i", i_goal, (int)trgt_traj.msg_.i_knotPoints.size());
+  
   MotionState g(trgt_traj.msg_.trajectory.points.at(trgt_traj.msg_.i_knotPoints.at(i_goal)));
   segment_points.push_back(g);
-  //ROS_INFO("i_goal: %i", i_goal);
   ROS_INFO("g: %s", g.toString().c_str());
 
 
@@ -1335,22 +1340,9 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory curre
   if( fabs(utility_.findDistanceBetweenAngles( ms_startSwitch.msg_.positions.at(2),
         firstSlope)) > 0.08)
   {
-    ROS_WARN("Not facing direction of first segment!");
-    // Slope of new 1st segment is robot's current orientation
-    double slope1 = ms_startSwitch.msg_.positions.at(2);
-    double slope2 = segment_points.at(2).msg_.positions.at(2);
-    double xPrime = segment_points.at(1).msg_.positions.at(0);
-    double yPrime = segment_points.at(1).msg_.positions.at(1);
-    double y      = segment_points.at(0).msg_.positions.at(1);
-    ROS_INFO("slope1: %f slope2: %f xPrime: %f yPrime: %f y: %f",
-        slope1, slope2, xPrime, yPrime, y);
-
-    double x = (xPrime*slope2 + yPrime - y) / slope1;
-    double yNew = y + slope1*x;
-
-    ROS_INFO("New segment 1 point: (%f, %f): ", x, yNew);
-    segment_points.at(1).msg_.positions.at(0) = x;
-    segment_points.at(1).msg_.positions.at(1) = yNew;
+    ROS_INFO("Transition not possible because robot is not oriented towards first segment");
+    RampTrajectory blank;
+    return blank;
   }
 
 
@@ -1605,10 +1597,10 @@ const MotionState Planner::predictStartPlanning() const {
   ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
   
   // Get the difference between robot's state and what state it should be at
-  MotionState diffI = m_i_.at(c_pc_).subtract(latestUpdate_);
+  MotionState diffI = m_i_.at(c_pc_).subtractPosition(latestUpdate_);
   //std::cout<<"\ndiff: "<<diff.toString();
 
-  MotionState diff = diffI.subtract(totalDiff_);
+  MotionState diff = diffI.subtractPosition(totalDiff_);
   
   ROS_INFO("m_cc: %s\ndiffI: %s\ntotalDiff: %s\ndiff: %s", 
       m_cc_.toString().c_str(),
@@ -1616,9 +1608,9 @@ const MotionState Planner::predictStartPlanning() const {
       totalDiff_.toString().c_str(),
       diff.toString().c_str());
 
-  // Subtract that difference from startPlanning
-  //result = startPlanning_.subtract(diff);
-  result = m_cc_.subtract(diffI);
+  // subtractPositioin that difference from startPlanning
+  //result = startPlanning_.subtractPositioin(diff);
+  result = m_cc_.subtractPosition(diffI);
 
 
   ROS_INFO("Exiting Planner::predictStartPlanning");
@@ -1647,7 +1639,13 @@ void Planner::updatePathsStart(const MotionState s) {
 
 
 void Planner::planningCycleCallback(const ros::TimerEvent&) {
+  ROS_INFO("********************************************************************");
+  ROS_INFO("********************************************************************");
+  ROS_INFO("********************************************************************");
   ROS_INFO("Planning cycle occurring, generation %i", generation_);
+  ROS_INFO("********************************************************************");
+  ROS_INFO("********************************************************************");
+  ROS_INFO("********************************************************************");
 
   if(generation_ > 0) {
     ROS_INFO("c_pc: %i Occurring at %f, diff of time: %f", 
@@ -1664,90 +1662,46 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
   if(c_pc_ < generationsPerCC_ || !cc_started_) {
 
 
-    // Check this first 
-    /*if(bestChangedAfterCC_) 
-    {
-      ROS_INFO("In bestChangedAfterCC_ if block!");
-      RampTrajectory T_new = population_.getBest();
-
-      trajectory_msgs::JointTrajectoryPoint j;
-      double t;
-      // if there's a curve, set next CC to start at the end of the curve
-      if(T_new.transitionTraj_.curves.size() > 0) 
-      {
-        ROS_INFO("T_new.transitionTraj.trajectory.points.size(): %i i_curveEnd: %i", 
-            (int)T_new.transitionTraj_.trajectory.points.size(), (int)T_new.transitionTraj_.i_curveEnd);
-        j = T_new.transitionTraj_.trajectory.points.at(T_new.transitionTraj_.i_curveEnd); 
-      }
-      // start next CC at point where robot has stopped to turn
-      else if(T_new.transitionTraj_.trajectory.points.size() == 0)
-      {
-        ROS_ERROR("Transition trajectory empty!");
-      }
-      else
-      {
-        ROS_INFO("T_new.transitionTraj.trajectory.points.size: %i T_new.transitionTraj.i_knotPoints.size(): %i",
-            (int)T_new.transitionTraj_.trajectory.points.size(), (int)T_new.transitionTraj_.i_knotPoints.size());
-        j = T_new.transitionTraj_.trajectory.points.at(T_new.transitionTraj_.i_knotPoints.at(2)); 
-      }
-      t = j.time_from_start.toSec();
-
-      // Finish by restarting CC
-      restartControlCycle(t);
-      bestChangedAfterCC_ = false;
-    }*/
 
 
-
-
-
-    /*if(errorReduction_ && cc_started_) {
+    if(errorReduction_ && cc_started_ && latestUpdate_.msg_.velocities.at(2) < 0.01) {
       // Update startPlanning
       MotionState ms_sp = predictStartPlanning();
       ROS_INFO("ms_sp: %s", ms_sp.toString().c_str());
-      ROS_INFO("startPlanning_.subtract(ms_sp): %s", 
-          startPlanning_.subtract(ms_sp).toString().c_str());
-      totalDiff_ = totalDiff_.add( startPlanning_.subtract(ms_sp) );
-      ROS_INFO("After adding diff, totalDiff_: %s", totalDiff_.toString().c_str());
+      ROS_INFO("startPlanning_.subtractPosition(ms_sp): %s", 
+          startPlanning_.subtractPosition(ms_sp).toString().c_str());
 
       startPlanning_ = ms_sp;
       ROS_INFO("After predicting, startPlanning_: %s", startPlanning_.toString().c_str());
-      //std::cout<<"\nAfter predicting startPlanning_:";
-      //std::cout<<"\nstartPlanning: "<<startPlanning_.toString()<<"\n";
 
-
-      // Generate new trajectories
-      // Update paths with startPlanning
-      //updatePathsStart(startPlanning_);
-
-      //std::vector<RampTrajectory> trajecs = getTrajectories(population_.paths_);
       std::vector<RampTrajectory> trajecs = replanTrajecs(population_.getTrajectories(), startPlanning_);
 
       ROS_INFO("trajecs.size(): %i", (int)trajecs.size());
 
       population_.replaceAll(trajecs);
-      population_ = evaluatePopulation(population_);
-      bestTrajec_ = population_.getBest();
-    }*/
+      //population_ = evaluatePopulation(population_);
+      //bestTrajec_ = population_.getBest();
+    }
 
 
 
 
     // Call modification
     if(modifications_) {
+      ROS_INFO("*****************************");
       ROS_INFO("Performing modification");
       ModificationResult mod = modification();
+      ROS_INFO("Done with modification");
+      ROS_INFO("*****************************");
 
+      ROS_INFO("Evaluating entire population!");
       population_ = mod.popNew_;
+      population_ = evaluatePopulation(population_);
+      ROS_INFO("After mod and eval, pop now: %s", population_.toString().c_str());
 
-      if(mod.i_modified_.size() > 0 && !cc_started_) 
-      {
-        //ROS_INFO("After modification, evaluating the new population");
-        population_ = evaluatePopulation(population_);
-        //ROS_INFO("After evaluating modified population, pop now: %s", population_.fitnessFeasibleToString().c_str());
-      }
 
-      if((mod.i_modified_.size() > 0 || c_pc_ == 0) && cc_started_) 
+      //if((mod.i_modified_.size() > 0 || c_pc_ == 0) && cc_started_) 
+      if(cc_started_) 
       {
         ROS_INFO("In checking for switches block, c_pc: %i", c_pc_);
         ROS_INFO("mod.i_modified.size(): %i", (int)mod.i_modified_.size());
@@ -1757,26 +1711,25 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
         // Check if current theta aligns with best trajec's theta
         // If not, this means there was a change of best in previous CC
         RampTrajectory tempBest = population_.getBest();
-        if(c_pc_ == 0 && fabs(utility_.findDistanceBetweenAngles(movingOn_.msg_.trajectory.points.at(0).positions.at(2), 
-              utility_.findAngleFromAToB(tempBest.path_.at(0).motionState_.msg_.positions, 
-                tempBest.path_.at(1).motionState_.msg_.positions))) > 0.1)
-        {
-          // Switch to best
-          i_mostPromising = population_.getBestIndex(); 
-        }
-        else 
-        {
-          // Find the best of the modified trajectories
-          i_mostPromising = bestTrajec_.equals(population_.get(0))? 1 : 0;
-          for(uint8_t i=0;i<population_.size();i++) {
-            if(i != population_.getBestIndex() && population_.get(i).msg_.fitness > 
-                population_.get(i_mostPromising).msg_.fitness) {
-              i_mostPromising = i;
-            }
-          } // end for
-        }
-        ROS_INFO("i_mostPromising: %i", (int)i_mostPromising);
 
+        // Find the best of the modified trajectories
+        i_mostPromising = bestTrajec_.equals(population_.get(0)) ? 1 : 0;
+        ROS_INFO("Starting i_mostPromising at %i", i_mostPromising);
+        ROS_INFO("pop.getBestIndex(): %i", population_.getBestIndex());
+        for(uint8_t i=0;i<population_.size();i++) 
+        {
+          if( i != population_.getBestIndex() && 
+              population_.get(i).msg_.fitness > population_.get(i_mostPromising).msg_.fitness)
+          {
+            i_mostPromising = i;
+          }
+        } // end for
+        
+        // Re-evaluate bestTrajec
+        bestTrajec_ = requestEvaluation(bestTrajec_);
+        ROS_INFO("i_mostPromising: %i", (int)i_mostPromising);
+        ROS_INFO("pop.(i_mostPromising): %s", population_.get(i_mostPromising).fitnessFeasibleToString().c_str());
+        ROS_INFO("bestTrajec before checking switch: %s", bestTrajec_.fitnessFeasibleToString().c_str());
 
         // Check if most promising is within fitness range of computing a switch
         tf::Vector3 v_linear( latestUpdate_.msg_.velocities.at(0),
@@ -1792,13 +1745,15 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
             (f > bestFitness || fabs(f - bestFitness) < transThreshold_) )
         {
           ROS_INFO("In computing T_new");
-          //RampTrajectory T_new = computeFullSwitch(bestTrajec_, mod.popNew_.get(i_mostPromising));
           RampTrajectory T_new = computeFullSwitch(movingOn_, population_.get(i_mostPromising));
           ROS_INFO("T_new: %s", T_new.toString().c_str());
+          ROS_INFO("transitionTraj_.curves.size(): %i", (int)T_new.transitionTraj_.curves.size());
           
           // Check if T_new better than current best trajectory
           // if it cannot transition with a curve, don't transition 
-          if(T_new.transitionTraj_.curves.size() > 1 && compareSwitchToBest(T_new, population_)) 
+          if(T_new.msg_.trajectory.points.size() > 0 && 
+              T_new.transitionTraj_.curves.size() > 0 &&
+              compareSwitchToBest(T_new, population_)) 
           {
             ROS_INFO("T_new is better, switching trajectories");
 
@@ -1815,16 +1770,20 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
             if(T_new.transitionTraj_.curves.size() > 0) 
             {
               ROS_INFO("T_new.transitionTraj.trajectory.points.size(): %i i_curveEnd: %i", 
-                  (int)T_new.transitionTraj_.trajectory.points.size(), (int)T_new.transitionTraj_.i_curveEnd);
+                  (int)T_new.transitionTraj_.trajectory.points.size(), 
+                  (int)T_new.transitionTraj_.i_curveEnd);
               j = T_new.transitionTraj_.trajectory.points.at(T_new.transitionTraj_.i_curveEnd); 
             }
             // start next CC at point where robot has stopped to turn
             else {
               ROS_INFO("T_new.transitionTraj.trajectory.points.size: %i T_new.transitionTraj.i_knotPoints.size(): %i",
-                  (int)T_new.transitionTraj_.trajectory.points.size(), (int)T_new.transitionTraj_.i_knotPoints.size());
+                  (int)T_new.transitionTraj_.trajectory.points.size(), 
+                  (int)T_new.transitionTraj_.i_knotPoints.size());
               j = T_new.transitionTraj_.trajectory.points.at(T_new.transitionTraj_.i_knotPoints.at(2)); 
             }
             t = j.time_from_start.toSec();
+
+            bestTrajec_ = T_new;
 
             // Finish by restarting CC
             restartControlCycle(t);
@@ -1854,7 +1813,13 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     c_pc_++;
     sendPopulation();
   
+    ROS_INFO("********************************************************************");
+    ROS_INFO("********************************************************************");
+    ROS_INFO("********************************************************************");
     ROS_INFO("Generation %i completed", (generation_-1));
+    ROS_INFO("********************************************************************");
+    ROS_INFO("********************************************************************");
+    ROS_INFO("********************************************************************");
   } // end if c_pc<genPerCC
 } // End planningCycleCallback
 
@@ -1868,7 +1833,11 @@ void Planner::doControlCycle() {
   ROS_INFO("In Planner::doControlCycle");
 
   // Set the bestT
-  RampTrajectory bestT = population_.get(population_.findBestIndex());
+  RampTrajectory bestT = bestTrajec_;
+  if(bestTrajec_.msg_.trajectory.points.size() == 0)
+  {
+    bestT = population_.get(population_.findBestIndex());
+  }
   
   // Send the best trajectory and set movingOn
   ROS_INFO("Sending best");
@@ -1877,7 +1846,9 @@ void Planner::doControlCycle() {
   
   // Set gensPerCC based on CC time
   generationsPerCC_ = controlCycle_.toSec() / planningCycle_.toSec();
-  ROS_INFO("CC Time: %f PC Time: %f generationsPerCC_: %i", controlCycle_.toSec(), planningCycle_.toSec(), 
+  ROS_INFO("CC Time: %f PC Time: %f generationsPerCC_: %i", 
+      controlCycle_.toSec(), 
+      planningCycle_.toSec(),
       generationsPerCC_);
 
   ROS_INFO("Setting movingOn_");
@@ -1894,22 +1865,18 @@ void Planner::doControlCycle() {
   ROS_INFO("New startPlanning_: %s", startPlanning_.toString().c_str());
 
   // After m_cc_ and startPlanning are set, adapt the population
-  ROS_INFO("Before adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", population_.size(), 
-      population_.toString().c_str());
+  ROS_INFO("Before adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", population_.size(), population_.toString().c_str());
   population_ = adaptPopulation(population_, startPlanning_, controlCycle_);
-  int i_prevBest = population_.getBestIndex();
-  population_ = evaluatePopulation(population_);
-  ROS_INFO("After adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", population_.size(), 
-      population_.toString().c_str());
+  //population_ = evaluatePopulation(population_);
+  ROS_INFO("After adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", population_.size(), population_.toString().c_str());
   
-  bestTrajec_ = population_.getBest();
+  bestTrajec_ = population_.get(population_.getBestIndex());
 
 
   // If error reduction
   // Set pop_orig_ and totalDiff to 0's
   if(errorReduction_) {
-    totalDiff_ = totalDiff_.zero(3);
-    pop_orig_ = population_;
+    setMi();
   }
   
   // Create sub-populations if enabled
@@ -1954,7 +1921,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
   
   
   // Uncertainty code
-  //****SP_LU_diffs_.push_back(startPlanning_.subtract(latestUpdate_));
+  //****SP_LU_diffs_.push_back(startPlanning_.subtractPosition(latestUpdate_));
   
   // Do the control cycle
   doControlCycle();
@@ -1998,6 +1965,7 @@ void Planner::sendBest() {
 
   if(!stop_) {
     RampTrajectory best = population_.get(population_.findBestIndex());
+    //RampTrajectory best = bestTrajec_;
 
     // If infeasible and too close to obstacle, 
     // Stop the robot by sending a blank trajectory
@@ -2180,7 +2148,7 @@ const MotionState Planner::findAverageDiff() {
   sendPopulation();
   std::cout<<"\nPop: "<<population_.toString();
   std::cout<<"\nPopulation initialized! Press enter to continue\n";
-  std::cin.get();
+  //std::cin.get();
  
 
 

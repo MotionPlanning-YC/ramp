@@ -506,7 +506,6 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         bi.segmentPoints  = segment_points;
         bi.l              = lambda;
         bi.ms_maxVA       = ms_maxVA;
-        //bi.ms_begin       = path_.points.at(0).motionState;
 
         bc.init(bi, path_.points.at(0).motionState);
         ROS_INFO("Done initializing curve");
@@ -532,7 +531,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         type_ = ALL_STRAIGHT_SEGMENTS;
       }
       else {
-        //ROS_INFO("Curve not verified, but not a transition trajectory");
+        ROS_INFO("Curve not verified, but not a transition trajectory");
         type_ = ALL_STRAIGHT_SEGMENTS;
       }
     } // end if

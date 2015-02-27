@@ -209,7 +209,7 @@ const MotionState MotionState::add(const MotionState m) const {
 
 
 /** */
-const MotionState MotionState::subtract(const MotionState m) const {
+const MotionState MotionState::subtractPosition(const MotionState m) const {
   ROS_INFO("In MotionState::subtract");
 
   MotionState result = *this;
@@ -223,19 +223,6 @@ const MotionState MotionState::subtract(const MotionState m) const {
     }
   }
 
-  /** Separate loops because it's not guaranteed that every MS will have
-   * same # of each vector */
-  /*for(int i=0;i<msg_.velocities.size() && i<m.msg_.velocities.size();i++) {
-    result.msg_.velocities.at(i) -= m.msg_.velocities.at(i);
-  }
-
-  for(int i=0;i<msg_.accelerations.size() && i<m.msg_.accelerations.size();i++) {
-    result.msg_.accelerations.at(i) -= m.msg_.accelerations.at(i);
-  }
-
-  for(int i=0;i<msg_.jerks.size() && i<m.msg_.jerks.size();i++) {
-    result.msg_.jerks.at(i) -= m.msg_.jerks.at(i);
-  }*/
 
   ROS_INFO("Exiting MotionState::subtract");
   return result;

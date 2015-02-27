@@ -20,7 +20,7 @@ class MotionState {
     void    transformBase(const tf::Transform t);
 
     const MotionState add(const MotionState m) const;
-    const MotionState subtract(const MotionState m) const; 
+    const MotionState subtractPosition(const MotionState m) const; 
     const MotionState multiply(const int num) const;
     const MotionState divide(const int num) const;
     const MotionState abs() const;

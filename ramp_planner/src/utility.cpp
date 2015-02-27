@@ -61,9 +61,10 @@ const double Utility::findAngleFromAToB(const std::vector<double> a, const std::
   double d_x = b.at(0) - a.at(0);
   double d_y = b.at(1) - a.at(1);
 
-  result = atan(d_y / d_x);
+  // Fails when vector from a to be is in 3rd quadrant
+  //result = atan(d_y / d_x);
   
-  /*double euc_dist = sqrt( pow(d_x,2) + pow(d_y,2) );
+  double euc_dist = sqrt( pow(d_x,2) + pow(d_y,2) );
   // If the positions are the same,
   // Set the result to the starting orientation if one is provided
   // Or to 0 if no starting orientation is provided
@@ -84,7 +85,7 @@ const double Utility::findAngleFromAToB(const std::vector<double> a, const std::
   // If b is in the 4th quadrant, d_y<=0 & d_x>=0
   else {
     result = asin(d_y / euc_dist); 
-  }*/
+  }
 
   return result;
 } // End findAngleFromAToB

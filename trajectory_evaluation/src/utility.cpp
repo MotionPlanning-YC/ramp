@@ -279,9 +279,7 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
 
   result<<"\n Knot Points:";
 
-  ROS_INFO("traj.i_knotpoints.size(): %i", (int)traj.i_knotPoints.size());
   for(unsigned int i=0;i<traj.i_knotPoints.size();i++) {
-    ROS_INFO("KP: %i", (int)i);
     
     result<<"\n   "<<i<<":";
     
