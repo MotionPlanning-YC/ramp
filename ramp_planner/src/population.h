@@ -15,8 +15,7 @@ class Population {
     /* Methods */
     const unsigned int    size() const;
     const int             add(const RampTrajectory rt);
-    const int             getBestIndex() const;
-    const int             findBestIndex();
+    const int             calcBestIndex() const;
     void                  clear();
     void                  replace(const uint8_t i, const RampTrajectory trajec);
     void                  replaceAll(const std::vector<RampTrajectory> new_pop);
@@ -31,7 +30,7 @@ class Population {
     const bool            canReplace(const RampTrajectory rt, const int i) const;
     const int             getReplacementID(const RampTrajectory rt) const;
     const int             getNumSubPops() const;
-    const RampTrajectory  getBest();
+    const RampTrajectory  getBest() const;
    
     const std::vector<RampTrajectory> getBestFromSubPops();
     const std::vector<Population> createSubPopulations(const double delta_theta=PI/3);
@@ -44,11 +43,9 @@ class Population {
     /** Data Members */
     std::vector<Path>           paths_;
     unsigned int                maxSize_;
-    int                         i_best_;
     
   private:
     std::vector<RampTrajectory> trajectories_;
-    bool                        changed_;
     std::vector<Population>     subPopulations_;
     bool                        isSubPopulation_;
     Utility                     utility_;

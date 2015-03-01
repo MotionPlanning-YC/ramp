@@ -1,8 +1,8 @@
 #include "population.h"
 
-Population::Population() : maxSize_(3), i_best_(-1), changed_(true), isSubPopulation_(false) {}
+Population::Population() : maxSize_(3), isSubPopulation_(false) {}
 
-Population::Population(const unsigned int size, const bool isSubPop) : maxSize_(size), i_best_(-1), changed_(true), isSubPopulation_(isSubPop) {}
+Population::Population(const unsigned int size, const bool isSubPop) : maxSize_(size), isSubPopulation_(isSubPop) {}
 
 
 /** Return the size of the population */
@@ -11,7 +11,6 @@ const unsigned int Population::size() const { return trajectories_.size(); }
 void Population::clear() { 
   trajectories_.clear(); 
   paths_.clear();
-  changed_ = true;
 }
 
 
@@ -35,7 +34,8 @@ const int Population::getIndexFromId(const uint16_t id) const {
 
 
 
-void Population::replace(const uint8_t i, const RampTrajectory trajec) {
+void Population::replace(const uint8_t i, const RampTrajectory trajec) 
+{
   if(i < trajectories_.size()) {
     trajectories_.at(i) = trajec;
     paths_.at(i) = trajec.path_;
@@ -45,8 +45,6 @@ void Population::replace(const uint8_t i, const RampTrajectory trajec) {
     trajectories_.push_back(trajec);
     paths_.push_back(trajec.path_);  
   }
-  
-  changed_ = true;
 }
 
 
@@ -61,8 +59,6 @@ void Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
   for(uint8_t i=0;i<new_pop.size();i++) {
     paths_.push_back(new_pop.at(i).path_);
   }
-
-  changed_ = true;
 } // End replaceAll
 
 
@@ -226,7 +222,7 @@ const bool Population::canReplace(const RampTrajectory rt, const int i) const {
   ROS_INFO("In Population::canReplace");
   ROS_INFO("i: %i feasible: %s", i, trajectories_.at(i).msg_.feasible ? "True" : "False");
   
-  if(i == i_best_) {
+  if(i == calcBestIndex()) {
     ROS_INFO("i == i_best, returning false");
     return false;
   }
@@ -253,10 +249,10 @@ const bool Population::canReplace(const RampTrajectory rt, const int i) const {
     }
 
     //std::cout<<"\np.trajectories.size(): "<<p.trajectories_.size();
-    //std::cout<<"\np.i_best_: "<<p.i_best_<<"\n";
+    //std::cout<<"\np.calcBestIndex(): "<<p.calcBestIndex()<<"\n";
 
     // if i is the best in trajectory i's sub-population
-    if(temp.equals( p.trajectories_.at(p.i_best_) )) {
+    if(temp.equals( p.trajectories_.at(p.calcBestIndex()) )) {
       ///std::cout<<"\ntemp == best in sub-population, returning false\n";
       return false;
     }
@@ -311,12 +307,11 @@ const int Population::getReplacementID(const RampTrajectory rt) const {
  *  Returns the index that the trajectory is added at */
 const int Population::add(const RampTrajectory rt) {
   ROS_INFO("In Population::add");
-  changed_ = true;
 
     if(subPopulations_.size() > 0) {
       // Go through each sub-population and find best
       for(uint8_t i=0;i<subPopulations_.size();i++) {
-        subPopulations_.at(i).findBestIndex();
+        subPopulations_.at(i).calcBestIndex();
       }
     }
    
@@ -346,26 +341,20 @@ const int Population::add(const RampTrajectory rt) {
 
 
   ROS_INFO("Cannot add trajectory");
-  changed_ = false;
 
   ROS_INFO("Exiting Population::add");
   return -1;
 } //End add
 
 
-const int Population::getBestIndex() const {
-  return i_best_;
-}
 
-
-/** Returns the fittest trajectory and sets i_best_ */
-const int Population::findBestIndex() {
-  //std::cout<<"\nIn findBestIndex\n";
-  
-  // If population has not changed since last
-  // findBest call, return without searching
-  if(!changed_) {
-    return i_best_;
+/** Returns the fittest trajectory and sets calcBestIndex() */
+const int Population::calcBestIndex() const 
+{
+  if(size() == 0)
+  {
+    ROS_ERROR("Calling Population::calcBestIndex(), but Population is empty");
+    return -1;
   }
  
   // Find the index of the trajectory with the highest fitness value
@@ -377,24 +366,18 @@ const int Population::findBestIndex() {
   } //end for
 
 
- 
-  // Set i_best_
-  i_best_ = i_max;
-
-  // Set changed 
-  changed_ = false;
-
-  //std::cout<<"\nReturning "<<i_best_;
-  return i_best_; 
-} //End findBestIndex
+  return i_max; 
+} //End calcBestIndex
 
 
 
-const RampTrajectory Population::getBest() {
-  if(i_best_ == -1 || changed_) {
-    findBestIndex();
+const RampTrajectory Population::getBest() const 
+{
+  if(size() == 0)
+  {
+    ROS_ERROR("Calling Population::getBest(), but Population is empty");
   }
-  return trajectories_.at(getBestIndex());
+  return trajectories_.at(calcBestIndex());
 }
 
 
@@ -412,7 +395,7 @@ const std::vector<RampTrajectory> Population::getBestFromSubPops() {
   else {
     for(uint8_t i=0;i<subPopulations_.size();i++) {
       if(subPopulations_.at(i).size() > 0) {
-        int i_best = subPopulations_.at(i).findBestIndex(); 
+        int i_best = subPopulations_.at(i).calcBestIndex(); 
         result.push_back(subPopulations_.at(i).get(i_best));
       }
     }
@@ -461,7 +444,7 @@ const std::vector<Population> Population::createSubPopulations(const double delt
 
   // Go through each sub-population and find best
   for(uint8_t i=0;i<subPopulations_.size();i++) {
-    subPopulations_.at(i).findBestIndex();
+    subPopulations_.at(i).calcBestIndex();
   }
 
   //std::cout<<"\n***********Leaving createSubPopulations***********\n";
@@ -480,7 +463,7 @@ const std::string Population::fitnessFeasibleToString() const {
   result<<"\nPopulation's fitness and feasibility:";
   for(unsigned int i=0;i<trajectories_.size();i++) {
     result<<"\n"<<trajectories_.at(i).fitnessFeasibleToString();
-    if(i == i_best_) {
+    if(i == calcBestIndex()) {
       result<<" - Best!";
     }
   }
@@ -496,7 +479,7 @@ const std::string Population::fitnessFeasibleToString() const {
 const std::string Population::toString() const {
   std::ostringstream result;
 
-  result<<"Best ID: "<<i_best_;
+  result<<"Best ID: "<<calcBestIndex();
 
   // If sub-populations exist, print those
   if(subPopulations_.size() > 0) {
@@ -532,6 +515,6 @@ ramp_msgs::Population Population::populationMsg()
     msg.population.push_back(trajectories_.at(i).msg_);
   }
   
-  msg.best_id = i_best_;
+  msg.best_id = calcBestIndex();
   return msg;
 }

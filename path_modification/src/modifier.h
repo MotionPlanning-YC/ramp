@@ -21,7 +21,7 @@ class Modifier {
     Swap swap; 
 
     ramp_msgs::ModificationRequest::Request mod_req;
-    std::vector<ramp_msgs::Path> perform();
+    const std::vector<ramp_msgs::Path> perform();
 
     Utility u;
 };

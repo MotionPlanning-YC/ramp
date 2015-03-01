@@ -48,7 +48,6 @@ class Planner {
     
     
     // The most fit trajectory in the population
-    RampTrajectory bestTrajec_;
 
 
     // Timer for sending the best trajec
@@ -144,10 +143,6 @@ class Planner {
 
     // Motion state that should be reached by next control cycle
     MotionState m_cc_;
-
-    // Each element is the target motion state 
-    // for each of i planning cycles
-    std::vector<MotionState> m_i_;
     
 
 
@@ -169,6 +164,9 @@ class Planner {
 
 
     /***** Methods *****/
+
+    const Path getRandomPath(const MotionState s, const MotionState g) const;
+    const Path getAdjustedPath(const MotionState s, const MotionState g) const;
     
     // Initialize start and goal
     void initStartGoal(const MotionState s, const MotionState g);
@@ -205,7 +203,7 @@ class Planner {
               const RampTrajectory trajec)      ;
 
     // Misc
-    const MotionState randomizeMSPositions(MotionState ms)        const ;
+    const MotionState randomizeMSPositions(const MotionState ms)        const ;
           void checkTrajChange()                                        ;
           void seedPopulation()                                         ;
           void seedPopulationTwo()                                      ;
@@ -240,32 +238,36 @@ class Planner {
 
 
 
-    void stopForDebugging();
-    void restartAfterDebugging();
-    void pause();
-
-
-
-    const std::vector<double> getScaledXY(const MotionState ms, 
-                                          const ramp_msgs::BezierInfo curve) const;
-
     // 1 if before, 2 if on curve, 3 if past curve 
     const int estimateIfOnCurve(const MotionState ms, 
                                 const ramp_msgs::BezierInfo curve) const;
 
     void restartControlCycle(const double t=2.0);
 
-    const std::vector<Path> getRandomPaths( const MotionState init, 
-                                            const MotionState goal);
-    const Population randomPopulation(const MotionState init, 
-                                      const MotionState goal);
+    const std::vector<Path> getRandomPaths        ( const MotionState init, const MotionState goal);
+    const std::vector<Path> getAdjustedPaths      ( const MotionState init, const MotionState goal);
+    const Population        getPopulation         ( const MotionState init, 
+                                                    const MotionState goal, 
+                                                    const bool        random = false );
 
 
+    // Work for CC
     void doControlCycle();
 
+    // Returns the index in the trajectory's path to start checking if the robot has passed it
     const uint8_t getIndexStartPathAdapting(const RampTrajectory t) const;
 
-    const double getScaledRange(const double v, const double min, const double max) const;
+
+    // Returns true if motion state satisfies constraints to be a knot point in Path p 
+    const bool validKPForPath(const MotionState ms, const Path p) const;
+
+    // Methods for debugging
+    void stopForDebugging();
+    void restartAfterDebugging();
+    void pause();
+
+
+
     /***** Data members *****/
 
     // Utility instance
@@ -313,6 +315,12 @@ class Planner {
     // Threshold for getting transition trajectory
     double              transThreshold_;
 
+    // Number of Control Cycles that have occurred
+    int                 num_cc_;
+
+    // Distance between each knot points
+    double              L_;
+
     // Handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
     EvaluationRequestHandler*   h_eval_req_;
@@ -324,28 +332,15 @@ class Planner {
 
 
 
+    double          t_fixed_cc_;
+    RampTrajectory  movingOn_;
+
+    // Error Reduction variables
+    bool                      errorReduction_;
+    std::vector<MotionState>  m_i_;
+    
     // Stop things for debugging
     bool stop_;
-
-    uint16_t num_controlCycles_;
-    uint16_t num_switches_;
-
-    ros::Time t_start_;
-
-    ros::Time t_prevCC_, t_prevPC_;
-
-    RampTrajectory movingOn_;
-
-    double t_fixed_cc_;
-
-
-    MotionState totalDiff_;
-    
-    Population pop_orig_;
-
-    bool bestChangedAfterCC_;
-
-    bool errorReduction_;
 };
 
 #endif

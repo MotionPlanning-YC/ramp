@@ -1,7 +1,7 @@
 #ifndef CHANGE_H
 #define CHANGE_H
-#include "ramp_msgs/Path.h"
 #include "utility.h"
+#include "constraints.h"
 
 class Change {
   public:
@@ -13,7 +13,8 @@ class Change {
     ramp_msgs::Path path_;
 
   private:
-    Utility utility;
+    Constraints checkConstraints_;
+    Utility utility_;
 };
 
 #endif

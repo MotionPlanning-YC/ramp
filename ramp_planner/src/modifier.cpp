@@ -55,8 +55,8 @@ const std::string Modifier::getOperator() const {
       result = "stop";
       break;
   }
-
  
+  result = "change";
   return result;
 } // End getOperator
 

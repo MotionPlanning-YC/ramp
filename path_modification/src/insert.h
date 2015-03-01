@@ -1,7 +1,7 @@
 #ifndef INSERT_H
 #define INSERT_H
 #include "utility.h"
-#include "ramp_msgs/Path.h"
+#include "constraints.h"
 
 class Insert {
   public:
@@ -12,7 +12,8 @@ class Insert {
 
     ramp_msgs::Path path_;
   private:
-    Utility utility;
+    Constraints checkConstraints_;
+    Utility utility_;
 };
 
 #endif
