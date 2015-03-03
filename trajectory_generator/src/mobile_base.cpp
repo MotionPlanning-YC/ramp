@@ -316,7 +316,7 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
 
   // Start transition trajectories right away,
   // otherwise, try to go straight for a while
-  double lambda = type_ == TRANSITION ? 0.1 : 0.5;
+  double lambda = type_ == TRANSITION ? 0.1 : 0.85;
 
   double min_lambda = (path_.points.at(0).motionState.positions.at(0) - segment_points.at(0).positions.at(0)) 
                       / (segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0));
@@ -1010,7 +1010,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
         // Set orientation threshold that requires a rotation 
         // before continuing to the next knot point
-        double threshold = 0.18326; 
+        double threshold = 0.2; 
         //ROS_INFO("threshold: %f", threshold);
 
         // If we need to rotate towards the next knot point

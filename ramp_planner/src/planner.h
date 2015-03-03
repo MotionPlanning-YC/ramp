@@ -255,7 +255,7 @@ class Planner {
 
     // Work for CC
     void doControlCycle();
-    const uint8_t computeSwitchPC();
+    const uint8_t computeSwitchPC(const Population pop, const RampTrajectory moving);
 
     // Returns the index in the trajectory's path to start checking if the robot has passed it
     const uint8_t getIndexStartPathAdapting(const RampTrajectory t) const;

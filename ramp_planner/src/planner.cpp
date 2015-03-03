@@ -439,14 +439,14 @@ const ramp_msgs::BezierInfo Planner::handleCurveEnd(const RampTrajectory traj) c
 
 
 const double Planner::updateCurvePos(const RampTrajectory traj, const ros::Duration d) const {
-  //ROS_INFO("In Planner::updateCurvePos");
+  ROS_INFO("In Planner::updateCurvePos");
   //ROS_INFO("startPlanning_: %s", startPlanning_.toString().c_str());
   //ROS_INFO("traj: %s", traj.toString().c_str());
   ramp_msgs::BezierInfo curve = traj.msg_.curves.at(0); 
   double result = curve.u_0;
 
   // if u_0==0 then estimateIfOnCurve returned 2 - already on curve
-  if(curve.u_0 == 0) {
+  if(curve.u_0 < 0.00001) {
     ROS_INFO("In if curve.u_0==0");
 
     // Get the time at the start of the curve
@@ -456,25 +456,35 @@ const double Planner::updateCurvePos(const RampTrajectory traj, const ros::Durat
 
     // t = the time spent moving on the curve
     double t = d.toSec() - t_s0;
+    ROS_INFO("t: %f", t);
 
-    ROS_INFO("t: %f Adding %f", t, (t*curve.u_dot_0));
-    
+    if(t < 0.0001)
+    {
+      result = 0.0001;
+    }
+    else
+    {
 
-    // At one point I changed this to the average of x and y scaled
-    // But my notes don't say why...
-    // But that change made a robot's prediction along a curve noticeably more inaccurate
-    //std::vector<double> scaled = getScaledXY(startPlanning_, traj.msg_.curves.at(0));
-    //ROS_INFO("Adding %f",(scaled.at(0) + scaled.at(1)) / 2.);
-    //result += (scaled.at(0) + scaled.at(1)) / 2.;
-    result += t * curve.u_dot_0;
+      ROS_INFO("t: %f Adding %f", t, (t*curve.u_dot_0));
+      
+
+      // At one point I changed this to the average of x and y scaled
+      // But my notes don't say why...
+      // But that change made a robot's prediction along a curve noticeably more inaccurate
+      //std::vector<double> scaled = getScaledXY(startPlanning_, traj.msg_.curves.at(0));
+      //ROS_INFO("Adding %f",(scaled.at(0) + scaled.at(1)) / 2.);
+      //result += (scaled.at(0) + scaled.at(1)) / 2.;
+      result += t * curve.u_dot_0;
+    }
   } // end if already on curve
 
   // Else, u_0 > 0, simply add to u_0
   else {
-    //ROS_INFO("Else not moving on curve, curve.u_0 > 0: %f curve.u_dot_0: %f", curve.u_0, curve.u_dot_0);
+    ROS_INFO("Else curve.u_0 > 0: %f curve.u_dot_0: %f", curve.u_0, curve.u_dot_0);
     result += curve.u_dot_0 * d.toSec();
   }
 
+  ROS_INFO("Exiting Planner::updateCurvePos");
   return result;
 } // End updateCurvePos
 
@@ -504,7 +514,7 @@ const std::vector<ramp_msgs::BezierInfo> Planner::adaptCurves(const Population p
       ROS_INFO("pop.getBestIndex: %i", (int)pop.calcBestIndex());
       // If moving on this curve, update u
       if( i == pop.calcBestIndex() && 
-            (curve.u_0 > 0 ||
+            (curve.u_0 > 0. ||
              estimateIfOnCurve(ms, curve) == 2))
       {
         ROS_INFO("Moving on this curve");
@@ -515,12 +525,17 @@ const std::vector<ramp_msgs::BezierInfo> Planner::adaptCurves(const Population p
         // Set the new ms_begin
         curve.ms_begin = ms.msg_;
       }  //end if moving on curve
+      else
+      {
+        ROS_INFO("Not moving on curve");
+      }
 
      
       /* Separate checking if on the curve and if done with curve
            because we could be done before ever incrementing u_0 */
       // Check if done with current curve
-      if(curve.u_0 > curve.u_target || estimateIfOnCurve(ms, curve) == 3) {
+      if(curve.u_0 > curve.u_target || estimateIfOnCurve(ms, curve) == 3) 
+      {
         ROS_INFO("Done with curve, u_0: %f", curve.u_0);
         curve = handleCurveEnd(pop.get(i));
       } // end if done with 1st curve
@@ -657,7 +672,14 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
   ramp_msgs::EvaluationRequest result;
 
   result.request.trajectory   = trajec.msg_;
-  result.request.currentTheta = latestUpdate_.msg_.positions.at(2);
+  if(population_.size() > 0)
+  {
+    result.request.currentTheta = population_.getBest().getDirection();
+  }
+  else
+  {
+    result.request.currentTheta = latestUpdate_.msg_.positions.at(2);
+  }
   result.request.t_start      = controlCycle_.toSec();
 
   return result;
@@ -1569,6 +1591,8 @@ const ModificationResult Planner::modification() {
   // Modify 1 or more trajectories
   std::vector<RampTrajectory> mod_trajec = modifyTrajec();
   
+  Population popCopy = population_;
+  
 
   // Evaluate and add the modified trajectories to the population
   // and update the planner and the modifier on the new paths
@@ -1578,15 +1602,26 @@ const ModificationResult Planner::modification() {
     // Evaluate the new trajectory
     mod_trajec.at(i) = evaluateTrajectory(mod_trajec.at(i));
 
-    
+
     // Add the new trajectory to the population
     // Index is where the trajectory was added in the population (may replace another)
     // If it was successfully added, push its index onto the result
-    int index = population_.add(mod_trajec.at(i));
+    //int index = population_.add(mod_trajec.at(i));
+    int index = popCopy.add(mod_trajec.at(i));
     if(index > -1) {
-      ROS_INFO("Modification Trajectory added to population at index: %i", index);
-      ROS_INFO("Modded Trajec %i: %s", i, mod_trajec.at(i).toString().c_str());
-      result.i_modified_.push_back(index);
+      // Check for new switchpc
+      int pc = computeSwitchPC(popCopy, movingOn_);
+      if(pc > c_pc_ && pc < generationsPerCC_)
+      {
+        population_.replace(index, mod_trajec.at(i));
+        ROS_INFO("Modification Trajectory added to population at index: %i", index);
+        ROS_INFO("Modded Trajec %i: %s", i, mod_trajec.at(i).toString().c_str());
+        result.i_modified_.push_back(index);
+      }
+      else
+      {
+        ROS_INFO("Tried to add trajec at index %i, but new pc_switch=%i", i, pc);
+      }
     }
     else {
       ROS_INFO("Modification Trajectory not added to population");
@@ -1721,8 +1756,9 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
       ModificationResult mod = modification();
       ROS_INFO("Done with modification");
       ROS_INFO("*****************************");
+      population_ = mod.popNew_;
 
-      if(cc_started_ && mod.i_modified_.size() > 0 &&
+      /*if(cc_started_ && mod.i_modified_.size() > 0 &&
           !population_.get(0).path_.at(0).motionState_.equals(goal_))
       {
         ROS_INFO("Modification changed population");
@@ -1733,16 +1769,16 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
         // Set pc_switch
         ROS_INFO("Finding new pc_switch");
-        pc_switch_ = computeSwitchPC();
+        pc_switch_ = computeSwitchPC(population_, movingOn_);
         ROS_INFO("pc_switch: %i", pc_switch_);
-      }
+      }*/
     } // end if modifications
 
 
 
     // If it's time to switch
     // Restart with time of transition trajectory
-    if(cc_started_ && c_pc_ == pc_switch_)
+    /*if(cc_started_ && c_pc_ == pc_switch_)
     {
       ROS_WARN("Time to switch");
       ROS_INFO("pc_switch: %i c_pc: %i", pc_switch_, c_pc_);
@@ -1783,7 +1819,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     {
       ROS_INFO("Not time to switch");
       ROS_INFO("pc_switch: %i c_pc: %i", pc_switch_, c_pc_);
-    }
+    }*/
 
 
     
@@ -1816,13 +1852,13 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
 
 
-const uint8_t Planner::computeSwitchPC() 
+const uint8_t Planner::computeSwitchPC(const Population pop, const RampTrajectory moving) 
 {
   ROS_INFO("In Planner::computeSwitchPC()");
 
   int result = generationsPerCC_;
   std::vector<RampTrajectory> transitions;
-  ROS_INFO("movingOn_: %s", movingOn_.toString().c_str());
+  ROS_INFO("moving: %s", moving.toString().c_str());
 
   for(int i_pc=result-1;i_pc>0;i_pc--)
   {
@@ -1830,16 +1866,16 @@ const uint8_t Planner::computeSwitchPC()
     transitions.clear();
 
     // If the robot is moving on a straight line at this pc, compute curves
-    MotionState ms = movingOn_.getPointAtTime( i_pc*planningCycle_.toSec() );
+    MotionState ms = moving.getPointAtTime( i_pc*planningCycle_.toSec() );
     ROS_INFO("ms at i_pc %i: %s", i_pc, ms.toString().c_str());
     if(fabs(ms.msg_.velocities.at(2)) < 0.001)
     {
 
       // Go through each trajectory and try to get a transition curve
-      for(uint8_t i=0;i<population_.size();i++)
+      for(uint8_t i=0;i<pop.size();i++)
       {
         ROS_INFO("Inner for, i: %i", i);
-        RampTrajectory T_new = getTransitionTrajectory(movingOn_, population_.get(i), i_pc);
+        RampTrajectory T_new = getTransitionTrajectory(moving, pop.get(i), i_pc);
         ROS_INFO("T_new: %s", T_new.toString().c_str());
 
         // If we are able to plan a curve and it's not the best
@@ -1856,6 +1892,7 @@ const uint8_t Planner::computeSwitchPC()
           ROS_INFO("Unable to plan a transition curve!");
           ROS_INFO("T_new.msg_.curves.size(): %i", (int)T_new.msg_.curves.size());
           ROS_INFO("T_new.msg_.i_knotPoints.size(): %i", (int)T_new.msg_.i_knotPoints.size());
+          i=pop.size();
         }
       } // end for
     } // end if moving on straight line
@@ -1868,7 +1905,7 @@ const uint8_t Planner::computeSwitchPC()
     // Check size-1 because no transition should be needed to continue moving
     // on the trajectory that is the current best
     //ROS_INFO("After checking curves, curves.size() == %i", (int)curves.size());
-    if(transitions.size() == population_.size())
+    if(transitions.size() == pop.size())
     {
       result = i_pc;
       break;
@@ -1953,7 +1990,7 @@ void Planner::doControlCycle() {
   
 
   ROS_INFO("Calling computeSwitchPC()");
-  pc_switch_ = computeSwitchPC();
+  pc_switch_ = computeSwitchPC(population_, movingOn_);
   ROS_INFO("pc_switch: %i", pc_switch_);
   
 
