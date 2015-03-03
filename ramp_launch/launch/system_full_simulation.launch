@@ -9,7 +9,7 @@
 
 
 <!-- Trajectory Generator -->
-<node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" output="screen" />
+<node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" />
 
 <!-- Path Modification -->
 <node name="path_modification" pkg="path_modification" type="path_modification" />
@@ -25,7 +25,7 @@
   <include file="$(find ramp_launch)/launch/planner_parameters.launch" />
   <rosparam file="$(find ramp_launch)/launch/config/robot_0.yaml" command="load" ns="robot_info/" />
 
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" />
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" />
 </group> 
 
 
@@ -36,7 +36,7 @@
   <include file="$(find ramp_launch)/launch/planner_parameters.launch" />
   <rosparam file="$(find ramp_launch)/launch/config/robot_1.yaml" command="load" ns="robot_info/" />
   
-  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" /> 
+  <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" /> 
 </group> 
 
 
@@ -60,7 +60,7 @@
 <!-- Evaluation -->
 
 <group ns="$(arg robot_0_name)">
-  <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen" > 
+  <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" > 
     <param name="robot_id" type="int" value="0" />
   </node>
 </group> 
@@ -78,7 +78,7 @@
 <!-- Start the ramp_control simulation nodes (locally, not on remote machines) -->
 
 <group ns="$(arg robot_0_name)" >
-  <node name="ramp_control" pkg="ramp_control" type="ramp_control" output="screen"  /> 
+  <node name="ramp_control" pkg="ramp_control" type="ramp_control" /> 
     <param name="orientation" type="double" value="0" />
     <param name="ramp_control/simulation" value="true" />
 </group> 

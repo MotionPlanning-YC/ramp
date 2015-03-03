@@ -34,19 +34,19 @@ int main(int argc, char** argv) {
   // Build a Path
   ramp_msgs::KnotPoint c1;
   c1.motionState.positions.push_back(1.5); // 0.70455
-  c1.motionState.positions.push_back(2.89445); // 0.4026
+  c1.motionState.positions.push_back(3.02645); // 0.4026
   c1.motionState.positions.push_back(-PI/2); // 0.519146
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(1.13672); // 0.70455
-  c2.motionState.positions.push_back(3.17255); // 0.4026
-  c2.motionState.positions.push_back(3.04341); // 0.519146
+  c2.motionState.positions.push_back(1.5); // 0.70455
+  c2.motionState.positions.push_back(2.89445); // 0.4026
+  c2.motionState.positions.push_back(-PI/2); // 0.519146
 
 
   ramp_msgs::KnotPoint c3;
-  c3.motionState.positions.push_back(1.5); // 0.857146
-  c3.motionState.positions.push_back(0.); // 0.71115
-  c3.motionState.positions.push_back(0.);  // 1.11151
+  c3.motionState.positions.push_back(1.302); // 0.857146
+  c3.motionState.positions.push_back(1.70645); // 0.71115
+  c3.motionState.positions.push_back(-1.73594);  // 1.11151
 
 
   ramp_msgs::KnotPoint c4;
@@ -83,15 +83,15 @@ int main(int argc, char** argv) {
   
   // Velocities
   c1.motionState.velocities.push_back(0.);  //.151426
-  c1.motionState.velocities.push_back(0.); //-.297903
+  c1.motionState.velocities.push_back(-0.33); //-.297903
   c1.motionState.velocities.push_back(0.); //-.118126
  
-  c2.motionState.velocities.push_back(0);  //.151426
+  c2.motionState.velocities.push_back(0.);  //.151426
   c2.motionState.velocities.push_back(0.); //-.297903
   c2.motionState.velocities.push_back(0.); //-.118126
 
-  c3.motionState.velocities.push_back(0.);
-  c3.motionState.velocities.push_back(0.);
+  c3.motionState.velocities.push_back(-0.33);
+  c3.motionState.velocities.push_back(0.0317074);
   c3.motionState.velocities.push_back(0);
 
   c4.motionState.velocities.push_back(0);
@@ -391,7 +391,7 @@ int main(int argc, char** argv) {
   
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
-  tr.request.type = PARTIAL_BEZIER;
+  tr.request.type = TRANSITION;
   tr.request.print = true;
   tr.request.bezierInfo = curves;
 

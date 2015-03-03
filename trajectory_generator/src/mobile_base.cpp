@@ -63,7 +63,7 @@ void MobileBase::initReflexxes() {
   // Maximum acceleration
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 1.;
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1] = 1.;
-  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[2] = PI;
+  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[2] = 3*PI/4;
   
 
   // As the maximum jerk values are not known, this is just to try
@@ -378,7 +378,7 @@ const ramp_msgs::MotionState MobileBase::getMaxMS() const {
 
 /** */
 const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool only_curve) {
-  //ROS_INFO("Entered MobileBase::bezier");
+  ROS_INFO("Entered MobileBase::bezier");
 
   std::vector<BezierCurve> result;
 
@@ -407,7 +407,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     inc++;
 
     if(inc == p_copy.points.size()) {
-      //ROS_INFO("Cannot plan Bezier, returning same Path at 402");
+      ROS_INFO("Cannot plan Bezier, returning same Path at 402");
       type_ = ALL_STRAIGHT_SEGMENTS;
       return result;
     }
@@ -430,7 +430,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     inc++;
 
     if(inc == p_copy.points.size()) {
-      //ROS_INFO("Cannot plan Bezier, returning same Path at 422");
+      ROS_INFO("Cannot plan Bezier, returning same Path at 422");
       type_ = ALL_STRAIGHT_SEGMENTS;
       return result;
     }
@@ -466,7 +466,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // control points, so we have all the info now
       // TODO: Change bezierStart to check u>0
       //if(bezierStart && i==1) {
-      if(req_.bezierInfo.at(0).u_0 > 0 && i==1) {
+      if(req_.bezierInfo.at(0).u_0 > 0 && i==1) 
+      {
         std::cout<<"\nIn if transition or bezierStart\n";
         
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
@@ -506,6 +507,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         bi.segmentPoints  = segment_points;
         bi.l              = lambda;
         bi.ms_maxVA       = ms_maxVA;
+
+       
 
         bc.init(bi, path_.points.at(0).motionState);
         ROS_INFO("Done initializing curve");
@@ -626,7 +629,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     }
   }
 
-  //ROS_INFO("Leaving MobileBase::bezier");
+  ROS_INFO("Exiting MobileBase::bezier");
   return result;
 } // End bezier
 
@@ -847,6 +850,12 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     res.trajectory.i_knotPoints.push_back(0);
     return true;
   }
+
+  if(utility_.getEuclideanDist( req.path.points.at(0).motionState.positions, 
+        req.path.points.at(1).motionState.positions) < 0.001)
+  {
+    req.path.points.erase(req.path.points.begin());
+  }
   
 
   // Initialize with request
@@ -1001,7 +1010,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
         // Set orientation threshold that requires a rotation 
         // before continuing to the next knot point
-        double threshold = 0.15; 
+        double threshold = 0.18326; 
         //ROS_INFO("threshold: %f", threshold);
 
         // If we need to rotate towards the next knot point

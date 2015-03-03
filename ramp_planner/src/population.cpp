@@ -140,15 +140,15 @@ const bool Population::infeasibleExists() const {
 /** This method checks if a trajectory can replace an existing trajectory in the population */
 const bool Population::replacementPossible(const RampTrajectory rt) const {
   ROS_INFO("In Population::replacementPossible");
-  ROS_INFO("rt: %s", rt.toString().c_str());
-  ROS_INFO("rt.fitness: %f feasible: %s t_coll: %f", rt.msg_.fitness, rt.msg_.feasible ? "True" : "False", 
-      rt.msg_.t_firstCollision);
-  ROS_INFO("pop: %s", toString().c_str());
+  //ROS_INFO("rt: %s", rt.toString().c_str());
+  //ROS_INFO("rt.fitness: %f feasible: %s t_coll: %f", rt.msg_.fitness, rt.msg_.feasible ? "True" : "False", 
+      //rt.msg_.t_firstCollision);
+  //ROS_INFO("pop: %s", toString().c_str());
   
-  ROS_INFO("Trajec 1 fit: %f feasible: %s t_coll: %f", trajectories_.at(1).msg_.fitness, 
-      trajectories_.at(1).msg_.feasible ? "True" : "False", trajectories_.at(1).msg_.t_firstCollision);
+  /*ROS_INFO("Trajec 1 fit: %f feasible: %s t_coll: %f", trajectories_.at(1).msg_.fitness, 
+      trajectories_.at(1).msg_.feasible ? "True" : "False", trajectories_.at(1).msg_.t_firstCollision);*/
 
-  ROS_INFO("getMinFitness(): %f", getMinFitness());
+  //ROS_INFO("getMinFitness(): %f", getMinFitness());
 
   // If the fitness is not higher than the minimum fitness
   if(rt.msg_.fitness <= getMinFitness()) {
@@ -220,7 +220,7 @@ const bool Population::replacementPossible(const RampTrajectory rt) const {
 /** This method returns true if rt can replace the trajectory at index i */
 const bool Population::canReplace(const RampTrajectory rt, const int i) const {
   ROS_INFO("In Population::canReplace");
-  ROS_INFO("i: %i feasible: %s", i, trajectories_.at(i).msg_.feasible ? "True" : "False");
+  //ROS_INFO("i: %i feasible: %s", i, trajectories_.at(i).msg_.feasible ? "True" : "False");
   
   if(i == calcBestIndex()) {
     ROS_INFO("i == i_best, returning false");
@@ -307,6 +307,7 @@ const int Population::getReplacementID(const RampTrajectory rt) const {
  *  Returns the index that the trajectory is added at */
 const int Population::add(const RampTrajectory rt) {
   ROS_INFO("In Population::add");
+  //ROS_INFO("rt: %s", rt.toString().c_str());
 
     if(subPopulations_.size() > 0) {
       // Go through each sub-population and find best

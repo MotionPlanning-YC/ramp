@@ -41,8 +41,8 @@ const Path RampTrajectory::getPath() const {
 const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const float t) const {
   //ROS_INFO("In RampTrajectory::getPointAtTime");
   
-  float resolutionRate = msg_.trajectory.points.at(1).time_from_start.toSec() -
-                          msg_.trajectory.points.at(0).time_from_start.toSec();
+  
+  float resolutionRate = 0.1;
   int i = ceil((t/resolutionRate));
   /*ROS_INFO("t: %f resolutionRate: %f i: %i size: %i", 
       t, 
@@ -89,22 +89,32 @@ const RampTrajectory RampTrajectory::getSubTrajectory(const float t) const {
     ROS_ERROR("msg_.trajectory.points.size == 0");
     return clone();
   }
-
-  if( t > msg_.trajectory.points.at( msg_.trajectory.points.size()-1 ).time_from_start.toSec()) 
+  else if(msg_.trajectory.points.size() == 1)
   {
-    t_stop = msg_.trajectory.points.at( msg_.trajectory.points.size()-1 ).time_from_start.toSec();
+    rt.trajectory.points.push_back(msg_.trajectory.points.at(0));
+    rt.i_knotPoints.push_back(0);
   }
 
-  uint8_t i_kp = 0;
-  for(float i=0.f;i<=t_stop+0.000001;i+=0.1f) { // TODO: i+=cycle_time
-    uint16_t index = floor(i*10.) < msg_.trajectory.points.size() ? floor(i*10) : 
-      msg_.trajectory.points.size()-1;
+  else
+  {
+    if( t > msg_.trajectory.points.at( msg_.trajectory.points.size()-1 ).time_from_start.toSec()) 
+    {
+      t_stop = msg_.trajectory.points.at( msg_.trajectory.points.size()-1 ).time_from_start.toSec();
+    }
 
-    ROS_INFO("index: %i size: %i", index, (int)msg_.trajectory.points.size());
-    rt.trajectory.points.push_back(msg_.trajectory.points.at(index));  // todo: i*1/cycle_time
-    if(msg_.i_knotPoints.at(i_kp) == index) {
-      rt.i_knotPoints.push_back(index);
-      i_kp++;
+    //ROS_INFO("t: %f t_stop: %f", t, t_stop);
+
+    uint8_t i_kp = 0;
+    for(float i=0.f;i<=t_stop+0.000001;i+=0.1f) { // TODO: i+=cycle_time
+      uint16_t index = floor(i*10.) < msg_.trajectory.points.size() ? floor(i*10) : 
+        msg_.trajectory.points.size()-1;
+
+      //ROS_INFO("index: %i size: %i", index, (int)msg_.trajectory.points.size());
+      rt.trajectory.points.push_back(msg_.trajectory.points.at(index));  // todo: i*1/cycle_time
+      if(msg_.i_knotPoints.at(i_kp) == index) {
+        rt.i_knotPoints.push_back(index);
+        i_kp++;
+      }
     }
   }
 

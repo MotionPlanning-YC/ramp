@@ -209,14 +209,16 @@ class Planner {
           void seedPopulationTwo()                                      ;
 
     const RampTrajectory  getTransitionTrajectory(const RampTrajectory current, 
-                                                  const RampTrajectory trgt_traj);
+                                                  const RampTrajectory trgt_traj,
+                                                  const uint8_t        c_pc);
     const MotionState     predictStartPlanning() const;
 
 
 
     const std::vector<RampTrajectory> switchTrajectory( const RampTrajectory from, 
-                                                        const RampTrajectory to);
-    const RampTrajectory computeFullSwitch(const RampTrajectory from, const RampTrajectory to);
+                                                        const RampTrajectory to,
+                                                        const uint8_t c_pc);
+    const RampTrajectory computeFullSwitch(const RampTrajectory from, const RampTrajectory to, const uint8_t c_pc);
     const bool checkIfSwitchCurveNecessary(const RampTrajectory from, const RampTrajectory to)
       const;
     
@@ -253,6 +255,7 @@ class Planner {
 
     // Work for CC
     void doControlCycle();
+    const uint8_t computeSwitchPC();
 
     // Returns the index in the trajectory's path to start checking if the robot has passed it
     const uint8_t getIndexStartPathAdapting(const RampTrajectory t) const;
@@ -265,6 +268,9 @@ class Planner {
     void stopForDebugging();
     void restartAfterDebugging();
     void pause();
+
+
+    const Population getTransPopAtPC(const Population pop, const RampTrajectory traj, const uint8_t pc);
 
 
 
@@ -341,6 +347,9 @@ class Planner {
     
     // Stop things for debugging
     bool stop_;
+
+
+    uint8_t pc_switch_;
 };
 
 #endif

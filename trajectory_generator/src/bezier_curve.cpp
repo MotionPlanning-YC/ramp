@@ -110,13 +110,13 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
 
 /** Determines if a curve violates angular motion constraints */
 const bool BezierCurve::verify() const {
-  //ROS_INFO("In BezierCurve::verify()");
+  ROS_INFO("In BezierCurve::verify()");
 
   double v_max = 0.4666;
   double w_max = 3*PI/4;
 
   double u_dot_max = getUDotMax(u_dot_0_);
-  //ROS_INFO("u_dot_max: %f", u_dot_max);
+  ROS_INFO("u_dot_max: %f", u_dot_max);
 
   double x_dot = (A_*t_R_min_ + C_)*u_dot_max;
   double y_dot = (B_*t_R_min_ + D_)*u_dot_max;
@@ -209,6 +209,8 @@ const ramp_msgs::MotionState BezierCurve::getInitialState() {
                 segmentPoints_.at(0).positions.at(0);
   double slope  = (run != 0) ? ryse / run : ryse;
   
+  //ROS_INFO("ryse: %f run: %f slope: %f", ryse, run, slope);
+  
   // Segment 1 size
   double l = l_ * utility_.positionDistance(
       segmentPoints_.at(0).positions, 
@@ -216,19 +218,39 @@ const ramp_msgs::MotionState BezierCurve::getInitialState() {
 
 
   // If change in y is greater
-  if( (slope >= 1)  ||
-      (slope == -1 && run < 0) ||
+  // no change in x
+  // greater change in y, 1st quadrant
+  // greater change in y, 3rd quadrant
+  // greater change in y, 4th quadrant
+  if( (run == 0)                ||
+      (slope >= 1)              ||
+      (slope == -1 && run < 0)  ||
       (slope < -1) ) 
   {
     result.velocities.at(1) = findVelocity(1, l, ryse);
-    result.velocities.at(0) = result.velocities.at(1) / slope;  
+
+    if(run == 0.)
+    {
+      result.velocities.at(0) = 0.;
+    }
+    else
+    {
+      result.velocities.at(0) = result.velocities.at(1) / slope;  
+    }
   }
   // if slope == -1 && ryse < 0
   // if slope < 0
   // else
   else {
     result.velocities.at(0) = findVelocity(0, l, run);
-    result.velocities.at(1) = result.velocities.at(0) * slope;
+    if(ryse == 0.)
+    {
+      result.velocities.at(1) = 0;
+    }
+    else
+    {
+      result.velocities.at(1) = result.velocities.at(0) * slope;
+    }
   }
 
   result.accelerations.push_back(0);
@@ -345,11 +367,11 @@ const double BezierCurve::getUDotInitial() const {
   if(isnan(u_dot_0_y)) {
     u_dot_0_y = -9999;
   }
-  /*if(print_) {
+  if(print_) {
     std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
     std::cout<<"\nu_0: "<<u_0_<<" u_dot_0: "<<u_dot_0_;
     std::cout<<"\nu_dot_0_x: "<<u_dot_0_x<<" u_dot_0_y: "<<u_dot_0_y;
-  }*/
+  }
 
   // Set a greater and lesser value
   double greater, lesser;
@@ -494,11 +516,11 @@ void BezierCurve::initReflexxes() {
 /** Initialize control points 
  *  Sets the first control point and then calls overloaded initControlPoints */
 void BezierCurve::initControlPoints() {
-  //std::cout<<"\nIn initControlPoints 0\n";
+  std::cout<<"\nIn initControlPoints 0\n";
 
   double l_s1 = utility_.positionDistance(segmentPoints_.at(1).positions, segmentPoints_.at(0).positions);
   double l_s2 = utility_.positionDistance(segmentPoints_.at(2).positions, segmentPoints_.at(1).positions);
-  //std::cout<<"\nl_s1: "<<l_s1<<" l_s2: "<<l_s2;
+  std::cout<<"\nl_s1: "<<l_s1<<" l_s2: "<<l_s2;
 
   // If 1st segment's length is smaller than 2nd segment's length
   // Compute first control point and call overloaded method
@@ -600,7 +622,7 @@ void BezierCurve::initControlPoints() {
 
 /** Initialize the control points of the Bezier curve given the first one */
 void BezierCurve::initControlPoints(const ramp_msgs::MotionState cp_0) {
-  //std::cout<<"\nIn initControlPoints 1\n";
+  std::cout<<"\nIn initControlPoints 1\n";
   ramp_msgs::MotionState C0, C1, C2, p0, p1, p2;
 
 
@@ -817,13 +839,13 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
   theta_prev_     = theta;
   theta_dot_prev_ = theta_dot;
   
-  /*if(print_) {
+  if(print_) {
     printf("\n");
     ROS_INFO("u: %f u_dot: %f u_dot_dot: %f", u, u_dot, u_dot_dot);
     ROS_INFO("x: %f             y: %f", x, y);
     ROS_INFO("x_dot: %f         y_dot: %f", x_dot, y_dot);
     ROS_INFO("x_dot_dot: %f     y_dot_dot: %f", x_dot_dot, y_dot_dot);
-  }*/
+  }
 
   // Push values onto MotionState
   result.positions.push_back(x);
@@ -856,43 +878,52 @@ const ramp_msgs::MotionState BezierCurve::spinOnce() {
                                  *reflexxesData_.inputParameters, 
                                   reflexxesData_.outputParameters, 
                                   reflexxesData_.flags );
+  //ROS_INFO("resultValue: %i", reflexxesData_.resultValue);
   
   // Check if the max velocity has been reached
   // If not, adjust the target position based on how far we've moved
   if(!reachedVMax_)
   {
-    //ROS_INFO("Adjusting target position"*/;
+    //ROS_INFO("Adjusting target position");
     double a = reflexxesData_.inputParameters->MaxVelocityVector->VecData[0] * 
                   CYCLE_TIME_IN_SECONDS;
     double b = reflexxesData_.outputParameters->NewPositionVector->VecData[0] - 
                   reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];
 
-    /*if(print_) {
-      ROS_INFO("a: %f b: %f a-b: %f", a, b, a-b);
-      ROS_INFO("Current Target: %f", 
-          reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
-    }*/
+    //ROS_INFO("a: %f b: %f a-b: %f", a, b, a-b);
+    //ROS_INFO("Current Target: %f", reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
+
 
     // Adjust target position
     reflexxesData_.inputParameters->TargetPositionVector->VecData[0] -= (a-b);
+    //ROS_INFO("New Target: %f", reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
     
-    //if(print_) {
-      //ROS_INFO("New Target: %f", reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
-    //}
-
-    // Check the new velocity to see if we're at the target
-    reachedVMax_ = (fabs(reflexxesData_.outputParameters->NewVelocityVector->VecData[0] - 
-      reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]) < 0.0001);
-    
-    if(reachedVMax_) {
-      reflexxesData_.inputParameters->TargetPositionVector->VecData[0] -= 0.000001;
+    if(reflexxesData_.inputParameters->TargetPositionVector->VecData[0] < 
+        reflexxesData_.inputParameters->CurrentPositionVector->VecData[0])
+    {
+      ROS_ERROR("Adjustment to target position makes target less than the current position");
+      ROS_ERROR("Current u: %f Target u: %f", 
+          reflexxesData_.inputParameters->CurrentPositionVector->VecData[0],
+          reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
+      ROS_ERROR("Setting resultValue=1 to stop planning");
+      reflexxesData_.resultValue = 1;
     }
-
-    // Call Reflexxes after adjusting in case we are currently at the new target
-    reflexxesData_.resultValue = reflexxesData_.rml->RMLPosition( 
-                                 *reflexxesData_.inputParameters, 
-                                  reflexxesData_.outputParameters, 
-                                  reflexxesData_.flags );
+    else 
+    {
+      // Check the new velocity to see if we're at the target
+      reachedVMax_ = (fabs(reflexxesData_.outputParameters->NewVelocityVector->VecData[0] - 
+        reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]) < 0.0001);
+      
+      if(reachedVMax_) {
+        reflexxesData_.inputParameters->TargetPositionVector->VecData[0] -= 0.000001;
+      }
+      
+      // Call Reflexxes after adjusting in case we are currently at the new target
+      reflexxesData_.resultValue = reflexxesData_.rml->RMLPosition( 
+                                   *reflexxesData_.inputParameters, 
+                                    reflexxesData_.outputParameters, 
+                                    reflexxesData_.flags );
+    } // end else no problem with adjustment
   } // end if adjusting target position
 
   // Build the new motion state

@@ -15,7 +15,7 @@
 <node name="path_modification" pkg="path_modification" type="path_modification" output="screen" />
 
 <!-- Trajectory Evaluation -->
-<node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen" />
+<node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" />
 
 
 <!-- Planner -->
@@ -27,7 +27,7 @@
 <node name="ramp_control" pkg="ramp_control" type="ramp_control" output="screen" >
   <remap from="odometry" to="odom" />
   <param name="simulation" value="true" />
-  <param name="orientation" type="double" value="0" />
+  <param name="orientation" type="double" value="-0.785" />
 </node>
 
 
