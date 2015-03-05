@@ -116,12 +116,99 @@ const RampTrajectory RampTrajectory::getSubTrajectory(const float t) const {
         i_kp++;
       }
     }
+    
+    // If the last point was not a knot point, make it one for the sub-trajectory
+    if(rt.i_knotPoints.at( rt.i_knotPoints.size()-1 ) != rt.trajectory.points.size()-1)
+    {
+      rt.i_knotPoints.push_back(rt.trajectory.points.size()-1);
+    }
   }
 
   RampTrajectory result(rt);
 
   return result;
 }
+
+
+const RampTrajectory RampTrajectory::getSubTrajectoryPost(const double t) const
+{
+  RampTrajectory rt;
+
+  double t_start = t;
+
+  if(msg_.trajectory.points.size() < 1)
+  {
+    ROS_ERROR("msg_.trajectory.points.size == 0");
+    return clone();
+  }
+  else if(msg_.trajectory.points.size() == 1 ||
+      t > msg_.trajectory.points.at( msg_.trajectory.points.size()-1 ).time_from_start.toSec())
+  {
+    rt.msg_.trajectory.points.push_back(msg_.trajectory.points.at(0));
+    rt.msg_.i_knotPoints.push_back(0);
+  }
+  
+  
+  else
+  {
+
+    //ROS_INFO("t: %f t_stop: %f", t, t_stop);
+
+    rt.msg_.i_knotPoints.push_back(0);
+    uint8_t i_kp = 0;
+    
+    double t_stop = 
+      msg_.trajectory.points.at(msg_.trajectory.points.size()-1).time_from_start.toSec();
+    
+    // Push on all the points
+    for(float i=t_start;i<=t_stop;i+=0.1f) 
+    {
+      uint16_t index = floor(i*10.) < msg_.trajectory.points.size() ? floor(i*10) : 
+        msg_.trajectory.points.size()-1;
+
+      // Adjust time
+      trajectory_msgs::JointTrajectoryPoint p = msg_.trajectory.points.at(index);
+      p.time_from_start = ros::Duration(p.time_from_start.toSec() - t_start);
+
+      //ROS_INFO("index: %i size: %i", index, (int)msg_.trajectory.points.size());
+      rt.msg_.trajectory.points.push_back(p); 
+      if(msg_.i_knotPoints.at(i_kp) == index) 
+      {
+        rt.msg_.i_knotPoints.push_back(index);
+        i_kp++;
+      }
+    } // end for
+    
+    // If the last point was not a knot point, make it one for the sub-trajectory
+    if(rt.msg_.i_knotPoints.at( rt.msg_.i_knotPoints.size()-1 ) != rt.msg_.trajectory.points.size()-1)
+    {
+      rt.msg_.i_knotPoints.push_back(rt.msg_.trajectory.points.size()-1);
+    }
+
+    // Make a path
+    /*Path temp(rt.msg_.trajectory.points.at(0), rt.msg_.trajectory.points.at(rt.msg_.trajectory.points.size()-1));
+    for(uint8_t i=0;i<path_.size();i++)
+    {
+      if(path_.at(i).motionState_.msg_.time > t_start)
+      {
+        temp.addBeforeGoal(path_.at(i));
+      }
+    }
+
+    if(msg_.i_curveEnd >= (t*10.))
+    {
+      KnotPoint k(msg_.curves.at(0).segmentPoints.at(0));
+      temp.all_.insert(temp.all_.begin()+1, k);
+    }
+
+    rt.path_ = temp;*/
+  } // end else
+
+  return rt;
+}
+
+
+
 
 
 const RampTrajectory RampTrajectory::clone() const { 

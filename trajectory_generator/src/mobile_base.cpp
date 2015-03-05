@@ -242,7 +242,7 @@ void MobileBase::insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ram
 
 /** Tests if a lambda value will have Bezier equations that are defined */
 const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segment_points, const double lambda) const {
-  //ROS_INFO("In lambdaOkay, lambda: %f", lambda);
+  ROS_INFO("In lambdaOkay, lambda: %f", lambda);
   ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;
 
   p0 = segment_points.at(0);
@@ -256,7 +256,7 @@ const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segm
   // Can use x or y...here we use x
   double min_lambda = (path_.points.at(0).motionState.positions.at(0) - segment_points.at(0).positions.at(0)) 
                       / (segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0));
-  //ROS_INFO("min_lambda in lambdaOkay: %f", min_lambda); 
+  ROS_INFO("min_lambda in lambdaOkay: %f", min_lambda); 
 
   // TODO: Check for v
   if(lambda < min_lambda) {
@@ -296,7 +296,7 @@ const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segm
   if(X1.positions.at(0) == ( (X0.positions.at(0) + X2.positions.at(0)) / 2. ) &&
       X1.positions.at(1) == ( (X0.positions.at(1) + X2.positions.at(1)) / 2. )) 
   {
-    //ROS_INFO("%f not okay", lambda);
+    ROS_INFO("%f not okay", lambda);
     return false;
   }
   
@@ -494,17 +494,19 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
       // If a "normal" bezier trajectory,
       else {
-        std::cout<<"\nIn else a normal trajectory\n";
+        ROS_INFO("In else a normal trajectory");
 
         // Get lambda value for segment points
         double lambda = (req_.bezierInfo.at(i-1).controlPoints.size() > 0) ?  req_.bezierInfo.at(i-1).l :
                                                         getControlPointLambda(segment_points);
+        ROS_INFO("lambda: %f", lambda);
 
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
 
         // TODO: Make a method to return a BezierInitializer
         ramp_msgs::BezierInfo bi;
         bi.segmentPoints  = segment_points;
+        bi.controlPoints  = req_.bezierInfo.at(i-1).controlPoints;
         bi.l              = lambda;
         bi.ms_maxVA       = ms_maxVA;
 

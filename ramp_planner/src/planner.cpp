@@ -9,10 +9,10 @@ Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalT
   cc_started_(false), c_pc_(0), transThreshold_(1./50.), num_cc_(0), L_(0.33), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), 
   stop_(false) 
 {
-  controlCycle_ = ros::Duration(2.f);
-  planningCycle_ = ros::Duration(1.f / 5.f);
+  controlCycle_           = ros::Duration(2.f);
+  planningCycle_          = ros::Duration(1.f / 5.f);
   imminentCollisionCycle_ = ros::Duration(1.f / 2.f);
-  generationsPerCC_ = controlCycle_.toSec() / planningCycle_.toSec();
+  generationsPerCC_       = controlCycle_.toSec() / planningCycle_.toSec();
 }
 
 Planner::~Planner() {
@@ -379,7 +379,8 @@ const int Planner::estimateIfOnCurve(const MotionState ms, const ramp_msgs::Bezi
                                 (y >= curve.controlPoints.at(2).positions.at(1));
 
 
-  //ROS_INFO("xSegOne: %s xSegTwo: %s ySegOne: %s ySegTwo: %s", xSegOne ? "True" : "False", xSegTwo ? "True" : "False", ySegOne ? "True" : "False", ySegTwo ? "True" : "False");
+  ROS_INFO("xSlope: %s xSlopeTwo: %s ySlope: %s ySlopeTwo: %s", xSlope ? "True" : "False", xSlopeTwo ? "True" : "False", ySlope ? "True" : "False", ySlopeTwo ? "True" : "False"); 
+  ROS_INFO("xSegOne: %s xSegTwo: %s ySegOne: %s ySegTwo: %s", xSegOne ? "True" : "False", xSegTwo ? "True" : "False", ySegOne ? "True" : "False", ySegTwo ? "True" : "False");
 
   bool xGood = (xSegOne || xSegTwo);
   bool yGood = (ySegOne || ySegTwo);
@@ -393,7 +394,7 @@ const int Planner::estimateIfOnCurve(const MotionState ms, const ramp_msgs::Bezi
   bool xPast = xSlopeTwo ?  x > curve.controlPoints.at(2).positions.at(0) :
                             x < curve.controlPoints.at(2).positions.at(0) ; 
   // Check if past curve
-  bool yPast = xSlopeTwo ?  y > curve.controlPoints.at(2).positions.at(1) :
+  bool yPast = ySlopeTwo ?  y > curve.controlPoints.at(2).positions.at(1) :
                             y < curve.controlPoints.at(2).positions.at(1) ; 
 
   ROS_INFO("xPast: %s yPast: %s", xPast ? "True" : "False", yPast ? "True" : "False");
@@ -534,7 +535,8 @@ const std::vector<ramp_msgs::BezierInfo> Planner::adaptCurves(const Population p
       /* Separate checking if on the curve and if done with curve
            because we could be done before ever incrementing u_0 */
       // Check if done with current curve
-      if(curve.u_0 > curve.u_target || estimateIfOnCurve(ms, curve) == 3) 
+      if( i == pop.calcBestIndex() && (curve.u_0 > curve.u_target || estimateIfOnCurve(ms, curve) == 3) )
+
       {
         ROS_INFO("Done with curve, u_0: %f", curve.u_0);
         curve = handleCurveEnd(pop.get(i));
@@ -1203,38 +1205,30 @@ const RampTrajectory Planner::computeFullSwitch(const RampTrajectory from, const
   ROS_INFO("In Planner::computeFullSwitch");
   RampTrajectory result;
 
-  //if(checkIfSwitchCurveNecessary(from, to)) {
-    ROS_INFO("Orientation needs to change");
+  //ROS_INFO("to: %s", to.toString().c_str());
 
-    //ROS_INFO("to: %s", to.toString().c_str());
-    // Get transition trajectory
-    std::vector<RampTrajectory> trajecs = switchTrajectory(from, to, c_pc);
+  // Get transition trajectory
+  std::vector<RampTrajectory> trajecs = switchTrajectory(from, to, c_pc);
 
-    // If a switch was possible
-    if(trajecs.size() > 0)
-    {
-      RampTrajectory T_new = trajecs.at(1);
-      Path p = T_new.path_;
-      ROS_INFO("Before eval, T_new.path: %s", T_new.path_.toString().c_str());
+  // If a switch was possible
+  if(trajecs.size() > 0)
+  {
+    RampTrajectory T_new = trajecs.at(1);
+    Path p = T_new.path_;
+    ROS_INFO("Before eval, T_new.path: %s", T_new.path_.toString().c_str());
 
-      // Evaluate T_new
-      ramp_msgs::EvaluationRequest er = buildEvaluationRequest(T_new);
-      er.request.t_start = planningCycle_.toSec();
-      T_new = requestEvaluation(er);
-      T_new.transitionTraj_ = trajecs.at(0).msg_;
-      T_new.path_ = p;
+    // Evaluate T_new
+    ramp_msgs::EvaluationRequest er = buildEvaluationRequest(T_new);
+    er.request.t_start = planningCycle_.toSec();
+    T_new = requestEvaluation(er);
+    T_new.transitionTraj_ = trajecs.at(0).msg_;
+    T_new.path_ = p;
 
-      result = T_new;
-      result.transitionTraj_ = trajecs.at(0).msg_;
-      ROS_INFO("After eval, T_new.path: %s", T_new.path_.toString().c_str());
-    }
-  //} // end if curve needed
+    result = T_new;
+    result.transitionTraj_ = trajecs.at(0).msg_;
+    ROS_INFO("After eval, T_new.path: %s", T_new.path_.toString().c_str());
+  }
 
-  // If no switch is necessary, return current+to
-  /*else {
-    ROS_INFO("No curve needed to switch");
-    result = from;
-  }*/
 
   ROS_INFO("Exiting Planner::computeFullSwitch");
   return result;
@@ -1250,7 +1244,7 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
   RampTrajectory switching = getTransitionTrajectory(from, to, c_pc);
   //ROS_INFO("After getting switching");
   RampTrajectory full = switching.clone();
-  //ROS_INFO("Switching trajectory: %s", switching.toString().c_str());
+  ROS_INFO("Switching trajectory: %s", switching.toString().c_str());
   //ROS_INFO("from: %s", from.toString().c_str());
   
   // Set the proper ID
@@ -1263,13 +1257,13 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
   
     /* After getting transition trajectory, we want to 
        concatenate it with the rest of the target trajectory */
-    
+
     //ROS_INFO("Getting t_cycle");
     // Set the cycle time and latest point's time
     ros::Duration t_cycle(0.1);
     ros::Duration t_latest  = switching.msg_.trajectory.points.size() == 0 ? t_cycle : 
-                                  switching.msg_.trajectory.points.at(
-                                    switching.msg_.trajectory.points.size()-1).time_from_start + t_cycle;
+                                switching.msg_.trajectory.points.at(
+                                switching.msg_.trajectory.points.size()-1).time_from_start + t_cycle;
 
     // Keep a counter for the knot points
     int c_kp = to.path_.size() < 3 ? 1 : 2;
@@ -1329,15 +1323,15 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
     }
 
     full.bezierPath_ = bp;
-   
-    
-    
+
+
+
     // Push on the target trajectory's Bezier curve
     for(uint8_t i_curve=0;i_curve<to.msg_.curves.size();i_curve++) {
       full.msg_.curves.push_back(to.msg_.curves.at(i_curve));
     }
 
-   
+ 
     // Set i_curveEnd for the 1st curve
     if(switching.msg_.curves.size() > 0) {
       ROS_INFO("In switching curve if");
@@ -1357,7 +1351,7 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
 
   result.push_back(switching);
   result.push_back(full);
-  
+ 
 
   ROS_INFO("Exiting Planner::switchTrajectory");
   return result;
@@ -1368,22 +1362,24 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
 
 
 const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory current, const RampTrajectory trgt_traj, 
-    const uint8_t c_pc) {
+    const uint8_t c_pc) 
+{
   ROS_INFO("In Planner::getTransitionTrajectory");
   //ROS_INFO("Current: %s", current.toString().c_str());
-  
+  ROS_INFO("Current.path: %s", current.path_.toString().c_str());
+ 
+  double t = c_pc * planningCycle_.toSec();
   if(!checkIfSwitchCurveNecessary(current, trgt_traj)) 
   {
-    return current;
+    return current.getSubTrajectoryPost(t);
   }
 
-  double t = c_pc * planningCycle_.toSec();
   //ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
-  
+ 
   //ROS_INFO("Before ms_startSwitch");
   MotionState ms_startSwitch = current.getPointAtTime(t);
   ROS_INFO("ms_startSwitch: %s", ms_startSwitch.toString().c_str());
-  
+ 
   //ROS_INFO("Before segment_points");
   std::vector<MotionState> segment_points;
   segment_points.push_back(ms_startSwitch);
@@ -1408,7 +1404,7 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory curre
   {
     i_goal = 2;
   }
-  
+ 
   ROS_INFO("i_goal: %i, trgt.knotpoints.size(): %i", i_goal, (int)trgt_traj.msg_.i_knotPoints.size());
   MotionState g(trgt_traj.msg_.trajectory.points.at(trgt_traj.msg_.i_knotPoints.at(i_goal)));
   segment_points.push_back(g);
@@ -1743,7 +1739,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
   ROS_INFO("********************************************************************");
   ROS_INFO("********************************************************************");
 
-  
+ 
 
   // Make sure not too many PC occur before next CC
   if(c_pc_ < generationsPerCC_ || !cc_started_) {
@@ -1756,29 +1752,26 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
       ModificationResult mod = modification();
       ROS_INFO("Done with modification");
       ROS_INFO("*****************************");
-      population_ = mod.popNew_;
 
-      /*if(cc_started_ && mod.i_modified_.size() > 0 &&
+      if(cc_started_ && mod.i_modified_.size() > 0 &&
           !population_.get(0).path_.at(0).motionState_.equals(goal_))
       {
         ROS_INFO("Modification changed population");
         ROS_INFO("Evaluating entire population!");
         population_ = mod.popNew_;
-        //population_ = evaluatePopulation(population_);
-        //ROS_INFO("After mod and eval, pop now: %s", population_.toString().c_str());
 
         // Set pc_switch
         ROS_INFO("Finding new pc_switch");
         pc_switch_ = computeSwitchPC(population_, movingOn_);
         ROS_INFO("pc_switch: %i", pc_switch_);
-      }*/
+      }
     } // end if modifications
 
 
 
     // If it's time to switch
     // Restart with time of transition trajectory
-    /*if(cc_started_ && c_pc_ == pc_switch_)
+    if(cc_started_ && c_pc_ == pc_switch_)
     {
       ROS_WARN("Time to switch");
       ROS_INFO("pc_switch: %i c_pc: %i", pc_switch_, c_pc_);
@@ -1786,7 +1779,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
       // Set population_ to have the transition trajectories included
       Population temp = getTransPopAtPC(population_, movingOn_, pc_switch_);
       ROS_INFO("Transition population: %s", temp.toString().c_str());
-      
+
       RampTrajectory best = temp.getBest();
       ROS_INFO("best: %s", best.toString().c_str());
       ROS_INFO("best.transTrajec: %s", utility_.toString(best.transitionTraj_).c_str());
@@ -1809,7 +1802,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
 
       // Set population_ to have the transition trajectories included
       population_ = getTransPopAtPC(population_, movingOn_, pc_switch_);
-      
+
       // Restart CC
       ROS_WARN("Restarting with t: %f", t);
       restartControlCycle(t);
@@ -1819,7 +1812,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     {
       ROS_INFO("Not time to switch");
       ROS_INFO("pc_switch: %i c_pc: %i", pc_switch_, c_pc_);
-    }*/
+    }
 
 
     
@@ -1879,7 +1872,7 @@ const uint8_t Planner::computeSwitchPC(const Population pop, const RampTrajector
         ROS_INFO("T_new: %s", T_new.toString().c_str());
 
         // If we are able to plan a curve and it's not the best
-        if( (T_new.msg_.i_knotPoints.size() == 1) ||
+        if( (T_new.msg_.i_knotPoints.size() == 2) ||
             (T_new.msg_.curves.size() > 0 &&
             T_new.msg_.i_knotPoints.size() < 5) )
         {
@@ -1898,7 +1891,8 @@ const uint8_t Planner::computeSwitchPC(const Population pop, const RampTrajector
     } // end if moving on straight line
     else
     {
-      ROS_INFO("Not moving on straight line");
+      ROS_INFO("Stopping! Not moving on straight line at pc: %i", i_pc);
+      i_pc = 0;
     }
 
     // If we were able to get a curve for each one
@@ -1908,7 +1902,7 @@ const uint8_t Planner::computeSwitchPC(const Population pop, const RampTrajector
     if(transitions.size() == pop.size())
     {
       result = i_pc;
-      break;
+      i_pc = 0;
     } // end if
   } // end for
 
@@ -1918,29 +1912,48 @@ const uint8_t Planner::computeSwitchPC(const Population pop, const RampTrajector
 }
 
 
+
+
+
+/**
+ * Should take in the population of the robot
+ */
 const Population Planner::getTransPopAtPC(const Population pop, const RampTrajectory traj, const uint8_t pc) 
 {
   ROS_INFO("In Planner::getTransPopAtPC");
   ROS_INFO("pc: %i pc_switch_: %i", pc, pc_switch_);
   Population result = pop;
-  ROS_INFO("result.paths.size(): %i", (int)result.paths_.size());
+  ROS_INFO("pop.bestIndex: %i", pop.calcBestIndex());
 
+  // Get the beginning state
+  MotionState ms = traj.getPointAtTime( pc*planningCycle_.toSec() );
+  if(fabs(ms.msg_.velocities.at(2)) > 0.01)
+  {
+    ROS_WARN("Robot is turning at pc %i along trajectory,\nms: %s", pc, ms.toString().c_str());
+  }
+  
   //ROS_INFO("In getTransPopAtPC, traj: %s", traj.toString().c_str());
   for(uint8_t i=0;i<pop.size();i++)
   {
+    //ROS_INFO("Pop.paths at %i: %s", i, pop.paths_.at(i).toString().c_str());
     //ROS_INFO("Pop at %i: %s", i, pop.get(i).toString().c_str());
-    RampTrajectory temp = computeFullSwitch(traj, pop.get(i), pc); 
-    //ROS_INFO("Temp %i: %s", i, temp.toString().c_str());
-    result.replace(i, temp);
+    //if(i != pop.calcBestIndex() )
+    if(fabs(ms.msg_.velocities.at(2)) < 0.01)
+    {
+      RampTrajectory temp = computeFullSwitch(traj, pop.get(i), pc); 
+      temp.msg_.curves = pop.get(i).msg_.curves;
+      result.replace(i, temp);
+    }
   } // end for
 
   ROS_INFO("After, result.paths.size(): %i", (int)result.paths_.size());
   return result; 
-}
+} // End getTransPopAtPC
 
 
 /** This methed runs the tasks needed to do a control cycle */
 void Planner::doControlCycle() {
+  ROS_WARN("Control Cycle %i occurring at Time: %f", num_cc_, ros::Time::now().toSec());
   ROS_INFO("In Planner::doControlCycle");
 
   // Set the bestT
@@ -2011,6 +2024,9 @@ void Planner::doControlCycle() {
   // Send the population to trajectory_visualization
   sendPopulation();
   
+  ROS_INFO("Control Cycle %i Ending, next one occurring in %f seconds", num_cc_, controlCycle_.toSec());
+  
+  num_cc_++;
   ROS_INFO("Exiting Planner::doControlCycle");
 } // End doControlCycle
 
@@ -2022,7 +2038,6 @@ void Planner::doControlCycle() {
  *  configuration of the robot, re-evaluates the population,
  *  and sends a new (and better) trajectory for the robot to move along */
 void Planner::controlCycleCallback(const ros::TimerEvent&) {
-  ROS_WARN("Control Cycle %i occurring at Time: %f", num_cc_, ros::Time::now().toSec());
   if(num_cc_ == 0)
   {
     planningCycleTimer_.start();
@@ -2049,8 +2064,6 @@ void Planner::controlCycleCallback(const ros::TimerEvent&) {
       cc_started_ = true;
     }
     
-    ROS_INFO("Control Cycle %i Ending, next one occurring in %f seconds", num_cc_, controlCycle_.toSec());
-    num_cc_++;
 
   //}
   /*else

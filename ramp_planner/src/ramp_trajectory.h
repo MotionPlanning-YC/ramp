@@ -25,6 +25,7 @@ class RampTrajectory {
     const std::string    fitnessFeasibleToString()            const;
     const std::string    toString()                           const;
     const RampTrajectory getSubTrajectory(const float t)      const;
+    const RampTrajectory getSubTrajectoryPost(const double t)  const;
 
     const trajectory_msgs::JointTrajectoryPoint getPointAtTime(const float t) const;
 

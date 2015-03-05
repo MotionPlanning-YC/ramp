@@ -524,8 +524,9 @@ void BezierCurve::initControlPoints() {
 
   // If 1st segment's length is smaller than 2nd segment's length
   // Compute first control point and call overloaded method
-  if(l_s1 < l_s2) {
-    //std::cout<<"\nIn if\n";
+  if(l_s1 < l_s2) 
+  {
+    std::cout<<"\nIn if\n";
 
     ramp_msgs::MotionState C0, p0, p1;
 
@@ -547,9 +548,10 @@ void BezierCurve::initControlPoints() {
 
   // Else just set all points in here
   else {
-    //std::cout<<"\nIn else\n";
+    std::cout<<"\nIn else\n";
 
-    // Adjust l
+    // Adjust l to get control points
+    // But keep l_ the same because this block 
     l_ = 1 - l_;
 
     
