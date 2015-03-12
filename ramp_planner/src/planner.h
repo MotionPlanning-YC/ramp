@@ -208,9 +208,9 @@ class Planner {
           void seedPopulation()                                         ;
           void seedPopulationTwo()                                      ;
 
-    const RampTrajectory  getTransitionTrajectory(const RampTrajectory current, 
+    const RampTrajectory  getTransitionTrajectory(const RampTrajectory movingOn, 
                                                   const RampTrajectory trgt_traj,
-                                                  const uint8_t        c_pc);
+                                                  const double t);
     const MotionState     predictStartPlanning() const;
 
 
@@ -256,6 +256,7 @@ class Planner {
     // Work for CC
     void doControlCycle();
     const uint8_t computeSwitchPC(const Population pop, const RampTrajectory moving);
+    const uint8_t computeSwitchPC(const RampTrajectory target, const RampTrajectory moving);
 
     // Returns the index in the trajectory's path to start checking if the robot has passed it
     const uint8_t getIndexStartPathAdapting(const RampTrajectory t) const;

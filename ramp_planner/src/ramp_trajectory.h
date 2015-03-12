@@ -18,14 +18,17 @@ class RampTrajectory {
     ramp_msgs::MotionState    ms_prevSP_;
     ramp_msgs::RampTrajectory transitionTraj_;
 
-    const RampTrajectory clone()                              const;
-    const bool           equals(const RampTrajectory& other)  const;
-    const Path           getPath()                            const;
-    const double         getDirection()                       const;
-    const std::string    fitnessFeasibleToString()            const;
-    const std::string    toString()                           const;
-    const RampTrajectory getSubTrajectory(const float t)      const;
-    const RampTrajectory getSubTrajectoryPost(const double t)  const;
+    const RampTrajectory clone()                                const;
+    const bool           equals(const RampTrajectory& other)    const;
+    const double         getIndexOfMs(const MotionState ms)     const;
+    const Path           getPath()                              const;
+    const double         getDirection()                         const;
+    const std::string    fitnessFeasibleToString()              const;
+    const std::string    toString()                             const;
+    const RampTrajectory getSubTrajectory(const float t)        const;
+    const RampTrajectory getSubTrajectoryPost(const double t)   const;
+
+    const RampTrajectory concatenate(const RampTrajectory traj, const uint8_t kp=0) const;
 
     const trajectory_msgs::JointTrajectoryPoint getPointAtTime(const float t) const;
 

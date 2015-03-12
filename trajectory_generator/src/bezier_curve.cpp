@@ -108,6 +108,8 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
 }
 
 
+
+
 /** Determines if a curve violates angular motion constraints */
 const bool BezierCurve::verify() const {
   ROS_INFO("In BezierCurve::verify()");

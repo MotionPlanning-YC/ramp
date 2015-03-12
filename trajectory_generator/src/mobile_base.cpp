@@ -464,8 +464,6 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // If we are starting with a curve
       // For transition trajectories, the segment points are the 
       // control points, so we have all the info now
-      // TODO: Change bezierStart to check u>0
-      //if(bezierStart && i==1) {
       if(req_.bezierInfo.at(0).u_0 > 0 && i==1) 
       {
         std::cout<<"\nIn if transition or bezierStart\n";
@@ -516,7 +514,6 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         ROS_INFO("Done initializing curve");
       } // end else "normal" trajectory
 
-
       // Verify the curve
       if(bc.verify()) {
         ROS_INFO("Curve is verified, generating points");
@@ -548,10 +545,11 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
   //ROS_INFO("Outside of for");
 
-  if(type_ != ALL_STRAIGHT_SEGMENTS) {
-
-    if(type_ == TRANSITION) {
-      //ROS_INFO("In type == transition");
+  if(type_ != ALL_STRAIGHT_SEGMENTS) 
+  {
+    if(type_ == TRANSITION) 
+    {
+      ROS_INFO("In type == transition");
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
       p.points.erase(p.points.begin()+2);
       p.points.insert(p.points.begin()+2, 
@@ -559,28 +557,10 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     }
 
     // If we are switching and have more than 1 curve
-    else if(req_.bezierInfo.size() > 1) {
-      //std::cout<<"\nIn first if\n";
-      //std::cout<<"\np.points.size(): "<<p.points.size();
-      
-      // Insert the 1st curve's last CP after the 1st KP
-      // used to be +1
-      //p.points.insert( p.points.begin()+2, 
-          //utility_.getKnotPoint( result.at(0).points_.at(result.at(0).points_.size()-1)));
+    else if(req_.bezierInfo.size() > 1) 
+    {
+      ROS_INFO("In else if bezierInfo.size()>1");
 
-      //ROS_INFO("Path p: %s", utility_.toString(p).c_str());
-      
-      // Remove the 3rd KP 
-      // used to be begin()+2, but i changed it when doing two cuvres and restarting CC
-      //p.points.erase( p.points.begin() + 2 );
-      //p.points.erase( p.points.begin() + 3 );
-      // Insert the 2nd curve's first and last CP
-      //p.points.insert(p.points.begin()+3, utility_.getKnotPoint(result.at(1).points_.at(0)));
-      //p.points.insert(p.points.begin()+4, 
-          //utility_.getKnotPoint(result.at(1).points_.at(result.at(1).points_.size()-1)));
-
-      // When switching at gen==21, robot is in the 1st curve
-      // Need to erase the start and finish of 1st curve and add in CPs
       //ROS_INFO("Actually Erasing: %s", utility_.toString( *(p.points.begin()+2) ).c_str());
       p.points.erase( p.points.begin()+2 );
       //ROS_INFO("Actually Erasing: %s", utility_.toString( *(p.points.begin()+1) ).c_str());
@@ -591,11 +571,6 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
       //ROS_INFO("Path p: %s", utility_.toString(p).c_str());
       
-      // Erase 2nd curve's middle segment point (it's in path)
-      //ROS_INFO("Actually Erasing: %s", utility_.toString( *(p.points.begin()+2) ).c_str());
-      // Removed for gen==21 on switch
-      //p.points.erase( p.points.begin()+2 );
-      
       // Insert the 2nd curve's 1st and last CPs
       p.points.insert(p.points.begin()+2, utility_.getKnotPoint(result.at(1).points_.at(0)));
       p.points.insert(p.points.begin()+3, 
@@ -603,8 +578,9 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     }
 
     // If already moving on curve
-    else if(req_.bezierInfo.at(0).u_0 > 0) {
-      //ROS_INFO("In else if bezierStart");
+    else if(req_.bezierInfo.at(0).u_0 > 0) 
+    {
+      ROS_INFO("In else if bezierStart");
       // Commented out when gen == 23 for the switch. at CC after restart, it was removing 1,1 and 3.5,2
       //ROS_INFO("Erasing: %s", utility_.toString( *(p.points.begin()+2) ).c_str());
       //p.points.erase( p.points.begin() + 2 );
@@ -612,19 +588,27 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       p.points.erase( p.points.begin() + 1 );
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
     }
-    // Else not on a curve
-    // maybe erase twice if two curves
-    else {
-      //ROS_INFO("In else");
+
+    else if(utility_.positionDistance( p.points.at(1).motionState.positions, 
+          req_.bezierInfo.at(0).segmentPoints.at(1).positions) > 0.01)
+    {
+      ROS_INFO("In else if Knot Point 1 != segment point 1");
+      ROS_INFO("Knot Point 1: %s\nSegment Point 1: %s", utility_.toString(p.points.at(1).motionState).c_str(), 
+          utility_.toString(req_.bezierInfo.at(0).segmentPoints.at(1)).c_str());
+      // Don't erase anything
+      // Insert
+      p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
+      p.points.insert(p.points.begin()+2, utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
+    }
+
+    // Else not on a curve, but a curve exists on the trajectory
+    else 
+    {
+      ROS_INFO("In else");
       //ROS_INFO("Erasing: %s", utility_.toString( *(p.points.begin()+1) ).c_str());
       p.points.erase( p.points.begin() + 1 );
-      
-      // Added for when gen==22, the robot does not start on curve so must erase 2
-      /*if(req_.bezierInfo.size() > 1) {
-        ROS_INFO("Erasing: %s", utility_.toString( *(p.points.begin()+1) ).c_str());
-        p.points.erase( p.points.begin() + 1 );
-      }*/
-      
+
+
       // Insert
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
       p.points.insert(p.points.begin()+2, utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
@@ -1092,7 +1076,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
 
     // Check if Reflexxes overshot target
-    if(!lastPointClosest(res.trajectory)) {
+    if(!lastPointClosest(res.trajectory)) 
+    {
       ROS_INFO("Last point is not closest");
 
       res.trajectory.trajectory.points.pop_back();
@@ -1102,7 +1087,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       timeFromStart_ -= ros::Duration(CYCLE_TIME_IN_SECONDS);
       
       // If it's the first kp and there's no curve
-      if(i_kp_ == 1 && type_ != PARTIAL_BEZIER) {
+      if(i_kp_ == 1 && req.path.points.size() > 2 && type_ != PARTIAL_BEZIER) 
+      {
         res.trajectory.i_knotPoints.pop_back();
       }
     } // end if checking Reflexxes overshooting

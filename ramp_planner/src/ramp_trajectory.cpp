@@ -132,6 +132,8 @@ const RampTrajectory RampTrajectory::getSubTrajectory(const float t) const {
 
 const RampTrajectory RampTrajectory::getSubTrajectoryPost(const double t) const
 {
+  ROS_INFO("In RampTrajectory::getSubTrajectoryPost");
+  ROS_INFO("t: %f", t);
   RampTrajectory rt;
 
   double t_start = t;
@@ -204,10 +206,90 @@ const RampTrajectory RampTrajectory::getSubTrajectoryPost(const double t) const
     rt.path_ = temp;*/
   } // end else
 
+  ROS_INFO("Returning sub-trajectory: %s", rt.toString().c_str());
+  ROS_INFO("Exiting RampTrajectory::getSubTrajectoryPost");
   return rt;
 }
 
 
+
+
+/*
+ * Concatenate traj onto this trajectory. kp is the knot to start on traj
+ */
+const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, const uint8_t kp) const
+{
+  ROS_INFO("In RampTrajectory::concatenate");
+  RampTrajectory result = clone();
+  uint8_t c_kp = kp;
+
+  ros::Duration t_cycleTime(0.1);
+  ros::Duration t_latest = msg_.trajectory.points.at(msg_.trajectory.points.size()-1).time_from_start;
+  for(uint16_t i=traj.msg_.i_knotPoints.size() == 1 ? 0 : traj.msg_.i_knotPoints.at(c_kp-1);
+      i<traj.msg_.trajectory.points.size();
+      i++)
+  {
+    trajectory_msgs::JointTrajectoryPoint temp = traj.msg_.trajectory.points.at(i);
+
+    // Set time
+    temp.time_from_start = ros::Duration(t_latest+t_cycleTime);
+    t_latest += t_cycleTime;
+
+    result.msg_.trajectory.points.push_back(temp);
+
+    if( i == traj.msg_.i_knotPoints.at(c_kp) )
+    {
+      result.msg_.i_knotPoints.push_back( result.msg_.trajectory.points.size()-1 ); 
+      c_kp++;
+    }
+  } //end for
+
+  // Set bezierPath
+  std::vector<KnotPoint> bp;
+  for(uint16_t i=0;i<result.msg_.i_knotPoints.size();i++) {
+    KnotPoint kp(result.msg_.trajectory.points.at(
+          result.msg_.i_knotPoints.at(i)));
+    bp.push_back(kp);
+  }
+
+  result.bezierPath_ = bp; 
+
+  // Push on the target trajectory's Bezier curve
+  for(uint8_t i_curve=0;i_curve<traj.msg_.curves.size();i_curve++) {
+    result.msg_.curves.push_back(traj.msg_.curves.at(i_curve));
+  }
+
+  /*ROS_INFO("Path before concat: %s", result.path_.toString().c_str());
+
+  // Set the correct Path 
+  for(uint8_t i=0;i<traj.path_.size();i++)
+  {
+    ROS_INFO("traj path[%i]: %s", i, traj.path_.at(i).toString().c_str());
+    result.path_.addBeforeGoal(traj.path_.at(i));
+  }
+  ROS_INFO("New path: %s", result.path_.toString().c_str());*/
+
+  // Set i_curveEnd for the 1st curve
+  /*if(result.msg_.curves.size() > 0) {
+    ROS_INFO("In switching curve if");
+    result.msg_.i_curveEnd = switching.msg_.i_curveEnd;
+  }
+  else if(result.msg_.curves.size() == 0) {
+    ROS_INFO("In switching curve result.curves.size() == 0");
+    result.msg_.i_curveEnd = 0;
+  }
+  else {
+    ROS_INFO("In switching curve else");
+    ROS_INFO("to.msg_.i_curveEnd: %i", (int)traj.msg_.i_curveEnd);
+    ROS_INFO("to_msg.curves.size(): %i", (int)traj.msg_.curves.size());
+    result.msg_.i_curveEnd = traj.msg_.curves.at(0).numOfPoints + switching.msg_.trajectory.points.size(); 
+  }*/
+
+
+  ROS_INFO("result: %s", result.toString().c_str());
+  ROS_INFO("Exiting RampTrajectory::concatenate");
+  return result;
+}
 
 
 
