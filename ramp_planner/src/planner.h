@@ -176,9 +176,11 @@ class Planner {
     const std::vector<Path>                   adaptPaths( const Population pop,
                                                           const MotionState start, 
                                                           const ros::Duration dur) const;
-    const std::vector<ramp_msgs::BezierInfo>  adaptCurves(const Population pop,
-                                                          const MotionState ms,
-                                                          const ros::Duration d) const;
+
+    const std::vector<ramp_msgs::BezierInfo> adaptCurves( const Population pop,
+                                                                          const MotionState ms,
+                                                                          const ros::Duration d) const;
+
     const ramp_msgs::BezierInfo               handleCurveEnd(const RampTrajectory traj) const;
 
     // Returns a unique id for a RampTrajectory 
@@ -211,14 +213,18 @@ class Planner {
     const RampTrajectory  getTransitionTrajectory(const RampTrajectory movingOn, 
                                                   const RampTrajectory trgt_traj,
                                                   const double t);
+    const RampTrajectory getBestTransTrajectory(const RampTrajectory moving,
+                                                const RampTrajectory target);
+
+
+
     const MotionState     predictStartPlanning() const;
 
 
 
     const std::vector<RampTrajectory> switchTrajectory( const RampTrajectory from, 
-                                                        const RampTrajectory to,
-                                                        const uint8_t c_pc);
-    const RampTrajectory computeFullSwitch(const RampTrajectory from, const RampTrajectory to, const uint8_t c_pc);
+                                                        const RampTrajectory to );
+    const RampTrajectory computeFullSwitch(const RampTrajectory from, const RampTrajectory to);
     const bool checkIfSwitchCurveNecessary(const RampTrajectory from, const RampTrajectory to)
       const;
     
@@ -272,6 +278,7 @@ class Planner {
 
 
     const Population getTransPopAtPC(const Population pop, const RampTrajectory traj, const uint8_t pc);
+    const Population getTransPop(const Population pop, const RampTrajectory movingOn);
 
 
 

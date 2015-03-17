@@ -44,11 +44,11 @@ const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const
   
   float resolutionRate = 0.1;
   int i = ceil((t/resolutionRate));
-  /*ROS_INFO("t: %f resolutionRate: %f i: %i size: %i", 
+  ROS_INFO("t: %f resolutionRate: %f i: %i size: %i", 
       t, 
       resolutionRate, 
       i, 
-      (int)msg_.trajectory.points.size());*/
+      (int)msg_.trajectory.points.size());
 
   if( i >= msg_.trajectory.points.size() ) {
     return msg_.trajectory.points.at( msg_.trajectory.points.size()-1 );
