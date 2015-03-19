@@ -32,13 +32,13 @@ class Population {
     const int             getNumSubPops() const;
     const RampTrajectory  getBest() const;
    
-    const std::vector<RampTrajectory> getBestFromSubPops();
+    const std::vector<RampTrajectory> getBestFromSubPops() const;
     const std::vector<Population> createSubPopulations(const double delta_theta=PI/3);
 
 
     const std::string     fitnessFeasibleToString() const;
     const std::string     toString() const;
-    ramp_msgs::Population populationMsg();
+    ramp_msgs::Population populationMsg() const;
 
     /** Data Members */
     std::vector<Path>           paths_;

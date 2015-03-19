@@ -1683,20 +1683,10 @@ const ModificationResult Planner::modification() {
     // If it was successfully added, push its index onto the result
     //int index = population_.add(mod_trajec.at(i));
     int index = popCopy.add(mod_trajec.at(i));
-    if(index > -1) {
-      // Check for new switchpc
-      int pc = computeSwitchPC(popCopy, movingOn_);
-      if(pc > c_pc_ && pc < generationsPerCC_)
-      {
-        population_.replace(index, mod_trajec.at(i));
-        ROS_INFO("Modification Trajectory added to population at index: %i", index);
-        ROS_INFO("Modded Trajec %i: %s", i, mod_trajec.at(i).toString().c_str());
-        result.i_modified_.push_back(index);
-      }
-      else
-      {
-        ROS_INFO("Tried to add trajec at index %i, but new pc_switch=%i", i, pc);
-      }
+    if(index > -1) 
+    {
+      population_.replace(index, mod_trajec.at(i));
+      result.i_modified_.push_back(index);
     }
     else {
       ROS_INFO("Modification Trajectory not added to population");
@@ -1838,11 +1828,6 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
         ROS_INFO("Modification changed population");
         ROS_INFO("Evaluating entire population!");
         population_ = mod.popNew_;
-
-        // Set pc_switch
-        ROS_INFO("Finding new pc_switch");
-        pc_switch_ = computeSwitchPC(population_, movingOn_);
-        ROS_INFO("pc_switch: %i", pc_switch_);
       }
     } // end if modifications
 
@@ -1854,7 +1839,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
     generation_++;
     c_pc_++;
 
-    sendPopulation();
+    //sendPopulation(population_);
   
     ROS_INFO("********************************************************************");
     ROS_INFO("********************************************************************");
@@ -2093,7 +2078,7 @@ void Planner::doControlCycle() {
   ros::Time t = ros::Time::now();
 
   // Set the bestT
-  RampTrajectory bestT = population_.get(population_.calcBestIndex());
+  RampTrajectory bestT = transPopulation_.getBest();
   ROS_INFO("bestT: %s", bestT.toString().c_str());
 
   
@@ -2135,7 +2120,6 @@ void Planner::doControlCycle() {
       population_.toString().c_str());
 
   // Before adapting, strip transitions
-  population_.replaceAll( stripTransitions(population_.getTrajectories()) );
   population_ = adaptPopulation(population_, startPlanning_, controlCycle_);
   population_ = evaluatePopulation(population_);
   ROS_INFO("After adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", 
@@ -2144,8 +2128,9 @@ void Planner::doControlCycle() {
   
   
   ROS_INFO("Calling getTransPop");
-  population_ = getTransPop(population_, movingOn_);
-  ROS_INFO("New pop: %s", population_.toString().c_str());
+  transPopulation_ = getTransPop(population_, movingOn_);
+  transPopulation_ = evaluatePopulation(transPopulation_);
+  ROS_INFO("New transPop: %s", transPopulation_.toString().c_str());
 
 
   // If error reduction
@@ -2162,7 +2147,7 @@ void Planner::doControlCycle() {
   }
  
   // Send the population to trajectory_visualization
-  sendPopulation();
+  sendPopulation(transPopulation_);
   
   ROS_INFO("Control Cycle %i Ending, next one occurring in %f seconds", num_cc_, controlCycle_.toSec());
  
@@ -2259,12 +2244,13 @@ void Planner::sendBest() {
 
 
 /** Send the whole population of trajectories to the trajectory viewer */
-void Planner::sendPopulation() {
+void Planner::sendPopulation(const Population pop) const 
+{
   ramp_msgs::Population msg;
 
   if(subPopulations_) {
-    Population temp(population_.getNumSubPops());
-    std::vector<RampTrajectory> trajecs = population_.getBestFromSubPops();
+    Population temp(pop.getNumSubPops());
+    std::vector<RampTrajectory> trajecs = pop.getBestFromSubPops();
     for(uint8_t i=0;i<trajecs.size();i++) {
       temp.add(trajecs.at(i));
     }
@@ -2273,7 +2259,7 @@ void Planner::sendPopulation() {
     msg = temp.populationMsg();
   }
   else {
-    msg = population_.populationMsg();
+    msg = pop.populationMsg();
   }
 
   msg.robot_id = id_;
@@ -2409,7 +2395,7 @@ const MotionState Planner::findAverageDiff() {
   // initialize population
   initPopulation();
   std::cout<<"\n"<<population_.fitnessFeasibleToString();
-  sendPopulation();
+  sendPopulation(population_);
   std::cout<<"\nPop: "<<population_.toString();
   std::cout<<"\nPopulation initialized! Press enter to continue\n";
   std::cin.get();
@@ -2433,7 +2419,7 @@ const MotionState Planner::findAverageDiff() {
     ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
     
 
-    sendPopulation();
+    sendPopulation(population_);
     std::cout<<"\nPopulation seeded! Press enter to continue\n";
     std::cin.get();
   }
@@ -2446,9 +2432,12 @@ const MotionState Planner::findAverageDiff() {
     std::cout<<"\nSub-populations created\n";
   }
 
+  // Initialize transPopulation
+  transPopulation_ = population_;
+
   
   // Start the planning cycle timer
-  //planningCycleTimer_.start();
+  planningCycleTimer_.start();
 
   // Wait for 100 generations before starting 
   while(generation_ < generationsBeforeCC_) {ros::spinOnce();}

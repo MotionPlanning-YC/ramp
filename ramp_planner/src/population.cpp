@@ -386,7 +386,8 @@ const RampTrajectory Population::getBest() const
 
 
 /** This method will return the best trajectory from each sub-population */
-const std::vector<RampTrajectory> Population::getBestFromSubPops() {
+const std::vector<RampTrajectory> Population::getBestFromSubPops() const
+{
   std::vector<RampTrajectory> result;
 
   if(subPopulations_.size() == 0) {
@@ -508,7 +509,7 @@ const std::string Population::toString() const {
 
 
 //Return a message of type ramp_msgs::Population to be sent to the trajectory viewer 
-ramp_msgs::Population Population::populationMsg()
+ramp_msgs::Population Population::populationMsg() const
 {
   ramp_msgs::Population msg;
   

@@ -27,9 +27,10 @@ const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) 
   double T = time_.perform();
   
 
-  orientation_.trajectory_ = trajectory_;
-  orientation_.currentTheta_ = currentTheta_;
-  double A = orientation_.perform();
+  //orientation_.trajectory_ = trajectory_;
+  //orientation_.currentTheta_ = currentTheta_;
+  //double A = orientation_.perform();
+  double A = 0.;
 
   ROS_INFO("T: %f A: %f", T, A);
 

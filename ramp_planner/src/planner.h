@@ -106,7 +106,7 @@ class Planner {
     void sendBest();
     
     // Send the whole population to the trajectory viewer
-    void sendPopulation();
+    void sendPopulation(const Population pop) const;
     void displayTrajectory(const ramp_msgs::RampTrajectory traj) const;
 
     // Evaluate the population 

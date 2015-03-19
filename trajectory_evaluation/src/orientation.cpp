@@ -7,11 +7,31 @@ const double Orientation::perform() {
   double result = 0.;
 
   // Add the change in orientation needed to move on this trajectory
-  // Check there is more than 1 points
+  // Check if there is more than 1 point
   if(trajectory_.i_knotPoints.size() > 1) 
   {
-    double thetaNec = utility_.findAngleFromAToB(trajectory_.trajectory.points.at(0),
-      trajectory_.trajectory.points.at( trajectory_.i_knotPoints.at(1) ));   
+
+    // Check for rotation at beginning
+    trajectory_msgs::JointTrajectoryPoint a = trajectory_.trajectory.points.at(0);
+    trajectory_msgs::JointTrajectoryPoint b = trajectory_.trajectory.points.at(trajectory_.i_knotPoints.at(1));
+    ROS_INFO("a: %s\nb: %s", utility_.toString(a).c_str(), utility_.toString(b).c_str());
+    if( fabs(utility_.positionDistance(a.positions, b.positions)) < 0.01)
+    {
+      if(trajectory_.i_knotPoints.size() > 2)
+      {
+        ROS_INFO("Rotation at beginning, setting b to knot point 2");
+        b = trajectory_.trajectory.points.at(trajectory_.i_knotPoints.at(2));
+        ROS_INFO("b: %s", utility_.toString(b).c_str());
+      }
+      else
+      {
+        ROS_WARN("Only two knot points and the points are equal.");
+        ROS_WARN("Point 0: %s\nPoint at KP 1: %s", utility_.toString(a).c_str(), utility_.toString(b).c_str());
+      }
+    }
+
+
+    double thetaNec = utility_.findAngleFromAToB(a, b);   
     double deltaTheta = fabs( utility_.findDistanceBetweenAngles(currentTheta_, thetaNec) );
     ROS_INFO("thetaNec: %f currentTheta_: %f deltaTheta: %f", thetaNec, currentTheta_, deltaTheta);
 
