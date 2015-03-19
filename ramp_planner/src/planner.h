@@ -33,6 +33,7 @@ class Planner {
     // the trajectory's path,
     // and the resolution rate for the trajectories
     Population                          population_;
+    Population                          transPopulation_;
     const float                         resolutionRate_;
     
     // Hold the start and goal configurations
@@ -280,6 +281,8 @@ class Planner {
     const Population getTransPopAtPC(const Population pop, const RampTrajectory traj, const uint8_t pc);
     const Population getTransPop(const Population pop, const RampTrajectory movingOn);
 
+    const std::vector<RampTrajectory> stripTransitions(const std::vector<RampTrajectory> trjs) const;
+
 
 
     /***** Data members *****/
@@ -357,6 +360,7 @@ class Planner {
     bool stop_;
 
 
+    ros::Time t_prevCC_;
     uint8_t pc_switch_;
 };
 
