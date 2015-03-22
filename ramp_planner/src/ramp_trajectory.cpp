@@ -5,6 +5,7 @@ RampTrajectory::RampTrajectory(const float resRate, unsigned int id) {
   msg_.feasible = true;
   msg_.fitness = -1;  
   msg_.t_firstCollision = ros::Duration(9999.f);
+  msg_.t_start          = ros::Duration(2.0f);
   msg_.resolutionRate = resRate;
 }
 
@@ -303,7 +304,7 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
  
   result<<"\nTrajectory ID: "<<msg_.id;
   result<<"\n Path: "<<bezierPath_.toString();
-  result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<(bool)msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
+  result<<"\n t_start: "<<msg_.t_start.toSec()<<" Fitness: "<<msg_.fitness<<" Feasible: "<<(bool)msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
 
   return result.str();
 }

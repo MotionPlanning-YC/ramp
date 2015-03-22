@@ -640,6 +640,10 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
     temp.msg_.fitness   = result.get(i).msg_.fitness;
     temp.msg_.feasible  = result.get(i).msg_.feasible;
 
+    temp.msg_.t_start   = ros::Duration(t_fixed_cc_);
+
+    ROS_INFO("Finished adapting trajectory %i, t_start: %f", i, temp.msg_.t_start.toSec());
+
     // Push onto updatedTrajecs
     updatedTrajecs.push_back(temp);
   } // end for
@@ -1256,6 +1260,9 @@ const bool Planner::checkIfSwitchCurveNecessary(const RampTrajectory from, const
 
 
 
+/*
+ * Difference between computeFullSwitch and switchTrajectory is the result contains the evaluation result
+ */
 const RampTrajectory Planner::computeFullSwitch(const RampTrajectory from, const RampTrajectory to) 
 {
   ROS_INFO("In Planner::computeFullSwitch");
@@ -1275,12 +1282,16 @@ const RampTrajectory Planner::computeFullSwitch(const RampTrajectory from, const
 
     // Evaluate T_new
     ramp_msgs::EvaluationRequest er = buildEvaluationRequest(T_new);
-    T_new = requestEvaluation(er);
-    T_new.transitionTraj_ = trajecs.at(0).msg_;
-    T_new.path_ = p;
+    T_new                           = requestEvaluation(er);
 
-    result = T_new;
-    result.transitionTraj_ = trajecs.at(0).msg_;
+    // Set misc members
+    T_new.transitionTraj_   = trajecs.at(0).msg_;
+    T_new.path_             = p;
+
+    // Set result
+    result                  = T_new;
+    result.transitionTraj_  = trajecs.at(0).msg_;
+
     ROS_INFO("After eval, T_new.path: %s", T_new.path_.toString().c_str());
   }
 
@@ -1388,12 +1399,15 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
       ROS_INFO("c_kp: %i", c_kp);
       ROS_INFO("c_kp: %i i_knotPoints.size(): %i", c_kp, (int)to.msg_.i_knotPoints.size());
 
-      full = switching.concatenate(to, c_kp);
-      full.path_ = to.path_;
+      full        = switching.concatenate(to, c_kp);
+      full.path_  = to.path_;
 
       ROS_INFO("full.path: %s", full.path_.toString().c_str());
       ROS_INFO("full.path after: %s", full.path_.toString().c_str());
     } // end if to's size > 2
+
+    switching.msg_.t_start  = ros::Duration(t);
+    full.msg_.t_start       = ros::Duration(t);
 
     result.push_back(switching);
     result.push_back(full);
@@ -1537,9 +1551,12 @@ const RampTrajectory Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr
   //std::cout<<"\nid: "<<id;
 
   
-  if(h_traj_req_->request(tr)) {
+  if(h_traj_req_->request(tr)) 
+  {
    
-    ROS_INFO("response.trajectory.size: %i", (int)tr.response.trajectory.trajectory.points.size());
+    ROS_INFO("response.trajectory.size: %i", 
+        (int)tr.response.trajectory.trajectory.points.size());
+
     // Set the actual trajectory msg
     result.msg_ = tr.response.trajectory;
     ROS_INFO("After set msg");
@@ -1566,7 +1583,7 @@ const RampTrajectory Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr
     ROS_ERROR("An error occurred when requesting a trajectory");
   }
 
-  //ROS_INFO("Exiting Planner::requestTrajectory");
+  ROS_INFO("Exiting Planner::requestTrajectory, t_start: %f", result.msg_.t_start.toSec());
   return result;
 }
 
@@ -2016,56 +2033,6 @@ const Population Planner::getTransPopAtPC(const Population pop, const RampTrajec
 
 
 
-/*
- * Remove transition trajectories and their curves from each trajectory
- */
-const std::vector<RampTrajectory> Planner::stripTransitions(const std::vector<RampTrajectory> trjs) const
-{
-  ROS_INFO("In stripTransitions");
-  std::vector<RampTrajectory> result = trjs;
-
-  ramp_msgs::RampTrajectory blank;
-  for(uint8_t i=0;i<trjs.size();i++)
-  {
-    ROS_INFO("trjs.at(i).transitionTraj_.trajectory.points.size(): %i", (int)trjs.at(i).transitionTraj_.trajectory.points.size());  
-    if(trjs.at(i).transitionTraj_.trajectory.points.size() > 0)
-    {
-      // Need to make a copy vector because of constness (I think? gives me an error for erase on result's vector) 
-      std::vector<trajectory_msgs::JointTrajectoryPoint> points = 
-        result.at(i).msg_.trajectory.points;
-      
-      // Erase points
-      points.erase( 
-        points.begin(),
-        points.begin()+trjs.at(i).transitionTraj_.trajectory.points.size());
-      
-      // ****
-      // TODO: Need to remove knot points for transitionTraj
-      // ****
-      
-      result.at(i).msg_.trajectory.points = points;
-
-      result.at(i).transitionTraj_ = blank;
-      
-      // If the trajectory has curves
-      if(trjs.at(i).msg_.curves.size() > 0)
-      {
-        ramp_msgs::MotionState ms_cp      = trjs.at(i).msg_.curves.at(0).controlPoints.at(1);
-        ramp_msgs::MotionState ms_pathKP  = trjs.at(i).path_.at(1).motionState_.msg_;
-        double dist = utility_.positionDistance(ms_cp.positions, ms_pathKP.positions);
-
-        // If the 2nd control points != the path's 2nd point, the first curve is a transition
-        if(fabs(dist) > 0.01)
-        {
-          result.at(i).msg_.curves.erase(result.at(i).msg_.curves.begin());
-        } // end if not the same point
-      } // end if has curves
-    } // end if has transition
-  } // end for
-
-  return result;
-} // End stripTransitions
-
 
 
 /** This methed runs the tasks needed to do a control cycle */
@@ -2122,13 +2089,14 @@ void Planner::doControlCycle() {
   population_ = evaluatePopulation(population_);
   ROS_INFO("After adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", 
       population_.size(), 
-      population_.toString().c_str());
+      population_.fitnessFeasibleToString().c_str());
+
   
   
   ROS_INFO("Calling getTransPop");
   transPopulation_ = getTransPop(population_, movingOn_);
   transPopulation_ = evaluatePopulation(transPopulation_);
-  ROS_INFO("New transPop: %s", transPopulation_.toString().c_str());
+  ROS_INFO("New transPop: %s", transPopulation_.fitnessFeasibleToString().c_str());
 
 
   // If error reduction

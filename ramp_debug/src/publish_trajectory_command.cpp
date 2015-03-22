@@ -420,6 +420,16 @@ int main(int argc, char** argv) {
   std::cout<<"\n\nPress Enter to Publish population\n";
   std::cin.get();
 
+
+  er.request.trajectory.t_start = ros::Duration(2.0);
+  
+  std::cout<<"\nSetting t_start to "<<2.0;
+  if(client_eval.call(er)) {
+    std::cout<<"\nEvaluated traj, fitness: "<<er.response.fitness;
+    std::cout<<"\nEvaluated traj, feasible: "<<er.response.feasible;
+  }
+
+
   // Create Population to send to trajectory_visualization
   ramp_msgs::Population pop;
   pop.population.push_back(tr.response.trajectory);

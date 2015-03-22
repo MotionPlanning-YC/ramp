@@ -281,8 +281,6 @@ class Planner {
     const Population getTransPopAtPC(const Population pop, const RampTrajectory traj, const uint8_t pc);
     const Population getTransPop(const Population pop, const RampTrajectory movingOn);
 
-    const std::vector<RampTrajectory> stripTransitions(const std::vector<RampTrajectory> trjs) const;
-
 
 
     /***** Data members *****/
