@@ -24,7 +24,6 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   // If there are obstacles, do collision detection
   if(received_ob) {
     cd.trajectory_  = req.trajectory;
-    cd.t_start_     = req.t_start;
     qr = cd.perform();
   }
   // Else, set collision to false
@@ -35,13 +34,13 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
 
   // Set response
   res.feasible = !qr.collision_;
-  res.t_firstCollision = qr.t_firstCollision_;
+  res.t_firstCollision = ros::Duration(qr.t_firstCollision_);
 
   // Do fitness
   res.fitness = ev.performFitness(qr);
 
   ROS_INFO("Robot %i Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", cd.id_, res.fitness, res.feasible ?  
-      "True" : "False", res.t_firstCollision);
+      "True" : "False", res.t_firstCollision.toSec());
   return true;
 } //End handleRequest
 

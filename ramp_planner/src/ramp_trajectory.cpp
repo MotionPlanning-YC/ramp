@@ -4,7 +4,7 @@ RampTrajectory::RampTrajectory(const float resRate, unsigned int id) {
   msg_.id = id;
   msg_.feasible = true;
   msg_.fitness = -1;  
-  msg_.t_firstCollision = 9999.f;
+  msg_.t_firstCollision = ros::Duration(9999.f);
   msg_.resolutionRate = resRate;
 }
 

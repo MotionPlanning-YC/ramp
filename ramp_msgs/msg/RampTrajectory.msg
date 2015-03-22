@@ -8,5 +8,7 @@ float32 resolutionRate
 bool feasible
 float32 fitness
 
-float32 t_firstCollision
+duration t_firstCollision
 int8 i_subPopulation
+
+duration t_start

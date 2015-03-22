@@ -721,7 +721,6 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
   {
     result.request.currentTheta = latestUpdate_.msg_.positions.at(2);
   }
-  result.request.t_start      = controlCycle_.toSec();
 
   return result;
 } // End buildEvaluationRequest
@@ -750,10 +749,10 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
  
 
   if(!population_.get(population_.calcBestIndex()).msg_.feasible && 
-      (population_.get(population_.calcBestIndex()).msg_.t_firstCollision < D_)) 
+      (population_.get(population_.calcBestIndex()).msg_.t_firstCollision.toSec() < D_)) 
   {
     ROS_WARN("Imminent Collision Robot: %i t_firstCollision: %f", id_, 
-        population_.get(population_.calcBestIndex()).msg_.t_firstCollision);
+        population_.get(population_.calcBestIndex()).msg_.t_firstCollision.toSec());
     h_parameters_.setImminentCollision(true); 
   } 
   else 
@@ -1276,7 +1275,6 @@ const RampTrajectory Planner::computeFullSwitch(const RampTrajectory from, const
 
     // Evaluate T_new
     ramp_msgs::EvaluationRequest er = buildEvaluationRequest(T_new);
-    er.request.t_start = planningCycle_.toSec();
     T_new = requestEvaluation(er);
     T_new.transitionTraj_ = trajecs.at(0).msg_;
     T_new.path_ = p;
@@ -2220,12 +2218,12 @@ void Planner::sendBest() {
 
     // If infeasible and too close to obstacle, 
     // Stop the robot by sending a blank trajectory
-    if(!best.msg_.feasible && (best.msg_.t_firstCollision < 3.f)) 
+    if(!best.msg_.feasible && (best.msg_.t_firstCollision.toSec() < 3.f)) 
     {
       std::cout<<"\nCollision within 3 seconds! Stopping robot!\n";
     }
     else if(best.msg_.feasible) {
-      ROS_INFO("Best trajectory is not feasible! Time until collision: %f", best.msg_.t_firstCollision);
+      ROS_INFO("Best trajectory is not feasible! Time until collision: %f", best.msg_.t_firstCollision.toSec());
     }
     
     h_control_->send(best.msg_);
@@ -2298,7 +2296,7 @@ const bool Planner::compareSwitchToBest(const RampTrajectory traj, const Populat
 
   if(!bestT.msg_.feasible) 
   {
-    t_new += (1000. / bestT.msg_.t_firstCollision);
+    t_new += (1000. / bestT.msg_.t_firstCollision.toSec());
   }
 
   // Best fitness adjusted for t_new

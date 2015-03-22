@@ -1,9 +1,8 @@
 RampTrajectory trajectory
 float64 currentTheta
-float64 t_start
 
 ---
 
 float64 fitness
 bool feasible
-float32 t_firstCollision
+duration t_firstCollision
