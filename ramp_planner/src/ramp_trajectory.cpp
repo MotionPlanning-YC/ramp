@@ -220,9 +220,23 @@ const RampTrajectory RampTrajectory::getSubTrajectoryPost(const double t) const
  */
 const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, const uint8_t kp) const
 {
-  ROS_INFO("In RampTrajectory::concatenate");
+  //ROS_INFO("In RampTrajectory::concatenate");
   RampTrajectory result = clone();
   uint8_t c_kp = kp;
+
+
+  /*
+   * Test that the last point in this trajectory matches the first point in traj
+   */
+  trajectory_msgs::JointTrajectoryPoint last  = msg_.trajectory.points.at(
+                                                msg_.trajectory.points.size()-1);
+  trajectory_msgs::JointTrajectoryPoint first = traj.msg_.trajectory.points.at(0);
+  if( fabs(utility_.positionDistance(last.positions, first.positions)) > 0.01)
+  {
+    return traj;
+  }
+
+
 
   ros::Duration t_cycleTime(0.1);
   ros::Duration t_latest = msg_.trajectory.points.at(msg_.trajectory.points.size()-1).time_from_start;

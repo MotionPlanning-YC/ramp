@@ -57,6 +57,12 @@ const double Utility::findAngleFromAToB(const std::vector<float> a, const std::v
 const double Utility::findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const {
   double result;
 
+  // If the positions are the same, return the orientation the robot already has
+  if(fabs(positionDistance(a, b)) < 0.01 && a.size() > 2)
+  {
+    return a.at(2);
+  }
+
   // Find the distances in x,y directions and Euclidean distance
   double d_x = b.at(0) - a.at(0);
   double d_y = b.at(1) - a.at(1);

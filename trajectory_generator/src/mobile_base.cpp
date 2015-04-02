@@ -477,13 +477,14 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         // TODO: Make a method to return a BezierInitializer
         // TODO: Just use req_.bezierInfo?
         ramp_msgs::BezierInfo bi;
-        bi.segmentPoints  = segment_points;
-        bi.controlPoints  = req_.bezierInfo.at(i-1).controlPoints;
-        bi.ms_maxVA       = ms_maxVA;
-        bi.u_0            = req_.bezierInfo.at(i-1).u_0;
-        bi.u_dot_0        = req_.bezierInfo.at(i-1).u_dot_0;
-        bi.ms_begin       = p_copy.points.at(0).motionState;
-        bi.l              = lambda;
+        bi.segmentPoints    = segment_points;
+        bi.controlPoints    = req_.bezierInfo.at(i-1).controlPoints;
+        bi.ms_maxVA         = ms_maxVA;
+        bi.u_0              = req_.bezierInfo.at(i-1).u_0;
+        bi.u_dot_0          = req_.bezierInfo.at(i-1).u_dot_0;
+        bi.u_dot_max        = req_.bezierInfo.at(i-1).u_dot_max;
+        bi.ms_begin         = p_copy.points.at(0).motionState;
+        bi.l                = lambda;
 
         bc.init(bi, path_.points.at(0).motionState);
       } // end if bezierStart

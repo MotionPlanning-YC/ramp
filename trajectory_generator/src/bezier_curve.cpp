@@ -56,6 +56,7 @@ void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionSt
 
   u_0_      = bi.u_0;
   u_dot_0_  = bi.u_dot_0; 
+  u_dot_max_ = bi.u_dot_max;
 
   if(bi.controlPoints.size() > 0) {
     initControlPoints(bi.controlPoints.at(0));
@@ -268,14 +269,14 @@ const ramp_msgs::MotionState BezierCurve::getInitialState() {
 /** Returns true if u_dot satisfies the motion constraints 
  *  given a u value - they may be different when testing for u_dot_max */
 const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_x, const double u_y) const {
-  /*if(print_) {
+  //if(print_) {
     std::cout<<"\n\nTesting constraints for "<<u_dot;
     std::cout<<"\n(A_*u_x+C_)*u_dot: "<<(A_*u_x+C_)*u_dot<<" x_dot_max: "<<ms_max_.velocities.at(0);
     std::cout<<"\n(B_*u_y+D_)*u_dot: "<<(B_*u_y+D_)*u_dot<<" y_dot_max: "<<ms_max_.velocities.at(1);
-  }*/
+  //}
   
   // Square them in case they are negative 
-  // Add .0001 because I was getting 0.33 > 0.33
+  // Add .0001 because floating-point comparison inaccuracy errors 
   if( pow( (A_*u_x+C_)*u_dot,2) > pow((ms_max_.velocities.at(0))+0.001,2) ||
       pow( (B_*u_y+D_)*u_dot,2) > pow((ms_max_.velocities.at(1))+0.001,2) )
   {
@@ -289,10 +290,10 @@ const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_
 
 
 const double BezierCurve::getUDotMax(const double u_dot_0) const {
-  //std::cout<<"\n\n***** Calculating u_dot_max *****\n";
+  std::cout<<"\n\n***** Calculating u_dot_max *****\n";
   double x_dot_max = ms_max_.velocities.at(0);
   double y_dot_max = ms_max_.velocities.at(1);
-  //std::cout<<"\nx_dot_max: "<<x_dot_max<<" y_dot_max: "<<y_dot_max;
+  std::cout<<"\nx_dot_max: "<<x_dot_max<<" y_dot_max: "<<y_dot_max;
 
   // Initialize variables
   double u_dot_max;
@@ -302,10 +303,10 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const {
   double u_dot_max_y = B_*u_y + D_ == 0 ? 0 : fabs(x_dot_max / (B_*u_y+D_));
 
 
-  /*if(print_) {
+  //if(print_) {
     std::cout<<"\nu_x: "<<u_x<<" u_y: "<<u_y;
     std::cout<<"\nu_dot_max_x: "<<u_dot_max_x<<" u_dot_max_y: "<<u_dot_max_y;
-  }*/
+  //}
 
   // Set a greater and lesser value
   double greater, lesser;
@@ -466,11 +467,20 @@ void BezierCurve::initReflexxes() {
   }
 
   double u_dot_max = getUDotMax(u_dot_0);
+  if(u_dot_max_ != 0)
+  {
+    u_dot_max  = u_dot_max_;
+  }
+  else
+  {
+    u_dot_max_ = u_dot_max;
+  }
+  ROS_INFO("u_dot_max: %f u_dot_max_: %f", u_dot_max, u_dot_max_);
 
 
   // Set the position and velocity Reflexxes variables
   reflexxesData_.inputParameters->CurrentPositionVector->VecData[0]     = u_0_;
-  reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]     = u_dot_0_;
+  reflexxesData_.inputParameters->CurrentVelocityVector->VecData[0]     = u_0_ > 0 ? u_dot_max_ : u_dot_0_;
   reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]         = u_dot_max;
 
   // Set u max acceleration
@@ -501,10 +511,9 @@ void BezierCurve::initReflexxes() {
     reflexxesData_.inputParameters->MaxVelocityVector->VecData[0];
  
 
-  if(print_) {
+  //if(print_) {
     printReflexxesInfo();
-    std::cin.get();
-  }
+  //}
 
 
   reflexxesData_.resultValue = 0;
@@ -825,12 +834,14 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
   // Velocity
   double x_dot = ((A_*u) + C_)*u_dot;
   double y_dot = (x_dot*(B_*u+D_)) / (A_*u+C_);
+  ROS_INFO("theta_prev: %f", theta_prev_);
+  ROS_INFO("utility_.findDistanceBetweenAngles(theta_prev_, theta): %f", utility_.findDistanceBetweenAngles(theta_prev_, theta));
   double theta_dot      = utility_.findDistanceBetweenAngles(theta_prev_, theta) / CYCLE_TIME_IN_SECONDS;
 
   // Acceleration
   double x_dot_dot = (x_dot - x_dot_prev_) / CYCLE_TIME_IN_SECONDS;
   double y_dot_dot = (y_dot - y_dot_prev_) / CYCLE_TIME_IN_SECONDS;
-  double theta_dot_dot  = (theta_dot - theta_dot_prev_) / CYCLE_TIME_IN_SECONDS;
+  double theta_dot_dot  = utility_.findDistanceBetweenAngles(theta_dot, theta_dot_prev_) / CYCLE_TIME_IN_SECONDS;
     //double x_dot_dot = u_dot_dot*(A_*u+C_) + A_*u_dot;
     //double y_dot_dot = u_dot_dot*(B_*u+D_) + B_*u_dot;
 
@@ -843,13 +854,13 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
   theta_prev_     = theta;
   theta_dot_prev_ = theta_dot;
   
-  if(print_) {
+  //if(print_) {
     printf("\n");
     ROS_INFO("u: %f u_dot: %f u_dot_dot: %f", u, u_dot, u_dot_dot);
     ROS_INFO("x: %f             y: %f", x, y);
-    ROS_INFO("x_dot: %f         y_dot: %f", x_dot, y_dot);
-    ROS_INFO("x_dot_dot: %f     y_dot_dot: %f", x_dot_dot, y_dot_dot);
-  }
+    ROS_INFO("x_dot: %f         y_dot: %f       theta_dot: %f", x_dot, y_dot, theta_dot);
+    ROS_INFO("x_dot_dot: %f     y_dot_dot: %f       theta_dot_dot: %f", x_dot_dot, y_dot_dot, theta_dot_dot);
+  //}
 
   // Push values onto MotionState
   result.positions.push_back(x);
