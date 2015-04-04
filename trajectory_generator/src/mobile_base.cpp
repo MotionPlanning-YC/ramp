@@ -386,23 +386,23 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
   // Set the index of which knot point to stop at
   //int stop = (req_.type == TRANSITION) ? 3 : 2; 
-  int stop = req_.bezierInfo.size()+1;
+  int stop = req_.bezierCurves.size()+1;
   //std::cout<<"\nstop: "<<stop;
 
 
   // Find the first segment point for the curve
   // Increment index until the two points are different
-  bool differentPoint = utility_.positionDistance(req_.bezierInfo.at(0).segmentPoints.at(0).positions, 
-          req_.bezierInfo.at(0).segmentPoints.at(1).positions) > 0.01;
+  bool differentPoint = utility_.positionDistance(req_.bezierCurves.at(0).segmentPoints.at(0).positions, 
+          req_.bezierCurves.at(0).segmentPoints.at(1).positions) > 0.01;
   int inc = 2;
   while(!differentPoint && inc < p_copy.points.size()) {
     /*std::cout<<"\nPoints 0 and 1 are the same";
     std::cout<<"\nPath: "<<utility_.toString(p)<<"\n";
-    std::cout<<"\nSegment point 0: "<<utility_.toString(req_.bezierInfo.at(0).segmentPoints.at(0));
-    std::cout<<"\nSegment point 1: "<<utility_.toString(req_.bezierInfo.at(0).segmentPoints.at(1))<<"\n";*/
-    req_.bezierInfo.at(0).segmentPoints.at(1) = p_copy.points.at(inc).motionState;
-    differentPoint = utility_.positionDistance(req_.bezierInfo.at(0).segmentPoints.at(0).positions, 
-          req_.bezierInfo.at(0).segmentPoints.at(1).positions) > 0.01;
+    std::cout<<"\nSegment point 0: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(0));
+    std::cout<<"\nSegment point 1: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1))<<"\n";*/
+    req_.bezierCurves.at(0).segmentPoints.at(1) = p_copy.points.at(inc).motionState;
+    differentPoint = utility_.positionDistance(req_.bezierCurves.at(0).segmentPoints.at(0).positions, 
+          req_.bezierCurves.at(0).segmentPoints.at(1).positions) > 0.01;
     //std::cin.get();
     inc++;
 
@@ -415,18 +415,18 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
   // Find the second segment point for the curve
   // Increment index until the two points are different
-  differentPoint = utility_.positionDistance(req_.bezierInfo.at(0).segmentPoints.at(1).positions, 
-          req_.bezierInfo.at(0).segmentPoints.at(2).positions) > 0.01;
+  differentPoint = utility_.positionDistance(req_.bezierCurves.at(0).segmentPoints.at(1).positions, 
+          req_.bezierCurves.at(0).segmentPoints.at(2).positions) > 0.01;
   inc = 3;
   while(!differentPoint && inc < p_copy.points.size()) {
     /*std::cout<<"\nPoints 1 and 2 are the same";
     std::cout<<"\nPath: "<<utility_.toString(p);
-    std::cout<<"\nSegment point 1: "<<utility_.toString(req_.bezierInfo.at(0).segmentPoints.at(1));
-    std::cout<<"\nSegment point 2: "<<utility_.toString(req_.bezierInfo.at(0).segmentPoints.at(2))<<"\n";*/
-    req_.bezierInfo.at(0).segmentPoints.at(2) = p_copy.points.at(inc).motionState;
+    std::cout<<"\nSegment point 1: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1));
+    std::cout<<"\nSegment point 2: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(2))<<"\n";*/
+    req_.bezierCurves.at(0).segmentPoints.at(2) = p_copy.points.at(inc).motionState;
     //std::cin.get();
-    differentPoint = utility_.positionDistance(req_.bezierInfo.at(0).segmentPoints.at(1).positions, 
-          req_.bezierInfo.at(0).segmentPoints.at(2).positions) > 0.01;
+    differentPoint = utility_.positionDistance(req_.bezierCurves.at(0).segmentPoints.at(1).positions, 
+          req_.bezierCurves.at(0).segmentPoints.at(2).positions) > 0.01;
     inc++;
 
     if(inc == p_copy.points.size()) {
@@ -444,10 +444,10 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     std::cout<<"\n---i: "<<(int)i<<"---\n";
 
     // Check that all of the points are different
-    if(utility_.positionDistance(req_.bezierInfo.at(i-1).segmentPoints.at(0).positions, 
-          req_.bezierInfo.at(i-1).segmentPoints.at(1).positions) > 0.01 &&
-        (utility_.positionDistance(req_.bezierInfo.at(i-1).segmentPoints.at(1).positions, 
-          req_.bezierInfo.at(i-1).segmentPoints.at(2).positions) > 0.01) )
+    if(utility_.positionDistance(req_.bezierCurves.at(i-1).segmentPoints.at(0).positions, 
+          req_.bezierCurves.at(i-1).segmentPoints.at(1).positions) > 0.01 &&
+        (utility_.positionDistance(req_.bezierCurves.at(i-1).segmentPoints.at(1).positions, 
+          req_.bezierCurves.at(i-1).segmentPoints.at(2).positions) > 0.01) )
     {
       ROS_INFO("In if");
 
@@ -456,7 +456,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
       // Set segment points
       std::vector<ramp_msgs::MotionState> segment_points = 
-        req_.bezierInfo.at(i-1).segmentPoints;
+        req_.bezierCurves.at(i-1).segmentPoints;
       
       double theta = utility_.findAngleFromAToB(
           segment_points.at(0).positions, segment_points.at(1).positions);
@@ -464,25 +464,25 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // If we are starting with a curve
       // For transition trajectories, the segment points are the 
       // control points, so we have all the info now
-      if(req_.bezierInfo.at(0).u_0 > 0 && i==1) 
+      if(req_.bezierCurves.at(0).u_0 > 0 && i==1) 
       {
         std::cout<<"\nIn if transition or bezierStart\n";
         
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
         
-        double lambda = (req_.bezierInfo.at(i-1).controlPoints.size() > 0) ?  
-          req_.bezierInfo.at(i-1).l : getControlPointLambda(segment_points);
+        double lambda = (req_.bezierCurves.at(i-1).controlPoints.size() > 0) ?  
+          req_.bezierCurves.at(i-1).l : getControlPointLambda(segment_points);
 
 
         // TODO: Make a method to return a BezierInitializer
-        // TODO: Just use req_.bezierInfo?
-        ramp_msgs::BezierInfo bi;
+        // TODO: Just use req_.bezierCurves?
+        ramp_msgs::BezierCurve bi;
         bi.segmentPoints    = segment_points;
-        bi.controlPoints    = req_.bezierInfo.at(i-1).controlPoints;
+        bi.controlPoints    = req_.bezierCurves.at(i-1).controlPoints;
         bi.ms_maxVA         = ms_maxVA;
-        bi.u_0              = req_.bezierInfo.at(i-1).u_0;
-        bi.u_dot_0          = req_.bezierInfo.at(i-1).u_dot_0;
-        bi.u_dot_max        = req_.bezierInfo.at(i-1).u_dot_max;
+        bi.u_0              = req_.bezierCurves.at(i-1).u_0;
+        bi.u_dot_0          = req_.bezierCurves.at(i-1).u_dot_0;
+        bi.u_dot_max        = req_.bezierCurves.at(i-1).u_dot_max;
         bi.ms_begin         = p_copy.points.at(0).motionState;
         bi.l                = lambda;
 
@@ -496,16 +496,16 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         ROS_INFO("In else a normal trajectory");
 
         // Get lambda value for segment points
-        double lambda = (req_.bezierInfo.at(i-1).controlPoints.size() > 0) ?  req_.bezierInfo.at(i-1).l :
+        double lambda = (req_.bezierCurves.at(i-1).controlPoints.size() > 0) ?  req_.bezierCurves.at(i-1).l :
                                                         getControlPointLambda(segment_points);
         ROS_INFO("lambda: %f", lambda);
 
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
 
         // TODO: Make a method to return a BezierInitializer
-        ramp_msgs::BezierInfo bi;
+        ramp_msgs::BezierCurve bi;
         bi.segmentPoints  = segment_points;
-        bi.controlPoints  = req_.bezierInfo.at(i-1).controlPoints;
+        bi.controlPoints  = req_.bezierCurves.at(i-1).controlPoints;
         bi.l              = lambda;
         bi.ms_maxVA       = ms_maxVA;
 
@@ -558,7 +558,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     }
 
     // If we are switching and have more than 1 curve
-    else if(req_.bezierInfo.size() > 1) 
+    else if(req_.bezierCurves.size() > 1) 
     {
       ROS_INFO("In else if bezierInfo.size()>1");
 
@@ -579,7 +579,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     }
 
     // If already moving on curve
-    else if(req_.bezierInfo.at(0).u_0 > 0) 
+    else if(req_.bezierCurves.at(0).u_0 > 0) 
     {
       ROS_INFO("In else if bezierStart");
       // Commented out when gen == 23 for the switch. at CC after restart, it was removing 1,1 and 3.5,2
@@ -591,11 +591,11 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     }
 
     else if(utility_.positionDistance( p.points.at(1).motionState.positions, 
-          req_.bezierInfo.at(0).segmentPoints.at(1).positions) > 0.01)
+          req_.bezierCurves.at(0).segmentPoints.at(1).positions) > 0.01)
     {
       ROS_INFO("In else if Knot Point 1 != segment point 1");
       ROS_INFO("Knot Point 1: %s\nSegment Point 1: %s", utility_.toString(p.points.at(1).motionState).c_str(), 
-          utility_.toString(req_.bezierInfo.at(0).segmentPoints.at(1)).c_str());
+          utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1)).c_str());
       // Don't erase anything
       // Insert
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
@@ -943,13 +943,12 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
 
       // Create a BezierInfo for the curve to return with the trajec
-      ramp_msgs::BezierInfo bi;
+      ramp_msgs::BezierCurve bi;
       bi.segmentPoints  = curves.at(c).segmentPoints_;
       bi.controlPoints  = curves.at(c).controlPoints_;
       bi.ms_maxVA       = curves.at(c).ms_max_;
       bi.ms_initialVA   = curves.at(c).ms_init_;
-      bi.numOfPoints    = curves.at(c).points_.size();
-      bi.u_0            = req_.bezierInfo.at(c).u_0;
+      bi.u_0            = req_.bezierCurves.at(c).u_0;
       bi.u_dot_0        = curves.at(c).u_dot_0_;
       bi.l              = curves.at(c).l_;
       bi.u_target       = curves.at(c).u_target_;

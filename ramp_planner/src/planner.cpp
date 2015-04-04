@@ -346,7 +346,7 @@ const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionSt
 
 // 1 if before curve, 2 if on curve, 3 if past curve 
 // TODO: Check for the 2nd segment as well?
-const int Planner::estimateIfOnCurve(const MotionState ms, const ramp_msgs::BezierInfo curve) const {
+const int Planner::estimateIfOnCurve(const MotionState ms, const ramp_msgs::BezierCurve curve) const {
   ROS_INFO("In estimateIfOnCurve");
   ROS_INFO("ms: %s", ms.toString().c_str());
   ROS_INFO("curve: %s", utility_.toString(curve).c_str());
@@ -424,9 +424,9 @@ const int Planner::estimateIfOnCurve(const MotionState ms, const ramp_msgs::Bezi
 
 
 
-const ramp_msgs::BezierInfo Planner::handleCurveEnd(const RampTrajectory traj) const 
+const ramp_msgs::BezierCurve Planner::handleCurveEnd(const RampTrajectory traj) const 
 {
-  ramp_msgs::BezierInfo result;
+  ramp_msgs::BezierCurve result;
 
   // If there are 2 curves, set the next one up 
   // Currently, the adaptive control cycles always end at
@@ -477,7 +477,7 @@ const double Planner::updateCurvePos(const RampTrajectory traj, const ros::Durat
   ROS_INFO("d: %f", d.toSec());
   //ROS_INFO("startPlanning_: %s", startPlanning_.toString().c_str());
   //ROS_INFO("traj: %s", traj.toString().c_str());
-  ramp_msgs::BezierInfo curve = traj.msg_.curves.at(0); 
+  ramp_msgs::BezierCurve curve = traj.msg_.curves.at(0); 
   double result = curve.u_0;
 
   // if u_0==0 then estimateIfOnCurve returned 2 - already on curve
@@ -526,11 +526,11 @@ const double Planner::updateCurvePos(const RampTrajectory traj, const ros::Durat
 
 /** Updates the curve u_0 and ms_begin */
 // TODO: Only need to update the bestTrajec's curve
-const std::vector<ramp_msgs::BezierInfo> Planner::adaptCurves(const Population pop, const MotionState ms, const ros::Duration d) const {
+const std::vector<ramp_msgs::BezierCurve> Planner::adaptCurves(const Population pop, const MotionState ms, const ros::Duration d) const {
   ROS_INFO("In Planner::adaptCurves");
 
-  std::vector<ramp_msgs::BezierInfo> result;
-  ramp_msgs::BezierInfo blank;
+  std::vector<ramp_msgs::BezierCurve> result;
+  ramp_msgs::BezierCurve blank;
 
   // Go through each trajectory 
   for(uint16_t i=0;i<pop.size();i++) 
@@ -543,7 +543,7 @@ const std::vector<ramp_msgs::BezierInfo> Planner::adaptCurves(const Population p
       ROS_INFO("In if trajectory has curve");
 
       // Set curve
-      ramp_msgs::BezierInfo curve = pop.get(i).msg_.curves.size() > 1 ? pop.get(i).msg_.curves.at(1) :
+      ramp_msgs::BezierCurve curve = pop.get(i).msg_.curves.size() > 1 ? pop.get(i).msg_.curves.at(1) :
                                                                         pop.get(i).msg_.curves.at(0) ;
       ROS_INFO("Set curve to: %s", utility_.toString(curve).c_str());
 
@@ -609,7 +609,7 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
  
   // Adapt the paths and curves
   std::vector<Path> paths                   = adaptPaths  (pop, ms, d);
-  std::vector<ramp_msgs::BezierInfo> curves = adaptCurves (pop, ms, d);
+  std::vector<ramp_msgs::BezierCurve> curves = adaptCurves (pop, ms, d);
 
   result.paths_ = paths;
 
@@ -623,7 +623,7 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
     RampTrajectory tempTraj = pop.get(i);
     ROS_INFO("Getting trajectory %i", (int)i);
 
-    std::vector<ramp_msgs::BezierInfo> c;
+    std::vector<ramp_msgs::BezierCurve> c;
     c.push_back(curves.at(i));
 
     ROS_INFO("Before buildTR");
@@ -664,7 +664,7 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
 
 // TODO: Clean up
 /** Build a TrajectoryRequest srv */
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path, const std::vector<ramp_msgs::BezierInfo> curves, const int id) const {
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path, const std::vector<ramp_msgs::BezierCurve> curves, const int id) const {
   //ROS_INFO("In buildTrajectoryRequest");
   ramp_msgs::TrajectoryRequest result;
 
@@ -681,19 +681,19 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
     {
       if(path.size() > 2) 
       {
-        ramp_msgs::BezierInfo temp;
+        ramp_msgs::BezierCurve temp;
         
         temp.segmentPoints.push_back( path.all_.at(0).motionState_.msg_ );
         temp.segmentPoints.push_back( path.all_.at(1).motionState_.msg_ );
         temp.segmentPoints.push_back( path.all_.at(2).motionState_.msg_ );
         
-        result.request.bezierInfo.push_back(temp);
+        result.request.bezierCurves.push_back(temp);
       }
     }
     else 
     {
       //ROS_INFO("In else if path.size < 3");
-      result.request.bezierInfo = curves;
+      result.request.bezierCurves = curves;
     } // end else
   } // end if
 
@@ -704,7 +704,7 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
 
 
 const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path, const int id) const {
-  std::vector<ramp_msgs::BezierInfo> curves;
+  std::vector<ramp_msgs::BezierCurve> curves;
   return buildTrajectoryRequest(path, curves, id);
 }
 
@@ -1072,8 +1072,8 @@ void Planner::setMi() {
 
 
 /** Pass in entire RampTrajectory because we need the path info */
-const ramp_msgs::BezierInfo Planner::replanCurve(const RampTrajectory trajec, const MotionState ms_start) const {
-  ramp_msgs::BezierInfo result = trajec.msg_.curves.at(0);
+const ramp_msgs::BezierCurve Planner::replanCurve(const RampTrajectory trajec, const MotionState ms_start) const {
+  ramp_msgs::BezierCurve result = trajec.msg_.curves.at(0);
 
   double delta_x = trajec.path_.all_.at(1).motionState_.msg_.positions.at(0) - result.segmentPoints.at(0).positions.at(0);
   double delta_y = trajec.path_.all_.at(1).motionState_.msg_.positions.at(1) - result.segmentPoints.at(0).positions.at(1);

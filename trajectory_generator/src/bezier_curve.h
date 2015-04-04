@@ -11,7 +11,7 @@ public:
   BezierCurve();
   ~BezierCurve();
 
-  void init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionState ms_current);
+  void init(const ramp_msgs::BezierCurve bi, const ramp_msgs::MotionState ms_current);
  
  
 

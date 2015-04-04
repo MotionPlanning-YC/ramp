@@ -37,7 +37,7 @@ void BezierCurve::dealloc() {
 
 
 
-void BezierCurve::init(const ramp_msgs::BezierInfo bi, const ramp_msgs::MotionState ms_current) {
+void BezierCurve::init(const ramp_msgs::BezierCurve bi, const ramp_msgs::MotionState ms_current) {
   segmentPoints_  = bi.segmentPoints;
   l_              = bi.l;
   theta_prev_     = utility_.findAngleFromAToB(

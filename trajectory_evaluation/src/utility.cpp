@@ -153,7 +153,8 @@ const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::MotionState>
 const ramp_msgs::Path Utility::getPath(const std::vector<ramp_msgs::KnotPoint> kps) const {
   ramp_msgs::Path result;
 
-  for(unsigned int i=0;i<kps.size();i++) {
+  for(unsigned int i=0;i<kps.size();i++) 
+  {
     result.points.push_back(kps.at(i));
   }
 
@@ -248,7 +249,7 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
 }
     
 
-const std::string Utility::toString(const ramp_msgs::BezierInfo bi) const {
+const std::string Utility::toString(const ramp_msgs::BezierCurve bi) const {
   std::ostringstream result;
 
   result<<"\nSegment Points: ";
@@ -260,8 +261,6 @@ const std::string Utility::toString(const ramp_msgs::BezierInfo bi) const {
   for(uint8_t i=0;i<bi.controlPoints.size();i++) {
     result<<"\n"<<toString(bi.controlPoints.at(i));
   }
-
-  result<<"\nTotal number of points: "<<bi.numOfPoints;
 
   result<<"\nms_maxVA: "<<toString(bi.ms_maxVA);
   result<<"\nms_initialVA: "<<toString(bi.ms_initialVA);

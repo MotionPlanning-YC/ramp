@@ -275,7 +275,7 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
 
 
 
-const std::string Utility::toString(const ramp_msgs::BezierInfo bi) const {
+const std::string Utility::toString(const ramp_msgs::BezierCurve bi) const {
   std::ostringstream result;
 
   result<<"\nSegment points:";
@@ -288,7 +288,7 @@ const std::string Utility::toString(const ramp_msgs::BezierInfo bi) const {
     result<<"\n"<<i<<": "<<toString(bi.controlPoints.at(i));
   }
 
-  result<<"\nTotal number of points: "<<bi.numOfPoints;
+  result<<"\nTotal number of points: "<<bi.points.size();
 
   result<<"\nInitial motion state: "<<toString(bi.ms_initialVA);
   result<<"\nMax motion state: "<<toString(bi.ms_maxVA);

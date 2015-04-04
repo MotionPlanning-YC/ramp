@@ -6,7 +6,7 @@
 #include "ramp_msgs/TrajectoryRequest.h"
 #include "ramp_msgs/EvaluationRequest.h"
 #include "ramp_msgs/Population.h"
-#include "ramp_msgs/BezierInfo.h"
+#include "ramp_msgs/BezierCurve.h"
 
 Utility u;
 
@@ -145,8 +145,8 @@ int main(int argc, char** argv) {
   /**************** Create Curves ********************/
   /***************************************************/
  
-  // Make BezierInfo from Path
-  ramp_msgs::BezierInfo bi;
+  // Make BezierCurve from Path
+  ramp_msgs::BezierCurve bi;
   
   ramp_msgs::MotionState sp0;
   //sp0 = p.points.at(1).motionState;
@@ -289,7 +289,6 @@ int main(int argc, char** argv) {
   bi.u_dot_max = 0.661828; 
   bi.l = 0.85;
 
-  bi.numOfPoints = 16;
 
 
   /**************************************************/
@@ -297,7 +296,7 @@ int main(int argc, char** argv) {
   /**************************************************/
 
   // Curve 1
-  ramp_msgs::BezierInfo bi2;
+  ramp_msgs::BezierCurve bi2;
 
 
   // Segment points
@@ -354,8 +353,6 @@ int main(int argc, char** argv) {
   bi2.u_dot_0 = 0.552394;
   bi2.u_target = 0.959989;
 
-  bi2.numOfPoints = 19;
-
 
   ramp_msgs::MotionState ms_initVA2;
   ms_initVA2.velocities.push_back(0.163205);
@@ -386,7 +383,7 @@ int main(int argc, char** argv) {
 
 
 
-  std::vector<ramp_msgs::BezierInfo> curves;
+  std::vector<ramp_msgs::BezierCurve> curves;
   curves.push_back(bi);
   //curves.push_back(bi2);
   
@@ -394,7 +391,7 @@ int main(int argc, char** argv) {
   tr.request.path = p;
   tr.request.type = PARTIAL_BEZIER;
   tr.request.print = true;
-  tr.request.bezierInfo = curves;
+  tr.request.bezierCurves = curves;
 
   std::cout<<"\nPress Enter to request and send the trajectory\n";
   std::cin.get();

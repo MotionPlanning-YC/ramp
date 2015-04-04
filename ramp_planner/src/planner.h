@@ -178,11 +178,11 @@ class Planner {
                                                           const MotionState start, 
                                                           const ros::Duration dur) const;
 
-    const std::vector<ramp_msgs::BezierInfo> adaptCurves( const Population pop,
+    const std::vector<ramp_msgs::BezierCurve> adaptCurves( const Population pop,
                                                                           const MotionState ms,
                                                                           const ros::Duration d) const;
 
-    const ramp_msgs::BezierInfo               handleCurveEnd(const RampTrajectory traj) const;
+    const ramp_msgs::BezierCurve               handleCurveEnd(const RampTrajectory traj) const;
 
     // Returns a unique id for a RampTrajectory 
     const unsigned int getIRT();
@@ -197,7 +197,7 @@ class Planner {
 
     // Msg building methods
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
-              const Path path, const std::vector<ramp_msgs::BezierInfo> curves,
+              const Path path, const std::vector<ramp_msgs::BezierCurve> curves,
               const int id=-1) const;
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
               const Path path, const int id=0) const;
@@ -235,7 +235,7 @@ class Planner {
 
 
 
-    const ramp_msgs::BezierInfo replanCurve(const RampTrajectory trajec, const MotionState ms_start) const;
+    const ramp_msgs::BezierCurve replanCurve(const RampTrajectory trajec, const MotionState ms_start) const;
     const RampTrajectory replanTrajec(const RampTrajectory trajec, const MotionState ms_start);
     const std::vector<RampTrajectory> replanTrajecs(const std::vector<RampTrajectory> trajecs, const MotionState ms_start);
     const std::vector<RampTrajectory> getTrajectories(const std::vector<Path> p);
@@ -249,7 +249,7 @@ class Planner {
 
     // 1 if before, 2 if on curve, 3 if past curve 
     const int estimateIfOnCurve(const MotionState ms, 
-                                const ramp_msgs::BezierInfo curve) const;
+                                const ramp_msgs::BezierCurve curve) const;
 
     void restartControlCycle(const double t=2.0);
 

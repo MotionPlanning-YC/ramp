@@ -348,7 +348,7 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
 
 
 
-const std::string Utility::toString(const ramp_msgs::BezierInfo bi) const {
+const std::string Utility::toString(const ramp_msgs::BezierCurve bi) const {
 std::ostringstream result;
 
   result<<"\nSegment Points: ";
@@ -360,8 +360,6 @@ std::ostringstream result;
   for(uint8_t i=0;i<bi.controlPoints.size();i++) {
     result<<"\n"<<toString(bi.controlPoints.at(i));
   }
-
-  result<<"\nTotal number of points: "<<bi.numOfPoints;
 
   result<<"\nms_maxVA: "<<toString(bi.ms_maxVA);
   result<<"\nms_initialVA: "<<toString(bi.ms_initialVA);
@@ -397,8 +395,8 @@ const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request 
       result<<"Prediction";
   }
 
-  for(uint8_t i=0;i<tr.bezierInfo.size();i++) {
-    result<<"\n Curve "<<(int)i<<"\n"<<toString(tr.bezierInfo.at(i));
+  for(uint8_t i=0;i<tr.bezierCurves.size();i++) {
+    result<<"\n Curve "<<(int)i<<"\n"<<toString(tr.bezierCurves.at(i));
   }
   
   result<<"\n";

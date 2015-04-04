@@ -6,7 +6,7 @@
 #include "ramp_msgs/TrajectoryRequest.h"
 #include "ramp_msgs/EvaluationRequest.h"
 #include "ramp_msgs/Population.h"
-#include "ramp_msgs/BezierInfo.h"
+#include "ramp_msgs/BezierCurve.h"
 
 Utility u;
 
