@@ -14,7 +14,6 @@ class RampTrajectory {
     
     ramp_msgs::RampTrajectory msg_;
     Path                      path_;
-    Path                      bezierPath_;
     ramp_msgs::MotionState    ms_prevSP_;
     ramp_msgs::RampTrajectory transitionTraj_;
 

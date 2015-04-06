@@ -297,8 +297,9 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
     result<<"\n   "<<i<<":";
     
     unsigned int index = traj.i_knotPoints.at(i);
-    if(index > traj.trajectory.points.size()-1) {
-      ROS_ERROR("index: %i, traj.points.size(): %i", 
+    if(index > traj.trajectory.points.size()-1) 
+    {
+      ROS_ERROR("Utility::toString(const ramp_msgs::RampTrajectory): index: %i, traj.points.size(): %i", 
           (int)index, 
           (int)traj.trajectory.points.size());
     }

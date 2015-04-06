@@ -106,17 +106,19 @@ const RampTrajectory RampTrajectory::getSubTrajectory(const float t) const {
     //ROS_INFO("t: %f t_stop: %f", t, t_stop);
 
     uint8_t i_kp = 0;
-    for(float i=0.f;i<=t_stop+0.000001;i+=0.1f) { // TODO: i+=cycle_time
+    for(float i=0.f;i<=t_stop+0.000001;i+=0.1f) 
+    { 
       uint16_t index = floor(i*10.) < msg_.trajectory.points.size() ? floor(i*10) : 
         msg_.trajectory.points.size()-1;
 
       //ROS_INFO("index: %i size: %i", index, (int)msg_.trajectory.points.size());
-      rt.trajectory.points.push_back(msg_.trajectory.points.at(index));  // todo: i*1/cycle_time
-      if(msg_.i_knotPoints.at(i_kp) == index) {
+      rt.trajectory.points.push_back(msg_.trajectory.points.at(index)); 
+      if(msg_.i_knotPoints.at(i_kp) == index) 
+      {
         rt.i_knotPoints.push_back(index);
         i_kp++;
-      }
-    }
+      } // end if
+    } // end for
     
     // If the last point was not a knot point, make it one for the sub-trajectory
     if(rt.i_knotPoints.at( rt.i_knotPoints.size()-1 ) != rt.trajectory.points.size()-1)
@@ -134,7 +136,6 @@ const RampTrajectory RampTrajectory::getSubTrajectory(const float t) const {
 const RampTrajectory RampTrajectory::getSubTrajectoryPost(const double t) const
 {
   ROS_INFO("In RampTrajectory::getSubTrajectoryPost");
-  ROS_INFO("t: %f", t);
   RampTrajectory rt;
 
   double t_start = t;
@@ -154,34 +155,32 @@ const RampTrajectory RampTrajectory::getSubTrajectoryPost(const double t) const
   
   else
   {
-
-    //ROS_INFO("t: %f t_stop: %f", t, t_stop);
-
     rt.msg_.i_knotPoints.push_back(0);
-    uint8_t i_kp = 0;
-    
-    double t_stop = 
-      msg_.trajectory.points.at(msg_.trajectory.points.size()-1).time_from_start.toSec();
+    uint8_t i_kp = 1;
     
     // Push on all the points
-    for(float i=t_start;i<=t_stop;i+=0.1f) 
+    //for(float i=t_start;i<=t_stop;i+=0.1f) 
+    for(int i=floor(t_start*10.);i<msg_.trajectory.points.size();i++) 
     {
-      uint16_t index = floor(i*10.) < msg_.trajectory.points.size() ? floor(i*10) : 
-        msg_.trajectory.points.size()-1;
 
+      // Get point
+      trajectory_msgs::JointTrajectoryPoint p = msg_.trajectory.points.at(i);
+      
       // Adjust time
-      trajectory_msgs::JointTrajectoryPoint p = msg_.trajectory.points.at(index);
       p.time_from_start = ros::Duration(p.time_from_start.toSec() - t_start);
 
-      //ROS_INFO("index: %i size: %i", index, (int)msg_.trajectory.points.size());
+      // Add to trajectory
       rt.msg_.trajectory.points.push_back(p); 
-      if(msg_.i_knotPoints.at(i_kp) == index) 
+
+      // If it's a knot point, push on it's index
+      if(msg_.i_knotPoints.at(i_kp) == i) 
       {
-        rt.msg_.i_knotPoints.push_back(index);
+        rt.msg_.i_knotPoints.push_back(rt.msg_.trajectory.points.size()-1);
         i_kp++;
       }
     } // end for
-    
+
+
     // If the last point was not a knot point, make it one for the sub-trajectory
     if(rt.msg_.i_knotPoints.at( rt.msg_.i_knotPoints.size()-1 ) != rt.msg_.trajectory.points.size()-1)
     {
@@ -267,7 +266,7 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
     bp.push_back(kp);
   }
 
-  result.bezierPath_ = bp; 
+  //result.bezierPath_ = bp; 
 
   // Push on the target trajectory's Bezier curve
   for(uint8_t i_curve=0;i_curve<traj.msg_.curves.size();i_curve++) {
@@ -317,7 +316,8 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
   std::ostringstream result;
  
   result<<"\nTrajectory ID: "<<msg_.id;
-  result<<"\n Path: "<<bezierPath_.toString();
+  //result<<"\n Path: "<<bezierPath_.toString();
+  result<<"\n Path: "<<getPath().toString();
   result<<"\n t_start: "<<msg_.t_start.toSec()<<" Fitness: "<<msg_.fitness<<" Feasible: "<<(bool)msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
 
   return result.str();

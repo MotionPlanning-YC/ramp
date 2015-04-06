@@ -488,11 +488,10 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
         bc.init(bi, path_.points.at(0).motionState);
       } // end if bezierStart
-      
-
 
       // If a "normal" bezier trajectory,
-      else {
+      else 
+      {
         ROS_INFO("In else a normal trajectory");
 
         // Get lambda value for segment points
@@ -515,14 +514,19 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         ROS_INFO("Done initializing curve");
       } // end else "normal" trajectory
 
+
       // Verify the curve
-      if(bc.verify()) {
+      if(bc.verify()) 
+      {
         ROS_INFO("Curve is verified, generating points");
+
         // Generate the curve
         bc.generateCurve();
         result.push_back(bc);
       }
-      else if(type_ == TRANSITION) {
+      
+      else if(type_ == TRANSITION) 
+      {
         ROS_INFO("Curve not verified, doing a transition so setting 0 velocity for KP: %s", 
             utility_.toString(path_.points.at(1).motionState).c_str());
 
@@ -532,7 +536,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         }
 
         type_ = ALL_STRAIGHT_SEGMENTS;
-      }
+      } // end else if transition
       else {
         ROS_INFO("Curve not verified, but not a transition trajectory");
         type_ = ALL_STRAIGHT_SEGMENTS;
@@ -546,6 +550,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
   //ROS_INFO("Outside of for");
 
+  // Set Path p's knot point indices
   if(type_ != ALL_STRAIGHT_SEGMENTS) 
   {
     if(type_ == TRANSITION) 
@@ -582,12 +587,9 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     else if(req_.bezierCurves.at(0).u_0 > 0) 
     {
       ROS_INFO("In else if bezierStart");
-      // Commented out when gen == 23 for the switch. at CC after restart, it was removing 1,1 and 3.5,2
-      //ROS_INFO("Erasing: %s", utility_.toString( *(p.points.begin()+2) ).c_str());
-      //p.points.erase( p.points.begin() + 2 );
-      //ROS_INFO("Erasing: %s", utility_.toString( *(p.points.begin()+1) ).c_str());
       p.points.erase( p.points.begin() + 1 );
-      p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
+      p.points.insert(p.points.begin()+1, 
+          utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
     }
 
     else if(utility_.positionDistance( p.points.at(1).motionState.positions, 
@@ -599,7 +601,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // Don't erase anything
       // Insert
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
-      p.points.insert(p.points.begin()+2, utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
+      p.points.insert(p.points.begin()+2, 
+          utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
     }
 
     // Else not on a curve, but a curve exists on the trajectory
@@ -612,9 +615,10 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
       // Insert
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
-      p.points.insert(p.points.begin()+2, utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
+      p.points.insert(p.points.begin()+2, 
+          utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
     }
-  }
+  } // end if not all straight segments
 
   ROS_INFO("Exiting MobileBase::bezier");
   return result;
@@ -858,7 +862,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   std::vector<BezierCurve> curves;
 
   // Use Bezier curves to smooth path
-  if(type_ != ALL_STRAIGHT_SEGMENTS) {
+  if(type_ != ALL_STRAIGHT_SEGMENTS) 
+  {
     ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
     curves = bezier(path_, type_ == TRANSITION);
     ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
@@ -872,7 +877,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     }*/
   } // end if curves
 
-  if(curves.size() == 0) {
+  if(curves.size() == 0) 
+  {
     type_ = ALL_STRAIGHT_SEGMENTS;
   }
 
@@ -894,13 +900,15 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   uint8_t c=0;
   // Go through every knotpoint in the path
   // (or until timeCutoff has been reached)
-  for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) {
+  for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) 
+  {
     ROS_INFO("i_kp_: %i", (int)i_kp_);
     reflexxesData_.resultValue = 0;
 
     // Push the initial state onto trajectory
     // And set previous knot point
-    if(i_kp_ == 1) {
+    if(i_kp_ == 1) 
+    {
       res.trajectory.trajectory.points.push_back(buildTrajectoryPoint(reflexxesData_));
       prevKP_ = res.trajectory.trajectory.points.at(0);
     }
@@ -952,12 +960,15 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       bi.u_dot_0        = curves.at(c).u_dot_0_;
       bi.l              = curves.at(c).l_;
       bi.u_target       = curves.at(c).u_target_;
+      bi.points         = curves.at(c).points_;
       res.trajectory.curves.push_back(bi);
 
-      if(i_kp_ == path_.points.size()-1) {
+      if(i_kp_ == path_.points.size()-1) 
+      {
         res.trajectory.i_curveEnd = res.trajectory.trajectory.points.size()-1;
       }
-      else {
+      else 
+      {
         res.trajectory.i_curveEnd = res.trajectory.trajectory.points.size();
       }
 

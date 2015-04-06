@@ -608,38 +608,50 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
   ROS_INFO("Before adaptPaths, paths.size(): %i", (int)result.paths_.size());
  
   // Adapt the paths and curves
-  std::vector<Path> paths                   = adaptPaths  (pop, ms, d);
-  std::vector<ramp_msgs::BezierCurve> curves = adaptCurves (pop, ms, d);
+  std::vector<Path> paths                     = adaptPaths  (pop, ms, d);
+  std::vector<ramp_msgs::BezierCurve> curves  = adaptCurves (pop, ms, d);
 
   result.paths_ = paths;
 
   // Create the vector to hold updated trajectories
   std::vector<RampTrajectory> updatedTrajecs;
 
+  ROS_INFO("pop.calcBestIndex(): %i", pop.calcBestIndex());
   ROS_INFO("paths.size(): %i", (int)paths.size());
   ROS_INFO("curves.size(): %i", (int)curves.size());
   // For each path, get a trajectory
   for(uint16_t i=0;i<pop.paths_.size();i++) {
-    RampTrajectory tempTraj = pop.get(i);
+    RampTrajectory temp, tempTraj = pop.get(i);
     ROS_INFO("Getting trajectory %i", (int)i);
+    
+    // If the best trajectory, don't re-plan - just take subtrajectory
+    if(i == pop.calcBestIndex())
+    {
+      ROS_INFO("In i == pop.calcBestIndex()");
+      //temp = tempTraj.getSubTrajectoryPost(d.toSec());
+      temp = tempTraj.getSubTrajectoryPost(controlCycle_.toSec());
+      temp.path_ = paths.at(i);
 
-    std::vector<ramp_msgs::BezierCurve> c;
-    c.push_back(curves.at(i));
+      ROS_INFO("Best Trajec after adapting: %s", temp.toString().c_str());
+      ROS_INFO("Best trajec path: %s", temp.path_.toString().c_str());
+    }
 
-    ROS_INFO("Before buildTR");
-    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(paths.at(i), c);
-    ROS_INFO("After buildTR");
+    else
+    {
+      ROS_INFO("In else i != pop.calcBestIndex()");
+      std::vector<ramp_msgs::BezierCurve> c;
+      c.push_back(curves.at(i));
 
-    ROS_INFO("Before RT");
-    /* Get the trajectory */
-    RampTrajectory temp = requestTrajectory(tr, result.get(i).msg_.id);
-    ROS_INFO("After RT");
-    ROS_INFO("temp.path: %s", temp.path_.toString().c_str());
+      ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(paths.at(i), c);
+
+      /* Get the trajectory */
+      temp = requestTrajectory(tr, result.get(i).msg_.id);
+      ROS_INFO("temp.path: %s", temp.path_.toString().c_str());
+    }
 
     // Set temporary evaluation results - need to actually call requestEvaluation to get actual fitness
     temp.msg_.fitness   = result.get(i).msg_.fitness;
     temp.msg_.feasible  = result.get(i).msg_.feasible;
-
     temp.msg_.t_start   = ros::Duration(t_fixed_cc_);
 
     ROS_INFO("Finished adapting trajectory %i, t_start: %f", i, temp.msg_.t_start.toSec());
@@ -1573,7 +1585,7 @@ const RampTrajectory Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr
     result.path_        = tr.request.path;
 
     if(tr.response.newPath.points.size() > 0) {
-      result.bezierPath_  = tr.response.newPath;
+      //result.bezierPath_  = tr.response.newPath;
     }
 
     // *** Set the previous knot point
@@ -1626,11 +1638,11 @@ const RampTrajectory Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er
 
 const RampTrajectory Planner::requestEvaluation(const RampTrajectory traj) {
   ramp_msgs::EvaluationRequest er = buildEvaluationRequest(traj);
-  RampTrajectory result = requestEvaluation(er);
+  RampTrajectory result           = requestEvaluation(er);
 
   // Set non-evaluation related members
   result.path_                = traj.path_;
-  result.bezierPath_          = traj.bezierPath_;
+  //result.bezierPath_          = traj.bezierPath_;
   result.msg_.i_subPopulation = traj.msg_.i_subPopulation; 
 
   return result;
@@ -2078,7 +2090,6 @@ void Planner::doControlCycle() {
 
 
   //ROS_INFO("Setting movingOn_");
-  //movingOn_ = bestT.getSubTrajectory(controlCycle_.toSec());
   movingOn_ = bestT.getSubTrajectory(t_fixed_cc_);
   ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
 
@@ -2092,7 +2103,7 @@ void Planner::doControlCycle() {
 
   // At CC, startPlanning is assumed to be perfect (no motion error accounted for yet)
   startPlanning_ = m_cc_;
-  //ROS_INFO("New startPlanning_: %s", startPlanning_.toString().c_str());
+  ROS_INFO("New startPlanning_: %s", startPlanning_.toString().c_str());
 
   // After m_cc_ and startPlanning are set, adapt the population
   ROS_INFO("Before adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", 
@@ -2306,12 +2317,12 @@ const bool Planner::compareSwitchToBest(const RampTrajectory traj, const Populat
 /** This method evaluates one trajectory.
  *  Eventually, we should be able to evaluate only specific segments along the trajectory  */
 const RampTrajectory Planner::evaluateTrajectory(const RampTrajectory trajec) {
-  //ROS_INFO("In Planner::evaluateTrajectory");
+  ROS_INFO("In Planner::evaluateTrajectory");
 
   RampTrajectory result = requestEvaluation(trajec);
   //ROS_INFO("result: %s", result.toString().c_str());
 
-  //ROS_INFO("Leaving Planner::evaluateTrajectory");
+  ROS_INFO("Leaving Planner::evaluateTrajectory");
   return result;
 } // End evaluateTrajectory
 
@@ -2322,19 +2333,21 @@ const RampTrajectory Planner::evaluateTrajectory(const RampTrajectory trajec) {
  * It also sets i_best_prev_
  **/
 const Population Planner::evaluatePopulation(const Population pop) {
-  //ROS_INFO("In Planner::evaluatePopulation");
+  ROS_INFO("In Planner::evaluatePopulation");
   Population result = pop;
+  ROS_INFO("Before evaluating, pop: %s", pop.fitnessFeasibleToString().c_str());
   
   // Go through each trajectory in the population and evaluate it
   for(uint16_t i=0;i<result.size();i++) {
     //ROS_INFO("i: %i", (int)i);
     result.replace(i, evaluateTrajectory(result.get(i)));
   } // end for
+  ROS_INFO("After evaluating, pop: %s", result.fitnessFeasibleToString().c_str());
  
 
   i_best_prev_ = result.calcBestIndex();
   
-  //ROS_INFO("Exiting Planner::evaluatePopulation");
+  ROS_INFO("Exiting Planner::evaluatePopulation");
   return result;
 } // End evaluatePopulation
 
