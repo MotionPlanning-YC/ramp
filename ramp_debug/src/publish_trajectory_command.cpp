@@ -33,9 +33,9 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(1.48634); // 0.70455
-  c1.motionState.positions.push_back(2.94961); // 0.4026
-  c1.motionState.positions.push_back(-0.50685); // 0.519146
+  c1.motionState.positions.push_back(1.39134); // 0.70455
+  c1.motionState.positions.push_back(2.99216); // 0.4026
+  c1.motionState.positions.push_back(-0.218816); // 0.519146
   
   ramp_msgs::KnotPoint c2;
   c2.motionState.positions.push_back(1.27328); // 0.70455
@@ -82,9 +82,9 @@ int main(int argc, char** argv) {
 
   
   // Velocities
-  c1.motionState.velocities.push_back(0.32434);  //.151426
-  c1.motionState.velocities.push_back(-0.197085); //-.297903
-  c1.motionState.velocities.push_back(-0.857781); //-.118126
+  c1.motionState.velocities.push_back(0.309014);  //.151426
+  c1.motionState.velocities.push_back(-0.0865687); //-.297903
+  c1.motionState.velocities.push_back(-1.15286); //-.118126
  
   c2.motionState.velocities.push_back(0.);  //.151426
   c2.motionState.velocities.push_back(0.); //-.297903
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
   // Accelerations
   c1.motionState.accelerations.push_back(0.0510873); //.0114877
   c1.motionState.accelerations.push_back(-0.368387);  //-.10465
-  c1.motionState.accelerations.push_back(1.02773); //.0746295
+  c1.motionState.accelerations.push_back(-0.690163); //.0746295
 
   c2.motionState.accelerations.push_back(0.);
   c2.motionState.accelerations.push_back(0.);
@@ -129,8 +129,8 @@ int main(int argc, char** argv) {
   c5.motionState.accelerations.push_back(0.); //.0746295
   
   ramp_msgs::Path p;
-  //p.points.push_back(zero);
-  p.points.push_back(c1);
+  p.points.push_back(zero);
+  //p.points.push_back(c1);
   p.points.push_back(c2);
   //p.points.push_back(c3);
   //p.points.push_back(c4);
@@ -277,13 +277,13 @@ int main(int argc, char** argv) {
   ms_begin.accelerations.push_back(0.);
   ms_begin.accelerations.push_back(0.);*/
 
-  bi.ms_begin = ms_begin;
+  //bi.ms_begin = ms_begin;
   bi.ms_initialVA = ms_initVA;
   bi.ms_maxVA = ms_maxVA;
  
 
   // u
-  bi.u_0 = 0.959358;
+  bi.u_0 = 0.;
   bi.u_target = 0.992861;
   bi.u_dot_0 = 0.685256;
   bi.u_dot_max = 0.661828; 

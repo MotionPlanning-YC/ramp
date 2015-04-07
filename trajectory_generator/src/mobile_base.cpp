@@ -29,7 +29,8 @@ MobileBase::~MobileBase() {
 
 
 /** Initialize Reflexxes variables */
-void MobileBase::initReflexxes() {
+void MobileBase::initReflexxes() 
+{
 
   // Set DOF
   reflexxesData_.NUMBER_OF_DOFS = 3;
@@ -961,6 +962,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       bi.l              = curves.at(c).l_;
       bi.u_target       = curves.at(c).u_target_;
       bi.points         = curves.at(c).points_;
+      bi.u_values       = curves.at(c).u_values_;
       res.trajectory.curves.push_back(bi);
 
       if(i_kp_ == path_.points.size()-1) 
@@ -1046,7 +1048,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       setTarget(path_.points.at(i_kp_).motionState);
       //ROS_INFO("Prev KP: %s", utility_.toString(prevKP_).c_str());
       //ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());
-      
+
       // Check they are not the same point
       if(utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, 
             path_.points.at(i_kp_).motionState.positions) > 0.0001)

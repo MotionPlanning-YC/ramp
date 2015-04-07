@@ -475,13 +475,13 @@ const ramp_msgs::BezierCurve Planner::handleCurveEnd(const RampTrajectory traj) 
 const double Planner::updateCurvePos(const RampTrajectory traj, const ros::Duration d) const {
   ROS_INFO("In Planner::updateCurvePos");
   ROS_INFO("d: %f", d.toSec());
-  //ROS_INFO("startPlanning_: %s", startPlanning_.toString().c_str());
-  //ROS_INFO("traj: %s", traj.toString().c_str());
+  
   ramp_msgs::BezierCurve curve = traj.msg_.curves.at(0); 
   double result = curve.u_0;
 
   // if u_0==0 then estimateIfOnCurve returned 2 - already on curve
-  if(curve.u_0 < 0.00001) {
+  if(curve.u_0 < 0.00001) 
+  {
     ROS_INFO("In if curve.u_0==0");
 
     // Get the time at the start of the curve
@@ -492,24 +492,26 @@ const double Planner::updateCurvePos(const RampTrajectory traj, const ros::Durat
     // t = the time spent moving on the curve
     double t = d.toSec() - t_s0;
     ROS_INFO("t: %f", t);
+    
+    int index = floor(t*10)-1;
+    ROS_INFO("index: %i u_values.size(): %i u_values[%i]: %f", index, (int)curve.u_values.size(), index, curve.u_values.at(index));
 
     if(t < 0.0001)
     {
       result = 0.0001;
+    }
+    else if(index >= curve.u_values.size())
+    {
+      ROS_INFO("index: %i curve.u_values.size(): %i, setting result to 1.1", index, (int)curve.u_values.size());
+      result = 1.1;
     }
     else
     {
 
       ROS_INFO("t: %f Adding %f", t, (t*curve.u_dot_0));
       
-
-      // At one point I changed this to the average of x and y scaled
-      // But my notes don't say why...
-      // But that change made a robot's prediction along a curve noticeably more inaccurate
-      //std::vector<double> scaled = getScaledXY(startPlanning_, traj.msg_.curves.at(0));
-      //ROS_INFO("Adding %f",(scaled.at(0) + scaled.at(1)) / 2.);
-      //result += (scaled.at(0) + scaled.at(1)) / 2.;
-      result += t * curve.u_dot_0;
+      //result += t * curve.u_dot_0;
+      result = curve.u_values.at(index);
     }
   } // end if already on curve
 
@@ -526,7 +528,8 @@ const double Planner::updateCurvePos(const RampTrajectory traj, const ros::Durat
 
 /** Updates the curve u_0 and ms_begin */
 // TODO: Only need to update the bestTrajec's curve
-const std::vector<ramp_msgs::BezierCurve> Planner::adaptCurves(const Population pop, const MotionState ms, const ros::Duration d) const {
+const std::vector<ramp_msgs::BezierCurve> Planner::adaptCurves(const Population pop, const MotionState ms, const ros::Duration d) const 
+{
   ROS_INFO("In Planner::adaptCurves");
 
   std::vector<ramp_msgs::BezierCurve> result;
@@ -571,7 +574,6 @@ const std::vector<ramp_msgs::BezierCurve> Planner::adaptCurves(const Population 
            because we could be done before ever incrementing u_0 */
       // Check if done with current curve
       if( i == pop.calcBestIndex() && (curve.u_0 > curve.u_target || estimateIfOnCurve(ms, curve) == 3) )
-
       {
         ROS_INFO("Done with curve, u_0: %f", curve.u_0);
         curve = handleCurveEnd(pop.get(i));
@@ -606,10 +608,12 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
   
   ROS_INFO("Before adaptPaths, paths.size(): %i", (int)pop.paths_.size());
   ROS_INFO("Before adaptPaths, paths.size(): %i", (int)result.paths_.size());
+  ros::Duration curveD = transPopulation_.getBest().msg_.t_start;
+  ROS_INFO("curveD: %f", curveD.toSec());
  
   // Adapt the paths and curves
   std::vector<Path> paths                     = adaptPaths  (pop, ms, d);
-  std::vector<ramp_msgs::BezierCurve> curves  = adaptCurves (pop, ms, d);
+  std::vector<ramp_msgs::BezierCurve> curves  = adaptCurves (pop, ms, curveD);
 
   result.paths_ = paths;
 
@@ -623,31 +627,15 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
   for(uint16_t i=0;i<pop.paths_.size();i++) {
     RampTrajectory temp, tempTraj = pop.get(i);
     ROS_INFO("Getting trajectory %i", (int)i);
-    
-    // If the best trajectory, don't re-plan - just take subtrajectory
-    if(i == pop.calcBestIndex())
-    {
-      ROS_INFO("In i == pop.calcBestIndex()");
-      //temp = tempTraj.getSubTrajectoryPost(d.toSec());
-      temp = tempTraj.getSubTrajectoryPost(controlCycle_.toSec());
-      temp.path_ = paths.at(i);
+      
+    std::vector<ramp_msgs::BezierCurve> c;
+    c.push_back(curves.at(i));
 
-      ROS_INFO("Best Trajec after adapting: %s", temp.toString().c_str());
-      ROS_INFO("Best trajec path: %s", temp.path_.toString().c_str());
-    }
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(paths.at(i), c);
 
-    else
-    {
-      ROS_INFO("In else i != pop.calcBestIndex()");
-      std::vector<ramp_msgs::BezierCurve> c;
-      c.push_back(curves.at(i));
-
-      ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(paths.at(i), c);
-
-      /* Get the trajectory */
-      temp = requestTrajectory(tr, result.get(i).msg_.id);
-      ROS_INFO("temp.path: %s", temp.path_.toString().c_str());
-    }
+    /* Get the trajectory */
+    temp = requestTrajectory(tr, result.get(i).msg_.id);
+    ROS_INFO("temp.path: %s", temp.path_.toString().c_str());
 
     // Set temporary evaluation results - need to actually call requestEvaluation to get actual fitness
     temp.msg_.fitness   = result.get(i).msg_.fitness;
@@ -2064,10 +2052,13 @@ void Planner::doControlCycle() {
   
   ros::Time t = ros::Time::now();
 
-
   // Set the bestT
   RampTrajectory bestT = transPopulation_.getBest();
+  double diff_ts = t_fixed_cc_ - bestT.msg_.t_start.toSec(); 
+  ROS_INFO("t_fixed_cc_: %f bestT.msg_.t_start: %f diff: %f",
+      t_fixed_cc_, bestT.msg_.t_start.toSec(), diff_ts);
   ROS_INFO("bestT: %s", bestT.toString().c_str());
+
 
   ROS_INFO("Latest Update: %s", latestUpdate_.toString().c_str());
   MotionState diff = bestT.path_.at(0).motionState_.subtractPosition(latestUpdate_);
@@ -2110,7 +2101,7 @@ void Planner::doControlCycle() {
       population_.size(), 
       population_.toString().c_str());
 
-  // Before adapting, strip transitions
+  // Adapt and evaluate population
   population_ = adaptPopulation(population_, startPlanning_, ros::Duration(t_fixed_cc_));
   population_ = evaluatePopulation(population_);
   ROS_INFO("After adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", 

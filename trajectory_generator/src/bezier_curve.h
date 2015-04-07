@@ -27,6 +27,7 @@ public:
   std::vector<ramp_msgs::MotionState> segmentPoints_  ;
   std::vector<ramp_msgs::MotionState> controlPoints_  ;
   std::vector<ramp_msgs::MotionState> points_         ;
+  std::vector<double> u_values_;
 
   void initControlPoints();
   void initControlPoints(const ramp_msgs::MotionState start);

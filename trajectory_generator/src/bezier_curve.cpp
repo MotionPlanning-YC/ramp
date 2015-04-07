@@ -791,14 +791,22 @@ const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve() {
    
     // Push on beginning point
     points_.push_back(ms_begin_);
+    u_values_.push_back(reflexxesData_.inputParameters->CurrentPositionVector->VecData[0]);
 
-    while(!finalStateReached()) {
+    while(!finalStateReached()) 
+    {
       points_.push_back(spinOnce());
     }
 
     // Set u_target
     u_target_ = reflexxesData_.inputParameters->TargetPositionVector->VecData[0];
     dealloc();
+  }
+
+  ROS_INFO("After generating curve, u_values:");
+  for(int i=0;i<u_values_.size();i++)
+  {
+    ROS_INFO("u_values_[%i]: %f", i, u_values_.at(i));
   }
 
   //ROS_INFO("Exiting BezierCurve::generateCurve()");
@@ -821,6 +829,8 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
   double Y0         = controlPoints_.at(0).positions.at(1);
   double Y1         = controlPoints_.at(1).positions.at(1);
   double Y2         = controlPoints_.at(2).positions.at(1);
+  
+  u_values_.push_back(u);
 
   /** Create new point */
   // Position
