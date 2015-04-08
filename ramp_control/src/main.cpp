@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
   ros::NodeHandle handle;  
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
   
-  handle.param("orientation", robot.initial_theta_, 0.);
+  handle.param("orientation", robot.initial_theta_, PI/4.);
   std::cout<<"\nrobot.orientation: "<<robot.initial_theta_;
   
   bool sim=false;

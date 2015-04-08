@@ -217,9 +217,9 @@ const RampTrajectory RampTrajectory::getSubTrajectoryPost(const double t) const
 /*
  * Concatenate traj onto this trajectory. kp is the knot to start on traj
  */
-const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, const uint8_t kp) const
+const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, const uint8_t kp) const 
 {
-  //ROS_INFO("In RampTrajectory::concatenate");
+  ROS_INFO("In RampTrajectory::concatenate");
   RampTrajectory result = clone();
   uint8_t c_kp = kp;
 
@@ -229,17 +229,29 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
    */
   trajectory_msgs::JointTrajectoryPoint last  = msg_.trajectory.points.at(
                                                 msg_.trajectory.points.size()-1);
-  trajectory_msgs::JointTrajectoryPoint first = traj.msg_.trajectory.points.at(0);
-  if( fabs(utility_.positionDistance(last.positions, first.positions)) > 0.01)
+  trajectory_msgs::JointTrajectoryPoint first = traj.msg_.trajectory.points.at(traj.msg_.i_knotPoints.at(kp));
+  if( fabs(utility_.positionDistance(last.positions, first.positions)) > 0.1)
   {
+    ROS_WARN("First and last points don't match!");
+    ROS_WARN("last: %s\nfirst: %s\ndiff: %f", utility_.toString(last).c_str(), utility_.toString(first).c_str(), fabs(utility_.positionDistance(last.positions, first.positions)));
     return traj;
   }
 
+  // If the last segment of this and first segment of traj have the same orientation
+  // Remove the last knot point of this trajectory
+  if( utility_.findDistanceBetweenAngles(last.positions.at(2), first.positions.at(2)) < 0.01)
+  {
+    ROS_INFO("Last segment of this and first segment of traj have the same orientation");
+    ROS_INFO("last.positions.at(2): %f first.positions.at(2): %f", 
+        last.positions.at(2), first.positions.at(2));
+    ROS_INFO("Removing last knotpoint of this trajectory");
+    result.msg_.i_knotPoints.pop_back();
+  }
 
 
   ros::Duration t_cycleTime(0.1);
   ros::Duration t_latest = msg_.trajectory.points.at(msg_.trajectory.points.size()-1).time_from_start;
-  for(uint16_t i=traj.msg_.i_knotPoints.size() == 1 ? 0 : traj.msg_.i_knotPoints.at(c_kp-1);
+  for(uint16_t i=traj.msg_.i_knotPoints.size() == 1 ? 0 : traj.msg_.i_knotPoints.at(c_kp-1)+1;
       i<traj.msg_.trajectory.points.size();
       i++)
   {
@@ -253,20 +265,13 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
 
     if( i == traj.msg_.i_knotPoints.at(c_kp) )
     {
+      ROS_INFO("i: %i traj.msg_.i_knotPoints.at(%i): %i", i, c_kp, traj.msg_.i_knotPoints.at(c_kp));
+      ROS_INFO("temp: %s", utility_.toString(temp).c_str());
       result.msg_.i_knotPoints.push_back( result.msg_.trajectory.points.size()-1 ); 
       c_kp++;
     }
   } //end for
 
-  // Set bezierPath
-  std::vector<KnotPoint> bp;
-  for(uint16_t i=0;i<result.msg_.i_knotPoints.size();i++) {
-    KnotPoint kp(result.msg_.trajectory.points.at(
-          result.msg_.i_knotPoints.at(i)));
-    bp.push_back(kp);
-  }
-
-  //result.bezierPath_ = bp; 
 
   // Push on the target trajectory's Bezier curve
   for(uint8_t i_curve=0;i_curve<traj.msg_.curves.size();i_curve++) {

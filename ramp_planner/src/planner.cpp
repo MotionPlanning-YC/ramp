@@ -232,8 +232,10 @@ const uint8_t Planner::getIndexStartPathAdapting(const RampTrajectory t) const
 
   // If the first part is just self-rotation to correct orientation,
   // add 1 to result
-  if(utility_.positionDistance( t.msg_.trajectory.points.at( t.msg_.i_knotPoints.at(1)).positions,
-                                t.msg_.trajectory.points.at( t.msg_.i_knotPoints.at(0)).positions) < 0.001)
+  if(t.msg_.i_knotPoints.size() > 1 && utility_.positionDistance( 
+                                        t.msg_.trajectory.points.at( t.msg_.i_knotPoints.at(1)).positions,
+                                        t.msg_.trajectory.points.at( t.msg_.i_knotPoints.at(0)).positions) 
+      < 0.001)
   {
     ROS_WARN("Adding 1 to result because first two position are the same, indicating a rotation to satisfy orientation");
     result++;
@@ -493,7 +495,8 @@ const double Planner::updateCurvePos(const RampTrajectory traj, const ros::Durat
     double t = d.toSec() - t_s0;
     ROS_INFO("t: %f", t);
     
-    int index = floor(t*10)-1;
+    // Previously was subtracting 1 from index. Not sure why that worked, but keep in mind if future issues arise
+    int index = floor(t*10);
     ROS_INFO("index: %i u_values.size(): %i u_values[%i]: %f", index, (int)curve.u_values.size(), index, curve.u_values.at(index));
 
     if(t < 0.0001)
@@ -1384,12 +1387,13 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
       int c_kp = 1;
 
       ROS_INFO("Checking if rotation at beginning");
-      // Check if there's rotation at the beginning, if so increment c_kp
-      // TODO: Better way of doing this
       if(to.msg_.i_knotPoints.size() < 2)
       {
         c_kp = 0;
       }
+      
+      // Check if there's rotation at the beginning, if so increment c_kp
+      // TODO: Better way of doing this
       else if(utility_.positionDistance( to.msg_.trajectory.points.at(0).positions,
             to.msg_.trajectory.points.at( to.msg_.i_knotPoints.at(1)).positions ) < 0.1)
       {
@@ -1482,6 +1486,7 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
     i_goal = 0;
   }
 
+  // Removed this section because we changed from getPath() to the actual path_ member
   // Else if there's self-rotation at the beginning
   else if(trj_target.msg_.i_knotPoints.size() > 2 && 
       utility_.positionDistance(  trj_target.path_.start_.motionState_.msg_.positions, 
@@ -1493,8 +1498,8 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
   }
   ROS_INFO("i_goal: %i", i_goal);
  
-  //MotionState g(trj_target.msg_.trajectory.points.at(trj_target.msg_.i_knotPoints.at(i_goal)));
-  MotionState g(trj_target.path_.at(i_goal).motionState_);
+  MotionState g(trj_target.msg_.trajectory.points.at(trj_target.msg_.i_knotPoints.at(i_goal)));
+  //MotionState g(trj_target.path_.at(i_goal).motionState_);
   segmentPoints.push_back(g);
 
   ROS_INFO("Segment points:");
@@ -1998,6 +2003,8 @@ const Population Planner::getTransPop(const Population pop, const RampTrajectory
     result.replace(i, temp);
   }
 
+  ROS_INFO("Trans pop full: %s", result.toString().c_str());
+
   ROS_INFO("Exiting Planner::getTransPop");
   return result;
 }
@@ -2052,17 +2059,15 @@ void Planner::doControlCycle() {
   
   ros::Time t = ros::Time::now();
 
+
   // Set the bestT
   RampTrajectory bestT = transPopulation_.getBest();
-  double diff_ts = t_fixed_cc_ - bestT.msg_.t_start.toSec(); 
-  ROS_INFO("t_fixed_cc_: %f bestT.msg_.t_start: %f diff: %f",
-      t_fixed_cc_, bestT.msg_.t_start.toSec(), diff_ts);
-  ROS_INFO("bestT: %s", bestT.toString().c_str());
-
 
   ROS_INFO("Latest Update: %s", latestUpdate_.toString().c_str());
   MotionState diff = bestT.path_.at(0).motionState_.subtractPosition(latestUpdate_);
   ROS_INFO("diff: %s", diff.toString().c_str());
+
+  ROS_INFO("bestT: %s", bestT.toString().c_str());
 
   
   // Send the best trajectory and set movingOn
@@ -2102,14 +2107,15 @@ void Planner::doControlCycle() {
       population_.toString().c_str());
 
   // Adapt and evaluate population
-  population_ = adaptPopulation(population_, startPlanning_, ros::Duration(t_fixed_cc_));
+  //population_ = adaptPopulation(population_, startPlanning_, ros::Duration(t_fixed_cc_));
+  population_ = adaptPopulation(population_, startPlanning_, controlCycle_);
   population_ = evaluatePopulation(population_);
   ROS_INFO("After adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", 
       population_.size(), 
       population_.fitnessFeasibleToString().c_str());
 
   
- 
+  // Find the transition (non-holonomic) population and set new control cycle time
   transPopulation_  = getTransPop(population_, movingOn_);
   transPopulation_  = evaluatePopulation(transPopulation_);
   controlCycle_     = ros::Duration(transPopulation_.getBest().msg_.t_start.toSec());
@@ -2117,7 +2123,7 @@ void Planner::doControlCycle() {
   controlCycleTimer_.setPeriod(controlCycle_, false);
   
   ROS_INFO("After finding transition population, controlCycle period: %f", controlCycle_.toSec());
-  ROS_INFO("New transPop: %s", transPopulation_.fitnessFeasibleToString().c_str());
+  ROS_INFO("New transPop: %s", transPopulation_.toString().c_str());
 
 
   // If error reduction
@@ -2446,7 +2452,7 @@ const MotionState Planner::findAverageDiff() {
   
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
-  goalThreshold_ = 0.2;
+  goalThreshold_ = 0.4;
   ros::Rate r(20);
   while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) {
     r.sleep();
