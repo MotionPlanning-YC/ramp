@@ -129,8 +129,8 @@ int main(int argc, char** argv) {
   c5.motionState.accelerations.push_back(0.); //.0746295
   
   ramp_msgs::Path p;
-  //p.points.push_back(zero);
-  p.points.push_back(c1);
+  p.points.push_back(zero);
+  //p.points.push_back(c1);
   p.points.push_back(c2);
   //p.points.push_back(c3);
   //p.points.push_back(c4);
@@ -259,8 +259,8 @@ int main(int argc, char** argv) {
   ramp_msgs::MotionState ms_maxVA;
   ms_maxVA.velocities.push_back(0.33);
   ms_maxVA.velocities.push_back(0.33);
-  ms_maxVA.accelerations.push_back(1.);
-  ms_maxVA.accelerations.push_back(1.);
+  ms_maxVA.accelerations.push_back(0.33);
+  ms_maxVA.accelerations.push_back(0.33);
 
 
 
@@ -283,11 +283,11 @@ int main(int argc, char** argv) {
  
 
   // u
-  bi.u_0 = 0.794312;
+  /*bi.u_0 = 0.794312;
   bi.u_target = 0.992861;
   bi.u_dot_0 = 0.685256;
   bi.u_dot_max = 0.661828; 
-  bi.l = 0.85;
+  bi.l = 0.85;*/
 
 
 

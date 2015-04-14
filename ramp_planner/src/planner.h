@@ -14,6 +14,7 @@
 
 struct ModificationResult {
   Population popNew_;
+  Population transNew_;
   std::vector<uint16_t> i_modified_;
 };
 

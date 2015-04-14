@@ -252,8 +252,7 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
   ros::Duration t_cycleTime(0.1);
   ros::Duration t_latest = msg_.trajectory.points.at(msg_.trajectory.points.size()-1).time_from_start;
   for(uint16_t i=traj.msg_.i_knotPoints.size() == 1 ? 0 : traj.msg_.i_knotPoints.at(c_kp-1)+1;
-      i<traj.msg_.trajectory.points.size();
-      i++)
+      i<traj.msg_.trajectory.points.size();i++)
   {
     trajectory_msgs::JointTrajectoryPoint temp = traj.msg_.trajectory.points.at(i);
 

@@ -238,12 +238,15 @@ void MobileRobot::calculateSpeedsAndTime () {
     trajectory_msgs::JointTrajectoryPoint next    = trajectory_.trajectory.points.at(i+1);
     //std::cout<<"\nPoint "<<i;
 
-    // If not taking acceleration into account, uncomment this 
-    // and comment out from double xInc to num_ =
-    speeds_linear_.push_back( sqrt( pow(current.velocities.at(0),2)
-                                  + pow(current.velocities.at(1),2) ));
+    double vx = (next.positions.at(0) - current.positions.at(0)) / 0.1;
+    double vy = (next.positions.at(1) - current.positions.at(1)) / 0.1;
+    //ROS_INFO("t: %f v: %f vx: %f vy: %f", current.time_from_start.toSec(), sqrt(vx*vx+vy*vy), vx, vy);
 
-    speeds_angular_.push_back( current.velocities.at(2) ); 
+    speeds_linear_.push_back( sqrt( pow(vx,2)
+                                  + pow(vy,2) ));
+
+    double w = (next.positions.at(2) - current.positions.at(2)) / 0.1;
+    speeds_angular_.push_back( w ); 
 
     end_times.push_back(start_time + next.time_from_start);
 
@@ -343,8 +346,8 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
 
     // Move to the next point
     ros::Time g_time = end_times.at(num_traveled_) + t_immiColl_;
-    while(ros::ok() && ros::Time::now() < g_time && !checkImminentCollision()) {
-    
+    while(ros::ok() && ros::Time::now() < g_time && !checkImminentCollision()) 
+    {
       twist_.linear.x   = speeds_linear_.at(num_traveled_);
       twist_.angular.z  = speeds_angular_.at(num_traveled_);
       //std::cout<<"\nspeeds_angular["<<num_traveled_<<"]: "<<speeds_angular_.at(num_traveled_);
@@ -356,7 +359,7 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
       {
         float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
         float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
-        ROS_INFO("dist: %f", dist);
+        //ROS_INFO("dist: %f", dist);
         twist_.angular.z = dist/2;
       }
     

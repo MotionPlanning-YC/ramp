@@ -9,7 +9,7 @@ Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalT
   cc_started_(false), c_pc_(0), transThreshold_(1./50.), num_cc_(0), L_(0.33), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), 
   stop_(false) 
 {
-  planningCycle_          = ros::Duration(1.f / 5.f);
+  planningCycle_          = ros::Duration(1.f / 2.f);
   imminentCollisionCycle_ = ros::Duration(1.f / 2.f);
   generationsPerCC_       = controlCycle_.toSec() / planningCycle_.toSec();
 }
@@ -1330,7 +1330,7 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
    * Find the best planning cycle to switch 
    */
   uint8_t pc = generationsPerCC_+1;
-  for(int i_pc=generationsPerCC_; i_pc > 0; i_pc--)
+  for(int i_pc=generationsPerCC_; i_pc > c_pc_; i_pc--)
   {
     ROS_INFO("Look for transition at i_pc: %i", i_pc);
 
@@ -1715,6 +1715,9 @@ const ModificationResult Planner::modification() {
     {
       population_.replace(index, mod_trajec.at(i));
       result.i_modified_.push_back(index);
+
+      RampTrajectory trans = computeFullSwitch(movingOn_, mod_trajec.at(i));
+      transPopulation_.replace(index, trans);
     }
     else {
       ROS_INFO("Modification Trajectory not added to population");
@@ -1733,7 +1736,8 @@ const ModificationResult Planner::modification() {
   // Find the best trajectory
   int index   = population_.calcBestIndex();
 
-  result.popNew_ = population_;
+  result.popNew_    = population_;
+  result.transNew_  = transPopulation_;
 
   //ROS_INFO("After modification, pop now: %s", result.popNew_.toString().c_str());
 
@@ -1854,9 +1858,14 @@ void Planner::planningCycleCallback(const ros::TimerEvent&) {
           !population_.get(0).path_.at(0).motionState_.equals(goal_))
       {
         ROS_INFO("Modification changed population");
-        ROS_INFO("Evaluating entire population!");
         population_ = mod.popNew_;
-      }
+        transPopulation_ = mod.transNew_;
+        ROS_INFO("New pop: %s", population_.toString().c_str());
+        ROS_INFO("New transPop: %s", transPopulation_.toString().c_str());
+
+        controlCycleTimer_.setPeriod(transPopulation_.getBest().msg_.t_start);
+        ROS_INFO("Modification: new CC timer: %f", transPopulation_.getBest().msg_.t_start.toSec());
+      } // end if trajectory added
     } // end if modifications
 
 
@@ -2120,7 +2129,8 @@ void Planner::doControlCycle() {
   transPopulation_  = evaluatePopulation(transPopulation_);
   controlCycle_     = ros::Duration(transPopulation_.getBest().msg_.t_start.toSec());
 
-  controlCycleTimer_.setPeriod(controlCycle_, false);
+  ROS_INFO("Control Cycle: new CC timer: %f", controlCycle_.toSec());
+  controlCycleTimer_.setPeriod(controlCycle_);
   
   ROS_INFO("After finding transition population, controlCycle period: %f", controlCycle_.toSec());
   ROS_INFO("New transPop: %s", transPopulation_.toString().c_str());

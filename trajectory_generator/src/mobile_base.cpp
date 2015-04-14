@@ -358,21 +358,34 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
 
 
 const ramp_msgs::MotionState MobileBase::getMaxMS() const {
+  ROS_INFO("In getMaxMS()");
   ramp_msgs::MotionState result;
 
-  result.velocities.push_back(
-      reflexxesData_.inputParameters->
-      MaxVelocityVector->VecData[0]);
-  result.velocities.push_back(
-      reflexxesData_.inputParameters->
-      MaxVelocityVector->VecData[1]);
-  result.accelerations.push_back(
-      reflexxesData_.inputParameters->
-      MaxAccelerationVector->VecData[0]);
-  result.accelerations.push_back(
-      reflexxesData_.inputParameters->
-      MaxAccelerationVector->VecData[1]);
+  
+  if(req_.bezierCurves.size() > 0 && req_.bezierCurves.at(0).ms_maxVA.velocities.size() > 1)
+  {
+    result.velocities.push_back(req_.bezierCurves.at(0).ms_maxVA.velocities.at(0));
+    result.velocities.push_back(req_.bezierCurves.at(0).ms_maxVA.velocities.at(1));
+    result.accelerations.push_back(req_.bezierCurves.at(0).ms_maxVA.accelerations.at(0));
+    result.accelerations.push_back(req_.bezierCurves.at(0).ms_maxVA.accelerations.at(1));
+  }
+  else
+  {
+    result.velocities.push_back(
+        reflexxesData_.inputParameters->
+        MaxVelocityVector->VecData[0]);
+    result.velocities.push_back(
+        reflexxesData_.inputParameters->
+        MaxVelocityVector->VecData[1]);
+    result.accelerations.push_back(
+        reflexxesData_.inputParameters->
+        MaxAccelerationVector->VecData[0]);
+    result.accelerations.push_back(
+        reflexxesData_.inputParameters->
+        MaxAccelerationVector->VecData[1]);
+  }
 
+  ROS_INFO("Leaving getMaxMS()");
   return result;
 }
 
