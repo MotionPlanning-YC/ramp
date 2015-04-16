@@ -221,7 +221,31 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
 {
   ROS_INFO("In RampTrajectory::concatenate");
   RampTrajectory result = clone();
-  uint8_t c_kp = kp;
+  uint8_t c_kp = kp+1;
+
+  if(msg_.trajectory.points.size() == 0)
+  {
+    ROS_WARN("msg_trajectory.points.size() == 0, Returning parameter traj");
+    return traj;
+  }
+
+  if(traj.msg_.trajectory.points.size() == 0)
+  {
+    ROS_WARN("traj.msg_trajectory.points.size() == 0, Returning *this");
+    return *this;
+  }
+  
+  if(traj.msg_.i_knotPoints.size() == 1)
+  {
+    ROS_WARN("traj.msg_.i_knotPoints.size() <= kp: %i, returning *this", (int)kp);
+    return *this;
+  }
+
+  if(traj.msg_.i_knotPoints.size() <= kp)
+  {
+    ROS_WARN("traj.msg_.i_knotPoints.size() <= kp: %i, returning *this", (int)kp);
+    return *this;
+  }
 
 
   /*
@@ -229,7 +253,7 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
    */
   trajectory_msgs::JointTrajectoryPoint last  = msg_.trajectory.points.at(
                                                 msg_.trajectory.points.size()-1);
-  trajectory_msgs::JointTrajectoryPoint first = traj.msg_.trajectory.points.at(traj.msg_.i_knotPoints.at(kp));
+  trajectory_msgs::JointTrajectoryPoint first = traj.msg_.trajectory.points.at(traj.msg_.i_knotPoints.at( kp ));
   if( fabs(utility_.positionDistance(last.positions, first.positions)) > 0.1)
   {
     ROS_WARN("First and last points don't match!");
@@ -237,9 +261,13 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
     return traj;
   }
 
+  ROS_INFO("traj.msg_.trajectory.points.size(): %i", (int)traj.msg_.trajectory.points.size());
+  ROS_INFO("kp: %i", kp);
+  ROS_INFO("traj.msg_.i_knotPoints.size(): %i", (int)traj.msg_.i_knotPoints.size());
+  trajectory_msgs::JointTrajectoryPoint endOfFirstSegment = traj.msg_.trajectory.points.at(traj.msg_.i_knotPoints.at( kp+1 ));
   // If the last segment of this and first segment of traj have the same orientation
   // Remove the last knot point of this trajectory
-  if( utility_.findDistanceBetweenAngles(last.positions.at(2), first.positions.at(2)) < 0.01)
+  if( msg_.curves.size() == 0 && utility_.findDistanceBetweenAngles(last.positions.at(2), first.positions.at(2)) < 0.01)
   {
     ROS_INFO("Last segment of this and first segment of traj have the same orientation");
     ROS_INFO("last.positions.at(2): %f first.positions.at(2): %f", 
@@ -251,8 +279,9 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
 
   ros::Duration t_cycleTime(0.1);
   ros::Duration t_latest = msg_.trajectory.points.at(msg_.trajectory.points.size()-1).time_from_start;
-  for(uint16_t i=traj.msg_.i_knotPoints.size() == 1 ? 0 : traj.msg_.i_knotPoints.at(c_kp-1)+1;
-      i<traj.msg_.trajectory.points.size();i++)
+  for(uint16_t  i=traj.msg_.i_knotPoints.size() == 1 ? 0 : traj.msg_.i_knotPoints.at(c_kp-1)+1 ;
+                i<traj.msg_.trajectory.points.size() ;
+                i++)
   {
     trajectory_msgs::JointTrajectoryPoint temp = traj.msg_.trajectory.points.at(i);
 

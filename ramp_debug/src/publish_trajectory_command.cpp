@@ -33,9 +33,9 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(1.45416); // 0.70455
-  c1.motionState.positions.push_back(2.96748); // 0.4026
-  c1.motionState.positions.push_back(-0.421072); // 0.519146
+  c1.motionState.positions.push_back(1.13573); // 0.70455
+  c1.motionState.positions.push_back(2.92256); // 0.4026
+  c1.motionState.positions.push_back(0.786858); // 0.519146
   
   ramp_msgs::KnotPoint c2;
   c2.motionState.positions.push_back(1.27328); // 0.70455
@@ -82,9 +82,9 @@ int main(int argc, char** argv) {
 
   
   // Velocities
-  c1.motionState.velocities.push_back(0.319232);  //.151426
-  c1.motionState.velocities.push_back(-0.160246); //-.297903
-  c1.motionState.velocities.push_back(-0.960554); //-.118126
+  c1.motionState.velocities.push_back(0.27271);  //.151426
+  c1.motionState.velocities.push_back(0.251015); //-.297903
+  c1.motionState.velocities.push_back(-0.779874); //-.118126
  
   c2.motionState.velocities.push_back(0.);  //.151426
   c2.motionState.velocities.push_back(0.); //-.297903
@@ -109,8 +109,8 @@ int main(int argc, char** argv) {
 
   // Accelerations
   c1.motionState.accelerations.push_back(0.0510873); //.0114877
-  c1.motionState.accelerations.push_back(-0.368387);  //-.10465
-  c1.motionState.accelerations.push_back(-1.01454); //.0746295
+  c1.motionState.accelerations.push_back(-0.394924);  //-.10465
+  c1.motionState.accelerations.push_back(4.2619); //.0746295
 
   c2.motionState.accelerations.push_back(0.);
   c2.motionState.accelerations.push_back(0.);
@@ -241,9 +241,9 @@ int main(int argc, char** argv) {
   cp2.positions.push_back(-0.624615);
   
   // *** Push on the Control points ***
-  bi.controlPoints.push_back(cp0);
+  /*bi.controlPoints.push_back(cp0);
   bi.controlPoints.push_back(cp1);
-  bi.controlPoints.push_back(cp2);
+  bi.controlPoints.push_back(cp2)*/;
 
 
   /** Why 0 initial velocity? **/
@@ -259,8 +259,8 @@ int main(int argc, char** argv) {
   ramp_msgs::MotionState ms_maxVA;
   ms_maxVA.velocities.push_back(0.33);
   ms_maxVA.velocities.push_back(0.33);
-  ms_maxVA.accelerations.push_back(0.33);
-  ms_maxVA.accelerations.push_back(0.33);
+  ms_maxVA.accelerations.push_back(1);
+  ms_maxVA.accelerations.push_back(1);
 
 
 
@@ -277,14 +277,14 @@ int main(int argc, char** argv) {
   ms_begin.accelerations.push_back(0.);
   ms_begin.accelerations.push_back(0.);*/
 
-  bi.ms_begin = ms_begin;
+  /*bi.ms_begin = ms_begin;
   bi.ms_initialVA = ms_initVA;
-  bi.ms_maxVA = ms_maxVA;
+  bi.ms_maxVA = ms_maxVA;*/
  
 
   // u
-  /*bi.u_0 = 0.794312;
-  bi.u_target = 0.992861;
+  /*bi.u_0 = 0.0685256;
+  bi.u_target = 0.959357;
   bi.u_dot_0 = 0.685256;
   bi.u_dot_max = 0.661828; 
   bi.l = 0.85;*/

@@ -12,4 +12,4 @@ gens_before_control_cycle: 0
 
 fixed_control_cycle_rate: 2
 
-error_reduction: false 
+error_reduction: true 
