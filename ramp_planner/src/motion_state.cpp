@@ -218,9 +218,9 @@ const MotionState MotionState::subtractPosition(const MotionState m) const {
     if(i != mobile_base_k_) {
       result.msg_.positions.at(i) -= m.msg_.positions.at(i);
     }
-    else {
+    /*else {
       result.msg_.positions.at(i) = utility_.displaceAngle(msg_.positions.at(i), -m.msg_.positions.at(i));
-    }
+    }*/
   }
 
 

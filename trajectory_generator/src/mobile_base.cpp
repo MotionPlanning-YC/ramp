@@ -839,9 +839,8 @@ const std::vector<uint8_t> MobileBase::getCurveKPs(const std::vector<BezierCurve
 bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) {
   //std::cout<<"\nTrajectory Request Received: "<<utility_.toString(req)<<"\n";
   
-  // If there's less than 3 points,
-  // make it have straight segments
-  if(req.path.points.size() < 3 && req.type != TRANSITION) {
+  // If there's less than 3 points, make it have straight segments
+  if(req.path.points.size() < 3) {
     ROS_WARN("Path request size < 3");
     req.type = ALL_STRAIGHT_SEGMENTS;
   }

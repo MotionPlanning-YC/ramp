@@ -141,7 +141,7 @@ class Planner {
     void updateCallback(const ramp_msgs::MotionState& msg);
 
     // Sets the m_i vector
-    void setMi();
+    const std::vector<MotionState> setMi(const RampTrajectory trj_current) const;
 
     // Motion state that should be reached by next control cycle
     MotionState m_cc_;
@@ -220,7 +220,7 @@ class Planner {
 
 
 
-    const MotionState     predictStartPlanning() const;
+    const MotionState     errorCorrection() const;
 
 
 

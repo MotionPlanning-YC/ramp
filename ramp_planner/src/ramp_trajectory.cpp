@@ -13,13 +13,19 @@ RampTrajectory::RampTrajectory(const ramp_msgs::RampTrajectory msg) : msg_(msg) 
 
 
 const bool RampTrajectory::equals(const RampTrajectory& other) const {
-  if(msg_.id == other.msg_.id) {
+  if(msg_.id == other.msg_.id) 
+  {
     return true;
   }
 
   return path_.equals(other.path_);
 }
 
+
+const double RampTrajectory::getT() const
+{
+  return msg_.trajectory.points.at(msg_.trajectory.points.size()-1).time_from_start.toSec();
+}
 
 const Path RampTrajectory::getPath() const {
   Path result;
@@ -361,6 +367,7 @@ const std::string RampTrajectory::toString() const {
   
   result<<"\nTrajectory ID: "<<msg_.id<<"\nTrajec: "<<utility_.toString(msg_);
   result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<(bool)msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
+  result<<"\n   Transition traj size: "<<transitionTraj_.trajectory.points.size();
   
   return result.str();
 }

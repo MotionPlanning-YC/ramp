@@ -14,13 +14,13 @@ class Path {
     Path(const ramp_msgs::Path p);
     ~Path();
     
-    //Data members
+    // Data members
     KnotPoint start_;
     KnotPoint goal_;
     std::vector<KnotPoint> all_;
     
     
-    //Methods
+    // Methods
     const bool equals(const Path& p) const;
     const KnotPoint at(const uint8_t i) const;
     void addBeforeGoal(const KnotPoint kp);

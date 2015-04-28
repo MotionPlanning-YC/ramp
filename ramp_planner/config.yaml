@@ -1,8 +1,8 @@
-population_size: 2
+population_size: 2 
 
 sub_populations: false 
 
-modifications: true 
+modifications: false 
 
 evaluations: true
 

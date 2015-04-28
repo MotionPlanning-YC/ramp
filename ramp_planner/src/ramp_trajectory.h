@@ -20,6 +20,7 @@ class RampTrajectory {
     const RampTrajectory clone()                                const;
     const bool           equals(const RampTrajectory& other)    const;
     const double         getIndexOfMs(const MotionState ms)     const;
+    const double         getT()                                 const;
     const Path           getPath()                              const;
     const double         getDirection()                         const;
     const std::string    fitnessFeasibleToString()              const;

@@ -120,6 +120,8 @@ const bool BezierCurve::verify() const {
   double w_max = 3*PI/4;
 
   double u_dot_max = getUDotMax(u_dot_0_);
+  double u_x = ( fabs(A_+C_) > fabs(C_) ) ? 1 : 0;
+  double u_y = ( fabs(B_+D_) > fabs(D_) ) ? 1 : 0;
   ROS_INFO("u_dot_max: %f", u_dot_max);
 
   double x_dot = (A_*t_R_min_ + C_)*u_dot_max;
@@ -272,6 +274,7 @@ const ramp_msgs::MotionState BezierCurve::getInitialState() {
 const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_x, const double u_y) const {
   //if(print_) {
     std::cout<<"\n\nTesting constraints for "<<u_dot;
+    std::cout<<"\nu_x: "<<u_x<<" u_y: "<<u_y;
     std::cout<<"\n(A_*u_x+C_)*u_dot: "<<(A_*u_x+C_)*u_dot<<" x_dot_max: "<<ms_max_.velocities.at(0);
     std::cout<<"\n(B_*u_y+D_)*u_dot: "<<(B_*u_y+D_)*u_dot<<" y_dot_max: "<<ms_max_.velocities.at(1);
   //}
@@ -305,13 +308,11 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const {
   double u_dot_max;
   double u_x = ( fabs(A_+C_) > fabs(C_) ) ? 1 : 0;
   double u_y = ( fabs(B_+D_) > fabs(D_) ) ? 1 : 0;
-  double u_dot_max_x = A_*u_x + C_ == 0 ? 0 : fabs(y_dot_max / (A_*u_x+C_));
-  double u_dot_max_y = B_*u_y + D_ == 0 ? 0 : fabs(x_dot_max / (B_*u_y+D_));
 
-  ROS_INFO("x_ddot_max / A_: %f y_ddot_max / B_: %f", (x_ddot_max / A_), (y_ddot_max / B_));
   // New method
-  u_dot_max_x = sqrt( fabs(x_ddot_max / A_) );
-  u_dot_max_y = sqrt( fabs(y_ddot_max / B_) );
+  double u_dot_max_x = sqrt( fabs(x_ddot_max / A_) );
+  double u_dot_max_y = sqrt( fabs(y_ddot_max / B_) );
+  ROS_INFO("x_ddot_max / A_: %f y_ddot_max / B_: %f", (x_ddot_max / A_), (y_ddot_max / B_));
 
 
   //if(print_) {
