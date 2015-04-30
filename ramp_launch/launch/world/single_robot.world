@@ -7,7 +7,7 @@ paused 1
 
 resolution 0.02
   
-interval_sim 10
+interval_sim 25
 
 
 define corobot corobot_base

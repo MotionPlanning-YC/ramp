@@ -32,6 +32,8 @@ class RampTrajectory {
 
     const trajectory_msgs::JointTrajectoryPoint getPointAtTime(const float t) const;
 
+    void offsetPositions(const MotionState diff);
+
   private:
     Utility utility_;
 };

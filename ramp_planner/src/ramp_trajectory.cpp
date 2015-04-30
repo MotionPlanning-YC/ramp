@@ -346,6 +346,28 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
 
 
 
+void RampTrajectory::offsetPositions(const MotionState diff)
+{
+  ROS_INFO("In RampTrajectory::offsetPositions");
+  
+  // Go through all the points and subtract diff
+  for(uint16_t i=0;i<msg_.trajectory.points.size();i++)
+  {
+    MotionState temp(msg_.trajectory.points.at(i));
+    temp = temp.subtractPosition(diff);
+
+    // Set new positions
+    for(uint8_t j=0;j<msg_.trajectory.points.at(i).positions.size();j++)
+    {
+      msg_.trajectory.points.at(i).positions.at(j) = temp.msg_.positions.at(j);
+    }
+  }
+
+  ROS_INFO("Exiting RampTrajectory::offsetPositions");
+} // End offsetPositions
+
+
+
 const RampTrajectory RampTrajectory::clone() const { 
   return *this;
 }

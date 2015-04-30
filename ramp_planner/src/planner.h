@@ -34,7 +34,9 @@ class Planner {
     // the trajectory's path,
     // and the resolution rate for the trajectories
     Population                          population_;
+    Population                          population_at_cc_;
     Population                          transPopulation_;
+    Population                          transPopulation_at_cc_;
     const float                         resolutionRate_;
     
     // Hold the start and goal configurations
@@ -281,6 +283,9 @@ class Planner {
 
     const Population getTransPopAtPC(const Population pop, const RampTrajectory traj, const uint8_t pc);
     const Population getTransPop(const Population pop, const RampTrajectory movingOn);
+
+
+    const Population offsetPopulation(const Population pop, const MotionState diff) const;
 
 
 

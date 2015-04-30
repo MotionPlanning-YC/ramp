@@ -14,7 +14,8 @@ Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalT
   generationsPerCC_       = controlCycle_.toSec() / planningCycle_.toSec();
 }
 
-Planner::~Planner() {
+Planner::~Planner() 
+{
   if(h_traj_req_!= 0) {
     delete h_traj_req_;
     h_traj_req_= 0;
@@ -791,7 +792,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
  * updates are relative to odometry frame
  * */
 void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
-  //std::cout<<"\nReceived update!\n";
+  ROS_INFO("In Planner::updateCallback");
 
  
   if(msg.positions.size() < 3 ||
@@ -819,7 +820,10 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
     latestUpdate_.msg_.accelerations.at(1) = msg.accelerations.at(0) * 
                                              sin(latestUpdate_.msg_.positions.at(2));
 
+    ROS_INFO("New latestUpdate_: %s", latestUpdate_.toString().c_str());
   } // end else
+  
+  ROS_INFO("Exiting Planner::updateCallback");
 } // End updateCallback
 
 
@@ -1706,13 +1710,13 @@ const std::vector<Path> Planner::modifyPath() {
 
 /** Modify a trajectory */ 
 const std::vector<RampTrajectory> Planner::modifyTrajec() {
-  //std::cout<<"\nIn modifyTrajec\n";
+  ROS_INFO("In Planner::modifyTrajec");
   std::vector<RampTrajectory> result;
   
 
   // The process begins by modifying one or more paths
   std::vector<Path> modded_paths = modifyPath();
-  //std::cout<<"\nNumber of modified paths returned: "<<modded_paths.size()<<"\n";
+  ROS_INFO("Number of modified paths: %i", (int)modded_paths.size());
 
 
   // For each targeted path,
@@ -1725,6 +1729,7 @@ const std::vector<RampTrajectory> Planner::modifyTrajec() {
   
   } // end for
   
+  ROS_INFO("Exiting Planner::modifyTrajec");
   return result;
 } // End modifyTrajectory
 
@@ -1744,6 +1749,7 @@ const ModificationResult Planner::modification() {
 
   // Modify 1 or more trajectories
   std::vector<RampTrajectory> mod_trajec = modifyTrajec();
+  ROS_INFO("Modification trajectories obtained: %i", (int)mod_trajec.size());
   
   Population popCopy = population_;
   
@@ -1760,7 +1766,9 @@ const ModificationResult Planner::modification() {
     // Add the new trajectory to the population
     // Index is where the trajectory was added in the population (may replace another)
     // If it was successfully added, push its index onto the result
+    ROS_INFO("Trying to add modified trajectory");
     int index = popCopy.add(mod_trajec.at(i));
+    ROS_INFO("Added at index %i", index);
     if(index > -1) 
     {
       population_.replace(index, mod_trajec.at(i));
@@ -1843,14 +1851,14 @@ const MotionState Planner::errorCorrection() const
   ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
   
   // Get the difference between robot's state and what state it should be at
-  MotionState diff = m_i_.at(c_pc_).subtractPosition(latestUpdate_);
-  
+  MotionState diff = m_i_.at(c_pc_).subtractPosition(latestUpdate_, true);
+ 
   ROS_INFO("m_cc: %s\ndiff: %s", 
       m_cc_.toString().c_str(),
       diff.toString().c_str());
 
   // subtractPosition that difference from startPlanning
-  result = m_cc_.subtractPosition(diff);
+  result = m_cc_.subtractPosition(diff, true);
 
   // Set new theta
   result.msg_.positions.at(2) = latestUpdate_.msg_.positions.at(2);
@@ -1882,6 +1890,53 @@ void Planner::updatePathsStart(const MotionState s)
 
 
 
+/*
+ * diff will be the amount to offset. Only the positions will be offset
+ */
+const Population Planner::offsetPopulation(const Population pop, const MotionState diff) const
+{
+  ROS_INFO("In Planner::offsetPopulation");
+  Population result = pop;
+
+  ROS_INFO("diff: %s", diff.toString().c_str());
+ 
+   
+  for(uint8_t i=0;i<pop.size();i++)
+  {
+    ROS_INFO("Trajectory %i", i);
+    RampTrajectory temp = pop.get(i);
+    temp.offsetPositions(diff);
+    
+    temp.path_.offsetPositions(diff); 
+      
+    ROS_INFO("curves.size: %i", (int)temp.msg_.curves.size());
+    for(uint8_t c=0;c<temp.msg_.curves.size() && temp.msg_.curves.at(c).segmentPoints.size() > 0;c++)
+    {
+      ROS_INFO("Fixing curve %i", c);
+      temp.msg_.curves.at(c).segmentPoints.at(1) = temp.path_.at(1).motionState_.msg_;
+      temp.msg_.curves.at(c).segmentPoints.at(2) = temp.path_.at(2).motionState_.msg_;
+      
+      MotionState c0(temp.msg_.curves.at(c).controlPoints.at(0));
+      MotionState c1(temp.msg_.curves.at(c).controlPoints.at(1));
+      MotionState c2(temp.msg_.curves.at(c).controlPoints.at(2));
+      
+      temp.msg_.curves.at(c).controlPoints.at(0) = c0.subtractPosition(diff).msg_;
+      temp.msg_.curves.at(c).controlPoints.at(1) = c1.subtractPosition(diff).msg_;
+      temp.msg_.curves.at(c).controlPoints.at(2) = c2.subtractPosition(diff).msg_;
+      ROS_INFO("After fixing curve: %s", utility_.toString(temp.msg_.curves.at(0)).c_str());
+    }
+
+    result.replace(i, temp);
+  }
+   
+  ROS_INFO("Exiting Planner::offsetPopulation");
+  return result;
+}
+
+
+
+
+
 void Planner::planningCycleCallback(const ros::TimerEvent& e) {
   ROS_INFO("*************************************************");
   ROS_INFO("Planning cycle occurring, generation %i", generation_);
@@ -1889,13 +1944,15 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
       e.last_expected.toSec(), e.last_real.toSec(), e.current_expected.toSec(), e.current_real.toSec(), e.profile.last_duration.toSec());
   ROS_INFO("Time since last: %f", (e.current_real - e.last_real).toSec());
   ROS_INFO("*************************************************");
-  
+ 
+  ROS_INFO("Time since last CC: %f", (ros::Time::now()-t_prevCC_).toSec());
+
   ros::Time t = ros::Time::now();
 
  
 
   // Make sure not too many PC occur before next CC
-  if(c_pc_ < generationsPerCC_ || !cc_started_) 
+  if(c_pc_ < generationsPerCC_) 
   {
 
     // Must have started control cycles
@@ -1913,6 +1970,8 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
       {
           ROS_INFO("Doing error correction");
           // Do error correction
+          MotionState diff = m_i_.at(c_pc_).subtractPosition(latestUpdate_, true);
+          ROS_INFO("diff: %s", diff.toString().c_str());
           startPlanning_ = errorCorrection();
           ROS_INFO("Updating paths starting position");
 
@@ -1921,14 +1980,21 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
           movingOn_ = requestTrajectory(p);
           ROS_INFO("New movingOn: %s", movingOn_.toString().c_str());
           
-          population_.replaceAll(replanTrajecs(population_.getTrajectories(), startPlanning_));
-
-          ROS_INFO("After getting corrected trajectories");
-          ROS_INFO("Getting transition population");
-          transPopulation_ = getTransPop(population_, movingOn_);
+          ROS_INFO("Before offset, pop: %s\ntransPop: %s", population_.toString().c_str(), 
+              transPopulation_.toString().c_str());
           
+          population_       = offsetPopulation(population_at_cc_, diff);
+          transPopulation_  = offsetPopulation(transPopulation_at_cc_, diff);
+
+          population_       = evaluatePopulation(population_);
+          transPopulation_  = evaluatePopulation(transPopulation_);
+          
+          /*population_.replaceAll(replanTrajecs(population_.getTrajectories(), startPlanning_));
+          transPopulation_ = getTransPop(population_, movingOn_);
           population_ = evaluatePopulation(population_);
           transPopulation_ = evaluatePopulation(transPopulation_);
+          ROS_INFO("Getting transition population");*/
+          
           ROS_INFO("After doing error correction, new pop: %s\n\n\nnew trans pop: %s", population_.toString().c_str(), 
               transPopulation_.toString().c_str());
       }
@@ -1982,7 +2048,8 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
 
     sendPopulation(transPopulation_);
   
-    ROS_INFO("Time spent in PC: %f", (ros::Time::now() - t).toSec());
+    /*ROS_INFO("Exiting PC at time: %f", ros::Time::now().toSec());
+    ROS_INFO("Time spent in PC: %f", (ros::Time::now() - t).toSec());*/
     ROS_INFO("********************************************************************");
     ROS_INFO("Generation %i completed", (generation_-1));
     ROS_INFO("********************************************************************");
@@ -2167,14 +2234,14 @@ void Planner::doControlCycle() {
   ROS_INFO("Time between control cycles: %f", (ros::Time::now() - t_prevCC_).toSec());
   t_prevCC_ = ros::Time::now();
   ROS_INFO("Number of planning cycles that occurred between CC's: %i", c_pc_);
-  
+
   ros::Time t = ros::Time::now();
 
 
   // Set the bestT
   RampTrajectory bestT = transPopulation_.getBest();
 
-  ROS_INFO("Latest Update: %s", latestUpdate_.toString().c_str());
+  ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
   MotionState diff = bestT.path_.at(0).motionState_.subtractPosition(latestUpdate_);
   ROS_INFO("diff: %s", diff.toString().c_str());
 
@@ -2198,7 +2265,7 @@ void Planner::doControlCycle() {
 
   //ROS_INFO("Setting movingOn_");
   movingOn_ = bestT.getSubTrajectory(t_fixed_cc_);
-  ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
+  //ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
 
   // Reset planning cycle count
   c_pc_ = 0;
@@ -2231,6 +2298,10 @@ void Planner::doControlCycle() {
   
   ROS_INFO("After finding transition population, controlCycle period: %f", controlCycle_.toSec());
   ROS_INFO("New transPop: %s", transPopulation_.toString().c_str());
+
+  population_at_cc_       = population_;
+  transPopulation_at_cc_  = transPopulation_;
+
 
   //ROS_INFO("Control Cycle: new CC timer: %f", controlCycle_.toSec());
   //controlCycleTimer_.setPeriod(controlCycle_);
@@ -2271,18 +2342,18 @@ void Planner::doControlCycle() {
  *  configuration of the robot, re-evaluates the population,
  *  and sends a new (and better) trajectory for the robot to move along */
 void Planner::controlCycleCallback(const ros::TimerEvent& e) {
+  // Restart the planning cycles
+  planningCycleTimer_.stop();
+  planningCycleTimer_.start();
+  
   ROS_INFO("*************************************************");
   ROS_INFO("  Control cycle timer event happening  ");
   ROS_INFO("  e.last_expected: %f\n  e.last_real: %f\n  current_expected: %f\n  current_real: %f\n  profile.last_duration: %f",
       e.last_expected.toSec(), e.last_real.toSec(), e.current_expected.toSec(), e.current_real.toSec(), e.profile.last_duration.toSec());
   ROS_INFO("Time since last: %f", (e.current_real - e.last_real).toSec());
   ROS_INFO("*************************************************");
-
-  if(num_cc_ == 0)
-  {
-    planningCycleTimer_.start();
-  }
   
+  ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
   
   // Do the control cycle
   doControlCycle();
@@ -2547,25 +2618,21 @@ const MotionState Planner::findAverageDiff() {
   // Initialize transPopulation
   transPopulation_ = population_;
 
-  
-  // Start the planning cycle timer
+  // Start the planning cycles
   planningCycleTimer_.start();
 
-  // Wait for 100 generations before starting 
+  // Wait for the specified number of generations before starting CC's
   while(generation_ < generationsBeforeCC_) {ros::spinOnce();}
-
-  // Set bestTrajec before starting initial CC
-  //bestTrajec_ = population_.get(population_.calcBestIndex());
-
-  // Start the control cycle timer
-  std::cout<<"\n********Robot "<<id_<<": Starting Control Cycle********\n";
+  
+  ROS_INFO("Starting CCs at t: %f", ros::Time::now().toSec());
+  // Start the control cycles
   controlCycleTimer_.start();
   imminentCollisionTimer_.start();
 
   
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
-  goalThreshold_ = 0.2;
+  goalThreshold_ = 0.1;
   ros::Rate r(20);
   while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) {
     r.sleep();

@@ -20,7 +20,7 @@ class MotionState {
     void    transformBase(const tf::Transform t);
 
     const MotionState add(const MotionState m) const;
-    const MotionState subtractPosition(const MotionState m) const; 
+    const MotionState subtractPosition(const MotionState m, bool orientation=false) const; 
     const MotionState multiply(const int num) const;
     const MotionState divide(const int num) const;
     const MotionState abs() const;
@@ -29,6 +29,8 @@ class MotionState {
     const double      normVelocity() const;
     const double      normAcceleration() const;
     const double      normJerk() const;
+
+    const trajectory_msgs::JointTrajectoryPoint getJTP() const;
     
     
     const   std::string toString() const;

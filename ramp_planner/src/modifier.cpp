@@ -62,7 +62,8 @@ const std::string Modifier::getOperator() const {
 
 /** This method generates the random paths to use for the modification operator passed in as op argument */
 const std::vector<int> Modifier::getTargets(const std::string op, const Population pop) {
-  //std::cout<<"\nIn targets\n";
+  ROS_INFO("In Modifier::getTargets");
+  ROS_INFO("op: %s", op.c_str());
   std::vector<int> result;
 
   // Get random path(s) to modify
@@ -83,7 +84,7 @@ const std::vector<int> Modifier::getTargets(const std::string op, const Populati
   } // end if crossover 
 
 
-  //std::cout<<"\nLeaving targets\n";
+  ROS_INFO("In Modifier::getTargets");
   return result;
 } // End getTargets
 
@@ -115,11 +116,12 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest(const Po
 
 /** This method performs all the tasks for path modification */
 const std::vector<Path> Modifier::perform(const Population pop) {
+  ROS_INFO("In Modifier::perform");
   std::vector<Path> result;
  
   // Build a modification request srv 
   ramp_msgs::ModificationRequest mr = buildModificationRequest(pop); 
-  
+  ROS_INFO("ModificationResult built"); 
 
   // Check if the operation changes the path
   if(mr.request.op == "stop") {
@@ -129,7 +131,6 @@ const std::vector<Path> Modifier::perform(const Population pop) {
   }
 
   else {
-    std::cout<<"\nIn else\n";
 
     // If the request was successful
     if(h_mod_req_->request(mr)) {
@@ -142,6 +143,6 @@ const std::vector<Path> Modifier::perform(const Population pop) {
     } // end inner if 
   } // end if operator != stop
 
-  std::cout<<"\nLeaving perform\n";
+  ROS_INFO("Exiting Modifier::perform");
   return result;
 }

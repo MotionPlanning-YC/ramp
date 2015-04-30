@@ -48,6 +48,35 @@ const MotionState MotionState::zero(const uint8_t size) const {
   return result;
 }
 
+    
+const trajectory_msgs::JointTrajectoryPoint MotionState::getJTP() const
+{
+  trajectory_msgs::JointTrajectoryPoint result;
+
+  for(uint16_t i=0;i<msg_.positions.size();i++)
+  {
+    result.positions.push_back(msg_.positions.at(i));
+  }
+
+  for(uint16_t i=0;i<msg_.velocities.size();i++)
+  {
+    result.velocities.push_back(msg_.velocities.at(i));
+  }
+
+  for(uint16_t i=0;i<msg_.accelerations.size();i++)
+  {
+    result.accelerations.push_back(msg_.accelerations.at(i));
+  }
+
+  for(uint16_t i=0;i<msg_.jerks.size();i++)
+  {
+    result.effort.push_back(msg_.jerks.at(i));
+  }
+
+  result.time_from_start = ros::Duration(msg_.time);
+
+  return result;
+}
 
 /** equals comparison */
 const bool MotionState::equals(const MotionState& ms) const 
@@ -209,13 +238,18 @@ const MotionState MotionState::add(const MotionState m) const {
 
 
 /** */
-const MotionState MotionState::subtractPosition(const MotionState m) const {
-  ROS_INFO("In MotionState::subtract");
+const MotionState MotionState::subtractPosition(const MotionState m, bool orientation) const {
+  //ROS_INFO("In MotionState::subtract");
 
   MotionState result = *this;
 
   for(int i=0;i<msg_.positions.size() && i<m.msg_.positions.size();i++) {
-    if(i != mobile_base_k_) {
+    if(i == mobile_base_k_ && orientation)
+    {
+      result.msg_.positions.at(i) = utility_.displaceAngle(result.msg_.positions.at(i), -m.msg_.positions.at(i));
+    }
+    else 
+    {
       result.msg_.positions.at(i) -= m.msg_.positions.at(i);
     }
     /*else {
@@ -224,7 +258,7 @@ const MotionState MotionState::subtractPosition(const MotionState m) const {
   }
 
 
-  ROS_INFO("Exiting MotionState::subtract");
+  //ROS_INFO("Exiting MotionState::subtract");
   return result;
 } // End subtract
 
