@@ -17,6 +17,7 @@ bool                evaluations;
 bool                seedPopulation;
 bool                errorReduction;
 double              t_cc_rate;
+double              t_pc_rate;
 
 
 
@@ -141,6 +142,11 @@ void loadParameters(const ros::NodeHandle handle) {
     ROS_INFO("t_cc_rate: %f", t_cc_rate);
   }
   
+  if(handle.hasParam("ramp/planning_cycle_rate")) {
+    handle.getParam("ramp/planning_cycle_rate", t_pc_rate);
+    ROS_INFO("t_pc_rate: %f", t_pc_rate);
+  }
+  
   if(handle.hasParam("ramp/error_reduction")) {
     handle.getParam("ramp/error_reduction", errorReduction);
     ROS_INFO("errorReduction: %s", errorReduction ? "True" : "False");
@@ -178,7 +184,7 @@ int main(int argc, char** argv) {
 
  
   /** Initialize the Planner's handlers */ 
-  my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, gensBeforeCC, t_cc_rate, errorReduction); 
+  my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction); 
   my_planner.modifications_   = modifications;
   my_planner.evaluations_     = evaluations;
   my_planner.seedPopulation_  = seedPopulation;

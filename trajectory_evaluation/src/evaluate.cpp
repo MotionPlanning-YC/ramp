@@ -42,7 +42,8 @@ const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) 
   penalties += orientation_.getPenalty();
   
   // If the trajectory is infeasible
-  if(feasible.collision_) {
+  if(feasible.collision_) 
+  {
 
     // Add the Penalty for being infeasible
     if (feasible.t_firstCollision_ == 0) 

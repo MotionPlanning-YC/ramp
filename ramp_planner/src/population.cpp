@@ -309,36 +309,35 @@ const int Population::add(const RampTrajectory rt) {
   ROS_INFO("In Population::add");
   //ROS_INFO("rt: %s", rt.toString().c_str());
 
-    if(subPopulations_.size() > 0) {
-      // Go through each sub-population and find best
-      for(uint8_t i=0;i<subPopulations_.size();i++) {
-        subPopulations_.at(i).calcBestIndex();
-      }
+  if(subPopulations_.size() > 0) {
+    // Go through each sub-population and find best
+    for(uint8_t i=0;i<subPopulations_.size();i++) {
+      subPopulations_.at(i).calcBestIndex();
     }
-   
-    // If it's a sub-population or
-    // If it's not full, simply push back
-    if(isSubPopulation_ || trajectories_.size() < maxSize_) {
-      trajectories_.push_back (rt);  
-      paths_.push_back        (rt.path_);
-      
-      ROS_INFO("In if isSubPopulation_ || trajectories_.size() < maxSize_");
-      ROS_INFO("Exiting Population::add");
-      return trajectories_.size()-1;
-    } 
+  }
+ 
+  // If it's a sub-population or
+  // If it's not full, simply push back
+  if(isSubPopulation_ || trajectories_.size() < maxSize_) {
+    trajectories_.push_back (rt);  
+    paths_.push_back        (rt.path_);
+    
+    ROS_INFO("In if isSubPopulation_ || trajectories_.size() < maxSize_");
+    ROS_INFO("Exiting Population::add");
+    return trajectories_.size()-1;
+  } 
 
-    // If full, replace a trajectory
-    else if(!contains(rt) && replacementPossible(rt)) {
+  // If full, replace a trajectory
+  else if(!contains(rt) && replacementPossible(rt)) 
+  {
+    int i = getReplacementID(rt);
 
-
-      int i = getReplacementID(rt);
-
-      replace(i, rt);
-      
-      ROS_INFO("Added trajectory to index %i", i);
-      ROS_INFO("Exiting Population::add");
-      return i;
-    }
+    replace(i, rt);
+    
+    ROS_INFO("Added trajectory to index %i", i);
+    ROS_INFO("Exiting Population::add");
+    return i;
+  }
 
 
   ROS_INFO("Cannot add trajectory");

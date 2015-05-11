@@ -102,6 +102,7 @@ class Planner {
               const int                 population_size, 
               const bool                sub_populations,  
               const int                 gens_before_cc=0,
+              const double              t_pc_rate=2.,
               const double              t_fixed_cc=2.,
               const bool                errorReduction=0);
     
