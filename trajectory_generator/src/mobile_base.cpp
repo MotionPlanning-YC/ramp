@@ -89,7 +89,6 @@ void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
   //ROS_INFO("Entered MobileBase::init");
   //std::cout<<"\nRequest received: "<<utility_.toString(req)<<"\n";
 
-  bezierStart = req.startBezier;
   //if(req.bezierInfo.u_0 > 0)
     //std::cout<<"\nBezier Info passed in: "<<utility_.toString(req.bezierInfo);
 
@@ -869,9 +868,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Set start time
   t_started_ = ros::Time::now();
 
-  // Set the trajectory's resolution rate
-  res.trajectory.resolutionRate = CYCLE_TIME_IN_SECONDS;
-
   std::vector<BezierCurve> curves;
 
   // Use Bezier curves to smooth path
@@ -977,16 +973,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       bi.u_values       = curves.at(c).u_values_;
       res.trajectory.curves.push_back(bi);
 
-      if(i_kp_ == path_.points.size()-1) 
-      {
-        res.trajectory.i_curveEnd = res.trajectory.trajectory.points.size()-1;
-      }
-      else 
-      {
-        res.trajectory.i_curveEnd = res.trajectory.trajectory.points.size();
-      }
-
-      //ROS_INFO("Setting i_curveEnd: %i", (int)res.trajectory.trajectory.points.size()-1);
 
       c++;
     } // end if bezier
@@ -1123,9 +1109,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   } // end for each knot point (outer-most loop)
  
 
-  // Lastly, set newPath in case the path changed
-  res.newPath = path_;
- 
   return true;
 } // End trajectoryRequest callback
 

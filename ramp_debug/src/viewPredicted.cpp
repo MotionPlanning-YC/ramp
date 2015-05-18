@@ -185,7 +185,6 @@ const ramp_msgs::RampTrajectory getPredictedTrajectory(const ramp_msgs::Obstacle
   // Now build a Trajectory Request 
   ramp_msgs::TrajectoryRequest tr;
     tr.request.path = getObstaclePath(ob, motion_type);
-    tr.request.resolutionRate = 5;
     tr.request.type = PREDICTION;
 
   // Get trajectory

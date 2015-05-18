@@ -17,22 +17,26 @@ Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalT
 Planner::~Planner() 
 {
   if(h_traj_req_!= 0) {
+
     delete h_traj_req_;
     h_traj_req_= 0;
   }
 
 
-  if(h_control_ != 0) {
+  if(h_control_ != 0) 
+  {
     delete h_control_;
     h_control_ = 0;
   }
 
-  if(h_eval_req_ != 0) {
+  if(h_eval_req_ != 0) 
+  {
     delete h_eval_req_;
     h_eval_req_ = 0;
   }
   
-  if(modifier_!= 0) {
+  if(modifier_!= 0) 
+  {
     delete modifier_;  
     modifier_= 0;
   }
@@ -41,7 +45,8 @@ Planner::~Planner()
 
 /** Explicitly restart the control cycles 
  *  Need to call doControlCycle because the timers first iteration is not now */
-void Planner::restartControlCycle(const double t) {
+void Planner::restartControlCycle(const double t) 
+{
   ROS_INFO("Restarting Control Cycle");
   controlCycleTimer_.stop();
 
@@ -60,7 +65,8 @@ void Planner::restartControlCycle(const double t) {
 
 
 
-const std::vector<Path> Planner::getRandomPaths(const MotionState init, const MotionState goal) {
+const std::vector<Path> Planner::getRandomPaths(const MotionState init, const MotionState goal) 
+{
   std::vector<Path> result;
 
   // Create n random paths, where n=populationSize
@@ -687,7 +693,6 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   ramp_msgs::TrajectoryRequest result;
 
   result.request.path           = path.buildPathMsg();
-  result.request.resolutionRate = resolutionRate_;
   result.request.type           = PARTIAL_BEZIER;
 
   // If path size > 2, assign a curve
@@ -1357,6 +1362,107 @@ const RampTrajectory Planner::computeFullSwitch(const RampTrajectory from, const
 
 
 
+bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory to, const double t)
+{
+  // Get the first two control points for the transition curve
+  MotionState ms_startTrans = from.getPointAtTime(t);
+  MotionState ms_endOfMovingOn = to.msg_.trajectory.points.size() > 0 ? 
+    to.msg_.trajectory.points.at(0) : 
+    from.msg_.trajectory.points.at(from.msg_.trajectory.points.size()-1);
+  //ROS_INFO("ms_startTrans: %s", ms_startTrans.toString().c_str());
+  //ROS_INFO("ms_endOfMovingOn: %s", ms_endOfMovingOn.toString().c_str());
+
+ 
+  /*
+   * If the robot does not have correct orientation to move on the first segment
+   * then a curve cannot be planned.
+   * return a blank trajectory
+   */
+  if(fabs(utility_.findDistanceBetweenAngles( 
+        ms_startTrans.msg_.positions.at(2), ms_endOfMovingOn.msg_.positions.at(2))) > 0.12 ) 
+  {
+    ROS_WARN("Cannot plan a transition curve!");
+    ROS_WARN("startTrans: %s\nendOfMovingOn: %s", ms_startTrans.toString().c_str(), 
+        ms_endOfMovingOn.toString().c_str());
+    return false;
+  }
+
+
+  // Add points to segments
+  std::vector<MotionState> segmentPoints;
+  segmentPoints.push_back(ms_startTrans);
+  segmentPoints.push_back(ms_endOfMovingOn);
+
+  /*
+   * Get 3rd control point
+   * 2nd knot point should be the initial point on that trajectory's bezier 
+   * Using start of Bezier rather than segment endpoint ensures that
+   * the trajectory will end at the start of the Bezier
+   */
+  int i_goal = 1;
+  if(to.msg_.i_knotPoints.size() == 1) 
+  {
+    i_goal = 0;
+  }
+
+  // Removed this section because we changed from getPath() to the actual path_ member
+  // Else if there's self-rotation at the beginning
+  else if(to.msg_.i_knotPoints.size() > 2 && 
+      utility_.positionDistance(  to.path_.start_.motionState_.msg_.positions, 
+                                  to.msg_.trajectory.points.at(
+                                    to.msg_.i_knotPoints.at(1)).positions ) 
+                                < 0.1)
+  {
+    i_goal = 2;
+  }
+  ROS_INFO("i_goal: %i", i_goal);
+ 
+  // Set third segment point
+  MotionState g(to.msg_.trajectory.points.at(to.msg_.i_knotPoints.at(i_goal)));
+  segmentPoints.push_back(g);
+
+  ROS_INFO("After getting all segments");
+
+  /*
+   * Check misc things like same orientation
+   */
+  if(fabs(utility_.findDistanceBetweenAngles( 
+        ms_startTrans.msg_.positions.at(2), ms_endOfMovingOn.msg_.positions.at(2))) > 0.12 ) 
+  {
+    ROS_WARN("Cannot plan a transition curve!");
+    ROS_WARN("startTrans: %s\nendOfMovingOn: %s", ms_startTrans.toString().c_str(), 
+        ms_endOfMovingOn.toString().c_str());
+    return false;
+  }
+  
+  /*
+   * After getting both segments, check if they have the same orientation
+   * If so, just return the rest of movingOn, no need to plan a transition trajectory
+   */
+  double thetaS1 = utility_.findAngleFromAToB(segmentPoints.at(0).msg_.positions, 
+                                              segmentPoints.at(1).msg_.positions);
+  double thetaS2 = utility_.findAngleFromAToB(segmentPoints.at(1).msg_.positions, 
+                                              segmentPoints.at(2).msg_.positions);
+  ROS_INFO("Theta 1: %f Theta 2: %f", thetaS1, thetaS2);
+  if( fabs(utility_.findDistanceBetweenAngles(thetaS1, thetaS2)) < 0.13 )
+  {
+    ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
+    return true;
+  }
+
+
+  /*
+   * See if a curve can be planned
+   */
+  BezierCurve curve;
+  curve.init(segmentPoints, 0.1);
+  
+  ROS_INFO("Curve formed for prediction: %s", utility_.toString(curve.getMsg()).c_str());
+
+
+  return curve.verify();
+
+}
 
 
 /*
@@ -1388,9 +1494,16 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
     ROS_INFO("t_pc: %f t: %f", t_pc, t);
     MotionState ms = from.getPointAtTime(t);
 
-    // Must be moving straight
-    // TODO: Change this to oriented towards end of "from" trajectory
-    RampTrajectory trans = getTransitionTrajectory(from, to, t);
+    ROS_INFO("Calling predictTransition");
+    if(predictTransition(from, to, t))
+    {
+      pc = i_pc;
+      break;
+    }
+    ROS_INFO("Done calling predictTransition");
+
+    // Get transition
+    /*RampTrajectory trans = getTransitionTrajectory(from, to, t);
 
     // If we were able to plan a curve, we are done - stop loop
     if( (trans.msg_.i_knotPoints.size() == 2) ||
@@ -1406,7 +1519,7 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
       ROS_INFO("Unable to plan a transition curve!");
       ROS_INFO("trans.msg_.curves.size(): %i", (int)trans.msg_.curves.size());
       ROS_INFO("trans.msg_.i_knotPoints.size(): %i", (int)trans.msg_.i_knotPoints.size());
-    }
+    }*/
   } // end for
 
  
@@ -1647,11 +1760,6 @@ const RampTrajectory Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr
 
     // Set the paths (straight-line and bezier)
     result.path_        = tr.request.path;
-
-    if(tr.response.newPath.points.size() > 0) 
-    {
-      //result.bezierPath_  = tr.response.newPath;
-    }
 
     // *** Set the previous knot point
     //result.ms_prevSP_ = tr.request.path.points.at(0).motionState;

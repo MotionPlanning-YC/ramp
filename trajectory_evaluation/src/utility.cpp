@@ -313,8 +313,6 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
     result<<"\n Curve "<<(int)i<<"\n"<<toString(traj.curves.at(i));
   }
 
-  result<<"\ni_curveEnd: "<<(int)traj.i_curveEnd<<"\n";
-
   //ROS_INFO("Done with curves");
 
   return result.str();

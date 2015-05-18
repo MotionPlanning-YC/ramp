@@ -12,6 +12,7 @@
 #include "ramp_msgs/EvaluationRequest.h"
 #include <tf/transform_datatypes.h>
 #include <ros/console.h>
+#include "ramp_msgs/Range.h"
 
 #define PI 3.14159f
 

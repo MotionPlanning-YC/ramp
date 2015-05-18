@@ -10,4 +10,7 @@
 <!-- Publish Trajectory -->
 <node name="publish_trajectory_command" pkg="ramp_debug" type="publishTrajectoryCommand" output="screen" />
 
+
+<!-- On robot, run corobot_software_launch and ramp_control -->
+
 </launch>

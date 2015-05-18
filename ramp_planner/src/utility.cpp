@@ -326,8 +326,6 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
     result<<"\n Curve "<<(int)i<<"\n"<<toString(traj.curves.at(i));
   }
 
-  result<<"\ni_curveEnd: "<<(int)traj.i_curveEnd<<"\n";
-
   result<<"\nt_start: "<<traj.t_start.toSec();
   result<<"\nFitness: "<<traj.fitness<<" Feasible: "<<traj.feasible<<" t_firstCollision: "<<traj.t_firstCollision;
 

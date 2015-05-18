@@ -56,7 +56,6 @@ int main(int argc, char** argv) {
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
   tr.request.type = PARTIAL_BEZIER;
-  tr.request.startBezier = false;
   tr.request.print = true;
 
 

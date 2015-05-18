@@ -1,12 +1,11 @@
 #include "ramp_trajectory.h"
 
-RampTrajectory::RampTrajectory(const float resRate, unsigned int id) {
+RampTrajectory::RampTrajectory(unsigned int id) {
   msg_.id = id;
   msg_.feasible = true;
   msg_.fitness = -1;  
   msg_.t_firstCollision = ros::Duration(9999.f);
   msg_.t_start          = ros::Duration(2.0f);
-  msg_.resolutionRate = resRate;
 }
 
 RampTrajectory::RampTrajectory(const ramp_msgs::RampTrajectory msg) : msg_(msg) {}

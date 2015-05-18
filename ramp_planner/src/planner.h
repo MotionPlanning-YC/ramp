@@ -11,6 +11,7 @@
 #include "population.h"
 #include "control_handler.h"
 #include "parameter_handler.h"
+#include "bezier_curve.h"
 
 struct ModificationResult {
   Population popNew_;
@@ -288,6 +289,7 @@ class Planner {
 
     const Population offsetPopulation(const Population pop, const MotionState diff) const;
 
+    bool predictTransition(const RampTrajectory from, const RampTrajectory to, const double t);
 
 
     /***** Data members *****/
