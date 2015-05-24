@@ -12,7 +12,7 @@ public:
   BezierCurve();
   ~BezierCurve();
 
-  void init(const std::vector<MotionState> sp, const double lambda);
+  void init(const std::vector<MotionState> sp, const double lambda, const MotionState ms_current);
   void init(const ramp_msgs::BezierCurve bi, const MotionState ms_current);
  
  

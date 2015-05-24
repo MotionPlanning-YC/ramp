@@ -247,8 +247,6 @@ class Planner {
     const std::vector<RampTrajectory> getTrajectories(std::vector<ramp_msgs::TrajectoryRequest> tr);
     void updatePathsStart(const MotionState s);
 
-    const bool compareSwitchToBest(const RampTrajectory traj, const Population pop) const;
-
 
 
 
@@ -290,6 +288,8 @@ class Planner {
     const Population offsetPopulation(const Population pop, const MotionState diff) const;
 
     bool predictTransition(const RampTrajectory from, const RampTrajectory to, const double t);
+
+    void reportTimeData() ;
 
 
     /***** Data members *****/
@@ -369,6 +369,12 @@ class Planner {
 
     ros::Time t_prevCC_;
     uint8_t pc_switch_;
+
+
+    std::vector<ros::Duration> adapt_durs_;
+    std::vector<ros::Duration> trans_durs_;
+    std::vector<ros::Duration> cc_durs_;
+    double avg_adapt_dur_, avg_trans_dur_, avg_cc_dur_;
 };
 
 #endif

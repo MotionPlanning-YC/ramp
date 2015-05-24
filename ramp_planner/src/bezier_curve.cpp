@@ -7,7 +7,7 @@ BezierCurve::~BezierCurve() {}
 
 
 
-void BezierCurve::init(const std::vector<MotionState> segment_points, const double lambda) 
+void BezierCurve::init(const std::vector<MotionState> segment_points, const double lambda, const MotionState ms_current) 
 {
   segmentPoints_ = segment_points;
   l_ = lambda;
@@ -18,6 +18,8 @@ void BezierCurve::init(const std::vector<MotionState> segment_points, const doub
   ms_max_.msg_.accelerations.push_back(1);
   ms_max_.msg_.accelerations.push_back(1);
   ms_max_.msg_.accelerations.push_back(3.f*PI/4.f);
+  
+  ms_current_ = ms_current;
 
   ms_init_ = getInitialState();
 
@@ -37,6 +39,10 @@ const bool BezierCurve::verify() const {
   double w_max = 3*PI/4;
 
   double u_dot_max = getUDotMax(u_dot_0_);
+  if(u_dot_max < 0.0001)
+  {
+    u_dot_max = getUDotInitial();
+  }
   double u_x = ( fabs(A_+C_) > fabs(C_) ) ? 1 : 0;
   double u_y = ( fabs(B_+D_) > fabs(D_) ) ? 1 : 0;
   ROS_INFO("u_dot_max: %f", u_dot_max);
@@ -56,10 +62,16 @@ const bool BezierCurve::verify() const {
 
 
 
-const double BezierCurve::findVelocity(const uint8_t i, const double l, const double slope) const {
+const double BezierCurve::findVelocity(const uint8_t i, const double l, const double slope) const 
+{
+  ROS_INFO("In BezierCurve::findVelocity");
+  ROS_INFO("i: %i l: %f slope: %f", i, l, slope);
   // s = s_0 + v_0*t + 1/2*a*t^2
   // t = (v - v_0) / a;
   
+  ROS_INFO("ms_current_: %s", ms_current_.toString().c_str());
+  ROS_INFO("ms_max_: %s", ms_max_.toString().c_str());
+
   // Use 2/3 of max acceleration
   double a = (2.*ms_max_.msg_.accelerations.at(i)/3.);
 
@@ -70,20 +82,25 @@ const double BezierCurve::findVelocity(const uint8_t i, const double l, const do
   double radicand = (2*a*l) + pow(v_0, 2);
   double v = sqrt(radicand);
 
-  //ROS_INFO("v_0: %f a: %f radicand: %f v: %f", v_0, a, radicand, v);
+  ROS_INFO("v_0: %f a: %f radicand: %f v: %f", v_0, a, radicand, v);
 
   // Check for bounds
-  if(v > ms_max_.msg_.velocities.at(i)) {
+  if(v > ms_max_.msg_.velocities.at(i)) 
+  {
     v = ms_max_.msg_.velocities.at(i);
   }
-  if(v < -ms_max_.msg_.velocities.at(i)) {
+  if(v < -ms_max_.msg_.velocities.at(i)) 
+  {
     v = -ms_max_.msg_.velocities.at(i);
   }
 
-  if(slope < 0 && v > 0) {
+  if(slope < 0 && v > 0) 
+  {
     v *= -1;
   }
 
+  ROS_INFO("v: %f", v);
+  ROS_INFO("Exiting BezierCurve::findVelocity");
   return v;
 } // End findVelocity
 
@@ -154,6 +171,7 @@ const MotionState BezierCurve::getInitialState() {
   result.msg_.accelerations.push_back(0);
   
 
+  ROS_INFO("result: %s", result.toString().c_str());
   ROS_INFO("Exiting BezierCurve::getInitialState()");
   return result;
 } // End getInitialState
@@ -259,6 +277,7 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const {
 
 
 const double BezierCurve::getUDotInitial() const {
+  ROS_INFO("In BezierCurve::getUDotInitial");
   /*if(print_) {
     std::cout<<"\n***** Calculating u_dot_0 *****\n";
     std::cout<<"\nms_begin: "<<utility_.toString(ms_begin_);
@@ -277,11 +296,9 @@ const double BezierCurve::getUDotInitial() const {
   if(isnan(u_dot_0_y)) {
     u_dot_0_y = -9999;
   }
-  if(print_) {
-    std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
-    std::cout<<"\nu_0: "<<u_0_<<" u_dot_0: "<<u_dot_0_;
-    std::cout<<"\nu_dot_0_x: "<<u_dot_0_x<<" u_dot_0_y: "<<u_dot_0_y;
-  }
+  std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
+  std::cout<<"\nu_0: "<<u_0_<<" u_dot_0: "<<u_dot_0_;
+  std::cout<<"\nu_dot_0_x: "<<u_dot_0_x<<" u_dot_0_y: "<<u_dot_0_y;
 
   // Set a greater and lesser value
   double greater, lesser;
@@ -423,7 +440,8 @@ void BezierCurve::initControlPoints() {
 
 
     /** C0 Velocities */
-    if(C0.msg_.velocities.size() == 0) {
+    if(C0.msg_.velocities.size() == 0) 
+    {
       C0.msg_.velocities.push_back(ms_init_.msg_.velocities.at(0));
       C0.msg_.velocities.push_back(ms_init_.msg_.velocities.at(1));
       C0.msg_.velocities.push_back(0);

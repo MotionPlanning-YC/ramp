@@ -385,11 +385,9 @@ const double BezierCurve::getUDotInitial() const {
   if(isnan(u_dot_0_y)) {
     u_dot_0_y = -9999;
   }
-  if(print_) {
     std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
     std::cout<<"\nu_0: "<<u_0_<<" u_dot_0: "<<u_dot_0_;
     std::cout<<"\nu_dot_0_x: "<<u_dot_0_x<<" u_dot_0_y: "<<u_dot_0_y;
-  }
 
   // Set a greater and lesser value
   double greater, lesser;
@@ -733,7 +731,8 @@ const bool BezierCurve::finalStateReached() const {
 }
 
 
-void BezierCurve::calculateABCD() {
+void BezierCurve::calculateABCD() 
+{
   ramp_msgs::MotionState p0 = controlPoints_.at(0);
   ramp_msgs::MotionState p1 = controlPoints_.at(1);
   ramp_msgs::MotionState p2 = controlPoints_.at(2);
