@@ -245,7 +245,7 @@ void MobileBase::insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ram
 
 /** Tests if a lambda value will have Bezier equations that are defined */
 const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segment_points, const double lambda) const {
-  ROS_INFO("In lambdaOkay, lambda: %f", lambda);
+  //ROS_INFO("In lambdaOkay, lambda: %f", lambda);
   ramp_msgs::MotionState X0, X1, X2, p0, p1, p2;
 
   p0 = segment_points.at(0);
@@ -259,10 +259,11 @@ const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segm
   // Can use x or y...here we use x
   double min_lambda = (path_.points.at(0).motionState.positions.at(0) - segment_points.at(0).positions.at(0)) 
                       / (segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0));
-  ROS_INFO("min_lambda in lambdaOkay: %f", min_lambda); 
+  //ROS_INFO("min_lambda in lambdaOkay: %f", min_lambda); 
 
   // TODO: Check for v
-  if(lambda < min_lambda) {
+  if(lambda < min_lambda) 
+  {
     return false;
   }
   
@@ -299,7 +300,7 @@ const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segm
   if(X1.positions.at(0) == ( (X0.positions.at(0) + X2.positions.at(0)) / 2. ) &&
       X1.positions.at(1) == ( (X0.positions.at(1) + X2.positions.at(1)) / 2. )) 
   {
-    ROS_INFO("%f not okay", lambda);
+    //ROS_INFO("%f not okay", lambda);
     return false;
   }
   
@@ -323,19 +324,19 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
 
   double min_lambda = (path_.points.at(0).motionState.positions.at(0) - segment_points.at(0).positions.at(0)) 
                       / (segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0));
-  ROS_INFO("min_lambda: %f", min_lambda);
+  //ROS_INFO("min_lambda: %f", min_lambda);
 
-  if(min_lambda > 1) {
-    
+  if(min_lambda > 1) 
+  {
     ROS_ERROR("Minimum lambda: %f", min_lambda);
     ROS_ERROR("Minimum lambda > 1");
-
     lambda = min_lambda;
   }
   else {
 
     bool loopedOnce=false;
-    while(!lambdaOkay(segment_points, lambda) && !loopedOnce) {
+    while(!lambdaOkay(segment_points, lambda) && !loopedOnce) 
+    {
       if(type_ == TRANSITION) {
         lambda-=0.05;
       }
@@ -360,7 +361,7 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
 
 
 const ramp_msgs::MotionState MobileBase::getMaxMS() const {
-  ROS_INFO("In getMaxMS()");
+  //ROS_INFO("In getMaxMS()");
   ramp_msgs::MotionState result;
 
   
@@ -387,14 +388,14 @@ const ramp_msgs::MotionState MobileBase::getMaxMS() const {
         MaxAccelerationVector->VecData[1]);
   }
 
-  ROS_INFO("Leaving getMaxMS()");
+  //ROS_INFO("Leaving getMaxMS()");
   return result;
 }
 
 
 /** */
 const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool only_curve) {
-  ROS_INFO("Entered MobileBase::bezier");
+  //ROS_INFO("Entered MobileBase::bezier");
 
   std::vector<BezierCurve> result;
 
@@ -422,8 +423,9 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     //std::cin.get();
     inc++;
 
-    if(inc == p_copy.points.size()) {
-      ROS_INFO("Cannot plan Bezier, returning same Path at 402");
+    if(inc == p_copy.points.size()) 
+    {
+      //ROS_INFO("Cannot plan Bezier, returning same Path at 402");
       type_ = ALL_STRAIGHT_SEGMENTS;
       return result;
     }
@@ -434,7 +436,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
   differentPoint = utility_.positionDistance(req_.bezierCurves.at(0).segmentPoints.at(1).positions, 
           req_.bezierCurves.at(0).segmentPoints.at(2).positions) > 0.01;
   inc = 3;
-  while(!differentPoint && inc < p_copy.points.size()) {
+  while(!differentPoint && inc < p_copy.points.size()) 
+  {
     /*std::cout<<"\nPoints 1 and 2 are the same";
     std::cout<<"\nPath: "<<utility_.toString(p);
     std::cout<<"\nSegment point 1: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1));
@@ -446,18 +449,18 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     inc++;
 
     if(inc == p_copy.points.size()) {
-      ROS_INFO("Cannot plan Bezier, returning same Path at 422");
+      //ROS_INFO("Cannot plan Bezier, returning same Path at 422");
       type_ = ALL_STRAIGHT_SEGMENTS;
       return result;
     }
   }
 
-  ROS_INFO("stop: %i", stop);
+  //ROS_INFO("stop: %i", stop);
 
   // Go through the path's knot points
   //std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
   for(uint8_t i=1;i<stop;i++) {
-    std::cout<<"\n---i: "<<(int)i<<"---\n";
+    //std::cout<<"\n---i: "<<(int)i<<"---\n";
 
     // Check that all of the points are different
     if(utility_.positionDistance(req_.bezierCurves.at(i-1).segmentPoints.at(0).positions, 
@@ -534,7 +537,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // Verify the curve
       if(bc.verify()) 
       {
-        ROS_INFO("Curve is verified, generating points");
+        //ROS_INFO("Curve is verified, generating points");
 
         // Generate the curve
         bc.generateCurve();
@@ -543,8 +546,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       
       else if(type_ == TRANSITION) 
       {
-        ROS_INFO("Curve not verified, doing a transition so setting 0 velocity for KP: %s", 
-            utility_.toString(path_.points.at(1).motionState).c_str());
+        //ROS_INFO("Curve not verified, doing a transition so setting 0 velocity for KP: %s", 
+            //utility_.toString(path_.points.at(1).motionState).c_str());
 
         uint8_t num_dof = path_.points.at(1).motionState.velocities.size();
         for(uint8_t i_v=0;i_v<num_dof;i_v++) {
@@ -617,8 +620,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
           req_.bezierCurves.at(0).segmentPoints.at(1).positions) > 0.01)
     {
       ROS_INFO("In else if Knot Point 1 != segment point 1");
-      ROS_INFO("Knot Point 1: %s\nSegment Point 1: %s", utility_.toString(p.points.at(1).motionState).c_str(), 
-          utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1)).c_str());
+      //ROS_INFO("Knot Point 1: %s\nSegment Point 1: %s", utility_.toString(p.points.at(1).motionState).c_str(), 
+          //utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1)).c_str());
       // Don't erase anything
       // Insert
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
@@ -891,14 +894,14 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   req_ = req;
 
   planning_full_ = segments_ == 0;
-  if(planning_full_)
+  /*if(planning_full_)
   {
     ROS_INFO("req.segments == 0 - Getting trajectory for whole path");
   }
   else
   {
     ROS_INFO("Not planning full, segments_: %i req_.segments: %i", (int)segments_, (int)req_.segments);
-  }
+  }*/
 
   // Set start time
   t_started_ = ros::Time::now();
@@ -908,9 +911,9 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Use Bezier curves to smooth path
   if(type_ != ALL_STRAIGHT_SEGMENTS) 
   {
-    ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
+    //ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
     curves = bezier(path_, type_ == TRANSITION);
-    ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
+    //ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
 
 
     // Currently adding 0 for both because 
@@ -979,8 +982,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     //std::cout<<"\ncurves.size(): "<<curves.size()<<"\n";
     if( (c < i_cs.size() && path_.points.size() > 2 && i_kp_ == i_cs.at(c)+1))
     {
-      ROS_INFO("At Bezier Curve %i", c);
-      ROS_INFO("timeFromStart_: %f", timeFromStart_.toSec());
+      //ROS_INFO("At Bezier Curve %i", c);
+      //ROS_INFO("timeFromStart_: %f", timeFromStart_.toSec());
       //std::cout<<"\ncurves.at("<<(int)c<<").size(): "<<curves.at(c).points_.size();
 
       // Insert all points on the curves into the trajectory

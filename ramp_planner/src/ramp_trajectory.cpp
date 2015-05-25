@@ -291,56 +291,41 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
   }
 
 
-
-
-  int initial_size = result.msg_.trajectory.points.size();
-  int traj_size = traj.msg_.i_knotPoints.size() == 1 ? 0 :
-                  traj.msg_.trajectory.points.size() - traj.msg_.i_knotPoints.at(c_kp-1);
+  // Find the new size of the trajectory
+  int initial_size  = result.msg_.trajectory.points.size();
+  int traj_size     = traj.msg_.i_knotPoints.size() == 1 ? 0 :
+                      traj.msg_.trajectory.points.size() - traj.msg_.i_knotPoints.at(c_kp-1);
   int total_size = initial_size + traj_size;
-  int traj_start = traj.msg_.i_knotPoints.size() == 1 ? 0 : traj.msg_.i_knotPoints.at(c_kp-1)+1;
 
-  // Do the insert
+  // Reserve space
   result.msg_.trajectory.points.reserve(total_size);
-  result.msg_.trajectory.points.insert(result.msg_.trajectory.points.end(),
-      traj.msg_.trajectory.points.begin()+traj_start+1, traj.msg_.trajectory.points.end());
   
-  // Get the for-loop variables
-  int start = initial_size;
-  int stop = result.msg_.trajectory.points.size();
-  int s = traj.msg_.trajectory.points.size() - stop;
-  /*ROS_INFO("start: %i stop: %i s: %i traj.size(): %i", start, stop, s, (int)traj.msg_.trajectory.points.size());
-  for(int i=0;i<traj.msg_.i_knotPoints.size();i++)
-  {
-    ROS_INFO("traj.msg_.i_knotPoints[%i]: %i", i, traj.msg_.i_knotPoints.at(i));
-  }*/
-  
+  // Get time variables
   ros::Duration t_cycleTime(0.1);
   ros::Duration t_latest =  msg_.trajectory.points.at
                             (initial_size-1).time_from_start;
-  for(uint16_t  i=start ;
-                i<stop  ;
-                i++)
+
+ // Push on the points
+  for(uint16_t  i=traj.msg_.i_knotPoints.size() == 1 ? 0 : traj.msg_.i_knotPoints.at(c_kp-1)+1 ;
+    i<traj.msg_.trajectory.points.size() ;
+    i++)
   {
-    //trajectory_msgs::JointTrajectoryPoint temp = traj.msg_.trajectory.points.at(i);
+   // Get the point and adjust the time
+    trajectory_msgs::JointTrajectoryPoint temp  = traj.msg_.trajectory.points.at(i);
+    temp.time_from_start                        = ros::Duration(t_latest+t_cycleTime);
+    result.msg_.trajectory.points.push_back(temp);
 
-    // Set time
-    //temp.time_from_start = ros::Duration(t_latest+t_cycleTime);
-    t_latest += t_cycleTime;
-    //result.msg_.trajectory.points.push_back(temp);
-
-    result.msg_.trajectory.points.at(i).time_from_start = t_latest+t_cycleTime;
-
-
-    if( i+s == (traj.msg_.i_knotPoints.at(c_kp)) )
+    // If it's a knot point, push back the index
+    if( i == traj.msg_.i_knotPoints.at(c_kp) )
     {
       //ROS_INFO("i: %i traj.msg_.i_knotPoints.at(%i): %i", i, c_kp, traj.msg_.i_knotPoints.at(c_kp));
       //ROS_INFO("temp: %s", utility_.toString(temp).c_str());
-      //result.msg_.i_knotPoints.push_back( result.msg_.trajectory.points.size()-1 ); 
-      result.msg_.i_knotPoints.push_back( i ); 
+      result.msg_.i_knotPoints.push_back( result.msg_.trajectory.points.size()-1 ); 
       c_kp++;
     }
+    
+    t_latest += t_cycleTime;
   } //end for
-
 
   // Push on the target trajectory's Bezier curve
   for(uint8_t i_curve=0;i_curve<traj.msg_.curves.size();i_curve++) 
