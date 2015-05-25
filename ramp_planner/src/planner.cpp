@@ -628,12 +628,12 @@ const std::vector<ramp_msgs::BezierCurve> Planner::adaptCurves(const Population 
 // Not const because it calls requestTrajectory which can call getIRT
 const Population Planner::adaptPopulation(const Population pop, const MotionState ms, const ros::Duration d) {
   ROS_INFO("In adaptPopulation");
-  ROS_INFO("pop: %s", pop.toString().c_str());
+  //ROS_INFO("pop: %s", pop.toString().c_str());
   //ROS_INFO("startPlanning_: %s \nduration: %f", startPlanning_.toString().c_str(), d.toSec());
   Population result = pop;
   
-  ROS_INFO("Before adaptPaths, paths.size(): %i", (int)pop.paths_.size());
-  ROS_INFO("Before adaptPaths, paths.size(): %i", (int)result.paths_.size());
+  //ROS_INFO("Before adaptPaths, paths.size(): %i", (int)pop.paths_.size());
+  //ROS_INFO("Before adaptPaths, paths.size(): %i", (int)result.paths_.size());
 
   // Find how long we've been moving on the curve - how long between CCs minus the start of the curve
   //ros::Duration curveD = ros::Duration(d.toSec() - transPopulation_.getBest().msg_.curves.at(0).controlPoints.at(0).time);
@@ -648,13 +648,13 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
   // Create the vector to hold updated trajectories
   std::vector<RampTrajectory> updatedTrajecs;
 
-  ROS_INFO("pop.calcBestIndex(): %i", pop.calcBestIndex());
+  /*ROS_INFO("pop.calcBestIndex(): %i", pop.calcBestIndex());
   ROS_INFO("paths.size(): %i", (int)paths.size());
-  ROS_INFO("curves.size(): %i", (int)curves.size());
+  ROS_INFO("curves.size(): %i", (int)curves.size());*/
   // For each path, get a trajectory
   for(uint16_t i=0;i<pop.paths_.size();i++) {
     RampTrajectory temp, tempTraj = pop.get(i);
-    ROS_INFO("Getting trajectory %i", (int)i);
+    //ROS_INFO("Getting trajectory %i", (int)i);
       
     std::vector<ramp_msgs::BezierCurve> c;
     c.push_back(curves.at(i));
@@ -665,22 +665,22 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
     /* Get the trajectory */
     temp = requestTrajectory(tr, result.get(i).msg_.id);
 
-    ROS_INFO("Temp before: %s", temp.toString().c_str());
+    //ROS_INFO("Temp before: %s", temp.toString().c_str());
     temp = temp.concatenate(pop.get(i), 4);
-    ROS_INFO("Temp now: %s", temp.toString().c_str());
+    //ROS_INFO("Temp now: %s", temp.toString().c_str());
 
     // Set temporary evaluation results - need to actually call requestEvaluation to get actual fitness
     temp.msg_.fitness   = result.get(i).msg_.fitness;
     temp.msg_.feasible  = result.get(i).msg_.feasible;
     temp.msg_.t_start   = ros::Duration(t_fixed_cc_);
 
-    ROS_INFO("Finished adapting trajectory %i, t_start: %f", i, temp.msg_.t_start.toSec());
+    //ROS_INFO("Finished adapting trajectory %i, t_start: %f", i, temp.msg_.t_start.toSec());
 
     // Push onto updatedTrajecs
     updatedTrajecs.push_back(temp);
   } // end for
 
-  ROS_INFO("updatedTrajecs size: %i", (int)updatedTrajecs.size());
+  //ROS_INFO("updatedTrajecs size: %i", (int)updatedTrajecs.size());
   // Replace the population's trajectories_ with the updated trajectories
   result.replaceAll(updatedTrajecs);
   
@@ -2370,7 +2370,7 @@ void Planner::doControlCycle()
 
   ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
   MotionState diff = bestT.path_.at(0).motionState_.subtractPosition(latestUpdate_);
-  ROS_INFO("diff: %s", diff.toString().c_str());
+  //ROS_INFO("diff: %s", diff.toString().c_str());
 
   ROS_INFO("bestT: %s", bestT.toString().c_str());
 
@@ -2379,6 +2379,7 @@ void Planner::doControlCycle()
   //ROS_INFO("Sending best");
   //ROS_INFO("bestT: %s", bestT.toString().c_str());
   sendBest();
+  //ROS_INFO("After sendBest");
 
   
   // Set gensPerCC based on CC time
@@ -2392,6 +2393,7 @@ void Planner::doControlCycle()
 
   //ROS_INFO("Setting movingOn_");
   movingOn_ = bestT.getSubTrajectory(t_fixed_cc_);
+  //ROS_INFO("After setting movingOn_");
   //ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
 
   // Reset planning cycle count
@@ -2419,7 +2421,7 @@ void Planner::doControlCycle()
   /*ROS_INFO("After adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", 
       population_.size(), 
       population_.fitnessFeasibleToString().c_str());*/
-  ROS_INFO("Time spent adapting: %f", d_adapt.toSec());
+  //ROS_INFO("Time spent adapting: %f", d_adapt.toSec());
 
 
   
@@ -2433,7 +2435,7 @@ void Planner::doControlCycle()
   
   //ROS_INFO("After finding transition population, controlCycle period: %f", controlCycle_.toSec());
   //ROS_INFO("New transPop: %s", transPopulation_.toString().c_str());
-  ROS_INFO("Time spent getting trans pop: %f", d_trans.toSec());
+  //ROS_INFO("Time spent getting trans pop: %f", d_trans.toSec());
 
   population_at_cc_       = population_;
   transPopulation_at_cc_  = transPopulation_;
