@@ -266,7 +266,7 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
   {
     ROS_WARN("First and last points don't match!");
     ROS_WARN("last: %s\nfirst: %s\ndiff: %f", utility_.toString(last).c_str(), utility_.toString(first).c_str(), fabs(utility_.positionDistance(last.positions, first.positions)));
-    return traj;
+    return *this;
   }
 
   ROS_INFO("traj.msg_.trajectory.points.size(): %i", (int)traj.msg_.trajectory.points.size());

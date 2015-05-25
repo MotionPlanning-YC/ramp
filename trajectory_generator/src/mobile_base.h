@@ -66,6 +66,8 @@ private:
   // Hold the curve indices
   std::vector<uint8_t> i_cs;
 
+  uint8_t segments_;
+  bool planning_full_;
 
   /***** Methods *****/
   // Initialize everything

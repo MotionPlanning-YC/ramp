@@ -2,7 +2,7 @@ population_size: 5
 
 sub_populations: false 
 
-modifications: true 
+modifications: false
 
 evaluations: true
 

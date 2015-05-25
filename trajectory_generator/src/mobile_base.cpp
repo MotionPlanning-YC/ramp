@@ -3,7 +3,7 @@
 
 
 /** Constructor */
-MobileBase::MobileBase() {
+MobileBase::MobileBase() : planning_full_(false) {
   reflexxesData_.rml = 0;
   reflexxesData_.inputParameters = 0;
   reflexxesData_.outputParameters = 0;
@@ -100,6 +100,9 @@ void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
  
   // Set trajectory type
   type_ = (TrajectoryType)req.type;
+
+  // Set segments
+  segments_ = req_.segments;
 
   // Initialize Reflexxes
   initReflexxes();
@@ -594,7 +597,11 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       p.points.insert(p.points.begin()+2, utility_.getKnotPoint(result.at(1).points_.at(0)));
       p.points.insert(p.points.begin()+3, 
           utility_.getKnotPoint(result.at(1).points_.at(result.at(1).points_.size()-1)));
-      req_.segments++;
+
+      if(!planning_full_)
+      {
+        segments_++;
+      }
     }
 
     // If already moving on curve
@@ -617,11 +624,16 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
       p.points.insert(p.points.begin()+2, 
           utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
-      req_.segments++;
-      req_.segments++;
+      
+      if(!planning_full_)
+      {
+        segments_++;
+        segments_++;
+      }
     }
 
     // Else not on a curve, but a curve exists on the trajectory
+    // Remove the 2nd knot point and replace it with start and end of the upcoming curve
     else 
     {
       ROS_INFO("In else");
@@ -633,7 +645,12 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
       p.points.insert(p.points.begin()+2, 
           utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
-      req_.segments++;
+
+      if(!planning_full_)
+      {
+        segments_++;
+        segments_++;
+      }
     }
   } // end if not all straight segments
 
@@ -873,6 +890,16 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   init(req);
   req_ = req;
 
+  planning_full_ = segments_ == 0;
+  if(planning_full_)
+  {
+    ROS_INFO("req.segments == 0 - Getting trajectory for whole path");
+  }
+  else
+  {
+    ROS_INFO("Not planning full, segments_: %i req_.segments: %i", (int)segments_, (int)req_.segments);
+  }
+
   // Set start time
   t_started_ = ros::Time::now();
 
@@ -913,13 +940,18 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Push 0 onto knot point indices
   res.trajectory.i_knotPoints.push_back(0);
 
+  if(planning_full_)
+  {
+    segments_ = path_.points.size();
+  }
+
  
-  ROS_INFO("About to start generating points, req_.segments: %i", req_.segments);
+  ROS_INFO("About to start generating points, segments_: %i", segments_);
   uint8_t c=0;
   // Go through every knotpoint in the path
   // (or until timeCutoff has been reached)
   //for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) 
-  for (i_kp_ = 1; i_kp_<req_.segments; i_kp_++) 
+  for (i_kp_ = 1; i_kp_<segments_; i_kp_++) 
   {
     ROS_INFO("i_kp_: %i", (int)i_kp_);
     reflexxesData_.resultValue = 0;

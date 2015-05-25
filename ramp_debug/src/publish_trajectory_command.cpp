@@ -392,7 +392,7 @@ int main(int argc, char** argv) {
   tr.request.type = PARTIAL_BEZIER;
   tr.request.print = true;
   tr.request.bezierCurves = curves;
-  tr.request.segments = 1;
+  tr.request.segments = 0;
 
   std::cout<<"\nPress Enter to request and send the trajectory\n";
   std::cin.get();

@@ -660,10 +660,14 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
     c.push_back(curves.at(i));
 
     ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(paths.at(i), c);
+    tr.request.segments = 2;
 
     /* Get the trajectory */
     temp = requestTrajectory(tr, result.get(i).msg_.id);
-    ROS_INFO("temp.path: %s", temp.path_.toString().c_str());
+
+    ROS_INFO("Temp before: %s", temp.toString().c_str());
+    temp = temp.concatenate(pop.get(i), 4);
+    ROS_INFO("Temp now: %s", temp.toString().c_str());
 
     // Set temporary evaluation results - need to actually call requestEvaluation to get actual fitness
     temp.msg_.fitness   = result.get(i).msg_.fitness;
