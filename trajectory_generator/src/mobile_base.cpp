@@ -575,7 +575,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
           utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
     }
 
-    // If we are switching and have more than 1 curve
+    // If we have more than 1 curve
     else if(req_.bezierCurves.size() > 1) 
     {
       ROS_INFO("In else if bezierInfo.size()>1");
@@ -594,6 +594,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       p.points.insert(p.points.begin()+2, utility_.getKnotPoint(result.at(1).points_.at(0)));
       p.points.insert(p.points.begin()+3, 
           utility_.getKnotPoint(result.at(1).points_.at(result.at(1).points_.size()-1)));
+      req_.segments++;
     }
 
     // If already moving on curve
@@ -616,6 +617,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
       p.points.insert(p.points.begin()+2, 
           utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
+      req_.segments++;
+      req_.segments++;
     }
 
     // Else not on a curve, but a curve exists on the trajectory
@@ -630,6 +633,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
       p.points.insert(p.points.begin()+2, 
           utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
+      req_.segments++;
     }
   } // end if not all straight segments
 
@@ -839,9 +843,13 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   //std::cout<<"\nTrajectory Request Received: "<<utility_.toString(req)<<"\n";
   
   // If there's less than 3 points, make it have straight segments
-  if(req.path.points.size() < 3) {
-    ROS_WARN("Path request size < 3");
+  // if req_.segments == 1
+  if( req.path.points.size() < 3 ||
+      req.segments == 1 ) 
+  {
+    ROS_WARN("Changing type to ALL_STRAIGHT_SEGMENTS");
     req.type = ALL_STRAIGHT_SEGMENTS;
+    req.segments++;
   }
 
   // If there's 2 points and they have the same x,y position
@@ -906,10 +914,12 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   res.trajectory.i_knotPoints.push_back(0);
 
  
+  ROS_INFO("About to start generating points, req_.segments: %i", req_.segments);
   uint8_t c=0;
   // Go through every knotpoint in the path
   // (or until timeCutoff has been reached)
-  for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) 
+  //for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) 
+  for (i_kp_ = 1; i_kp_<req_.segments; i_kp_++) 
   {
     ROS_INFO("i_kp_: %i", (int)i_kp_);
     reflexxesData_.resultValue = 0;

@@ -45,20 +45,20 @@ int main(int argc, char** argv) {
 
 
   ramp_msgs::KnotPoint c3;
-  c3.motionState.positions.push_back(1.); // 0.857146
-  c3.motionState.positions.push_back(0.); // 0.71115
+  c3.motionState.positions.push_back(0.5); // 0.857146
+  c3.motionState.positions.push_back(2.0); // 0.71115
   c3.motionState.positions.push_back(0.);  // 1.11151
 
 
   ramp_msgs::KnotPoint c4;
-  c4.motionState.positions.push_back(3.5);
-  c4.motionState.positions.push_back(3.5);
+  c4.motionState.positions.push_back(3.0);
+  c4.motionState.positions.push_back(0.75);
   c4.motionState.positions.push_back(PI/4);
 
 
   ramp_msgs::KnotPoint c5;
   c5.motionState.positions.push_back(3.5);
-  c5.motionState.positions.push_back(1.5);
+  c5.motionState.positions.push_back(3.5);
   c5.motionState.positions.push_back(0.);
 
   ramp_msgs::KnotPoint c6;
@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
   //p.points.push_back(c2);
   p.points.push_back(c3);
   p.points.push_back(c4);
-  //p.points.push_back(c5);
+  p.points.push_back(c5);
   //p.points.push_back(c6);
   //p.points.push_back(c7);
   //p.points.push_back(c8);
@@ -392,6 +392,7 @@ int main(int argc, char** argv) {
   tr.request.type = PARTIAL_BEZIER;
   tr.request.print = true;
   tr.request.bezierCurves = curves;
+  tr.request.segments = 1;
 
   std::cout<<"\nPress Enter to request and send the trajectory\n";
   std::cin.get();
