@@ -10,7 +10,8 @@ ros::Publisher pub_obj;
 Obstacle obstacle;
 
 /** Get the other robot's current odometry information and update the dynamicObject */
-void updateOtherRobotCb(const nav_msgs::Odometry& o) {
+void updateOtherRobotCb(const nav_msgs::Odometry& o) 
+{
   obstacle.update(o);
 } //End updateOtherRobotCb
 
@@ -40,7 +41,8 @@ void publishList(const ros::TimerEvent& e) {
 
 
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) 
+{
   ros::init(argc, argv, "ramp_sensing");
   ros::NodeHandle handle;
   

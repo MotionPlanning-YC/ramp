@@ -5,7 +5,8 @@
 #include <tf/transform_datatypes.h>
 #include <vector>
 
-class Obstacle {
+class Obstacle 
+{
   public:
     Obstacle();
     Obstacle(const nav_msgs::Odometry p);

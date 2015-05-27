@@ -110,10 +110,15 @@ void MobileRobot::turn(const float speed, const float angle) const {
 }
 
 
-const std::vector<double> MobileRobot::computeAcceleration() const {
+/*
+ * Computes acceleration manually
+ */
+const std::vector<double> MobileRobot::computeAcceleration() const 
+{
   std::vector<double> result;
 
-  for(unsigned int i=0;i<k_dof_;i++) {
+  for(unsigned int i=0;i<k_dof_;i++) 
+  {
     double a = (motion_state_.velocities.at(i) - prev_motion_state_.velocities.at(i)) 
               / (ros::Time::now() - prev_t_).toSec();
     result.push_back(a);
@@ -122,10 +127,13 @@ const std::vector<double> MobileRobot::computeAcceleration() const {
   return result;
 }
 
-/** This is a callback for receiving odometry from the robot and sets the configuration of the robot */
+/* 
+ * This is a callback for receiving odometry from the robot and sets the configuration of the robot 
+ * It does not mutate any motion data. The time value is added based on num_travaled_.
+ */
 void MobileRobot::odomCb(const nav_msgs::Odometry& msg) {
   //std::cout<<"\nReceived odometry update\n";
-  
+ 
   prev_motion_state_ = motion_state_;
 
   // Clear position and velocity vectors
@@ -146,7 +154,8 @@ void MobileRobot::odomCb(const nav_msgs::Odometry& msg) {
   // Odometry does not have acceleration info, but
   // it would be pushed on here
   std::vector<double> a = computeAcceleration();
-  for(unsigned int i=0;i<a.size();i++) {
+  for(unsigned int i=0;i<a.size();i++) 
+  {
     motion_state_.accelerations.push_back(a.at(i));
   }
 

@@ -6,7 +6,8 @@ Obstacle::Obstacle() {
   odom_t_prev = temp;
 }
 
-Obstacle::Obstacle(const nav_msgs::Odometry o) {
+Obstacle::Obstacle(const nav_msgs::Odometry o) 
+{
   odom_t      = o;
   odom_t_prev = o;
 }
@@ -14,7 +15,8 @@ Obstacle::Obstacle(const nav_msgs::Odometry o) {
 Obstacle::~Obstacle() {}
 
 
-void Obstacle::update(const nav_msgs::Odometry o) {
+void Obstacle::update(const nav_msgs::Odometry o) 
+{
 
   //Set new odometry infomation
   odom_t_prev = odom_t;
@@ -26,6 +28,7 @@ void Obstacle::update(const nav_msgs::Odometry o) {
 
 
 const ramp_msgs::Obstacle Obstacle::buildObstacleMsg() {
+
   ramp_msgs::Obstacle result;
 
   result.odom_t      = odom_t;

@@ -21,6 +21,8 @@
 <!-- Planner -->
 <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" /> 
 
+<node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="screen" />
+
 
 <!-- Simulation -->
 <node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/world/single_robot.world" /> 

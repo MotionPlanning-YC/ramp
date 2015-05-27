@@ -285,6 +285,7 @@ class Planner {
     const Population getTransPop(const Population pop, const RampTrajectory movingOn);
 
 
+    const RampTrajectory offsetTrajectory(const RampTrajectory t, const MotionState diff) const;
     const Population offsetPopulation(const Population pop, const MotionState diff) const;
 
     bool predictTransition(const RampTrajectory from, const RampTrajectory to, const double t);
@@ -357,6 +358,7 @@ class Planner {
 
 
     double          t_fixed_cc_;
+    RampTrajectory  movingOnCC_;
     RampTrajectory  movingOn_;
 
     // Error Reduction variables
@@ -374,7 +376,12 @@ class Planner {
     std::vector<ros::Duration> adapt_durs_;
     std::vector<ros::Duration> trans_durs_;
     std::vector<ros::Duration> cc_durs_;
-    double avg_adapt_dur_, avg_trans_dur_, avg_cc_dur_;
+    std::vector<ros::Duration> mutate_durs_;
+    std::vector<ros::Duration> pc_durs_;
+    std::vector<ros::Duration> trajec_durs_;
+    std::vector<ros::Duration> error_correct_durs_;
+    double avg_adapt_dur_, avg_trans_dur_, avg_cc_dur_, avg_mutate_dur_, avg_pc_dur_, avg_trajec_dur_, 
+           avg_error_correct_dur_;
 };
 
 #endif

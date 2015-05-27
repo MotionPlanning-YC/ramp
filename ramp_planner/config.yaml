@@ -1,8 +1,8 @@
-population_size: 2
+population_size: 5
 
 sub_populations: false 
 
-modifications: false
+modifications: true
 
 evaluations: true
 
@@ -14,4 +14,4 @@ planning_cycle_rate: 3
 
 fixed_control_cycle_rate: 2
 
-error_reduction: false
+error_reduction: true

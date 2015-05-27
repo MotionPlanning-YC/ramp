@@ -342,6 +342,10 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
 
 
 
+/*
+ * path_ is mutated in this method! The knot points of the Path are also offset by diff
+ * The BezierCurves have their segment and control points offset
+ */
 void RampTrajectory::offsetPositions(const MotionState diff)
 {
   ROS_INFO("In RampTrajectory::offsetPositions");
@@ -357,7 +361,48 @@ void RampTrajectory::offsetPositions(const MotionState diff)
     {
       msg_.trajectory.points.at(i).positions.at(j) = temp.msg_.positions.at(j);
     }
+  } // end outter for
+  ROS_INFO("Done offsetting points");
+
+  if(path_.size() > 0)
+  {
+    path_.offsetPositions(diff);
   }
+  else
+  {
+    ROS_WARN("path_.size() == 0, not touching it");
+  }
+  ROS_INFO("Done offsetting path");
+
+
+  if(msg_.curves.size() > 0 && path_.size() < 3)
+  {
+    ROS_WARN("temp.msg_.curves.size() > 0 && temp.path_.size() < 3");
+    ROS_WARN("temp.path_: %s", path_.toString().c_str());
+    ROS_WARN("temp.curve.at(0): %s", utility_.toString(msg_.curves.at(0)).c_str());
+  }
+    
+  for(uint8_t c=0;c<msg_.curves.size() && path_.size() > 2;c++)
+  {
+    /*ROS_INFO("Fixing curve %i, path_.size(): %i segmentPoints.size(): %i controlPoints.size(): %i", 
+        c, 
+        path_.size(), 
+        (int)msg_.curves.at(c).segmentPoints.size(), 
+        (int)msg_.curves.at(c).controlPoints.size());*/
+
+    msg_.curves.at(c).segmentPoints.at(1) = path_.at(1).motionState_.msg_;
+    msg_.curves.at(c).segmentPoints.at(2) = path_.at(2).motionState_.msg_;
+    
+    MotionState c0(msg_.curves.at(c).controlPoints.at(0));
+    MotionState c1(msg_.curves.at(c).controlPoints.at(1));
+    MotionState c2(msg_.curves.at(c).controlPoints.at(2));
+    
+    msg_.curves.at(c).controlPoints.at(0) = c0.subtractPosition(diff).msg_;
+    msg_.curves.at(c).controlPoints.at(1) = c1.subtractPosition(diff).msg_;
+    msg_.curves.at(c).controlPoints.at(2) = c2.subtractPosition(diff).msg_;
+    //ROS_INFO("After fixing curve: %s", utility_.toString(msg_.curves.at(0)).c_str());
+  } // end for
+
 
   ROS_INFO("Exiting RampTrajectory::offsetPositions");
 } // End offsetPositions

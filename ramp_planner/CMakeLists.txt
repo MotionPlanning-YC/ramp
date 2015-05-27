@@ -30,10 +30,8 @@ set (CMAKE_CXX_FLAGS "-g")
 ## Declare a cpp executable
 add_executable(${PROJECT_NAME} src/bezier_curve.cpp src/main.cpp src/planner.cpp src/control_handler.cpp src/knot_point.cpp src/modification_request_handler.cpp src/modifier.cpp src/motion_state.cpp src/parameter_handler.cpp src/path.cpp src/population.cpp src/ramp_trajectory.cpp src/range.cpp src/trajectory_request_handler.cpp src/evaluation_request_handler.cpp src/utility.cpp)
 
-
 # Add the -std argument to compile enum
 set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS -std=c++0x)
-
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} yaml-cpp)
@@ -41,4 +39,18 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} yaml-cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(${PROJECT_NAME} ramp_msgs_generate_messages_cpp)
+
+
+## Declare a cpp executable
+add_executable(obstacle src/control_handler.cpp src/knot_point.cpp src/main_obstacle.cpp src/motion_state.cpp src/obstacle.cpp src/path.cpp src/ramp_trajectory.cpp src/range.cpp src/trajectory_request_handler.cpp src/utility.cpp)
+
+# Add the -std argument to compile enum
+set_target_properties(obstacle PROPERTIES COMPILE_FLAGS -std=c++0x)
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(obstacle ${catkin_LIBRARIES} yaml-cpp)
+
+## Add cmake target dependencies of the executable/library
+## as an example, message headers may need to be generated before nodes
+add_dependencies(obstacle ramp_msgs_generate_messages_cpp)
 
