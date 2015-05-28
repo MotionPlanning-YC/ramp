@@ -860,7 +860,6 @@ const std::vector<uint8_t> MobileBase::getCurveKPs(const std::vector<BezierCurve
 
 // Service callback, the input is a path and the output a trajectory
 bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) {
-  //std::cout<<"\nTrajectory Request Received: "<<utility_.toString(req)<<"\n";
   
   // If there's less than 3 points, make it have straight segments
   // if req_.segments == 1

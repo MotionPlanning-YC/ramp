@@ -182,8 +182,8 @@ void MobileRobot::updateCallback(const ros::TimerEvent& e) {
 /** This method updates the MobileRobot's trajectory
  *   It calls calculateSpeedsAndTimes to update the robot's vectors needed to move */
 void MobileRobot::updateTrajectory(const ramp_msgs::RampTrajectory msg) {
-  //std::cout<<"\nIn updateTrajectory!\n";
-  //std::cout<<"\nTrajectory: "<<utility_.toString(msg);
+  std::cout<<"\nIn updateTrajectory!\n";
+  std::cout<<"\nTrajectory: "<<utility_.toString(msg);
   
   // Update data members
   restart_        = true;
@@ -263,7 +263,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   }
 
 
-  //printVectors();
+  printVectors();
 } // End calculateSpeedsAndTime
 
 
@@ -341,7 +341,8 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
 
     // Force a stop until there is no imminent collision
     ros::Time t_startIC = ros::Time::now();
-    while(checkImminentCollision()) {
+    while(checkImminentCollision()) 
+    {
       ros::spinOnce();
     }
     t_immiColl_ += ros::Time::now() - t_startIC; 
@@ -349,7 +350,8 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
 
     
     // If a new trajectory was received, restart the outer while 
-    if(restart_) {
+    if(restart_) 
+    {
       continue;
     }
 
@@ -368,18 +370,20 @@ void MobileRobot::moveOnTrajectory(bool simulation) {
       {
         float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
         float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
-        //ROS_INFO("dist: %f", dist);
+        ROS_INFO("actual_theta: %f orientations[%i]: %f dist: %f", actual_theta, num_traveled_, 
+            orientations_.at(num_traveled_), dist);
         twist_.angular.z = dist;
       }
     
-      //std::cout<<"\ntwist_linear: "<<twist_.linear.x;
-      //std::cout<<"\ntwist_angular: "<<twist_.angular.z<<"\n";
+      std::cout<<"\ntwist_linear: "<<twist_.linear.x;
+      std::cout<<"\ntwist_angular: "<<twist_.angular.z<<"\n";
 
       // Send the twist_message to move the robot
       sendTwist();
 
       // If we have the simulation up, publish to cmd_vel
-      if(simulation) {
+      if(simulation) 
+      {
         pub_cmd_vel_.publish(twist_);
       }
       
