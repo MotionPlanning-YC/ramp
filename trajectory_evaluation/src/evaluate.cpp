@@ -8,7 +8,8 @@ Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) : Q(1000.) 
 }
 
 /** This method accepts an EvaluationRequest and sets the appropriate members for evaluation */
-void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request req) {
+void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request req) 
+{
   trajectory_ = req.trajectory;
   currentTheta_ = req.currentTheta;
 } //End setRequest
@@ -18,7 +19,8 @@ void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request req) {
 
 
 /** This method computes the fitness of the trajectory_ member */
-const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) {
+const double Evaluate::performFitness(CollisionDetection::QueryResult feasible) 
+{
   double result=0;
 
   // Set values for time and add to result

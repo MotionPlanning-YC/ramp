@@ -5,10 +5,12 @@
 Change::Change(const ramp_msgs::Path p) : path_(p) {}
 
 
-const ramp_msgs::Path Change::perform() {
+const ramp_msgs::Path Change::perform() 
+{
   ROS_INFO("Before: %s", utility_.toString(path_).c_str()); 
 
-  if(path_.points.size() > 2) {
+  if(path_.points.size() > 2) 
+  {
 
     // Randomly choose a knot point to change
     unsigned int i_knotPoint = rand() % (path_.points.size()-2) + 1;

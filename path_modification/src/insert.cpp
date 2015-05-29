@@ -6,7 +6,8 @@ Insert::Insert(const ramp_msgs::Path p) : path_(p) {}
 
 
 
-const ramp_msgs::Path Insert::perform() {
+const ramp_msgs::Path Insert::perform() 
+{
 
   // Randomly choose the two adjacent knot points
   // One index is generated randomly and the second will be the next knot point,
@@ -17,7 +18,8 @@ const ramp_msgs::Path Insert::perform() {
 
   // If the last index was chosen, swap the values so i_knotPoint1 < i_knotPoint2
   // this just makes it simpler 
-  if(i_knotPoint2 < i_knotPoint1) {
+  if(i_knotPoint2 < i_knotPoint1) 
+  {
     unsigned int swap = i_knotPoint1;
     i_knotPoint1 = i_knotPoint2;
     i_knotPoint2 = swap;

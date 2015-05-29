@@ -14,7 +14,7 @@ bool received_ob = false;
 bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
                    ramp_msgs::EvaluationRequest::Response& res) 
 {
-  //ROS_INFO("Robot %i Evaluating trajectory: %s", cd.id_, u.toString(req.trajectory).c_str());
+  ROS_INFO("Robot %i Evaluating trajectory: %s", cd.id_, u.toString(req.trajectory).c_str());
 
   ev.setRequest(req);
   
@@ -46,7 +46,9 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
 
 
 /** Subscribe to the object_list topic to get the latest list information about objects, update the collision detection's obstacle list */
-void obstacleCb(const ramp_msgs::Obstacle& ol) {
+void obstacleCb(const ramp_msgs::Obstacle& ol) 
+{
+  ROS_INFO("Received Obstacle Info");
   cd.obstacle_ = ol;
   received_ob = true;
 } //End objectCb

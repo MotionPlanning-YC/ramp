@@ -3,7 +3,8 @@
 
 CollisionDetection::CollisionDetection() : predictionTime_(ros::Duration(5)), h_traj_req_(0) {}
 
-CollisionDetection::~CollisionDetection() {
+CollisionDetection::~CollisionDetection() 
+{
   if(h_traj_req_ != 0) {
     delete h_traj_req_;
     h_traj_req_ = 0;
@@ -67,8 +68,8 @@ void CollisionDetection::setOb_T_w_b(int id) {
 
   // robot 0 needs robot 1's pose
   else {
-    tf::Vector3 pos(1.5f, 3.5f, 0.f);
-    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(-1.5708));
+    tf::Vector3 pos(3.5f, 0.f, 0.f);
+    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(2.35f));
     ob_T_w_b_.setOrigin(pos);
   }
 } // End setOb_T_w_b
@@ -99,6 +100,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   ROS_INFO("In CollisionDetection::query"); 
   ROS_INFO("trajectory.points.size(): %i", (int)trajectory_.trajectory.points.size());
   ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.trajectory.points.size());
+  ROS_INFO("ob_trajectory: %s", utility_.toString(ob_trajectory).c_str());
 
   CollisionDetection::QueryResult result;
   uint8_t t_checkColl = 2;
@@ -132,7 +134,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   
   //std::cout<<"\nobstable trajectory size: "<<ob_trajectory.trajectory.points.size();
   // For every point, check circle detection on a subset of the obstacle's trajectory
-  float radius = 0.275f;
+  float radius = 0.33f;
   for(uint16_t i=0;i<i_stop;i++) 
   {
     
@@ -152,7 +154,11 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // Get the distance between the centers
       float dist = sqrt( pow(p_i.positions.at(0) - p_ob.positions.at(0),2) + pow(p_i.positions.at(1) - p_ob.positions.at(1),2) );
 
-      //std::cout<<"\nRobot id: "<<id<<" - Comparing trajectory point: ("<<p_i.positions.at(0)<<","<<p_i.positions.at(1)<<") and obstacle point: ("<<p_ob.positions.at(0)<<","<<p_ob.positions.at(1)<<") - dist = "<<dist;
+      ROS_INFO("Robot id: %i - Comparing trajectory point (%f,%f) and obstacle point (%f,%f): dist = %f", 
+          id_, 
+          p_i.positions.at(0), p_i.positions.at(1), 
+          p_ob.positions.at(0), p_ob.positions.at(1), 
+          dist);
       
         
 

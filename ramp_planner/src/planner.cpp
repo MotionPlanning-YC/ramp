@@ -1541,22 +1541,24 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
       // Start at 1 because that should be the starting knot point of the curve
       int c_kp = 1;
 
-      // If it's the best (no rotation at beginning) or if it's a straight line (no curve), set to 0
-      if( to.equals(transPopulation_.getBest()) || to.msg_.i_knotPoints.size() < 3)
+      // If it's the best (no rotation at beginning)
+      /*if( to.equals(transPopulation_.getBest()))
       {
+        ROS_INFO("Setting c_kp = 0");
         c_kp = 0;
-      }
+      }*/
       
       // Check if there's rotation at the beginning, if so increment c_kp
       // TODO: Better way of doing this
-      else if(utility_.positionDistance( to.msg_.trajectory.points.at(0).positions,
+      // Used to be else-if
+      if(utility_.positionDistance( to.msg_.trajectory.points.at(0).positions,
             to.msg_.trajectory.points.at( to.msg_.i_knotPoints.at(1)).positions ) < 0.1)
       {
-        //std::cout<<"\nIncrementing c_kp";
+        std::cout<<"\nIncrementing c_kp";
         c_kp++;
       }
-      //ROS_INFO("c_kp: %i", c_kp);
-      //ROS_INFO("c_kp: %i i_knotPoints.size(): %i", c_kp, (int)to.msg_.i_knotPoints.size());
+      ROS_INFO("c_kp: %i", c_kp);
+      ROS_INFO("c_kp: %i i_knotPoints.size(): %i", c_kp, (int)to.msg_.i_knotPoints.size());
 
       // Set full as the concatenating of switching and to
       full        = switching.concatenate(to, c_kp);
@@ -1596,10 +1598,10 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
 const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_movingOn, 
     const RampTrajectory trj_target, const double t) 
 {
-  /*ROS_INFO("In Planner::getTransitionTrajectory");
+  ROS_INFO("In Planner::getTransitionTrajectory");
   ROS_INFO("t: %f", t);
   ROS_INFO("trj_movingOn: %s", trj_movingOn.toString().c_str());
-  ROS_INFO("trj_target: %s", trj_target.toString().c_str());*/
+  ROS_INFO("trj_target: %s", trj_target.toString().c_str());
 
   /* 
    * The segment points for a transition are
@@ -1628,6 +1630,7 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
         ms_startTrans.msg_.positions.at(2), ms_endOfMovingOn.msg_.positions.at(2))) > 0.12 ) 
   {
     ROS_WARN("Cannot plan a transition curve!");
+    ROS_WARN("Robot does not have correct orientation to move on first segment of a transition curve");
     ROS_WARN("startTrans: %s\nendOfMovingOn: %s", ms_startTrans.toString().c_str(), 
         ms_endOfMovingOn.toString().c_str());
     RampTrajectory blank;
@@ -1669,11 +1672,11 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
   MotionState g(trj_target.msg_.trajectory.points.at(trj_target.msg_.i_knotPoints.at(i_goal)));
   segmentPoints.push_back(g);
 
-  /*ROS_INFO("Segment points:");
+  ROS_INFO("Segment points:");
   for(int i=0;i<segmentPoints.size();i++)
   {
     ROS_INFO("Segment point [%i]: %s", i, segmentPoints.at(i).toString().c_str());
-  }*/
+  }
 
   // Make the path of the transition curve
   Path p(segmentPoints);
@@ -1686,12 +1689,12 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
                                               segmentPoints.at(1).msg_.positions);
   double thetaS2 = utility_.findAngleFromAToB(segmentPoints.at(1).msg_.positions, 
                                               segmentPoints.at(2).msg_.positions);
-  //ROS_INFO("Theta 1: %f Theta 2: %f", thetaS1, thetaS2);
+  ROS_INFO("Theta 1: %f Theta 2: %f", thetaS1, thetaS2);
   if( fabs(utility_.findDistanceBetweenAngles(thetaS1, thetaS2)) < 0.13 )
   {
     ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
     ROS_WARN("Removing the following point at index 1 of the Path: %s", p.at(1).toString().c_str());
-    p.all_.pop_back();
+    p.all_.erase(p.all_.begin()+1);
   }
   /*else
   {
@@ -2389,7 +2392,7 @@ void Planner::doControlCycle()
   
   // Send the best trajectory and set movingOn
   //ROS_INFO("Sending best");
-  //ROS_INFO("bestT: %s", bestT.toString().c_str());
+  ROS_INFO("bestT: %s", bestT.toString().c_str());
   sendBest();
   //ROS_INFO("After sendBest");
 
@@ -2407,7 +2410,7 @@ void Planner::doControlCycle()
   movingOnCC_ = bestT.getSubTrajectory(t_fixed_cc_);
   movingOn_ = movingOnCC_;
   //ROS_INFO("After setting movingOn_");
-  //ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
+  ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
 
   // Reset planning cycle count
   c_pc_ = 0;
@@ -2420,9 +2423,9 @@ void Planner::doControlCycle()
   //ROS_INFO("New startPlanning_: %s", startPlanning_.toString().c_str());
 
   // After m_cc_ and startPlanning are set, adapt the population
-  /*ROS_INFO("Before adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", 
+  ROS_INFO("Before adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", 
       population_.size(), 
-      population_.toString().c_str());*/
+      population_.toString().c_str());
 
   // Adapt and evaluate population
   //ROS_INFO("About to adapt, controlCycle_: %f", controlCycle_.toSec());
@@ -2431,9 +2434,9 @@ void Planner::doControlCycle()
   population_ = evaluatePopulation(population_);
   ros::Duration d_adapt = ros::Time::now() - t_startAdapt;
   adapt_durs_.push_back(d_adapt);
-  /*ROS_INFO("After adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", 
+  ROS_INFO("After adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", 
       population_.size(), 
-      population_.fitnessFeasibleToString().c_str());*/
+      population_.fitnessFeasibleToString().c_str());
   //ROS_INFO("Time spent adapting: %f", d_adapt.toSec());
 
 
@@ -2766,7 +2769,7 @@ void Planner::reportTimeData()
   sendPopulation(population_);
   std::cout<<"\nPop: "<<population_.toString();
   std::cout<<"\nPopulation initialized! Press enter to continue\n";
-  std::cin.get();
+  //std::cin.get();
  
 
 
@@ -2789,7 +2792,7 @@ void Planner::reportTimeData()
 
     sendPopulation(population_);
     std::cout<<"\nPopulation seeded! Press enter to continue\n";
-    std::cin.get();
+    //std::cin.get();
   }
 
 

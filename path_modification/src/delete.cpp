@@ -6,7 +6,8 @@ Delete::Delete(const ramp_msgs::Path p) : path_(p) {}
 
 const ramp_msgs::Path Delete::perform() {
 
-  if(path_.points.size() > 2) {
+  if(path_.points.size() > 2) 
+  {
  
     // Randomly choose a knot point to delete 
     // Cannot delete the start or goal, so adjust the range a bit, range= [1,(size-2)]

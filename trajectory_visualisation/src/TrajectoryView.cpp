@@ -162,27 +162,32 @@ void TrajectoryView::drawPopulation() {
       //std::cout<<"\npoints[0]: ("<<points.at(0).positions.at(0)<<", "<<points.at(0).positions.at(1)<<")\n";
 
       // If movingOn, set to black
-      if(t == populations_.at(p).population.size()-1) {
+      if(t == populations_.at(p).population.size()-1) 
+      {
         penTraj = QPen( QColor(0, 0, 0, 255) );
       }
       // Green for robot 1 and feasible
-      else if(populations_.at(p).robot_id == 0 && populations_.at(p).population.at(t).feasible) {
+      else if(populations_.at(p).robot_id == 0 && populations_.at(p).population.at(t).feasible) 
+      {
         penTraj = QPen( QColor(0, 255, 0, 255) );
       }
       // Blue for robot 2 and feasible
-      else if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible) {
+      else if(populations_.at(p).robot_id == 1 && populations_.at(p).population.at(t).feasible) 
+      {
         penTraj = QPen( QColor(0,0,255,255) );
       }
       
       // Else, if either are in collision, red
-      else {
+      else 
+      {
         penTraj = QPen( QColor(255,0,0,150) );
       }
 
       // If the best trajectory, set to red
       // Used for single robot traj viewing
-      if(t == i) {
-        penTraj = QPen( QColor(255,0,0,150) );
+      if(t == i) 
+      {
+        penTraj = QPen( QColor(0,0,255,150) );
       }
 
       if(points.size() == 1) {
