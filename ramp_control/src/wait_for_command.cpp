@@ -28,7 +28,7 @@ void trajCallback(const ramp_msgs::RampTrajectory& msg) {
   robot.updateTrajectory(msg);
   
   // Make the robot move along the trajectory
-  robot.moveOnTrajectory(false);
+  robot.moveOnTrajectory();
 }
 
 

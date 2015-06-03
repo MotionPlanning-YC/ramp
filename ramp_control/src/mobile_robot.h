@@ -27,7 +27,7 @@ class MobileRobot {
     void turn(const float speed, const float angle) const; 
     void stop() const;
 
-    void moveOnTrajectory(bool simulation);
+    void moveOnTrajectory();
     void moveOnTrajectoryRot(const ramp_msgs::RampTrajectory traj, bool simulation);
     void odomCb(const nav_msgs::Odometry& msg);
     void updateTrajectory(const ramp_msgs::RampTrajectory msg); 
@@ -49,6 +49,8 @@ class MobileRobot {
     ros::Timer                        timer_;
     double                            initial_theta_;
 
+    bool                              check_imminent_coll_;
+    bool                              sim_;
     
     // static const members
     static const std::string  TOPIC_STR_PHIDGET_MOTOR;
@@ -64,7 +66,7 @@ class MobileRobot {
     void                        sendTwist() const;
     void                        calculateSpeedsAndTime();
     void                        printVectors() const;
-    const bool                  checkImminentCollision() const;
+    const bool                  checkImminentCollision();
     const std::vector<double>   computeAcceleration() const;
     
     void                        accountForAcceleration();
@@ -83,10 +85,12 @@ class MobileRobot {
     std::vector<double>       orientations_;
 
     geometry_msgs::Twist      twist_;
+    geometry_msgs::Twist      zero_twist_;
     TrajectoryRequestHandler* h_traj_req_;
     ramp_msgs::MotionState    prev_motion_state_; 
     ros::Time                 prev_t_;
     ros::Duration             t_immiColl_;
+
 };
 
 #endif

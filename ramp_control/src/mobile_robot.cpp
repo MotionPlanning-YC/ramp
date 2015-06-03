@@ -20,6 +20,10 @@ MobileRobot::MobileRobot() : restart_(false), num_(0), num_traveled_(0), k_dof_(
   }
 
   prev_motion_state_ = motion_state_;
+
+
+  zero_twist_.linear.x = 0.;
+  zero_twist_.angular.z = 0.;
 }
 
 
@@ -271,13 +275,27 @@ void MobileRobot::calculateSpeedsAndTime () {
 
 
 
-void MobileRobot::sendTwist() const {
+void MobileRobot::sendTwist() const 
+{
   pub_twist_.publish(twist_); 
+
+  // If we have the simulation up, publish to cmd_vel
+  if(sim_) 
+  {
+    pub_cmd_vel_.publish(twist_);
+  }
 }
 
 
-void MobileRobot::sendTwist(const geometry_msgs::Twist t) const {
+void MobileRobot::sendTwist(const geometry_msgs::Twist t) const 
+{
   pub_twist_.publish(t); 
+
+  // If we have the simulation up, publish to cmd_vel
+  if(sim_) 
+  {
+    pub_cmd_vel_.publish(t);
+  }
 }
 
 
@@ -316,9 +334,15 @@ void MobileRobot::printVectors() const {
 
 
 /** Returns true if there is imminent collision */
-const bool MobileRobot::checkImminentCollision() const {
-  bool result;
+const bool MobileRobot::checkImminentCollision()  
+{
+  bool result = false;
   ros::param::get("imminent_collision", result);
+  if(result)
+  {
+    ROS_ERROR("Imminent Collision exists! Stopping robot, initial_theta_: %f", initial_theta_);
+  }
+  //ROS_INFO("Imminent Collision: %s", result ? "True" : "False");
   return result;
 } // End checkImminentCollision
 
@@ -328,25 +352,30 @@ const bool MobileRobot::checkImminentCollision() const {
 
 
 /** This method moves the robot along trajectory_ */
-void MobileRobot::moveOnTrajectory(bool simulation) 
+void MobileRobot::moveOnTrajectory() 
 {
   restart_ = false;
   ros::Rate r(20);
 
   // Execute the trajectory
-  while( (num_traveled_+1) < num_) {
+  while( (num_traveled_+1) < num_) 
+  {
     //ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
     //ROS_INFO("At state: %s", utility_.toString(motion_state_).c_str());
     restart_ = false;
  
 
     // Force a stop until there is no imminent collision
-    ros::Time t_startIC = ros::Time::now();
-    while(checkImminentCollision()) 
+    if(check_imminent_coll_)
     {
-      ros::spinOnce();
+      ros::Time t_startIC = ros::Time::now();
+      while(checkImminentCollision()) 
+      {
+        sendTwist(zero_twist_);
+        ros::spinOnce();
+      }
+      t_immiColl_ += ros::Time::now() - t_startIC;
     }
-    t_immiColl_ += ros::Time::now() - t_startIC; 
     //std::cout<<"\nt_immiColl: "<<t_immiColl_;
 
     
@@ -375,18 +404,9 @@ void MobileRobot::moveOnTrajectory(bool simulation)
             //orientations_.at(num_traveled_), dist);
         twist_.angular.z = dist;
       }*/
-    
-      //std::cout<<"\ntwist_linear: "<<twist_.linear.x;
-      //std::cout<<"\ntwist_angular: "<<twist_.angular.z<<"\n";
 
       // Send the twist_message to move the robot
       sendTwist();
-
-      // If we have the simulation up, publish to cmd_vel
-      if(simulation) 
-      {
-        pub_cmd_vel_.publish(twist_);
-      }
       
       // Sleep
       r.sleep();
@@ -396,7 +416,8 @@ void MobileRobot::moveOnTrajectory(bool simulation)
     } // end while (move to the next point)
     
     // If a new trajectory was received, restart the outer while 
-    if(restart_) {
+    if(restart_) 
+    {
       continue;
     }
 

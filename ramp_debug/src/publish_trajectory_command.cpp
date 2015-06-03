@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
 
   ramp_msgs::KnotPoint c5;
   c5.motionState.positions.push_back(3.5);
-  c5.motionState.positions.push_back(3.5);
+  c5.motionState.positions.push_back(0.);
   c5.motionState.positions.push_back(0.);
 
   ramp_msgs::KnotPoint c6;
@@ -132,8 +132,8 @@ int main(int argc, char** argv) {
   p.points.push_back(zero);
   //p.points.push_back(c1);
   //p.points.push_back(c2);
-  p.points.push_back(c3);
-  p.points.push_back(c4);
+  //p.points.push_back(c3);
+  //p.points.push_back(c4);
   p.points.push_back(c5);
   //p.points.push_back(c6);
   //p.points.push_back(c7);
@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
   sp1.accelerations.push_back(0);*/
 
   ramp_msgs::MotionState sp2;
-  sp2 = p.points.at(2).motionState;
+  //sp2 = p.points.at(2).motionState;
   //sp2 = p.points.at(1).motionState;
   //sp2 = c3.motionState;
 

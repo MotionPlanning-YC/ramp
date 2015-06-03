@@ -187,7 +187,7 @@ void TrajectoryView::drawPopulation() {
       // Used for single robot traj viewing
       if(t == i) 
       {
-        penTraj = QPen( QColor(0,0,255,150) );
+        penTraj = QPen( QColor(0,0,255,255) );
       }
 
       if(points.size() == 1) {

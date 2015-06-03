@@ -10,7 +10,7 @@ Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalT
   stop_(false) 
 {
   planningCycle_          = ros::Duration(1.f / 2.f);
-  imminentCollisionCycle_ = ros::Duration(1.f / 2.f);
+  imminentCollisionCycle_ = ros::Duration(1.f / 10.f);
   generationsPerCC_       = controlCycle_.toSec() / planningCycle_.toSec();
 }
 
@@ -273,22 +273,27 @@ const uint8_t Planner::getNumThrowawayPoints(const RampTrajectory traj, const ro
       i_kp++) 
   {
     ROS_INFO("i_kp: %i", (int)i_kp);
-
-    // Get the knot point 
-    trajectory_msgs::JointTrajectoryPoint point = traj.msg_.trajectory.points.at( 
-                                                    traj.msg_.i_knotPoints.at(i_kp));
-    ROS_INFO("point: %s", utility_.toString(point).c_str());
-
-    // Compare the durations
-    if( (dur > point.time_from_start) || 
-        (fabs(dur.toSec() - point.time_from_start.toSec()) < 0.0001) ) 
+    
+    // Only adapt the best trajectory
+    // TODO: Make this method not do a loop
+    if(i_kp == transPopulation_.calcBestIndex())
     {
-      //ROS_INFO("Past KP, dur.toSec(): %f kp time: %f", dur.toSec(), point.time_from_start.toSec());
-      result++;
-    }
-    else {
-      //ROS_INFO("Behind KP, dur.toSec(): %f kp time: %f", dur.toSec(), point.time_from_start.toSec());
-      break;
+      // Get the knot point 
+      trajectory_msgs::JointTrajectoryPoint point = traj.msg_.trajectory.points.at( 
+                                                      traj.msg_.i_knotPoints.at(i_kp));
+      ROS_INFO("point: %s", utility_.toString(point).c_str());
+
+      // Compare the durations
+      if( (dur > point.time_from_start) || 
+          (fabs(dur.toSec() - point.time_from_start.toSec()) < 0.0001) ) 
+      {
+        //ROS_INFO("Past KP, dur.toSec(): %f kp time: %f", dur.toSec(), point.time_from_start.toSec());
+        result++;
+      }
+      else {
+        //ROS_INFO("Behind KP, dur.toSec(): %f kp time: %f", dur.toSec(), point.time_from_start.toSec());
+        break;
+      }
     }
   } // end for
 
@@ -779,19 +784,21 @@ const unsigned int Planner::getIRT() { return i_rt++; }
 
 
 /** Check if there is imminent collision in the best trajectory */
-void Planner::imminentCollisionCallback(const ros::TimerEvent& t) {
+void Planner::imminentCollisionCallback(const ros::TimerEvent& t) 
+{
   //ROS_INFO("In imminentCollisionCallback");
  
 
-  if(!population_.get(population_.calcBestIndex()).msg_.feasible && 
-      (population_.get(population_.calcBestIndex()).msg_.t_firstCollision.toSec() < D_)) 
+  if(!transPopulation_.getBest().msg_.feasible && 
+      (transPopulation_.getBest().msg_.t_firstCollision.toSec() < D_)) 
   {
     ROS_WARN("Imminent Collision Robot: %i t_firstCollision: %f", id_, 
-        population_.get(population_.calcBestIndex()).msg_.t_firstCollision.toSec());
+        transPopulation_.getBest().msg_.t_firstCollision.toSec());
     h_parameters_.setImminentCollision(true); 
   } 
   else 
   {
+    ROS_INFO("No imminent collision, t_firstCollision: %f", transPopulation_.getBest().msg_.t_firstCollision.toSec());
     h_parameters_.setImminentCollision(false);
   }
 
@@ -1525,9 +1532,9 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
 
     ros::Time t_start_trans = ros::Time::now();
     RampTrajectory switching  = getTransitionTrajectory(from, to, t);
-    ROS_INFO("Time spent getting transition: %f", (ros::Time::now()-t_start_trans).toSec());
+    //ROS_INFO("Time spent getting transition: %f", (ros::Time::now()-t_start_trans).toSec());
     RampTrajectory full       = switching.clone();
-    ROS_INFO("Switching trajectory: %s", switching.toString().c_str());
+    //ROS_INFO("Switching trajectory: %s", switching.toString().c_str());
 
     //ROS_INFO("to.path_.size(): %i", (int)to.path_.size());
     // If the target trajec is a straight line, no need to continue
@@ -1554,11 +1561,11 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
       if(utility_.positionDistance( to.msg_.trajectory.points.at(0).positions,
             to.msg_.trajectory.points.at( to.msg_.i_knotPoints.at(1)).positions ) < 0.1)
       {
-        std::cout<<"\nIncrementing c_kp";
+        //std::cout<<"\nIncrementing c_kp";
         c_kp++;
       }
-      ROS_INFO("c_kp: %i", c_kp);
-      ROS_INFO("c_kp: %i i_knotPoints.size(): %i", c_kp, (int)to.msg_.i_knotPoints.size());
+      //ROS_INFO("c_kp: %i", c_kp);
+      //ROS_INFO("c_kp: %i i_knotPoints.size(): %i", c_kp, (int)to.msg_.i_knotPoints.size());
 
       // Set full as the concatenating of switching and to
       full        = switching.concatenate(to, c_kp);
@@ -1598,10 +1605,10 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
 const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_movingOn, 
     const RampTrajectory trj_target, const double t) 
 {
-  ROS_INFO("In Planner::getTransitionTrajectory");
+  /*ROS_INFO("In Planner::getTransitionTrajectory");
   ROS_INFO("t: %f", t);
   ROS_INFO("trj_movingOn: %s", trj_movingOn.toString().c_str());
-  ROS_INFO("trj_target: %s", trj_target.toString().c_str());
+  ROS_INFO("trj_target: %s", trj_target.toString().c_str());*/
 
   /* 
    * The segment points for a transition are
@@ -1672,11 +1679,11 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
   MotionState g(trj_target.msg_.trajectory.points.at(trj_target.msg_.i_knotPoints.at(i_goal)));
   segmentPoints.push_back(g);
 
-  ROS_INFO("Segment points:");
+  /*ROS_INFO("Segment points:");
   for(int i=0;i<segmentPoints.size();i++)
   {
     ROS_INFO("Segment point [%i]: %s", i, segmentPoints.at(i).toString().c_str());
-  }
+  }*/
 
   // Make the path of the transition curve
   Path p(segmentPoints);
@@ -2099,8 +2106,8 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
           movingOn_ = movingOnCC_;
           movingOn_.offsetPositions(diff);
           //ROS_INFO("Done offsetting movingOn_");
-          ROS_INFO("Corrected startPlanning_: %s", startPlanning_.toString().c_str());
-          ROS_INFO("Corrected movingOn_: %s", movingOn_.toString().c_str());
+          //ROS_INFO("Corrected startPlanning_: %s", startPlanning_.toString().c_str());
+          //ROS_INFO("Corrected movingOn_: %s", movingOn_.toString().c_str());
 
           //ROS_INFO("Before offset, pop: %s\ntransPop: %s", population_.toString().c_str(), 
               //transPopulation_.toString().c_str());
@@ -2114,22 +2121,22 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
           //ROS_INFO("After doing error correction, new pop: %s\n\n\nnew trans pop: %s", population_.toString().c_str(), 
               //transPopulation_.toString().c_str());
       }
-      else
+      /*else
       {
         ROS_INFO("Not doing error correction");
         ROS_INFO("c_pc: %i population_.getBest().msg_.curves.size(): %i", c_pc_, (int)population_.getBest().msg_.curves.size());
         ROS_INFO("population_.getBest().msg_.curves.at(0).u_0: %f", population_.getBest().msg_.curves.at(0).u_0); 
-      }
+      }*/
 
       error_correct_durs_.push_back(ros::Time::now() - t_start_error);
     } // end if doing error correction 
-    else
+    /*else
     {
       ROS_INFO("Not doing error correction");
       ROS_INFO("cc_started_: %s c_pc_: %i errorReduction_: %s fabs(latestUpdate_.msg_.velocities.at(2)): %f", 
           cc_started_ ? "True" : "False", c_pc_,
           errorReduction_ ? "True" : "False", fabs(latestUpdate_.msg_.velocities.at(2)));
-    }
+    }*/
 
     /*
      * Modification
@@ -2387,9 +2394,6 @@ void Planner::doControlCycle()
   MotionState diff = bestT.path_.at(0).motionState_.subtractPosition(latestUpdate_);
   //ROS_INFO("diff: %s", diff.toString().c_str());
 
-  ROS_INFO("bestT: %s", bestT.toString().c_str());
-
-  
   // Send the best trajectory and set movingOn
   //ROS_INFO("Sending best");
   ROS_INFO("bestT: %s", bestT.toString().c_str());
@@ -2438,9 +2442,17 @@ void Planner::doControlCycle()
       population_.size(), 
       population_.fitnessFeasibleToString().c_str());
   //ROS_INFO("Time spent adapting: %f", d_adapt.toSec());
+ 
+  if(population_.calcBestIndex() != transPopulation_.calcBestIndex())
+  {
+    ROS_WARN("Population (holo) best ID: %i\nPopulation (non-holo) best ID: %i", 
+        population_.calcBestIndex(), transPopulation_.calcBestIndex());
+    ROS_INFO("Pop: %s", population_.toString().c_str());
+    ROS_INFO("Trans Pop: %s", transPopulation_.toString().c_str());
+  }
 
 
-  
+ 
   // Find the transition (non-holonomic) population and set new control cycle time
   ros::Time t_startTrans = ros::Time::now();
   transPopulation_  = getTransPop(population_, movingOn_);
@@ -2450,7 +2462,7 @@ void Planner::doControlCycle()
   trans_durs_.push_back(d_trans);
   
   //ROS_INFO("After finding transition population, controlCycle period: %f", controlCycle_.toSec());
-  //ROS_INFO("New transPop: %s", transPopulation_.toString().c_str());
+  ROS_INFO("New transPop: %s", transPopulation_.toString().c_str());
   //ROS_INFO("Time spent getting trans pop: %f", d_trans.toSec());
 
   population_at_cc_       = population_;

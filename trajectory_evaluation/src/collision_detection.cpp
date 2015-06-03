@@ -25,6 +25,7 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const {
   ROS_INFO("In CollisionDetection::perform()");
 
   CollisionDetection::QueryResult result;
+  
 
   // Duration for predicting the object trajectories
   ros::Duration d(5);
@@ -103,7 +104,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   ROS_INFO("ob_trajectory: %s", utility_.toString(ob_trajectory).c_str());
 
   CollisionDetection::QueryResult result;
-  uint8_t t_checkColl = 2;
+  uint8_t t_checkColl = 6;
 
   /*if(ob_trajectory.trajectory.points.size() <= 2) {
     if(id == 0)
@@ -132,7 +133,6 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   
   ROS_INFO("i_stop: %i", i_stop);
   
-  //std::cout<<"\nobstable trajectory size: "<<ob_trajectory.trajectory.points.size();
   // For every point, check circle detection on a subset of the obstacle's trajectory
   float radius = 0.33f;
   for(uint16_t i=0;i<i_stop;i++) 

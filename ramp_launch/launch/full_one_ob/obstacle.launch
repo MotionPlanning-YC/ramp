@@ -17,6 +17,7 @@
   <remap from="odometry" to="odom" />
   <param name="simulation" value="true" />
   <param name="orientation" value="2.35" />
+  <param name="check_imminent_coll" value="false" />
   <remap from="cmd_vel" to="/robot_1/cmd_vel" />
 </node>
 </group>

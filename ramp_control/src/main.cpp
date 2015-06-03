@@ -17,7 +17,8 @@ void trajCallback(const ramp_msgs::RampTrajectory::ConstPtr& msg) {
 
 
 /** Initialize the MobileRobot's publishers and subscibers*/
-void init_advertisers_subscribers(MobileRobot& robot, ros::NodeHandle& handle, bool simulation) {
+void init_advertisers_subscribers(MobileRobot& robot, ros::NodeHandle& handle, bool simulation) 
+{
 
   
   // Publishers
@@ -48,15 +49,21 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "ramp_control");
   ros::NodeHandle handle;  
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
-  
+ 
   handle.param("ramp_control/orientation", robot.initial_theta_, PI/4.);
   //handle.param("orientation", robot.initial_theta_, 0.);
   std::cout<<"\nrobot.orientation: "<<robot.initial_theta_;
-  
+
   bool sim=false;
   handle.param("ramp_control/simulation", sim, false);
   std::cout<<"\nsim: "<<sim<<"\n";
+  robot.sim_ = sim;
  
+ 
+  bool check_imminent_coll=true;
+  handle.param("ramp_control/check_imminent_coll", check_imminent_coll, true);
+  ROS_INFO("check_imminent_coll: %s", check_imminent_coll ? "True" : "False");
+  robot.check_imminent_coll_ = check_imminent_coll;
 
   // Initialize publishers and subscribers
   robot.init(handle);
@@ -67,8 +74,9 @@ int main(int argc, char** argv) {
   ramp_msgs::RampTrajectory init;
   robot.trajectory_ = init;
 
-  while(ros::ok()) {
-    robot.moveOnTrajectory(sim);
+  while(ros::ok()) 
+  {
+    robot.moveOnTrajectory();
     ros::spinOnce();
   }
 
