@@ -1,9 +1,11 @@
 <launch>
 
+
 <include file="$(find ramp_launch)/launch/full_one_ob/planner_simulation.launch" />
 <include file="$(find ramp_launch)/launch/full_one_ob/obstacle.launch" />
 
 <node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/full_one_ob/simulation.world" />
+
 
 
 </launch>

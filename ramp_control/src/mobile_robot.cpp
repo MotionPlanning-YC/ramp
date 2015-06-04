@@ -136,7 +136,7 @@ const std::vector<double> MobileRobot::computeAcceleration() const
  * It does not mutate any motion data. The time value is added based on num_travaled_.
  */
 void MobileRobot::odomCb(const nav_msgs::Odometry& msg) {
-  //std::cout<<"\nReceived odometry update\n";
+  ROS_INFO("Received odometry update!");
  
   prev_motion_state_ = motion_state_;
 
@@ -197,7 +197,7 @@ void MobileRobot::updateTrajectory(const ramp_msgs::RampTrajectory msg) {
   t_immiColl_     = ros::Duration(0);
   
   // Update vectors for speeds and times
-  if(trajectory_.trajectory.points.size() > 2) 
+  if(trajectory_.trajectory.points.size() > 0) 
   {
     calculateSpeedsAndTime();
   }
@@ -300,32 +300,37 @@ void MobileRobot::sendTwist(const geometry_msgs::Twist t) const
 
 
 /** This method prints out the information vectors */
-void MobileRobot::printVectors() const {
+void MobileRobot::printVectors() const 
+{
     
   std::cout<<"\nspeeds_linear size: "<<speeds_linear_.size();
   std::cout<<"\nspeeds_linear: [";
-  for(unsigned int i=0;i<speeds_linear_.size()-1;i++) {
+  for(unsigned int i=0;i<speeds_linear_.size()-1;i++) 
+  {
     std::cout<<speeds_linear_.at(i)<<", ";
   }
   std::cout<<speeds_linear_.at(speeds_linear_.size()-1)<<"]";
   
   std::cout<<"\nspeeds_angular size: "<<speeds_angular_.size();
   std::cout<<"\nspeeds_angular_: [";
-  for(unsigned int i=0;i<speeds_angular_.size()-1;i++) {
+  for(unsigned int i=0;i<speeds_angular_.size()-1;i++) 
+  {
     std::cout<<speeds_angular_.at(i)<<", ";
   }
   std::cout<<speeds_angular_.at(speeds_angular_.size()-1)<<"]";
 
   std::cout<<"\nend_times size: "<<end_times.size();
   std::cout<<"\nend_times: [";
-  for(unsigned int i=0;i<end_times.size()-1;i++) {
+  for(unsigned int i=0;i<end_times.size()-1;i++) 
+  {
     std::cout<<end_times.at(i)<<", ";
   }
   std::cout<<end_times.at(end_times.size()-1)<<"]";
 
   std::cout<<"\norientations_ size: "<<orientations_.size();
   std::cout<<"\norientations_: [";
-  for(unsigned int i=0;i<orientations_.size()-1;i++) {
+  for(unsigned int i=0;i<orientations_.size()-1;i++) 
+  {
     std::cout<<orientations_.at(i)<<", ";
   }
   std::cout<<orientations_.at(orientations_.size()-1)<<"]";
@@ -360,8 +365,8 @@ void MobileRobot::moveOnTrajectory()
   // Execute the trajectory
   while( (num_traveled_+1) < num_) 
   {
-    //ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
-    //ROS_INFO("At state: %s", utility_.toString(motion_state_).c_str());
+    ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
+    ROS_INFO("At state: %s", utility_.toString(motion_state_).c_str());
     restart_ = false;
  
 
@@ -404,6 +409,8 @@ void MobileRobot::moveOnTrajectory()
             //orientations_.at(num_traveled_), dist);
         twist_.angular.z = dist;
       }*/
+
+      ROS_INFO("twist.linear.x: %f twist.angular.z: %f", twist_.linear.x, twist_.angular.z);
 
       // Send the twist_message to move the robot
       sendTwist();

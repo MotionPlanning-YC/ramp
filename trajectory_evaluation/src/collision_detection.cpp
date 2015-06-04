@@ -21,7 +21,8 @@ void CollisionDetection::init(ros::NodeHandle& h) {
 
 
 /** Returns true if trajectory_ is in collision with any of the objects */
-const CollisionDetection::QueryResult CollisionDetection::perform() const {
+const CollisionDetection::QueryResult CollisionDetection::perform() const 
+{
   ROS_INFO("In CollisionDetection::perform()");
 
   CollisionDetection::QueryResult result;
@@ -98,10 +99,10 @@ void CollisionDetection::setOb_T_w_b(int id) {
  * The robots are treated as circles for simple collision detection
  */
 const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::RampTrajectory ob_trajectory) const {
-  ROS_INFO("In CollisionDetection::query"); 
+  /*ROS_INFO("In CollisionDetection::query"); 
   ROS_INFO("trajectory.points.size(): %i", (int)trajectory_.trajectory.points.size());
   ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.trajectory.points.size());
-  ROS_INFO("ob_trajectory: %s", utility_.toString(ob_trajectory).c_str());
+  ROS_INFO("ob_trajectory: %s", utility_.toString(ob_trajectory).c_str());*/
 
   CollisionDetection::QueryResult result;
   uint8_t t_checkColl = 6;
@@ -154,11 +155,11 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // Get the distance between the centers
       float dist = sqrt( pow(p_i.positions.at(0) - p_ob.positions.at(0),2) + pow(p_i.positions.at(1) - p_ob.positions.at(1),2) );
 
-      ROS_INFO("Robot id: %i - Comparing trajectory point (%f,%f) and obstacle point (%f,%f): dist = %f", 
+      /*ROS_INFO("Robot id: %i - Comparing trajectory point (%f,%f) and obstacle point (%f,%f): dist = %f", 
           id_, 
           p_i.positions.at(0), p_i.positions.at(1), 
           p_ob.positions.at(0), p_ob.positions.at(1), 
-          dist);
+          dist);*/
       
         
 
@@ -166,14 +167,14 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // there is collision
       if( dist <= radius*2 ) 
       {
-        ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+        /*ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
             p_i.positions.at(0),
             p_i.positions.at(1),
             p_ob.positions.at(0),
             p_ob.positions.at(1),
             dist,
             (int)i,
-            (int)j);
+            (int)j);*/
         result.collision_ = true;
         result.t_firstCollision_ = p_i.time_from_start.toSec();
         i = i_stop;
@@ -243,7 +244,8 @@ const MotionType CollisionDetection::findMotionType(const ramp_msgs::Obstacle ob
 
 /** This method returns the predicted trajectory for an obstacle for the future duration d 
  * TODO: Remove Duration parameter and make the predicted trajectory be computed until robot reaches bounds of environment */
-const ramp_msgs::RampTrajectory CollisionDetection::getPredictedTrajectory(const ramp_msgs::Obstacle ob) const {
+const ramp_msgs::RampTrajectory CollisionDetection::getPredictedTrajectory(const ramp_msgs::Obstacle ob) const 
+{
   ramp_msgs::RampTrajectory result;
 
   // First, identify which type of trajectory it is
@@ -254,11 +256,12 @@ const ramp_msgs::RampTrajectory CollisionDetection::getPredictedTrajectory(const
   // Now build a Trajectory Request 
   ramp_msgs::TrajectoryRequest tr;
     tr.request.path = getObstaclePath(ob, motion_type);
-    tr.request.type = 4;  // Prediction
+    tr.request.type = PREDICTION;  // Prediction
 
 
   // Get trajectory
-  if(h_traj_req_->request(tr)) {
+  if(h_traj_req_->request(tr)) 
+  {
     result = tr.response.trajectory;
   }
 
@@ -281,15 +284,11 @@ const ramp_msgs::RampTrajectory CollisionDetection::getPredictedTrajectory(const
  *  The path is based on 1) the type of motion the obstacle currently has
  *  2) the duration that we should predict the motion for 
  */
-const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obstacle ob, const MotionType mt) const {
+const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obstacle ob, const MotionType mt) const 
+{
   ramp_msgs::Path result;
 
   std::vector<ramp_msgs::KnotPoint> path;
-
-  //std::cout<<"\nObstacle odometry passed in:\nPosition: ("<<ob.odom_t.pose.pose.position.x<<", "<<ob.odom_t.pose.pose.position.y<<", "<<tf::getYaw(ob.odom_t.pose.pose.orientation)<<")";
-
-  //std::cout<<"\nVelocity: ("<<ob.odom_t.twist.twist.linear.x<<", "<<ob.odom_t.twist.twist.linear.y<<", "<<ob.odom_t.twist.twist.angular.z<<")";
-
 
   /***********************************************************************
    Create and initialize the first point in the path
@@ -323,9 +322,11 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
   start.motionState.velocities.at(0) = v*cos(phi);
   start.motionState.velocities.at(1) = v*sin(phi);
 
+  ROS_INFO("start: %s", utility_.toString(start).c_str());
 
 
-  if(v < 0) {
+  if(v < 0) 
+  {
     start.motionState.positions.at(2) = utility_.displaceAngle(start.motionState.positions.at(2), PI);
   }
   
@@ -333,23 +334,18 @@ const ramp_msgs::Path CollisionDetection::getObstaclePath(const ramp_msgs::Obsta
    ***********************************************************************
    ***********************************************************************/
 
-  ROS_INFO("Before adjusting, start: %s", utility_.toString(start.motionState).c_str());
-  ROS_INFO("t_start: %f", t_start_);
-
   /** Adjust the position based on the starting time of the trajectory passed in */
   start.motionState.positions.at(0) += start.motionState.velocities.at(0) * t_start_;
   start.motionState.positions.at(1) += start.motionState.velocities.at(1) * t_start_;
   start.motionState.positions.at(2) += start.motionState.velocities.at(2) * t_start_;
 
-  ROS_INFO("After adjusting, start: %s", utility_.toString(start.motionState).c_str());
-
   // Push the first point onto the path
   path.push_back(start);
 
-
   /** Find the ending configuration for the predicted trajectory based on motion type */
   // If translation
-  if(mt == MotionType::Translation) {
+  if(mt == MotionType::Translation) 
+  {
 
     // Create the Goal Knotpoint
     ramp_msgs::KnotPoint goal;

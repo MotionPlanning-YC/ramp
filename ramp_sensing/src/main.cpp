@@ -33,7 +33,8 @@ void updateOtherRobotCb(const nav_msgs::Odometry& o)
 
 
 /** Publish the list of objects */
-void publishList(const ros::TimerEvent& e) {
+void publishList(const ros::TimerEvent& e) 
+{
   //pub_obj.publish(prepareList());
   pub_obj.publish(obstacle.buildObstacleMsg());
 } //End sendList

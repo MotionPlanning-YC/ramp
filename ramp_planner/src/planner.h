@@ -281,7 +281,6 @@ class Planner {
     void pause();
 
 
-    const Population getTransPopAtPC(const Population pop, const RampTrajectory traj, const uint8_t pc);
     const Population getTransPop(const Population pop, const RampTrajectory movingOn);
 
 

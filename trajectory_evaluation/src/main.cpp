@@ -51,6 +51,10 @@ void obstacleCb(const ramp_msgs::Obstacle& ol)
   ROS_INFO("Received Obstacle Info");
   cd.obstacle_ = ol;
   received_ob = true;
+  /*ROS_INFO("Obstacle odometry passed in:\nPosition: (%f, %f, %f)", 
+      ol.odom_t.pose.pose.position.x, 
+      ol.odom_t.pose.pose.position.y, 
+      tf::getYaw(ol.odom_t.pose.pose.orientation));*/
 } //End objectCb
 
 
