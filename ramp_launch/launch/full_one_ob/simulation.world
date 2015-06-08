@@ -25,7 +25,7 @@ define corobot corobot_base
     z [0 0.222]
   )
   
-  size [1 1 0.5]
+  size [0.33 0.33 0.5]
 )
 
 define corobot_base position 
@@ -41,19 +41,16 @@ window
 (
   size [ 635.000 666.000 ] # in pixels
   scale 36.995   # pixels per meter
-  center [ -0.040  -0.274 ]
   rotate [ 0  0 ]
-  			
-  show_data 1              # 1=on 0=off
+
+  show_data 1
+  gui_nose 1
+  gui_move 1
 )
 
 
-corobot
-(		  
-  name "robot_0"
-  color "blue"
-  #pose [ 0 0 0 0 ] 
-  pose [0 0 0 45]
+corobot( name "r0" pose [0 0 0 45] )
+corobot( name "r1" color "red" pose [3.5 0 0 135] )
   #pose [0 0 0 45]
   #pose [ 1.5 3.5 0 -90 ] 
   #pose [0.344 0.196 0 0]
@@ -62,23 +59,5 @@ corobot
   #pose [2.5 1 0 -45]
   #pose [3.5 2 0 180]
 
-  size [0.25 0.25 0.5]
-)
-
-corobot
-(		  
-  name "robot_1"
-  color "red"
-  #pose [ 0 0 0 0 ] 
-  pose [3.5 0 0 135]
-  #pose [0 0 0 45]
-  #pose [ 1.5 3.5 0 -90 ] 
-  #pose [0.344 0.196 0 0]
-  #pose [ 0 0 0 29.745 ] 
-  #pose [ 0 0 0 45 ] 
-  #pose [2.5 1 0 -45]
-  #pose [3.5 2 0 180]
-
-  size [0.25 0.25 0.5]
-)
+  #size [0.25 0.25 0.5]
 

@@ -173,9 +173,11 @@ void MobileRobot::odomCb(const nav_msgs::Odometry& msg) {
 
 /** This method is on a timer to publish the robot's latest configuration */
 void MobileRobot::updateCallback(const ros::TimerEvent& e) {
+  //ROS_INFO("Publishing latest MotionState");
   //std::cout<<"\nIn updatePublishTimer\n";
   
-  if (pub_update_) {
+  if (pub_update_) 
+  {
       pub_update_.publish(motion_state_);
       //ROS_INFO("Motion state: %s", utility_.toString(motion_state_).c_str());
   }
@@ -185,8 +187,9 @@ void MobileRobot::updateCallback(const ros::TimerEvent& e) {
 
 /** This method updates the MobileRobot's trajectory
  *   It calls calculateSpeedsAndTimes to update the robot's vectors needed to move */
-void MobileRobot::updateTrajectory(const ramp_msgs::RampTrajectory msg) {
-  //std::cout<<"\nIn updateTrajectory!\n";
+void MobileRobot::updateTrajectory(const ramp_msgs::RampTrajectory msg) 
+{
+  //ROS_INFO("Received RampTrajectory");
   //std::cout<<"\nTrajectory: "<<utility_.toString(msg);
   
   // Update data members
@@ -277,6 +280,7 @@ void MobileRobot::calculateSpeedsAndTime () {
 
 void MobileRobot::sendTwist() const 
 {
+  //ROS_INFO("In MobileRobot::sendTwist()");
   pub_twist_.publish(twist_); 
 
   // If we have the simulation up, publish to cmd_vel
@@ -284,6 +288,8 @@ void MobileRobot::sendTwist() const
   {
     pub_cmd_vel_.publish(twist_);
   }
+  
+  //ROS_INFO("Exiting MobileRobot::sendTwist()");
 }
 
 
@@ -347,7 +353,7 @@ const bool MobileRobot::checkImminentCollision()
   {
     ROS_ERROR("Imminent Collision exists! Stopping robot, initial_theta_: %f", initial_theta_);
   }
-  //ROS_INFO("Imminent Collision: %s", result ? "True" : "False");
+  ROS_INFO("Imminent Collision: %s", result ? "True" : "False");
   return result;
 } // End checkImminentCollision
 
@@ -394,6 +400,7 @@ void MobileRobot::moveOnTrajectory()
     ros::Time g_time = end_times.at(num_traveled_) + t_immiColl_;
     while(ros::ok() && ros::Time::now() < g_time && !checkImminentCollision()) 
     {
+      ROS_INFO("In while send twist");
       twist_.linear.x   = speeds_linear_.at(num_traveled_);
       twist_.angular.z  = speeds_angular_.at(num_traveled_);
       //std::cout<<"\nspeeds_angular["<<num_traveled_<<"]: "<<speeds_angular_.at(num_traveled_);
@@ -415,12 +422,17 @@ void MobileRobot::moveOnTrajectory()
       // Send the twist_message to move the robot
       sendTwist();
       
+      ROS_INFO("About to sleep");
       // Sleep
       r.sleep();
       
+      ROS_INFO("About to spin");
       // Spin to check for updates
       ros::spinOnce();
+
+      ROS_INFO("Done spinning");
     } // end while (move to the next point)
+    ROS_INFO("After while send twist");
     
     // If a new trajectory was received, restart the outer while 
     if(restart_) 
@@ -431,6 +443,7 @@ void MobileRobot::moveOnTrajectory()
     // Increment num_traveled
     num_traveled_++;
 
+    ROS_INFO("About to spin");
     // Spin once to check for updates in the trajectory
     ros::spinOnce();
   } // end while

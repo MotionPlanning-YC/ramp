@@ -14,4 +14,4 @@ planning_cycle_rate: 3
 
 fixed_control_cycle_rate: 2
 
-error_reduction: false
+error_reduction: true
