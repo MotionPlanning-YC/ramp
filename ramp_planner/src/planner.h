@@ -254,8 +254,6 @@ class Planner {
     const int estimateIfOnCurve(const MotionState ms, 
                                 const ramp_msgs::BezierCurve curve) const;
 
-    void restartControlCycle(const double t=2.0);
-
     const std::vector<Path> getRandomPaths        ( const MotionState init, const MotionState goal);
     const std::vector<Path> getAdjustedPaths      ( const MotionState init, const MotionState goal);
     const Population        getPopulation         ( const MotionState init, 

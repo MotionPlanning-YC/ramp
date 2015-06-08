@@ -136,7 +136,7 @@ const std::vector<double> MobileRobot::computeAcceleration() const
  * It does not mutate any motion data. The time value is added based on num_travaled_.
  */
 void MobileRobot::odomCb(const nav_msgs::Odometry& msg) {
-  ROS_INFO("Received odometry update!");
+  //ROS_INFO("Received odometry update!");
  
   prev_motion_state_ = motion_state_;
 
@@ -353,7 +353,7 @@ const bool MobileRobot::checkImminentCollision()
   {
     ROS_ERROR("Imminent Collision exists! Stopping robot, initial_theta_: %f", initial_theta_);
   }
-  ROS_INFO("Imminent Collision: %s", result ? "True" : "False");
+  //ROS_INFO("Imminent Collision: %s", result ? "True" : "False");
   return result;
 } // End checkImminentCollision
 
@@ -371,8 +371,8 @@ void MobileRobot::moveOnTrajectory()
   // Execute the trajectory
   while( (num_traveled_+1) < num_) 
   {
-    ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
-    ROS_INFO("At state: %s", utility_.toString(motion_state_).c_str());
+    //ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
+    //ROS_INFO("At state: %s", utility_.toString(motion_state_).c_str());
     restart_ = false;
  
 
@@ -400,10 +400,8 @@ void MobileRobot::moveOnTrajectory()
     ros::Time g_time = end_times.at(num_traveled_) + t_immiColl_;
     while(ros::ok() && ros::Time::now() < g_time && !checkImminentCollision()) 
     {
-      ROS_INFO("In while send twist");
       twist_.linear.x   = speeds_linear_.at(num_traveled_);
       twist_.angular.z  = speeds_angular_.at(num_traveled_);
-      //std::cout<<"\nspeeds_angular["<<num_traveled_<<"]: "<<speeds_angular_.at(num_traveled_);
  
       // When driving straight, adjust the angular speed 
       // to maintain orientation
@@ -417,22 +415,17 @@ void MobileRobot::moveOnTrajectory()
         twist_.angular.z = dist;
       }*/
 
-      ROS_INFO("twist.linear.x: %f twist.angular.z: %f", twist_.linear.x, twist_.angular.z);
+      //ROS_INFO("twist.linear.x: %f twist.angular.z: %f", twist_.linear.x, twist_.angular.z);
 
       // Send the twist_message to move the robot
       sendTwist();
       
-      ROS_INFO("About to sleep");
       // Sleep
       r.sleep();
       
-      ROS_INFO("About to spin");
       // Spin to check for updates
       ros::spinOnce();
-
-      ROS_INFO("Done spinning");
     } // end while (move to the next point)
-    ROS_INFO("After while send twist");
     
     // If a new trajectory was received, restart the outer while 
     if(restart_) 
@@ -443,17 +436,23 @@ void MobileRobot::moveOnTrajectory()
     // Increment num_traveled
     num_traveled_++;
 
-    ROS_INFO("About to spin");
     // Spin once to check for updates in the trajectory
     ros::spinOnce();
   } // end while
 
-  // Stops the wheels
-  twist_.linear.x = 0;
-  twist_.angular.z = 0;
-  sendTwist();
-  sendTwist();
-  sendTwist();
+  // Check that we moved on a trajectory
+  if(num_traveled_ > 1)
+  {
+    // Stops the wheels
+    twist_.linear.x = 0;
+    twist_.angular.z = 0;
+    sendTwist();
+    sendTwist();
+
+    // Set num and num_traveled so we don't come back into this if-block each time
+    num_ = 0;
+    num_traveled_ = 0;
+  } // end if finished a trajectory
 } // End moveOnTrajectory
 
 

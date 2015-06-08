@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
 
   std::cout<<"\nHandle namespace: "<<handle.getNamespace();
   
-  ros::Subscriber sub_update_ = handle.subscribe("update", 2, &Planner::updateCallback, &my_planner);
+  ros::Subscriber sub_update_ = handle.subscribe("update", 100, &Planner::updateCallback, &my_planner);
 
 
   // Load ros parameters

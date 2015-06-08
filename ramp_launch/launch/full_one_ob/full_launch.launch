@@ -5,8 +5,7 @@
 
 
 <include file="$(find ramp_launch)/launch/full_one_ob/planner_simulation.launch" />
-<!-- <include file="$(find ramp_launch)/launch/full_one_ob/obstacle.launch" /> -->
-
+<include file="$(find ramp_launch)/launch/full_one_ob/obstacle.launch" /> 
 
 
 </launch>

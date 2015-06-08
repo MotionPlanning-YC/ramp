@@ -33,7 +33,7 @@ void init_advertisers_subscribers(MobileRobot& robot, ros::NodeHandle& handle, b
  
   // Subscribers
   robot.sub_odometry_ = handle.subscribe(MobileRobot::TOPIC_STR_ODOMETRY, 1000, &MobileRobot::odomCb, &robot);
-  
+
   // Timers
   // 15 Hz seems to be the fastest possible while avoiding nan errors
   robot.timer_ = handle.createTimer(ros::Duration(1.f / 15.f), &MobileRobot::updateCallback, &robot);

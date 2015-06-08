@@ -43,26 +43,6 @@ Planner::~Planner()
 }
 
 
-/** Explicitly restart the control cycles 
- *  Need to call doControlCycle because the timers first iteration is not now */
-void Planner::restartControlCycle(const double t) 
-{
-  ROS_INFO("Restarting Control Cycle");
-  controlCycleTimer_.stop();
-
-  // If a CC time is specified, change the timer
-  if(t != controlCycle_.toSec()) {
-    ROS_WARN("New time for next control cycle: %f", t);
-    controlCycle_ = ros::Duration(t);
-    controlCycleTimer_.setPeriod(controlCycle_);
-  }
-
-  doControlCycle();
-  controlCycleTimer_.start();
-} // End restartControlCycle
-
-
-
 
 
 const std::vector<Path> Planner::getRandomPaths(const MotionState init, const MotionState goal) 
