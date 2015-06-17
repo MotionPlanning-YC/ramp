@@ -6,7 +6,7 @@
 <!-- Obstacle -->
 <node name="obstacle" pkg="ramp_planner" type="obstacle" output="screen" /> 
 <node name="ramp_control" pkg="ramp_control" type="ramp_control" output="screen">
-  <remap from="odometry" to="odom" />
+  <remap from="odometry" to="/robot_1/odom" />
   <param name="simulation" value="true" />
   <param name="orientation" value="2.35" />
   <param name="check_imminent_coll" value="false" />

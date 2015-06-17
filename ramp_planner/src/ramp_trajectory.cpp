@@ -12,7 +12,8 @@ RampTrajectory::RampTrajectory(unsigned int id) {
 RampTrajectory::RampTrajectory(const ramp_msgs::RampTrajectory msg) : msg_(msg) {}
 
 
-const bool RampTrajectory::equals(const RampTrajectory& other) const {
+const bool RampTrajectory::equals(const RampTrajectory& other) const 
+{
   if(msg_.id == other.msg_.id) 
   {
     return true;
@@ -278,15 +279,24 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
   ROS_INFO("kp: %i", kp);
   ROS_INFO("traj.msg_.i_knotPoints.size(): %i", (int)traj.msg_.i_knotPoints.size());
   ROS_INFO("traj.msg_.i_knotPoints.at(%i): %i", kp+1, traj.msg_.i_knotPoints.at(kp+1));*/
+  
   trajectory_msgs::JointTrajectoryPoint endOfFirstSegment = traj.msg_.trajectory.points.at(traj.msg_.i_knotPoints.at( kp+1 ));
+
+  // If there is no curve and
+  // If there is only two knot points and
   // If the last segment of this and first segment of traj have the same orientation
   // Remove the last knot point of this trajectory
-  if( msg_.curves.size() == 0 && utility_.findDistanceBetweenAngles(last.positions.at(2), first.positions.at(2)) < 0.01)
+  // E.g. trajectories (0,0)->(1,0) and (1,0)->(2,0) concatenate to (0,0)->(2,0)
+  // *** Assumes that first segment of target does not start a curve ***
+  if( msg_.curves.size() == 0 && 
+      msg_.i_knotPoints.size() < 3 &&
+      //utility_.findDistanceBetweenAngles(last.positions.at(2), first.positions.at(2)) < 0.01 &&
+      utility_.findDistanceBetweenAngles(last.positions.at(2), endOfFirstSegment.positions.at(2)) < 0.01)
   {
-    /*ROS_INFO("Last segment of this and first segment of traj have the same orientation");
+    ROS_INFO("Last segment of this and first segment of traj have the same orientation");
     ROS_INFO("last.positions.at(2): %f first.positions.at(2): %f", 
         last.positions.at(2), first.positions.at(2));
-    ROS_INFO("Removing last knotpoint of this trajectory");*/
+    ROS_INFO("Removing last knotpoint of this trajectory");
     result.msg_.i_knotPoints.pop_back();
   }
 
@@ -335,7 +345,7 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
   }
 
 
-  //ROS_INFO("result: %s", result.toString().c_str());
+  ROS_INFO("result: %s", result.toString().c_str());
   ROS_INFO("Exiting RampTrajectory::concatenate");
   return result;
 }

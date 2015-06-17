@@ -7,3 +7,4 @@ int8 segments
 ---
 
 RampTrajectory trajectory
+bool error

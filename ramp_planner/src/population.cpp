@@ -89,9 +89,12 @@ const double Population::getMinFitness() const {
 
 
 
-const bool Population::contains(const RampTrajectory rt) const {
-  for(uint8_t i=0;i<size();i++) {
-    if(trajectories_.at(i).equals(rt)) {
+const bool Population::contains(const RampTrajectory rt) const 
+{
+  for(uint8_t i=0;i<size();i++) 
+  {
+    if(trajectories_.at(i).equals(rt)) 
+    {
       ROS_INFO("Population contains trajectory at index %i", (int)i);
       return true;
     }

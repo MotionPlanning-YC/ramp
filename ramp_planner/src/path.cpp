@@ -79,6 +79,9 @@ void Path::offsetPositions(const MotionState diff)
   {
     all_.at(i).motionState_ = all_.at(i).motionState_.subtractPosition(diff);
   }
+
+  start_  = all_.at(0);
+  goal_   = all_.at(all_.size()-1);
 }
 
 void Path::addBeforeGoal(const KnotPoint kp) {

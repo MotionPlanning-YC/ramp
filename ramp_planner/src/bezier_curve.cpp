@@ -9,11 +9,16 @@ BezierCurve::~BezierCurve() {}
 
 void BezierCurve::init(const std::vector<MotionState> segment_points, const double lambda, const MotionState ms_current) 
 {
+  segmentPoints_.clear();
+  controlPoints_.clear();
+  ms_max_.msg_.velocities.clear();
+  ms_max_.msg_.accelerations.clear();
+
   segmentPoints_ = segment_points;
   l_ = lambda;
 
-  ms_max_.msg_.velocities.push_back(0.33);
-  ms_max_.msg_.velocities.push_back(0.33);
+  ms_max_.msg_.velocities.push_back(0.46);
+  ms_max_.msg_.velocities.push_back(0.46);
   ms_max_.msg_.velocities.push_back(3.f*PI/4.f);
   ms_max_.msg_.accelerations.push_back(1);
   ms_max_.msg_.accelerations.push_back(1);
@@ -22,6 +27,12 @@ void BezierCurve::init(const std::vector<MotionState> segment_points, const doub
   ms_current_ = ms_current;
 
   ms_init_ = getInitialState();
+
+  ROS_INFO("Segment Points:");
+  for(int i=0;i<segmentPoints_.size();i++) {
+    std::cout<<"\n"<<utility_.toString(segmentPoints_.at(i).msg_);
+  }
+  std::cout<<"\n";
 
   initControlPoints();
   calculateConstants();

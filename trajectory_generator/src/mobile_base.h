@@ -120,6 +120,8 @@ private:
   const std::vector<uint8_t> getCurveKPs(const std::vector<BezierCurve> curves) const;
 
   const bool lastPointClosest(const ramp_msgs::RampTrajectory traj) const;
+
+  bool checkSpeed(const ramp_msgs::Path p);
 };
 
 #endif 

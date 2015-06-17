@@ -61,7 +61,7 @@ const double Orientation::getPenalty() const {
         pow(trajectory_.trajectory.points.at(0).velocities.at(1), 2) );
 
 
-    if(mag_linear > 0 && deltaTheta > PI/4) 
+    if(mag_linear > 0 && deltaTheta > PI/2.f) 
     {
       double normalize = PI;
       deltaTheta /= normalize;
