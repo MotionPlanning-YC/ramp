@@ -90,9 +90,9 @@ int main(int argc, char** argv) {
   c2.motionState.velocities.push_back(0.); //-.297903
   c2.motionState.velocities.push_back(0.); //-.118126
 
-  c3.motionState.velocities.push_back(0.496596);
-  c3.motionState.velocities.push_back(0.163708);
-  c3.motionState.velocities.push_back(-1.77438);
+  c3.motionState.velocities.push_back(0.);
+  c3.motionState.velocities.push_back(0.);
+  c3.motionState.velocities.push_back(0.);
 
   c4.motionState.velocities.push_back(0);
   c4.motionState.velocities.push_back(0);

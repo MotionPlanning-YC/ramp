@@ -297,8 +297,7 @@ const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_
 
 
 
-const double BezierCurve::getUDotMax(const double u_dot_0) const 
-{
+const double BezierCurve::getUDotMax(const double u_dot_0) const {
   //std::cout<<"\n\n***** Calculating u_dot_max *****\n";
   double x_dot_max = ms_max_.velocities.at(0);
   double y_dot_max = ms_max_.velocities.at(1);
@@ -317,9 +316,7 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const
   // New method
   double u_dot_max_x = sqrt( fabs(x_ddot_max / A_) );
   double u_dot_max_y = sqrt( fabs(y_ddot_max / B_) );
-  ROS_INFO("x_ddot_max: %f A_: %f x_ddot_max / A_: %f y_ddot_max: %f B_: %f y_ddot_max / B_: %f",
-     x_ddot_max, A_, (x_ddot_max / A_), 
-     y_ddot_max, B_, (y_ddot_max / B_));
+  //ROS_INFO("x_ddot_max / A_: %f y_ddot_max / B_: %f", (x_ddot_max / A_), (y_ddot_max / B_));
 
 
   /*//if(print_) {
@@ -329,13 +326,11 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const
 
   // Set a greater and lesser value
   double greater, lesser;
-  if(u_dot_max_x > u_dot_max_y) 
-  {
+  if(u_dot_max_x > u_dot_max_y) {
     greater = u_dot_max_x;
     lesser = u_dot_max_y;
   }
-  else 
-  {
+  else {
     greater = u_dot_max_y;
     lesser = u_dot_max_x;
   }
@@ -344,29 +339,25 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const
   /** Set u_dot_max*/
 
   // If both are zero
-  if(u_dot_max_x == 0 && u_dot_max_y == 0) 
-  {
+  if(u_dot_max_x == 0 && u_dot_max_y == 0) {
     ROS_ERROR("u_dot_max_x == 0 && u_dot_max_y == 0");
     u_dot_max = 0;
   }
 
   // Test greater
-  else if(satisfiesConstraints(greater, u_x, u_y)) 
-  {
+  else if(satisfiesConstraints(greater, u_x, u_y)) {
     ROS_INFO("Setting u_dot_max to %f", greater);
     u_dot_max = greater;
   }
 
   // If greater too large, test lesser
-  else if(satisfiesConstraints(lesser, u_x, u_y)) 
-  {
+  else if(satisfiesConstraints(lesser, u_x, u_y)) {
     ROS_INFO("Setting u_dot_max to %f", lesser);
     u_dot_max = lesser;    
   }
 
   // Else, set it to initial u_dot
-  else 
-  {
+  else {
     ROS_INFO("Setting u_dot_max to u_dot_0: %f", u_dot_0);
     u_dot_max = u_dot_0;
   }
@@ -379,8 +370,7 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const
 
 
 
-const double BezierCurve::getUDotInitial() const 
-{
+const double BezierCurve::getUDotInitial() const {
   /*if(print_) {
     std::cout<<"\n***** Calculating u_dot_0 *****\n";
     std::cout<<"\nms_begin: "<<utility_.toString(ms_begin_);
@@ -393,12 +383,10 @@ const double BezierCurve::getUDotInitial() const
   
   double u_dot_0_x = fabs(x_dot_0 / (A_*u_0_+C_));
   double u_dot_0_y = fabs(y_dot_0 / (B_*u_0_+D_));
-  if(isnan(u_dot_0_x)) 
-  {
+  if(isnan(u_dot_0_x)) {
     u_dot_0_x = -9999;
   }
-  if(isnan(u_dot_0_y)) 
-  {
+  if(isnan(u_dot_0_y)) {
     u_dot_0_y = -9999;
   }
     /*std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
@@ -407,38 +395,32 @@ const double BezierCurve::getUDotInitial() const
 
   // Set a greater and lesser value
   double greater, lesser;
-  if(u_dot_0_x > u_dot_0_y) 
-  {
+  if(u_dot_0_x > u_dot_0_y) {
     greater = u_dot_0_x;
     lesser = u_dot_0_y;
   }
-  else 
-  {
+  else {
     greater = u_dot_0_y;
     lesser = u_dot_0_x;
   }
 
   // If both are zero
-  if(u_dot_0_x == 0 && u_dot_0_y == 0) 
-  {
+  if(u_dot_0_x == 0 && u_dot_0_y == 0) {
     //ROS_ERROR("u_dot_0_x == 0 && u_dot_0_y == 0");
     return 0;
   }
 
   // Test greater
-  else if(satisfiesConstraints(greater, u_0_, u_0_)) 
-  {
+  else if(satisfiesConstraints(greater, u_0_, u_0_)) {
     return greater;
   }
 
   // If greater too large, test lesser
-  else if(satisfiesConstraints(lesser, u_0_, u_0_)) 
-  {
+  else if(satisfiesConstraints(lesser, u_0_, u_0_)) {
     return lesser;    
   }
 
-  else 
-  {
+  else {
     //ROS_ERROR("Neither u_dot_0 values satisfy constraints");
     return 0;
   }
