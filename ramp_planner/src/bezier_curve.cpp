@@ -26,7 +26,9 @@ void BezierCurve::init(const std::vector<MotionState> segment_points, const doub
   
   ms_current_ = ms_current;
 
+  ROS_INFO("Before calling getInitialState");
   ms_init_ = getInitialState();
+
 
   ROS_INFO("Segment Points:");
   for(int i=0;i<segmentPoints_.size();i++) {

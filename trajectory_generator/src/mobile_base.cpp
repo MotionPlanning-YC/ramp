@@ -388,12 +388,8 @@ const ramp_msgs::MotionState MobileBase::getMaxMS() const {
         MaxAccelerationVector->VecData[1]);*/
     result.velocities.push_back(0.33);
     result.velocities.push_back(0.33);
-    result.accelerations.push_back(
-        reflexxesData_.inputParameters->
-        MaxAccelerationVector->VecData[0]);
-    result.accelerations.push_back(
-        reflexxesData_.inputParameters->
-        MaxAccelerationVector->VecData[1]);
+    result.accelerations.push_back(0.25);
+    result.accelerations.push_back(0.25);
   }
 
   //ROS_INFO("Leaving getMaxMS()");
@@ -987,9 +983,9 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Use Bezier curves to smooth path
   if(type_ != ALL_STRAIGHT_SEGMENTS) 
   {
-    //ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
+    ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
     curves = bezier(path_, type_ == TRANSITION);
-    //ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
+    ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
 
 
     // Currently adding 0 for both because 
@@ -1056,8 +1052,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
     // *** Set the new target ***
     setTarget(path_.points.at(i_kp_).motionState);
-    /*ROS_INFO("Prev KP: %s", utility_.toString(prevKP_).c_str());
-    ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());*/
+    ROS_INFO("Prev KP: %s", utility_.toString(prevKP_).c_str());
+    ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());
 
 
 
@@ -1190,8 +1186,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         while (!finalStateReached()) {
 
           trajectory_msgs::JointTrajectoryPoint p = spinOnce();
-          //ROS_INFO("p: %s", utility_.toString(p).c_str());
-          //ROS_INFO("result: %i", reflexxesData_.resultValue);
+          ROS_INFO("p: %s", utility_.toString(p).c_str());
+          ROS_INFO("result: %i", reflexxesData_.resultValue);
           if(reflexxesData_.resultValue == -100)
           {
             ROS_ERROR("An error occurred in Reflexxes, setting res.error=1 and returning");

@@ -1418,11 +1418,15 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   {
     i_goal = 2;
   }
-  ROS_INFO("i_goal: %i", i_goal);
+  ROS_INFO("i_goal: %i to.msg_.trajectory.points.size(): %i to.msg_.i_knotPoints.size(): %i", 
+      i_goal,
+      (int)to.msg_.trajectory.points.size(),
+      (int)to.msg_.i_knotPoints.size());
  
   // Set third segment point
   MotionState g(to.msg_.trajectory.points.at(to.msg_.i_knotPoints.at(i_goal)));
   segmentPoints.push_back(g);
+  ROS_INFO("After getting segment points");
 
   /*
    * Check misc things like same orientation, duplicate knot points, speed too fast
@@ -1436,6 +1440,7 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
     return false;
   }
 
+  // Check duplicates and speeds of segment points
   for(int i=0;i<segmentPoints.size()-1;i++)
   {
     MotionState a = segmentPoints.at(i);
@@ -1472,6 +1477,7 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   } // end for
 
 
+  ROS_INFO("Done checking segments");
   
 
   
@@ -1483,7 +1489,7 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
                                               segmentPoints.at(1).msg_.positions);
   double thetaS2 = utility_.findAngleFromAToB(segmentPoints.at(1).msg_.positions, 
                                               segmentPoints.at(2).msg_.positions);
-  //ROS_INFO("Theta 1: %f Theta 2: %f", thetaS1, thetaS2);
+  ROS_INFO("Theta 1: %f Theta 2: %f", thetaS1, thetaS2);
   if( fabs(utility_.findDistanceBetweenAngles(thetaS1, thetaS2)) < 0.13 )
   {
     ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");

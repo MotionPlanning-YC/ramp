@@ -278,11 +278,11 @@ const ramp_msgs::MotionState BezierCurve::getInitialState() {
 /** Returns true if u_dot satisfies the motion constraints 
  *  given a u value - they may be different when testing for u_dot_max */
 const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_x, const double u_y) const {
-  /*std::cout<<"\n\nTesting constraints for "<<u_dot;
+  std::cout<<"\n\nTesting constraints for "<<u_dot;
   std::cout<<"\nu_x: "<<u_x<<" u_y: "<<u_y;
   std::cout<<"\n(A_*u_x+C_)*u_dot: "<<(A_*u_x+C_)*u_dot<<" x_dot_max: "<<ms_max_.velocities.at(0);
-  std::cout<<"\n(B_*u_y+D_)*u_dot: "<<(B_*u_y+D_)*u_dot<<" y_dot_max: "<<ms_max_.velocities.at(1);*/
-  
+  std::cout<<"\n(B_*u_y+D_)*u_dot: "<<(B_*u_y+D_)*u_dot<<" y_dot_max: "<<ms_max_.velocities.at(1);
+ 
   // Square them in case they are negative 
   // Add .0001 because floating-point comparison inaccuracy errors 
   if( pow( (A_*u_x+C_)*u_dot,2) > pow((ms_max_.velocities.at(0))+0.001,2) ||
@@ -302,24 +302,19 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const
   //std::cout<<"\n\n***** Calculating u_dot_max *****\n";
   double x_dot_max = ms_max_.velocities.at(0);
   double y_dot_max = ms_max_.velocities.at(1);
-  //std::cout<<"\nx_dot_max: "<<x_dot_max<<" y_dot_max: "<<y_dot_max;
+  std::cout<<"\nx_dot_max: "<<x_dot_max<<" y_dot_max: "<<y_dot_max;
 
   // Need the max accelerations
   double x_ddot_max = ms_max_.accelerations.at(0);
   double y_ddot_max = ms_max_.accelerations.at(1);
-  //ROS_INFO("x_ddot_max: %f y_ddot_max: %f", x_ddot_max, y_ddot_max);
-
-  // Initialize variables
-  double u_dot_max;
-  double u_x = ( fabs(A_+C_) > fabs(C_) ) ? 1 : 0;
-  double u_y = ( fabs(B_+D_) > fabs(D_) ) ? 1 : 0;
+  ROS_INFO("x_ddot_max: %f y_ddot_max: %f", x_ddot_max, y_ddot_max);
 
   // New method
   double u_dot_max_x = sqrt( fabs(x_ddot_max / A_) );
   double u_dot_max_y = sqrt( fabs(y_ddot_max / B_) );
-  /*ROS_INFO("x_ddot_max: %f A_: %f x_ddot_max / A_: %f y_ddot_max: %f B_: %f y_ddot_max / B_: %f",
+  ROS_INFO("x_ddot_max: %f A_: %f x_ddot_max / A_: %f y_ddot_max: %f B_: %f y_ddot_max / B_: %f",
      x_ddot_max, A_, (x_ddot_max / A_), 
-     y_ddot_max, B_, (y_ddot_max / B_));*/
+     y_ddot_max, B_, (y_ddot_max / B_));
 
 
   /*//if(print_) {
@@ -342,6 +337,11 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const
 
 
   /** Set u_dot_max*/
+  // Initialize variables
+  double u_dot_max;
+  double u_x = ( fabs(A_+C_) > fabs(C_) ) ? 1 : 0;
+  double u_y = ( fabs(B_+D_) > fabs(D_) ) ? 1 : 0;
+
 
   // If both are zero
   if(u_dot_max_x == 0 && u_dot_max_y == 0) 
