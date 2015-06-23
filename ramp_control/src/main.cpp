@@ -48,20 +48,21 @@ int main(int argc, char** argv) {
 
   ros::init(argc, argv, "ramp_control");
   ros::NodeHandle handle;  
+  ros::NodeHandle handle_local("~");
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
  
-  handle.param("ramp_control/orientation", robot.initial_theta_, PI/4.);
-  //handle.param("orientation", robot.initial_theta_, 0.);
+  //handle.param("ramp_control/orientation", robot.initial_theta_, PI/4.);
+  handle_local.param("orientation", robot.initial_theta_, 0.);
   std::cout<<"\nrobot.orientation: "<<robot.initial_theta_;
 
   bool sim=false;
-  handle.param("ramp_control/simulation", sim, false);
+  handle_local.param("simulation", sim, false);
   std::cout<<"\nsim: "<<sim<<"\n";
   robot.sim_ = sim;
  
  
   bool check_imminent_coll=true;
-  handle.param("ramp_control/check_imminent_coll", check_imminent_coll, true);
+  handle_local.param("check_imminent_coll", check_imminent_coll, true);
   ROS_INFO("check_imminent_coll: %s", check_imminent_coll ? "True" : "False");
   robot.check_imminent_coll_ = check_imminent_coll;
 

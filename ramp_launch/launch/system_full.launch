@@ -100,9 +100,9 @@
 
 
 <!-- Launch the other files to start remote nodes -->
-<include file="$(find ramp_launch)/launch/launch_include/general.launch" />
-<include file="$(find ramp_launch)/launch/launch_include/phidget_sensors.launch" /> 
-<include file="$(find ramp_launch)/launch/launch_include/motors.launch" />
+<include file="$(find ramp_launch)/launch/full_one_ob/general.launch" />
+<include file="$(find ramp_launch)/launch/full_one_ob/phidget_sensors.launch" /> 
+<include file="$(find ramp_launch)/launch/full_one_ob/motors.launch" />
 
 
 

@@ -369,6 +369,7 @@ void MobileRobot::moveOnTrajectory()
 {
   restart_ = false;
   ros::Rate r(20);
+  ros::Rate r_ic(100);
 
   // Execute the trajectory
   while( (num_traveled_+1) < num_) 
@@ -385,6 +386,7 @@ void MobileRobot::moveOnTrajectory()
       while(checkImminentCollision()) 
       {
         sendTwist(zero_twist_);
+        r_ic.sleep();
         ros::spinOnce();
       }
       t_immiColl_ += ros::Time::now() - t_startIC;

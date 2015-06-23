@@ -105,7 +105,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   ROS_INFO("ob_trajectory: %s", utility_.toString(ob_trajectory).c_str());*/
 
   CollisionDetection::QueryResult result;
-  uint8_t t_checkColl = 6;
+  uint8_t t_checkColl = 1;
 
   /*if(ob_trajectory.trajectory.points.size() <= 2) {
     if(id == 0)
@@ -155,11 +155,11 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // Get the distance between the centers
       float dist = sqrt( pow(p_i.positions.at(0) - p_ob.positions.at(0),2) + pow(p_i.positions.at(1) - p_ob.positions.at(1),2) );
 
-      /*ROS_INFO("Robot id: %i - Comparing trajectory point (%f,%f) and obstacle point (%f,%f): dist = %f", 
+      ROS_INFO("Robot id: %i - Comparing trajectory point (%f,%f) and obstacle point (%f,%f): dist = %f", 
           id_, 
           p_i.positions.at(0), p_i.positions.at(1), 
           p_ob.positions.at(0), p_ob.positions.at(1), 
-          dist);*/
+          dist);
       
         
 
@@ -167,14 +167,14 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // there is collision
       if( dist <= radius*2 ) 
       {
-        /*ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+        ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
             p_i.positions.at(0),
             p_i.positions.at(1),
             p_ob.positions.at(0),
             p_ob.positions.at(1),
             dist,
             (int)i,
-            (int)j);*/
+            (int)j);
         result.collision_ = true;
         result.t_firstCollision_ = p_i.time_from_start.toSec();
         i = i_stop;

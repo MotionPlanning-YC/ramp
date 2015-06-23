@@ -1,11 +1,25 @@
 <launch>
 
-<param name="/use_sim_time" type="bool" value="true" /> 
+<param name="use_sim_time" value="false" />
+
+<arg name="robot_0_name" value="robot_0" />
+<arg name="robot_1_name" value="robot_1" />
+
+
+<!-- Define the machines -->
+
+<include file="$(find ramp_launch)/launch/corobots.machine" />
+
+
+<!-- <include file="$(find ramp_launch)/launch/full_one_ob/planner_simulation.launch" /> -->
+<include file="$(find ramp_launch)/launch/full_one_ob/planner.launch" />
+<include file="$(find ramp_launch)/launch/full_one_ob/obstacle.launch" />
 
 
 
-<include file="$(find ramp_launch)/launch/full_one_ob/planner_simulation.launch" />
-<include file="$(find ramp_launch)/launch/full_one_ob/obstacle.launch" /> 
+<!-- Launch the other files to start remote nodes -->
+<include file="$(find ramp_launch)/launch/full_one_ob/phidget_sensors.launch" /> 
+<include file="$(find ramp_launch)/launch/full_one_ob/motors.launch" />
 
 
 </launch>
