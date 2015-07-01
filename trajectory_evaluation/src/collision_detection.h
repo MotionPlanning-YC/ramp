@@ -32,16 +32,12 @@ class CollisionDetection {
     void                        init(ros::NodeHandle& h);
     const QueryResult           perform() const;
     const QueryResult           query(const ramp_msgs::RampTrajectory ob_trajectory) const;
-    const ramp_msgs::RampTrajectory getPredictedTrajectory(const ramp_msgs::Obstacle) const;
 
 
     /***** Data Members ****/
-    int                   id_;
-    double                t_start_;
-    tf::Transform         ob_T_w_b_;
     ramp_msgs::Obstacle   obstacle_;
     ramp_msgs::RampTrajectory trajectory_;
-    ros::Duration         predictionTime_;
+    std::vector<ramp_msgs::RampTrajectory> obstacle_trjs_;
   
 
     ros::Publisher pub_population;
@@ -49,12 +45,8 @@ class CollisionDetection {
   private:
 
     /***** Methods *****/
-    void                  setOb_T_w_b(int id);
-    const MotionType      findMotionType(const ramp_msgs::Obstacle) const;
-    const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const MotionType mt) const;
 
     /***** Data Members *****/
-    TrajectoryRequestHandler* h_traj_req_;
     Utility                   utility_;
 };
 

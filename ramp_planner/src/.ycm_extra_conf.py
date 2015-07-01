@@ -55,7 +55,7 @@ flags = [
 '-Wunknown-pragmas',
 '-Wunused-function',
 '-Wunused-label',
-'-Wc++98-compat',
+#'-Wc++98-compat',
 '-Wno-long-long',
 '-Wno-variadic-macros',
 '-fexceptions',

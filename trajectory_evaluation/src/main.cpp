@@ -14,9 +14,11 @@ bool received_ob = false;
 bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
                    ramp_msgs::EvaluationRequest::Response& res) 
 {
-  ROS_INFO("Robot %i Evaluating trajectory: %s", cd.id_, u.toString(req.trajectory).c_str());
+  ROS_INFO("Robot Evaluating trajectory: %s", u.toString(req.trajectory).c_str());
 
   ev.setRequest(req);
+
+  cd.obstacle_trjs_ = req.obstacle_trjs;
   
   // Make a QueryResult object
   CollisionDetection::QueryResult qr;
@@ -39,32 +41,10 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   // Do fitness
   res.fitness = ev.performFitness(qr);
 
-  ROS_INFO("Robot %i Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", cd.id_, res.fitness, res.feasible ?  
+  ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ?  
       "True" : "False", res.t_firstCollision.toSec());
   return true;
 } //End handleRequest
-
-
-/** Subscribe to the object_list topic to get the latest list information about objects, update the collision detection's obstacle list */
-void obstacleCb(const ramp_msgs::Obstacle& ol) 
-{
-  ROS_INFO("Received Obstacle Info");
-  cd.obstacle_ = ol;
-  received_ob = true;
-  /*ROS_INFO("Obstacle odometry passed in:\nPosition: (%f, %f, %f)", 
-      ol.odom_t.pose.pose.position.x, 
-      ol.odom_t.pose.pose.position.y, 
-      tf::getYaw(ol.odom_t.pose.pose.orientation));*/
-} //End objectCb
-
-
-/*void temp_odomCb(const nav_msgs::Odometry& msg) {
-  ramp_msgs::Obstacle ob;
-  ob.odom_t     = msg;
-  cd.obstacle_  = ob;
-
-  received_ob = true;
-}*/
 
 
 int main(int argc, char** argv) {
@@ -73,14 +53,10 @@ int main(int argc, char** argv) {
   ros::NodeHandle handle;
 
   int id;
-  handle.getParam("trajectory_evaluation/robot_id", cd.id_);
-  std::cout<<"\nTrajectory Evaluation id: "<<cd.id_;
   cd.init(handle);
 
  
   ros::ServiceServer service    = handle.advertiseService("trajectory_evaluation", handleRequest);
-  ros::Subscriber sub_obj_list  = handle.subscribe("object_list", 1000, obstacleCb);
-  //ros::Subscriber sub_ob_odom  = handle.subscribe("odom", 1000, temp_odomCb);
 
   //cd.pub_population = handle.advertise<ramp_msgs::Population>("/robot_1/population", 1000);
 

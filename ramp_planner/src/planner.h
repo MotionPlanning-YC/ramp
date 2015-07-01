@@ -12,12 +12,24 @@
 #include "control_handler.h"
 #include "parameter_handler.h"
 #include "bezier_curve.h"
+#include <type_traits>
 
-struct ModificationResult {
+struct ModificationResult 
+{
   Population popNew_;
   Population transNew_;
   std::vector<uint16_t> i_modified_;
 };
+
+
+enum MotionType 
+{
+  MT_NONE                         = 0,
+  MT_TRANSLATION                  = 1,
+  MT_ROTATION                     = 2,
+  MT_TRANSLATON_AND_ROTATION      = 3,
+};
+
 
 class Planner {
   public:
@@ -141,11 +153,22 @@ class Planner {
     // Set the transformation from odometry to world CS
     void setT_base_w(std::vector<double> base_pos);
 
-    // Callback for receiving updates from the ramp_control
-    void updateCallback(const ramp_msgs::MotionState& msg);
-
     // Sets the m_i vector
     const std::vector<MotionState> setMi(const RampTrajectory trj_current) const;
+
+    void setOb_T_w_b();
+    tf::Transform ob_T_w_b_;
+    RampTrajectory ob_trajectory_;
+
+
+    const MotionType findMotionType(const ramp_msgs::Obstacle ob) const;
+    const ramp_msgs::RampTrajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob) const;
+    const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const MotionType mt) const;
+    
+    void sensingCycleCallback     (const ramp_msgs::Obstacle& msg);
+    void updateCallback(const ramp_msgs::MotionState& msg);
+
+    /** Data */
 
     // Motion state that should be reached by next control cycle
     MotionState m_cc_;

@@ -45,6 +45,252 @@ Planner::~Planner()
 
 
 
+
+//TODO: Get this from parameters...
+/** Transformation matrix of obstacle robot from base frame to world frame*/
+void Planner::setOb_T_w_b() 
+{
+
+  // robot 1 needs robot 0's pose
+  if(id_ == 1) 
+  {
+    tf::Vector3 pos(0., 1.5, 0);
+    ob_T_w_b_.setOrigin(pos);
+    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(0));
+  }
+
+  // robot 0 needs robot 1's pose
+  else 
+  {
+    tf::Vector3 pos(3.5f, 0.f, 0.f);
+    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(2.35f));
+    ob_T_w_b_.setOrigin(pos);
+  }
+} // End setOb_T_w_b
+
+
+
+/** This method determines what type of motion an obstacle has */
+const MotionType Planner::findMotionType(const ramp_msgs::Obstacle ob) const 
+{
+  MotionType result;
+
+  // Find the linear and angular velocities
+  tf::Vector3 v_linear;
+  tf::vector3MsgToTF(ob.odom_t.twist.twist.linear, v_linear);
+
+  tf::Vector3 v_angular;
+  tf::vector3MsgToTF(ob.odom_t.twist.twist.angular, v_angular);
+
+  // Find magnitude of velocity vectors
+  float mag_linear_t  = sqrt( tf::tfDot(v_linear, v_linear)   );
+  float mag_angular_t = sqrt( tf::tfDot(v_angular, v_angular) );
+
+
+  // Translation only
+  // normally 0.0066 when idle
+  if(mag_linear_t >= 0.0001 && mag_angular_t < 0.1) 
+  {
+    result = MT_TRANSLATION;
+  }
+
+  // Self-Rotation
+  // normally 0.053 when idle
+  else if(mag_linear_t < 0.15 && mag_angular_t >= 0.1) 
+  {
+    result = MT_ROTATION;
+  }
+
+  // Either translation+self-rotation or global rotation
+  else if(mag_linear_t >= 0.15 && mag_angular_t >= 0.1) 
+  {
+    result = MT_TRANSLATON_AND_ROTATION;
+  }
+
+  // Else, there is no motion
+  else 
+  {
+    result = MT_NONE;
+  }
+
+  return result;
+} // End findMotionType
+
+
+
+
+/** This method returns the predicted trajectory for an obstacle for the future duration d 
+ * TODO: Remove Duration parameter and make the predicted trajectory be computed until robot reaches bounds of environment */
+const ramp_msgs::RampTrajectory Planner::getPredictedTrajectory(const ramp_msgs::Obstacle ob) const 
+{
+  ramp_msgs::RampTrajectory result;
+
+  // First, identify which type of trajectory it is
+  // translations only, self-rotation, translation and self-rotation, or global rotation
+  MotionType motion_type = findMotionType(ob);
+  
+
+  // Now build a Trajectory Request 
+  ramp_msgs::TrajectoryRequest tr;
+    tr.request.path = getObstaclePath(ob, motion_type);
+    tr.request.type = PREDICTION;  // Prediction
+
+
+  // Get trajectory
+  if(h_traj_req_->request(tr)) 
+  {
+    result = tr.response.trajectory;
+  }
+
+  return result;
+} // End getPredictedTrajectory
+
+
+
+
+
+
+/** 
+ *  This method returns a prediction for the obstacle's path. 
+ *  The path is based on 1) the type of motion the obstacle currently has
+ *  2) the duration that we should predict the motion for 
+ */
+const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, const MotionType mt) const 
+{
+  ramp_msgs::Path result;
+
+  std::vector<ramp_msgs::KnotPoint> path;
+
+  /***********************************************************************
+   Create and initialize the first point in the path
+   ***********************************************************************/
+  ramp_msgs::KnotPoint start;
+  start.motionState.positions.push_back(ob.odom_t.pose.pose.position.x);
+  start.motionState.positions.push_back(ob.odom_t.pose.pose.position.y);
+  start.motionState.positions.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
+
+  start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.x);
+  start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.y);
+  start.motionState.velocities.push_back(ob.odom_t.twist.twist.angular.z);
+
+  /** Transform point based on the obstacle's odometry frame */
+  // Transform the position
+  tf::Vector3 p_st(start.motionState.positions.at(0), start.motionState.positions.at(1), 0); 
+  tf::Vector3 p_st_tf = ob_T_w_b_ * p_st;
+  
+  start.motionState.positions.at(0) = p_st_tf.getX();
+  start.motionState.positions.at(1) = p_st_tf.getY();
+  start.motionState.positions.at(2) = utility_.displaceAngle(
+      tf::getYaw(ob_T_w_b_.getRotation()), start.motionState.positions.at(2));
+  
+  
+  // Transform the velocity
+  std::vector<double> zero; zero.push_back(0); zero.push_back(0); 
+  double teta = utility_.findAngleFromAToB(zero, start.motionState.positions);
+  double phi = start.motionState.positions.at(2);
+  double v = start.motionState.velocities.at(0);
+
+  start.motionState.velocities.at(0) = v*cos(phi);
+  start.motionState.velocities.at(1) = v*sin(phi);
+
+  ROS_INFO("start: %s", utility_.toString(start).c_str());
+
+
+  if(v < 0) 
+  {
+    start.motionState.positions.at(2) = utility_.displaceAngle(start.motionState.positions.at(2), PI);
+  }
+  
+  /***********************************************************************
+   ***********************************************************************
+   ***********************************************************************/
+
+  double t_start = transPopulation_.getBest().msg_.t_start.toSec();
+
+  /** Adjust the position based on the starting time of the trajectory passed in */
+  start.motionState.positions.at(0) += start.motionState.velocities.at(0) * t_start;
+  start.motionState.positions.at(1) += start.motionState.velocities.at(1) * t_start;
+  start.motionState.positions.at(2) += start.motionState.velocities.at(2) * t_start;
+
+  // Push the first point onto the path
+  path.push_back(start);
+
+  /** Find the ending configuration for the predicted trajectory based on motion type */
+  // If translation
+  if(mt == MT_TRANSLATION) 
+  {
+
+    // Create the Goal Knotpoint
+    ramp_msgs::KnotPoint goal;
+
+
+    double theta = start.motionState.positions.at(2);
+    double delta_x = cos(phi)*ob.odom_t.twist.twist.linear.x;
+    double delta_y = sin(phi)*ob.odom_t.twist.twist.linear.x;
+    //std::cout<<"\ntheta: "<<theta<<" delta_x: "<<delta_x<<" delta_y: "<<delta_y<<"\n";
+   
+
+    ros::Duration predictionTime_(5.0f);
+    // Get the goal position in the base frame
+    tf::Vector3 ob_goal_b(start.motionState.positions.at(0) + (delta_x * predictionTime_.toSec()), 
+                          start.motionState.positions.at(1) + (delta_y * predictionTime_.toSec()),
+                          0);
+
+    goal.motionState.positions.push_back(ob_goal_b.getX());
+    goal.motionState.positions.push_back(ob_goal_b.getY());
+    goal.motionState.positions.push_back(start.motionState.positions.at(2));
+    goal.motionState.velocities.push_back(start.motionState.velocities.at(0));
+    goal.motionState.velocities.push_back(start.motionState.velocities.at(1));
+    goal.motionState.velocities.push_back(start.motionState.velocities.at(2));
+
+
+    // Push goal onto the path
+    path.push_back(goal);
+  } // end if translation
+
+
+  //std::cout<<"\nPath: "<<utility_.toString(utility_.getPath(path));
+  result = utility_.getPath(path);
+  return result; 
+}
+
+
+
+
+
+
+void Planner::sensingCycleCallback(const ramp_msgs::Obstacle& msg)
+{
+  ROS_INFO("In sensingCycleCallback");
+
+  ob_trajectory_ = getPredictedTrajectory(msg);
+  ROS_INFO("ob_trajectory_: %s", ob_trajectory_.toString().c_str());
+
+  population_       = evaluatePopulation(population_);
+  transPopulation_  = evaluatePopulation(transPopulation_);
+  ROS_INFO("Pop now: %s", population_.toString().c_str());
+  ROS_INFO("Trans Pop now: %s", transPopulation_.toString().c_str());
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const std::vector<Path> Planner::getRandomPaths(const MotionState init, const MotionState goal) 
 {
   std::vector<Path> result;
@@ -724,7 +970,8 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
 } // End buildTrajectoryRequest
 
 
-const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path, const int id) const {
+const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path path, const int id) const 
+{
   std::vector<ramp_msgs::BezierCurve> curves;
   return buildTrajectoryRequest(path, curves, id);
 }
@@ -746,6 +993,8 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
   {
     result.request.currentTheta = latestUpdate_.msg_.positions.at(2);
   }
+
+  result.request.obstacle_trjs.push_back(ob_trajectory_.msg_);
 
   return result;
 } // End buildEvaluationRequest
@@ -2851,7 +3100,7 @@ void Planner::reportTimeData()
   transPopulation_at_cc_ = transPopulation_;
 
   // Start the planning cycles
-  planningCycleTimer_.start();
+  //planningCycleTimer_.start();
 
   // Wait for the specified number of generations before starting CC's
   while(generation_ < generationsBeforeCC_) {ros::spinOnce();}
@@ -2859,7 +3108,7 @@ void Planner::reportTimeData()
   ROS_INFO("Starting CCs at t: %f", ros::Time::now().toSec());
 
   // Start the control cycles
-  controlCycleTimer_.start();
+  //controlCycleTimer_.start();
   imminentCollisionTimer_.start();
 
   ROS_INFO("CCs started");

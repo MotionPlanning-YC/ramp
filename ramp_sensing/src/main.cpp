@@ -17,25 +17,10 @@ void updateOtherRobotCb(const nav_msgs::Odometry& o)
 
 
 
-/** Prepare the object list by adding on all of the objects */
-/*const ramp_msgs::ObstacleList prepareList() {
-  ramp_msgs::ObstacleList list;
-
-  //Other Robot
-  list.obstacles.push_back(obstacle.buildObstacleMsg());
-
-  //Misc objects...
-
-  return list;
-} //End prepareList*/
-
-
-
 
 /** Publish the list of objects */
 void publishList(const ros::TimerEvent& e) 
 {
-  //pub_obj.publish(prepareList());
   pub_obj.publish(obstacle.buildObstacleMsg());
 } //End sendList
 
@@ -57,10 +42,11 @@ int main(int argc, char** argv)
   ros::Subscriber sub_other_robot = handle.subscribe(other_robot_odom, 100, updateOtherRobotCb);
 
   //Publishers
-  pub_obj = handle.advertise<ramp_msgs::Obstacle>("object_list", 1000);
+  pub_obj = handle.advertise<ramp_msgs::Obstacle>("obstacles", 1000);
 
   //Timers
-  ros::Timer timer = handle.createTimer(ros::Duration(1.f / 3.f), publishList);
+  ros::Timer timer = handle.createTimer(ros::Duration(1.f / 1.f), publishList);
+  //timer.start();
    
 
   std::cout<<"\nSpinning\n";

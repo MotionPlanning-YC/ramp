@@ -12,16 +12,18 @@
 #include "range.h"
 #include "ramp_msgs/RampTrajectory.h"
 #include "ramp_msgs/Path.h"
+#include "ramp_msgs/Obstacle.h"
 #include <tf/transform_datatypes.h>
 #include <ros/console.h>
 
 #define PI 3.14159f
 
-enum TrajectoryType {
+enum TrajectoryType 
+{
   ALL_STRAIGHT_SEGMENTS = 0,
-  ALL_BEZIER            = 1,
-  PARTIAL_BEZIER        = 2,
-  TRANSITION            = 3
+  PARTIAL_BEZIER        = 1,
+  TRANSITION            = 2,
+  PREDICTION            = 3
 };
 
 

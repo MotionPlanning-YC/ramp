@@ -1,5 +1,6 @@
 RampTrajectory trajectory
 float64 currentTheta
+RampTrajectory[] obstacle_trjs
 
 ---
 
