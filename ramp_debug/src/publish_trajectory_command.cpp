@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
   c8.motionState.positions.push_back(1.25361);
 
   ramp_msgs::KnotPoint c9;
-  c9.motionState.positions.push_back(3.5);
+  c9.motionState.positions.push_back(1.5);
   c9.motionState.positions.push_back(3.5);
   c9.motionState.positions.push_back(PI/4);
   
@@ -129,16 +129,16 @@ int main(int argc, char** argv) {
   c5.motionState.accelerations.push_back(0.); //.0746295
   
   ramp_msgs::Path p;
-  //p.points.push_back(zero);
-  p.points.push_back(c1);
-  p.points.push_back(c2);
-  p.points.push_back(c3);
+  p.points.push_back(zero);
+  //p.points.push_back(c1);
+  //p.points.push_back(c2);
+  //p.points.push_back(c3);
   //p.points.push_back(c4);
   //p.points.push_back(c5);
   //p.points.push_back(c6);
   //p.points.push_back(c7);
   //p.points.push_back(c8);
-  //p.points.push_back(c9);
+  p.points.push_back(c9);
   
 
   /***************************************************/
@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
   sp1.accelerations.push_back(0);*/
 
   ramp_msgs::MotionState sp2;
-  sp2 = p.points.at(2).motionState;
+  //sp2 = p.points.at(2).motionState;
   //sp2 = p.points.at(1).motionState;
   //sp2 = c3.motionState;
 

@@ -19,6 +19,7 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const
   CollisionDetection::QueryResult result;
   
   
+  ROS_INFO("obstacle_trjs_.size(): %i", (int)obstacle_trjs_.size());
   // Predict the obstacle's trajectory
   for(uint8_t i=0;i<obstacle_trjs_.size();i++)
   {
@@ -63,19 +64,19 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   
   uint16_t i_stop;
   if(trajectory_.i_knotPoints.size() == 0) {
-    ROS_INFO("i_stop=0");
+    //ROS_INFO("i_stop=0");
     i_stop = 0;
   }
   else if(trajectory_.i_knotPoints.size() == 1) {
-    ROS_INFO("i_stop=1");
+    //ROS_INFO("i_stop=1");
     i_stop = 1;
   }
   else if(trajectory_.i_knotPoints.size() <= 2) {
-    ROS_INFO("i_stop=kp 1");
+    //ROS_INFO("i_stop=kp 1");
     i_stop = trajectory_.i_knotPoints.at(1);
   }
   else {
-    ROS_INFO("i_stop=kp 2");
+    //ROS_INFO("i_stop=kp 2");
     i_stop = trajectory_.i_knotPoints.at(2);
   }
   
@@ -102,8 +103,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // Get the distance between the centers
       float dist = sqrt( pow(p_i.positions.at(0) - p_ob.positions.at(0),2) + pow(p_i.positions.at(1) - p_ob.positions.at(1),2) );
 
-      /*ROS_INFO("Robot id: %i - Comparing trajectory point (%f,%f) and obstacle point (%f,%f): dist = %f", 
-          id_, 
+      /*ROS_INFO("Comparing trajectory point (%f,%f) and obstacle point (%f,%f): dist = %f", 
           p_i.positions.at(0), p_i.positions.at(1), 
           p_ob.positions.at(0), p_ob.positions.at(1), 
           dist);*/
@@ -131,7 +131,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   } // end for
 
 
-  ROS_INFO("Exiting CollisionDetection::query");
+  //ROS_INFO("Exiting CollisionDetection::query");
   return result;
 } //End query
 

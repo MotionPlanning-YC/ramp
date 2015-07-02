@@ -24,15 +24,15 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   CollisionDetection::QueryResult qr;
 
   // If there are obstacles, do collision detection
-  if(received_ob) {
+  //if(received_ob) {
     cd.trajectory_  = req.trajectory;
     qr = cd.perform();
-  }
+  //}
   // Else, set collision to false
-  else {
-    qr.collision_ = 0;
-    qr.t_firstCollision_ = 9999.0f; 
-  }
+  //else {
+    //qr.collision_ = 0;
+    //qr.t_firstCollision_ = 9999.0f; 
+  //}
 
   // Set response
   res.feasible = !qr.collision_;

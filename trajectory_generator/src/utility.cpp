@@ -382,16 +382,13 @@ const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request 
     case ALL_STRAIGHT_SEGMENTS:
       result<<"All Straight Segments";
       break;
-    case ALL_BEZIER:
-      result<<"All Bezier";
-      break;
     case PARTIAL_BEZIER:
       result<<"Partial Bezier";
       break;
     case TRANSITION:
       result<<"Transition";
       break;
-    case PREDICT:
+    case PREDICTION:
       result<<"Prediction";
   }
 

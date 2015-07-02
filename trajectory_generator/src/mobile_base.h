@@ -69,6 +69,9 @@ private:
   uint8_t segments_;
   bool planning_full_;
 
+  double x_dot_scalar_;
+  double y_dot_scalar_;
+
   /***** Methods *****/
   // Initialize everything
   void init(const ramp_msgs::TrajectoryRequest::Request req);

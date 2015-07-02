@@ -336,3 +336,15 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
 
   return result.str();
 }
+    
+
+const std::string Utility::toString(const ramp_msgs::Obstacle ob) const
+{
+  std::ostringstream result;
+
+  result<<"Pose: ("<<ob.odom_t.pose.pose.position.x<<", "<<ob.odom_t.pose.pose.position.y<<", "<<ob.odom_t.pose.pose.position.z<<")";
+  result<<"Twist: ("<<ob.odom_t.twist.twist.linear.x<<", "<<ob.odom_t.twist.twist.linear.y<<", "<<ob.odom_t.twist.twist.linear.z<<")";
+
+
+  return result.str();
+}

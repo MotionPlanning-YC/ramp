@@ -44,7 +44,15 @@ bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
 {
   ROS_INFO("Request Received: %s", utility.toString(req).c_str());
 
-  if(req.type != PREDICT) 
+  // Why req.segments == 1?
+  if(req.path.points.size() < 3 || req.segments == 1)
+  {
+    ROS_WARN("Changing type to ALL_STRAIGHT_SEGMENTS");
+    req.type = ALL_STRAIGHT_SEGMENTS;
+    req.segments++;
+  }
+
+  if(req.type != PREDICTION) 
   {
     fixDuplicates(req);
     

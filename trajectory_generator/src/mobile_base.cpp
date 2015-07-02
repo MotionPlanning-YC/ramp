@@ -76,7 +76,8 @@ void MobileBase::initReflexxes()
   reflexxesData_.outputParameters->NewPositionVector->VecData[0] = -99;
   reflexxesData_.outputParameters->NewPositionVector->VecData[1] = -99;
   reflexxesData_.outputParameters->NewPositionVector->VecData[2] = -99;
-  
+
+
   // Result
   reflexxesData_.resultValue = 0;
 } // End initReflexxes
@@ -138,6 +139,7 @@ void MobileBase::setTarget(const ramp_msgs::MotionState ms) {
       reflexxesData_.inputParameters->TargetVelocityVector->VecData[i] = ms.velocities.at(i);
     }
   }
+
   
   // Phase sync makes the orientation correct to drive in a straight line
   reflexxesData_.flags.SynchronizationBehavior = 
@@ -797,26 +799,34 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
   for(unsigned int i=0;i<reflexxesData_.NUMBER_OF_DOFS;i++) {
       
     // If Reflexxes has not been called yet
-    if(data.outputParameters->NewPositionVector->VecData[0] == -99) {
+    if(data.outputParameters->NewPositionVector->VecData[0] == -99) 
+    {
       point.positions.push_back(data.inputParameters->CurrentPositionVector->VecData[i]);
       point.velocities.push_back(data.inputParameters->CurrentVelocityVector->VecData[i]);
       point.accelerations.push_back(data.inputParameters->CurrentAccelerationVector->VecData[i]);
     }
     
     // If selection vector is true
-    else if(reflexxesData_.inputParameters->SelectionVector->VecData[i]) {
+    else if(reflexxesData_.inputParameters->SelectionVector->VecData[i]) 
+    {
       point.positions.push_back(data.outputParameters->NewPositionVector->VecData[i]);
-      point.velocities.push_back(data.outputParameters->NewVelocityVector->VecData[i]);
+      if(i == 0)
+        //point.velocities.push_back(data.outputParameters->NewVelocityVector->VecData[i] * x_dot_scalar_);
+        point.velocities.push_back(0.46 * x_dot_scalar_);
+      else if(i==1)
+        point.velocities.push_back(data.outputParameters->NewVelocityVector->VecData[i] * y_dot_scalar_);
       point.accelerations.push_back(data.outputParameters->NewAccelerationVector->VecData[i]);
 
-      if(i == 2) {
+      if(i == 2) 
+      {
         point.positions.at(2) = utility_.displaceAngle(prevKP_.positions.at(2), 
                                   data.outputParameters->NewPositionVector->VecData[i]);
       }
     } // end if selection vector is true
     
     // Else if we're at orientation dof
-    else if(i == 2) {
+    else if(i == 2) 
+    {
       
       // If straight-line paths, make theta be towards next point
       /*double theta = utility_.findAngleFromAToB( data.inputParameters->CurrentPositionVector->VecData[0],
@@ -851,7 +861,8 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
     } // end else-if orientation
       
     // Else, just push on the current value
-    else {
+    else 
+    {
       point.positions.push_back(
           reflexxesData_.inputParameters->CurrentPositionVector->VecData[i]);
       point.velocities.push_back(
@@ -1052,8 +1063,22 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
     // *** Set the new target ***
     setTarget(path_.points.at(i_kp_).motionState);
+    
+    double D = sqrt(  pow(path_.points.at(i_kp_).motionState.positions.at(0) - prevKP_.positions.at(0), 2) 
+                    + pow(path_.points.at(i_kp_).motionState.positions.at(1) - prevKP_.positions.at(1), 2) );
+    double slope = (path_.points.at(i_kp_).motionState.positions.at(1) - prevKP_.positions.at(1)) / 
+                  (path_.points.at(i_kp_).motionState.positions.at(0) - prevKP_.positions.at(0));
+
+    x_dot_scalar_ = ( fabs(path_.points.at(i_kp_).motionState.positions.at(0) - prevKP_.positions.at(0)) / D );
+    y_dot_scalar_ = ( fabs(path_.points.at(i_kp_).motionState.positions.at(1) - prevKP_.positions.at(1)) / D );
+
+
+    
+    
     ROS_INFO("Prev KP: %s", utility_.toString(prevKP_).c_str());
     ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());
+
+    ROS_INFO("x_dot_scalar_: %f y_dot_scalar_: %f", x_dot_scalar_, y_dot_scalar_);
 
 
 
@@ -1186,8 +1211,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         while (!finalStateReached()) {
 
           trajectory_msgs::JointTrajectoryPoint p = spinOnce();
-          ROS_INFO("p: %s", utility_.toString(p).c_str());
-          ROS_INFO("result: %i", reflexxesData_.resultValue);
+          //ROS_INFO("p: %s", utility_.toString(p).c_str());
+          //ROS_INFO("result: %i", reflexxesData_.resultValue);
           if(reflexxesData_.resultValue == -100)
           {
             ROS_ERROR("An error occurred in Reflexxes, setting res.error=1 and returning");

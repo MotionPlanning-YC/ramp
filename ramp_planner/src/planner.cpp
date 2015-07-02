@@ -91,6 +91,7 @@ const MotionType Planner::findMotionType(const ramp_msgs::Obstacle ob) const
   // normally 0.0066 when idle
   if(mag_linear_t >= 0.0001 && mag_angular_t < 0.1) 
   {
+    ROS_INFO("Obstacle MotionType: Translation");
     result = MT_TRANSLATION;
   }
 
@@ -98,18 +99,21 @@ const MotionType Planner::findMotionType(const ramp_msgs::Obstacle ob) const
   // normally 0.053 when idle
   else if(mag_linear_t < 0.15 && mag_angular_t >= 0.1) 
   {
+    ROS_INFO("Obstacle MotionType: Rotation");
     result = MT_ROTATION;
   }
 
   // Either translation+self-rotation or global rotation
   else if(mag_linear_t >= 0.15 && mag_angular_t >= 0.1) 
   {
+    ROS_INFO("Obstacle MotionType: Translation and Rotation");
     result = MT_TRANSLATON_AND_ROTATION;
   }
 
   // Else, there is no motion
   else 
   {
+    ROS_INFO("Obstacle MotionType: None");
     result = MT_NONE;
   }
 
@@ -172,6 +176,8 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.x);
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.y);
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.angular.z);
+  
+  ROS_INFO("start before transform: %s", utility_.toString(start).c_str());
 
   /** Transform point based on the obstacle's odometry frame */
   // Transform the position
@@ -193,7 +199,7 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
   start.motionState.velocities.at(0) = v*cos(phi);
   start.motionState.velocities.at(1) = v*sin(phi);
 
-  ROS_INFO("start: %s", utility_.toString(start).c_str());
+  ROS_INFO("start after transform: %s", utility_.toString(start).c_str());
 
 
   if(v < 0) 
@@ -214,6 +220,11 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
 
   // Push the first point onto the path
   path.push_back(start);
+
+  if(mt == MT_NONE)
+  {
+    path.push_back(start);
+  }
 
   /** Find the ending configuration for the predicted trajectory based on motion type */
   // If translation
@@ -261,15 +272,21 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
 
 void Planner::sensingCycleCallback(const ramp_msgs::Obstacle& msg)
 {
-  ROS_INFO("In sensingCycleCallback");
+  //ROS_INFO("In sensingCycleCallback");
+  //ROS_INFO("msg: %s", utility_.toString(msg).c_str());
+
+  ros::Time start = ros::Time::now();
 
   ob_trajectory_ = getPredictedTrajectory(msg);
-  ROS_INFO("ob_trajectory_: %s", ob_trajectory_.toString().c_str());
+  //ROS_INFO("Time to get obstacle trajectory: %f", (ros::Time::now() - start).toSec());
+  //ROS_INFO("ob_trajectory_: %s", ob_trajectory_.toString().c_str());
 
   population_       = evaluatePopulation(population_);
   transPopulation_  = evaluatePopulation(transPopulation_);
-  ROS_INFO("Pop now: %s", population_.toString().c_str());
-  ROS_INFO("Trans Pop now: %s", transPopulation_.toString().c_str());
+  //ROS_INFO("Pop now: %s", population_.toString().c_str());
+  //ROS_INFO("Trans Pop now: %s", transPopulation_.toString().c_str());
+
+  sc_durs_.push_back( ros::Time::now() - start );
 }
 
 
@@ -1032,7 +1049,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
   } 
   else 
   {
-    ROS_INFO("No imminent collision, t_firstCollision: %f", transPopulation_.getBest().msg_.t_firstCollision.toSec());
+    //ROS_INFO("No imminent collision, t_firstCollision: %f", transPopulation_.getBest().msg_.t_firstCollision.toSec());
     h_parameters_.setImminentCollision(false);
   }
 
@@ -1156,6 +1173,8 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
 
   // Set the base transformation
   setT_base_w(start_.msg_.positions);
+
+  setOb_T_w_b();
 
   // Set misc members
   populationSize_       = population_size;
@@ -3032,10 +3051,23 @@ void Planner::reportTimeData()
   ROS_INFO("Average pc duration: %f", avg_pc_dur_);
 
 
+  sum = 0.;
+  for(uint8_t i=0;i<sc_durs_.size();i++)
+  {
+    ROS_INFO("sc duration[%i]: %f", i, sc_durs_.at(i).toSec());
+    sum += sc_durs_.at(i).toSec();
+  }
+  avg_sc_dur_ = sum / sc_durs_.size();
+  ROS_INFO("Average sc duration: %f", avg_sc_dur_);
+
 
   sum = 0.;
   for(uint8_t i=0;i<trajec_durs_.size();i++)
   {
+    if(i % 5 == 0)
+    {
+      ROS_INFO("trajec duration[%i]: %f", i, trajec_durs_.at(i).toSec());
+    }
     sum += trajec_durs_.at(i).toSec();
   }
   avg_trajec_dur_ = sum / trajec_durs_.size();
@@ -3100,7 +3132,7 @@ void Planner::reportTimeData()
   transPopulation_at_cc_ = transPopulation_;
 
   // Start the planning cycles
-  //planningCycleTimer_.start();
+  planningCycleTimer_.start();
 
   // Wait for the specified number of generations before starting CC's
   while(generation_ < generationsBeforeCC_) {ros::spinOnce();}
@@ -3108,7 +3140,7 @@ void Planner::reportTimeData()
   ROS_INFO("Starting CCs at t: %f", ros::Time::now().toSec());
 
   // Start the control cycles
-  //controlCycleTimer_.start();
+  controlCycleTimer_.start();
   imminentCollisionTimer_.start();
 
   ROS_INFO("CCs started");
