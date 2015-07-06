@@ -78,6 +78,7 @@ private:
 
   // Set the target of the Reflexxes library
   void setTarget(const ramp_msgs::MotionState ms);
+  void setMaxV(const double x_dot, const double y_dot, const double theta_dot=3.f*PI/4.f);
 
   // Set the selection vector for a path
   void setSelectionVector();
