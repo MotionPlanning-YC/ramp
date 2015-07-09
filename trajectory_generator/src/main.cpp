@@ -38,14 +38,39 @@ void fixDuplicates(ramp_msgs::TrajectoryRequest::Request& req)
 }
 
 
+bool checkGoal(ramp_msgs::TrajectoryRequest::Request req)
+{
+  ramp_msgs::MotionState a = req.path.points.at(0).motionState;
+  ramp_msgs::MotionState b = req.path.points.at(1).motionState;
+
+  if(utility.positionDistance(a.positions, b.positions) < 0.1)
+  {
+    return true;
+  }
+
+  return false;
+}
+
 
 bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
                       ramp_msgs::TrajectoryRequest::Response& res) 
 {
   ROS_INFO("Request Received: %s", utility.toString(req).c_str());
 
+  /*
+   * Check for start == goal
+   */
+  if(req.path.points.size() == 2 && checkGoal(req))
+  {
+    res.trajectory.trajectory.points.push_back(utility.getTrajectoryPoint(req.path.points.at(0).motionState));
+    res.trajectory.i_knotPoints.push_back(0);
+    return true;
+  }
+
+
+
   // Why req.segments == 1?
-  if(req.path.points.size() < 3 || req.segments == 1)
+  if(req.type != PREDICTION && (req.path.points.size() < 3 || req.segments == 1))
   {
     ROS_WARN("Changing type to ALL_STRAIGHT_SEGMENTS");
     req.type = ALL_STRAIGHT_SEGMENTS;

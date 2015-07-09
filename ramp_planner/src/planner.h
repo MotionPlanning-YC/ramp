@@ -400,9 +400,10 @@ class Planner {
     std::vector<ros::Duration> pc_durs_;
     std::vector<ros::Duration> sc_durs_;
     std::vector<ros::Duration> trajec_durs_;
+    std::vector<ros::Duration> eval_durs_;
     std::vector<ros::Duration> error_correct_durs_;
     double avg_adapt_dur_, avg_trans_dur_, avg_cc_dur_, avg_mutate_dur_, avg_pc_dur_, avg_trajec_dur_, 
-           avg_error_correct_dur_, avg_sc_dur_;
+           avg_eval_dur_, avg_error_correct_dur_, avg_sc_dur_;
 };
 
 #endif
