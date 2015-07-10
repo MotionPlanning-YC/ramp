@@ -28,19 +28,19 @@ bool Prediction::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   double vNorm = sqrt(v.dot(v));
   double w = ms_init.velocities.at(2);
 
-  if(fabs(w) < 0.0001 && fabs(vNorm) < 0.0001) 
+  if(fabs(w) < 0.01 && fabs(vNorm) < 0.01) 
   {
     ROS_INFO("No velocity, Pushing on one point");
     traj.push_back(ms_init);
   }
   
-  else if(fabs(w) > 0.0001 && fabs(vNorm) < 0.0001) 
+  else if(fabs(w) > 0.01 && fabs(vNorm) < 0.01) 
   {
     ROS_INFO("Self-rotating, Pushing on one point");
     traj.push_back(ms_init);
   }
 
-  else if(fabs(req.path.points.at(0).motionState.velocities.at(2)) < 0.0001) 
+  else if(fabs(req.path.points.at(0).motionState.velocities.at(2)) < 0.01) 
   {
     ROS_INFO("In straight line prediction");
     Line li;
@@ -50,7 +50,7 @@ bool Prediction::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     traj = li.generatePoints(); 
   }
 
-  else if(fabs(req.path.points.at(0).motionState.velocities.at(2)) > 0.0001 ) 
+  else if(fabs(req.path.points.at(0).motionState.velocities.at(2)) > 0.01 ) 
   {
     ROS_INFO("In circle prediction");
     Circle ci;

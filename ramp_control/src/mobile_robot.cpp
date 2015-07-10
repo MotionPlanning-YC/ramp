@@ -251,7 +251,12 @@ void MobileRobot::calculateSpeedsAndTime () {
 
 
   // Go through all the points of the received trajectory
-  for(int i=0;i<num_-1;i++) {
+  for(int i=0;i<num_-1;i++) 
+  {
+    if(i >= trajectory_.trajectory.points.size()-1)
+    {
+      ROS_ERROR("i: %i trajectory.size(): %i", i, (int)trajectory_.trajectory.points.size());
+    }
     trajectory_msgs::JointTrajectoryPoint current = trajectory_.trajectory.points.at(i);
     trajectory_msgs::JointTrajectoryPoint next    = trajectory_.trajectory.points.at(i+1);
     //std::cout<<"\nPoint "<<i;
@@ -272,7 +277,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   }
 
 
-  printVectors();
+  //printVectors();
 } // End calculateSpeedsAndTime
 
 

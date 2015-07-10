@@ -8,7 +8,7 @@ evaluations: true
 
 seed_population: true
 
-gens_before_control_cycle: 0
+gens_before_control_cycle: 13
 
 planning_cycle_rate: 5
 

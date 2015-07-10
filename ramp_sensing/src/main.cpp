@@ -45,7 +45,7 @@ int main(int argc, char** argv)
   pub_obj = handle.advertise<ramp_msgs::Obstacle>("obstacles", 1000);
 
   //Timers
-  ros::Timer timer = handle.createTimer(ros::Duration(1.f / 1.f), publishList);
+  ros::Timer timer = handle.createTimer(ros::Duration(1.f / 5.f), publishList);
   //timer.start();
    
 
