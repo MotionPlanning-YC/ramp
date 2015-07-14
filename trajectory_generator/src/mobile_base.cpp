@@ -3,7 +3,8 @@
 
 
 /** Constructor */
-MobileBase::MobileBase() : planning_full_(false) {
+MobileBase::MobileBase() : planning_full_(false) 
+{
   reflexxesData_.rml = 0;
   reflexxesData_.inputParameters = 0;
   reflexxesData_.outputParameters = 0;
@@ -11,16 +12,20 @@ MobileBase::MobileBase() : planning_full_(false) {
 
 
 /** Destructor */
-MobileBase::~MobileBase() {
-  if(reflexxesData_.rml != 0) {
+MobileBase::~MobileBase() 
+{
+  if(reflexxesData_.rml != 0) 
+  {
     delete reflexxesData_.rml;
     reflexxesData_.rml = 0;
   }
-  if(reflexxesData_.inputParameters) {
+  if(reflexxesData_.inputParameters) 
+  {
     delete reflexxesData_.inputParameters;
     reflexxesData_.inputParameters = 0;
   }
-  if(reflexxesData_.outputParameters != 0) {
+  if(reflexxesData_.outputParameters != 0) 
+  {
     delete reflexxesData_.outputParameters;
     reflexxesData_.outputParameters = 0;
   }
@@ -36,7 +41,8 @@ void MobileBase::initReflexxes()
   reflexxesData_.NUMBER_OF_DOFS = 3;
 
   // Initialize all relevant objects of the Type II Reflexxes Motion Library
-  if(reflexxesData_.rml == 0) {
+  if(reflexxesData_.rml == 0) 
+  {
     reflexxesData_.rml = new ReflexxesAPI( 
             reflexxesData_.NUMBER_OF_DOFS, CYCLE_TIME_IN_SECONDS );
 
@@ -64,13 +70,13 @@ void MobileBase::initReflexxes()
   // Maximum acceleration
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 1.;
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1] = 1.;
-  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[2] = 3*PI/4;
+  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[2] = PI;
   
 
   // As the maximum jerk values are not known, this is just to try
   reflexxesData_.inputParameters->MaxJerkVector->VecData[0] = 1;
   reflexxesData_.inputParameters->MaxJerkVector->VecData[1] = 1;
-  reflexxesData_.inputParameters->MaxJerkVector->VecData[2] = PI/3;
+  reflexxesData_.inputParameters->MaxJerkVector->VecData[2] = PI;
 
   // Set flag value to know if Reflexxes has been called yet
   reflexxesData_.outputParameters->NewPositionVector->VecData[0] = -99;
@@ -581,7 +587,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // control points, so we have all the info now
       if(req_.bezierCurves.at(0).u_0 > 0 && i==1) 
       {
-        //std::cout<<"\nIn if transition or bezierStart\n";
+        std::cout<<"\nIn if transition or bezierStart\n";
         
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
         
@@ -607,12 +613,12 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // If a "normal" bezier trajectory,
       else 
       {
-        //ROS_INFO("In else a normal trajectory");
+        ROS_INFO("In else a normal trajectory");
 
         // Get lambda value for segment points
         lambda = (req_.bezierCurves.at(i-1).controlPoints.size() > 0) ?  req_.bezierCurves.at(i-1).l :
                                                         getControlPointLambda(segment_points);
-        ////ROS_INFO("lambda: %f", lambda);
+        ROS_INFO("lambda: %f", lambda);
 
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
 
@@ -1089,9 +1095,9 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Use Bezier curves to smooth path
   if(type_ != ALL_STRAIGHT_SEGMENTS) 
   {
-    //ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
+    ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
     curves = bezier(path_, type_ == TRANSITION);
-    //ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
+    ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
 
 
     // Currently adding 0 for both because 

@@ -64,7 +64,7 @@ void Planner::setOb_T_w_b()
   {
     ROS_INFO("Setting obstacle pose as (3.5,0,2.35)");
     tf::Vector3 pos(3.5f, 0.f, 0.f);
-    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(2.35f));
+    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(1.9635));
     ob_T_w_b_.setOrigin(pos);
   }
 } // End setOb_T_w_b
@@ -1059,6 +1059,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
   {
     ROS_WARN("Imminent Collision Robot: %i t_firstCollision: %f", id_, 
         transPopulation_.getBest().msg_.t_firstCollision.toSec());
+    ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.toString().c_str());
     h_parameters_.setImminentCollision(true); 
   } 
   else 
@@ -2526,7 +2527,15 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
     // t=t+1
     generation_++;
     c_pc_++;
-    sendPopulation(transPopulation_);
+
+    if(cc_started_)
+    {
+      sendPopulation(transPopulation_);
+    }
+    else
+    {
+      sendPopulation(population_);
+    }
  
     /*//ROS_INFO("Exiting PC at time: %f", ros::Time::now().toSec());
     //ROS_INFO("Time spent in PC: %f", (ros::Time::now() - t).toSec());*/
@@ -2695,7 +2704,7 @@ void Planner::doControlCycle()
 
   // Send the best trajectory and set movingOn
   ////ROS_INFO("Sending best");
-  //ROS_INFO("bestT: %s", bestT.toString().c_str());
+  ROS_INFO("bestT: %s", bestT.toString().c_str());
   sendBest();
   ////ROS_INFO("After sendBest");
 
@@ -2729,12 +2738,12 @@ void Planner::doControlCycle()
   //ROS_INFO("Before adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", population_.size(), population_.toString().c_str());
   //ROS_INFO("transPop.bestID: %i", transPopulation_.calcBestIndex());
 
-  /*//ROS_INFO("Before adaptation and evaluation, pop size: %i pop: %s\n%s\n\n\nnew trans pop: %s\n%s", 
+  ROS_INFO("Before adaptation and evaluation, pop size: %i pop: %s\n%s\n\n\nnew trans pop: %s\n%s", 
       (int)population_.size(),
       population_.get(0).toString().c_str(),
       population_.get(1).toString().c_str(),
       transPopulation_.get(0).toString().c_str(),
-      transPopulation_.get(1).toString().c_str());*/
+      transPopulation_.get(1).toString().c_str());
   // Adapt and evaluate population
   //ROS_INFO("About to adapt, controlCycle_: %f", controlCycle_.toSec());
   ros::Time t_startAdapt = ros::Time::now();
@@ -2742,10 +2751,10 @@ void Planner::doControlCycle()
   population_ = evaluatePopulation(population_);
   ros::Duration d_adapt = ros::Time::now() - t_startAdapt;
   adapt_durs_.push_back(d_adapt);
-  /*ROS_INFO("After adaptation and evaluation, pop size: %i pop: %s\n%s\nDone printing pop", 
+  ROS_INFO("After adaptation and evaluation, pop size: %i pop: %s\n%s\nDone printing pop", 
       population_.size(), 
       population_.get(0).toString().c_str(),
-      population_.get(1).toString().c_str());*/
+      population_.get(1).toString().c_str());
   //ROS_INFO("After adaptation and evaluation, pop size: %i pop: \n%s\nDone printing pop", population_.size(), population_.toString().c_str());
   ////ROS_INFO("Time spent adapting: %f", d_adapt.toSec());
  
@@ -2758,7 +2767,7 @@ void Planner::doControlCycle()
   }
 
 
-  //ROS_INFO("Before getTransPop: %s", transPopulation_.toString().c_str());
+  ROS_INFO("Before getTransPop: %s", transPopulation_.toString().c_str());
  
   // Find the transition (non-holonomic) population and set new control cycle time
   ros::Time t_startTrans = ros::Time::now();
@@ -2769,17 +2778,13 @@ void Planner::doControlCycle()
   trans_durs_.push_back(d_trans);
   
   //ROS_INFO("After finding transition population, controlCycle period: %f", controlCycle_.toSec());
-  /*ROS_INFO("New transPop: %s\n\n%s", 
+  ROS_INFO("New transPop: %s\n\n%s", 
       transPopulation_.get(0).toString().c_str(),
-      transPopulation_.get(1).toString().c_str());*/
+      transPopulation_.get(1).toString().c_str());
   //ROS_INFO("Time spent getting trans pop: %f", d_trans.toSec());
 
   population_at_cc_       = population_;
   transPopulation_at_cc_  = transPopulation_;
-
-
-  ////ROS_INFO("Control Cycle: new CC timer: %f", controlCycle_.toSec());
-  //controlCycleTimer_.setPeriod(controlCycle_, false);
 
 
   // If error reduction
@@ -2846,6 +2851,7 @@ void Planner::controlCycleCallback(const ros::TimerEvent& e) {
   if(!cc_started_) 
   {
     cc_started_ = true;
+    h_parameters_.setCCStarted(true); 
   }
     
   //ROS_INFO("Leaving Control Cycle, period: %f", controlCycle_.toSec());
@@ -3158,18 +3164,18 @@ void Planner::reportTimeData()
   // Initialize transPopulation
   transPopulation_ = population_;
 
-  population_at_cc_ = population_;
-  transPopulation_at_cc_ = transPopulation_;
+  population_at_cc_       = population_;
+  transPopulation_at_cc_  = transPopulation_;
 
   // Start the planning cycles
   planningCycleTimer_.start();
+    
+  
+  h_parameters_.setCCStarted(false); 
 
-  double T = generationsBeforeCC_ * planningCycle_.toSec();
-  double T_cc = generationsPerCC_;
+
   int num_pc = generationsBeforeCC_ - generationsPerCC_;
-
   ROS_INFO("generationsBeforeCC_: %i generationsPerCC_: %i num_pc: %i", generationsBeforeCC_, generationsPerCC_, num_pc);
-
 
   // Wait for the specified number of generations before starting CC's
   while(generation_ < num_pc) {ros::spinOnce();}

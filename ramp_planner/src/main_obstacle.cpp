@@ -18,15 +18,15 @@ int main(int argc, char** argv)
   MotionState s;
   s.msg_.positions.push_back(3.5);
   s.msg_.positions.push_back(0.f);
-  s.msg_.positions.push_back(3.f*PI/4.f);
+  s.msg_.positions.push_back(1.9635);
   s.msg_.velocities.push_back(0.f);
   s.msg_.velocities.push_back(0.f);
   s.msg_.velocities.push_back(0.f);
 
   MotionState kp;
-  kp.msg_.positions.push_back(2.);
-  kp.msg_.positions.push_back(2.);
-  kp.msg_.positions.push_back(3.f*PI/4.f);
+  kp.msg_.positions.push_back(2.7347);
+  kp.msg_.positions.push_back(1.6522);
+  kp.msg_.positions.push_back(1.9635);
   kp.msg_.velocities.push_back(0.f);
   kp.msg_.velocities.push_back(0.f);
   kp.msg_.velocities.push_back(0.f);
@@ -40,18 +40,18 @@ int main(int argc, char** argv)
   g.msg_.velocities.push_back(0.f);
 
   Path p(s,g);
-  //p.addBeforeGoal(kp);
+  p.addBeforeGoal(kp);
 
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p.buildPathMsg();
   tr.request.type = PARTIAL_BEZIER;
 
   ramp_msgs::BezierCurve curve;
-  /*curve.segmentPoints.push_back(p.at(0).motionState_.msg_);
+  curve.segmentPoints.push_back(p.at(0).motionState_.msg_);
   curve.segmentPoints.push_back(p.at(1).motionState_.msg_);
-  curve.segmentPoints.push_back(p.at(2).motionState_.msg_);*/
+  curve.segmentPoints.push_back(p.at(2).motionState_.msg_);
 
-  //tr.request.bezierCurves.push_back(curve);
+  tr.request.bezierCurves.push_back(curve);
   
   ROS_INFO("Press Enter to request and send the trajectory\n");
   std::cin.get();
@@ -59,14 +59,27 @@ int main(int argc, char** argv)
   // Get and publish trajectory
   if(client.call(tr)) 
   {
-    std::cout<<"\nSending Trajectory "<<u.toString(tr.response.trajectory)<<"\n";
-    pub_traj.publish(tr.response.trajectory);
+    ROS_INFO("Got obstacle trajectory!");
   }
-  else {
-    std::cout<<"\nSome error getting trajectory\n";
+  else 
+  {
+    ROS_WARN("Some error getting obstacle trajectory");
   }
 
+  bool cc_started = false;
+  ros::Rate r(10);
+  
+  while(!cc_started)
+  {
+    ROS_INFO("In while");
+    handle.getParam("/ramp/cc_started", cc_started);
+    ROS_INFO("/ramp/cc_started: %s", cc_started ? "True" : "False");
+    r.sleep();
+    ros::spinOnce();
+  }
 
+  std::cout<<"\nSending Trajectory "<<u.toString(tr.response.trajectory)<<"\n";
+  pub_traj.publish(tr.response.trajectory);
   
   // Create Population to send to trajectory_visualization
   ramp_msgs::Population pop;

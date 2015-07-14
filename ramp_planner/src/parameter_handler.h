@@ -8,6 +8,7 @@ class ParameterHandler {
     ParameterHandler(); 
 
     void setImminentCollision(bool ic); 
+    void setCCStarted(bool cc); 
 
   private:
 };
