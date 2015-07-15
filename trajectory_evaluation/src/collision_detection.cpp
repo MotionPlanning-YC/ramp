@@ -14,12 +14,12 @@ void CollisionDetection::init(ros::NodeHandle& h) {}
 /** Returns true if trajectory_ is in collision with any of the objects */
 const CollisionDetection::QueryResult CollisionDetection::perform() const 
 {
-  ROS_INFO("In CollisionDetection::perform()");
+  //ROS_INFO("In CollisionDetection::perform()");
 
   CollisionDetection::QueryResult result;
   
   
-  ROS_INFO("obstacle_trjs_.size(): %i", (int)obstacle_trjs_.size());
+  //ROS_INFO("obstacle_trjs_.size(): %i", (int)obstacle_trjs_.size());
   // Predict the obstacle's trajectory
   for(uint8_t i=0;i<obstacle_trjs_.size();i++)
   {
@@ -36,7 +36,7 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const
   }
 
 
-  ROS_INFO("Exiting CollisionDetection::perform()");
+  //ROS_INFO("Exiting CollisionDetection::perform()");
   return result;  
 } //End perform
 
@@ -89,7 +89,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     i_stop = trajectory_.i_knotPoints.at(2);
   }
   
-  ROS_INFO("i_stop: %i", i_stop);
+  //ROS_INFO("i_stop: %i", i_stop);
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
   float radius = 0.25f;

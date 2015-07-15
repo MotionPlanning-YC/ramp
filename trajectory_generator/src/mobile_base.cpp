@@ -70,7 +70,7 @@ void MobileBase::initReflexxes()
   // Maximum acceleration
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 1.;
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1] = 1.;
-  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[2] = PI;
+  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[2] = 3.f*PI/4.f;
   
 
   // As the maximum jerk values are not known, this is just to try
@@ -93,7 +93,7 @@ void MobileBase::initReflexxes()
 /** Initialize class object with a request */
 // TODO: change 3 booleans to 1 enum
 void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
-  ////ROS_INFO("Entered MobileBase::init");
+  //ROS_INFO("Entered MobileBase::init");
   //std::cout<<"\nRequest received: "<<utility_.toString(req)<<"\n";
 
   //if(req.bezierInfo.u_0 > 0)
@@ -128,7 +128,7 @@ void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
   // make Reflexxes unable to find goal
   timeCutoff_ = ros::Duration(50);
   
-  ////ROS_INFO("Leaving MobileBase::init");
+  //ROS_INFO("Leaving MobileBase::init");
 } // End init
 
 
@@ -419,7 +419,7 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
 
   double min_lambda = (path_.points.at(0).motionState.positions.at(0) - segment_points.at(0).positions.at(0)) 
                       / (segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0));
-  ////ROS_INFO("min_lambda: %f", min_lambda);
+  //ROS_INFO("min_lambda: %f", min_lambda);
 
   if(min_lambda > 1) 
   {
@@ -456,7 +456,7 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
 
 
 const ramp_msgs::MotionState MobileBase::getMaxMS() const {
-  ////ROS_INFO("In getMaxMS()");
+  //ROS_INFO("In getMaxMS()");
   ramp_msgs::MotionState result;
 
   
@@ -487,7 +487,7 @@ const ramp_msgs::MotionState MobileBase::getMaxMS() const {
     result.accelerations.push_back(1);*/
   }
 
-  ////ROS_INFO("Leaving getMaxMS()");
+  //ROS_INFO("Leaving getMaxMS()");
   return result;
 }
 
@@ -495,7 +495,7 @@ const ramp_msgs::MotionState MobileBase::getMaxMS() const {
 /** */
 const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool only_curve) 
 {
-  ////ROS_INFO("Entered MobileBase::bezier");
+  //ROS_INFO("Entered MobileBase::bezier");
 
   std::vector<BezierCurve> result;
 
@@ -526,7 +526,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
     if(inc == p_copy.points.size()) 
     {
-      ////ROS_INFO("Cannot plan Bezier, returning same Path at 402");
+      //ROS_INFO("Cannot plan Bezier, returning same Path at 402");
       type_ = ALL_STRAIGHT_SEGMENTS;
       return result;
     }
@@ -550,13 +550,13 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     inc++;
 
     if(inc == p_copy.points.size()) {
-      ////ROS_INFO("Cannot plan Bezier, returning same Path at 422");
+      //ROS_INFO("Cannot plan Bezier, returning same Path at 422");
       type_ = ALL_STRAIGHT_SEGMENTS;
       return result;
     }
   }
 
-  ////ROS_INFO("stop: %i", stop);
+  //ROS_INFO("stop: %i", stop);
 
   // Go through the path's knot points
   //std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
@@ -569,7 +569,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         (utility_.positionDistance(req_.bezierCurves.at(i-1).segmentPoints.at(1).positions, 
           req_.bezierCurves.at(i-1).segmentPoints.at(2).positions) > 0.01) )
     {
-      ////ROS_INFO("In if");
+      //ROS_INFO("In if");
 
       BezierCurve bc;
       bc.print_ = print_;
@@ -587,7 +587,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // control points, so we have all the info now
       if(req_.bezierCurves.at(0).u_0 > 0 && i==1) 
       {
-        std::cout<<"\nIn if transition or bezierStart\n";
+        //std::cout<<"\nIn if transition or bezierStart\n";
         
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
         
@@ -613,12 +613,12 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // If a "normal" bezier trajectory,
       else 
       {
-        ROS_INFO("In else a normal trajectory");
+        //ROS_INFO("In else a normal trajectory");
 
         // Get lambda value for segment points
         lambda = (req_.bezierCurves.at(i-1).controlPoints.size() > 0) ?  req_.bezierCurves.at(i-1).l :
                                                         getControlPointLambda(segment_points);
-        ROS_INFO("lambda: %f", lambda);
+        //ROS_INFO("lambda: %f", lambda);
 
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
 
@@ -632,7 +632,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
        
 
         bc.init(bi, path_.points.at(0).motionState);
-        ////ROS_INFO("Done initializing curve");
+        //ROS_INFO("Done initializing curve");
       } // end else "normal" trajectory
 
 
@@ -640,7 +640,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       // TODO: Implement break in case of infinite loop, print error
       while(lambdaOkay(bc.segmentPoints_, lambda) && lambda > 0.09 && lambda < 0.91 && !verified)
       {
-        ////ROS_INFO("Lambda %f did not work", lambda);
+        //ROS_INFO("Lambda %f did not work", lambda);
         if(req_.type == TRANSITION)
         {
           lambda += 0.05;
@@ -649,7 +649,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
         {
           lambda -= 0.05;
         }
-        ////ROS_INFO("New lambda: %f", lambda);
+        //ROS_INFO("New lambda: %f", lambda);
         ramp_msgs::BezierCurve bi;
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
         bi.segmentPoints  = segment_points;
@@ -669,7 +669,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       //if(bc.verify()) 
       if(verified) 
       {
-        ////ROS_INFO("Curve is verified, generating points");
+        //ROS_INFO("Curve is verified, generating points");
 
         // Generate the curve
         bc.generateCurve();
@@ -678,8 +678,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
       
       else if(type_ == TRANSITION) 
       {
-        ////ROS_INFO("Curve not verified, doing a transition so setting 0 velocity for KP: %s", 
-            //utility_.toString(path_.points.at(1).motionState).c_str());
+        //ROS_INFO("Curve not verified, doing a transition so setting 0 velocity for KP: %s", utility_.toString(path_.points.at(1).motionState).c_str());
 
         uint8_t num_dof = path_.points.at(1).motionState.velocities.size();
         for(uint8_t i_v=0;i_v<num_dof;i_v++) 
@@ -697,19 +696,19 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     } // end if
     else 
     {
-      //ROS_WARN("Two of the three segment points for Bezier curve are too close");
+      ROS_WARN("Two of the three segment points for Bezier curve are too close");
       type_ = ALL_STRAIGHT_SEGMENTS;
     }
   } // end for
 
-  ////ROS_INFO("Outside of for");
+  //ROS_INFO("Outside of for");
 
   // Set Path p's knot point indices
   if(type_ != ALL_STRAIGHT_SEGMENTS) 
   {
     if(type_ == TRANSITION) 
     {
-      ////ROS_INFO("In type == transition");
+      //ROS_INFO("In type == transition");
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
       p.points.erase(p.points.begin()+2);
       p.points.insert(p.points.begin()+2, 
@@ -719,17 +718,17 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     // If we have more than 1 curve
     else if(req_.bezierCurves.size() > 1) 
     {
-      ////ROS_INFO("In else if bezierInfo.size()>1");
+      //ROS_INFO("In else if bezierInfo.size()>1");
 
-      ////ROS_INFO("Actually Erasing: %s", utility_.toString( *(p.points.begin()+2) ).c_str());
+      //ROS_INFO("Actually Erasing: %s", utility_.toString( *(p.points.begin()+2) ).c_str());
       p.points.erase( p.points.begin()+2 );
-      ////ROS_INFO("Actually Erasing: %s", utility_.toString( *(p.points.begin()+1) ).c_str());
+      //ROS_INFO("Actually Erasing: %s", utility_.toString( *(p.points.begin()+1) ).c_str());
       p.points.erase( p.points.begin()+1 );
       // Insert the 1st curve's last CP
       p.points.insert( p.points.begin()+1, 
           utility_.getKnotPoint( result.at(0).points_.at(result.at(0).points_.size()-1)));
 
-      ////ROS_INFO("Path p: %s", utility_.toString(p).c_str());
+      //ROS_INFO("Path p: %s", utility_.toString(p).c_str());
       
       // Insert the 2nd curve's 1st and last CPs
       p.points.insert(p.points.begin()+2, utility_.getKnotPoint(result.at(1).points_.at(0)));
@@ -745,7 +744,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     // If already moving on curve
     else if(req_.bezierCurves.at(0).u_0 > 0) 
     {
-      ////ROS_INFO("In else if bezierStart");
+      //ROS_INFO("In else if bezierStart");
       p.points.erase( p.points.begin() + 1 );
       p.points.insert(p.points.begin()+1, 
           utility_.getKnotPoint(result.at(0).points_.at(result.at(0).points_.size()-1)));
@@ -754,9 +753,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     else if(utility_.positionDistance( p.points.at(1).motionState.positions, 
           req_.bezierCurves.at(0).segmentPoints.at(1).positions) > 0.01)
     {
-      ////ROS_INFO("In else if Knot Point 1 != segment point 1");
-      ////ROS_INFO("Knot Point 1: %s\nSegment Point 1: %s", utility_.toString(p.points.at(1).motionState).c_str(), 
-          //utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1)).c_str());
+      //ROS_INFO("In else if Knot Point 1 != segment point 1");
+      //ROS_INFO("Knot Point 1: %s\nSegment Point 1: %s", utility_.toString(p.points.at(1).motionState).c_str(), utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1)).c_str());
       // Don't erase anything
       // Insert
       p.points.insert(p.points.begin()+1, utility_.getKnotPoint(result.at(0).points_.at(0)));
@@ -774,8 +772,8 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     // Remove the 2nd knot point and replace it with start and end of the upcoming curve
     else 
     {
-      ////ROS_INFO("In else");
-      ////ROS_INFO("Erasing: %s", utility_.toString( *(p.points.begin()+1) ).c_str());
+      //ROS_INFO("In else");
+      //ROS_INFO("Erasing: %s", utility_.toString( *(p.points.begin()+1) ).c_str());
       p.points.erase( p.points.begin() + 1 );
 
 
@@ -792,7 +790,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     }
   } // end if not all straight segments
 
-  ////ROS_INFO("Exiting MobileBase::bezier");
+  //ROS_INFO("Exiting MobileBase::bezier");
   return result;
 } // End bezier
 
@@ -943,7 +941,7 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
 
 
 
-      ////ROS_INFO("theta: %f", theta);
+      //ROS_INFO("theta: %f", theta);
       // Get angular velocity
       double w = utility_.findDistanceBetweenAngles(data.inputParameters->CurrentPositionVector->VecData[2], theta) /
         CYCLE_TIME_IN_SECONDS;
@@ -988,10 +986,10 @@ const std::vector<uint8_t> MobileBase::getCurveKPs(const std::vector<BezierCurve
   std::vector<uint8_t> result;
   
   for(uint8_t i_c=0; i_c < curves.size(); i_c++) {
-    ////ROS_INFO("curves.at(%i): %s", (int)i_c, utility_.toString(curves.at(i_c).points_.at(0)).c_str());
+    //ROS_INFO("curves.at(%i): %s", (int)i_c, utility_.toString(curves.at(i_c).points_.at(0)).c_str());
     
     for(uint8_t i_kp=0;i_kp < path_.points.size();i_kp++) {
-      ////ROS_INFO("path.poinst.at(%i): %s", (int)i_kp, utility_.toString(path_.points.at(i_kp).motionState).c_str());
+      //ROS_INFO("path.poinst.at(%i): %s", (int)i_kp, utility_.toString(path_.points.at(i_kp).motionState).c_str());
       
       if(utility_.positionDistance(curves.at(i_c).points_.at(0).positions,
                                    path_.points.at(i_kp).motionState.positions) < 0.0001)
@@ -1010,31 +1008,34 @@ const std::vector<uint8_t> MobileBase::getCurveKPs(const std::vector<BezierCurve
 
 
 
-bool MobileBase::checkSpeed(const ramp_msgs::Path p)
+bool MobileBase::checkSpeed(const ramp_msgs::Path p, const std::vector<uint8_t> i_cs)
 {
   //ROS_INFO("In MobileBase::checkSpeed");
   for(uint8_t i=0;i<p.points.size()-1;i++)
   {
     //ROS_INFO("i: %i", i);
-    if( p.points.at(i).motionState.velocities.size() > 0 &&
-        fabs(p.points.at(i).motionState.velocities.at(0)) > 0.0001 &&
-        fabs(p.points.at(i).motionState.velocities.at(1)) > 0.0001)
+    if(i_cs.size() == 0 || (i_cs.size() > 0 && i != i_cs.at(0)))
     {
-      double delta_x = fabs(p.points.at(i+1).motionState.positions.at(0) - 
-        p.points.at(i).motionState.positions.at(0));
-      double delta_y = fabs(p.points.at(i+1).motionState.positions.at(1) - 
-        p.points.at(i).motionState.positions.at(1));
-
-      double max_gain_x = fabs(p.points.at(i).motionState.velocities.at(0)) * CYCLE_TIME_IN_SECONDS;
-      double max_gain_y = fabs(p.points.at(i).motionState.velocities.at(1)) * CYCLE_TIME_IN_SECONDS;
-
-      if( (max_gain_x > delta_x) ||
-          (max_gain_y > delta_y) )
+      if( p.points.at(i).motionState.velocities.size() > 0 &&
+          fabs(p.points.at(i).motionState.velocities.at(0)) > 0.0001 &&
+          fabs(p.points.at(i).motionState.velocities.at(1)) > 0.0001)
       {
-        ROS_WARN("The speed of knot point %i is high enough to overshoot next knot point.\nCheck this if there are issues with trajectory request", i);
-        return false;
-      }
-    } // end if velocity size > 0
+        double delta_x = fabs(p.points.at(i+1).motionState.positions.at(0) - 
+          p.points.at(i).motionState.positions.at(0));
+        double delta_y = fabs(p.points.at(i+1).motionState.positions.at(1) - 
+          p.points.at(i).motionState.positions.at(1));
+
+        double max_gain_x = fabs(p.points.at(i).motionState.velocities.at(0)) * CYCLE_TIME_IN_SECONDS;
+        double max_gain_y = fabs(p.points.at(i).motionState.velocities.at(1)) * CYCLE_TIME_IN_SECONDS;
+
+        if( (max_gain_x > delta_x) ||
+            (max_gain_y > delta_y) )
+        {
+          ROS_WARN("The speed of knot point %i is high enough to overshoot next knot point.\nCheck this if there are issues with trajectory request", i);
+          return false;
+        }
+      } // end if velocity size > 0
+    }
   } // end for
 
   //ROS_INFO("Exiting MobileBase::checkSpeed");
@@ -1095,9 +1096,9 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   // Use Bezier curves to smooth path
   if(type_ != ALL_STRAIGHT_SEGMENTS) 
   {
-    ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
+    //ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
     curves = bezier(path_, type_ == TRANSITION);
-    ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
+    //ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
 
 
     // Currently adding 0 for both because 
@@ -1131,7 +1132,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
 
 
-  if(!checkSpeed(path_))
+  if(!checkSpeed(path_, i_cs))
   {
     path_.points.erase(path_.points.begin()+1);
     if(i_cs.size() > 0)
@@ -1147,7 +1148,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   }
 
  
-  ////ROS_INFO("About to start generating points, segments_: %i", segments_);
+  //ROS_INFO("About to start generating points, segments_: %i", segments_);
   uint8_t c=0;
   // Go through every knotpoint in the path
   // (or until timeCutoff has been reached)
@@ -1212,7 +1213,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     if( (c < i_cs.size() && path_.points.size() > 2 && i_kp_ == i_cs.at(c)+1))
     {
       //ROS_INFO("At Bezier Curve %i", c);
-      ////ROS_INFO("timeFromStart_: %f", timeFromStart_.toSec());
+      //ROS_INFO("timeFromStart_: %f", timeFromStart_.toSec());
       //std::cout<<"\ncurves.at("<<(int)c<<").size(): "<<curves.at(c).points_.size();
 
       // Insert all points on the curves into the trajectory
@@ -1281,7 +1282,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         // Set orientation threshold that requires a rotation 
         // before continuing to the next knot point
         double threshold = 0.2; 
-        ////ROS_INFO("threshold: %f", threshold);
+        //ROS_INFO("threshold: %f", threshold);
 
         // If we need to rotate towards the next knot point
         // 0.0872664 = 5 degrees
@@ -1324,8 +1325,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       if(utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, 
             path_.points.at(i_kp_).motionState.positions) > 0.0001)
       {
-        ////ROS_INFO("Pushing on points b/c dist: %f", utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, 
-              //path_.points.at(i_kp_).motionState.positions));
+        //ROS_INFO("Pushing on points b/c dist: %f", utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, path_.points.at(i_kp_).motionState.positions));
               
         // We go to the next knotpoint only once we reach this one
         while (!finalStateReached()) {
@@ -1353,11 +1353,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       // Else if there's only 2 points and the current point and next knot point are the same
       // It was a path with the same point
       else if(req.path.points.size() == 2) {
-        ////ROS_INFO("Last position and next knot point are the same position, path size == 2");
+        //ROS_INFO("Last position and next knot point are the same position, path size == 2");
         res.trajectory.trajectory.points.push_back(res.trajectory.trajectory.points.at(0));
       }
       //else {
-        ////ROS_INFO("Last position and next knot point are the same position, path size > 2");
+        //ROS_INFO("Last position and next knot point are the same position, path size > 2");
       //}
     } // end if
 
@@ -1368,7 +1368,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     // Check if Reflexxes overshot target
     if(!lastPointClosest(res.trajectory)) 
     {
-      ////ROS_INFO("Last point is not closest");
+      //ROS_INFO("Last point is not closest");
 
       res.trajectory.trajectory.points.pop_back();
       res.trajectory.i_knotPoints.at(res.trajectory.i_knotPoints.size()-1) =
@@ -1379,13 +1379,12 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       // If it's the first kp and there's no curve
       if(i_kp_ == 1 && req.path.points.size() > 2 && type_ != PARTIAL_BEZIER)
       {
-        ////ROS_INFO("Remvoing last knot point index");
+        //ROS_INFO("Remvoing last knot point index");
         res.trajectory.i_knotPoints.pop_back();
       }
     } // end if checking Reflexxes overshooting
 
-      ////ROS_INFO("Reached target: %s \nAt state: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str(),
-            //utility_.toString(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1)).c_str());
+      //ROS_INFO("Reached target: %s \nAt state: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str(), utility_.toString(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1)).c_str());
   } // end for each knot point (outer-most loop)
  
 
@@ -1425,7 +1424,7 @@ const std::vector<trajectory_msgs::JointTrajectoryPoint> MobileBase::rotate(cons
   while(!finalStateReached()) 
   {
     trajectory_msgs::JointTrajectoryPoint p = spinOnce();
-    //ROS_INFO("p: %s", utility_.toString(p).c_str());
+    ////ROS_INFO("p: %s", utility_.toString(p).c_str());
     result.push_back(p);
   }
   
@@ -1465,7 +1464,7 @@ const bool MobileBase::checkTarget() {
 
 
 const bool MobileBase::lastPointClosest(const ramp_msgs::RampTrajectory traj) const {
-  ////ROS_INFO("In lastPointClosest");
+  //ROS_INFO("In lastPointClosest");
   
   std::vector<double> target_p, target_v; 
   target_p.push_back(reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
@@ -1476,34 +1475,34 @@ const bool MobileBase::lastPointClosest(const ramp_msgs::RampTrajectory traj) co
   target_v.push_back(reflexxesData_.inputParameters->TargetVelocityVector->VecData[1]);
   target_v.push_back(reflexxesData_.inputParameters->TargetVelocityVector->VecData[2]);
 
-  ////ROS_INFO("After setting targets");
+  //ROS_INFO("After setting targets");
 
-  ////ROS_INFO("traj size: %i", (int)traj.trajectory.points.size());
+  //ROS_INFO("traj size: %i", (int)traj.trajectory.points.size());
   trajectory_msgs::JointTrajectoryPoint last = traj.trajectory.points.at(traj.trajectory.points.size()-1);
   trajectory_msgs::JointTrajectoryPoint nextToLast_to_last = 
     traj.trajectory.points.at(traj.trajectory.points.size()-2);
 
-  ////ROS_INFO("last: %s \nnext_to_last: %s", utility_.toString(last).c_str(), utility_.toString(nextToLast_to_last).c_str());
+  //ROS_INFO("last: %s \nnext_to_last: %s", utility_.toString(last).c_str(), utility_.toString(nextToLast_to_last).c_str());
 
-  ////ROS_INFO("Done setting last and nextToLast_to_last");
-  ////ROS_INFO("last.positions size(): %i target_p.size: %i", (int)last.positions.size(), (int)target_p.size());
+  //ROS_INFO("Done setting last and nextToLast_to_last");
+  //ROS_INFO("last.positions size(): %i target_p.size: %i", (int)last.positions.size(), (int)target_p.size());
  
   double dist_last_p = utility_.getEuclideanDist(last.positions, target_p);
   double dist_nextToLast_p = utility_.getEuclideanDist(nextToLast_to_last.positions, target_p);
 
-  ////ROS_INFO("dist_last_p: %f dist_nextToLast_p: %f", dist_last_p, dist_nextToLast_p);
+  //ROS_INFO("dist_last_p: %f dist_nextToLast_p: %f", dist_last_p, dist_nextToLast_p);
  
   double dist_last_v = utility_.getEuclideanDist(last.velocities, target_v);
   double dist_nextToLast_v = utility_.getEuclideanDist(nextToLast_to_last.velocities, target_v);
   
-  ////ROS_INFO("dist_last_v: %f dist_nextToLast_v: %f", dist_last_v, dist_nextToLast_v);
+  //ROS_INFO("dist_last_v: %f dist_nextToLast_v: %f", dist_last_v, dist_nextToLast_v);
 
   double dist_last = dist_last_p + dist_last_v;
   double dist_nextToLast = dist_nextToLast_p + dist_nextToLast_v;
   
-  ////ROS_INFO("dist_last: %f dist_nextToLast: %f fabs(dist_last - dist_nextToLast): %f", dist_last, dist_nextToLast, fabs(dist_last - dist_nextToLast));
+  //ROS_INFO("dist_last: %f dist_nextToLast: %f fabs(dist_last - dist_nextToLast): %f", dist_last, dist_nextToLast, fabs(dist_last - dist_nextToLast));
 
-  ////ROS_INFO("Exiting MobileBase::lastPointClosest");
+  //ROS_INFO("Exiting MobileBase::lastPointClosest");
   return (dist_last < dist_nextToLast) && fabs(dist_last - dist_nextToLast) > 0.0001;
 }
 

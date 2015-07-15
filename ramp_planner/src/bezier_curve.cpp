@@ -30,11 +30,11 @@ void BezierCurve::init(const std::vector<MotionState> segment_points, const doub
   ms_init_ = getInitialState();
 
 
-  //ROS_INFO("Segment Points:");
+  /*ROS_INFO("Segment Points:");
   for(int i=0;i<segmentPoints_.size();i++) {
     std::cout<<"\n"<<utility_.toString(segmentPoints_.at(i).msg_);
   }
-  std::cout<<"\n";
+  std::cout<<"\n";*/
 
   initControlPoints();
   calculateConstants();
@@ -222,10 +222,10 @@ const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_
 
 
 const double BezierCurve::getUDotMax(const double u_dot_0) const {
-  std::cout<<"\n\n***** Calculating u_dot_max *****\n";
+  //std::cout<<"\n\n***** Calculating u_dot_max *****\n";
   double x_dot_max = ms_max_.msg_.velocities.at(0);
   double y_dot_max = ms_max_.msg_.velocities.at(1);
-  std::cout<<"\nx_dot_max: "<<x_dot_max<<" y_dot_max: "<<y_dot_max;
+  //std::cout<<"\nx_dot_max: "<<x_dot_max<<" y_dot_max: "<<y_dot_max;
 
   // Need the max accelerations
   double x_ddot_max = ms_max_.msg_.accelerations.at(0);
@@ -244,8 +244,8 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const {
 
 
   //if(print_) {
-    std::cout<<"\nu_x: "<<u_x<<" u_y: "<<u_y;
-    std::cout<<"\nu_dot_max_x: "<<u_dot_max_x<<" u_dot_max_y: "<<u_dot_max_y;
+    //std::cout<<"\nu_x: "<<u_x<<" u_y: "<<u_y;
+    //std::cout<<"\nu_dot_max_x: "<<u_dot_max_x<<" u_dot_max_y: "<<u_dot_max_y;
   //}
 
   // Set a greater and lesser value
@@ -318,38 +318,44 @@ const double BezierCurve::getUDotInitial() const {
   if(isnan(u_dot_0_y)) {
     u_dot_0_y = -9999;
   }
-  std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
+  /*std::cout<<"\nx_dot_0: "<<x_dot_0<<" y_dot_0: "<<y_dot_0;
   std::cout<<"\nu_0: "<<u_0_<<" u_dot_0: "<<u_dot_0_;
-  std::cout<<"\nu_dot_0_x: "<<u_dot_0_x<<" u_dot_0_y: "<<u_dot_0_y;
+  std::cout<<"\nu_dot_0_x: "<<u_dot_0_x<<" u_dot_0_y: "<<u_dot_0_y;*/
 
   // Set a greater and lesser value
   double greater, lesser;
-  if(u_dot_0_x > u_dot_0_y) {
+  if(u_dot_0_x > u_dot_0_y) 
+  {
     greater = u_dot_0_x;
     lesser = u_dot_0_y;
   }
-  else {
+  else 
+  {
     greater = u_dot_0_y;
     lesser = u_dot_0_x;
   }
 
   // If both are zero
-  if(u_dot_0_x == 0 && u_dot_0_y == 0) {
+  if(u_dot_0_x == 0 && u_dot_0_y == 0) 
+  {
     //ROS_ERROR("u_dot_0_x == 0 && u_dot_0_y == 0");
     return 0;
   }
 
   // Test greater
-  else if(satisfiesConstraints(greater, u_0_, u_0_)) {
+  else if(satisfiesConstraints(greater, u_0_, u_0_)) 
+  {
     return greater;
   }
 
   // If greater too large, test lesser
-  else if(satisfiesConstraints(lesser, u_0_, u_0_)) {
+  else if(satisfiesConstraints(lesser, u_0_, u_0_)) 
+  {
     return lesser;    
   }
 
-  else {
+  else 
+  {
     //ROS_ERROR("Neither u_dot_0 values satisfy constraints");
     return 0;
   }
@@ -358,7 +364,8 @@ const double BezierCurve::getUDotInitial() const {
 
 
 
-const double BezierCurve::getUDotDotMax(const double u_dot_max) const {
+const double BezierCurve::getUDotDotMax(const double u_dot_max) const 
+{
   double result;
 
   // Set u max acceleration
@@ -366,13 +373,16 @@ const double BezierCurve::getUDotDotMax(const double u_dot_max) const {
   // Setting u_x and u_y to minimize Au+C or Bu+D - that leads to max a
   double u_x = ( fabs(A_+C_) > fabs(C_) ) ? 0 : 1;
   double u_y = ( fabs(B_+D_) > fabs(D_) ) ? 0 : 1;
-  if(A_*u_x + C_ != 0) {
+  if(A_*u_x + C_ != 0) 
+  {
     result = fabs( (ms_max_.msg_.accelerations.at(0) - A_*u_dot_max) / (A_*u_x+C_) );
   }
-  else if (B_*u_y + D_ != 0) {
+  else if (B_*u_y + D_ != 0) 
+  {
     result = fabs( (ms_max_.msg_.accelerations.at(1) - B_*u_dot_max) / (B_*u_y+D_) );
   }
-  else {
+  else 
+  {
     ROS_ERROR("Neither u acceleration equations are defined!");
     result = 0.1;
   }
@@ -387,18 +397,19 @@ const double BezierCurve::getUDotDotMax(const double u_dot_max) const {
 
 /** Initialize control points 
  *  Sets the first control point and then calls overloaded initControlPoints */
-void BezierCurve::initControlPoints() {
-  std::cout<<"\nIn initControlPoints 0\n";
+void BezierCurve::initControlPoints() 
+{
+  //std::cout<<"\nIn initControlPoints 0\n";
 
   double l_s1 = utility_.positionDistance(segmentPoints_.at(1).msg_.positions, segmentPoints_.at(0).msg_.positions);
   double l_s2 = utility_.positionDistance(segmentPoints_.at(2).msg_.positions, segmentPoints_.at(1).msg_.positions);
-  std::cout<<"\nl_s1: "<<l_s1<<" l_s2: "<<l_s2;
+  //std::cout<<"\nl_s1: "<<l_s1<<" l_s2: "<<l_s2;
 
   // If 1st segment's length is smaller than 2nd segment's length
   // Compute first control point and call overloaded method
   if(l_s1 < l_s2) 
   {
-    std::cout<<"\nIn if\n";
+    //std::cout<<"\nIn if\n";
 
     MotionState C0, p0, p1;
 
@@ -419,8 +430,9 @@ void BezierCurve::initControlPoints() {
   }
 
   // Else just set all points in here
-  else {
-    std::cout<<"\nIn else\n";
+  else 
+  {
+    //std::cout<<"\nIn else\n";
 
     // Adjust l to get control points
     // But keep l_ the same because this block 
@@ -483,11 +495,11 @@ void BezierCurve::initControlPoints() {
     controlPoints_.push_back(C1);
     controlPoints_.push_back(C2);
     
-    std::cout<<"\nControl Points:";
+    /*std::cout<<"\nControl Points:";
     for(int i=0;i<controlPoints_.size();i++) {
       std::cout<<"\n"<<utility_.toString(controlPoints_.at(i).msg_);
     }
-    std::cout<<"\n";
+    std::cout<<"\n";*/
   } // end else
 } // End initControlPoints
 
@@ -497,7 +509,7 @@ void BezierCurve::initControlPoints() {
 
 /** Initialize the control points of the Bezier curve given the first one */
 void BezierCurve::initControlPoints(const MotionState cp_0) {
-  std::cout<<"\nIn initControlPoints 1\n";
+  //std::cout<<"\nIn initControlPoints 1\n";
   MotionState C0, C1, C2, p0, p1, p2;
 
 
@@ -533,11 +545,13 @@ void BezierCurve::initControlPoints(const MotionState cp_0) {
 
   // If s1 is greater than entire 2nd segment,
   // set 3rd control point to end of 2nd segment
-  if(s1 > l2) {
+  if(s1 > l2) 
+  {
     C2.msg_.positions.push_back(p2.msg_.positions.at(0));  
     C2.msg_.positions.push_back(p2.msg_.positions.at(1));
   }
-  else {
+  else 
+  {
     C2.msg_.positions.push_back(x);  
     C2.msg_.positions.push_back(y);
   }
@@ -545,13 +559,15 @@ void BezierCurve::initControlPoints(const MotionState cp_0) {
 
 
   /** C0 Velocities */
-  if(C0.msg_.velocities.size() == 0) {
+  if(C0.msg_.velocities.size() == 0) 
+  {
     C0.msg_.velocities.push_back(ms_init_.msg_.velocities.at(0));
     C0.msg_.velocities.push_back(ms_init_.msg_.velocities.at(1));
     C0.msg_.velocities.push_back(0);
   }
   /** C0 Accelerations */
-  if(C0.msg_.accelerations.size() == 0) {
+  if(C0.msg_.accelerations.size() == 0) 
+  {
     C0.msg_.accelerations.push_back(0);
     C0.msg_.accelerations.push_back(0);
     C0.msg_.accelerations.push_back(0);
@@ -564,17 +580,19 @@ void BezierCurve::initControlPoints(const MotionState cp_0) {
   controlPoints_.push_back(C1);
   controlPoints_.push_back(C2);
   
-  std::cout<<"\nControl Points:";
-  for(int i=0;i<controlPoints_.size();i++) {
+  /*std::cout<<"\nControl Points:";
+  for(int i=0;i<controlPoints_.size();i++) 
+  {
     std::cout<<"\n"<<utility_.toString(controlPoints_.at(i).msg_);
-  }
+  }*/
 } // End initControlPoints
 
 
 
 
 
-void BezierCurve::calculateABCD() {
+void BezierCurve::calculateABCD() 
+{
   MotionState p0 = controlPoints_.at(0);
   MotionState p1 = controlPoints_.at(1);
   MotionState p2 = controlPoints_.at(2);
@@ -598,8 +616,8 @@ void BezierCurve::calculateABCD() {
 
 
 /** Calculate the minimum radius along the curve */
-void BezierCurve::calculateR_min() {
-
+void BezierCurve::calculateR_min() 
+{
   double numerator_term_one   = ((A_*A_) + (B_*B_)) * (t_R_min_*t_R_min_);
   double numerator_term_two   = 2 * ((A_*C_)+(B_*D_)) * t_R_min_;
   double numerator_term_three = (C_*C_) + (D_*D_);
@@ -613,12 +631,15 @@ void BezierCurve::calculateR_min() {
 
 
 /** Calculate time when minimum radius occurs along the curve */
-void BezierCurve::calculateT_R_min() {
-  if(fabs(A_) < 0.000001 && fabs(B_) < 0.000001) {
+void BezierCurve::calculateT_R_min() 
+{
+  if(fabs(A_) < 0.000001 && fabs(B_) < 0.000001) 
+  {
     ////ROS_INFO("Both A_ and B_ are 0 - setting t_R_min_ to 0");
     t_R_min_ = 0.;
   }
-  else {
+  else 
+  {
     double numerator = -((A_*C_) + (B_*D_));
     double denominator = ((A_*A_) + (B_*B_));
     ////ROS_INFO("numerator: %f denominator: %f", numerator, denominator);

@@ -1,7 +1,8 @@
 #include "time.h"
 
 
-const double Time::perform() {
+const double Time::perform() 
+{
   double result = 0.;
 
   // Get the total time to move along the trajectory

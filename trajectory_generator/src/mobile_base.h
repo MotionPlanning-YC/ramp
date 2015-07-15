@@ -125,7 +125,7 @@ private:
 
   const bool lastPointClosest(const ramp_msgs::RampTrajectory traj) const;
 
-  bool checkSpeed(const ramp_msgs::Path p);
+  bool checkSpeed(const ramp_msgs::Path p, const std::vector<uint8_t> i_cs);
 };
 
 #endif 

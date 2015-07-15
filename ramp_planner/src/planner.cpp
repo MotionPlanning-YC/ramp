@@ -64,7 +64,7 @@ void Planner::setOb_T_w_b()
   {
     ROS_INFO("Setting obstacle pose as (3.5,0,2.35)");
     tf::Vector3 pos(3.5f, 0.f, 0.f);
-    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(1.9635));
+    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(2.00457));
     ob_T_w_b_.setOrigin(pos);
   }
 } // End setOb_T_w_b
@@ -270,24 +270,32 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
 
 void Planner::sensingCycleCallback(const ramp_msgs::Obstacle& msg)
 {
-  ROS_INFO("In sensingCycleCallback");
+  //ROS_INFO("In sensingCycleCallback");
   //ROS_INFO("msg: %s", utility_.toString(msg).c_str());
 
   ros::Time start = ros::Time::now();
 
   ob_trajectory_ = getPredictedTrajectory(msg);
-  ROS_INFO("Time to get obstacle trajectory: %f", (ros::Time::now() - start).toSec());
-  ////ROS_INFO("ob_trajectory_: %s", ob_trajectory_.toString().c_str());
+  //ROS_INFO("Time to get obstacle trajectory: %f", (ros::Time::now() - start).toSec());
+  //ROS_INFO("ob_trajectory_: %s", ob_trajectory_.toString().c_str());
 
   ros::Time s = ros::Time::now();
   population_       = evaluatePopulation(population_);
   transPopulation_  = evaluatePopulation(transPopulation_);
-  ROS_INFO("Time to evaluate population: %f", (ros::Time::now() - s).toSec());
+  //ROS_INFO("Time to evaluate population: %f", (ros::Time::now() - s).toSec());
   ////ROS_INFO("Pop now: %s", population_.toString().c_str());
   ////ROS_INFO("Trans Pop now: %s", transPopulation_.toString().c_str());
 
   sc_durs_.push_back( ros::Time::now() - start );
-  sendPopulation(transPopulation_);
+  
+  if(cc_started_)
+  {
+    sendPopulation(transPopulation_);
+  }
+  else
+  {
+    sendPopulation(population_);
+  }
 }
 
 
@@ -2188,14 +2196,15 @@ const std::vector<RampTrajectory> Planner::modifyTrajec()
  *  and return the index of the new best trajectory */
 const ModificationResult Planner::modification() 
 {
-  //ROS_INFO("In Planner::modification()");
+  ROS_INFO("In Planner::modification()");
   ModificationResult result;
 
   // Modify 1 or more trajectories
   std::vector<RampTrajectory> mod_trajec = modifyTrajec();
-  //ROS_INFO("Modification trajectories obtained: %i", (int)mod_trajec.size());
+  ROS_INFO("Modification trajectories obtained: %i", (int)mod_trajec.size());
   
   Population popCopy = population_;
+  Population trans_popCopy = transPopulation_;
   //Population popCopy = population_at_cc_;
   
 
@@ -2203,7 +2212,11 @@ const ModificationResult Planner::modification()
   // and update the planner and the modifier on the new paths
   for(unsigned int i=0;i<mod_trajec.size();i++) 
   {
-    //ROS_INFO("Modified trajectory: %s", mod_trajec.at(i).toString().c_str());
+    ROS_INFO("Modified trajectory: %s", mod_trajec.at(i).toString().c_str());
+    if(mod_trajec.at(i).path_.size() == 2)
+    {
+      ROS_INFO("Straight line!");
+    }
     //std::cout<<"\nramp_planner: Evaluating trajectory "<<(int)i<<"\n";
 
     // Evaluate the new trajectory
@@ -2214,44 +2227,74 @@ const ModificationResult Planner::modification()
     // Index is where the trajectory was added in the population (may replace another)
     // If it was successfully added, push its index onto the result
     ////ROS_INFO("Trying to add modified trajectory");
-    int index = popCopy.add(mod_trajec.at(i));
-    //ROS_INFO("Added at index %i", index);
-    if(index > -1) 
+    int index=-1;
+    if(cc_started_)
     {
-      population_.replace(index, mod_trajec.at(i));
-      result.i_modified_.push_back(index);
+      if(popCopy.replacementPossible(mod_trajec.at(i)))
+      {
+        RampTrajectory trans = computeFullSwitch(movingOn_, mod_trajec.at(i));
+        index = trans_popCopy.add(trans);
+        if(index > -1)
+        {
+          popCopy.replace(index, mod_trajec.at(i));
+          result.i_modified_.push_back(index);
+        }
+      } // end if replacementPossible
+    } // end if cc_started
+    else
+    {
+      ROS_INFO("In !cc_started_");
+      index = popCopy.add(mod_trajec.at(i));
+      ROS_INFO("index: %i", index);
+      if(index > -1)
+      {
+        ROS_INFO("Adding to i_modified_");
+        result.i_modified_.push_back(index);
+      }
+    }
+    
+    if(index < 0)
+    {
+      ROS_INFO("Modification Trajectory not added to population");
+      ROS_INFO("best fitness: %f", population_.getBest().msg_.fitness);
+    }
 
-      if(cc_started_)
+    //ROS_INFO("Added at index %i", index);
+    /*if(index > -1) 
+    {
+      if(!cc_started_)
+      {
+        population_.replace(index, mod_trajec.at(i));
+        result.i_modified_.push_back(index);
+      }
+      else
       {
         //ROS_INFO("Computing switch to modified trajectory");
         RampTrajectory trans = computeFullSwitch(movingOn_, mod_trajec.at(i));
+        bool index_trans = trans_popCopy.canReplace(trans, index);
         transPopulation_.replace(index, trans);
       }
     }
     else 
     {
       //ROS_INFO("Modification Trajectory not added to population");
-    }
+    }*/
 
     // If sub-populations are being used and
     // the trajectory was added to the population, update the sub-populations 
     // (can result in infinite loop if not updated but re-evaluated)
     if(subPopulations_ && index >= 0) 
     {
-      population_.createSubPopulations();
+      popCopy.createSubPopulations();
     }
   } // end for
 
 
-  // Find the best trajectory
-  int index   = population_.calcBestIndex();
-
-  result.popNew_    = population_;
-  result.transNew_  = transPopulation_;
-
+  result.popNew_    = popCopy;
+  result.transNew_  = trans_popCopy;
   ////ROS_INFO("After modification, pop now: %s", result.popNew_.toString().c_str());
 
-  //ROS_INFO("Exiting Planner::modification");
+  ROS_INFO("Exiting Planner::modification");
   return result;
 } // End modification
 
@@ -2476,47 +2519,45 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
       ros::Time t = ros::Time::now();
       ModificationResult mod = modification();
       mutate_durs_.push_back(ros::Time::now() - t);
-      //ROS_INFO("Done with modification");
+      ROS_INFO("Done with modification");
       //ROS_INFO("*****************************");
 
 
       // cc_started needed? still want to replace if they haven't started, only need cc_started when switching 
-      if(cc_started_ && mod.i_modified_.size() > 0 &&
+      // TODO: cc_started used to be a predicate here
+      if(mod.i_modified_.size() > 0 &&
           !population_.get(0).path_.at(0).motionState_.equals(goal_))
       {
-        population_ = mod.popNew_;
-        transPopulation_ = mod.transNew_;
+        ROS_INFO("In if trajectory added");
+        population_       = mod.popNew_;
+        transPopulation_  = mod.transNew_;
         //population_at_cc_ = mod.popNew_;
         //transPopulation_at_cc_ = mod.transNew_;
         
         ////ROS_INFO("Modification changed population");
-        for(int i=0;i<mod.i_modified_.size();i++)
+        /*for(int i=0;i<mod.i_modified_.size();i++)
         {
           RampTrajectory temp = mod.popNew_.get(mod.i_modified_.at(i));
-          /*if(!did_error_correction)
-          {
-            temp.offsetPositions(diff);
-          }*/
           mod.popNew_.replace(mod.i_modified_.at(i), temp);
 
           temp = mod.transNew_.get(mod.i_modified_.at(i));
-          /*if(!did_error_correction)
-          {
-            temp.offsetPositions(diff);
-          }*/
           mod.transNew_.replace(mod.i_modified_.at(i), temp);
-        }
-        population_ = mod.popNew_;
-        transPopulation_ = mod.transNew_;
+        }*/
+        //population_       = mod.popNew_;
+        //transPopulation_  = mod.transNew_;
         // Pop = popnew was outside this block - why?
-        /*//ROS_INFO("New pop: %s", population_.toString().c_str());
-        //ROS_INFO("New transPop: %s", transPopulation_.toString().c_str());*/
+        ROS_INFO("New pop: %s", population_.toString().c_str());
+        ROS_INFO("New transPop: %s", transPopulation_.toString().c_str());
 
 
         controlCycle_ = transPopulation_.getBest().msg_.t_start;
         controlCycleTimer_.setPeriod(transPopulation_.getBest().msg_.t_start, false);
         //ROS_INFO("Modification: new CC timer: %f", transPopulation_.getBest().msg_.t_start.toSec());
       } // end if trajectory added
+      else
+      {
+        ROS_INFO("No trajectory added");
+      }
     } // end if modifications
 
 
@@ -2536,6 +2577,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
     {
       sendPopulation(population_);
     }
+    ROS_INFO("population.bestID: %i", population_.calcBestIndex());
  
     /*//ROS_INFO("Exiting PC at time: %f", ros::Time::now().toSec());
     //ROS_INFO("Time spent in PC: %f", (ros::Time::now() - t).toSec());*/
@@ -2972,7 +3014,8 @@ const Population Planner::evaluatePopulation(const Population pop)
   //ROS_INFO("Before evaluating, pop: %s", pop.fitnessFeasibleToString().c_str());
   
   // Go through each trajectory in the population and evaluate it
-  for(uint16_t i=0;i<result.size();i++) {
+  for(uint16_t i=0;i<result.size();i++) 
+  {
     ////ROS_INFO("i: %i", (int)i);
     result.replace(i, evaluateTrajectory(result.get(i)));
   } // end for
@@ -3175,6 +3218,11 @@ void Planner::reportTimeData()
 
 
   int num_pc = generationsBeforeCC_ - generationsPerCC_;
+  if(num_pc < 0)
+  {
+    ROS_WARN("num_pc is less than zero: %i - Setting num_pc = 0", num_pc);
+    num_pc = 0;
+  }
   ROS_INFO("generationsBeforeCC_: %i generationsPerCC_: %i num_pc: %i", generationsBeforeCC_, generationsPerCC_, num_pc);
 
   // Wait for the specified number of generations before starting CC's
