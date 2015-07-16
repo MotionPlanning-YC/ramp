@@ -19,6 +19,7 @@
   <remap from="odometry" to="odom" />
   <param name="simulation" value="true" />
   <param name="check_imminent_coll" value="false" />
+  <param name="orientation" type="double" value="1.9635" />
 </node>
 
 </launch>

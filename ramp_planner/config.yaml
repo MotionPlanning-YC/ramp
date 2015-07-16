@@ -1,4 +1,4 @@
-population_size: 5
+population_size: 6
 
 sub_populations: false
 
@@ -10,7 +10,7 @@ seed_population: false
 
 gens_before_control_cycle: 20
 
-planning_cycle_rate: 5
+planning_cycle_rate: 10
 
 fixed_control_cycle_rate: 2
 

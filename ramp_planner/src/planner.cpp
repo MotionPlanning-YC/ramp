@@ -3230,6 +3230,9 @@ void Planner::reportTimeData()
  
   //ROS_INFO("Starting CCs at t: %f", ros::Time::now().toSec());
 
+  // Right before starting CC, make sure transPopulation is updated
+  transPopulation_ = population_;
+  
   // Start the control cycles
   controlCycleTimer_.start();
   imminentCollisionTimer_.start();
