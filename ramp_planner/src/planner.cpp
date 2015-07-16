@@ -1248,9 +1248,9 @@ void Planner::seedPopulation() {
 
   ramp_msgs::KnotPoint kp2;
   
+  kp2.motionState.positions.push_back(0.);
   kp2.motionState.positions.push_back(3.);
-  kp2.motionState.positions.push_back(3.);
-  kp2.motionState.positions.push_back(PI/4.);
+  kp2.motionState.positions.push_back(PI/2.);
   
   kp2.motionState.velocities.push_back(0);
   kp2.motionState.velocities.push_back(0);
@@ -1265,9 +1265,9 @@ void Planner::seedPopulation() {
 
   ramp_msgs::KnotPoint kp3;
   
-  kp3.motionState.positions.push_back(1.27328);
-  kp3.motionState.positions.push_back(3.10524);
-  kp3.motionState.positions.push_back(-PI/4);
+  kp3.motionState.positions.push_back(2.f);
+  kp3.motionState.positions.push_back(0.f);
+  kp3.motionState.positions.push_back(0.f);
   
   kp3.motionState.velocities.push_back(0);
   kp3.motionState.velocities.push_back(0);
@@ -1283,8 +1283,9 @@ void Planner::seedPopulation() {
   /**** Create the vector of Paths ****/
 
   std::vector<Path> paths;
-  paths.push_back(p3);
+  paths.push_back(p1);
   paths.push_back(p2);
+  paths.push_back(p3);
   /************************************/
 
   /**** Get trajectories ****/  
@@ -2212,11 +2213,7 @@ const ModificationResult Planner::modification()
   // and update the planner and the modifier on the new paths
   for(unsigned int i=0;i<mod_trajec.size();i++) 
   {
-    ROS_INFO("Modified trajectory: %s", mod_trajec.at(i).toString().c_str());
-    if(mod_trajec.at(i).path_.size() == 2)
-    {
-      ROS_INFO("Straight line!");
-    }
+    //ROS_INFO("Modified trajectory: %s", mod_trajec.at(i).toString().c_str());
     //std::cout<<"\nramp_planner: Evaluating trajectory "<<(int)i<<"\n";
 
     // Evaluate the new trajectory
@@ -2286,6 +2283,7 @@ const ModificationResult Planner::modification()
     if(subPopulations_ && index >= 0) 
     {
       popCopy.createSubPopulations();
+      //trans_popCopy.createSubPopulations();
     }
   } // end for
 
@@ -2579,6 +2577,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
     }
     ROS_INFO("population.bestID: %i", population_.calcBestIndex());
  
+    ROS_INFO("Pop: %s", population_.toString().c_str());
     /*//ROS_INFO("Exiting PC at time: %f", ros::Time::now().toSec());
     //ROS_INFO("Time spent in PC: %f", (ros::Time::now() - t).toSec());*/
     pc_durs_.push_back(ros::Time::now() - t_start);
@@ -3159,7 +3158,8 @@ void Planner::reportTimeData()
  *******************************************************/
 
 
- void Planner::go() {
+void Planner::go() 
+{
 
   // t=0
   generation_ = 0;
@@ -3193,7 +3193,7 @@ void Planner::reportTimeData()
 
     sendPopulation(population_);
     std::cout<<"\nPopulation seeded! Press enter to continue\n";
-    //std::cin.get();
+    std::cin.get();
   }
 
 
@@ -3234,7 +3234,7 @@ void Planner::reportTimeData()
   transPopulation_ = population_;
   
   // Start the control cycles
-  controlCycleTimer_.start();
+  //controlCycleTimer_.start();
   imminentCollisionTimer_.start();
 
   //ROS_INFO("CCs started");

@@ -1,6 +1,6 @@
-population_size: 6
+population_size: 10
 
-sub_populations: false
+sub_populations: true
 
 modifications: true
 
