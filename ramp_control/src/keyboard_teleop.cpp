@@ -3,7 +3,7 @@
 #include <signal.h>
 #include <termios.h>
 #include <stdio.h>
-#include "corobot_msgs/MotorCommand.h"
+//#include "corobot_msgs/MotorCommand.h"
 #include "geometry_msgs/Twist.h"
 
 
@@ -19,7 +19,7 @@
 int kfd = 0;
 struct termios cooked, raw;
 int l_wheel = 0, r_wheel = 0;
-corobot_msgs::MotorCommand motorCommand;
+//corobot_msgs::MotorCommand motorCommand;
 geometry_msgs::Twist twist;
 
 
@@ -28,8 +28,8 @@ int main(int argc, char** argv) {
 
   ros::init(argc, argv, "keyboard_teleop");
   ros::NodeHandle handle;
-  ros::Publisher pub_motors = handle.advertise<corobot_msgs::MotorCommand>("PhidgetMotor", 1000);
-  ros::Publisher pub_update = handle.advertise<corobot_msgs::MotorCommand>("update", 1000);
+  //ros::Publisher pub_motors = handle.advertise<corobot_msgs::MotorCommand>("PhidgetMotor", 1000);
+  //ros::Publisher pub_update = handle.advertise<corobot_msgs::MotorCommand>("update", 1000);
   ros::Publisher pub_twist  = handle.advertise<geometry_msgs::Twist>("cmd_vel", 1000);
 
   char c;
