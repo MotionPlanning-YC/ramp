@@ -53,8 +53,8 @@ int main(int argc, char** argv) {
     switch(c) {
       case KEYCODE_U:
         std::cout<<"\nc = UP\n";
-        motorCommand.leftSpeed  = 25;
-        motorCommand.rightSpeed = 25;
+        //motorCommand.leftSpeed  = 25;
+        //motorCommand.rightSpeed = 25;
         twist.linear.x = 0.33;
         twist.angular.z = 0;
         
@@ -62,8 +62,8 @@ int main(int argc, char** argv) {
 
       case KEYCODE_D:
         std::cout<<"\nc = DOWN\n";
-        motorCommand.leftSpeed = -25;
-        motorCommand.rightSpeed = -25;
+        //motorCommand.leftSpeed = -25;
+        //motorCommand.rightSpeed = -25;
         twist.linear.x = -0.33;
         twist.angular.z = 0;
 
@@ -71,8 +71,8 @@ int main(int argc, char** argv) {
 
       case KEYCODE_L:
         std::cout<<"\nc = LEFT\n";
-        motorCommand.leftSpeed = -25;
-        motorCommand.rightSpeed = 25;
+        //motorCommand.leftSpeed = -25;
+        //motorCommand.rightSpeed = 25;
         twist.angular.z = 3.14159/6;
         twist.linear.x = 0;
 
@@ -80,8 +80,8 @@ int main(int argc, char** argv) {
 
       case KEYCODE_R:
         std::cout<<"\nc = RIGHT\n";
-        motorCommand.leftSpeed = 25;
-        motorCommand.rightSpeed = -25;
+        //motorCommand.leftSpeed = 25;
+        //motorCommand.rightSpeed = -25;
         twist.angular.z = -3.14159/6;
         twist.linear.x = 0;
 
@@ -119,10 +119,10 @@ int main(int argc, char** argv) {
         std::cout<<"\nc is none!\n";
     }
 
-    motorCommand.secondsDuration = 1;
-    motorCommand.acceleration = 25;
+    //motorCommand.secondsDuration = 1;
+    //motorCommand.acceleration = 25;
 
-    pub_motors.publish(motorCommand);
+    //pub_motors.publish(motorCommand);
 
     ros::Time t = ros::Time::now();
     while((ros::Time::now() - t) < ros::Duration(2)) {
