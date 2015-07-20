@@ -47,11 +47,13 @@ const int Population::getIndexFromId(const uint16_t id) const
 
 void Population::replace(const uint8_t i, const RampTrajectory trajec) 
 {
-  if(i < trajectories_.size()) {
+  if(i < trajectories_.size()) 
+  {
     trajectories_.at(i) = trajec;
     paths_.at(i) = trajec.path_;
   }
-  else {
+  else 
+  {
     ROS_WARN("Replacing trajectory at index %i, but population size = %lu\n", (int)i, trajectories_.size());
     trajectories_.push_back(trajec);
     paths_.push_back(trajec.path_);  
@@ -60,14 +62,16 @@ void Population::replace(const uint8_t i, const RampTrajectory trajec)
 
 
 
-void Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
+void Population::replaceAll(const std::vector<RampTrajectory> new_pop) 
+{
   
   // Set trajectories vector
   trajectories_ = new_pop;
 
   // Set paths vector
   paths_.clear();
-  for(uint8_t i=0;i<new_pop.size();i++) {
+  for(uint8_t i=0;i<new_pop.size();i++) 
+  {
     paths_.push_back(new_pop.at(i).path_);
   }
 } // End replaceAll
@@ -76,7 +80,8 @@ void Population::replaceAll(const std::vector<RampTrajectory> new_pop) {
 
 
 
-const int Population::getNumSubPops() const {
+const int Population::getNumSubPops() const 
+{
   return subPopulations_.size();
 }
 
@@ -514,7 +519,8 @@ const std::vector<Population> Population::createSubPopulations(const double delt
 
 
 /** fitness and feasible toString */
-const std::string Population::fitnessFeasibleToString() const {
+const std::string Population::fitnessFeasibleToString() const 
+{
   std::ostringstream result;
 
   result<<"\n****************************************************";
@@ -535,7 +541,8 @@ const std::string Population::fitnessFeasibleToString() const {
 
 
 /** toString */
-const std::string Population::toString() const {
+const std::string Population::toString() const 
+{
   std::ostringstream result;
 
   result<<"Best ID: "<<calcBestIndex();

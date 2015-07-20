@@ -1281,7 +1281,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
         // Set orientation threshold that requires a rotation 
         // before continuing to the next knot point
-        double threshold = 0.2; 
+        double threshold = 0.3; 
         //ROS_INFO("threshold: %f", threshold);
 
         // If we need to rotate towards the next knot point

@@ -2197,12 +2197,12 @@ const std::vector<RampTrajectory> Planner::modifyTrajec()
  *  and return the index of the new best trajectory */
 const ModificationResult Planner::modification() 
 {
-  ROS_INFO("In Planner::modification()");
+  //ROS_INFO("In Planner::modification()");
   ModificationResult result;
 
   // Modify 1 or more trajectories
   std::vector<RampTrajectory> mod_trajec = modifyTrajec();
-  ROS_INFO("Modification trajectories obtained: %i", (int)mod_trajec.size());
+  //ROS_INFO("Modification trajectories obtained: %i", (int)mod_trajec.size());
   
   Population popCopy = population_;
   Population trans_popCopy = transPopulation_;
@@ -2240,22 +2240,13 @@ const ModificationResult Planner::modification()
     } // end if cc_started
     else
     {
-      ROS_INFO("In !cc_started_");
       index = popCopy.add(mod_trajec.at(i));
-      ROS_INFO("index: %i", index);
       if(index > -1)
       {
-        ROS_INFO("Adding to i_modified_");
         result.i_modified_.push_back(index);
-      }
-    }
+      } // end if added
+    } // end else
     
-    if(index < 0)
-    {
-      ROS_INFO("Modification Trajectory not added to population");
-      ROS_INFO("best fitness: %f", population_.getBest().msg_.fitness);
-    }
-
     //ROS_INFO("Added at index %i", index);
     /*if(index > -1) 
     {
@@ -2292,7 +2283,7 @@ const ModificationResult Planner::modification()
   result.transNew_  = trans_popCopy;
   ////ROS_INFO("After modification, pop now: %s", result.popNew_.toString().c_str());
 
-  ROS_INFO("Exiting Planner::modification");
+  //ROS_INFO("Exiting Planner::modification");
   return result;
 } // End modification
 
@@ -2517,7 +2508,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
       ros::Time t = ros::Time::now();
       ModificationResult mod = modification();
       mutate_durs_.push_back(ros::Time::now() - t);
-      ROS_INFO("Done with modification");
+      //ROS_INFO("Done with modification");
       //ROS_INFO("*****************************");
 
 
@@ -2526,7 +2517,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
       if(mod.i_modified_.size() > 0 &&
           !population_.get(0).path_.at(0).motionState_.equals(goal_))
       {
-        ROS_INFO("In if trajectory added");
+        //ROS_INFO("In if trajectory added");
         population_       = mod.popNew_;
         transPopulation_  = mod.transNew_;
         //population_at_cc_ = mod.popNew_;
@@ -2544,18 +2535,18 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
         //population_       = mod.popNew_;
         //transPopulation_  = mod.transNew_;
         // Pop = popnew was outside this block - why?
-        ROS_INFO("New pop: %s", population_.toString().c_str());
-        ROS_INFO("New transPop: %s", transPopulation_.toString().c_str());
+        //ROS_INFO("New pop: %s", population_.toString().c_str());
+        //ROS_INFO("New transPop: %s", transPopulation_.toString().c_str());
 
 
         controlCycle_ = transPopulation_.getBest().msg_.t_start;
         controlCycleTimer_.setPeriod(transPopulation_.getBest().msg_.t_start, false);
         //ROS_INFO("Modification: new CC timer: %f", transPopulation_.getBest().msg_.t_start.toSec());
       } // end if trajectory added
-      else
+      /*else
       {
         ROS_INFO("No trajectory added");
-      }
+      }*/
     } // end if modifications
 
 
@@ -2575,9 +2566,9 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
     {
       sendPopulation(population_);
     }
-    ROS_INFO("population.bestID: %i", population_.calcBestIndex());
+    //ROS_INFO("population.bestID: %i", population_.calcBestIndex());
  
-    ROS_INFO("Pop: %s", population_.toString().c_str());
+    //ROS_INFO("Pop: %s", population_.toString().c_str());
     /*//ROS_INFO("Exiting PC at time: %f", ros::Time::now().toSec());
     //ROS_INFO("Time spent in PC: %f", (ros::Time::now() - t).toSec());*/
     pc_durs_.push_back(ros::Time::now() - t_start);
@@ -3234,7 +3225,7 @@ void Planner::go()
   transPopulation_ = population_;
   
   // Start the control cycles
-  //controlCycleTimer_.start();
+  controlCycleTimer_.start();
   imminentCollisionTimer_.start();
 
   //ROS_INFO("CCs started");
@@ -3242,7 +3233,7 @@ void Planner::go()
  
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
-  goalThreshold_ = 0.2;
+  goalThreshold_ = 0.5;
   ros::Rate r(20);
   while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) 
   {

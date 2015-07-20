@@ -11,8 +11,10 @@ const float timeNeededToTurn = 2.5;
 
 
 
-MobileRobot::MobileRobot() : restart_(false), num_(0), num_traveled_(0), k_dof_(3), h_traj_req_(0) { 
-  for(unsigned int i=0;i<k_dof_;i++) {
+MobileRobot::MobileRobot() : restart_(false), num_(0), num_traveled_(0), k_dof_(3), h_traj_req_(0) 
+{ 
+  for(unsigned int i=0;i<k_dof_;i++)
+  {
     motion_state_.positions.push_back(0);
     motion_state_.velocities.push_back(0);
     motion_state_.accelerations.push_back(0);
@@ -27,91 +29,23 @@ MobileRobot::MobileRobot() : restart_(false), num_(0), num_traveled_(0), k_dof_(
 }
 
 
-MobileRobot::~MobileRobot() {
-  if(h_traj_req_ != 0) {
+MobileRobot::~MobileRobot() 
+{
+  if(h_traj_req_ != 0) 
+  {
     delete h_traj_req_;
     h_traj_req_ = 0;
   }
 }
 
 
-void MobileRobot::init(ros::NodeHandle& h) {
+void MobileRobot::init(ros::NodeHandle& h) 
+{
   h_traj_req_ = new TrajectoryRequestHandler((const ros::NodeHandle&)h);
 }
 
 
 
-
-/** Publishes the MotorCommand msg. The MobileRobot will drive based on the msg. */
-void MobileRobot::drive(const corobot_msgs::MotorCommand msg) const {
-  pub_phidget_motor_.publish(msg);
-}
-
-void MobileRobot::stop() const {
-  corobot_msgs::MotorCommand msg;
-  msg.leftSpeed  = 0;
-  msg.rightSpeed = 0;
-  msg.secondsDuration = 0;
-  msg.acceleration = ACCELERATION_CONSTANT;
-
-  // Send Command
-  drive(msg);
-}
-
-
-void MobileRobot::driveStraight(const unsigned int speed) const {
-
-  corobot_msgs::MotorCommand msg;
-
-  // Set the speed
-  msg.leftSpeed = speed;
-  msg.rightSpeed = speed;
-  
-  // The time should be indefinite, so just make it very high
-  msg.secondsDuration = 1000;
-
-  // acceleration does not matter with corobot
-  msg.acceleration = ACCELERATION_CONSTANT;
-
-  // Send command
-  drive(msg);
-}
-
-
-void MobileRobot::turn(const unsigned int speed, const bool cwise) const {
-
-
-  corobot_msgs::MotorCommand msg;
-
-  // Set the speed
-  if(cwise) {
-    msg.leftSpeed = speed;
-  }
-  else 
-    msg.leftSpeed = -speed;
-
-  msg.rightSpeed = -msg.leftSpeed;
-  
-  // The time should be indefinite, so just make it very high
-  msg.secondsDuration = 1000;
-
-  // acceleration does not matter with corobot
-  msg.acceleration = ACCELERATION_CONSTANT;
-  
-  // Send Command
-  drive(msg);
-}
-
-
-void MobileRobot::turn(const float speed, const float angle) const {
- geometry_msgs::Twist v;
-
- v.linear.x = 0;
- v.angular.z = speed;
- 
- // Need to set up stopping the turn once the desired angle has been turned 
- pub_twist_.publish(v);
-}
 
 
 /*
@@ -291,10 +225,10 @@ void MobileRobot::sendTwist() const
   pub_twist_.publish(twist_); 
 
   // If we have the simulation up, publish to cmd_vel
-  if(sim_) 
-  {
+  //if(sim_) 
+  //{
     pub_cmd_vel_.publish(twist_);
-  }
+  //}
   
   //ROS_INFO("Exiting MobileRobot::sendTwist()");
 }

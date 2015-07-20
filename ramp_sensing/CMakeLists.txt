@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ramp_sensing)
 
-find_package(catkin REQUIRED COMPONENTS corobot_msgs message_generation ramp_msgs roscpp tf)
+find_package(catkin REQUIRED COMPONENTS message_generation ramp_msgs roscpp tf)
 
 #######################################
 ## Declare ROS messages and services ##
@@ -31,5 +31,5 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ramp_msgs_generate_messages_cpp corobot_msgs_generate_messages_cpp)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ramp_msgs_generate_messages_cpp)
 

@@ -6,7 +6,6 @@
 #include "utility.h"
 #include "trajectory_request_handler.h"
 #include "nav_msgs/Odometry.h"
-#include "corobot_msgs/MotorCommand.h"
 #include "geometry_msgs/Twist.h"
 #include "tf/transform_datatypes.h"
 #include "ramp_msgs/MotionState.h"
@@ -20,12 +19,6 @@ class MobileRobot {
     
     /** Methods **/ 
     void init(ros::NodeHandle& h);
-
-    void drive(corobot_msgs::MotorCommand msg) const;
-    void driveStraight(const unsigned int speed) const;
-    void turn(const unsigned int speed, const bool cwise) const;
-    void turn(const float speed, const float angle) const; 
-    void stop() const;
 
     void moveOnTrajectory();
     void moveOnTrajectoryRot(const ramp_msgs::RampTrajectory traj, bool simulation);
