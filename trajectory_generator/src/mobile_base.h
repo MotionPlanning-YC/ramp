@@ -72,6 +72,8 @@ private:
   double x_dot_scalar_;
   double y_dot_scalar_;
 
+  double MAX_SPEED;
+
   /***** Methods *****/
   // Initialize everything
   void init(const ramp_msgs::TrajectoryRequest::Request req);

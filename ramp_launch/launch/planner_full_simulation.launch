@@ -29,7 +29,7 @@
 <node name="ramp_control" pkg="ramp_control" type="ramp_control" output="screen" >
   <remap from="odometry" to="odom" />
   <param name="simulation" value="true" />
-  <param name="orientation" type="double" value="0.785" />
+  <param name="orientation" type="double" value="0." />
 </node>
 
 

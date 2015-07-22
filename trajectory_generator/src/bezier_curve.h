@@ -55,6 +55,9 @@ private:
   double        theta_dot_prev_         ;
 
 
+  double MAX_SPEED;
+
+
   void initReflexxes()    ;
 
   void calculateConstants() ;

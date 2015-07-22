@@ -58,7 +58,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   //ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
 
   CollisionDetection::QueryResult result;
-  uint8_t t_checkColl = 0;
+  uint8_t t_checkColl = 1;
 
   /*if(ob_trajectory.trajectory.points.size() <= 2) {
     if(id == 0)

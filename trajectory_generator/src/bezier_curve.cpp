@@ -1,11 +1,13 @@
 #include "bezier_curve.h"
 
 
+
 BezierCurve::BezierCurve() : initialized_(false), deallocated_(false), reachedVMax_(false) 
 {
   reflexxesData_.rml = 0;
   reflexxesData_.inputParameters  = 0;
   reflexxesData_.outputParameters = 0;
+  MAX_SPEED = 0.33f;
 }
 
 BezierCurve::~BezierCurve() 
@@ -128,7 +130,7 @@ void BezierCurve::init(const ramp_msgs::BezierCurve bi, const ramp_msgs::MotionS
 const bool BezierCurve::verify() const {
   //ROS_INFO("In BezierCurve::verify()");
 
-  double v_max = 0.467;
+  double v_max = MAX_SPEED;
   double w_max = 3*PI/4;
 
   double u_dot_max = getUDotMax(u_dot_0_);
@@ -251,7 +253,7 @@ const ramp_msgs::MotionState BezierCurve::getInitialState()
   
   //ROS_INFO("ryse: %f run: %f slope: %f l: %f", ryse, run, slope, l);
 
-  double v_max = 0.467;
+  double v_max = MAX_SPEED;
 
   // If change in y is greater
   // no change in x
@@ -329,7 +331,7 @@ const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_
 
   //ROS_INFO("x_dot: %f y_dot: %f v: %f", x_dot, y_dot, v);
 
-  if(v > 0.467)
+  if(v > MAX_SPEED)
   {
     return false;
   }

@@ -8,6 +8,7 @@ MobileBase::MobileBase() : planning_full_(false)
   reflexxesData_.rml = 0;
   reflexxesData_.inputParameters = 0;
   reflexxesData_.outputParameters = 0;
+  MAX_SPEED = 0.33f;
 } 
 
 
@@ -62,8 +63,8 @@ void MobileBase::initReflexxes()
 
   // Set up the motion constraints (max velocity, acceleration and jerk)
   // Maximum velocity   
-  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0] = 0.33;
-  reflexxesData_.inputParameters->MaxVelocityVector->VecData[1] = 0.33;
+  reflexxesData_.inputParameters->MaxVelocityVector->VecData[0] = MAX_SPEED * cos(PI/4.f);
+  reflexxesData_.inputParameters->MaxVelocityVector->VecData[1] = MAX_SPEED * sin(PI/4.f);
   reflexxesData_.inputParameters->MaxVelocityVector->VecData[2] = 3*PI/4;
   
 
@@ -1182,8 +1183,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     }
     else
     {
-      x_dot = fabs(0.467 * cos(theta));
-      y_dot = fabs(0.467 * sin(theta));
+      x_dot = fabs(MAX_SPEED * cos(theta));
+      y_dot = fabs(MAX_SPEED * sin(theta));
     }
     //ROS_INFO("x_dot: %f y_dot: %f", x_dot, y_dot);
 

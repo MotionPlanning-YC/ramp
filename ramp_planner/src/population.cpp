@@ -355,7 +355,7 @@ const int Population::getReplacementID(const RampTrajectory rt) const
  *  Returns the index that the trajectory is added at */
 const int Population::add(const RampTrajectory rt) 
 {
-  ROS_INFO("In Population::add");
+  //ROS_INFO("In Population::add");
   ////ROS_INFO("rt: %s", rt.toString().c_str());
 
   /*if(subPopulations_.size() > 0) 
@@ -374,8 +374,8 @@ const int Population::add(const RampTrajectory rt)
     trajectories_.push_back (rt);  
     paths_.push_back        (rt.path_);
     
-    ROS_INFO("In if isSubPopulation_ || trajectories_.size() < maxSize_");
-    ROS_INFO("Exiting Population::add");
+    //ROS_INFO("In if isSubPopulation_ || trajectories_.size() < maxSize_");
+    //ROS_INFO("Exiting Population::add");
     return trajectories_.size()-1;
   } 
 

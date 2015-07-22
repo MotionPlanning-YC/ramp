@@ -26,6 +26,7 @@ enum TrajectoryType {
 };
 
 
+
 class Utility {
   public:
     Utility();
