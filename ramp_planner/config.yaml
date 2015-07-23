@@ -10,7 +10,7 @@ seed_population: false
 
 gens_before_control_cycle: 20
 
-planning_cycle_rate: 5
+planning_cycle_rate: 8
 
 fixed_control_cycle_rate: 2
 

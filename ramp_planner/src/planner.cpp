@@ -62,7 +62,7 @@ void Planner::setOb_T_w_b()
   // robot 0 needs robot 1's pose
   else 
   {
-    ROS_INFO("Setting obstacle pose as (3.5,0,2.35)");
+    ROS_INFO("Setting obstacle pose as (3.5,0,1.9635)");
     tf::Vector3 pos(3.5f, 0.f, 0.f);
     ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(2.00457));
     ob_T_w_b_.setOrigin(pos);
@@ -270,7 +270,7 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
 
 void Planner::sensingCycleCallback(const ramp_msgs::Obstacle& msg)
 {
-  //ROS_INFO("In sensingCycleCallback");
+  ROS_INFO("In sensingCycleCallback");
   //ROS_INFO("msg: %s", utility_.toString(msg).c_str());
 
   ros::Time start = ros::Time::now();
@@ -285,6 +285,29 @@ void Planner::sensingCycleCallback(const ramp_msgs::Obstacle& msg)
   //ROS_INFO("Time to evaluate population: %f", (ros::Time::now() - s).toSec());
   ////ROS_INFO("Pop now: %s", population_.toString().c_str());
   ////ROS_INFO("Trans Pop now: %s", transPopulation_.toString().c_str());
+  
+  
+  movingOn_ = evaluateTrajectory(movingOn_);
+  ROS_INFO("movingOn_ Feasible: %s", movingOn_.msg_.feasible ? "True" : "False");
+  
+  trajectory_msgs::JointTrajectoryPoint ob = ob_trajectory_.msg_.trajectory.points.at(0);
+  double dist = utility_.positionDistance(ob.positions, latestUpdate_.msg_.positions);
+  
+  if(!movingOn_.msg_.feasible &&
+      dist < 0.7f)
+  {
+    ROS_WARN("Imminent Collision Robot: %i dist: %f", id_, dist);
+    ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.toString().c_str());
+    h_parameters_.setImminentCollision(true); 
+  }
+
+  else 
+  {
+    ROS_INFO("No imminent collision, dist: %f", dist);
+    ROS_INFO("movingOn_: %s", movingOn_.toString().c_str());
+    h_parameters_.setImminentCollision(false);
+  }
+
 
   sc_durs_.push_back( ros::Time::now() - start );
   
@@ -1061,18 +1084,32 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
 {
   ////ROS_INFO("In imminentCollisionCallback");
  
+  trajectory_msgs::JointTrajectoryPoint ob = ob_trajectory_.msg_.trajectory.points.at(0);
+  double dist = utility_.positionDistance(ob.positions, latestUpdate_.msg_.positions);
+    
+  ROS_WARN("latestUpdate_: %s\nob_point: %s", latestUpdate_.toString().c_str(), utility_.toString(ob).c_str());
 
-  if(!transPopulation_.getBest().msg_.feasible && 
+  if(!transPopulation_.getBest().msg_.feasible &&
+      dist < 0.7f)
+  {
+    ROS_WARN("Imminent Collision Robot: %i dist: %f", id_, dist);
+    ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.toString().c_str());
+    h_parameters_.setImminentCollision(true); 
+  }
+
+
+  /*if(!transPopulation_.getBest().msg_.feasible && 
       (transPopulation_.getBest().msg_.t_firstCollision.toSec() < controlCycle_.toSec())) 
   {
     ROS_WARN("Imminent Collision Robot: %i t_firstCollision: %f", id_, 
         transPopulation_.getBest().msg_.t_firstCollision.toSec());
     ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.toString().c_str());
     h_parameters_.setImminentCollision(true); 
-  } 
+  }*/
   else 
   {
-    ////ROS_INFO("No imminent collision, t_firstCollision: %f", transPopulation_.getBest().msg_.t_firstCollision.toSec());
+    ROS_INFO("No imminent collision, dist: %f", dist);
+    ROS_INFO("startPlanning: %s", startPlanning_.toString().c_str());
     h_parameters_.setImminentCollision(false);
   }
 
@@ -3222,7 +3259,7 @@ void Planner::go()
   
   // Start the control cycles
   controlCycleTimer_.start();
-  imminentCollisionTimer_.start();
+  //imminentCollisionTimer_.start();
 
   //ROS_INFO("CCs started");
 
