@@ -131,7 +131,7 @@ const bool BezierCurve::verify() const {
   //ROS_INFO("In BezierCurve::verify()");
 
   double v_max = MAX_SPEED;
-  double w_max = 3*PI/4;
+  double w_max = PI/2.f;
 
   double u_dot_max = getUDotMax(u_dot_0_);
   double u_x = ( fabs(A_+C_) > fabs(C_) ) ? 1 : 0;

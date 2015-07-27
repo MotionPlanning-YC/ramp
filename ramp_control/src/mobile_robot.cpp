@@ -211,7 +211,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   }
 
 
-  //printVectors();
+  printVectors();
 } // End calculateSpeedsAndTime
 
 
@@ -356,7 +356,7 @@ void MobileRobot::moveOnTrajectory()
         float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
         //ROS_INFO("actual_theta: %f orientations[%i]: %f dist: %f", actual_theta, num_traveled_, 
             //orientations_.at(num_traveled_), dist);
-        twist_.angular.z = dist;
+        //twist_.angular.z = dist;
       }
 
       ROS_INFO("twist.linear.x: %f twist.angular.z: %f", twist_.linear.x, twist_.angular.z);

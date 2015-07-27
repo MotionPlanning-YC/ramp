@@ -34,7 +34,7 @@ const double Evaluate::performFitness(CollisionDetection::QueryResult feasible)
   //double A = orientation_.perform();
   double A = 0.;
 
-  ROS_INFO("T: %f A: %f", T, A);
+  //ROS_INFO("T: %f A: %f", T, A);
 
   double cost = T + A;
 
@@ -54,7 +54,7 @@ const double Evaluate::performFitness(CollisionDetection::QueryResult feasible)
       penalties += (Q / feasible.t_firstCollision_);
   }
 
-  ROS_INFO("cost: %f penalties: %f", cost, penalties);
+  //ROS_INFO("cost: %f penalties: %f", cost, penalties);
   
   
   result = (1. / (cost + penalties));

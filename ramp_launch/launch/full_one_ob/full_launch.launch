@@ -8,7 +8,7 @@
 
 <!-- Define the machines -->
 
-<!-- <include file="$(find ramp_launch)/launch/corobots.machine" /> -->
+<include file="$(find ramp_launch)/launch/corobots.machine" />
 
 
 <!-- <include file="$(find ramp_launch)/launch/full_one_ob/planner_simulation.launch" /> -->
@@ -18,8 +18,8 @@
 
 
 <!-- Launch the other files to start remote nodes -->
-<!-- <include file="$(find ramp_launch)/launch/full_one_ob/phidget_sensors.launch" />  -->
-<!-- <include file="$(find ramp_launch)/launch/full_one_ob/motors.launch" /> -->
+<include file="$(find ramp_launch)/launch/full_one_ob/phidget_sensors.launch" />
+<include file="$(find ramp_launch)/launch/full_one_ob/motors.launch" />
 
 
 </launch>

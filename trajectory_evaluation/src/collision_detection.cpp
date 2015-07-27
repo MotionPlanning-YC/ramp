@@ -50,7 +50,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
 {
   //ROS_INFO("In CollisionDetection::query"); 
   //ROS_INFO("trajectory.points.size(): %i", (int)trajectory_.trajectory.points.size());
-  ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.trajectory.points.size());
+  //ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.trajectory.points.size());
   //ROS_INFO("ob_trajectory: %s", utility_.toString(ob_trajectory).c_str());
 
   double t_start = trajectory_.t_start.toSec();
@@ -89,7 +89,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     i_stop = trajectory_.i_knotPoints.at(2);
   }
   
-  ROS_INFO("i_stop: %i", i_stop);
+  //ROS_INFO("i_stop: %i", i_stop);
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
   float radius = 0.33f;

@@ -63,8 +63,8 @@ void Planner::setOb_T_w_b()
   else 
   {
     ROS_INFO("Setting obstacle pose as (3.5,0,1.9635)");
-    tf::Vector3 pos(3.5f, 0.f, 0.f);
-    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(2.00457));
+    tf::Vector3 pos(2.f, 3.5f, 0.f);
+    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(-PI/2.f));
     ob_T_w_b_.setOrigin(pos);
   }
 } // End setOb_T_w_b
@@ -271,13 +271,13 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
 void Planner::sensingCycleCallback(const ramp_msgs::Obstacle& msg)
 {
   ROS_INFO("In sensingCycleCallback");
-  //ROS_INFO("msg: %s", utility_.toString(msg).c_str());
+  ROS_INFO("msg: %s", utility_.toString(msg).c_str());
 
   ros::Time start = ros::Time::now();
 
   ob_trajectory_ = getPredictedTrajectory(msg);
   //ROS_INFO("Time to get obstacle trajectory: %f", (ros::Time::now() - start).toSec());
-  //ROS_INFO("ob_trajectory_: %s", ob_trajectory_.toString().c_str());
+  ROS_INFO("ob_trajectory_: %s", ob_trajectory_.toString().c_str());
 
   ros::Time s = ros::Time::now();
   population_       = evaluatePopulation(population_);
@@ -288,7 +288,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::Obstacle& msg)
   
   
   movingOn_ = evaluateTrajectory(movingOn_);
-  ROS_INFO("movingOn_ Feasible: %s", movingOn_.msg_.feasible ? "True" : "False");
+  //ROS_INFO("movingOn_ Feasible: %s", movingOn_.msg_.feasible ? "True" : "False");
   
   trajectory_msgs::JointTrajectoryPoint ob = ob_trajectory_.msg_.trajectory.points.at(0);
   double dist = utility_.positionDistance(ob.positions, latestUpdate_.msg_.positions);
@@ -304,7 +304,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::Obstacle& msg)
   else 
   {
     ROS_INFO("No imminent collision, dist: %f", dist);
-    ROS_INFO("movingOn_: %s", movingOn_.toString().c_str());
+    //ROS_INFO("movingOn_: %s", movingOn_.toString().c_str());
     h_parameters_.setImminentCollision(false);
   }
 
@@ -319,6 +319,8 @@ void Planner::sensingCycleCallback(const ramp_msgs::Obstacle& msg)
   {
     sendPopulation(population_);
   }
+
+  ROS_INFO("Exiting sensingCycleCallback");
 }
 
 
@@ -1214,7 +1216,7 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
                                      &Planner::controlCycleCallback, this);
   controlCycleTimer_.stop();
 
-  planningCycle_      = ros::Duration(1./t_pc_rate);
+  planningCycle_      = ros::Duration(1.f/t_pc_rate);
   planningCycleTimer_ = h.createTimer(ros::Duration(planningCycle_), 
                                       &Planner::planningCycleCallback, this);
   planningCycleTimer_.stop();
@@ -1694,8 +1696,8 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
 
   if(to.msg_.trajectory.points.size() == 0)
   {
-    ROS_WARN("to.msg_.trajectory.points.size() == 0");
-    ROS_WARN("Returning false");
+    //ROS_WARN("to.msg_.trajectory.points.size() == 0");
+    //ROS_WARN("Returning false");
     return false;
   }
 
@@ -1716,9 +1718,8 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   if(fabs(utility_.findDistanceBetweenAngles( 
         ms_startTrans.msg_.positions.at(2), ms_endOfMovingOn.msg_.positions.at(2))) > 0.12 ) 
   {
-    ROS_WARN("Cannot plan a transition curve!");
-    ROS_WARN("startTrans: %s\nendOfMovingOn: %s", ms_startTrans.toString().c_str(), 
-        ms_endOfMovingOn.toString().c_str());
+    //ROS_WARN("Cannot plan a transition curve!");
+    //ROS_WARN("startTrans: %s\nendOfMovingOn: %s", ms_startTrans.toString().c_str(), ms_endOfMovingOn.toString().c_str());
     return false;
   }
 
@@ -1763,9 +1764,8 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   if(fabs(utility_.findDistanceBetweenAngles( 
         ms_startTrans.msg_.positions.at(2), ms_endOfMovingOn.msg_.positions.at(2))) > 0.12 ) 
   {
-    ROS_WARN("Cannot plan a transition curve!");
-    ROS_WARN("startTrans: %s\nendOfMovingOn: %s", ms_startTrans.toString().c_str(), 
-        ms_endOfMovingOn.toString().c_str());
+    //ROS_WARN("Cannot plan a transition curve!");
+    //ROS_WARN("startTrans: %s\nendOfMovingOn: %s", ms_startTrans.toString().c_str(), ms_endOfMovingOn.toString().c_str());
     return false;
   }
 
@@ -1778,8 +1778,8 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
     // Check duplicate
     if(utility_.positionDistance(a.msg_.positions, b.msg_.positions) < 0.1)
     {
-      ROS_WARN("Cannot plan a transition curve because there are duplicate segment points");
-      ROS_WARN("%s\n%s", a.toString().c_str(), b.toString().c_str());
+      //ROS_WARN("Cannot plan a transition curve because there are duplicate segment points");
+      //ROS_WARN("%s\n%s", a.toString().c_str(), b.toString().c_str());
       return false;
     }
 
@@ -1821,7 +1821,7 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   //ROS_INFO("Theta 1: %f Theta 2: %f", thetaS1, thetaS2);
   if( fabs(utility_.findDistanceBetweenAngles(thetaS1, thetaS2)) < 0.13 )
   {
-    ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
+    //ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
     return true;
   }
 
@@ -1997,10 +1997,9 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
   if(fabs(utility_.findDistanceBetweenAngles( 
         ms_startTrans.msg_.positions.at(2), ms_endOfMovingOn.msg_.positions.at(2))) > 0.12 ) 
   {
-    ROS_WARN("Cannot plan a transition curve!");
-    ROS_WARN("Robot does not have correct orientation to move on first segment of a transition curve");
-    ROS_WARN("startTrans: %s\nendOfMovingOn: %s", ms_startTrans.toString().c_str(), 
-        ms_endOfMovingOn.toString().c_str());
+    //ROS_WARN("Cannot plan a transition curve!");
+    //ROS_WARN("Robot does not have correct orientation to move on first segment of a transition curve");
+    //ROS_WARN("startTrans: %s\nendOfMovingOn: %s", ms_startTrans.toString().c_str(), ms_endOfMovingOn.toString().c_str());
     RampTrajectory blank;
     return blank;
   }
@@ -2035,7 +2034,7 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
   {
     i_goal = 2;
   }
-  ROS_INFO("i_goal: %i", i_goal);
+  //ROS_INFO("i_goal: %i", i_goal);
  
   MotionState g(trj_target.msg_.trajectory.points.at(trj_target.msg_.i_knotPoints.at(i_goal)));
   segmentPoints.push_back(g);
@@ -2060,8 +2059,8 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
   ////ROS_INFO("Theta 1: %f Theta 2: %f", thetaS1, thetaS2);
   if( fabs(utility_.findDistanceBetweenAngles(thetaS1, thetaS2)) < 0.13 )
   {
-    ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
-    ROS_WARN("Removing the following point at index 1 of the Path: %s", p.at(1).toString().c_str());
+    //ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
+    //ROS_WARN("Removing the following point at index 1 of the Path: %s", p.at(1).toString().c_str());
     p.all_.erase(p.all_.begin()+1);
   }
   /*else
@@ -2082,7 +2081,7 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
   RampTrajectory trj_transition = requestTrajectory(tr);
 
   ////ROS_INFO("trj_transition: %s", trj_transition.toString().c_str());
-  ROS_INFO("Exiting Planner::getTransitionTrajectory");
+  //ROS_INFO("Exiting Planner::getTransitionTrajectory");
   return trj_transition;
 } // End getTransitionTrajectory
 

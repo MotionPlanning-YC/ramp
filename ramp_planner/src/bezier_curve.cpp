@@ -19,7 +19,7 @@ void BezierCurve::init(const std::vector<MotionState> segment_points, const doub
 
   ms_max_.msg_.velocities.push_back(0.33);
   ms_max_.msg_.velocities.push_back(0.33);
-  ms_max_.msg_.velocities.push_back(3.f*PI/4.f);
+  ms_max_.msg_.velocities.push_back(PI/2.f);
   ms_max_.msg_.accelerations.push_back(1);
   ms_max_.msg_.accelerations.push_back(1);
   ms_max_.msg_.accelerations.push_back(3.f*PI/4.f);
@@ -49,7 +49,7 @@ const bool BezierCurve::verify() const {
   //ROS_INFO("In BezierCurve::verify()");
 
   double v_max = 0.467;
-  double w_max = 3*PI/4;
+  double w_max = PI/2.f;
 
   double u_dot_max = getUDotMax(u_dot_0_);
   if(u_dot_max < 0.0001)
