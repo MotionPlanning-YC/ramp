@@ -52,11 +52,11 @@ const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const
   
   float resolutionRate = 0.1;
   int i = ceil((t/resolutionRate));
-  ROS_INFO("t: %f resolutionRate: %f i: %i size: %i", 
+  /*ROS_INFO("t: %f resolutionRate: %f i: %i size: %i", 
       t, 
       resolutionRate, 
       i, 
-      (int)msg_.trajectory.points.size());
+      (int)msg_.trajectory.points.size());*/
 
   if( i >= msg_.trajectory.points.size() ) {
     return msg_.trajectory.points.at( msg_.trajectory.points.size()-1 );
@@ -113,7 +113,6 @@ const RampTrajectory RampTrajectory::getSubTrajectory(const float t) const {
       t_stop = msg_.trajectory.points.at( msg_.trajectory.points.size()-1 ).time_from_start.toSec();
     }
 
-    ROS_INFO("t: %f t_stop: %f", t, t_stop);
 
     uint8_t i_kp = 0;
     for(float i=0.f;i<=t_stop+0.0001;i+=0.100001f) 
@@ -146,7 +145,7 @@ const RampTrajectory RampTrajectory::getSubTrajectory(const float t) const {
 
 const RampTrajectory RampTrajectory::getSubTrajectoryPost(const double t) const
 {
-  ROS_INFO("In RampTrajectory::getSubTrajectoryPost");
+  //ROS_INFO("In RampTrajectory::getSubTrajectoryPost");
   RampTrajectory rt;
 
   double t_start = t;
@@ -217,8 +216,8 @@ const RampTrajectory RampTrajectory::getSubTrajectoryPost(const double t) const
     rt.path_ = temp;*/
   } // end else
 
-  ROS_INFO("Returning sub-trajectory: %s", rt.toString().c_str());
-  ROS_INFO("Exiting RampTrajectory::getSubTrajectoryPost");
+  //ROS_INFO("Returning sub-trajectory: %s", rt.toString().c_str());
+  //ROS_INFO("Exiting RampTrajectory::getSubTrajectoryPost");
   return rt;
 }
 
@@ -230,7 +229,7 @@ const RampTrajectory RampTrajectory::getSubTrajectoryPost(const double t) const
  */
 const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, const uint8_t kp) const 
 {
-  ROS_INFO("In RampTrajectory::concatenate");
+  //ROS_INFO("In RampTrajectory::concatenate");
   //ROS_INFO("kp: %i", kp);
   RampTrajectory result = clone();
   uint8_t c_kp = kp+1;
@@ -293,10 +292,10 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
       //utility_.findDistanceBetweenAngles(last.positions.at(2), first.positions.at(2)) < 0.01 &&
       utility_.findDistanceBetweenAngles(last.positions.at(2), endOfFirstSegment.positions.at(2)) < 0.01)
   {
-    ROS_INFO("Last segment of this and first segment of traj have the same orientation");
+    /*ROS_INFO("Last segment of this and first segment of traj have the same orientation");
     ROS_INFO("last.positions.at(2): %f first.positions.at(2): %f", 
         last.positions.at(2), first.positions.at(2));
-    ROS_INFO("Removing last knotpoint of this trajectory");
+    ROS_INFO("Removing last knotpoint of this trajectory");*/
     result.msg_.i_knotPoints.pop_back();
   }
 
@@ -345,8 +344,8 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
   }
 
 
-  ROS_INFO("result: %s", result.toString().c_str());
-  ROS_INFO("Exiting RampTrajectory::concatenate");
+  //ROS_INFO("result: %s", result.toString().c_str());
+  //ROS_INFO("Exiting RampTrajectory::concatenate");
   return result;
 }
 
@@ -372,7 +371,7 @@ void RampTrajectory::offsetPositions(const MotionState diff)
       msg_.trajectory.points.at(i).positions.at(j) = temp.msg_.positions.at(j);
     }
   } // end outter for
-  ROS_INFO("Done offsetting points");
+  //ROS_INFO("Done offsetting points");
 
   if(path_.size() > 0)
   {
@@ -382,7 +381,6 @@ void RampTrajectory::offsetPositions(const MotionState diff)
   {
     ROS_WARN("path_.size() == 0, not touching it");
   }
-  ROS_INFO("Done offsetting path");
 
 
   if(msg_.curves.size() > 0 && path_.size() < 3)

@@ -13,6 +13,7 @@
 #include "ramp_msgs/RampTrajectory.h"
 #include "ramp_msgs/Path.h"
 #include "ramp_msgs/Obstacle.h"
+#include "std_msgs/Bool.h"
 #include <tf/transform_datatypes.h>
 #include <ros/console.h>
 

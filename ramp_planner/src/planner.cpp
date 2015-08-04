@@ -293,20 +293,20 @@ void Planner::sensingCycleCallback(const ramp_msgs::Obstacle& msg)
   trajectory_msgs::JointTrajectoryPoint ob = ob_trajectory_.msg_.trajectory.points.at(0);
   double dist = utility_.positionDistance(ob.positions, latestUpdate_.msg_.positions);
   
-  if(!movingOn_.msg_.feasible &&
+  /*if(!movingOn_.msg_.feasible &&
       dist < 0.7f)
   {
     ROS_WARN("Imminent Collision Robot: %i dist: %f", id_, dist);
     ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.toString().c_str());
-    h_parameters_.setImminentCollision(true); 
+    //h_parameters_.setImminentCollision(true); 
   }
 
   else 
   {
     ROS_INFO("No imminent collision, dist: %f", dist);
     //ROS_INFO("movingOn_: %s", movingOn_.toString().c_str());
-    h_parameters_.setImminentCollision(false);
-  }
+    //h_parameters_.setImminentCollision(false);
+  }*/
 
 
   sc_durs_.push_back( ros::Time::now() - start );
@@ -1091,29 +1091,25 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
     
   ROS_WARN("latestUpdate_: %s\nob_point: %s", latestUpdate_.toString().c_str(), utility_.toString(ob).c_str());
 
-  if(!transPopulation_.getBest().msg_.feasible &&
-      dist < 0.7f)
+  std_msgs::Bool ic;
+  //if(!transPopulation_.getBest().msg_.feasible &&
+  if(!movingOn_.msg_.feasible &&
+      dist < 0.5f)
   {
     ROS_WARN("Imminent Collision Robot: %i dist: %f", id_, dist);
     ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.toString().c_str());
-    h_parameters_.setImminentCollision(true); 
+    
+    ic.data = true;
   }
 
-
-  /*if(!transPopulation_.getBest().msg_.feasible && 
-      (transPopulation_.getBest().msg_.t_firstCollision.toSec() < controlCycle_.toSec())) 
-  {
-    ROS_WARN("Imminent Collision Robot: %i t_firstCollision: %f", id_, 
-        transPopulation_.getBest().msg_.t_firstCollision.toSec());
-    ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.toString().c_str());
-    h_parameters_.setImminentCollision(true); 
-  }*/
   else 
   {
     ROS_INFO("No imminent collision, dist: %f", dist);
     ROS_INFO("startPlanning: %s", startPlanning_.toString().c_str());
-    h_parameters_.setImminentCollision(false);
+    ic.data = false;
   }
+    
+  h_control_->sendIC(ic);
 
   //std::cout<<"\nAfter imminentCollisionCycle_\n";
 }
@@ -1679,7 +1675,7 @@ const RampTrajectory Planner::computeFullSwitch(const RampTrajectory from, const
   // the holonomic trajectory
   else
   {
-    ROS_WARN("A switch was not possible, returning \"to\" trajectory: %s", to.toString().c_str());
+    //ROS_WARN("A switch was not possible, returning \"to\" trajectory: %s", to.toString().c_str());
     return to;
   }
 
@@ -2767,7 +2763,7 @@ void Planner::doControlCycle()
   // Set the bestT
   RampTrajectory bestT = transPopulation_.getBest();
 
-  ////ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
+  ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
   MotionState diff = bestT.path_.at(0).motionState_.subtractPosition(latestUpdate_);
   ////ROS_INFO("diff: %s", diff.toString().c_str());
 
@@ -3233,6 +3229,8 @@ void Planner::go()
   population_at_cc_       = population_;
   transPopulation_at_cc_  = transPopulation_;
 
+  t_start_ = ros::Time::now();
+
   // Start the planning cycles
   planningCycleTimer_.start();
     
@@ -3258,7 +3256,7 @@ void Planner::go()
   
   // Start the control cycles
   controlCycleTimer_.start();
-  //imminentCollisionTimer_.start();
+  imminentCollisionTimer_.start();
 
   //ROS_INFO("CCs started");
 

@@ -34,7 +34,7 @@ int main(int argc, char** argv)
   MotionState g;
   g.msg_.positions.push_back(2.f);
   g.msg_.positions.push_back(0.f);
-  g.msg_.positions.push_back(-PI/2.f);
+  g.msg_.positions.push_back(-PI/2);
   g.msg_.velocities.push_back(0.f);
   g.msg_.velocities.push_back(0.f);
   g.msg_.velocities.push_back(0.f);
@@ -77,7 +77,9 @@ int main(int argc, char** argv)
     ros::spinOnce();
   }
 
-  std::cout<<"\nSending Trajectory "<<u.toString(tr.response.trajectory)<<"\n";
+  ROS_INFO("Publishing trajectory: %s", u.toString(tr.response.trajectory).c_str());
+  pub_traj.publish(tr.response.trajectory);
+  pub_traj.publish(tr.response.trajectory);
   pub_traj.publish(tr.response.trajectory);
   pub_traj.publish(tr.response.trajectory);
   pub_traj.publish(tr.response.trajectory);

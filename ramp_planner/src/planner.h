@@ -393,6 +393,8 @@ class Planner {
     uint8_t pc_switch_;
 
 
+    ros::Time t_start_;
+
 
     std::vector<ros::Duration> adapt_durs_;
     std::vector<ros::Duration> trans_durs_;

@@ -5,6 +5,7 @@ const std::string MobileRobot::TOPIC_STR_PHIDGET_MOTOR="PhidgetMotor";
 const std::string MobileRobot::TOPIC_STR_ODOMETRY="odometry";
 const std::string MobileRobot::TOPIC_STR_UPDATE="update";
 const std::string MobileRobot::TOPIC_STR_TWIST="twist";
+const std::string MobileRobot::TOPIC_STR_IC="imminent_collision";
 const float BASE_WIDTH=0.2413;
 
 const float timeNeededToTurn = 2.5; 
@@ -104,6 +105,13 @@ void MobileRobot::odomCb(const nav_msgs::Odometry& msg) {
   prev_t_ = ros::Time::now();
 } // End updateState
 
+
+void MobileRobot::imminentCollisionCb(const std_msgs::Bool msg)
+{
+  ROS_INFO("In MobileRobot::imminentCollisionCb");
+  ROS_INFO("msg: %s", msg.data ? "True" : "False");
+  imminent_coll_ = msg.data;
+}
 
 
 
@@ -310,11 +318,14 @@ void MobileRobot::moveOnTrajectory()
   ros::Rate r(20);
   ros::Rate r_ic(100);
 
+  ros::Time s;
+
   // Execute the trajectory
   while( (num_traveled_+1) < num_) 
   {
-    //ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
+    ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
     //ROS_INFO("At state: %s", utility_.toString(motion_state_).c_str());
+    s = ros::Time::now();
     restart_ = false;
  
 
@@ -322,7 +333,7 @@ void MobileRobot::moveOnTrajectory()
     if(check_imminent_coll_)
     {
       ros::Time t_startIC = ros::Time::now();
-      while(checkImminentCollision()) 
+      while(imminent_coll_) 
       {
         sendTwist(zero_twist_);
         r_ic.sleep();
@@ -330,7 +341,7 @@ void MobileRobot::moveOnTrajectory()
       }
       t_immiColl_ += ros::Time::now() - t_startIC;
     }
-    //std::cout<<"\nt_immiColl: "<<t_immiColl_;
+    ROS_INFO("t_immiColl_: %f", t_immiColl_.toSec());
 
     
     // If a new trajectory was received, restart the outer while 
@@ -341,7 +352,7 @@ void MobileRobot::moveOnTrajectory()
 
     // Move to the next point
     ros::Time g_time = end_times.at(num_traveled_) + t_immiColl_;
-    while(ros::ok() && ros::Time::now() < g_time && !checkImminentCollision()) 
+    while(ros::ok() && ros::Time::now() < g_time) 
     {
       twist_.linear.x   = speeds_linear_.at(num_traveled_);
       twist_.angular.z  = speeds_angular_.at(num_traveled_);
@@ -382,6 +393,8 @@ void MobileRobot::moveOnTrajectory()
 
     // Spin once to check for updates in the trajectory
     ros::spinOnce();
+
+    ROS_INFO("Point took %f", (ros::Time::now() - s).toSec());
   } // end while
 
   // Check that we moved on a trajectory

@@ -1300,7 +1300,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
           } // end for
 
 
-          if(timeFromStart_ < timeCutoff_) {
+          if(timeFromStart_ < timeCutoff_) 
+          {
             res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
           }
 
@@ -1346,7 +1347,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         } // end while
 
         // Once we reached the target, we set that the latest point is a knotpoint
-        if(timeFromStart_ < timeCutoff_) {
+        if(timeFromStart_ < timeCutoff_) 
+        {
           res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
         }
       } // end if different points
@@ -1511,9 +1513,12 @@ const bool MobileBase::lastPointClosest(const ramp_msgs::RampTrajectory traj) co
 // Returns true if the target has been reached
 bool MobileBase::finalStateReached() const {
   
-  if(timeFromStart_ >= timeCutoff_) {
+  if(timeFromStart_ >= timeCutoff_) 
+  {
     ROS_WARN("timeFromStart_ > timeCutoff_ (%f)", timeCutoff_.toSec());
     ROS_WARN("Check this trajectory request");
+    ROS_WARN("reflexxesData_.resultValue: %i", reflexxesData_.resultValue);
+    ROS_WARN("Request: %s", utility_.toString(req_).c_str());
   }
  
   return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED)  

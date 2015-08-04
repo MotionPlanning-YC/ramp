@@ -9,6 +9,7 @@
 #include "geometry_msgs/Twist.h"
 #include "tf/transform_datatypes.h"
 #include "ramp_msgs/MotionState.h"
+#include "std_msgs/Bool.h"
 #include <math.h>
 
 class MobileRobot {
@@ -24,6 +25,7 @@ class MobileRobot {
     void moveOnTrajectoryRot(const ramp_msgs::RampTrajectory traj, bool simulation);
     void odomCb(const nav_msgs::Odometry& msg);
     void updateTrajectory(const ramp_msgs::RampTrajectory msg); 
+    void imminentCollisionCb(const std_msgs::Bool msg); 
     void updateCallback(const ros::TimerEvent&);
     void sendTwist(const geometry_msgs::Twist twist) const;
     void controlCycle(geometry_msgs::Twist twist, ros::Time end_time, ros::Rate r);
@@ -36,6 +38,7 @@ class MobileRobot {
     ros::Publisher                    pub_cmd_vel_;
     ros::Publisher                    pub_update_;
     ros::Subscriber                   sub_odometry_;
+    ros::Subscriber                   sub_imminent_collision_;
     ramp_msgs::MotionState            motion_state_; 
     geometry_msgs::Twist              velocity_;
     ramp_msgs::RampTrajectory         trajectory_;
@@ -43,6 +46,7 @@ class MobileRobot {
     double                            initial_theta_;
 
     bool                              check_imminent_coll_;
+    bool                              imminent_coll_;
     bool                              sim_;
     
     // static const members
@@ -50,6 +54,7 @@ class MobileRobot {
     static const std::string  TOPIC_STR_ODOMETRY;
     static const std::string  TOPIC_STR_UPDATE;
     static const std::string  TOPIC_STR_TWIST;
+    static const std::string  TOPIC_STR_IC;
     static const int          ACCELERATION_CONSTANT = 50;
 
   private:

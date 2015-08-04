@@ -3,6 +3,7 @@
 #include "ros/ros.h"
 #include "ramp_msgs/RampTrajectory.h"
 #include "ramp_msgs/Population.h"
+#include "std_msgs/Bool.h"
 
 class ControlHandler {
   public:
@@ -10,11 +11,13 @@ class ControlHandler {
 
     void send(ramp_msgs::RampTrajectory bestTrajec);
     void sendPopulation(ramp_msgs::Population population);
+    void sendIC(std_msgs::Bool value);
 
   private:
     ros::NodeHandle handle_;
     ros::Publisher pub_bestTrajec_;
     ros::Publisher pub_population_;
+    ros::Publisher pub_imminent_collision_;
 };
 
 #endif
