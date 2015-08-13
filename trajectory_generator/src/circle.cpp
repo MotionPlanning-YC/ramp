@@ -58,7 +58,7 @@ void Circle::init(const ramp_msgs::MotionState s) {
   // This is always -alpha, why?
   initCircleTheta_ = utility_.findAngleFromAToB(center_.positions, start_.positions);
 
-  timeCutoff_ = ros::Duration(10);
+  timeCutoff_ = ros::Duration(7.5);
   initReflexxes();
   //std::cout<<"\nLeaving init\n";
 }

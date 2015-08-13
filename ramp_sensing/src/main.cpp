@@ -2,11 +2,12 @@
 #include "ros/ros.h"
 #include "nav_msgs/Odometry.h"
 #include "tf/transform_datatypes.h"
+#include "ramp_msgs/ObstacleList.h"
 #include "obstacle.h"
 
 
 ros::Publisher pub_obj;
-//ramp_msgs::ObstacleList list;
+ramp_msgs::ObstacleList list;
 Obstacle obstacle;
 
 /** Get the other robot's current odometry information and update the dynamicObject */
@@ -45,7 +46,7 @@ int main(int argc, char** argv)
   pub_obj = handle.advertise<ramp_msgs::Obstacle>("obstacles", 1000);
 
   //Timers
-  ros::Timer timer = handle.createTimer(ros::Duration(1.f / 3.f), publishList);
+  ros::Timer timer = handle.createTimer(ros::Duration(1.f / 5.f), publishList);
   //timer.start();
    
 

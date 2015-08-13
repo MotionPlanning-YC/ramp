@@ -15,3 +15,8 @@ planning_cycle_rate: 5
 fixed_control_cycle_rate: 2
 
 error_reduction: true
+
+num_of_obstacles: 2
+
+obstacle_topics: ['robot_0', 'robot_1']
+

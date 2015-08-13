@@ -165,7 +165,7 @@ class Planner {
     const ramp_msgs::RampTrajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob) const;
     const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const MotionType mt) const;
     
-    void sensingCycleCallback     (const ramp_msgs::Obstacle& msg);
+    void sensingCycleCallback     (const ramp_msgs::ObstacleList& msg);
     void updateCallback(const ramp_msgs::MotionState& msg);
 
     /** Data */
@@ -387,6 +387,9 @@ class Planner {
     
     // Stop things for debugging
     bool stop_;
+
+
+    bool moving_on_coll_;
 
 
     ros::Time t_prevCC_;

@@ -219,7 +219,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   }
 
 
-  printVectors();
+  //printVectors();
 } // End calculateSpeedsAndTime
 
 
@@ -247,10 +247,10 @@ void MobileRobot::sendTwist(const geometry_msgs::Twist t) const
   pub_twist_.publish(t); 
 
   // If we have the simulation up, publish to cmd_vel
-  if(sim_) 
-  {
+  //if(sim_) 
+  //{
     pub_cmd_vel_.publish(t);
-  }
+  //}
 }
 
 
@@ -323,7 +323,7 @@ void MobileRobot::moveOnTrajectory()
   // Execute the trajectory
   while( (num_traveled_+1) < num_) 
   {
-    ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
+    //ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
     //ROS_INFO("At state: %s", utility_.toString(motion_state_).c_str());
     s = ros::Time::now();
     restart_ = false;
@@ -335,13 +335,14 @@ void MobileRobot::moveOnTrajectory()
       ros::Time t_startIC = ros::Time::now();
       while(imminent_coll_) 
       {
+        ROS_ERROR("Imminent Collision Exists, Stopping robot");
         sendTwist(zero_twist_);
         r_ic.sleep();
         ros::spinOnce();
       }
       t_immiColl_ += ros::Time::now() - t_startIC;
     }
-    ROS_INFO("t_immiColl_: %f", t_immiColl_.toSec());
+    //ROS_INFO("t_immiColl_: %f", t_immiColl_.toSec());
 
     
     // If a new trajectory was received, restart the outer while 
@@ -367,10 +368,10 @@ void MobileRobot::moveOnTrajectory()
         float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
         //ROS_INFO("actual_theta: %f orientations[%i]: %f dist: %f", actual_theta, num_traveled_, 
             //orientations_.at(num_traveled_), dist);
-        //twist_.angular.z = dist;
+        twist_.angular.z = dist;
       }
 
-      ROS_INFO("twist.linear.x: %f twist.angular.z: %f", twist_.linear.x, twist_.angular.z);
+      //ROS_INFO("twist.linear.x: %f twist.angular.z: %f", twist_.linear.x, twist_.angular.z);
 
       // Send the twist_message to move the robot
       sendTwist();
@@ -394,7 +395,7 @@ void MobileRobot::moveOnTrajectory()
     // Spin once to check for updates in the trajectory
     ros::spinOnce();
 
-    ROS_INFO("Point took %f", (ros::Time::now() - s).toSec());
+    //ROS_INFO("Point took %f", (ros::Time::now() - s).toSec());
   } // end while
 
   // Check that we moved on a trajectory

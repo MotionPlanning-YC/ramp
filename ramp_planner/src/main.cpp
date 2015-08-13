@@ -18,11 +18,14 @@ bool                seedPopulation;
 bool                errorReduction;
 double              t_cc_rate;
 double              t_pc_rate;
+int                 num_obs;
+std::vector<std::string> ob_topics;
 
 
 
 // Initializes a vector of Ranges that the Planner is initialized with
-void initDOF(const std::vector<double> dof_min, const std::vector<double> dof_max) {
+void initDOF(const std::vector<double> dof_min, const std::vector<double> dof_max) 
+{
   
   for(unsigned int i=0;i<dof_min.size();i++) {
     Range temp(dof_min.at(i), dof_max.at(i));
