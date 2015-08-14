@@ -124,11 +124,16 @@ const double Utility::findDistanceBetweenAngles(const double a1, const double a2
 
 
 const double Utility::displaceAngle(const double a1, double a2) const {
+  ROS_INFO("In Utility::displaceAngle");
+  ROS_INFO("a1: %f a2: %f", a1, a2);
 
   a2 = fmodf(a2, 2*PI);
 
-  if(a2 > PI) {
+  if(a2 > PI) 
+  {
+    ROS_INFO("Changing a2 Before: %f", a2);
     a2 = fmodf(a2,PI) - PI;
+    ROS_INFO("Changing a2 After: %f", a2);
   }
 
   return findDistanceBetweenAngles(-a1, a2);
@@ -348,3 +353,18 @@ const std::string Utility::toString(const ramp_msgs::Obstacle ob) const
 
   return result.str();
 }
+
+const std::string Utility::toString(const ramp_msgs::ObstacleList ob) const
+{
+
+  std::ostringstream result;
+
+  for(int i=0;i<ob.obstacles.size();i++)
+  {
+    result<<"\nObstacle "<<i<<": "<<toString(ob.obstacles.at(i));      
+  }
+
+  return result.str();
+}
+
+

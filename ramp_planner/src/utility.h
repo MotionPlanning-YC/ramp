@@ -1,6 +1,7 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <queue>
 #include <sstream>
@@ -51,6 +52,7 @@ class Utility {
 
     
     const std::string toString(const ramp_msgs::Obstacle ob) const;
+    const std::string toString(const ramp_msgs::ObstacleList ob) const;
     const std::string toString(const ramp_msgs::MotionState mp) const;
     const std::string toString(const ramp_msgs::KnotPoint kp) const;
     const std::string toString(const ramp_msgs::Path path) const;

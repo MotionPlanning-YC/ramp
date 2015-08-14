@@ -16,7 +16,6 @@ class Obstacle
 
     //Hold odometry information for t and t-1
     nav_msgs::Odometry odom_t;
-    nav_msgs::Odometry odom_t_prev;
 
     //Time of last update
     ros::Time last_updated_;

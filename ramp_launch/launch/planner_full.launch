@@ -19,6 +19,9 @@
 <!-- Trajectory Visualization -->
 <node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" /> 
 
+<!-- Sensing -->
+<node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="screen" />
+
 <!-- Planner -->
 <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" /> 
 

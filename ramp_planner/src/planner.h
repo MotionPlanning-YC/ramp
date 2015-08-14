@@ -83,11 +83,6 @@ class Planner {
     // Cycle to check imminent collision
     ros::Timer imminentCollisionTimer_;
     ros::Duration imminentCollisionCycle_;
-
-
-    // Transformation of the initial pose of the robot 
-    // We use this to transform the odometry updates into world CS
-    tf::Transform T_w_odom_;
    
     
     // Robot ID
@@ -114,6 +109,7 @@ class Planner {
               const std::vector<Range>  r,                
               const int                 population_size, 
               const bool                sub_populations,  
+              const std::vector<tf::Transform> ob_T_odoms,
               const int                 gens_before_cc=0,
               const double              t_pc_rate=2.,
               const double              t_fixed_cc=2.,
@@ -156,14 +152,14 @@ class Planner {
     // Sets the m_i vector
     const std::vector<MotionState> setMi(const RampTrajectory trj_current) const;
 
-    void setOb_T_w_b();
-    tf::Transform ob_T_w_b_;
-    RampTrajectory ob_trajectory_;
+    void setOb_T_w_odom();
+    std::vector<tf::Transform> ob_T_w_odom_;
+    std::vector<RampTrajectory> ob_trajectory_;
 
 
     const MotionType findMotionType(const ramp_msgs::Obstacle ob) const;
-    const ramp_msgs::RampTrajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob) const;
-    const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const MotionType mt) const;
+    const ramp_msgs::RampTrajectory getPredictedTrajectory(const ramp_msgs::Obstacle ob, const tf::Transform tf) const;
+    const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const tf::Transform T_w_odom, const MotionType mt) const;
     
     void sensingCycleCallback     (const ramp_msgs::ObstacleList& msg);
     void updateCallback(const ramp_msgs::MotionState& msg);
@@ -397,6 +393,9 @@ class Planner {
 
 
     ros::Time t_start_;
+
+
+    tf::Transform T_w_odom_;
 
 
     std::vector<ros::Duration> adapt_durs_;

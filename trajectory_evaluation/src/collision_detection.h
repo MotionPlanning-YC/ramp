@@ -35,7 +35,6 @@ class CollisionDetection {
 
 
     /***** Data Members ****/
-    ramp_msgs::Obstacle   obstacle_;
     ramp_msgs::RampTrajectory trajectory_;
     std::vector<ramp_msgs::RampTrajectory> obstacle_trjs_;
   

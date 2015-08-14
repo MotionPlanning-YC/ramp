@@ -18,5 +18,5 @@ error_reduction: true
 
 num_of_obstacles: 2
 
-obstacle_topics: ['robot_0', 'robot_1']
+obstacle_topics: ['/robot_1/odom', '/robot_2/odom']
 

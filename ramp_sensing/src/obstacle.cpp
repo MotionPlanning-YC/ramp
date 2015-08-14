@@ -4,13 +4,11 @@ Obstacle::Obstacle() {
   nav_msgs::Odometry temp;
   temp.pose.pose.orientation.w = 1.;
   odom_t      = temp;
-  odom_t_prev = temp;
 }
 
 Obstacle::Obstacle(const nav_msgs::Odometry o) 
 {
   odom_t      = o;
-  odom_t_prev = o;
 }
 
 Obstacle::~Obstacle() {}
@@ -24,7 +22,6 @@ void Obstacle::update(const nav_msgs::Odometry o)
       tf::getYaw(o.pose.pose.orientation));*/
 
   //Set new odometry infomation
-  odom_t_prev = odom_t;
   odom_t      = o;
 
   //Update time
@@ -39,7 +36,6 @@ const ramp_msgs::Obstacle Obstacle::buildObstacleMsg()
   
 
   result.odom_t      = odom_t;
-  result.odom_t_prev = odom_t_prev;
   
   /*ROS_INFO("Building Obstacle msg:\nPosition: (%f, %f, %f)", 
       result.odom_t.pose.pose.position.x, 

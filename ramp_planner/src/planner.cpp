@@ -48,25 +48,25 @@ Planner::~Planner()
 
 //TODO: Get this from parameters...
 /** Transformation matrix of obstacle robot from base frame to world frame*/
-void Planner::setOb_T_w_b() 
+void Planner::setOb_T_w_odom() 
 {
+  
+  // Obstacle 1
+  tf::Transform temp;
+  tf::Vector3 pos(3.5f, 3.5, 0.f);
+  temp.setRotation(tf::createQuaternionFromYaw(-3.f*PI/4.f));
+  temp.setOrigin(pos);
 
-  // robot 1 needs robot 0's pose
-  if(id_ == 1) 
-  {
-    tf::Vector3 pos(0., 1.5, 0);
-    ob_T_w_b_.setOrigin(pos);
-    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(0));
-  }
+  ob_T_w_odom_.push_back(temp);
 
-  // robot 0 needs robot 1's pose
-  else 
-  {
-    tf::Vector3 pos(3.5f, 3.5, 0.f);
-    ob_T_w_b_.setRotation(tf::createQuaternionFromYaw(-3.f*PI/4.f));
-    ob_T_w_b_.setOrigin(pos);
-  }
-} // End setOb_T_w_b
+ 
+  // Obstacle 2
+  tf::Vector3 pos_two(0.f, 3.5, 0.f);
+  temp.setOrigin(pos_two);
+  temp.setRotation(tf::createQuaternionFromYaw(-3.f*PI/4.f));
+  
+  ob_T_w_odom_.push_back(temp);
+} // End setOb_T_w_odom
 
 
 
@@ -125,7 +125,7 @@ const MotionType Planner::findMotionType(const ramp_msgs::Obstacle ob) const
 
 /** This method returns the predicted trajectory for an obstacle for the future duration d 
  * TODO: Remove Duration parameter and make the predicted trajectory be computed until robot reaches bounds of environment */
-const ramp_msgs::RampTrajectory Planner::getPredictedTrajectory(const ramp_msgs::Obstacle ob) const 
+const ramp_msgs::RampTrajectory Planner::getPredictedTrajectory(const ramp_msgs::Obstacle ob, const tf::Transform tf) const 
 {
   ramp_msgs::RampTrajectory result;
 
@@ -136,7 +136,7 @@ const ramp_msgs::RampTrajectory Planner::getPredictedTrajectory(const ramp_msgs:
 
   // Now build a Trajectory Request 
   ramp_msgs::TrajectoryRequest tr;
-    tr.request.path = getObstaclePath(ob, motion_type);
+    tr.request.path = getObstaclePath(ob, tf, motion_type);
     tr.request.type = PREDICTION;  // Prediction
 
 
@@ -159,11 +159,14 @@ const ramp_msgs::RampTrajectory Planner::getPredictedTrajectory(const ramp_msgs:
  *  The path is based on 1) the type of motion the obstacle currently has
  *  2) the duration that we should predict the motion for 
  */
-const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, const MotionType mt) const 
+const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, const tf::Transform T_w_odom, const MotionType mt) const 
 {
   ramp_msgs::Path result;
 
   std::vector<ramp_msgs::KnotPoint> path;
+
+  ROS_INFO("tf: (%f, %f, %f)", T_w_odom.getOrigin().getX(), T_w_odom.getOrigin().getY(), 
+      tf::getYaw(T_w_odom.getRotation()));
 
   /***********************************************************************
    Create and initialize the first point in the path
@@ -177,20 +180,21 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.y);
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.angular.z);
   
-  //ROS_INFO("start before transform: %s", utility_.toString(start).c_str());
+  ROS_INFO("start before transform: %s", utility_.toString(start).c_str());
 
   /** Transform point based on the obstacle's odometry frame */
   // Transform the position
   tf::Vector3 p_st(start.motionState.positions.at(0), start.motionState.positions.at(1), 0); 
-  tf::Vector3 p_st_tf = ob_T_w_b_ * p_st;
+  tf::Vector3 p_st_tf = T_w_odom * p_st;
 
-  //ROS_INFO("p_st: (%f, %f, %f)", p_st.getX(), p_st.getY(), p_st.getZ());
+  ROS_INFO("p_st: (%f, %f, %f)", p_st.getX(), p_st.getY(), p_st.getZ());
   
   start.motionState.positions.at(0) = p_st_tf.getX();
   start.motionState.positions.at(1) = p_st_tf.getY();
   start.motionState.positions.at(2) = utility_.displaceAngle(
-      tf::getYaw(ob_T_w_b_.getRotation()), start.motionState.positions.at(2));
+      tf::getYaw(T_w_odom.getRotation()), start.motionState.positions.at(2));
   
+  ROS_INFO("start position after transform: %s", utility_.toString(start).c_str());
   
   // Transform the velocity
   std::vector<double> zero; zero.push_back(0); zero.push_back(0); 
@@ -198,10 +202,12 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
   double phi = start.motionState.positions.at(2);
   double v = start.motionState.velocities.at(0);
 
+  ROS_INFO("teta: %f phi: %f v: %f", teta, phi, v);
+
   start.motionState.velocities.at(0) = v*cos(phi);
   start.motionState.velocities.at(1) = v*sin(phi);
 
-  //ROS_INFO("start after transform: %s", utility_.toString(start).c_str());
+  ROS_INFO("start (position and velocity) after transform: %s", utility_.toString(start).c_str());
 
 
   if(v < 0) 
@@ -267,45 +273,64 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
 
 
 
-/*void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
+void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 {
   ROS_INFO("In sensingCycleCallback");
   ROS_INFO("msg: %s", utility_.toString(msg).c_str());
 
+  ramp_msgs::Population pop;
+
   ros::Time start = ros::Time::now();
 
-  ob_trajectory_ = getPredictedTrajectory(msg);
-  //ROS_INFO("Time to get obstacle trajectory: %f", (ros::Time::now() - start).toSec());
-  ROS_INFO("ob_trajectory_: %s", ob_trajectory_.toString().c_str());
+  // For each obstacle, predict its trajectory
+  for(uint8_t i=0;i<msg.obstacles.size();i++)
+  {
+
+    RampTrajectory ob_temp_trj = getPredictedTrajectory(msg.obstacles.at(i), ob_T_w_odom_.at(i));
+    if(ob_trajectory_.size() < i+1)
+    {
+      ob_trajectory_.push_back(ob_temp_trj);
+    }
+    else
+    {
+      ob_trajectory_.at(i) = ob_temp_trj;
+    }
+
+    pop.population.push_back(ob_temp_trj.msg_);
+    //ROS_INFO("Time to get obstacle trajectory: %f", (ros::Time::now() - start).toSec());
+    ROS_INFO("ob_trajectory_: %s", ob_temp_trj.toString().c_str());
+  } // end for
 
   ros::Time s = ros::Time::now();
-  population_       = evaluatePopulation(population_);
-  transPopulation_  = evaluatePopulation(transPopulation_);
+  //population_       = evaluatePopulation(population_);
+  //transPopulation_  = evaluatePopulation(transPopulation_);
   //ROS_INFO("Time to evaluate population: %f", (ros::Time::now() - s).toSec());
   ////ROS_INFO("Pop now: %s", population_.toString().c_str());
   ////ROS_INFO("Trans Pop now: %s", transPopulation_.toString().c_str());
   
   
-  RampTrajectory temp_mo = movingOn_.getSubTrajectoryPost(c_pc_ * planningCycle_.toSec());
-  temp_mo = evaluateTrajectory(temp_mo);
-  moving_on_coll_ = !temp_mo.msg_.feasible;
+  //RampTrajectory temp_mo = movingOn_.getSubTrajectoryPost(c_pc_ * planningCycle_.toSec());
+  //temp_mo = evaluateTrajectory(temp_mo);
+  //moving_on_coll_ = !temp_mo.msg_.feasible;
    
   //movingOn_ = evaluateTrajectory(movingOn_);
   //ROS_INFO("movingOn_ Feasible: %s", movingOn_.msg_.feasible ? "True" : "False");
 
   sc_durs_.push_back( ros::Time::now() - start );
   
-  if(cc_started_)
+  /*if(cc_started_)
   {
     sendPopulation(transPopulation_);
   }
   else
   {
     sendPopulation(population_);
-  }
+  }*/
+
+  h_control_->sendPopulation(pop);
 
   ROS_INFO("Exiting sensingCycleCallback");
-}*/
+}
 
 
 
@@ -1042,7 +1067,10 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
     result.request.currentTheta = latestUpdate_.msg_.positions.at(2);
   }
 
-  result.request.obstacle_trjs.push_back(ob_trajectory_.msg_);
+  for(uint8_t i=0;i<ob_trajectory_.size();i++)
+  {
+    result.request.obstacle_trjs.push_back(ob_trajectory_.at(i).msg_);
+  }
 
   return result;
 } // End buildEvaluationRequest
@@ -1070,37 +1098,41 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
 {
   ROS_INFO("In imminentCollisionCallback");
   std_msgs::Bool ic;
- 
-  if(ob_trajectory_.msg_.trajectory.points.size() > 0)
+
+  for(uint8_t i=0;i<ob_trajectory_.size();i++)
   {
-    trajectory_msgs::JointTrajectoryPoint ob = ob_trajectory_.msg_.trajectory.points.at(0);
-    double dist = utility_.positionDistance(ob.positions, latestUpdate_.msg_.positions);
-      
-    ROS_WARN("latestUpdate_: %s\nob_point: %s", latestUpdate_.toString().c_str(), utility_.toString(ob).c_str());
-
-    //if(!transPopulation_.getBest().msg_.feasible &&
-    //if(!movingOn_.msg_.feasible &&
-    if(moving_on_coll_ &&
-        dist < 0.5f)
+    
+    if(ob_trajectory_.at(i).msg_.trajectory.points.size() > 0)
     {
-      ROS_WARN("Imminent Collision Robot: %i dist: %f", id_, dist);
-      ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.toString().c_str());
-      
-      ic.data = true;
+      trajectory_msgs::JointTrajectoryPoint ob = ob_trajectory_.at(i).msg_.trajectory.points.at(0);
+      double dist = utility_.positionDistance(ob.positions, latestUpdate_.msg_.positions);
+        
+      ROS_WARN("latestUpdate_: %s\nob_point: %s", latestUpdate_.toString().c_str(), utility_.toString(ob).c_str());
+
+      //if(!movingOn_.msg_.feasible &&
+      if(moving_on_coll_ &&
+          dist < 0.5f)
+      {
+        ROS_WARN("Imminent Collision Robot: %i dist: %f", id_, dist);
+        ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.at(i).toString().c_str());
+        
+        ic.data = true;
+        break;
+      }
+
+      else 
+      {
+        ROS_INFO("No imminent collision, dist: %f", dist);
+        ROS_INFO("startPlanning: %s", startPlanning_.toString().c_str());
+        ic.data = false;
+      }
     }
-
-    else 
+    else
     {
-      ROS_INFO("No imminent collision, dist: %f", dist);
-      ROS_INFO("startPlanning: %s", startPlanning_.toString().c_str());
       ic.data = false;
     }
-  }
-  else
-  {
-    ic.data = false;
-  }
-    
+  } // end for
+
   h_control_->sendIC(ic);
 
   //std::cout<<"\nAfter imminentCollisionCycle_\n";
@@ -1186,7 +1218,7 @@ void Planner::initStartGoal(const MotionState s, const MotionState g) {
 
 
 /** Initialize the handlers and allocate them on the heap */
-void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r, const int population_size, const bool sub_populations, const int gens_before_cc, const double t_pc_rate, const double t_fixed_cc, const bool errorReduction) {
+void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r, const int population_size, const bool sub_populations, const std::vector<tf::Transform> ob_T_odoms, const int gens_before_cc, const double t_pc_rate, const double t_fixed_cc, const bool errorReduction) {
   ////ROS_INFO("In Planner::init");
 
   // Set ID
@@ -1224,11 +1256,12 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
   // Set the base transformation
   setT_base_w(start_.msg_.positions);
 
-  setOb_T_w_b();
+  //setOb_T_w_odom();
 
   // Set misc members
   populationSize_       = population_size;
   subPopulations_       = sub_populations;
+  ob_T_w_odom_          = ob_T_odoms;
   generationsBeforeCC_  = gens_before_cc;
   t_fixed_cc_           = t_fixed_cc;
   errorReduction_       = errorReduction;
@@ -2791,16 +2824,9 @@ void Planner::doControlCycle()
   startPlanning_ = m_cc_;
   ////ROS_INFO("New startPlanning_: %s", startPlanning_.toString().c_str());
 
-  // After m_cc_ and startPlanning are set, adapt the population
   //ROS_INFO("Before adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", population_.size(), population_.toString().c_str());
   //ROS_INFO("transPop.bestID: %i", transPopulation_.calcBestIndex());
 
-  /*ROS_INFO("Before adaptation and evaluation, pop size: %i pop: %s\n%s\n\n\nnew trans pop: %s\n%s", 
-      (int)population_.size(),
-      population_.get(0).toString().c_str(),
-      population_.get(1).toString().c_str(),
-      transPopulation_.get(0).toString().c_str(),
-      transPopulation_.get(1).toString().c_str());*/
   // Adapt and evaluate population
   //ROS_INFO("About to adapt, controlCycle_: %f", controlCycle_.toSec());
   ros::Time t_startAdapt = ros::Time::now();
@@ -3178,9 +3204,7 @@ void Planner::go()
   
   // initialize population
   initPopulation();
-  std::cout<<"\n"<<population_.fitnessFeasibleToString();
   sendPopulation(population_);
-  std::cout<<"\nPop: "<<population_.toString();
   std::cout<<"\nPopulation initialized! Press enter to continue\n";
   //std::cin.get();
  
@@ -3224,8 +3248,10 @@ void Planner::go()
 
   t_start_ = ros::Time::now();
 
+  ROS_INFO("Planning Cycles started!");
+
   // Start the planning cycles
-  planningCycleTimer_.start();
+  //planningCycleTimer_.start();
     
   
   h_parameters_.setCCStarted(false); 
@@ -3248,8 +3274,8 @@ void Planner::go()
   transPopulation_ = population_;
   
   // Start the control cycles
-  controlCycleTimer_.start();
-  imminentCollisionTimer_.start();
+  //controlCycleTimer_.start();
+  //imminentCollisionTimer_.start();
 
   //ROS_INFO("CCs started");
 

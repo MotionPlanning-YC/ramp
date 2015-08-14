@@ -200,7 +200,6 @@ const ramp_msgs::RampTrajectory getPredictedTrajectory(const ramp_msgs::Obstacle
 
 
 void odometryCallback(const nav_msgs::Odometry& msg) {
-  obstacle.odom_t_prev = obstacle.odom_t;
   obstacle.odom_t = msg;
 
   odom_recv = true;
