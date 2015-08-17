@@ -16,7 +16,9 @@ fixed_control_cycle_rate: 2
 
 error_reduction: true
 
-num_of_obstacles: 2
+num_of_obstacles: 3
 
-obstacle_topics: ['/robot_1/odom', '/robot_2/odom']
+obstacle_odoms: ['/robot_1/odom', '/robot_2/odom', '/robot_3/odom']
+
+obstacle_vels: ['/robot_1/cmd_vel', '/robot_2/cmd_vel', '/robot_3/cmd_vel']
 

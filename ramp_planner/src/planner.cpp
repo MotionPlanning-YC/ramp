@@ -278,8 +278,6 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   ROS_INFO("In sensingCycleCallback");
   ROS_INFO("msg: %s", utility_.toString(msg).c_str());
 
-  ramp_msgs::Population pop;
-
   ros::Time start = ros::Time::now();
 
   // For each obstacle, predict its trajectory
@@ -296,38 +294,35 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
       ob_trajectory_.at(i) = ob_temp_trj;
     }
 
-    pop.population.push_back(ob_temp_trj.msg_);
     //ROS_INFO("Time to get obstacle trajectory: %f", (ros::Time::now() - start).toSec());
     ROS_INFO("ob_trajectory_: %s", ob_temp_trj.toString().c_str());
   } // end for
 
   ros::Time s = ros::Time::now();
-  //population_       = evaluatePopulation(population_);
-  //transPopulation_  = evaluatePopulation(transPopulation_);
+  population_       = evaluatePopulation(population_);
+  transPopulation_  = evaluatePopulation(transPopulation_);
   //ROS_INFO("Time to evaluate population: %f", (ros::Time::now() - s).toSec());
   ////ROS_INFO("Pop now: %s", population_.toString().c_str());
   ////ROS_INFO("Trans Pop now: %s", transPopulation_.toString().c_str());
   
   
-  //RampTrajectory temp_mo = movingOn_.getSubTrajectoryPost(c_pc_ * planningCycle_.toSec());
-  //temp_mo = evaluateTrajectory(temp_mo);
-  //moving_on_coll_ = !temp_mo.msg_.feasible;
-   
+  RampTrajectory temp_mo = movingOn_.getSubTrajectoryPost(c_pc_ * planningCycle_.toSec());
+  temp_mo = evaluateTrajectory(temp_mo);
+  moving_on_coll_ = !temp_mo.msg_.feasible;
+
   //movingOn_ = evaluateTrajectory(movingOn_);
   //ROS_INFO("movingOn_ Feasible: %s", movingOn_.msg_.feasible ? "True" : "False");
 
   sc_durs_.push_back( ros::Time::now() - start );
   
-  /*if(cc_started_)
+  if(cc_started_)
   {
     sendPopulation(transPopulation_);
   }
   else
   {
     sendPopulation(population_);
-  }*/
-
-  h_control_->sendPopulation(pop);
+  }
 
   ROS_INFO("Exiting sensingCycleCallback");
 }
@@ -1106,16 +1101,16 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
     {
       trajectory_msgs::JointTrajectoryPoint ob = ob_trajectory_.at(i).msg_.trajectory.points.at(0);
       double dist = utility_.positionDistance(ob.positions, latestUpdate_.msg_.positions);
-        
+
       ROS_WARN("latestUpdate_: %s\nob_point: %s", latestUpdate_.toString().c_str(), utility_.toString(ob).c_str());
 
       //if(!movingOn_.msg_.feasible &&
-      if(moving_on_coll_ &&
+      if(//moving_on_coll_ &&
           dist < 0.5f)
       {
         ROS_WARN("Imminent Collision Robot: %i dist: %f", id_, dist);
         ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.at(i).toString().c_str());
-        
+
         ic.data = true;
         break;
       }
@@ -3251,7 +3246,7 @@ void Planner::go()
   ROS_INFO("Planning Cycles started!");
 
   // Start the planning cycles
-  //planningCycleTimer_.start();
+  planningCycleTimer_.start();
     
   
   h_parameters_.setCCStarted(false); 
@@ -3274,8 +3269,8 @@ void Planner::go()
   transPopulation_ = population_;
   
   // Start the control cycles
-  //controlCycleTimer_.start();
-  //imminentCollisionTimer_.start();
+  controlCycleTimer_.start();
+  imminentCollisionTimer_.start();
 
   //ROS_INFO("CCs started");
 

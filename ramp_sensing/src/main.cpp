@@ -9,7 +9,7 @@
 ros::Publisher pub_obj;
 std::vector< Obstacle> obs;
 ramp_msgs::ObstacleList list;
-std::vector< std::string > ob_topics;
+std::vector< std::string > ob_odoms;
 std::map< std::string, uint8_t > topic_index_map;
 
 /** Get the other robot's current odometry information and update the dynamicObject */
@@ -60,26 +60,26 @@ int main(int argc, char** argv)
   handle.getParam("ramp_sensing/other_robot_odom", other_robot_odom);
   std::cout<<"\nother_robot_odom:"<<other_robot_odom;*/
 
-  if(handle.hasParam("/ramp/obstacle_topics"))
+  if(handle.hasParam("/ramp/obstacle_odoms"))
   {
-    ROS_INFO("Found rosparam obstacle_topics");
-    handle.getParam("ramp/obstacle_topics", ob_topics);
-    ROS_INFO("ob_topics.size(): %i", (int)ob_topics.size());
-    for(int i=0;i<ob_topics.size();i++)
+    ROS_INFO("Found rosparam obstacle_odoms");
+    handle.getParam("/ramp/obstacle_odoms", ob_odoms);
+    ROS_INFO("ob_odoms.size(): %i", (int)ob_odoms.size());
+    for(int i=0;i<ob_odoms.size();i++)
     {
-      ROS_INFO("ob_topics[%i]: %s", i, ob_topics.at(i).c_str());
-      topic_index_map[ob_topics.at(i)] = i;
+      ROS_INFO("ob_odoms[%i]: %s", i, ob_odoms.at(i).c_str());
+      topic_index_map[ob_odoms.at(i)] = i;
     }
   }
   else
   {
-    ROS_ERROR("Could not find obstacle_topics rosparam!");
+    ROS_ERROR("ramp_sensing: Could not find obstacle_topics rosparam!");
   }
 
   std::vector< ros::Subscriber > subs_obs;
-  for(uint8_t i=0;i<ob_topics.size();i++)
+  for(uint8_t i=0;i<ob_odoms.size();i++)
   {
-    ros::Subscriber sub_ob = handle.subscribe<nav_msgs::Odometry>(ob_topics.at(i), 100, boost::bind(updateOtherRobotCb, _1, ob_topics.at(i)));
+    ros::Subscriber sub_ob = handle.subscribe<nav_msgs::Odometry>(ob_odoms.at(i), 100, boost::bind(updateOtherRobotCb, _1, ob_odoms.at(i)));
     subs_obs.push_back(sub_ob);
   } // end for
 
