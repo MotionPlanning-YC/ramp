@@ -7,6 +7,9 @@ int num_obs;
 std::vector< std::string > ob_odoms;
 std::vector< std::string > ob_vels;
 std::vector< ros::Publisher > ob_pubs;
+std::vector< double > ob_delays;
+std::vector< ros::Duration > dur_delays;
+std::vector< ros::Timer > ob_timers;
 
 void getObstacleParams(const ros::NodeHandle handle)
 {
@@ -42,35 +45,27 @@ void getObstacleParams(const ros::NodeHandle handle)
       ROS_INFO("ob_vels[%i]: %s", i, ob_vels.at(i).c_str());
     }
   }
-}
 
 
-
-void publishToAllObs(const geometry_msgs::Twist twist)
-{
-  for(uint8_t i=0;i<ob_pubs.size();i++)
+  if(handle.hasParam("/ramp/obstacle_delays"))
   {
-    ob_pubs.at(i).publish(twist);
+    handle.getParam("/ramp/obstacle_delays", ob_delays);
+
+    double last_t = 0.;
+    for(int i=0;i<ob_delays.size();i++)
+    {
+      dur_delays.push_back(ros::Duration(ob_delays.at(i) - last_t));
+      last_t = dur_delays.at(i).toSec();
+    }
   }
 }
 
 
-int main(int argc, char** argv)
+
+
+void publishToOb(const ros::TimerEvent e, const int index)
 {
-  ros::init(argc, argv, "obstacle");
-  ros::NodeHandle handle;
-
-  getObstacleParams(handle);
-  ROS_INFO("Obtained obstacle rosparams, please review and hit enter to continue");
-  std::cin.get();
-  
-  for(uint8_t i=0;i<ob_odoms.size();i++)
-  {
-    ros::Publisher pub_twist = handle.advertise<geometry_msgs::Twist>(ob_vels.at(i), 1000);
-    ob_pubs.push_back(pub_twist);
-  }
-
-  Utility u;
+  ROS_INFO("index: %i", index);
 
 
   ros::Rate r(15);
@@ -83,28 +78,12 @@ int main(int argc, char** argv)
   twist.angular.x = 0.f;
   twist.angular.y = 0.f;
   twist.angular.z = 0.f;
-
-  ROS_INFO("Press Enter to begin obstacle movement");
-
-  std::cin.get();
-  
-
-  bool cc_started = false;
-  while(!cc_started)
-  {
-    handle.getParam("/ramp/cc_started", cc_started);
-    //ROS_INFO("/ramp/cc_started: %s", cc_started ? "True" : "False");
-    r.sleep();
-    ros::spinOnce();
-  }
-
-  ROS_INFO("Starting obstacle motion!");
-
+ 
   // Drive forward
   ros::Time t = ros::Time::now();
   while(ros::Time::now() - t < d)
   {
-    publishToAllObs(twist);
+    ob_pubs.at(index).publish(twist);
     r.sleep();
   }
 
@@ -132,7 +111,7 @@ int main(int argc, char** argv)
   t = ros::Time::now();
   while(ros::Time::now() - t < d)
   {
-    publishToAllObs(twist);
+    ob_pubs.at(index).publish(twist);
     r.sleep();
   }
 
@@ -145,7 +124,7 @@ int main(int argc, char** argv)
   t = ros::Time::now();
   while(ros::Time::now() - t < d)
   {
-    publishToAllObs(twist);
+    ob_pubs.at(index).publish(twist);
     r.sleep();
   }
 
@@ -158,7 +137,7 @@ int main(int argc, char** argv)
   t = ros::Time::now();
   while(ros::Time::now() - t < d)
   {
-    publishToAllObs(twist);
+    ob_pubs.at(index).publish(twist);
     r.sleep();
   }
 
@@ -171,7 +150,7 @@ int main(int argc, char** argv)
   t = ros::Time::now();
   while(ros::Time::now() - t < d)
   {
-    publishToAllObs(twist);
+    ob_pubs.at(index).publish(twist);
     r.sleep();
   }
 
@@ -184,20 +163,77 @@ int main(int argc, char** argv)
   t = ros::Time::now();
   while(ros::Time::now() - t < d)
   {
-    publishToAllObs(twist);
+    ob_pubs.at(index).publish(twist);
     r.sleep();
   }
 
   
   twist.linear.x = 0.;
   twist.angular.z = 0.;
-  publishToAllObs(twist);
-  publishToAllObs(twist);
-  publishToAllObs(twist);
-  publishToAllObs(twist);
-  publishToAllObs(twist);
+  ob_pubs.at(index).publish(twist);
+  ob_pubs.at(index).publish(twist);
+  ob_pubs.at(index).publish(twist);
+  ob_pubs.at(index).publish(twist);
+  ob_pubs.at(index).publish(twist);
+}
+
+void publishToAllObs(const geometry_msgs::Twist twist)
+{
+  for(uint8_t i=0;i<ob_pubs.size();i++)
+  {
+    ob_pubs.at(i).publish(twist);
+  }
+}
+
+
+int main(int argc, char** argv)
+{
+  ros::init(argc, argv, "obstacle");
+  ros::NodeHandle handle;
+
+  getObstacleParams(handle);
+  ROS_INFO("Obtained obstacle rosparams, please review and hit enter to continue");
+  std::cin.get();
+  
+  for(uint8_t i=0;i<ob_odoms.size();i++)
+  {
+    ros::Publisher pub_twist = handle.advertise<geometry_msgs::Twist>(ob_vels.at(i), 1000);
+    ob_pubs.push_back(pub_twist);
+
+    ros::Timer temp = handle.createTimer(ros::Duration(ob_delays.at(i)), boost::bind(publishToOb, _1, i), true, true);
+    ob_timers.push_back(temp);
+  }
+
+  Utility u;
+
+
+  ros::Rate r(15);
+  ros::Duration d(3.);
+  geometry_msgs::Twist twist;
+  
+
+  ROS_INFO("Press Enter to begin obstacle movement");
+
+  std::cin.get();
+  
+
+  bool cc_started = false;
+  /*while(!cc_started)
+  {
+    handle.getParam("/ramp/cc_started", cc_started);
+    //ROS_INFO("/ramp/cc_started: %s", cc_started ? "True" : "False");
+    r.sleep();
+    ros::spinOnce();
+  }*/
+
+  ROS_INFO("Starting obstacle motion!");
+
 
 
   ROS_INFO("Obstacle node done");
+  ros::AsyncSpinner spinner(8);
+  std::cout<<"\nWaiting for requests...\n";
+  spinner.start();
+  ros::waitForShutdown();
   return 0;
 }
