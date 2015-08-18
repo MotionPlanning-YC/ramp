@@ -165,8 +165,7 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
 
   std::vector<ramp_msgs::KnotPoint> path;
 
-  ROS_INFO("tf: (%f, %f, %f)", T_w_odom.getOrigin().getX(), T_w_odom.getOrigin().getY(), 
-      tf::getYaw(T_w_odom.getRotation()));
+  //ROS_INFO("tf: (%f, %f, %f)", T_w_odom.getOrigin().getX(), T_w_odom.getOrigin().getY(), tf::getYaw(T_w_odom.getRotation()));
 
   /***********************************************************************
    Create and initialize the first point in the path
@@ -180,21 +179,21 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.y);
   start.motionState.velocities.push_back(ob.odom_t.twist.twist.angular.z);
   
-  ROS_INFO("start before transform: %s", utility_.toString(start).c_str());
+  //ROS_INFO("start before transform: %s", utility_.toString(start).c_str());
 
   /** Transform point based on the obstacle's odometry frame */
   // Transform the position
   tf::Vector3 p_st(start.motionState.positions.at(0), start.motionState.positions.at(1), 0); 
   tf::Vector3 p_st_tf = T_w_odom * p_st;
 
-  ROS_INFO("p_st: (%f, %f, %f)", p_st.getX(), p_st.getY(), p_st.getZ());
+  //ROS_INFO("p_st: (%f, %f, %f)", p_st.getX(), p_st.getY(), p_st.getZ());
   
   start.motionState.positions.at(0) = p_st_tf.getX();
   start.motionState.positions.at(1) = p_st_tf.getY();
   start.motionState.positions.at(2) = utility_.displaceAngle(
       tf::getYaw(T_w_odom.getRotation()), start.motionState.positions.at(2));
   
-  ROS_INFO("start position after transform: %s", utility_.toString(start).c_str());
+  //ROS_INFO("start position after transform: %s", utility_.toString(start).c_str());
   
   // Transform the velocity
   std::vector<double> zero; zero.push_back(0); zero.push_back(0); 
@@ -202,12 +201,12 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
   double phi = start.motionState.positions.at(2);
   double v = start.motionState.velocities.at(0);
 
-  ROS_INFO("teta: %f phi: %f v: %f", teta, phi, v);
+  //ROS_INFO("teta: %f phi: %f v: %f", teta, phi, v);
 
   start.motionState.velocities.at(0) = v*cos(phi);
   start.motionState.velocities.at(1) = v*sin(phi);
 
-  ROS_INFO("start (position and velocity) after transform: %s", utility_.toString(start).c_str());
+  //ROS_INFO("start (position and velocity) after transform: %s", utility_.toString(start).c_str());
 
 
   if(v < 0) 
@@ -275,8 +274,8 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
 
 void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 {
-  ROS_INFO("In sensingCycleCallback");
-  ROS_INFO("msg: %s", utility_.toString(msg).c_str());
+  //ROS_INFO("In sensingCycleCallback");
+  //ROS_INFO("msg: %s", utility_.toString(msg).c_str());
 
   ros::Time start = ros::Time::now();
 
@@ -295,7 +294,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
     }
 
     //ROS_INFO("Time to get obstacle trajectory: %f", (ros::Time::now() - start).toSec());
-    ROS_INFO("ob_trajectory_: %s", ob_temp_trj.toString().c_str());
+    //ROS_INFO("ob_trajectory_: %s", ob_temp_trj.toString().c_str());
   } // end for
 
   ros::Time s = ros::Time::now();
@@ -307,6 +306,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   
   
   RampTrajectory temp_mo = movingOn_.getSubTrajectoryPost(c_pc_ * planningCycle_.toSec());
+  temp_mo.msg_.t_start = ros::Duration(0);
   temp_mo = evaluateTrajectory(temp_mo);
   moving_on_coll_ = !temp_mo.msg_.feasible;
 
@@ -324,7 +324,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
     sendPopulation(population_);
   }
 
-  ROS_INFO("Exiting sensingCycleCallback");
+  //ROS_INFO("Exiting sensingCycleCallback");
 }
 
 
@@ -1105,8 +1105,8 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
       ROS_WARN("latestUpdate_: %s\nob_point: %s", latestUpdate_.toString().c_str(), utility_.toString(ob).c_str());
 
       //if(!movingOn_.msg_.feasible &&
-      if(//moving_on_coll_ &&
-          dist < 0.5f)
+      if(moving_on_coll_ &&
+          dist < 0.75f)
       {
         ROS_WARN("Imminent Collision Robot: %i dist: %f", id_, dist);
         ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.at(i).toString().c_str());
@@ -2807,7 +2807,9 @@ void Planner::doControlCycle()
   movingOnCC_ = bestT.getSubTrajectory(t_fixed_cc_);
   movingOn_ = movingOnCC_;
   movingOn_.msg_.t_start = ros::Duration(0);
-  ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
+  movingOn_ = evaluateTrajectory(movingOn_);
+  moving_on_coll_ = !movingOn_.msg_.feasible;
+  //ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
 
   // Reset planning cycle count
   c_pc_ = 0;

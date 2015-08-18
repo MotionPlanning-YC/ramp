@@ -80,7 +80,7 @@ void Circle::initReflexxes() {
   reflexxesData_.inputParameters->MaxVelocityVector->VecData[0]     = fabs(w_);
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 1;
 
-  reflexxesData_.inputParameters->TargetPositionVector->VecData[0] = 2*PI;
+  reflexxesData_.inputParameters->TargetPositionVector->VecData[0] = PI;
   reflexxesData_.inputParameters->TargetVelocityVector->VecData[0] = fabs(w_);
 
   reflexxesData_.inputParameters->SelectionVector->VecData[0] = true;

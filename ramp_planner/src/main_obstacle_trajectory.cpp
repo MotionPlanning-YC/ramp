@@ -1,5 +1,6 @@
 #include <ros/ros.h>
-#include "obstacle.h"
+#include "utility.h"
+#include "path.h"
 #include "control_handler.h"
 #include "trajectory_request_handler.h"
 

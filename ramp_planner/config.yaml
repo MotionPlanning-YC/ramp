@@ -8,9 +8,9 @@ evaluations: true
 
 seed_population: false 
 
-gens_before_control_cycle: 20
+gens_before_control_cycle: 50
 
-planning_cycle_rate: 5
+planning_cycle_rate: 12
 
 fixed_control_cycle_rate: 2
 
@@ -21,4 +21,6 @@ num_of_obstacles: 3
 obstacle_odoms: ['/robot_1/odom', '/robot_2/odom', '/robot_3/odom']
 
 obstacle_vels: ['/robot_1/cmd_vel', '/robot_2/cmd_vel', '/robot_3/cmd_vel']
+
+obstacle_delays: [0, 1, 2]
 
