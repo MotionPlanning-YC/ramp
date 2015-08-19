@@ -22,5 +22,5 @@ obstacle_odoms: ['/robot_1/odom', '/robot_2/odom', '/robot_3/odom']
 
 obstacle_vels: ['/robot_1/cmd_vel', '/robot_2/cmd_vel', '/robot_3/cmd_vel']
 
-obstacle_delays: [0, 1, 5]
+obstacle_delays: [2, 0, 3]
 
