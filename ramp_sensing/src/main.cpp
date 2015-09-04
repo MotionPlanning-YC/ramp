@@ -6,6 +6,7 @@
 #include "obstacle.h"
 
 
+double rate;
 ros::Publisher pub_obj;
 std::vector< Obstacle> obs;
 ramp_msgs::ObstacleList list;
@@ -76,6 +77,16 @@ int main(int argc, char** argv)
     ROS_ERROR("ramp_sensing: Could not find obstacle_topics rosparam!");
   }
 
+  if(handle.hasParam("/ramp/sensing_cycle_rate"))
+  {
+    handle.getParam("/ramp/sensing_cycle_rate", rate);
+    ROS_INFO("Sensing cycle rate: %f", rate);
+  }
+  else
+  {
+    ROS_ERROR("ramp_sensing: Could not find sensing_cycle_rate rosparam!");
+  }
+
   std::vector< ros::Subscriber > subs_obs;
   for(uint8_t i=0;i<ob_odoms.size();i++)
   {
@@ -87,7 +98,7 @@ int main(int argc, char** argv)
   pub_obj = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1000);
 
   //Timers
-  ros::Timer timer = handle.createTimer(ros::Duration(1.f / 5.f), publishList);
+  ros::Timer timer = handle.createTimer(ros::Duration(1.f / rate), publishList);
    
 
   std::cout<<"\nSpinning\n";

@@ -56,7 +56,7 @@ add_dependencies(obstacle_trajectory ramp_msgs_generate_messages_cpp)
 
 
 ## Declare a cpp executable
-add_executable(obstacle_twist_all src/control_handler.cpp src/knot_point.cpp src/main_obstacle_twist_all.cpp src/motion_state.cpp src/path.cpp src/ramp_trajectory.cpp src/range.cpp src/trajectory_request_handler.cpp src/utility.cpp)
+add_executable(obstacle_twist_all src/main_obstacle_twist_all.cpp)
 
 # Add the -std argument to compile enum
 set_target_properties(obstacle_twist_all PROPERTIES COMPILE_FLAGS -std=c++0x)
@@ -66,13 +66,13 @@ target_link_libraries(obstacle_twist_all ${catkin_LIBRARIES} yaml-cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(obstacle_twist_all ramp_msgs_generate_messages_cpp)
+#add_dependencies(obstacle_twist_all ramp_msgs_generate_messages_cpp)
 
 
 
 
 ## Declare a cpp executable
-add_executable(obstacle_twist_one src/control_handler.cpp src/knot_point.cpp src/main_obstacle_twist_one.cpp src/motion_state.cpp src/path.cpp src/ramp_trajectory.cpp src/range.cpp src/trajectory_request_handler.cpp src/utility.cpp)
+add_executable(obstacle_twist_one src/main_obstacle_twist_one.cpp)
 
 # Add the -std argument to compile enum
 set_target_properties(obstacle_twist_one PROPERTIES COMPILE_FLAGS -std=c++0x)
@@ -82,5 +82,21 @@ target_link_libraries(obstacle_twist_one ${catkin_LIBRARIES} yaml-cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(obstacle_twist_one ramp_msgs_generate_messages_cpp)
+#add_dependencies(obstacle_twist_one)
+
+
+
+## Declare a cpp executable
+add_executable(obstacle_twist_all_single src/main_obstacle_twist_all_single.cpp)
+
+# Add the -std argument to compile enum
+set_target_properties(obstacle_twist_all_single PROPERTIES COMPILE_FLAGS -std=c++0x)
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(obstacle_twist_all_single ${catkin_LIBRARIES} yaml-cpp)
+
+## Add cmake target dependencies of the executable/library
+## as an example, message headers may need to be generated before nodes
+#add_dependencies(obstacle_twist_all_single)
+
 

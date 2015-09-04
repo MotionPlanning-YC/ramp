@@ -243,7 +243,7 @@ class Planner {
 
 
 
-    const MotionState     errorCorrection() const;
+    const MotionState     errorCorrection();
 
 
 
@@ -306,7 +306,7 @@ class Planner {
 
     bool predictTransition(const RampTrajectory from, const RampTrajectory to, const double t);
 
-    void reportTimeData() ;
+    void reportData() ;
 
 
     /***** Data members *****/
@@ -397,6 +397,9 @@ class Planner {
 
     tf::Transform T_w_odom_;
 
+    std::vector<double> error_correct_val_pos_, error_correct_val_or_;
+    double avg_error_correct_val_pos_, avg_error_correct_val_or_;
+    
 
     std::vector<ros::Duration> adapt_durs_;
     std::vector<ros::Duration> trans_durs_;

@@ -13,6 +13,9 @@
 
 <!-- Path Modification -->
 <node name="path_modification" pkg="path_modification" type="path_modification" />
+  
+<!-- Trajectory Evaluation -->
+<node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" /> 
 
 
 
@@ -45,30 +48,14 @@
 
 <group ns="$(arg robot_0_name)"> 
   <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" > 
-    <param name="other_robot_odom" type="str" value="/$(arg robot_1_name)/odometry" />  
+    <param name="other_robot_odom" type="str" value="/$(arg robot_1_name)/odom" />  
   </node> 
 </group> 
 
 <group ns="$(arg robot_1_name)"> 
    <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" >  
-     <param name="other_robot_odom" type="str" value="/$(arg robot_0_name)/odometry" /> 
+     <param name="other_robot_odom" type="str" value="/$(arg robot_0_name)/odom" /> 
    </node> 
-</group> 
-
-
-
-<!-- Evaluation -->
-
-<group ns="$(arg robot_0_name)">
-  <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" > 
-    <param name="robot_id" type="int" value="0" />
-  </node>
-</group> 
-
-<group ns="$(arg robot_1_name)">
-  <node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" > 
-    <param name="robot_id" type="int" value="1" />
-  </node>
 </group> 
 
 

@@ -320,8 +320,6 @@ const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_
   //ROS_INFO("In BezierCurve::satisfiesConstraints");
   //ROS_INFO("u_dot: %f u_x: %f u_y: %f", u_dot, u_x, u_y);
   //ROS_INFO("t_R_min_: %f", t_R_min_);
-  //std::cout<<"\n(A_*u_x+C_)*u_dot: "<<(A_*u_x+C_)*u_dot<<" x_dot_max: "<<ms_max_.velocities.at(0);
-  //std::cout<<"\n(B_*u_y+D_)*u_dot: "<<(B_*u_y+D_)*u_dot<<" y_dot_max: "<<ms_max_.velocities.at(1);
  
   //double x_dot = pow( (A_*u_x+C_)*u_dot,2);
   //double y_dot = pow( (B_*u_y+D_)*u_dot,2);
@@ -329,7 +327,7 @@ const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_
   double y_dot = ((B_*t_R_min_)+D_)*u_dot;
   double v = sqrt( pow(x_dot,2) + pow(y_dot,2) );
 
-  //ROS_INFO("x_dot: %f y_dot: %f v: %f", x_dot, y_dot, v);
+  //ROS_INFO("x_dot: %f y_dot: %f v: %f MAX_SPEED: %f", x_dot, y_dot, v, MAX_SPEED);
 
   if(v > MAX_SPEED)
   {
@@ -353,10 +351,6 @@ const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_
 const double BezierCurve::getUDotMax(const double u_dot_0) const 
 {
   //ROS_INFO("In BezierCurve::getUDotMax");
-
-  double x_dot_max = ms_max_.velocities.at(0);
-  double y_dot_max = ms_max_.velocities.at(1);
-  //std::cout<<"\nx_dot_max: "<<x_dot_max<<" y_dot_max: "<<y_dot_max;
 
   // Need the max accelerations
   double x_ddot_max = ms_max_.accelerations.at(0);

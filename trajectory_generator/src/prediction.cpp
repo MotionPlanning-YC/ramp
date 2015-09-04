@@ -17,7 +17,7 @@ void Prediction::init(const ramp_msgs::TrajectoryRequest::Request req)
 
 bool Prediction::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) 
 {
-  ROS_INFO("In Prediction::trajectoryRequest");
+  //ROS_INFO("In Prediction::trajectoryRequest");
   res.trajectory.i_knotPoints.push_back(0);
 
 
@@ -30,19 +30,19 @@ bool Prediction::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
   if(fabs(w) < 0.01 && fabs(vNorm) < 0.01) 
   {
-    ROS_INFO("No velocity, Pushing on one point");
+    //ROS_INFO("No velocity, Pushing on one point");
     traj.push_back(ms_init);
   }
   
   else if(fabs(w) > 0.01 && fabs(vNorm) < 0.01) 
   {
-    ROS_INFO("Self-rotating, Pushing on one point");
+    //ROS_INFO("Self-rotating, Pushing on one point");
     traj.push_back(ms_init);
   }
 
   else if(fabs(req.path.points.at(0).motionState.velocities.at(2)) < 0.01) 
   {
-    ROS_INFO("In straight line prediction");
+    //ROS_INFO("In straight line prediction");
     Line li;
 
 
@@ -52,18 +52,18 @@ bool Prediction::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
   else if(fabs(req.path.points.at(0).motionState.velocities.at(2)) > 0.01 ) 
   {
-    ROS_INFO("In circle prediction");
+    //ROS_INFO("In circle prediction");
     Circle ci;
     ci.init(req.path.points.at(0).motionState);
     traj = ci.generatePoints(); 
   }
   else 
   {
-    ROS_INFO("In else");
+    //ROS_INFO("In else");
     traj.push_back(req.path.points.at(0).motionState);
   }
 
-  ROS_INFO("Done with building path");
+  //ROS_INFO("Done with building path");
 
   ramp_msgs::RampTrajectory rt;
   for(int i=0;i<traj.size();i++) 

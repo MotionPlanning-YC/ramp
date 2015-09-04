@@ -97,7 +97,7 @@ const RampTrajectory RampTrajectory::getSubTrajectory(const float t) const {
 
   if(msg_.trajectory.points.size() < 1)
   {
-    ROS_ERROR("msg_.trajectory.points.size == 0");
+    //ROS_ERROR("msg_.trajectory.points.size == 0");
     return clone();
   }
   else if(msg_.trajectory.points.size() == 1)
@@ -357,7 +357,7 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
  */
 void RampTrajectory::offsetPositions(const MotionState diff)
 {
-  ROS_INFO("In RampTrajectory::offsetPositions");
+  //ROS_INFO("In RampTrajectory::offsetPositions");
   
   // Go through all the points and subtract diff
   for(uint16_t i=0;i<msg_.trajectory.points.size();i++)
@@ -412,7 +412,7 @@ void RampTrajectory::offsetPositions(const MotionState diff)
   } // end for
 
 
-  ROS_INFO("Exiting RampTrajectory::offsetPositions");
+  //ROS_INFO("Exiting RampTrajectory::offsetPositions");
 } // End offsetPositions
 
 
