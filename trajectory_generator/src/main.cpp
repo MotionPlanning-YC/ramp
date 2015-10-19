@@ -23,12 +23,12 @@ void fixDuplicates(ramp_msgs::TrajectoryRequest::Request& req)
 
     if(utility.positionDistance(a.positions, b.positions) < 0.1)
     {
-      ROS_WARN("Consecutive duplicate knot points in path:\nPath[%i]:\n%s\nand\nPath[%i]\n%s\nRemoving knot point at index %i", 
+      /*ROS_WARN("Consecutive duplicate knot points in path:\nPath[%i]:\n%s\nand\nPath[%i]\n%s\nRemoving knot point at index %i", 
           i+1,
           utility.toString(a).c_str(),
           i+1,
           utility.toString(b).c_str(),
-          i);
+          i);*/
       req.path.points.erase(req.path.points.begin()+i+1);
       i--;
     }
@@ -55,7 +55,7 @@ bool checkGoal(ramp_msgs::TrajectoryRequest::Request req)
 bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
                       ramp_msgs::TrajectoryRequest::Response& res) 
 {
-  //ROS_INFO("Request Received: %s", utility.toString(req).c_str());
+  ROS_INFO("Request Received: %s", utility.toString(req).c_str());
 
   /*
    * Check for start == goal
@@ -72,7 +72,7 @@ bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
   // Why req.segments == 1?
   if(req.type != PREDICTION && (req.path.points.size() < 3 || req.segments == 1))
   {
-    ROS_WARN("Changing type to ALL_STRAIGHT_SEGMENTS");
+    //ROS_WARN("Changing type to ALL_STRAIGHT_SEGMENTS");
     req.type = ALL_STRAIGHT_SEGMENTS;
     req.segments++;
   }
@@ -94,7 +94,8 @@ bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
   }
 
   //ROS_INFO("Trajectory Done");
-  //ROS_INFO("Sending back: %s", utility.toString(res.trajectory).c_str());
+  ROS_INFO("Response: %s", utility.toString(res).c_str());
+ 
   return true;
 }
 
@@ -115,7 +116,6 @@ int main(int argc, char** argv) {
 
 
   ros::AsyncSpinner spinner(8);
-  std::cout<<"\nWaiting for requests...\n";
   spinner.start();
   ros::waitForShutdown();
   //ros::spin();

@@ -253,8 +253,8 @@ int main(int argc, char** argv) {
 
   std::cout<<"\nHandle namespace: "<<handle.getNamespace();
   
-  ros::Subscriber sub_update_ = handle.subscribe("update", 100, &Planner::updateCallback, &my_planner);
-  ros::Subscriber sub_sc_ = handle.subscribe("obstacles", 100, &Planner::sensingCycleCallback, &my_planner);
+  ros::Subscriber sub_update_ = handle.subscribe("update", 1, &Planner::updateCallback, &my_planner);
+  ros::Subscriber sub_sc_ = handle.subscribe("obstacles", 1, &Planner::sensingCycleCallback, &my_planner);
 
 
   // Load ros parameters

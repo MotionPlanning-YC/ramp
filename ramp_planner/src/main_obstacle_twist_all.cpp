@@ -154,12 +154,12 @@ void publishToOb(const ros::TimerEvent e, const int index)
   {
     
     
-    /*driveStraight(index, 0.28, 5);
+    driveStraight(index, 0.33, 5);
     
-    d = ros::Duration(6);
+    //d = ros::Duration(4);
 
     // Drive forward
-    ros::Time t = ros::Time::now();
+    /*ros::Time t = ros::Time::now();
     while(ros::Time::now() - t < d)
     {
       //ob_pubs.at(index).publish(twist);
@@ -196,11 +196,11 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
 
     // Translate+rotate
-    twist.linear.x = 0.28;
-    twist.angular.z = (index == 1) ? -0.64 : 0.8;
+    twist.linear.x = 0.33;
+    twist.angular.z = (index == 1) ? -0.64 : -0.8;
     //twist.angular.z = -0.68;
 
-    d = ros::Duration(2.);
+    d = ros::Duration(1.75);
     t = ros::Time::now();
     while(ros::Time::now() - t < d)
     {
@@ -211,7 +211,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     // Self rotate
     twist.linear.x = 0.28;
-    twist.angular.z = (index == 1) ? 0.64 : -0.8;
+    twist.angular.z = (index == 1) ? 0.64 : 0.8;
     //twist.angular.z = 0.8;
 
     d = ros::Duration(2.5);
@@ -225,10 +225,10 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     // Self rotate
     twist.linear.x = 0.28;
-    twist.angular.z = (index == 1) ? -0.8 : 0.64;
+    twist.angular.z = (index == 1) ? -0.8 : -0.64;
     //twist.angular.z = 0.8;
 
-    d = ros::Duration(2.);
+    d = ros::Duration(3);
     t = ros::Time::now();
     while(ros::Time::now() - t < d)
     {
@@ -239,10 +239,10 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     // Self rotate
     twist.linear.x = 0.28;
-    twist.angular.z = (index == 1) ? 0.64 : -0.8;
+    twist.angular.z = (index == 1) ? 0.64 : 0.8;
     //twist.angular.z = 0.8;
 
-    d = ros::Duration(4.);
+    d = ros::Duration(2.25);
     t = ros::Time::now();
     while(ros::Time::now() - t < d)
     {
@@ -287,10 +287,10 @@ int main(int argc, char** argv)
   // Create publishers
   for(uint8_t i=0;i<ob_odoms.size();i++)
   {
-    ros::Publisher pub_twist = handle.advertise<geometry_msgs::Twist>(ob_vels.at(i), 1000);
+    ros::Publisher pub_twist = handle.advertise<geometry_msgs::Twist>(ob_vels.at(i), 10);
     ob_pubs.push_back(pub_twist);
   }
-  corobot_pub = handle.advertise<corobot_msgs::MotorCommand>("PhidgetMotor", 1000);
+  corobot_pub = handle.advertise<corobot_msgs::MotorCommand>("PhidgetMotor", 10);
 
   ROS_INFO("Waiting for /ramp/cc_started=true...");
 

@@ -269,8 +269,8 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
   trajectory_msgs::JointTrajectoryPoint first = traj.msg_.trajectory.points.at(traj.msg_.i_knotPoints.at( kp ));
   if( fabs(utility_.positionDistance(last.positions, first.positions)) > 0.1)
   {
-    ROS_WARN("First and last points don't match!");
-    ROS_WARN("last: %s\nfirst: %s\ndiff: %f", utility_.toString(last).c_str(), utility_.toString(first).c_str(), fabs(utility_.positionDistance(last.positions, first.positions)));
+    //ROS_WARN("First and last points don't match!");
+    //ROS_WARN("last: %s\nfirst: %s\ndiff: %f", utility_.toString(last).c_str(), utility_.toString(first).c_str(), fabs(utility_.positionDistance(last.positions, first.positions)));
     return *this;
   }
 
@@ -379,16 +379,16 @@ void RampTrajectory::offsetPositions(const MotionState diff)
   }
   else
   {
-    ROS_WARN("path_.size() == 0, not touching it");
+    //ROS_WARN("path_.size() == 0, not touching it");
   }
 
 
-  if(msg_.curves.size() > 0 && path_.size() < 3)
+  /*if(msg_.curves.size() > 0 && path_.size() < 3)
   {
     ROS_WARN("temp.msg_.curves.size() > 0 && temp.path_.size() < 3");
     ROS_WARN("temp.path_: %s", path_.toString().c_str());
     ROS_WARN("temp.curve.at(0): %s", utility_.toString(msg_.curves.at(0)).c_str());
-  }
+  }*/
     
   for(uint8_t c=0;c<msg_.curves.size() && path_.size() > 2;c++)
   {

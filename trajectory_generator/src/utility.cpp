@@ -392,15 +392,27 @@ const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request 
       result<<"Prediction";
   }
 
-  result<<"\nSegments: "<<(int)tr.segments;
+  result<<"\nPrint: "<<(tr.print ? "True" : "False");
 
   for(uint8_t i=0;i<tr.bezierCurves.size();i++) {
     result<<"\n Curve "<<(int)i<<"\n"<<toString(tr.bezierCurves.at(i));
   }
+
+  result<<"\nSegments: "<<(int)tr.segments;
   
   result<<"\n";
 
   return result.str();
 }
 
+
+const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Response tr) const
+{
+  std::ostringstream result;
+
+  result<<"\nTrajectory: "<<toString(tr.trajectory);
+  result<<"\nError: "<<(tr.error ? "True" : "False");
+
+  return result.str();
+}
 

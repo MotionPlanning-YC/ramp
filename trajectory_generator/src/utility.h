@@ -63,6 +63,7 @@ class Utility {
     const std::string toString(const ramp_msgs::RampTrajectory traj) const;
     const std::string toString(const trajectory_msgs::JointTrajectoryPoint p) const;
     const std::string toString(const ramp_msgs::TrajectoryRequest::Request tr) const;
+    const std::string toString(const ramp_msgs::TrajectoryRequest::Response tr) const;
 };
 
 

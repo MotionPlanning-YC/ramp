@@ -202,7 +202,7 @@ const bool Population::replacementPossible(const RampTrajectory rt) const
     std::vector<uint8_t> i_validSubpops;
     for(uint8_t i=0;i<subPopulations_.size();i++) 
     {
-      if(subPopulations_.at(i).size() > 1) 
+      if(subPopulations_.at(i).size() > 1 && rt.msg_.fitness > subPopulations_.at(i).getMinFitness()) 
       {
         i_validSubpops.push_back(i);
       }
@@ -297,6 +297,11 @@ const bool Population::canReplace(const RampTrajectory rt, const int i) const
     if(temp.equals( p.trajectories_.at(p.calcBestIndex()) )) 
     {
       //std::cout<<"\ntemp == best in sub-population, returning false\n";
+      return false;
+    }
+
+    if(rt.msg_.fitness < temp.msg_.fitness)
+    {
       return false;
     }
   } // end if sub-pops are being used

@@ -51,14 +51,17 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   //ROS_INFO("In CollisionDetection::query"); 
   //ROS_INFO("trajectory.points.size(): %i", (int)trajectory_.trajectory.points.size());
   //ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.trajectory.points.size());
-  //ROS_INFO("ob_trajectory: %s", utility_.toString(ob_trajectory).c_str());
+  /*if(ob_trajectory.trajectory.points.size() > 2)
+  {
+    ROS_INFO("ob_trajectory: %s", utility_.toString(ob_trajectory).c_str());
+  }*/
 
   double t_start = trajectory_.t_start.toSec();
   int j_offset = t_start * 10.f;
   //ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
 
   CollisionDetection::QueryResult result;
-  uint8_t t_checkColl = 1;
+  uint8_t t_checkColl = 3;
 
   /*if(ob_trajectory.trajectory.points.size() <= 2) {
     if(id == 0)
@@ -94,7 +97,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   //ROS_INFO("i_stop: %i", i_stop);
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
-  float radius = 0.18f;
+  float radius = 0.21f;
   for(uint16_t i=0;i<i_stop;i++) 
   {
     
@@ -122,7 +125,10 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
         j<=(i+t_checkColl+j_offset) && j<ob_trajectory.trajectory.points.size(); 
         j++) 
     {
-      //ROS_INFO("i: %i j: %i", i, j);
+    /*if(ob_trajectory.trajectory.points.size() > 2)
+    {
+      ROS_INFO("i: %i j: %i", i, j);
+    }*/
 
       // Get the jth point of the obstacle's trajectory
       trajectory_msgs::JointTrajectoryPoint p_ob  = ob_trajectory.trajectory.points.at(j);
@@ -130,11 +136,13 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // Get the distance between the centers
       float dist = sqrt( pow(p_i.positions.at(0) - p_ob.positions.at(0),2) + pow(p_i.positions.at(1) - p_ob.positions.at(1),2) );
 
-      /*ROS_INFO("Comparing trajectory point (%f,%f) and obstacle point (%f,%f): dist = %f", 
+    /*if(ob_trajectory.trajectory.points.size() > 2)
+    {
+      ROS_INFO("Comparing trajectory point (%f,%f) and obstacle point (%f,%f): dist = %f", 
           p_i.positions.at(0), p_i.positions.at(1), 
           p_ob.positions.at(0), p_ob.positions.at(1), 
-          dist);*/
-      
+          dist);
+    }*/
         
 
       // If the distance between the two centers is less than the sum of the two radii, 

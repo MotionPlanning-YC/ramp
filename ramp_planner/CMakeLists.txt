@@ -70,33 +70,3 @@ target_link_libraries(obstacle_twist_all ${catkin_LIBRARIES} yaml-cpp)
 
 
 
-
-## Declare a cpp executable
-add_executable(obstacle_twist_one src/main_obstacle_twist_one.cpp)
-
-# Add the -std argument to compile enum
-set_target_properties(obstacle_twist_one PROPERTIES COMPILE_FLAGS -std=c++0x)
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(obstacle_twist_one ${catkin_LIBRARIES} yaml-cpp)
-
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-#add_dependencies(obstacle_twist_one)
-
-
-
-## Declare a cpp executable
-add_executable(obstacle_twist_all_single src/main_obstacle_twist_all_single.cpp)
-
-# Add the -std argument to compile enum
-set_target_properties(obstacle_twist_all_single PROPERTIES COMPILE_FLAGS -std=c++0x)
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(obstacle_twist_all_single ${catkin_LIBRARIES} yaml-cpp)
-
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-#add_dependencies(obstacle_twist_all_single)
-
-

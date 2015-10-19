@@ -48,7 +48,7 @@ void BezierCurve::init(const std::vector<MotionState> segment_points, const doub
 const bool BezierCurve::verify() const {
   //ROS_INFO("In BezierCurve::verify()");
 
-  double v_max = 0.467;
+  double v_max = 0.33;
   double w_max = PI/2.f;
 
   double u_dot_max = getUDotMax(u_dot_0_);
@@ -56,8 +56,6 @@ const bool BezierCurve::verify() const {
   {
     u_dot_max = getUDotInitial();
   }
-  double u_x = ( fabs(A_+C_) > fabs(C_) ) ? 1 : 0;
-  double u_y = ( fabs(B_+D_) > fabs(D_) ) ? 1 : 0;
   //ROS_INFO("u_dot_max: %f", u_dot_max);
 
   double x_dot = (A_*t_R_min_ + C_)*u_dot_max;
@@ -135,6 +133,9 @@ const MotionState BezierCurve::getInitialState() {
   double run  = segmentPoints_.at(1).msg_.positions.at(0) - 
                 segmentPoints_.at(0).msg_.positions.at(0);
   double slope  = (run != 0) ? ryse / run : ryse;
+
+  double theta = utility_.findAngleFromAToB(segmentPoints_.at(0).msg_.positions, segmentPoints_.at(1).msg_.positions);
+
   
   ////ROS_INFO("ryse: %f run: %f slope: %f", ryse, run, slope);
   
@@ -143,6 +144,7 @@ const MotionState BezierCurve::getInitialState() {
       segmentPoints_.at(0).msg_.positions, 
       segmentPoints_.at(1).msg_.positions);
 
+  double v_max = 0.33;
 
   // If change in y is greater
   // no change in x
@@ -154,29 +156,37 @@ const MotionState BezierCurve::getInitialState() {
       (slope == -1 && run < 0)  ||
       (slope < -1) ) 
   {
-    result.msg_.velocities.at(1) = findVelocity(1, l, ryse);
+    result.msg_.velocities.at(1) = findVelocity(1, l, theta);
 
     if(run == 0.)
     {
       result.msg_.velocities.at(0) = 0.;
     }
+    else if(run > 0.)
+    {
+      result.msg_.velocities.at(0) = sqrt( pow(v_max,2) - pow(result.msg_.velocities.at(1),2) );      
+    }
     else
     {
-      result.msg_.velocities.at(0) = result.msg_.velocities.at(1) / slope;  
+      result.msg_.velocities.at(0) = -sqrt( pow(v_max,2) - pow(result.msg_.velocities.at(1),2) );  
     }
   }
   // if slope == -1 && ryse < 0
   // if slope < 0
   // else
   else {
-    result.msg_.velocities.at(0) = findVelocity(0, l, run);
+    result.msg_.velocities.at(0) = findVelocity(0, l, theta);
     if(ryse == 0.)
     {
       result.msg_.velocities.at(1) = 0;
     }
+    else if(ryse > 0.)
+    {
+      result.msg_.velocities.at(1) = sqrt( pow(v_max,2) - pow(result.msg_.velocities.at(0),2) );      
+    }
     else
     {
-      result.msg_.velocities.at(1) = result.msg_.velocities.at(0) * slope;
+      result.msg_.velocities.at(1) = -sqrt( pow(v_max,2) - pow(result.msg_.velocities.at(0),2) );
     }
   }
 
@@ -202,7 +212,7 @@ const bool BezierCurve::satisfiesConstraints(const double u_dot, const double u_
 
   ////ROS_INFO("x_dot: %f y_dot: %f v: %f", x_dot, y_dot, v);
 
-  if(v > 0.467)
+  if(v > 0.33)
   {
     return false;
   }

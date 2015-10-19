@@ -31,8 +31,8 @@ void init_advertisers_subscribers(MobileRobot& robot, ros::NodeHandle& handle, b
   }
  
   // Subscribers
-  robot.sub_odometry_ = handle.subscribe(MobileRobot::TOPIC_STR_ODOMETRY, 1000, &MobileRobot::odomCb, &robot);
-  robot.sub_imminent_collision_ = handle.subscribe(MobileRobot::TOPIC_STR_IC, 1000, &MobileRobot::imminentCollisionCb, &robot);
+  robot.sub_odometry_ = handle.subscribe(MobileRobot::TOPIC_STR_ODOMETRY, 1, &MobileRobot::odomCb, &robot);
+  robot.sub_imminent_collision_ = handle.subscribe(MobileRobot::TOPIC_STR_IC, 1, &MobileRobot::imminentCollisionCb, &robot);
 
   // Timers
   // 15 Hz seems to be the fastest possible while avoiding nan errors
@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "ramp_control");
   ros::NodeHandle handle;  
   ros::NodeHandle handle_local("~");
-  ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1000, trajCallback);
+  ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1, trajCallback);
  
   handle.param("ramp_control/orientation", robot.initial_theta_, PI/4.);
   //handle_local.param("orientation", robot.initial_theta_, 0.);

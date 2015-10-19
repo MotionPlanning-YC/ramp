@@ -1,4 +1,4 @@
-population_size: 5
+population_size: 7
 
 sub_populations: false 
 
@@ -8,22 +8,22 @@ evaluations: true
 
 seed_population: false 
 
-gens_before_control_cycle: 25
+gens_before_control_cycle: 60 
 
-planning_cycle_rate: 12
+planning_cycle_rate: 20
 
-fixed_control_cycle_rate: 2
+fixed_control_cycle_rate: 1.2
 
-sensing_cycle_rate: 10
+sensing_cycle_rate: 15
 
-error_reduction: true
+error_reduction: true 
 
 num_of_obstacles: 3
 
-#obstacle_odoms: ['/obstacle_1/odometry', '/obstacle_2/odom', '/obstacle_3/odom']
-#obstacle_vels: ['/obstacle_1/twist', '/obstacle_2/mobile_base/commands/velocity', '/obstacle_3/mobile_base/commands/velocity']
-obstacle_odoms: ['/robot_1/odom', '/robot_2/odom', '/robot_3/odom']
-obstacle_vels: ['/robot_1/cmd_vel', '/robot_2/cmd_vel', '/robot_3/cmd_vel']
+obstacle_odoms: ['/obstacle_1/odometry', '/obstacle_2/odom', '/obstacle_3/odom']
+obstacle_vels: ['/obstacle_1/twist', '/obstacle_2/mobile_base/commands/velocity', '/obstacle_3/mobile_base/commands/velocity']
+#obstacle_odoms: ['/robot_1/odom', '/robot_2/odom', '/robot_3/odom']
+#obstacle_vels: ['/robot_1/cmd_vel', '/robot_2/cmd_vel', '/robot_3/cmd_vel']
 
-obstacle_delays: [0, 1, 1]
+obstacle_delays: [0, 1, 2]
 

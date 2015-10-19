@@ -90,12 +90,12 @@ int main(int argc, char** argv)
   std::vector< ros::Subscriber > subs_obs;
   for(uint8_t i=0;i<ob_odoms.size();i++)
   {
-    ros::Subscriber sub_ob = handle.subscribe<nav_msgs::Odometry>(ob_odoms.at(i), 100, boost::bind(updateOtherRobotCb, _1, ob_odoms.at(i)));
+    ros::Subscriber sub_ob = handle.subscribe<nav_msgs::Odometry>(ob_odoms.at(i), 1, boost::bind(updateOtherRobotCb, _1, ob_odoms.at(i)));
     subs_obs.push_back(sub_ob);
   } // end for
 
   //Publishers
-  pub_obj = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1000);
+  pub_obj = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
 
   //Timers
   ros::Timer timer = handle.createTimer(ros::Duration(1.f / rate), publishList);
