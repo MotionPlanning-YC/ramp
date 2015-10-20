@@ -48,8 +48,6 @@ class Planner {
     // and the resolution rate for the trajectories
     Population                          population_;
     Population                          population_at_cc_;
-    Population                          transPopulation_;
-    Population                          transPopulation_at_cc_;
     const float                         resolutionRate_;
     
     // Hold the start and goal configurations
