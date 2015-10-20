@@ -50,13 +50,13 @@ void Population::replace(const uint8_t i, const RampTrajectory trajec)
   if(i < trajectories_.size()) 
   {
     trajectories_.at(i) = trajec;
-    paths_.at(i) = trajec.path_;
+    paths_.at(i) = trajec.holonomic_path_;
   }
   else 
   {
     ROS_WARN("Replacing trajectory at index %i, but population size = %lu\n", (int)i, trajectories_.size());
     trajectories_.push_back(trajec);
-    paths_.push_back(trajec.path_);  
+    paths_.push_back(trajec.holonomic_path_);  
   }
 }
 
@@ -72,7 +72,7 @@ void Population::replaceAll(const std::vector<RampTrajectory> new_pop)
   paths_.clear();
   for(uint8_t i=0;i<new_pop.size();i++) 
   {
-    paths_.push_back(new_pop.at(i).path_);
+    paths_.push_back(new_pop.at(i).holonomic_path_);
   }
 } // End replaceAll
 
@@ -377,7 +377,7 @@ const int Population::add(const RampTrajectory rt)
   if(isSubPopulation_ || trajectories_.size() < maxSize_) 
   {
     trajectories_.push_back (rt);  
-    paths_.push_back        (rt.path_);
+    paths_.push_back        (rt.holonomic_path_);
     
     //ROS_INFO("In if isSubPopulation_ || trajectories_.size() < maxSize_");
     //ROS_INFO("Exiting Population::add");

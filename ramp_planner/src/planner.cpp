@@ -603,7 +603,8 @@ const uint8_t Planner::getNumThrowawayPoints(const RampTrajectory traj, const ro
  * For each knot point in a path, it will remove the knot point if
  * its time_from_start is <= the Duration argument
  * */
-const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionState start, ros::Duration dur) const {
+const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionState start, ros::Duration dur) const 
+{
   //ROS_INFO("In Planner::adaptPaths");
   //ROS_INFO("pop.paths.size(): %i", (int)pop.paths_.size());
   //ROS_INFO("dur.toSec(): %f", dur.toSec());
@@ -2925,7 +2926,8 @@ void Planner::doControlCycle()
 /** This method updates the population based on the latest 
  *  configuration of the robot, re-evaluates the population,
  *  and sends a new (and better) trajectory for the robot to move along */
-void Planner::controlCycleCallback(const ros::TimerEvent& e) {
+void Planner::controlCycleCallback(const ros::TimerEvent& e) 
+{
   // Restart the planning cycles
   planningCycleTimer_.stop();
   planningCycleTimer_.start();

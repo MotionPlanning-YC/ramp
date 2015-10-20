@@ -49,7 +49,8 @@ const Path RampTrajectory::getNonHolonomicPath() const
 
 
 /** Time is in seconds */
-const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const float t) const {
+const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const float t) const 
+{
   //ROS_INFO("In RampTrajectory::getPointAtTime");
   
   
@@ -422,12 +423,14 @@ void RampTrajectory::offsetPositions(const MotionState diff)
 
 
 
-const RampTrajectory RampTrajectory::clone() const { 
+const RampTrajectory RampTrajectory::clone() const 
+{ 
   return *this;
 }
 
 
-const std::string RampTrajectory::fitnessFeasibleToString() const {
+const std::string RampTrajectory::fitnessFeasibleToString() const 
+{
   std::ostringstream result;
  
   result<<"\nTrajectory ID: "<<msg_.id;
@@ -438,7 +441,8 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
   return result.str();
 }
 
-const std::string RampTrajectory::toString() const {
+const std::string RampTrajectory::toString() const 
+{
   std::ostringstream result;
   
   result<<"\nTrajectory ID: "<<msg_.id<<"\nTrajec: "<<utility_.toString(msg_);
