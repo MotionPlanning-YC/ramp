@@ -1,12 +1,15 @@
 #include "modifier.h"
 
 
-Modifier::Modifier(const ros::NodeHandle& h, const unsigned int n) : num_ops(n) {
+Modifier::Modifier(const ros::NodeHandle& h, const unsigned int n) : num_ops(n) 
+{
   h_mod_req_ = new ModificationRequestHandler(h);
 }
 
-Modifier::~Modifier() {
-  if(h_mod_req_ != 0) {
+Modifier::~Modifier() 
+{
+  if(h_mod_req_ != 0) 
+  {
     delete h_mod_req_;
     h_mod_req_ = 0;
   }
@@ -16,14 +19,16 @@ Modifier::~Modifier() {
 
 
 /** This method returns a random operator */
-const std::string Modifier::getOperator() const {
+const std::string Modifier::getOperator() const 
+{
   std::string result;  
   
   // First, randomly select an operator
   unsigned int op = rand() % num_ops;
 
   // Assign the correct name for the operator
-  switch(op) {
+  switch(op) 
+  {
 
     // Insert
     case 0:
@@ -61,7 +66,8 @@ const std::string Modifier::getOperator() const {
 
 
 /** This method generates the random paths to use for the modification operator passed in as op argument */
-const std::vector<int> Modifier::getTargets(const std::string op, const Population pop) {
+const std::vector<int> Modifier::getTargets(const std::string op, const Population pop) 
+{
   //ROS_INFO("In Modifier::getTargets");
   //ROS_INFO("op: %s", op.c_str());
   std::vector<int> result;
@@ -74,7 +80,8 @@ const std::vector<int> Modifier::getTargets(const std::string op, const Populati
 
 
   // If crossover, get a second path
-  if(op == "crossover") {
+  if(op == "crossover") 
+  {
     unsigned int i_p2;
     do { i_p2 = rand() % pop.paths_.size(); } 
     while (i_p1 == i_p2);
@@ -94,14 +101,16 @@ const std::vector<int> Modifier::getTargets(const std::string op, const Populati
  * This method builds a ModificationRequest srv 
  * For stop operator, the path can be retreived from srv
  * */
-const ramp_msgs::ModificationRequest Modifier::buildModificationRequest(const Population pop) {
+const ramp_msgs::ModificationRequest Modifier::buildModificationRequest(const Population pop) 
+{
   ramp_msgs::ModificationRequest result;
 
   result.request.op = getOperator();
 
   // Push the target paths onto the modification request
   std::vector<int> targets = getTargets(result.request.op, pop);
-  for(unsigned int i=0;i<targets.size();i++) {
+  for(unsigned int i=0;i<targets.size();i++) 
+  {
     //std::cout<<"\nTarget index: "<<targets.at(i);
     //std::cout<<"\nPath "<<targets.at(i)<<" size: "<<pop.paths_.at(targets.at(i)).size()<<"\n";
     result.request.paths.push_back(
@@ -115,7 +124,8 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest(const Po
 
 
 /** This method performs all the tasks for path modification */
-const std::vector<Path> Modifier::perform(const Population pop) {
+const std::vector<Path> Modifier::perform(const Population pop) 
+{
   //ROS_INFO("In Modifier::perform");
   std::vector<Path> result;
  
@@ -124,19 +134,23 @@ const std::vector<Path> Modifier::perform(const Population pop) {
   //ROS_INFO("ModificationResult built"); 
 
   // Check if the operation changes the path
-  if(mr.request.op == "stop") {
+  if(mr.request.op == "stop") 
+  {
     // Call stop with the path chosen by buildModificationRequest
     //Path temp = stop(mr.request.paths.at(0));
     //result.push_back(temp);
   }
 
-  else {
+  else 
+  {
 
     // If the request was successful
-    if(h_mod_req_->request(mr)) {
+    if(h_mod_req_->request(mr)) 
+    {
 
       // Push on the modified paths
-      for(unsigned int i=0;i<mr.response.mod_paths.size();i++) {
+      for(unsigned int i=0;i<mr.response.mod_paths.size();i++) 
+      {
         Path temp(mr.response.mod_paths.at(i));
         result.push_back(temp);
       }

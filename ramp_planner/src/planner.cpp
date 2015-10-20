@@ -2230,7 +2230,7 @@ const RampTrajectory Planner::requestEvaluation(const RampTrajectory traj)
 const std::vector<Path> Planner::modifyPath() 
 { 
   //ROS_INFO("About to modify a path, pop is: %s\n%s", population_.get(0).toString().c_str(), population_.get(1).toString().c_str());
-  return modifier_->perform(population_);
+  return modifier_->perform(transPopulation_);
   //return modifier_->perform(population_at_cc_);
 }
 
@@ -2282,8 +2282,8 @@ const ModificationResult Planner::modification()
   std::vector<RampTrajectory> mod_trajec = modifyTrajec();
   //ROS_INFO("Modification trajectories obtained: %i", (int)mod_trajec.size());
   
-  Population popCopy = population_;
-  Population trans_popCopy = transPopulation_;
+  Population popCopy = transPopulation_;
+  //Population trans_popCopy = transPopulation_;
   //Population popCopy = population_at_cc_;
   
 
@@ -2308,7 +2308,7 @@ const ModificationResult Planner::modification()
       if(popCopy.replacementPossible(mod_trajec.at(i)))
       {
         RampTrajectory trans = computeFullSwitch(movingOn_, mod_trajec.at(i));
-        index = trans_popCopy.add(trans);
+        index = popCopy.add(trans);
         if(index > -1)
         {
           popCopy.replace(index, mod_trajec.at(i));
@@ -2321,6 +2321,7 @@ const ModificationResult Planner::modification()
       index = popCopy.add(mod_trajec.at(i));
       if(index > -1)
       {
+        popCopy.replace(index, mod_trajec.at(i));
         result.i_modified_.push_back(index);
       } // end if added
     } // end else
@@ -2358,7 +2359,6 @@ const ModificationResult Planner::modification()
 
 
   result.popNew_    = popCopy;
-  result.transNew_  = trans_popCopy;
   ////ROS_INFO("After modification, pop now: %s", result.popNew_.toString().c_str());
 
   //ROS_INFO("Exiting Planner::modification");
@@ -2519,9 +2519,9 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
       // moving on a curve, which is what the previous one checks?
       // If not first PC and best trajectory has no curve
       // best curve has a curve and we aren't moving on it
-      if(population_.getBest().msg_.curves.size() == 0    || 
-          ( population_.getBest().msg_.curves.size() > 0  && 
-            population_.getBest().msg_.curves.at(0).u_0 < 0.0001))
+      if(transPopulation_.getBest().msg_.curves.size() == 0    || 
+          ( transPopulation_.getBest().msg_.curves.size() > 0  && 
+            transPopulation_.getBest().msg_.curves.at(0).u_0 < 0.0001))
       {
           //ROS_INFO("Doing error correction");
           //ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
@@ -2544,10 +2544,10 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
               transPopulation_.get(0).toString().c_str(),
               transPopulation_.get(1).toString().c_str());*/
 
-          population_       = offsetPopulation(population_at_cc_, diff);
+          //population_       = offsetPopulation(population_at_cc_, diff);
           transPopulation_  = offsetPopulation(transPopulation_at_cc_, diff);
 
-          population_       = evaluatePopulation(population_);
+          //population_       = evaluatePopulation(population_);
           transPopulation_  = evaluatePopulation(transPopulation_);
 
           /*//ROS_INFO("After doing error correction, new pop: %s\n%s\n\n\nnew trans pop: %s\n%s", 
@@ -2597,8 +2597,7 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
           //&& !population_.get(0).path_.at(0).motionState_.equals(goal_))
       {
         //ROS_INFO("In if trajectory added");
-        population_       = mod.popNew_;
-        transPopulation_  = mod.transNew_;
+        transPopulation_       = mod.popNew_;
         //population_at_cc_ = mod.popNew_;
         //transPopulation_at_cc_ = mod.transNew_;
         
@@ -2887,7 +2886,7 @@ void Planner::doControlCycle()
       transPopulation_.get(1).toString().c_str());
   //ROS_INFO("Time spent getting trans pop: %f", d_trans.toSec());
 
-  population_at_cc_       = population_;
+  //population_at_cc_       = population_;
   transPopulation_at_cc_  = transPopulation_;
 
 
