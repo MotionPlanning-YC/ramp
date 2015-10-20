@@ -1,6 +1,7 @@
 #include "ramp_trajectory.h"
 
-RampTrajectory::RampTrajectory(unsigned int id) {
+RampTrajectory::RampTrajectory(unsigned int id) 
+{
   msg_.id = id;
   msg_.feasible = true;
   msg_.fitness = -1;  
@@ -19,7 +20,7 @@ const bool RampTrajectory::equals(const RampTrajectory& other) const
     return true;
   }
 
-  return path_.equals(other.path_);
+  return holonomic_path_.equals(other.holonomic_path_);
 }
 
 
@@ -28,10 +29,12 @@ const double RampTrajectory::getT() const
   return msg_.trajectory.points.at(msg_.trajectory.points.size()-1).time_from_start.toSec();
 }
 
-const Path RampTrajectory::getPath() const {
+const Path RampTrajectory::getNonHolonomicPath() const 
+{
   Path result;
 
-  for(unsigned int i=0;i<msg_.i_knotPoints.size();i++) {
+  for(unsigned int i=0;i<msg_.i_knotPoints.size();i++) 
+  {
 
     MotionState ms(msg_.trajectory.points.at( msg_.i_knotPoints.at(i)));
   
@@ -71,11 +74,12 @@ const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const
 
 /** Returns the direction of the trajectory, i.e. the
 * orientation the base needs to move on the trajectory */
-const double RampTrajectory::getDirection() const {
+const double RampTrajectory::getDirection() const 
+{
   //std::cout<<"\nIn getDirection\n";
-  std::vector<double> a = path_.start_.motionState_.msg_.positions;
+  std::vector<double> a = holonomic_path_.start_.motionState_.msg_.positions;
 
-  std::vector<double> b = path_.all_.at(1).motionState_.msg_.positions;
+  std::vector<double> b = holonomic_path_.all_.at(1).motionState_.msg_.positions;
 
     //msg_.trajectory.points.at(msg_.i_knotPoints.at(2)) :
     //msg_.trajectory.points.at(msg_.i_knotPoints.at(1)) ;
@@ -88,7 +92,8 @@ const double RampTrajectory::getDirection() const {
 
 // Inclusive
 // TODO: Change for loop to only use integers because it's a pain to deal with floating point +,-
-const RampTrajectory RampTrajectory::getSubTrajectory(const float t) const {
+const RampTrajectory RampTrajectory::getSubTrajectory(const float t) const 
+{
   //ROS_INFO("In RampTrajectory::getSubTrajectory");
   //ROS_INFO("t: %f size: %i", t, (int)msg_.trajectory.points.size());
   ramp_msgs::RampTrajectory rt;
@@ -373,9 +378,9 @@ void RampTrajectory::offsetPositions(const MotionState diff)
   } // end outter for
   //ROS_INFO("Done offsetting points");
 
-  if(path_.size() > 0)
+  if(holonomic_path_.size() > 0)
   {
-    path_.offsetPositions(diff);
+    holonomic_path_.offsetPositions(diff);
   }
   else
   {
@@ -390,16 +395,16 @@ void RampTrajectory::offsetPositions(const MotionState diff)
     ROS_WARN("temp.curve.at(0): %s", utility_.toString(msg_.curves.at(0)).c_str());
   }*/
     
-  for(uint8_t c=0;c<msg_.curves.size() && path_.size() > 2;c++)
+  for(uint8_t c=0;c<msg_.curves.size() && holonomic_path_.size() > 2;c++)
   {
-    /*ROS_INFO("Fixing curve %i, path_.size(): %i segmentPoints.size(): %i controlPoints.size(): %i", 
+    /*ROS_INFO("Fixing curve %i, holonomic_path_.size(): %i segmentPoints.size(): %i controlPoints.size(): %i", 
         c, 
-        path_.size(), 
+        holonomic_path_.size(), 
         (int)msg_.curves.at(c).segmentPoints.size(), 
         (int)msg_.curves.at(c).controlPoints.size());*/
 
-    msg_.curves.at(c).segmentPoints.at(1) = path_.at(1).motionState_.msg_;
-    msg_.curves.at(c).segmentPoints.at(2) = path_.at(2).motionState_.msg_;
+    msg_.curves.at(c).segmentPoints.at(1) = holonomic_path_.at(1).motionState_.msg_;
+    msg_.curves.at(c).segmentPoints.at(2) = holonomic_path_.at(2).motionState_.msg_;
     
     MotionState c0(msg_.curves.at(c).controlPoints.at(0));
     MotionState c1(msg_.curves.at(c).controlPoints.at(1));
@@ -426,8 +431,8 @@ const std::string RampTrajectory::fitnessFeasibleToString() const {
   std::ostringstream result;
  
   result<<"\nTrajectory ID: "<<msg_.id;
-  //result<<"\n Path: "<<bezierPath_.toString();
-  result<<"\n Path: "<<getPath().toString();
+  result<<"\n Holonomic Path: "<<holonomic_path_.toString();
+  result<<"\n Non-holonomic Path: "<<getNonHolonomicPath().toString();
   result<<"\n t_start: "<<msg_.t_start.toSec()<<" Fitness: "<<msg_.fitness<<" Feasible: "<<(bool)msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
 
   return result.str();

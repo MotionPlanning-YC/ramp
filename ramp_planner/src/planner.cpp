@@ -770,20 +770,20 @@ const ramp_msgs::BezierCurve Planner::handleCurveEnd(const RampTrajectory traj) 
   // Else if there was only 1 curve, check the path and set the segment points for the next one
   else
   {
-    if(traj.path_.size() > 3)
+    if(traj.holonomic_path_.size() > 3)
     {
-      ////ROS_INFO("traj.path: %s", traj.path_.toString().c_str());
-      if(traj.path_.size() == 3)
+      ////ROS_INFO("traj.path: %s", traj.holonomic_path_.toString().c_str());
+      if(traj.holonomic_path_.size() == 3)
       {
 
       } // end if size==3
-      if(traj.path_.size() < 4)
+      if(traj.holonomic_path_.size() < 4)
       {
-        //ROS_ERROR("traj.path.size(): %i", (int)traj.path_.size());
+        //ROS_ERROR("traj.path.size(): %i", (int)traj.holonomic_path_.size());
       }
-      result.segmentPoints.push_back(traj.path_.at(1).motionState_.msg_);
-      result.segmentPoints.push_back(traj.path_.at(2).motionState_.msg_);
-      result.segmentPoints.push_back(traj.path_.at(3).motionState_.msg_);
+      result.segmentPoints.push_back(traj.holonomic_path_.at(1).motionState_.msg_);
+      result.segmentPoints.push_back(traj.holonomic_path_.at(2).motionState_.msg_);
+      result.segmentPoints.push_back(traj.holonomic_path_.at(3).motionState_.msg_);
     } // end if path.size() > 2
   } // end if only one curve
 
@@ -1468,8 +1468,8 @@ const ramp_msgs::BezierCurve Planner::replanCurve(const RampTrajectory trajec, c
   ramp_msgs::BezierCurve result = trajec.msg_.curves.at(0);
 
   // Get length of original curve's first segment
-  double delta_x = trajec.path_.all_.at(1).motionState_.msg_.positions.at(0) - result.segmentPoints.at(0).positions.at(0);
-  double delta_y = trajec.path_.all_.at(1).motionState_.msg_.positions.at(1) - result.segmentPoints.at(0).positions.at(1);
+  double delta_x = trajec.holonomic_path_.all_.at(1).motionState_.msg_.positions.at(0) - result.segmentPoints.at(0).positions.at(0);
+  double delta_y = trajec.holonomic_path_.all_.at(1).motionState_.msg_.positions.at(1) - result.segmentPoints.at(0).positions.at(1);
   double l = sqrt( pow(delta_x, 2) + pow(delta_y, 2) );
 
   double theta = ms_start.msg_.positions.at(2);
@@ -1506,11 +1506,11 @@ const RampTrajectory Planner::replanTrajec(const RampTrajectory trajec, const Mo
   //ROS_INFO("result: %s", result.toString().c_str());
   //ROS_INFO("result.curves.size: %i", (int)result.msg_.curves.size());
 
-  result.path_.start_ = ms_start;
+  result.holonomic_path_.start_ = ms_start;
   //ROS_INFO("ms_start: %s", ms_start.toString().c_str());
 
-  result.path_.all_.erase( result.path_.all_.begin() );
-  result.path_.all_.insert( result.path_.all_.begin(), ms_start);
+  result.holonomic_path_.all_.erase( result.holonomic_path_.all_.begin() );
+  result.holonomic_path_.all_.insert( result.holonomic_path_.all_.begin(), ms_start);
 
   double v = sqrt(  pow( ms_start.msg_.velocities.at(0), 2) + 
                     pow( ms_start.msg_.velocities.at(1), 2) );
@@ -1523,9 +1523,9 @@ const RampTrajectory Planner::replanTrajec(const RampTrajectory trajec, const Mo
       result.msg_.curves.at(0).u_0 < 0.001      ) 
   {
     result.msg_.curves.at(0) = replanCurve( trajec, ms_start );
-    result.path_.all_.erase(result.path_.all_.begin()+1);
+    result.holonomic_path_.all_.erase(result.holonomic_path_.all_.begin()+1);
     MotionState m(result.msg_.curves.at(0).segmentPoints.at(1));
-    result.path_.all_.insert(result.path_.all_.begin()+1, m);
+    result.holonomic_path_.all_.insert(result.holonomic_path_.all_.begin()+1, m);
    
   }
   else 
@@ -1538,7 +1538,7 @@ const RampTrajectory Planner::replanTrajec(const RampTrajectory trajec, const Mo
     }
   }
 
-  ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(result.path_, result.msg_.curves, trajec.msg_.id);
+  ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(result.holonomic_path_, result.msg_.curves, trajec.msg_.id);
 
   result = requestTrajectory(tr, result.msg_.id);
 
@@ -1693,7 +1693,7 @@ const RampTrajectory Planner::computeFullSwitch(const RampTrajectory from, const
   if(trajecs.size() > 0)
   {
     RampTrajectory T_new = trajecs.at(1);
-    Path p = T_new.path_;
+    Path p = T_new.holonomic_path_;
     ////ROS_INFO("Before eval, T_new.path: %s", T_new.path_.toString().c_str());
 
     // Evaluate T_new
@@ -1702,7 +1702,7 @@ const RampTrajectory Planner::computeFullSwitch(const RampTrajectory from, const
 
     // Set misc members
     T_new.transitionTraj_   = trajecs.at(0).msg_;
-    T_new.path_             = p;
+    T_new.holonomic_path_             = p;
 
     // Set result
     result                  = T_new;
@@ -1781,7 +1781,7 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   // Removed this section because we changed from getPath() to the actual path_ member
   // Else if there's self-rotation at the beginning
   else if(to.msg_.i_knotPoints.size() > 2 && 
-      utility_.positionDistance(  to.path_.start_.motionState_.msg_.positions, 
+      utility_.positionDistance(  to.holonomic_path_.start_.motionState_.msg_.positions, 
                                   to.msg_.trajectory.points.at(
                                     to.msg_.i_knotPoints.at(1)).positions ) 
                                 < 0.1)
@@ -1973,7 +1973,7 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
 
       // Set the proper ID, path, and t_starts
       full.msg_.id            = to.msg_.id;
-      full.path_              = to.path_;
+      full.holonomic_path_              = to.holonomic_path_;
 
       //double T = movingOn_.msg_.trajectory.points.at(movingOn_.msg_.trajectory.points.size()-1).time_from_start.toSec();
       //full.msg_.t_start       = c_pc_ > 0 ? ros::Duration(t_fixed_cc_ - (T - t)) : ros::Duration(t);
@@ -2064,7 +2064,7 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
   // Removed this section because we changed from getPath() to the actual path_ member
   // Else if there's self-rotation at the beginning
   else if(trj_target.msg_.i_knotPoints.size() > 2 && 
-      utility_.positionDistance(  trj_target.path_.start_.motionState_.msg_.positions, 
+      utility_.positionDistance(  trj_target.holonomic_path_.start_.motionState_.msg_.positions, 
                                   trj_target.msg_.trajectory.points.at(
                                     trj_target.msg_.i_knotPoints.at(1)).positions ) 
                                 < 0.1)
@@ -2151,7 +2151,7 @@ const RampTrajectory Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr
     result.msg_.t_start = ros::Duration(t_fixed_cc_);
 
     // Set the paths (straight-line and bezier)
-    result.path_        = tr.request.path;
+    result.holonomic_path_        = tr.request.path;
 
     // *** Set the previous knot point
     //result.ms_prevSP_ = tr.request.path.points.at(0).motionState;
@@ -2185,7 +2185,8 @@ const RampTrajectory Planner::requestTrajectory(const Path p, const int id) {
 
 
 /** Request an evaluation */
-const RampTrajectory Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er) {
+const RampTrajectory Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er) 
+{
   //ROS_INFO("In Planner::requestEvaluation");
   RampTrajectory result = er.request.trajectory; 
   //ROS_INFO("result.t_start: %f", result.msg_.t_start.toSec());
@@ -2196,7 +2197,8 @@ const RampTrajectory Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er
     result.msg_.feasible          = er.response.feasible;
     result.msg_.t_firstCollision  = er.response.t_firstCollision;
   }
-  else {
+  else 
+  {
     ROS_ERROR("An error occurred when evaluating a trajectory");
   }
   
@@ -2205,12 +2207,13 @@ const RampTrajectory Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er
 }
 
 
-const RampTrajectory Planner::requestEvaluation(const RampTrajectory traj) {
+const RampTrajectory Planner::requestEvaluation(const RampTrajectory traj) 
+{
   ramp_msgs::EvaluationRequest er = buildEvaluationRequest(traj);
   RampTrajectory result           = requestEvaluation(er);
 
   // Set non-evaluation related members
-  result.path_                = traj.path_;
+  result.holonomic_path_                = traj.holonomic_path_;
   //result.bezierPath_          = traj.bezierPath_;
   result.msg_.i_subPopulation = traj.msg_.i_subPopulation; 
 
@@ -2245,7 +2248,8 @@ const std::vector<RampTrajectory> Planner::modifyTrajec()
 
 
   // For each targeted path,
-  for(unsigned int i=0;i<modded_paths.size();i++) {
+  for(unsigned int i=0;i<modded_paths.size();i++) 
+  {
     //std::cout<<"\nramp_planner: Modifying trajectory "<<(int)i;
     
     // Get trajectory
@@ -2806,7 +2810,7 @@ void Planner::doControlCycle()
   RampTrajectory bestT = transPopulation_.getBest();
 
   //ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
-  MotionState diff = bestT.path_.at(0).motionState_.subtractPosition(latestUpdate_);
+  MotionState diff = bestT.holonomic_path_.at(0).motionState_.subtractPosition(latestUpdate_);
   ////ROS_INFO("diff: %s", diff.toString().c_str());
 
   // Send the best trajectory and set movingOn

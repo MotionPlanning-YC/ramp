@@ -5,7 +5,8 @@
 #include "path.h"
 #include "utility.h"
 
-class RampTrajectory {
+class RampTrajectory 
+{
   public:
     
     explicit RampTrajectory(unsigned int id=0);
@@ -13,7 +14,7 @@ class RampTrajectory {
     ~RampTrajectory() {}
     
     ramp_msgs::RampTrajectory msg_;
-    Path                      path_;
+    Path                      holonomic_path_;
     ramp_msgs::MotionState    ms_prevSP_;
     ramp_msgs::RampTrajectory transitionTraj_;
 
@@ -21,7 +22,7 @@ class RampTrajectory {
     const bool           equals(const RampTrajectory& other)    const;
     const double         getIndexOfMs(const MotionState ms)     const;
     const double         getT()                                 const;
-    const Path           getPath()                              const;
+    const Path           getNonHolonomicPath()                  const;
     const double         getDirection()                         const;
     const std::string    fitnessFeasibleToString()              const;
     const std::string    toString()                             const;
