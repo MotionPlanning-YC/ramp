@@ -235,7 +235,7 @@ void MobileRobot::sendTwist() const
   // If we have the simulation up, publish to cmd_vel
   //if(sim_) 
   //{
-    //pub_cmd_vel_.publish(twist_);
+    pub_cmd_vel_.publish(twist_);
   //}
   
   //ROS_INFO("Exiting MobileRobot::sendTwist()");
@@ -366,8 +366,7 @@ void MobileRobot::moveOnTrajectory()
         //ROS_INFO("initial_theta_: %f motion_state_.positions.at(2): %f", initial_theta_, motion_state_.positions.at(2));
         float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
         float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
-        //ROS_INFO("actual_theta: %f orientations[%i]: %f dist: %f", actual_theta, num_traveled_, 
-            //orientations_.at(num_traveled_), dist);
+        ROS_INFO("actual_theta: %f orientations[%i]: %f dist: %f", actual_theta, num_traveled_, orientations_.at(num_traveled_), dist);
         twist_.angular.z = dist;
       }
 

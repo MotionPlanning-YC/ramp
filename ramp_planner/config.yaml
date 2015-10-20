@@ -1,4 +1,4 @@
-population_size: 7
+population_size: 2
 
 sub_populations: false 
 
@@ -8,7 +8,7 @@ evaluations: true
 
 seed_population: false 
 
-gens_before_control_cycle: 60 
+gens_before_control_cycle: 0 
 
 planning_cycle_rate: 20
 
