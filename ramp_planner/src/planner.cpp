@@ -9,7 +9,7 @@ Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalT
   cc_started_(false), c_pc_(0), transThreshold_(1./50.), num_cc_(0), L_(0.33), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), 
   stop_(false), moving_on_coll_(false)
 {
-  planningCycle_          = ros::Duration(1.f / 20.f);
+  //planningCycle_          = ros::Duration(1.f / 20.f);
   imminentCollisionCycle_ = ros::Duration(1.f / 10.f);
   generationsPerCC_       = controlCycle_.toSec() / planningCycle_.toSec();
 }
@@ -1168,7 +1168,8 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
     ROS_ERROR("Odometry message from ramp_control does not have all DOFs: %s", 
         utility_.toString(msg).c_str());
   }
-  else {
+  else 
+  {
     latestUpdate_ = msg;
 
     // Transform configuration from odometry to world coordinates
@@ -1247,10 +1248,9 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
                                      &Planner::controlCycleCallback, this);
   controlCycleTimer_.stop();
 
-  planningCycle_      = ros::Duration(1.f/t_pc_rate);
-  planningCycleTimer_ = h.createTimer(ros::Duration(planningCycle_), 
-                                      &Planner::planningCycleCallback, this);
-  planningCycleTimer_.stop();
+  //planningCycle_      = ros::Duration(1.f/t_pc_rate);
+  //planningCycleTimer_ = h.createTimer(ros::Duration(planningCycle_), &Planner::planningCycleCallback, this);
+  //planningCycleTimer_.stop();
 
   imminentCollisionTimer_ = h.createTimer(ros::Duration(imminentCollisionCycle_), 
                                           &Planner::imminentCollisionCallback, this);
@@ -1446,7 +1446,8 @@ const std::vector<MotionState> Planner::setMi(const RampTrajectory trj_current) 
  
   // Set m_i
   // Each m_i will be start + (delta_m_inc * i)
-  for(int i=0;i<generationsPerCC_;i++) {
+  for(int i=0;i<generationsPerCC_;i++) 
+  {
     MotionState temp = movingOn_.getPointAtTime(planningCycle_.toSec()*(i+1));
     
     result.push_back(temp);
@@ -2422,7 +2423,7 @@ const Population Planner::offsetPopulation(const Population pop, const MotionSta
 
 const MotionState Planner::errorCorrection()  
 {
-  //ROS_INFO("In Planner::errorCorrection");
+  ROS_INFO("In Planner::errorCorrection");
   MotionState result;
 
   //ROS_INFO("c_pc: %i", (int)c_pc_);
@@ -2432,11 +2433,16 @@ const MotionState Planner::errorCorrection()
   //ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
   
   // Get the difference between robot's state and what state it should be at
-  MotionState diff = m_i_.at(c_pc_).subtractPosition(latestUpdate_, true);
+  ros::Duration t_since_cc = ros::Time::now() - t_prevCC_;
+  //MotionState diff = m_i_.at(t_since_cc.toSec()).subtractPosition(latestUpdate_, true);
+  MotionState diff = movingOnCC_.getPointAtTime(t_since_cc.toSec());
+  ROS_INFO("Diff before subtract: %s", diff.toString().c_str());
+  diff = diff.subtractPosition(latestUpdate_, true);
+  ROS_INFO("Diff after subtract: %s", diff.toString().c_str());
   error_correct_val_pos_.push_back( sqrt( pow(diff.msg_.positions.at(0), 2) + pow(diff.msg_.positions.at(1),2) ) );
   error_correct_val_or_.push_back(diff.msg_.positions.at(2));
  
-  //ROS_INFO("m_cc: %s\ndiff: %s", m_cc_.toString().c_str(), diff.toString().c_str());
+  ROS_INFO("m_cc: %s\ndiff: %s", m_cc_.toString().c_str(), diff.toString().c_str());
 
   // subtractPosition that difference from startPlanning
   result = m_cc_.subtractPosition(diff, true);
@@ -2445,14 +2451,16 @@ const MotionState Planner::errorCorrection()
   result.msg_.positions.at(2) = latestUpdate_.msg_.positions.at(2);
 
 
-  //ROS_INFO("Exiting Planner::errorCorrection");
+  ROS_INFO("result: %s", result.toString().c_str());
+  ROS_INFO("Exiting Planner::errorCorrection");
   return result;
 }
 
 
 
 
-void Planner::planningCycleCallback(const ros::TimerEvent& e) {
+void Planner::planningCycleCallback() 
+{
   ros::Time t_start = ros::Time::now();
   //ROS_INFO("*************************************************");
   ROS_INFO("Planning cycle occurring, generation %i", generation_);
@@ -2466,141 +2474,144 @@ void Planner::planningCycleCallback(const ros::TimerEvent& e) {
  
   MotionState diff;
 
-  // Make sure not too many PC occur before next CC
-  if(!cc_started_ || c_pc_ < generationsPerCC_) 
+
+  /*
+   * Error correction
+   */
+  // Must have started control cycles
+  // c_pc < total number of PC's per CC
+  // errorReduction is true
+  // Driving straight
+  if(errorReduction_ && cc_started_ && generation_ % 5 == 0 &&
+      fabs(latestUpdate_.msg_.velocities.at(2)) < 0.1)
   {
+    ros::Time t_start_error = ros::Time::now();
 
-    /*
-     * Error correction
-     */
-    // Must have started control cycles
-    // c_pc < total number of PC's per CC
-    // errorReduction is true
-    // Driving straight
-    if(cc_started_ && c_pc_ < generationsPerCC_ && generation_ % 2 == 0 &&
-        errorReduction_ && fabs(latestUpdate_.msg_.velocities.at(2)) < 0.1)
+    // TODO: Is this if statement needed? Isn't it essentially checking that we are not
+    // moving on a curve, which is what the previous one checks?
+    // If not first PC and best trajectory has no curve
+    // best curve has a curve and we aren't moving on it
+    if(population_.getBest().msg_.curves.size() == 0    || 
+        ( population_.getBest().msg_.curves.size() > 0  && 
+          population_.getBest().msg_.curves.at(0).u_0 < 0.0001))
     {
-      ros::Time t_start_error = ros::Time::now();
+      ROS_INFO("Doing error correction");
+      ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
+      // Do error correction
+      ros::Duration t_since_cc = ros::Time::now() - t_prevCC_;
+      ROS_INFO("t_since_cc: %f", t_since_cc.toSec());
+      ROS_INFO("movingOnCC_: %s", movingOnCC_.toString().c_str());
+      diff = movingOnCC_.getPointAtTime(t_since_cc.toSec());
+      ROS_INFO("movingOnCC_ at t_since_cc: %s", diff.toString().c_str());
+      diff = diff.subtractPosition(latestUpdate_, true);
+      startPlanning_ = errorCorrection();
+      ROS_INFO("diff: %s", diff.toString().c_str());
 
-      // TODO: Is this if statement needed? Isn't it essentially checking that we are not
-      // moving on a curve, which is what the previous one checks?
-      // If not first PC and best trajectory has no curve
-      // best curve has a curve and we aren't moving on it
-      if(population_.getBest().msg_.curves.size() == 0    || 
-          ( population_.getBest().msg_.curves.size() > 0  && 
-            population_.getBest().msg_.curves.at(0).u_0 < 0.0001))
-      {
-          //ROS_INFO("Doing error correction");
-          //ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
-          // Do error correction
-          diff = m_i_.at(c_pc_).subtractPosition(latestUpdate_, true);
-          startPlanning_ = errorCorrection();
-          //ROS_INFO("diff: %s", diff.toString().c_str());
+      ////ROS_INFO("Updating movingOn");
+      Path p(latestUpdate_, startPlanning_);
+      movingOn_ = movingOnCC_;
+      movingOn_.offsetPositions(diff);
+      
+      /*//ROS_INFO("Corrected startPlanning_: %s", startPlanning_.toString().c_str());
+      //ROS_INFO("Corrected movingOn_: %s", movingOn_.toString().c_str());*/
 
-          ////ROS_INFO("Updating movingOn");
-          Path p(latestUpdate_, startPlanning_);
-          movingOn_ = movingOnCC_;
-          movingOn_.offsetPositions(diff);
-          
-          /*//ROS_INFO("Corrected startPlanning_: %s", startPlanning_.toString().c_str());
-          //ROS_INFO("Corrected movingOn_: %s", movingOn_.toString().c_str());*/
+      /*//ROS_INFO("Before offset, pop: %s\n%stransPop: %s\n%s", 
+          population_.get(0).toString().c_str(),
+          population_.get(1).toString().c_str(),
+          population_.get(0).toString().c_str(),
+          population_.get(1).toString().c_str());*/
 
-          /*//ROS_INFO("Before offset, pop: %s\n%stransPop: %s\n%s", 
-              population_.get(0).toString().c_str(),
-              population_.get(1).toString().c_str(),
-              population_.get(0).toString().c_str(),
-              population_.get(1).toString().c_str());*/
+      population_  = offsetPopulation(population_at_cc_, diff);
 
-          population_  = offsetPopulation(population_at_cc_, diff);
+      population_  = evaluatePopulation(population_);
 
-          population_  = evaluatePopulation(population_);
+      /*//ROS_INFO("After doing error correction, new pop: %s\n%s\n\n\nnew trans pop: %s\n%s", 
+          population_.get(0).toString().c_str(),
+          population_.get(1).toString().c_str(),
+          population_.get(0).toString().c_str(),
+          population_.get(1).toString().c_str());*/
 
-          /*//ROS_INFO("After doing error correction, new pop: %s\n%s\n\n\nnew trans pop: %s\n%s", 
-              population_.get(0).toString().c_str(),
-              population_.get(1).toString().c_str(),
-              population_.get(0).toString().c_str(),
-              population_.get(1).toString().c_str());*/
-
-      } // end if doing error correction
-      /*else
-      {
-        //ROS_INFO("Not doing error correction");
-        //ROS_INFO("c_pc: %i population_.getBest().msg_.curves.size(): %i", c_pc_, (int)population_.getBest().msg_.curves.size());
-        //ROS_INFO("population_.getBest().msg_.curves.at(0).u_0: %f", population_.getBest().msg_.curves.at(0).u_0); 
-      }*/
-
-      error_correct_durs_.push_back(ros::Time::now() - t_start_error);
-    } // end if doing error correction 
+    } // end if doing error correction
     /*else
     {
       //ROS_INFO("Not doing error correction");
-      //ROS_INFO("cc_started_: %s c_pc_: %i errorReduction_: %s fabs(latestUpdate_.msg_.velocities.at(2)): %f", 
-          cc_started_ ? "True" : "False", c_pc_,
-          errorReduction_ ? "True" : "False", 
-          fabs(latestUpdate_.msg_.velocities.at(2)));
+      //ROS_INFO("c_pc: %i population_.getBest().msg_.curves.size(): %i", c_pc_, (int)population_.getBest().msg_.curves.size());
+      //ROS_INFO("population_.getBest().msg_.curves.at(0).u_0: %f", population_.getBest().msg_.curves.at(0).u_0); 
     }*/
 
+    error_correct_durs_.push_back(ros::Time::now() - t_start_error);
+  } // end if doing error correction 
+  /*else
+  {
+    //ROS_INFO("Not doing error correction");
+    //ROS_INFO("cc_started_: %s c_pc_: %i errorReduction_: %s fabs(latestUpdate_.msg_.velocities.at(2)): %f", 
+        cc_started_ ? "True" : "False", c_pc_,
+        errorReduction_ ? "True" : "False", 
+        fabs(latestUpdate_.msg_.velocities.at(2)));
+  }*/
 
 
-    /*
-     * Modification
-     */
-    if(modifications_) 
+
+  /*
+   * Modification
+   */
+  if(modifications_) 
+  {
+    //ROS_INFO("*****************************");
+    //ROS_INFO("Performing modification");
+    ros::Time t = ros::Time::now();
+    ModificationResult mod = modification();
+    mutate_durs_.push_back(ros::Time::now() - t);
+    //ROS_INFO("Done with modification");
+    //ROS_INFO("*****************************");
+
+
+    // cc_started needed? still want to replace if they haven't started, only need cc_started when switching 
+    // TODO: cc_started used to be a predicate here
+    if(mod.i_modified_.size() > 0) 
+        //&& !population_.get(0).path_.at(0).motionState_.equals(goal_))
     {
-      //ROS_INFO("*****************************");
-      //ROS_INFO("Performing modification");
-      ros::Time t = ros::Time::now();
-      ModificationResult mod = modification();
-      mutate_durs_.push_back(ros::Time::now() - t);
-      //ROS_INFO("Done with modification");
-      //ROS_INFO("*****************************");
+      //ROS_INFO("In if trajectory added");
+      population_       = mod.popNew_;
+      
+      controlCycle_ = population_.getBest().msg_.t_start;
+      controlCycleTimer_.setPeriod(population_.getBest().msg_.t_start, false);
+      //ROS_INFO("Modification: new CC timer: %f", population_.getBest().msg_.t_start.toSec());
+    } // end if trajectory added
+    /*else
+    {
+      ROS_INFO("No trajectory added");
+    }*/
+  } // end if modifications
 
 
-      // cc_started needed? still want to replace if they haven't started, only need cc_started when switching 
-      // TODO: cc_started used to be a predicate here
-      if(mod.i_modified_.size() > 0) 
-          //&& !population_.get(0).path_.at(0).motionState_.equals(goal_))
-      {
-        //ROS_INFO("In if trajectory added");
-        population_       = mod.popNew_;
-        
-        controlCycle_ = population_.getBest().msg_.t_start;
-        controlCycleTimer_.setPeriod(population_.getBest().msg_.t_start, false);
-        //ROS_INFO("Modification: new CC timer: %f", population_.getBest().msg_.t_start.toSec());
-      } // end if trajectory added
-      /*else
-      {
-        ROS_INFO("No trajectory added");
-      }*/
-    } // end if modifications
+
+  /* 
+   * Finish up
+   */
+  // t=t+1
+  generation_++;
+  c_pc_++;
+
+  //if(cc_started_)
+  //{
+    sendPopulation(population_);
+  //}
+  //else
+  //{
+    //sendPopulation(population_);
+  //}
+  //ROS_INFO("population.bestID: %i", population_.calcBestIndex());
+
+  //ROS_INFO("Pop: %s", population_.toString().c_str());
+  /*//ROS_INFO("Exiting PC at time: %f", ros::Time::now().toSec());
+  //ROS_INFO("Time spent in PC: %f", (ros::Time::now() - t).toSec());*/
 
 
- 
-    /* 
-     * Finish up
-     */
-    // t=t+1
-    generation_++;
-    c_pc_++;
-
-    //if(cc_started_)
-    //{
-      sendPopulation(population_);
-    //}
-    //else
-    //{
-      //sendPopulation(population_);
-    //}
-    //ROS_INFO("population.bestID: %i", population_.calcBestIndex());
- 
-    //ROS_INFO("Pop: %s", population_.toString().c_str());
-    /*//ROS_INFO("Exiting PC at time: %f", ros::Time::now().toSec());
-    //ROS_INFO("Time spent in PC: %f", (ros::Time::now() - t).toSec());*/
-    pc_durs_.push_back(ros::Time::now() - t_start);
-    //ROS_INFO("********************************************************************");
-    //ROS_INFO("Generation %i completed", (generation_-1));
-    //ROS_INFO("********************************************************************");
-  } // end if c_pc<genPerCC
+  pc_durs_.push_back(ros::Time::now() - t_start);
+  //ROS_INFO("********************************************************************");
+  //ROS_INFO("Generation %i completed", (generation_-1));
+  //ROS_INFO("********************************************************************");
 } // End planningCycleCallback
 
 
@@ -2756,7 +2767,7 @@ void Planner::doControlCycle()
   // Set the bestT
   RampTrajectory bestT = population_.getBest();
 
-  //ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
+  ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
   //MotionState diff = bestT.holonomic_path_.at(0).motionState_.subtractPosition(latestUpdate_);
   ////ROS_INFO("diff: %s", diff.toString().c_str());
 
@@ -2785,7 +2796,7 @@ void Planner::doControlCycle()
   //ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
 
   // Reset planning cycle count
-  c_pc_ = 0;
+  //c_pc_ = 0;
 
   // The motion state that we should reach by the next control cycle
   m_cc_ = bestT.getPointAtTime(t_fixed_cc_);
@@ -2820,7 +2831,7 @@ void Planner::doControlCycle()
   //ROS_INFO("Before getTransPop: %s", population_.toString().c_str());
  
   // Find the transition (non-holonomic) population and set new control cycle time
-  ros::Time t_startTrans = ros::Time::now();
+  /*ros::Time t_startTrans = ros::Time::now();
   population_           = getTransPop(population_, movingOn_);
   population_           = evaluatePopulation(population_);
   controlCycle_         = ros::Duration(population_.getBest().msg_.t_start.toSec());
@@ -2830,10 +2841,9 @@ void Planner::doControlCycle()
   //ROS_INFO("After finding transition population, controlCycle period: %f", controlCycle_.toSec());
   ROS_INFO("New transPop: %s\n\n%s", 
       population_.get(0).toString().c_str(),
-      population_.get(1).toString().c_str());
+      population_.get(1).toString().c_str());*/
   //ROS_INFO("Time spent getting trans pop: %f", d_trans.toSec());
 
-  //population_at_cc_       = population_;
   population_at_cc_  = population_;
 
 
@@ -3283,7 +3293,8 @@ void Planner::go()
   ros::Rate r(20);
   while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) 
   {
-    r.sleep();
+    planningCycleCallback();
+    //r.sleep();
     ros::spinOnce(); 
   } // end while
   reportData();

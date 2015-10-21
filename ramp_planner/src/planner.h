@@ -214,7 +214,8 @@ class Planner {
 
     // Callback methods for ros::Timers
     void controlCycleCallback     (const ros::TimerEvent& t);
-    void planningCycleCallback    (const ros::TimerEvent& t);
+    //void planningCycleCallback    (const ros::TimerEvent& t);
+    void planningCycleCallback    ();
     void imminentCollisionCallback(const ros::TimerEvent& t);
 
     // Msg building methods
