@@ -371,6 +371,7 @@ class Planner {
     ParameterHandler            h_parameters_;
 
 
+    double delta_t_switch_;
 
     double          t_fixed_cc_;
     RampTrajectory  movingOnCC_;

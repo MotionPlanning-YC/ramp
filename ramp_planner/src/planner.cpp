@@ -7,7 +7,7 @@
 
 Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(1.5f), 
   cc_started_(false), c_pc_(0), transThreshold_(1./50.), num_cc_(0), L_(0.33), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), 
-  stop_(false), moving_on_coll_(false)
+  stop_(false), moving_on_coll_(false), delta_t_switch_(0.2)
 {
   //planningCycle_          = ros::Duration(1.f / 20.f);
   imminentCollisionCycle_ = ros::Duration(1.f / 10.f);
@@ -1901,12 +1901,16 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
    * Find the best planning cycle to switch 
    */
   //ROS_INFO("generationsPerCC_: %i c_pc+1: %i", generationsPerCC_, (c_pc_+1));
-  uint8_t pc = generationsPerCC_+1;
-  for(int i_pc=generationsPerCC_-1; i_pc > (c_pc_+1); i_pc--)
+  //uint8_t pc = generationsPerCC_+1;
+  uint8_t deltasPerCC = controlCycle_.toSec() / delta_t_switch_;
+  uint8_t delta_t_now = (ros::Time::now() - t_prevCC_).toSec() / delta_t_switch_;
+  double delta_t = ((deltasPerCC+1)*delta_t_switch_);
+  for(int i_delta_t=deltasPerCC-1; i_delta_t > (delta_t_now+1); i_delta_t--)
   {
     //ROS_INFO("Look for transition at i_pc: %i", i_pc);
 
-    double t_pc = i_pc * planningCycle_.toSec();
+    //double t_pc = i_pc * planningCycle_.toSec();
+    double t_pc = i_delta_t * delta_t_switch_;
 
     // Get t and the motion state along moving at time t
     /*double t = errorReduction_                      ? 
@@ -1917,7 +1921,8 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
 
     if(predictTransition(from, to, t_pc))
     {
-      pc = i_pc;
+      //pc = i_pc;
+      delta_t = t_pc;
       break;
     }
     /*else
@@ -1931,18 +1936,17 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
    * Call getTransitionTrajectory
    * if we can find one before next CC
    */
-  if(pc  < generationsPerCC_)
+  if(delta_t  < ((deltasPerCC+1)*delta_t_switch_))
   {
-    double t_pc = pc * planningCycle_.toSec();
+    //double t_pc = pc * planningCycle_.toSec();
 
     // Get t and the motion state along moving at time t
-    double t = errorReduction_                      ? 
+    /*double t = errorReduction_                      ? 
                 from.getT() - (t_fixed_cc_ - t_pc)  : 
-                t_pc ;
+                t_pc ;*/
     //ROS_INFO("pc: %i t_pc: %f t: %f", pc, t_pc, t);
 
-    ros::Time t_start_trans = ros::Time::now();
-    RampTrajectory switching  = getTransitionTrajectory(from, to, t);
+    RampTrajectory switching  = getTransitionTrajectory(from, to, delta_t);
     ////ROS_INFO("Time spent getting transition: %f", (ros::Time::now()-t_start_trans).toSec());
     RampTrajectory full       = switching.clone();
     //ROS_INFO("Switching trajectory: %s", switching.toString().c_str());
@@ -1974,12 +1978,12 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
       ////ROS_INFO("full.path after: %s", full.path_.toString().c_str());
 
       // Set the proper ID, path, and t_starts
-      full.msg_.id            = to.msg_.id;
-      full.holonomic_path_              = to.holonomic_path_;
+      full.msg_.id          = to.msg_.id;
+      full.holonomic_path_  = to.holonomic_path_;
 
       //double T = movingOn_.msg_.trajectory.points.at(movingOn_.msg_.trajectory.points.size()-1).time_from_start.toSec();
       //full.msg_.t_start       = c_pc_ > 0 ? ros::Duration(t_fixed_cc_ - (T - t)) : ros::Duration(t);
-      full.msg_.t_start       = ros::Duration(pc * planningCycle_.toSec());
+      full.msg_.t_start       = ros::Duration(delta_t);
       switching.msg_.t_start  = full.msg_.t_start;
 
       full.transitionTraj_    = switching.msg_;
@@ -2831,7 +2835,7 @@ void Planner::doControlCycle()
   //ROS_INFO("Before getTransPop: %s", population_.toString().c_str());
  
   // Find the transition (non-holonomic) population and set new control cycle time
-  /*ros::Time t_startTrans = ros::Time::now();
+  ros::Time t_startTrans = ros::Time::now();
   population_           = getTransPop(population_, movingOn_);
   population_           = evaluatePopulation(population_);
   controlCycle_         = ros::Duration(population_.getBest().msg_.t_start.toSec());
@@ -2841,7 +2845,7 @@ void Planner::doControlCycle()
   //ROS_INFO("After finding transition population, controlCycle period: %f", controlCycle_.toSec());
   ROS_INFO("New transPop: %s\n\n%s", 
       population_.get(0).toString().c_str(),
-      population_.get(1).toString().c_str());*/
+      population_.get(1).toString().c_str());
   //ROS_INFO("Time spent getting trans pop: %f", d_trans.toSec());
 
   population_at_cc_  = population_;
@@ -3293,8 +3297,8 @@ void Planner::go()
   ros::Rate r(20);
   while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) 
   {
-    planningCycleCallback();
-    //r.sleep();
+    //planningCycleCallback();
+    r.sleep();
     ros::spinOnce(); 
   } // end while
   reportData();
