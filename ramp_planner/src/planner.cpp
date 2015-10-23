@@ -517,14 +517,14 @@ const Population Planner::getPopulation( const MotionState init, const MotionSta
 
 const uint8_t Planner::getIndexStartPathAdapting(const RampTrajectory t) const 
 {
-  /*//ROS_INFO("In Planner::getIndexStartPathAdapting");
-  //ROS_INFO("t transTraj.size(): %i", (int)t.transitionTraj_.trajectory.points.size());
-  //ROS_INFO("# of curves: %i", (int)t.msg_.curves.size());*/
+  ROS_INFO("In Planner::getIndexStartPathAdapting");
+  ROS_INFO("t transTraj.size(): %i", (int)t.transitionTraj_.trajectory.points.size());
+  ROS_INFO("# of curves: %i", (int)t.msg_.curves.size());
   uint8_t result;
   bool    has_curve = t.msg_.curves.size() > 0;
 
   if(t.transitionTraj_.trajectory.points.size() > 0) {
-    //ROS_INFO("In t.transitionTraj_.trajectory.points.size() > 0");
+    ROS_INFO("In t.transitionTraj_.trajectory.points.size() > 0");
     result = t.transitionTraj_.i_knotPoints.size();
   }
   else if(t.msg_.curves.size() > 1 && t.transitionTraj_.trajectory.points.size() == 0)
@@ -545,11 +545,11 @@ const uint8_t Planner::getIndexStartPathAdapting(const RampTrajectory t) const
                                         t.msg_.trajectory.points.at( t.msg_.i_knotPoints.at(0)).positions) 
       < 0.001)
   {
-    //ROS_WARN("Adding 1 to result because first two position are the same, indicating a rotation to satisfy orientation");
+    ROS_WARN("Adding 1 to result because first two position are the same, indicating a rotation to satisfy orientation");
     result++;
   }
 
-  //ROS_INFO("getIndexStartPathAdapting returning: %i", result);
+  ROS_INFO("getIndexStartPathAdapting returning: %i", result);
   return result;
 }
 
@@ -565,7 +565,7 @@ const uint8_t Planner::getNumThrowawayPoints(const RampTrajectory traj, const ro
       i_kp<traj.msg_.i_knotPoints.size();
       i_kp++) 
   {
-    ////ROS_INFO("i_kp: %i", (int)i_kp);
+    ROS_INFO("i_kp: %i", (int)i_kp);
     
     // Only adapt the best trajectory
     // TODO: Make this method not do a loop
@@ -574,23 +574,23 @@ const uint8_t Planner::getNumThrowawayPoints(const RampTrajectory traj, const ro
       // Get the knot point 
       trajectory_msgs::JointTrajectoryPoint point = traj.msg_.trajectory.points.at( 
                                                       traj.msg_.i_knotPoints.at(i_kp));
-      ////ROS_INFO("point: %s", utility_.toString(point).c_str());
+      ROS_INFO("point: %s", utility_.toString(point).c_str());
 
       // Compare the durations
       if( (dur > point.time_from_start) || 
           (fabs(dur.toSec() - point.time_from_start.toSec()) < 0.0001) ) 
       {
-        ////ROS_INFO("Past KP, dur.toSec(): %f kp time: %f", dur.toSec(), point.time_from_start.toSec());
+        ROS_INFO("Past KP, dur.toSec(): %f kp time: %f", dur.toSec(), point.time_from_start.toSec());
         result++;
       }
       else {
-        ////ROS_INFO("Behind KP, dur.toSec(): %f kp time: %f", dur.toSec(), point.time_from_start.toSec());
+        ROS_INFO("Behind KP, dur.toSec(): %f kp time: %f", dur.toSec(), point.time_from_start.toSec());
         break;
       }
     } // end if best trajectory
     else
     {
-      //ROS_INFO("Not best trajectory in transition population, only removing first knot point (startPlanning_)");
+      ROS_INFO("Not best trajectory in transition population, only removing first knot point (startPlanning_)");
     }
   } // end for
 
@@ -605,9 +605,9 @@ const uint8_t Planner::getNumThrowawayPoints(const RampTrajectory traj, const ro
  * */
 const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionState start, ros::Duration dur) const 
 {
-  //ROS_INFO("In Planner::adaptPaths");
-  //ROS_INFO("pop.paths.size(): %i", (int)pop.paths_.size());
-  //ROS_INFO("dur.toSec(): %f", dur.toSec());
+  ROS_INFO("In Planner::adaptPaths");
+  ROS_INFO("pop.paths.size(): %i", (int)pop.paths_.size());
+  ROS_INFO("dur.toSec(): %f", dur.toSec());
   std::vector<Path> result;
 
   // Check that time has passed
@@ -617,21 +617,21 @@ const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionSt
 
     // For each trajectory
     for(uint8_t i=0;i<pop.size();i++) {
-      ////ROS_INFO("Path: %s", pop.paths_.at(i).toString().c_str());
-      ////ROS_INFO("Get Path: %s", pop.get(i).getPath().toString().c_str());
+      ROS_INFO("Path: %s", pop.paths_.at(i).toString().c_str());
+      ROS_INFO("Get Path: %s", pop.get(i).getNonHolonomicPath().toString().c_str());
       Path temp = pop.paths_.at(i);
 
       // Track how many knot points we get rid of
       // Initialize to 1 to always remove starting position
       unsigned int throwaway=getNumThrowawayPoints(pop.get(i), dur);
-      ////ROS_INFO("throwaway: %i", (int)throwaway);
+      ROS_INFO("throwaway: %i", (int)throwaway);
 
       
       // If the whole path has been passed, adjust throwaway so that 
       //  we are left with a path that is: {new_start_, goal_}
       if( throwaway >= pop.paths_.at(i).size() ) 
       { 
-        ////ROS_INFO("Decrementing throwaway");
+        ROS_INFO("Decrementing throwaway");
         throwaway = pop.paths_.at(i).size()-1;
       }
 
@@ -651,13 +651,13 @@ const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionSt
 
       // Set start_ to be the new starting configuration of the path
       temp.start_ = start;
-      ////ROS_INFO("After adapting Path: %s", temp.toString().c_str());
+      ROS_INFO("After adapting Path: %s", temp.toString().c_str());
 
       result.push_back(temp);
     } // end outer for
   } // end if dur > 0
 
-  //ROS_INFO("Exiting adaptPaths");
+  ROS_INFO("Exiting adaptPaths");
   return result;
 } // End adaptPaths
 
@@ -1731,12 +1731,12 @@ const RampTrajectory Planner::computeFullSwitch(const RampTrajectory from, const
 
 bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory to, const double t)
 {
-  //ROS_INFO("In Planner::predictTransition");
+  ROS_INFO("In Planner::predictTransition");
 
   if(to.msg_.trajectory.points.size() == 0)
   {
-    ////ROS_WARN("to.msg_.trajectory.points.size() == 0");
-    ////ROS_WARN("Returning false");
+    ROS_WARN("to.msg_.trajectory.points.size() == 0");
+    ROS_WARN("Returning false");
     return false;
   }
 
@@ -1757,8 +1757,8 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   if(fabs(utility_.findDistanceBetweenAngles( 
         ms_startTrans.msg_.positions.at(2), ms_endOfMovingOn.msg_.positions.at(2))) > 0.12 ) 
   {
-    ////ROS_WARN("Cannot plan a transition curve!");
-    ////ROS_WARN("startTrans: %s\nendOfMovingOn: %s", ms_startTrans.toString().c_str(), ms_endOfMovingOn.toString().c_str());
+    ROS_WARN("Cannot plan a transition curve!");
+    ROS_WARN("startTrans: %s\nendOfMovingOn: %s", ms_startTrans.toString().c_str(), ms_endOfMovingOn.toString().c_str());
     return false;
   }
 
@@ -1803,8 +1803,8 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   if(fabs(utility_.findDistanceBetweenAngles( 
         ms_startTrans.msg_.positions.at(2), ms_endOfMovingOn.msg_.positions.at(2))) > 0.12 ) 
   {
-    ////ROS_WARN("Cannot plan a transition curve!");
-    ////ROS_WARN("startTrans: %s\nendOfMovingOn: %s", ms_startTrans.toString().c_str(), ms_endOfMovingOn.toString().c_str());
+    ROS_WARN("Cannot plan a transition curve!");
+    ROS_WARN("startTrans: %s\nendOfMovingOn: %s", ms_startTrans.toString().c_str(), ms_endOfMovingOn.toString().c_str());
     return false;
   }
 
@@ -1817,8 +1817,8 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
     // Check duplicate
     if(utility_.positionDistance(a.msg_.positions, b.msg_.positions) < 0.1)
     {
-      ////ROS_WARN("Cannot plan a transition curve because there are duplicate segment points");
-      ////ROS_WARN("%s\n%s", a.toString().c_str(), b.toString().c_str());
+      ROS_WARN("Will not plan a transition curve because there are duplicate segment points");
+      ROS_WARN("%s\n%s", a.toString().c_str(), b.toString().c_str());
       return false;
     }
 
@@ -1845,7 +1845,7 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   } // end for
 
 
-  //ROS_INFO("Done checking segments");
+  ROS_INFO("Done checking segments");
   
 
   
@@ -1860,7 +1860,7 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   //ROS_INFO("Theta 1: %f Theta 2: %f", thetaS1, thetaS2);
   if( fabs(utility_.findDistanceBetweenAngles(thetaS1, thetaS2)) < 0.13 )
   {
-    ////ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
+    ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
     return true;
   }
 
@@ -1875,13 +1875,14 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
     curve.init(segmentPoints, lambda, ms_startTrans);
     if(curve.verify())
     {
+  
+      ROS_INFO("Curve formed for prediction: %s", utility_.toString(curve.getMsg()).c_str());
+      ROS_INFO("Exiting Planner::predictTransition");
       return true;
     }
   }
-  
-  ////ROS_INFO("Curve formed for prediction: %s", utility_.toString(curve.getMsg()).c_str());
 
-  //ROS_INFO("Exiting Planner::predictTransition");
+  ROS_WARN("No possible curve could be planned");
   return false;
 }
 
@@ -1893,7 +1894,7 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
  */
 const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory from, const RampTrajectory to) 
 {
-  //ROS_INFO("In Planner::switchTrajectory");
+  ROS_INFO("In Planner::switchTrajectory");
   //ROS_INFO("from: %s\nto.path: %s", from.toString().c_str(), to.path_.toString().c_str());
   std::vector<RampTrajectory> result;
 
@@ -1901,16 +1902,23 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
    * Find the best planning cycle to switch 
    */
   //ROS_INFO("generationsPerCC_: %i c_pc+1: %i", generationsPerCC_, (c_pc_+1));
-  //uint8_t pc = generationsPerCC_+1;
-  uint8_t deltasPerCC = controlCycle_.toSec() / delta_t_switch_;
+  
+  // TODO: Use current CC time or fixed cc time? Come back to this.
+  //uint8_t deltasPerCC = (controlCycle_.toSec()+0.0001) / delta_t_switch_;
+  uint8_t deltasPerCC = (t_fixed_cc_+0.0001) / delta_t_switch_;
+
   uint8_t delta_t_now = (ros::Time::now() - t_prevCC_).toSec() / delta_t_switch_;
-  double delta_t = ((deltasPerCC+1)*delta_t_switch_);
+  ROS_INFO("(ros::Time::now() - t_prevCC_): %f", (ros::Time::now() - t_prevCC_).toSec());
+  double  delta_t     = ((deltasPerCC+1)*delta_t_switch_);
+  ROS_INFO("deltasPerCC: %i delta_t_now: %i delta_t: %f", deltasPerCC, delta_t_now, delta_t);
+  
   for(int i_delta_t=deltasPerCC-1; i_delta_t > (delta_t_now+1); i_delta_t--)
   {
-    //ROS_INFO("Look for transition at i_pc: %i", i_pc);
+    ROS_INFO("Look for transition at i_delta_t: %i", i_delta_t);
 
     //double t_pc = i_pc * planningCycle_.toSec();
     double t_pc = i_delta_t * delta_t_switch_;
+    ROS_INFO("i_delta_t: %i t_pc: %f", i_delta_t, t_pc);
 
     // Get t and the motion state along moving at time t
     /*double t = errorReduction_                      ? 
@@ -1922,6 +1930,7 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
     if(predictTransition(from, to, t_pc))
     {
       //pc = i_pc;
+      ROS_INFO("Stopping at t_pc: %f", t_pc);
       delta_t = t_pc;
       break;
     }
@@ -1998,7 +2007,7 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
   }*/
  
 
-  //ROS_INFO("Exiting Planner::switchTrajectory");
+  ROS_INFO("Exiting Planner::switchTrajectory");
   return result;
 } // End switchTrajectory
 
