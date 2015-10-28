@@ -2879,7 +2879,6 @@ void Planner::doControlCycle()
   ros::Time t_startTrans = ros::Time::now();
   population_           = getTransPop(population_, movingOn_);
   population_           = evaluatePopulation(population_);
-  controlCycle_         = ros::Duration(population_.getBest().msg_.t_start.toSec());
   ros::Duration d_trans = ros::Time::now() - t_startTrans;
   trans_durs_.push_back(d_trans);
   
@@ -2911,6 +2910,8 @@ void Planner::doControlCycle()
   /*//ROS_INFO("Control Cycle %i Ending, next one occurring in %f seconds", 
       num_cc_, controlCycle_.toSec());*/
 
+  //controlCycle_         = ros::Duration(population_.getBest().msg_.t_start.toSec());
+  controlCycle_         = population_.getEarliestStartTime();
   ROS_INFO("Control Cycle: new CC timer: %f", controlCycle_.toSec());
   controlCycleTimer_.setPeriod(controlCycle_, false);
 
