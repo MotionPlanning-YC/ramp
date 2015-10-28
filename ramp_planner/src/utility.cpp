@@ -11,8 +11,8 @@ Utility::Utility() {
 
 
 /** This method returns the Euclidean distance between two position vectors */
-const double Utility::positionDistance(const std::vector<double> a, const std::vector<double> b) const {
-
+const double Utility::positionDistance(const std::vector<double> a, const std::vector<double> b) const 
+{
   double d_x = b.at(0) - a.at(0);
   double d_y = b.at(1) - a.at(1);
   return sqrt( pow(d_x,2) + pow(d_y,2) );
@@ -21,32 +21,38 @@ const double Utility::positionDistance(const std::vector<double> a, const std::v
 
 
 
-const double Utility::findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const {
+const double Utility::findAngleFromAToB(const trajectory_msgs::JointTrajectoryPoint a, const trajectory_msgs::JointTrajectoryPoint b) const 
+{
   std::vector<double> c;
   std::vector<double> d;
   
   // Set c
-  for(unsigned int i=0;i<a.positions.size();i++) {
+  for(unsigned int i=0;i<a.positions.size();i++) 
+  {
     c.push_back(a.positions.at(i));
   }
   
   //Set d
-  for(unsigned int i=0;i<b.positions.size();i++) {
+  for(unsigned int i=0;i<b.positions.size();i++) 
+  {
     d.push_back(b.positions.at(i));
   }
 
   return findAngleFromAToB(c, d);
 }
 
-const double Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const {
+const double Utility::findAngleFromAToB(const std::vector<float> a, const std::vector<float> b) const 
+{
   std::vector<double> d_a;
   std::vector<double> d_b;
   
-  for(unsigned int i=0;i<a.size();i++) {
+  for(unsigned int i=0;i<a.size();i++) 
+  {
     d_a.push_back(a.at(i));
   }
   
-  for(unsigned int i=0;i<b.size();i++) {
+  for(unsigned int i=0;i<b.size();i++) 
+  {
     d_b.push_back(b.at(i));
   }
 
@@ -54,7 +60,8 @@ const double Utility::findAngleFromAToB(const std::vector<float> a, const std::v
 }
 
 /** This method returns the angle that will form a straight line from position a to position b. a and b are [x, y] vectors. */
-const double Utility::findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const {
+const double Utility::findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const 
+{
   double result;
 
   // If the positions are the same, return the orientation the robot already has
@@ -74,22 +81,26 @@ const double Utility::findAngleFromAToB(const std::vector<double> a, const std::
   // If the positions are the same,
   // Set the result to the starting orientation if one is provided
   // Or to 0 if no starting orientation is provided
-  if(euc_dist <= 0.0001) {
+  if(euc_dist <= 0.0001) 
+  {
     result = 0;
   }
 
   // If b is in the 1st or 2nd quadrants
-  else if(d_y > 0) {
+  else if(d_y > 0) 
+  {
     result = acos(d_x / euc_dist);
   }
 
   // If b is in the 3rd quadrant, d_y<0 & d_x<0
-  else if(d_x < 0) {
+  else if(d_x < 0) 
+  {
     result = -PI - asin(d_y / euc_dist);
   }
 
   // If b is in the 4th quadrant, d_y<=0 & d_x>=0
-  else {
+  else 
+  {
     result = asin(d_y / euc_dist); 
   }
 
@@ -98,23 +109,27 @@ const double Utility::findAngleFromAToB(const std::vector<double> a, const std::
 
 
 /** This method returns distance between orientations a1 and a2. The distance is in the range [-PI, PI]. */
-const double Utility::findDistanceBetweenAngles(const double a1, const double a2) const {
+const double Utility::findDistanceBetweenAngles(const double a1, const double a2) const 
+{
   double result;
   double difference = a2 - a1;
   
   // If difference > pi, the result should be in [-PI,0] range
-  if(difference > PI) {
+  if(difference > PI) 
+  {
     difference = fmodf(difference, PI);
     result = difference - PI;
   }
 
   // If difference < -pi, the result should be in [0,PI] range
-  else if(difference < -PI) {
+  else if(difference < -PI) 
+  {
     result = difference + (2*PI);
   }
 
   // Else, the difference is fine
-  else {
+  else 
+  {
     result = difference;
   }
 
@@ -318,7 +333,7 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
   result<<"\n Points:";
   //for(unsigned int i=15;i<27;i++) {
   //for(unsigned int i=0;i<7;i++) {
-  for(unsigned int i=0;i<25 && i<traj.trajectory.points.size();i++) {
+  for(unsigned int i=0;i<50 && i<traj.trajectory.points.size();i++) {
   //for(unsigned int i=0;i<traj.trajectory.points.size();i++) {
     result<<"\n\n   Point "<<i<<":";
     

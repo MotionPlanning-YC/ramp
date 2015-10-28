@@ -21,14 +21,14 @@ void fixDuplicates(ramp_msgs::TrajectoryRequest::Request& req)
     ramp_msgs::MotionState a = req.path.points.at(i).motionState;
     ramp_msgs::MotionState b = req.path.points.at(i+1).motionState;
 
-    if(utility.positionDistance(a.positions, b.positions) < 0.1)
+    if(utility.positionDistance(a.positions, b.positions) < 0.01)
     {
-      /*ROS_WARN("Consecutive duplicate knot points in path:\nPath[%i]:\n%s\nand\nPath[%i]\n%s\nRemoving knot point at index %i", 
+      ROS_WARN("Consecutive duplicate knot points in path:\nPath[%i]:\n%s\nand\nPath[%i]\n%s\nRemoving knot point at index %i", 
           i+1,
           utility.toString(a).c_str(),
           i+1,
           utility.toString(b).c_str(),
-          i);*/
+          i);
       req.path.points.erase(req.path.points.begin()+i+1);
       i--;
     }
