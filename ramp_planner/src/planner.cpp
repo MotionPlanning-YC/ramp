@@ -1166,7 +1166,8 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
  * and transformes it by T_base_w because 
  * updates are relative to odometry frame
  * */
-void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
+void Planner::updateCallback(const ramp_msgs::MotionState& msg) 
+{
   ////ROS_INFO("In Planner::updateCallback");
 
  
