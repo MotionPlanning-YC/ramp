@@ -6,7 +6,7 @@ Utility utility;
 
 
 Planner             my_planner; 
-int 				        id;
+int                 id;
 MotionState         start, goal;
 std::vector<Range>  ranges;
 int                 population_size;
@@ -20,7 +20,7 @@ double              t_cc_rate;
 double              t_pc_rate;
 int                 num_obs;
 std::vector<std::string> ob_topics;
-std::vector< tf::Transform > ob_tfs;
+std::vector<tf::Transform> ob_tfs;
 
 
 // Initializes a vector of Ranges that the Planner is initialized with
@@ -58,7 +58,7 @@ void initStartGoal(const std::vector<float> s, const std::vector<float> g)
 
 void loadObstacleTF()
 {
-  std::ifstream ifile("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/obstacle_tf.txt", std::ios::in);
+  std::ifstream ifile("/home/mahmoud/NetBeansProjects/ROSProject/ros_ws/src/ramp_planner/obstacle_tf.txt", std::ios::in);
 
   if(!ifile.is_open())
   {
@@ -81,6 +81,7 @@ void loadObstacleTF()
         conf.push_back(stod(token));
         line.erase(0, pos+1);
       } // end inner while
+    
       ROS_INFO("Last token: %s", line.c_str());
 
       conf.push_back(stod(line));
@@ -239,11 +240,6 @@ void loadParameters(const ros::NodeHandle handle)
     }
   std::cout<<"\n---------------------------------------";
 }
-
-
-
-
-
 
 int main(int argc, char** argv) {
   srand( time(0));

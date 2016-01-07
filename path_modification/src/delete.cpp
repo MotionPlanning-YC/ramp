@@ -1,6 +1,5 @@
 #include "delete.h"
 
-
 Delete::Delete(const ramp_msgs::Path p) : path_(p) {}
 
 

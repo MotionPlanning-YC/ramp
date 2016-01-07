@@ -18,7 +18,7 @@ sensing_cycle_rate: 15
 
 error_reduction: true 
 
-num_of_obstacles: 4
+num_of_obstacles: 3
 
 obstacle_odoms: ['/obstacle_1/odometry', '/obstacle_2/odom', '/obstacle_3/odom']
 obstacle_vels: ['/obstacle_1/twist', '/obstacle_2/mobile_base/commands/velocity', '/obstacle_3/mobile_base/commands/velocity']

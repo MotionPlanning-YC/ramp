@@ -13,6 +13,7 @@ class ModificationRequestHandler {
   private:
     ros::NodeHandle handle_;
     ros::ServiceClient client_;
+   
 };
 
 #endif

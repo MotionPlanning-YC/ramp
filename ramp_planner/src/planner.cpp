@@ -340,23 +340,6 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const std::vector<Path> Planner::getRandomPaths(const MotionState init, const MotionState goal) 
 {
   std::vector<Path> result;
@@ -475,7 +458,6 @@ const Path Planner::getAdjustedPath(const MotionState s, const MotionState g) co
 
   return result;
 } // End getAdjustedPath
-
 
 
 
@@ -1166,8 +1148,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
  * and transformes it by T_base_w because 
  * updates are relative to odometry frame
  * */
-void Planner::updateCallback(const ramp_msgs::MotionState& msg) 
-{
+void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
   ////ROS_INFO("In Planner::updateCallback");
 
  

@@ -6,7 +6,6 @@
 #include "line.h"
 #include "circle.h"
 #include "ros/ros.h"
-
 #include "bezier_curve.h"
 #include "ramp_msgs/Population.h"
 
@@ -100,8 +99,7 @@ bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
 }
 
 
-
-// Main function
+ //Main function
 int main(int argc, char** argv) {
 
   // Initialize the ROS node 
@@ -117,6 +115,7 @@ int main(int argc, char** argv) {
 
   ros::AsyncSpinner spinner(8);
   spinner.start();
+  ROS_INFO("Spinning ...");
   ros::waitForShutdown();
   //ros::spin();
 

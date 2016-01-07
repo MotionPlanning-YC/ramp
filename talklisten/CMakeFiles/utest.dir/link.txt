@@ -1,0 +1,1 @@
+/usr/bin/c++       CMakeFiles/utest.dir/test/utest.cpp.o  -o utest -rdynamic -Wl,-Bstatic -lgtest -lgtest_main -Wl,-Bdynamic -lpthread 

@@ -1,7 +1,5 @@
 #include "mobile_base.h"
 
-
-
 /** Constructor */
 MobileBase::MobileBase() : planning_full_(false) 
 {

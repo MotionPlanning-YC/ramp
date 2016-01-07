@@ -14,7 +14,7 @@
 class CollisionDetection {
   public:
   
-    /** Struct to hold information about a query */
+    /* Struct to hold information about a query */
     struct QueryResult {
       QueryResult() : collision_(false), t_firstCollision_(9999.0f), 
                       i_obstacle_(-1) {}

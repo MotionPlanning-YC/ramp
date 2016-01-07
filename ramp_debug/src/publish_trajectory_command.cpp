@@ -34,20 +34,20 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(3.5); // 0.70455
-  c1.motionState.positions.push_back(3.5); // 0.4026
+  c1.motionState.positions.push_back(1.5); // 0.70455
+  c1.motionState.positions.push_back(2.); // 0.4026
   c1.motionState.positions.push_back(-2.3561); // 0.519146
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(1.); // 0.70455
-  c2.motionState.positions.push_back(1.); // 0.4026
-  c2.motionState.positions.push_back(0.); // 0.519146
+  c2.motionState.positions.push_back(1.75); // 0.70455
+  c2.motionState.positions.push_back(0.); // 0.4026
+  c2.motionState.positions.push_back(-PI/2.f); // 0.519146
 
 
   ramp_msgs::KnotPoint c3;
-  c3.motionState.positions.push_back(3.5); // 0.857146
+  c3.motionState.positions.push_back(3.25); // 0.857146
   c3.motionState.positions.push_back(0); // 0.71115
-  c3.motionState.positions.push_back(1.9635);  // 1.11151
+  c3.motionState.positions.push_back(3.f*PI/4.f);  // 1.11151
 
 
   ramp_msgs::KnotPoint c4;
@@ -82,13 +82,13 @@ int main(int argc, char** argv) {
   c9.motionState.positions.push_back(PI/4);
   
   // Velocities
-  c1.motionState.velocities.push_back(0.);  //.151426
-  c1.motionState.velocities.push_back(0.); //-.297903
-  c1.motionState.velocities.push_back(0.); //-.118126
+  c1.motionState.velocities.push_back(-0.23);  //.151426
+  c1.motionState.velocities.push_back(-0.23); //-.297903
+  c1.motionState.velocities.push_back(0.22); //-.118126
  
-  c2.motionState.velocities.push_back(0.);  //.151426
-  c2.motionState.velocities.push_back(0.); //-.297903
-  c2.motionState.velocities.push_back(0.); //-.118126
+  c2.motionState.velocities.push_back(-0.2);  //.151426
+  c2.motionState.velocities.push_back(-0.15); //-.297903
+  c2.motionState.velocities.push_back(-0.13); //-.118126
 
   c3.motionState.velocities.push_back(0.);
   c3.motionState.velocities.push_back(0.);
@@ -248,12 +248,12 @@ int main(int argc, char** argv) {
 
   /** Why 0 initial velocity? **/
   ramp_msgs::MotionState ms_initVA;
-  ms_initVA.velocities.push_back(0.144063);
-  ms_initVA.velocities.push_back(0.444224);
+  ms_initVA.velocities.push_back(0.);
+  ms_initVA.velocities.push_back(0.);
   ms_initVA.velocities.push_back(0);
   ms_initVA.accelerations.push_back(0);
   ms_initVA.accelerations.push_back(0);
-  //ms_initVA.accelerations.push_back(0);
+  ms_initVA.accelerations.push_back(0);
 
   
   ramp_msgs::MotionState ms_maxVA;

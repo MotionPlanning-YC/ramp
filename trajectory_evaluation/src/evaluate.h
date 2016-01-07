@@ -6,7 +6,6 @@
 #include "orientation.h"
 #include "collision_detection.h"
 #include "utility.h"
-#include "corobot_msgs/SensorMsg.h"
 #include "collision_detection.h"
 
 
