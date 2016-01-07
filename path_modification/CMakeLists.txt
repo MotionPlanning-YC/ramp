@@ -56,6 +56,10 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 ##set (CMAKE_CXX_FLAGS "-g")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
+
+catkin_add_gtest(insert_test test/insert_test.cpp src/constraints.cpp src/utility.cpp src/insert.cpp)
+target_link_libraries(insert_test ${catkin_LIBRARIES})
+
 catkin_add_gtest(path_modification_testFunctionality test/path_modification_testFunctionality.cpp src/change.cpp src/constraints.cpp src/crossover.cpp src/delete.cpp src/insert.cpp src/modifier.cpp src/swap.cpp src/utility.cpp)
 target_link_libraries(path_modification_testFunctionality ${catkin_LIBRARIES} pthread)
 
