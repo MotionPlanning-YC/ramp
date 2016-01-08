@@ -1,6 +1,6 @@
 
 #include <gtest/gtest.h>
-#include "../src/insert.h"
+#include "../src/delete.h"
 
 
 TEST(TestSuite, perform)
@@ -28,13 +28,13 @@ TEST(TestSuite, perform)
 
   size_t p_size = p.points.size();
 
-  Insert i;
-  i.path_ = p;   
-  i.perform();
+  Delete d;
+  d.path_ = p;   
+  d.perform();
 
 
   // Check the size
-  EXPECT_EQ(i.path_.points.size(), p_size+1);
+  EXPECT_EQ(d.path_.points.size(), p_size-1);
 }
 
 
