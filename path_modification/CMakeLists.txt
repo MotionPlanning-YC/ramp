@@ -67,6 +67,12 @@ target_link_libraries(insert_test ${catkin_LIBRARIES})
 catkin_add_gtest(delete_test test/delete_test.cpp src/constraints.cpp src/utility.cpp src/delete.cpp)
 target_link_libraries(delete_test ${catkin_LIBRARIES})
 
+catkin_add_gtest(change_test test/change_test.cpp src/constraints.cpp src/utility.cpp src/change.cpp)
+target_link_libraries(change_test ${catkin_LIBRARIES})
+
+catkin_add_gtest(swap_test test/swap_test.cpp src/constraints.cpp src/utility.cpp src/swap.cpp)
+target_link_libraries(swap_test ${catkin_LIBRARIES})
+
 
 
 
