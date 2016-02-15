@@ -63,12 +63,13 @@ const double Orientation::getPenalty() const
         pow(trajectory_.trajectory.points.at(0).velocities.at(1), 2) );
 
 
-    /*if(mag_linear > 0 && deltaTheta >= PI/2.f) 
+    // If delta theta is too high, add a penalty
+    if(mag_linear > 0 && deltaTheta >= PI/2.f) 
     {
       double normalize = PI;
       deltaTheta /= normalize;
       result += (Q_ * normalize);
-    }*/
+    }
   } // end if > 1 knot point*/
 
 
@@ -81,7 +82,7 @@ const double Orientation::getPenalty() const
 
     if(fabs(v) < 0.0001 && fabs(w) > 0.01)
     {
-      result += 10000;
+      result += 1000;
     }
   }
 

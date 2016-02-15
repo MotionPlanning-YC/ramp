@@ -46,12 +46,15 @@ const double Evaluate::performFitness(CollisionDetection::QueryResult feasible)
   // If the trajectory is infeasible
   if(feasible.collision_) 
   {
-
     // Add the Penalty for being infeasible
-    if (feasible.t_firstCollision_ == 0) 
-      penalties += Q;
-    else    
+    if(feasible.t_firstCollision_ > 0 && feasible.t_firstCollision_ < 10.0f)
+    {
       penalties += (Q / feasible.t_firstCollision_);
+    }
+    else
+    {
+      penalties += Q;
+    }
   }
 
   //ROS_INFO("cost: %f penalties: %f", cost, penalties);
