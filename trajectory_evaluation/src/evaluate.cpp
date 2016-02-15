@@ -55,6 +55,9 @@ const double Evaluate::performFitness(CollisionDetection::QueryResult feasible)
     {
       penalties += Q;
     }
+
+    // Make cost 0 to not consider T and A
+    cost = 0;
   }
 
   //ROS_INFO("cost: %f penalties: %f", cost, penalties);
