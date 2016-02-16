@@ -1007,7 +1007,8 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   ramp_msgs::TrajectoryRequest result;
 
   result.request.path           = path.buildPathMsg();
-  result.request.type           = PARTIAL_BEZIER;
+  //result.request.type           = PARTIAL_BEZIER;
+  result.request.type           = ALL_STRAIGHT_SEGMENTS;
 
   // If path size > 2, assign a curve
   if(path.size() > 2) {
