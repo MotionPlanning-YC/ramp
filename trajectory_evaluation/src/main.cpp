@@ -1,5 +1,4 @@
 #include <iostream>
-#include "ros/ros.h"
 #include "evaluate.h"
 #include "tf/transform_datatypes.h"
 #include "ramp_msgs/Obstacle.h"

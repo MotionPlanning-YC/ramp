@@ -15,7 +15,7 @@
 #include <gtest/gtest.h>
 
 // include main file of the server process (trajectory generator) as header file.
-#include "../src/main_testing.h"
+#include "main_testing.h"
 
 // include messages that needed for client process (planner).
 #include "ramp_msgs/Path.h"

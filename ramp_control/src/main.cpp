@@ -67,7 +67,6 @@ int main(int argc, char** argv) {
   robot.check_imminent_coll_ = check_imminent_coll;
 
   // Initialize publishers and subscribers
-  robot.init(handle);
   init_advertisers_subscribers(robot, handle, sim);
 
 

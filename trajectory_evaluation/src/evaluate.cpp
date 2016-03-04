@@ -25,8 +25,7 @@ const double Evaluate::performFitness(CollisionDetection::QueryResult feasible)
 
   // Set values for time and add to result
   // Negate because for this criterion, shorter values are better
-  time_.trajectory_ = trajectory_;
-  double T = time_.perform();
+  double T = trajectory_.trajectory.points.at(trajectory_.trajectory.points.size()-1).time_from_start.toSec();
   
 
   orientation_.trajectory_ = trajectory_;

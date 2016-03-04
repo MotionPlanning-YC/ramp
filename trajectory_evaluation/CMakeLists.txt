@@ -28,10 +28,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
 
 ### Declare a cpp executable
-add_executable(${PROJECT_NAME} src/main.cpp src/collision_detection.cpp src/euclidean_distance.cpp src/evaluate.cpp src/orientation.cpp src/time.cpp src/trajectory_request_handler.cpp src/utility.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/collision_detection.cpp src/euclidean_distance.cpp src/evaluate.cpp src/orientation.cpp src/utility.cpp)
 #
 ## Add the -std argument to compile enum
-set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS -std=c++0x)
+#set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS -std=c++0x)
 #
 ### Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
@@ -47,11 +47,11 @@ add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ramp_msgs
 
 ## ============= Testing Section =============================================
 
-catkin_add_gtest(trajectory_evaluation_testFunctionality test/trajectory_evaluation_testFunctionality.cpp src/collision_detection.cpp src/euclidean_distance.cpp src/evaluate.cpp src/orientation.cpp src/time.cpp src/trajectory_request_handler.cpp src/utility.cpp)
+catkin_add_gtest(trajectory_evaluation_testFunctionality test/trajectory_evaluation_testFunctionality.cpp src/collision_detection.cpp src/euclidean_distance.cpp src/evaluate.cpp src/orientation.cpp src/utility.cpp)
 
 target_link_libraries(trajectory_evaluation_testFunctionality ${catkin_LIBRARIES} pthread)
 
-catkin_add_gtest(trajectory_evaluation_testPerformance test/trajectory_evaluation_testPerformance.cpp src/collision_detection.cpp src/euclidean_distance.cpp src/evaluate.cpp src/orientation.cpp src/time.cpp src/trajectory_request_handler.cpp src/utility.cpp)
+catkin_add_gtest(trajectory_evaluation_testPerformance test/trajectory_evaluation_testPerformance.cpp src/collision_detection.cpp src/euclidean_distance.cpp src/evaluate.cpp src/orientation.cpp src/utility.cpp)
 target_link_libraries(trajectory_evaluation_testPerformance ${catkin_LIBRARIES} pthread)
 
 ##============================================================================

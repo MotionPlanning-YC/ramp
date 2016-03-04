@@ -66,15 +66,16 @@ const double Orientation::getPenalty() const
     // If delta theta is too high, add a penalty
     if(mag_linear > 0 && deltaTheta >= PI/2.f) 
     {
+      //ROS_INFO("Adding penalty for deltaTheta: %f", deltaTheta);
       double normalize = PI;
       deltaTheta /= normalize;
       result += (Q_ * normalize);
     }
-  } // end if > 1 knot point*/
+  } // end if > 1 knot point
 
 
   //ROS_INFO("trajectory.size(): %i", (int)trajectory_.trajectory.points.size());
-  if(trajectory_.trajectory.points.size() > 2)
+  /*if(trajectory_.trajectory.points.size() > 2)
   {
     trajectory_msgs::JointTrajectoryPoint p = trajectory_.trajectory.points.at(2);
     double v = sqrt( pow(p.velocities.at(0), 2) + pow(p.velocities.at(1), 2) );
@@ -84,7 +85,7 @@ const double Orientation::getPenalty() const
     {
       result += 1000;
     }
-  }
+  }*/
 
   return result;
 }

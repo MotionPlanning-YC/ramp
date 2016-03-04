@@ -2,7 +2,6 @@
 #define EVALUATE_H
 #include "ramp_msgs/EvaluationRequest.h"
 #include "euclidean_distance.h"
-#include "time.h"
 #include "orientation.h"
 #include "collision_detection.h"
 #include "utility.h"
@@ -22,7 +21,6 @@ class Evaluate {
 
     /** Different evaluation criteria */
     EuclideanDistance eucDist_;
-    Time time_;
     Orientation orientation_;
 
     

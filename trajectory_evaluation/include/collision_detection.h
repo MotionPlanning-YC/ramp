@@ -6,7 +6,6 @@
 #include "tf/transform_datatypes.h"
 #include "ramp_msgs/TrajectoryRequest.h"
 #include "ramp_msgs/Obstacle.h"
-#include "trajectory_request_handler.h"
 
 
 

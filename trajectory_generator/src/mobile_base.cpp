@@ -1280,7 +1280,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
         // Set orientation threshold that requires a rotation 
         // before continuing to the next knot point
-        double threshold = 0.3; 
+        double threshold = 0.2; 
         ////ROS_INFO("threshold: %f", threshold);
 
         // If we need to rotate towards the next knot point
@@ -1328,7 +1328,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
         ////ROS_INFO("Pushing on points b/c dist: %f", utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, path_.points.at(i_kp_).motionState.positions));
               
         // We go to the next knotpoint only once we reach this one
-        while (!finalStateReached()) {
+        while (!finalStateReached()) 
+        {
 
           trajectory_msgs::JointTrajectoryPoint p = spinOnce();
           //////ROS_INFO("p: %s", utility_.toString(p).c_str());

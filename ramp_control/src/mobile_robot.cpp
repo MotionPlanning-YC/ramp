@@ -12,7 +12,7 @@ const float timeNeededToTurn = 2.5;
 
 
 
-MobileRobot::MobileRobot() : restart_(false), num_(0), num_traveled_(0), k_dof_(3), h_traj_req_(0) 
+MobileRobot::MobileRobot() : restart_(false), num_(0), num_traveled_(0), k_dof_(3)  
 { 
   for(unsigned int i=0;i<k_dof_;i++)
   {
@@ -31,19 +31,9 @@ MobileRobot::MobileRobot() : restart_(false), num_(0), num_traveled_(0), k_dof_(
 
 
 MobileRobot::~MobileRobot() 
-{
-  if(h_traj_req_ != 0) 
-  {
-    delete h_traj_req_;
-    h_traj_req_ = 0;
-  }
-}
+{}
 
 
-void MobileRobot::init(ros::NodeHandle& h) 
-{
-  h_traj_req_ = new TrajectoryRequestHandler((const ros::NodeHandle&)h);
-}
 
 
 

@@ -136,7 +136,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
 
   ros::Rate r(10);
-  ros::Duration d(2.);
+  ros::Duration d(1.5);
   geometry_msgs::Twist twist;
   
   twist.linear.x = 0.28f;
@@ -145,7 +145,6 @@ void publishToOb(const ros::TimerEvent e, const int index)
   twist.angular.x = 0.f;
   twist.angular.y = 0.f;
   twist.angular.z = 0.f;
-
 
   /*
    * Set motion for Obstacle 1
@@ -158,6 +157,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
     
     //d = ros::Duration(4);
 
+    //twist.angular.z = (index == 1) ? 0.64 : 0.8;
     // Drive forward
     /*ros::Time t = ros::Time::now();
     while(ros::Time::now() - t < d)
@@ -197,13 +197,13 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     // Translate+rotate
     twist.linear.x = 0.33;
-    twist.angular.z = (index == 1) ? -0.64 : -0.8;
     //twist.angular.z = -0.68;
 
     d = ros::Duration(1.75);
     t = ros::Time::now();
     while(ros::Time::now() - t < d)
     {
+      twist.angular.z = (index == 1) ? -0.64 : -0.8;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }
@@ -211,13 +211,13 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     // Self rotate
     twist.linear.x = 0.28;
-    twist.angular.z = (index == 1) ? 0.64 : 0.8;
     //twist.angular.z = 0.8;
 
     d = ros::Duration(2.5);
     t = ros::Time::now();
     while(ros::Time::now() - t < d)
     {
+      twist.angular.z = (index == 1) ? 0.64 : 0.8;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }
@@ -225,13 +225,13 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     // Self rotate
     twist.linear.x = 0.28;
-    twist.angular.z = (index == 1) ? -0.8 : -0.64;
     //twist.angular.z = 0.8;
 
     d = ros::Duration(3);
     t = ros::Time::now();
     while(ros::Time::now() - t < d)
     {
+      twist.angular.z = (index == 1) ? -0.8 : -0.64;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }
@@ -239,13 +239,13 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     // Self rotate
     twist.linear.x = 0.28;
-    twist.angular.z = (index == 1) ? 0.64 : 0.8;
     //twist.angular.z = 0.8;
 
     d = ros::Duration(2.25);
     t = ros::Time::now();
     while(ros::Time::now() - t < d)
     {
+      twist.angular.z = (index == 1) ? 0.64 : 0.8;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }

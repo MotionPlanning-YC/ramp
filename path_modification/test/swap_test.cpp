@@ -1,6 +1,6 @@
 
 #include <gtest/gtest.h>
-#include "../src/swap.h"
+#include "../include/swap.h"
 
 
 TEST(TestSuite, perform)

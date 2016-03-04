@@ -15,7 +15,7 @@
 #include <gtest/gtest.h>
 
 // include main file of the server process (path modification) as header file.
-#include "../src/main_testing.h"
+#include "../include/main_testing.h"
 
 // include messages that needed for client process (planner).
 #include "ramp_msgs/MotionState.h"

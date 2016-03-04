@@ -946,7 +946,7 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
  
   // Adapt the paths and curves
   std::vector<Path> paths                     = adaptPaths  (pop, ms, d);
-  std::vector<ramp_msgs::BezierCurve> curves  = adaptCurves (pop, ms, d);
+  //std::vector<ramp_msgs::BezierCurve> curves  = adaptCurves (pop, ms, d);
 
   result.paths_ = paths;
 
@@ -962,16 +962,16 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
     ////ROS_INFO("Getting trajectory %i", (int)i);
       
     std::vector<ramp_msgs::BezierCurve> c;
-    c.push_back(curves.at(i));
+    //c.push_back(curves.at(i));
 
     ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(paths.at(i), c);
-    tr.request.segments = 2;
+    //tr.request.segments = 2;
 
     /* Get the trajectory */
     temp = requestTrajectory(tr, result.get(i).msg_.id);
 
     ////ROS_INFO("Temp before: %s", temp.toString().c_str());
-    temp = temp.concatenate(pop.get(i), 4);
+    //temp = temp.concatenate(pop.get(i), 4);
     ////ROS_INFO("Temp now: %s", temp.toString().c_str());
 
     // Set temporary evaluation results - need to actually call requestEvaluation to get actual fitness
@@ -1113,7 +1113,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
       //if(!movingOn_.msg_.feasible &&
       if((moving_on_coll_        &&
           dist < dist_threshold) || 
-          (dist < 0.45 && population_.getBest().msg_.t_firstCollision.toSec() < 0.25f))
+          (dist < 0.45 && population_.getBest().msg_.t_firstCollision.toSec() < 0.5f))
         // Consider t_collision of best trajectory
       {
         //ROS_WARN("Imminent Collision Robot: %i dist: %f", id_, dist);
@@ -2783,7 +2783,7 @@ const Population Planner::getTransPop(const Population pop, const RampTrajectory
 void Planner::doControlCycle() 
 {
   //ROS_WARN("Control Cycle %i occurring at Time: %f", num_cc_, ros::Time::now().toSec());
-  //ROS_INFO("controlCycle_: %f", controlCycle_.toSec());
+  ROS_INFO("controlCycle_: %f", controlCycle_.toSec());
   //ROS_INFO("Time between control cycles: %f", (ros::Time::now() - t_prevCC_).toSec());
   t_prevCC_ = ros::Time::now();
   //ROS_INFO("Number of planning cycles that occurred between CC's: %i", c_pc_);
@@ -2801,7 +2801,7 @@ void Planner::doControlCycle()
 
   // Send the best trajectory and set movingOn
   ////ROS_INFO("Sending best");
-  //ROS_INFO("bestT: %s", bestT.toString().c_str());
+  ROS_INFO("bestT: %s", bestT.toString().c_str());
   sendBest();
   ////ROS_INFO("After sendBest");
 
@@ -3301,8 +3301,9 @@ void Planner::go()
   }
   ROS_INFO("generationsBeforeCC_: %i generationsPerCC_: %i num_pc: %i", generationsBeforeCC_, generationsPerCC_, num_pc);
 
+  ros::Rate r(20);
   // Wait for the specified number of generations before starting CC's
-  while(generation_ < num_pc) {ros::spinOnce();}
+  while(generation_ < num_pc) {planningCycleCallback(); r.sleep(); ros::spinOnce();}
  
   ROS_INFO("Starting CCs at t: %f", ros::Time::now().toSec());
 
@@ -3318,15 +3319,17 @@ void Planner::go()
  
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
+  ros::Time t_start = ros::Time::now();
   goalThreshold_ = 0.5;
-  ros::Rate r(20);
   while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) 
   {
     planningCycleCallback();
     r.sleep();
     ros::spinOnce(); 
   } // end while
+  ros::Duration t_execution = ros::Time::now() - t_start;
   reportData();
+  ROS_INFO("Total execution time: %f", t_execution.toSec());
 
   //ROS_INFO("Planning done!");
   //ROS_INFO("latestUpdate_: %s\ngoal: %s", latestUpdate_.toString().c_str(), goal_.toString().c_str());
