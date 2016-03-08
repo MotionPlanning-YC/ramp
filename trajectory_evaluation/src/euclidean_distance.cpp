@@ -1,4 +1,4 @@
-#include "euclidean_distance.h"
+#include "../include/euclidean_distance.h"
 
 
 /** This method finds the euclidean distance from the last trajectory point to the goal */
