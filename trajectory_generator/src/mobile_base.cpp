@@ -1128,11 +1128,23 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   res.trajectory.i_knotPoints.push_back(0);
 
 
+  // If using holonomic motion, set the knot velocities to all equal 0
+  if(type_ == ALL_STRAIGHT_SEGMENTS)
+  {
+    for(uint16_t i=0;i<path_.points.size();i++)
+    {
+      for(uint8_t j=0;j<path_.points.at(0).motionState.velocities.size();j++)
+      {
+        path_.points.at(i).motionState.velocities.at(j) = 0;
+      }
+    }
+  }
 
 
 
   if(!checkSpeed(path_, i_cs))
   {
+    ROS_INFO("Check speed is false! Removing knot point 1");
     path_.points.erase(path_.points.begin()+1);
     if(i_cs.size() > 0)
     {
@@ -1166,9 +1178,9 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     }
     
     double theta = utility_.findAngleFromAToB(prevKP_.positions, path_.points.at(i_kp_).motionState.positions);;
-    ////ROS_INFO("path_.points.at(%i): %s", i_kp_, utility_.toString(path_.points.at(i_kp_)).c_str());
-    ////ROS_INFO("prevKP: %s", utility_.toString(prevKP_).c_str());
-    ////ROS_INFO("theta: %f", theta);
+    ROS_INFO("path_.points.at(%i): %s", i_kp_, utility_.toString(path_.points.at(i_kp_)).c_str());
+    ROS_INFO("prevKP: %s", utility_.toString(prevKP_).c_str());
+    ROS_INFO("theta: %f", theta);
 
 
     double x_dot, y_dot;
@@ -1195,11 +1207,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     // *** Set the new target ***
     setMaxV(x_dot, y_dot);
     setTarget(path_.points.at(i_kp_).motionState);
+    ROS_INFO("After setting new target:");
+    ROS_INFO("Prev KP: %s", utility_.toString(prevKP_).c_str());
+    ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());
 
-    ////ROS_INFO("Prev KP: %s", utility_.toString(prevKP_).c_str());
-    ////ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());
-
-    ////ROS_INFO("x_dot_scalar_: %f y_dot_scalar_: %f", x_dot_scalar_, y_dot_scalar_);
+    ROS_INFO("x_dot_scalar_: %f y_dot_scalar_: %f", x_dot_scalar_, y_dot_scalar_);
 
 
 
@@ -1254,8 +1266,9 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
     /** Straight Line Segment */
     // Else if straight-line segment
-    else {
-      ////ROS_INFO("In else, straight-line segment");
+    else 
+    {
+      ROS_INFO("In else, straight-line segment");
 
       // Get rotation if needed
       double trajec_size = res.trajectory.trajectory.points.size();
@@ -1266,11 +1279,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       trajectory_msgs::JointTrajectoryPoint next_knot =
             utility_.getTrajectoryPoint(path_.points.at(i_kp_).motionState);
 
-      ////ROS_INFO("=== Orientation Information ===");
-      ////ROS_INFO("last: %s", utility_.toString(last).c_str());
-      ////ROS_INFO("next_knot: %s", utility_.toString(next_knot).c_str());
-      ////ROS_INFO("utility_.findAngleFromAToB(last, next_knot): %f", utility_.findAngleFromAToB(last, next_knot));
-      ////ROS_INFO("utility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)): %f", utility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)));
+      ROS_INFO("=== Orientation Information ===");
+      ROS_INFO("last: %s", utility_.toString(last).c_str());
+      ROS_INFO("next_knot: %s", utility_.toString(next_knot).c_str());
+      ROS_INFO("utility_.findAngleFromAToB(last, next_knot): %f", utility_.findAngleFromAToB(last, next_knot));
+      ROS_INFO("utility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)): %f", utility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)));
 
 
       // Check for goal because the robot should not rotate
@@ -1293,15 +1306,17 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
             rotate(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot),
                     last.velocities.at(2), last.accelerations.at(2));
 
-          for(uint16_t p=0;p<rotate_points.size();p++) {
+          for(uint16_t p=0;p<rotate_points.size();p++) 
+          {
             res.trajectory.trajectory.points.push_back(rotate_points.at(p));
           } // end for
 
 
-          if(timeFromStart_ < timeCutoff_) 
+          // Do not add another knot point for self-rotation
+          /*if(timeFromStart_ < timeCutoff_) 
           {
             res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
-          }
+          }*/
 
           setSelectionVector();
           reflexxesData_.resultValue = 0;
