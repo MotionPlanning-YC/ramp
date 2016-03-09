@@ -7,7 +7,7 @@
 
 Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(1.5f), 
   cc_started_(false), c_pc_(0), transThreshold_(1./50.), num_cc_(0), L_(0.33), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), 
-  stop_(false), moving_on_coll_(false), delta_t_switch_(0.2)
+ delta_t_switch_(0.2), stop_(false), moving_on_coll_(false)
 {
   //planningCycle_          = ros::Duration(1.f / 20.f);
   imminentCollisionCycle_ = ros::Duration(1.f / 10.f);
@@ -467,6 +467,7 @@ const Population Planner::getPopulation( const MotionState init, const MotionSta
 
   // Set the size
   result.maxSize_ = populationSize_;
+  result.type_    = pop_type_;
 
   // Get some random paths
   std::vector<Path> paths = random ?  getRandomPaths  (init, goal)  : 
@@ -1008,7 +1009,7 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
 
   result.request.path           = path.buildPathMsg();
   //result.request.type           = PARTIAL_BEZIER;
-  result.request.type           = ALL_STRAIGHT_SEGMENTS;
+  result.request.type           = population_.type_;//ALL_STRAIGHT_SEGMENTS;
 
   // If path size > 2, assign a curve
   if(path.size() > 2) 
@@ -1223,7 +1224,7 @@ void Planner::initStartGoal(const MotionState s, const MotionState g) {
 
 
 /** Initialize the handlers and allocate them on the heap */
-void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r, const int population_size, const bool sub_populations, const std::vector<tf::Transform> ob_T_odoms, const int gens_before_cc, const double t_pc_rate, const double t_fixed_cc, const bool errorReduction) {
+void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState s, const MotionState g, const std::vector<Range> r, const int population_size, const bool sub_populations, const std::vector<tf::Transform> ob_T_odoms, const TrajectoryType pop_type, const int gens_before_cc, const double t_pc_rate, const double t_fixed_cc, const bool errorReduction) {
   ////ROS_INFO("In Planner::init");
 
   // Set ID
@@ -1266,6 +1267,7 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
   populationSize_       = population_size;
   subPopulations_       = sub_populations;
   ob_T_w_odom_          = ob_T_odoms;
+  pop_type_             = pop_type;
   generationsBeforeCC_  = gens_before_cc;
   t_fixed_cc_           = t_fixed_cc;
   errorReduction_       = errorReduction;
@@ -2757,17 +2759,18 @@ const Population Planner::getTransPop(const Population pop, const RampTrajectory
   ////ROS_INFO("pop: %s", pop.toString().c_str());
   Population result = pop;
 
-
-  // Go through the population and get:
-  // 1) planning cycle to switch at
-  // 2) transition trajectory
-  for(uint8_t i=0;i<pop.size();i++)
+  if(result.type_ != ALL_STRAIGHT_SEGMENTS)
   {
-    //ROS_INFO("i: %i", i);
-    RampTrajectory temp = computeFullSwitch(movingOn_, pop.get(i));
-    result.replace(i, temp);
+    // Go through the population and get:
+    // 1) planning cycle to switch at
+    // 2) transition trajectory
+    for(uint8_t i=0;i<pop.size();i++)
+    {
+      //ROS_INFO("i: %i", i);
+      RampTrajectory temp = computeFullSwitch(movingOn_, pop.get(i));
+      result.replace(i, temp);
+    }
   }
-
   ////ROS_INFO("Trans pop full: %s", result.toString().c_str());
 
   //ROS_INFO("Exiting Planner::getTransPop");
@@ -2849,11 +2852,11 @@ void Planner::doControlCycle()
   //ROS_INFO("Before getTransPop: %s", population_.toString().c_str());
  
   // Find the transition (non-holonomic) population and set new control cycle time
-  /*ros::Time t_startTrans = ros::Time::now();
+  ros::Time t_startTrans = ros::Time::now();
   population_           = getTransPop(population_, movingOn_);
   population_           = evaluatePopulation(population_);
   ros::Duration d_trans = ros::Time::now() - t_startTrans;
-  trans_durs_.push_back(d_trans);*/
+  trans_durs_.push_back(d_trans);
   
   //ROS_INFO("After finding transition population, controlCycle period: %f", controlCycle_.toSec());
   //ROS_INFO("New transPop: %s\n\n%s", 

@@ -10,7 +10,7 @@ class Population {
   public:
 
     Population();
-    Population(const unsigned int size, const bool isSubPop=false);
+    Population(const unsigned int size, const TrajectoryType type, const bool isSubPop=false);
 
     /* Methods */
     const unsigned int    size() const;
@@ -44,6 +44,7 @@ class Population {
 
     /** Data Members */
     std::vector<Path>           paths_;
+    TrajectoryType              type_; 
     unsigned int                maxSize_;
     
   private:

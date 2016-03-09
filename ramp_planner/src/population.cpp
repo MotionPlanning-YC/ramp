@@ -1,8 +1,8 @@
 #include "population.h"
 
-Population::Population() : maxSize_(3), isSubPopulation_(false) {}
+Population::Population() : type_(PARTIAL_BEZIER), maxSize_(3), isSubPopulation_(false) {}
 
-Population::Population(const unsigned int size, const bool isSubPop) : maxSize_(size), isSubPopulation_(isSubPop) {}
+Population::Population(const unsigned int size, const TrajectoryType type, const bool isSubPop) : type_(type), maxSize_(size), isSubPopulation_(isSubPop) {}
 
 
 /** Return the size of the population */
@@ -27,6 +27,7 @@ const RampTrajectory Population::get(const unsigned int i) const
 {
   return trajectories_.at(i);
 } // End get
+
 
 
 /** Returns -1 if it cannot find the id */
@@ -494,7 +495,7 @@ const std::vector<Population> Population::createSubPopulations(const double delt
   // Create the sub-populations
   for(uint8_t i=0;i<num;i++) 
   {
-    Population sub(maxSize_, true);
+    Population sub(maxSize_, type_, true);
     subPopulations_.push_back(sub);
   }
 

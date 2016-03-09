@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
   ros::NodeHandle handle_local("~");
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1, trajCallback);
  
-  handle.param("ramp_control/orientation", robot.initial_theta_, 0.);
+  handle.param("ramp_control/orientation", robot.initial_theta_, 0.785);
   //handle_local.param("orientation", robot.initial_theta_, 0.);
   std::cout<<"\nrobot.orientation: "<<robot.initial_theta_;
 

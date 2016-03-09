@@ -108,6 +108,7 @@ class Planner {
               const int                 population_size, 
               const bool                sub_populations,  
               const std::vector<tf::Transform> ob_T_odoms,
+              const TrajectoryType      pop_type=PARTIAL_BEZIER,
               const int                 gens_before_cc=0,
               const double              t_pc_rate=2.,
               const double              t_fixed_cc=2.,
@@ -360,6 +361,9 @@ class Planner {
 
     // Distance between each knot points
     double              L_;
+
+    // Type of trajectories the population will hold
+    TrajectoryType      pop_type_;
 
     // Handlers to communicate with other packages
     TrajectoryRequestHandler*   h_traj_req_;
