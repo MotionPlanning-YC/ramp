@@ -1008,8 +1008,7 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   ramp_msgs::TrajectoryRequest result;
 
   result.request.path           = path.buildPathMsg();
-  //result.request.type           = PARTIAL_BEZIER;
-  result.request.type           = population_.type_;//ALL_STRAIGHT_SEGMENTS;
+  result.request.type           = population_.type_;
 
   // If path size > 2, assign a curve
   if(path.size() > 2) 
@@ -2759,7 +2758,7 @@ const Population Planner::getTransPop(const Population pop, const RampTrajectory
   ////ROS_INFO("pop: %s", pop.toString().c_str());
   Population result = pop;
 
-  if(result.type_ != ALL_STRAIGHT_SEGMENTS)
+  if(result.type_ != HOLONOMIC)
   {
     // Go through the population and get:
     // 1) planning cycle to switch at

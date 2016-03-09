@@ -108,7 +108,7 @@ class Planner {
               const int                 population_size, 
               const bool                sub_populations,  
               const std::vector<tf::Transform> ob_T_odoms,
-              const TrajectoryType      pop_type=PARTIAL_BEZIER,
+              const TrajectoryType      pop_type=HYBRID,
               const int                 gens_before_cc=0,
               const double              t_pc_rate=2.,
               const double              t_fixed_cc=2.,

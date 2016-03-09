@@ -19,8 +19,8 @@
 #define CYCLE_TIME_IN_SECONDS 0.1
 
 enum TrajectoryType {
-  ALL_STRAIGHT_SEGMENTS = 0,
-  PARTIAL_BEZIER        = 1,
+  HOLONOMIC             = 0,
+  HYBRID                = 1,
   TRANSITION            = 2,
   PREDICTION            = 3
 };

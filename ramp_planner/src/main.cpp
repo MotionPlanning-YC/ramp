@@ -19,6 +19,8 @@ bool                errorReduction;
 double              t_cc_rate;
 double              t_pc_rate;
 int                 num_obs;
+int                 pop_type;
+TrajectoryType      pt;
 std::vector<std::string> ob_topics;
 std::vector<tf::Transform> ob_tfs;
 
@@ -199,9 +201,19 @@ void loadParameters(const ros::NodeHandle handle)
     ROS_INFO("t_cc_rate: %f", t_cc_rate);
   }
   
-  if(handle.hasParam("ramp/planning_cycle_rate")) {
-    handle.getParam("ramp/planning_cycle_rate", t_pc_rate);
-    ROS_INFO("t_pc_rate: %f", t_pc_rate);
+  if(handle.hasParam("ramp/pop_traj_type")) 
+  {
+    handle.getParam("ramp/pop_traj_type", pop_type);
+    ROS_INFO("pop_type: %s", pop_type ? "Partial Bezier" : "All Straight");
+    switch (pop_type) 
+    {
+      case 0:
+        pt = HOLONOMIC;
+        break;
+      case 1:
+        pt = HYBRID;
+        break;
+    }
   }
   
   if(handle.hasParam("ramp/error_reduction")) 
@@ -260,10 +272,9 @@ int main(int argc, char** argv) {
 
   ROS_INFO("Parameters loaded. Please review them and press Enter to continue");
   std::cin.get();
-
  
   /** Initialize the Planner's handlers */ 
-  my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, ob_tfs, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction); 
+  my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, ob_tfs, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction); 
   my_planner.modifications_   = modifications;
   my_planner.evaluations_     = evaluations;
   my_planner.seedPopulation_  = seedPopulation;

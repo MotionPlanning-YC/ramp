@@ -1,6 +1,6 @@
 #include "population.h"
 
-Population::Population() : type_(PARTIAL_BEZIER), maxSize_(3), isSubPopulation_(false) {}
+Population::Population() : type_(HYBRID), maxSize_(3), isSubPopulation_(false) {}
 
 Population::Population(const unsigned int size, const TrajectoryType type, const bool isSubPop) : type_(type), maxSize_(size), isSubPopulation_(isSubPop) {}
 

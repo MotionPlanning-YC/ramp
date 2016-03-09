@@ -379,10 +379,10 @@ const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request 
   result<<"\n  Path: "<<toString(tr.path);
   result<<"\n  type: ";
   switch(tr.type) {
-    case ALL_STRAIGHT_SEGMENTS:
+    case HOLONOMIC:
       result<<"All Straight Segments";
       break;
-    case PARTIAL_BEZIER:
+    case HYBRID:
       result<<"Partial Bezier";
       break;
     case TRANSITION:

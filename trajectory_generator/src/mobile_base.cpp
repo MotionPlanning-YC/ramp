@@ -526,7 +526,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
     if(inc == p_copy.points.size()) 
     {
       ////ROS_INFO("Cannot plan Bezier, returning same Path at 402");
-      type_ = ALL_STRAIGHT_SEGMENTS;
+      type_ = HOLONOMIC;
       return result;
     }
   }
@@ -550,7 +550,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
     if(inc == p_copy.points.size()) {
       ////ROS_INFO("Cannot plan Bezier, returning same Path at 422");
-      type_ = ALL_STRAIGHT_SEGMENTS;
+      type_ = HOLONOMIC;
       return result;
     }
   }
@@ -685,25 +685,25 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
           path_.points.at(1).motionState.velocities.at(i_v) = 0;
         }
 
-        type_ = ALL_STRAIGHT_SEGMENTS;
+        type_ = HOLONOMIC;
       } // end else if transition
       else 
       {
         ////ROS_INFO("Curve not verified, but not a transition trajectory");
-        type_ = ALL_STRAIGHT_SEGMENTS;
+        type_ = HOLONOMIC;
       }
     } // end if
     else 
     {
       //ROS_WARN("Two of the three segment points for Bezier curve are too close");
-      type_ = ALL_STRAIGHT_SEGMENTS;
+      type_ = HOLONOMIC;
     }
   } // end for
 
   ////ROS_INFO("Outside of for");
 
   // Set Path p's knot point indices
-  if(type_ != ALL_STRAIGHT_SEGMENTS) 
+  if(type_ != HOLONOMIC) 
   {
     if(type_ == TRANSITION) 
     {
@@ -1053,8 +1053,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   if( req.path.points.size() < 3 ||
       req.segments == 1 ) 
   {
-    //ROS_WARN("Changing type to ALL_STRAIGHT_SEGMENTS");
-    req.type = ALL_STRAIGHT_SEGMENTS;
+    //ROS_WARN("Changing type to HOLONOMIC");
+    req.type = HOLONOMIC;
     req.segments++;
   }
 
@@ -1095,7 +1095,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   std::vector<BezierCurve> curves;
 
   // Use Bezier curves to smooth path
-  if(type_ != ALL_STRAIGHT_SEGMENTS) 
+  if(type_ != HOLONOMIC) 
   {
     ////ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
     curves = bezier(path_, type_ == TRANSITION);
@@ -1112,7 +1112,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
   if(curves.size() == 0) 
   {
-    type_ = ALL_STRAIGHT_SEGMENTS;
+    type_ = HOLONOMIC;
   }
 
   // Print curves
@@ -1131,7 +1131,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
 
   // If using holonomic motion, set the knot velocities to all equal 0
-  if(type_ == ALL_STRAIGHT_SEGMENTS)
+  if(type_ == HOLONOMIC)
   {
     for(uint16_t i=0;i<path_.points.size();i++)
     {
@@ -1290,7 +1290,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
       // Check for goal because the robot should not rotate
       // if it overshoots the goal.
-      if(!checkTarget() || type_ == ALL_STRAIGHT_SEGMENTS) 
+      if(!checkTarget() || type_ == HOLONOMIC) 
       {
 
         // Set orientation threshold that requires a rotation 
@@ -1396,7 +1396,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       timeFromStart_ -= ros::Duration(CYCLE_TIME_IN_SECONDS);
       
       // If it's the first kp and there's no curve
-      if(i_kp_ == 1 && req.path.points.size() > 2 && type_ != PARTIAL_BEZIER)
+      if(i_kp_ == 1 && req.path.points.size() > 2 && type_ != HYBRID)
       {
         ////ROS_INFO("Remvoing last knot point index");
         res.trajectory.i_knotPoints.pop_back();
