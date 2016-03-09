@@ -12,11 +12,12 @@ const double Orientation::perform()
   if(trajectory_.i_knotPoints.size() > 1) 
   {
 
-    // Check for rotation at beginning
     trajectory_msgs::JointTrajectoryPoint a = trajectory_.trajectory.points.at(0);
     trajectory_msgs::JointTrajectoryPoint b = trajectory_.trajectory.points.at(trajectory_.i_knotPoints.at(1));
     //ROS_INFO("a: %s\nb: %s", utility_.toString(a).c_str(), utility_.toString(b).c_str());
-    if( fabs(utility_.positionDistance(a.positions, b.positions)) < 0.01)
+    
+    // Check for rotation at beginning
+    /*if( fabs(utility_.positionDistance(a.positions, b.positions)) < 0.01)
     {
       if(trajectory_.i_knotPoints.size() > 2)
       {
@@ -29,7 +30,7 @@ const double Orientation::perform()
         //ROS_WARN("Only two knot points and the points are equal.");
         //ROS_WARN("Point 0: %s\nPoint at KP 1: %s", utility_.toString(a).c_str(), utility_.toString(b).c_str());
       //}
-    }
+    }*/
 
 
     double thetaNec = utility_.findAngleFromAToB(a, b);   
@@ -62,11 +63,12 @@ const double Orientation::getPenalty() const
     double mag_linear = sqrt( pow(trajectory_.trajectory.points.at(0).velocities.at(0), 2) + 
         pow(trajectory_.trajectory.points.at(0).velocities.at(1), 2) );
 
+    ROS_INFO("thetaNec: %f deltaTheta: %f mag_linear: %f", thetaNec, deltaTheta, mag_linear);
 
     // If delta theta is too high, add a penalty
     if(mag_linear > 0 && deltaTheta >= PI/2.f) 
     {
-      //ROS_INFO("Adding penalty for deltaTheta: %f", deltaTheta);
+      ROS_INFO("Adding penalty for deltaTheta: %f", deltaTheta);
       double normalize = PI;
       deltaTheta /= normalize;
       result += (Q_ * normalize);

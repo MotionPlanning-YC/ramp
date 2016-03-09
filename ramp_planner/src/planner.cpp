@@ -530,14 +530,14 @@ const uint8_t Planner::getIndexStartPathAdapting(const RampTrajectory t) const
 
   // If the first part is just self-rotation to correct orientation,
   // add 1 to result
-  if(t.msg_.i_knotPoints.size() > 1 && utility_.positionDistance( 
+  /*if(t.msg_.i_knotPoints.size() > 1 && utility_.positionDistance( 
                                         t.msg_.trajectory.points.at( t.msg_.i_knotPoints.at(1)).positions,
                                         t.msg_.trajectory.points.at( t.msg_.i_knotPoints.at(0)).positions) 
       < 0.001)
   {
     ROS_WARN("Adding 1 to result because first two position are the same, indicating a rotation to satisfy orientation");
     result++;
-  }
+  }*/
 
   ROS_INFO("getIndexStartPathAdapting returning: %i", result);
   return result;
@@ -1011,7 +1011,8 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   result.request.type           = ALL_STRAIGHT_SEGMENTS;
 
   // If path size > 2, assign a curve
-  if(path.size() > 2) {
+  if(path.size() > 2) 
+  {
     //ROS_INFO("In if path.size() > 2)");
 
     // If it's the first time getting a curve 
@@ -1057,14 +1058,14 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
   ramp_msgs::EvaluationRequest result;
 
   result.request.trajectory   = trajec.msg_;
-  if(population_.size() > 0)
-  {
-    result.request.currentTheta = population_.getBest().getDirection();
-  }
-  else
-  {
+  //if(population_.size() > 0)
+  //{
+    //result.request.currentTheta = population_.getBest().getDirection();
+  //}
+  //else
+  //{
     result.request.currentTheta = latestUpdate_.msg_.positions.at(2);
-  }
+  //}
 
   for(uint8_t i=0;i<ob_trajectory_.size();i++)
   {
@@ -1776,14 +1777,14 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
 
   // Removed this section because we changed from getPath() to the actual path_ member
   // Else if there's self-rotation at the beginning
-  else if(to.msg_.i_knotPoints.size() > 2 && 
+  /*else if(to.msg_.i_knotPoints.size() > 2 && 
       utility_.positionDistance(  to.holonomic_path_.start_.motionState_.msg_.positions, 
                                   to.msg_.trajectory.points.at(
                                     to.msg_.i_knotPoints.at(1)).positions ) 
                                 < 0.0001)
   {
     i_goal = 2;
-  }
+  }*/
   //ROS_INFO("i_goal: %i to.msg_.trajectory.points.size(): %i to.msg_.i_knotPoints.size(): %i", i_goal, (int)to.msg_.trajectory.points.size(), (int)to.msg_.i_knotPoints.size());
  
   // Set third segment point
@@ -1981,13 +1982,13 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
       // Check if there's rotation at the beginning, if so increment c_kp
       // TODO: Better way of doing this
       // Used to be else-if
-      if(utility_.positionDistance( to.msg_.trajectory.points.at(0).positions,
+      /*if(utility_.positionDistance( to.msg_.trajectory.points.at(0).positions,
             to.msg_.trajectory.points.at( to.msg_.i_knotPoints.at(1)).positions ) < 0.0001)
       {
         //std::cout<<"\nIncrementing c_kp";
         //ROS_INFO("Incrementing c_kp to %i", (c_kp+1));
         c_kp++;
-      }
+      }*/
       //ROS_INFO("c_kp: %i", c_kp);
       //ROS_INFO("c_kp: %i i_knotPoints.size(): %i", c_kp, (int)to.msg_.i_knotPoints.size());
 
@@ -2089,14 +2090,14 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
 
   // Removed this section because we changed from getPath() to the actual path_ member
   // Else if there's self-rotation at the beginning
-  else if(trj_target.msg_.i_knotPoints.size() > 2 && 
+  /*else if(trj_target.msg_.i_knotPoints.size() > 2 && 
       utility_.positionDistance(  trj_target.holonomic_path_.start_.motionState_.msg_.positions, 
                                   trj_target.msg_.trajectory.points.at(
                                     trj_target.msg_.i_knotPoints.at(1)).positions ) 
                                 < 0.0001)
   {
     i_goal = 2;
-  }
+  }*/
   //ROS_INFO("i_goal: %i", i_goal);
  
   // Can't really use holonomic path because 
@@ -2805,15 +2806,6 @@ void Planner::doControlCycle()
   sendBest();
   ////ROS_INFO("After sendBest");
 
-  
-  // Set gensPerCC based on CC time
-  //generationsPerCC_ = controlCycle_.toSec() / planningCycle_.toSec();
-  /*//ROS_INFO("CC Time: %f PC Time: %f generationsPerCC_: %i", 
-      controlCycle_.toSec(), 
-      planningCycle_.toSec(),
-      generationsPerCC_);*/
-
-
 
   ////ROS_INFO("Setting movingOn_");
   movingOnCC_             = bestT.getSubTrajectory(t_fixed_cc_);
@@ -2823,8 +2815,6 @@ void Planner::doControlCycle()
   moving_on_coll_         = !movingOn_.msg_.feasible;
   //ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
 
-  // Reset planning cycle count
-  //c_pc_ = 0;
 
   // The motion state that we should reach by the next control cycle
   m_cc_ = bestT.getPointAtTime(t_fixed_cc_);
@@ -2845,7 +2835,7 @@ void Planner::doControlCycle()
   ros::Duration d_adapt = ros::Time::now() - t_startAdapt;
   adapt_durs_.push_back(d_adapt);
   
-  //ROS_INFO("After adaptation and evaluation, pop size: %i pop: \n%s\nDone printing pop", population_.size(), population_.toString().c_str());
+  ROS_INFO("After adaptation and evaluation, pop size: %i pop: \n%s\nDone printing pop", population_.size(), population_.toString().c_str());
   ////ROS_INFO("Time spent adapting: %f", d_adapt.toSec());
  
   //if(population_.calcBestIndex() != population_.calcBestIndex())
@@ -3242,6 +3232,8 @@ void Planner::go()
   
   // initialize population
   initPopulation();
+  ROS_INFO("Population Initialized");
+  std::cin.get();
   sendPopulation(population_);
   std::cout<<"\ntransPopulation initialized! Press enter to continue\n";
   //std::cin.get();

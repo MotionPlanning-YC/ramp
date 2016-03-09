@@ -13,7 +13,8 @@ bool received_ob = false;
 bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
                    ramp_msgs::EvaluationRequest::Response& res) 
 {
-  //ROS_INFO("Robot Evaluating trajectory: %s", u.toString(req.trajectory).c_str());
+  ROS_INFO("Robot Evaluating trajectory: %s", u.toString(req.trajectory).c_str());
+  ROS_INFO("Current theta: %f", req.currentTheta);
 
   ev.setRequest(req);
 
@@ -40,7 +41,7 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   // Do fitness
   res.fitness = ev.performFitness(qr);
 
-  //ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
+  ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
   return true;
 } //End handleRequest
 

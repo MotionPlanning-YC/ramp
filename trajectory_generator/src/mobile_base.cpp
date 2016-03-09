@@ -1044,7 +1044,9 @@ bool MobileBase::checkSpeed(const ramp_msgs::Path p, const std::vector<uint8_t> 
 
 
 // Service callback, the input is a path and the output a trajectory
-bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) {
+bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) 
+{
+  //ROS_INFO("In MobileBase::trajectoryRequest");
   
   // If there's less than 3 points, make it have straight segments
   // if req_.segments == 1
@@ -1133,7 +1135,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   {
     for(uint16_t i=0;i<path_.points.size();i++)
     {
-      for(uint8_t j=0;j<path_.points.at(0).motionState.velocities.size();j++)
+      for(uint8_t j=0;j<path_.points.at(i).motionState.velocities.size();j++)
       {
         path_.points.at(i).motionState.velocities.at(j) = 0;
       }
@@ -1166,7 +1168,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   //for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) 
   for (i_kp_ = 1; i_kp_<segments_; i_kp_++) 
   {
-    ////ROS_INFO("i_kp_: %i", (int)i_kp_);
+    ROS_INFO("i_kp_: %i", (int)i_kp_);
     reflexxesData_.resultValue = 0;
 
     // Push the initial state onto trajectory
