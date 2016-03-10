@@ -2604,8 +2604,10 @@ void Planner::planningCycleCallback()
       //ROS_INFO("In if trajectory added");
       population_       = mod.popNew_;
       
-      controlCycle_ = population_.getBest().msg_.t_start;
-      controlCycleTimer_.setPeriod(population_.getBest().msg_.t_start, false);
+      controlCycle_ = population_.getEarliestStartTime();
+      controlCycleTimer_.setPeriod(controlCycle_, false);
+      //controlCycle_ = population_.getBest().msg_.t_start;
+      //controlCycleTimer_.setPeriod(population_.getBest().msg_.t_start, false);
       //ROS_INFO("Modification: new CC timer: %f", population_.getBest().msg_.t_start.toSec());
     } // end if trajectory added
     /*else
@@ -2836,6 +2838,17 @@ void Planner::doControlCycle()
   population_ = evaluatePopulation(population_);
   ros::Duration d_adapt = ros::Time::now() - t_startAdapt;
   adapt_durs_.push_back(d_adapt);
+
+  if(utility_.positionDistance(movingOn_.msg_.trajectory.points.at(movingOn_.msg_.trajectory.points.size()-1).positions,
+        population_.getBest().msg_.trajectory.points.at(0).positions) > 0.01)
+  {
+    ROS_WARN("Moving on and next best DO NOT MATCH: %f", 
+        utility_.positionDistance(movingOn_.msg_.trajectory.points.at(movingOn_.msg_.trajectory.points.size()-1).positions,
+        population_.getBest().msg_.trajectory.points.at(0).positions));
+  
+    ROS_WARN("movingOn_: %s", movingOn_.toString().c_str());
+    ROS_WARN("Pop best: %s", population_.getBest().toString().c_str());
+  }
   
   ROS_INFO("After adaptation and evaluation, pop size: %i pop: \n%s\nDone printing pop", population_.size(), population_.toString().c_str());
   ////ROS_INFO("Time spent adapting: %f", d_adapt.toSec());
@@ -2882,13 +2895,9 @@ void Planner::doControlCycle()
   // Send the population to trajectory_visualization
   sendPopulation(population_);
   
-  /*//ROS_INFO("Control Cycle %i Ending, next one occurring in %f seconds", 
-      num_cc_, controlCycle_.toSec());*/
-
-  //controlCycle_         = ros::Duration(population_.getBest().msg_.t_start.toSec());
-  //***controlCycle_         = population_.getEarliestStartTime();
-  //ROS_INFO("Control Cycle: new CC timer: %f", controlCycle_.toSec());
-  //***controlCycleTimer_.setPeriod(controlCycle_, false);
+  controlCycle_         = population_.getEarliestStartTime();
+  ROS_INFO("Control Cycle: new CC timer: %f", controlCycle_.toSec());
+  controlCycleTimer_.setPeriod(controlCycle_, false);
 
   ros::Duration d_cc = ros::Time::now() - t;
   cc_durs_.push_back(d_cc);

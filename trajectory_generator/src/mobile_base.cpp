@@ -1048,6 +1048,20 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 {
   //ROS_INFO("In MobileBase::trajectoryRequest");
   
+
+  // If using holonomic motion, set the knot velocities to all equal 0
+  if(type_ == HOLONOMIC)
+  {
+    for(uint16_t i=0;i<path_.points.size();i++)
+    {
+      for(uint8_t j=0;j<path_.points.at(i).motionState.velocities.size();j++)
+      {
+        path_.points.at(i).motionState.velocities.at(j) = 0;
+      }
+    }
+  }
+
+
   // If there's less than 3 points, make it have straight segments
   // if req_.segments == 1
   if( req.path.points.size() < 3 ||
@@ -1130,21 +1144,9 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   res.trajectory.i_knotPoints.push_back(0);
 
 
-  // If using holonomic motion, set the knot velocities to all equal 0
-  if(type_ == HOLONOMIC)
-  {
-    for(uint16_t i=0;i<path_.points.size();i++)
-    {
-      for(uint8_t j=0;j<path_.points.at(i).motionState.velocities.size();j++)
-      {
-        path_.points.at(i).motionState.velocities.at(j) = 0;
-      }
-    }
-  }
 
 
-
-  if(!checkSpeed(path_, i_cs))
+  /*if(!checkSpeed(path_, i_cs))
   {
     ROS_INFO("Check speed is false! Removing knot point 1");
     path_.points.erase(path_.points.begin()+1);
@@ -1152,7 +1154,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     {
       i_cs.at(0)--;
     }
-  }
+  }*/
 
 
   if(planning_full_)
@@ -1205,6 +1207,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       path_.points.at(i_kp_).motionState.velocities.push_back(x_dot);
       path_.points.at(i_kp_).motionState.velocities.push_back(y_dot);
     }
+    ROS_INFO("x_dot: %f y_dot: %f", x_dot, y_dot);
 
     // *** Set the new target ***
     setMaxV(x_dot, y_dot);
@@ -1213,7 +1216,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     ROS_INFO("Prev KP: %s", utility_.toString(prevKP_).c_str());
     ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());
 
-    ROS_INFO("x_dot_scalar_: %f y_dot_scalar_: %f", x_dot_scalar_, y_dot_scalar_);
 
 
 

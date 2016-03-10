@@ -67,9 +67,6 @@ private:
   uint8_t segments_;
   bool planning_full_;
 
-  double x_dot_scalar_;
-  double y_dot_scalar_;
-
   double MAX_SPEED;
 
   /***** Methods *****/
