@@ -2275,10 +2275,12 @@ const std::vector<RampTrajectory> Planner::modifyTrajec()
   
 
   // The process begins by modifying one or more paths
+  ros::Time t_p = ros::Time::now();
   std::vector<Path> modded_paths = modifyPath();
-  ////ROS_INFO("Number of modified paths: %i", (int)modded_paths.size());
+  //ROS_INFO("Number of modified paths: %i", (int)modded_paths.size());
 
 
+  ros::Time t_for = ros::Time::now();
   // For each targeted path,
   for(unsigned int i=0;i<modded_paths.size();i++) 
   {
@@ -2287,7 +2289,6 @@ const std::vector<RampTrajectory> Planner::modifyTrajec()
     // Get trajectory
     RampTrajectory temp = requestTrajectory(modded_paths.at(i));
     result.push_back(temp);
-  
   } // end for
   
   //ROS_INFO("Exiting Planner::modifyTrajec");
@@ -2306,15 +2307,18 @@ const std::vector<RampTrajectory> Planner::modifyTrajec()
  *  and return the index of the new best trajectory */
 const ModificationResult Planner::modification() 
 {
+  ros::Time t_m = ros::Time::now();
   //ROS_INFO("In Planner::modification()");
   ModificationResult result;
 
   // Modify 1 or more trajectories
+  ros::Time now = ros::Time::now();
   std::vector<RampTrajectory> mod_trajec = modifyTrajec();
   //ROS_INFO("Modification trajectories obtained: %i", (int)mod_trajec.size());
   
   Population popCopy = population_;
 
+  ros::Time t_for = ros::Time::now();
   // Evaluate and add the modified trajectories to the population
   // and update the planner and the modifier on the new paths
   for(unsigned int i=0;i<mod_trajec.size();i++) 
@@ -2328,15 +2332,10 @@ const ModificationResult Planner::modification()
     // Make a copy of the trajec
     RampTrajectory modded_t = mod_trajec.at(i);
 
-    // If cc's have started, get full switching trajectory
-    if(cc_started_)
-    {
-      //modded_t = computeFullSwitch(movingOn_, mod_trajec.at(i));
-    }
-    
     // Add the new trajectory to the population
     // Index is where the trajectory was added in the population (may replace another)
     // If it was successfully added, push its index onto the result
+    ros::Time t_start = ros::Time::now();
     int index = popCopy.add(modded_t);
     
     if(index > -1)
@@ -2355,7 +2354,7 @@ const ModificationResult Planner::modification()
     }
   } // end for
 
-
+  ros::Time t_p = ros::Time::now();
   result.popNew_    = popCopy;
   ////ROS_INFO("After modification, pop now: %s", result.popNew_.toString().c_str());
 
@@ -2453,7 +2452,7 @@ const Population Planner::offsetPopulation(const Population pop, const MotionSta
 
 const MotionState Planner::errorCorrection()  
 {
-  ROS_INFO("In Planner::errorCorrection");
+  //ROS_INFO("In Planner::errorCorrection");
   MotionState result;
 
   //ROS_INFO("c_pc: %i", (int)c_pc_);
@@ -2466,13 +2465,13 @@ const MotionState Planner::errorCorrection()
   ros::Duration t_since_cc = ros::Time::now() - t_prevCC_;
   //MotionState diff = m_i_.at(t_since_cc.toSec()).subtractPosition(latestUpdate_, true);
   MotionState diff = movingOnCC_.getPointAtTime(t_since_cc.toSec());
-  ROS_INFO("Diff before subtract: %s", diff.toString().c_str());
+  //ROS_INFO("Diff before subtract: %s", diff.toString().c_str());
   diff = diff.subtractPosition(latestUpdate_, true);
-  ROS_INFO("Diff after subtract: %s", diff.toString().c_str());
+  //ROS_INFO("Diff after subtract: %s", diff.toString().c_str());
   error_correct_val_pos_.push_back( sqrt( pow(diff.msg_.positions.at(0), 2) + pow(diff.msg_.positions.at(1),2) ) );
   error_correct_val_or_.push_back(diff.msg_.positions.at(2));
  
-  ROS_INFO("m_cc: %s\ndiff: %s", m_cc_.toString().c_str(), diff.toString().c_str());
+  //ROS_INFO("m_cc: %s\ndiff: %s", m_cc_.toString().c_str(), diff.toString().c_str());
 
   // subtractPosition that difference from startPlanning
   result = m_cc_.subtractPosition(diff, true);
@@ -2481,8 +2480,8 @@ const MotionState Planner::errorCorrection()
   result.msg_.positions.at(2) = latestUpdate_.msg_.positions.at(2);
 
 
-  ROS_INFO("result: %s", result.toString().c_str());
-  ROS_INFO("Exiting Planner::errorCorrection");
+  //ROS_INFO("result: %s", result.toString().c_str());
+  //ROS_INFO("Exiting Planner::errorCorrection");
   return result;
 }
 
@@ -2525,17 +2524,17 @@ void Planner::planningCycleCallback()
         ( population_.getBest().msg_.curves.size() > 0  && 
           population_.getBest().msg_.curves.at(0).u_0 < 0.0001))
     {
-      ROS_INFO("Doing error correction");
-      ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
+      //ROS_INFO("Doing error correction");
+      //ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
       // Do error correction
       ros::Duration t_since_cc = ros::Time::now() - t_prevCC_;
-      ROS_INFO("t_since_cc: %f", t_since_cc.toSec());
-      ROS_INFO("movingOnCC_: %s", movingOnCC_.toString().c_str());
+      //ROS_INFO("t_since_cc: %f", t_since_cc.toSec());
+      //ROS_INFO("movingOnCC_: %s", movingOnCC_.toString().c_str());
       diff = movingOnCC_.getPointAtTime(t_since_cc.toSec());
-      ROS_INFO("movingOnCC_ at t_since_cc: %s", diff.toString().c_str());
+      //ROS_INFO("movingOnCC_ at t_since_cc: %s", diff.toString().c_str());
       diff = diff.subtractPosition(latestUpdate_, true);
       startPlanning_ = errorCorrection();
-      ROS_INFO("diff: %s", diff.toString().c_str());
+      //ROS_INFO("diff: %s", diff.toString().c_str());
 
       ////ROS_INFO("Updating movingOn");
       Path p(latestUpdate_, startPlanning_);
@@ -2627,7 +2626,7 @@ void Planner::planningCycleCallback()
 
   //if(cc_started_)
   //{
-    sendPopulation(population_);
+    //sendPopulation(population_);
   //}
   //else
   //{

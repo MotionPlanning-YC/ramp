@@ -130,6 +130,7 @@ const std::vector<Path> Modifier::perform(const Population pop)
   std::vector<Path> result;
  
   // Build a modification request srv 
+  ros::Time t_b = ros::Time::now();
   ramp_msgs::ModificationRequest mr = buildModificationRequest(pop); 
   //ROS_INFO("ModificationResult built"); 
 
@@ -148,6 +149,7 @@ const std::vector<Path> Modifier::perform(const Population pop)
     if(h_mod_req_->request(mr)) 
     {
 
+      ros::Time t_m = ros::Time::now();
       // Push on the modified paths
       for(unsigned int i=0;i<mr.response.mod_paths.size();i++) 
       {

@@ -106,7 +106,7 @@ void SLike(const int index, const double v, const double w, const double t)
 
 void driveStraight(const int index, const double v, const double t)
 {
-  ROS_INFO("In driveStraight");
+  //ROS_INFO("In driveStraight");
 
   ros::Rate r(25);
   ros::Duration d(t);
@@ -121,7 +121,7 @@ void driveStraight(const int index, const double v, const double t)
  
   // Drive forward
   ros::Time start = ros::Time::now();
-  while(ros::Time::now() - start < d)
+  while(ros::ok() && ros::Time::now() - start < d)
   {
     ob_pubs.at(index).publish(twist);
     r.sleep();
@@ -173,7 +173,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
  
     // Drive forward
     ros::Time t = ros::Time::now();
-    while(ros::Time::now() - t < d)
+    while(ros::ok() && ros::Time::now() - t < d)
     {
       ob_pubs.at(index).publish(twist);
       r.sleep();
@@ -201,7 +201,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     d = ros::Duration(1.75);
     t = ros::Time::now();
-    while(ros::Time::now() - t < d)
+    while(ros::ok() && ros::Time::now() - t < d)
     {
       twist.angular.z = (index == 1) ? -0.64 : -0.8;
       ob_pubs.at(index).publish(twist);
@@ -215,7 +215,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     d = ros::Duration(2.5);
     t = ros::Time::now();
-    while(ros::Time::now() - t < d)
+    while(ros::ok() && ros::Time::now() - t < d)
     {
       twist.angular.z = (index == 1) ? 0.64 : 0.8;
       ob_pubs.at(index).publish(twist);
@@ -229,7 +229,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     d = ros::Duration(3);
     t = ros::Time::now();
-    while(ros::Time::now() - t < d)
+    while(ros::ok() && ros::Time::now() - t < d)
     {
       twist.angular.z = (index == 1) ? -0.8 : -0.64;
       ob_pubs.at(index).publish(twist);
@@ -243,7 +243,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     d = ros::Duration(2.25);
     t = ros::Time::now();
-    while(ros::Time::now() - t < d)
+    while(ros::ok() && ros::Time::now() - t < d)
     {
       twist.angular.z = (index == 1) ? 0.64 : 0.8;
       ob_pubs.at(index).publish(twist);
