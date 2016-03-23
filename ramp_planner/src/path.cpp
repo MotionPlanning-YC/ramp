@@ -60,8 +60,10 @@ const bool Path::equals(const Path& p) const {
     return false;
   }
 
-  for(uint8_t i=0;i<size();i++) {
-    if(!all_.at(i).equals(p.all_.at(i))) {
+  for(uint8_t i=0;i<size();i++) 
+  {
+    if(!all_.at(i).equals(p.all_.at(i))) 
+    {
       return false;
     }
   }

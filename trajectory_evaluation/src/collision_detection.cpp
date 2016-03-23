@@ -71,33 +71,24 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   }*/
   
   uint16_t i_stop;
-  if(trajectory_.i_knotPoints.size() == 0) 
+  if(   trajectory_.curves.size() == 0 ||
+      ( trajectory_.curves.size() == 1 && trajectory_.i_knotPoints.size() == 2) )
   {
-    //ROS_INFO("i_stop=0");
-    i_stop = 0;
-  }
-  else if(trajectory_.i_knotPoints.size() == 1) 
-  {
-    //ROS_INFO("i_stop=1");
-    i_stop = 1;
-  }
-  else if(trajectory_.i_knotPoints.size() <= 2) 
-  {
-    //ROS_INFO("i_stop=kp 1");
     i_stop = trajectory_.i_knotPoints.at(1);
   }
-  else 
+  
+  else
   {
-    //ROS_INFO("i_stop=kp 2");
     i_stop = trajectory_.i_knotPoints.at(2);
   }
+  
 
   int j_start;
   
   //ROS_INFO("i_stop: %i", i_stop);
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
-  float radius = 0.21f;
+  float radius = 0.25f;
   for(uint16_t i=0;i<i_stop;i++) 
   {
     

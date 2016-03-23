@@ -4,7 +4,6 @@
 #include "ramp_msgs/Obstacle.h"
 
 Evaluate ev;
-CollisionDetection cd;
 Utility u;
 bool received_ob = false;
 
@@ -17,15 +16,15 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
 
   ev.setRequest(req);
 
-  cd.obstacle_trjs_ = req.obstacle_trjs;
+  //cd.obstacle_trjs_ = req.obstacle_trjs;
   
   // Make a QueryResult object
-  CollisionDetection::QueryResult qr;
+  //CollisionDetection::QueryResult qr;
 
   // If there are obstacles, do collision detection
   //if(received_ob) {
-    cd.trajectory_  = req.trajectory;
-    qr = cd.perform();
+    //cd.trajectory_  = req.trajectory;
+    //qr = cd.perform();
   //}
   // Else, set collision to false
   //else {
@@ -34,11 +33,14 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   //}
 
   // Set response
-  res.feasible = !qr.collision_;
-  res.t_firstCollision = ros::Duration(qr.t_firstCollision_);
+  //res.feasible = !qr.collision_;
+  //res.t_firstCollision = ros::Duration(qr.t_firstCollision_);
+
+  res.feasible = ev.performFeasibility();
+ 
 
   // Do fitness
-  res.fitness = ev.performFitness(qr);
+  res.fitness = ev.performFitness(res.feasible);
 
   //ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
   return true;
@@ -51,8 +53,6 @@ int main(int argc, char** argv) {
   ros::NodeHandle handle;
 
   int id;
-  cd.init(handle);
-
  
   ros::ServiceServer service    = handle.advertiseService("trajectory_evaluation", handleRequest);
 

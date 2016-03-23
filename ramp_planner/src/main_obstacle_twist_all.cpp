@@ -1,6 +1,5 @@
 #include <ros/ros.h>
 #include "geometry_msgs/Twist.h"
-#include "corobot_msgs/MotorCommand.h"
 
 
 int num_obs;
@@ -135,7 +134,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
   ROS_INFO("Elapsed time: %f", (ros::Time::now() - node_start).toSec());
 
 
-  ros::Rate r(10);
+  ros::Rate r(5);
   ros::Duration d(1.5);
   geometry_msgs::Twist twist;
   
@@ -149,11 +148,11 @@ void publishToOb(const ros::TimerEvent e, const int index)
   /*
    * Set motion for Obstacle 1
    */
-  if(index == 0)
+  if(index == 1)
   {
     
     
-    driveStraight(index, 0.33, 5);
+    driveStraight(index, 0.33, 10);
     
     //d = ros::Duration(4);
 
@@ -287,11 +286,9 @@ int main(int argc, char** argv)
   // Create publishers
   for(uint8_t i=0;i<ob_odoms.size();i++)
   {
-    ros::Publisher pub_twist = handle.advertise<geometry_msgs::Twist>(ob_vels.at(i), 10);
+    ros::Publisher pub_twist = handle.advertise<geometry_msgs::Twist>(ob_vels.at(i), 1000);
     ob_pubs.push_back(pub_twist);
   }
-  corobot_pub = handle.advertise<corobot_msgs::MotorCommand>("PhidgetMotor", 10);
-
   ROS_INFO("Waiting for /ramp/cc_started=true...");
 
   // Wait for ramp to start moving the robot

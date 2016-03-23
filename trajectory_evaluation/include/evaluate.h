@@ -5,7 +5,6 @@
 #include "orientation.h"
 #include "collision_detection.h"
 #include "utility.h"
-#include "collision_detection.h"
 
 
 
@@ -17,13 +16,15 @@ class Evaluate {
     
     void setRequest(const ramp_msgs::EvaluationRequest::Request req);
 
-    const double performFitness(CollisionDetection::QueryResult feasible);
+    bool performFeasibility();
+    const double performFitness(bool feasible);
 
     /** Different evaluation criteria */
     EuclideanDistance eucDist_;
     Orientation orientation_;
 
     
+    CollisionDetection cd_;
 
     //Information sent by the request
     ramp_msgs::RampTrajectory trajectory_;

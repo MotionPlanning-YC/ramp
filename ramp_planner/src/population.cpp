@@ -383,7 +383,7 @@ const int Population::add(const RampTrajectory rt)
     //ROS_INFO("In if isSubPopulation_ || trajectories_.size() < maxSize_");
     //ROS_INFO("Exiting Population::add");
     return trajectories_.size()-1;
-  } 
+  }
 
   // If full, replace a trajectory
   else if(!contains(rt) && replacementPossible(rt)) 
@@ -398,7 +398,9 @@ const int Population::add(const RampTrajectory rt)
   }
 
 
-  //ROS_INFO("Cannot add trajectory");
+  /*ROS_INFO("Cannot add trajectory");
+  ROS_INFO("%s", rt.toString().c_str());
+  ROS_INFO("pop: %s", toString().c_str());*/
 
   //ROS_INFO("Exiting Population::add");
   return -1;
@@ -412,6 +414,7 @@ const int Population::calcBestIndex() const
   if(size() == 0)
   {
     ROS_ERROR("Calling Population::calcBestIndex(), but Population is empty");
+    ROS_INFO("Pop: %s", toString().c_str());
     return -1;
   }
  
@@ -548,9 +551,10 @@ const std::string Population::fitnessFeasibleToString() const
   result<<"\nPopulation's fitness and feasibility:";
   for(unsigned int i=0;i<trajectories_.size();i++) {
     result<<"\n"<<trajectories_.at(i).fitnessFeasibleToString();
-    if(i == calcBestIndex()) {
-      result<<" - Best!";
-    }
+    //if(i == calcBestIndex()) 
+    //{
+      //result<<" - Best!";
+    //}
   }
   result<<"\n****************************************************";
 
@@ -566,7 +570,7 @@ const std::string Population::toString() const
 {
   std::ostringstream result;
 
-  result<<"Best ID: "<<calcBestIndex();
+//  result<<"Best ID: "<<calcBestIndex();
 
   // If sub-populations exist, print those
   if(subPopulations_.size() > 0) 

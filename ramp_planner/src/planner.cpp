@@ -490,6 +490,7 @@ const Population Planner::getPopulation( const MotionState init, const MotionSta
   }
 
   // Evaluate the population 
+  ROS_INFO("Calling evaluatePopulation in getPopulation");
   result = evaluatePopulation(result);
 
   ////ROS_INFO("Exiting Planner::getRandomPopulation");
@@ -1054,7 +1055,8 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
 
 
 /** Build an EvaluationRequest srv */
-const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTrajectory trajec) {
+const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTrajectory trajec) 
+{
   ramp_msgs::EvaluationRequest result;
 
   result.request.trajectory   = trajec.msg_;
@@ -1111,10 +1113,9 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
 
       //ROS_WARN("latestUpdate_: %s\nob_point: %s", latestUpdate_.toString().c_str(), utility_.toString(ob).c_str());
 
-      //if(!movingOn_.msg_.feasible &&
-      if((moving_on_coll_        &&
-          dist < dist_threshold) || 
-          (dist < 0.45 && population_.getBest().msg_.t_firstCollision.toSec() < 0.5f))
+      if(dist < dist_threshold &&
+          (moving_on_coll_ ||
+           population_.getBest().msg_.t_firstCollision.toSec() < 0.75f))
         // Consider t_collision of best trajectory
       {
         //ROS_WARN("Imminent Collision Robot: %i dist: %f", id_, dist);
@@ -2185,9 +2186,6 @@ const RampTrajectory Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr
     // Set the paths (straight-line and bezier)
     result.holonomic_path_        = tr.request.path;
 
-    // *** Set the previous knot point
-    //result.ms_prevSP_ = tr.request.path.points.at(0).motionState;
-
     // Set the ID of the trajectory
     if(id != -1) {
       result.msg_.id = id;
@@ -2207,7 +2205,8 @@ const RampTrajectory Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr
 
 
 
-const RampTrajectory Planner::requestTrajectory(const Path p, const int id) {
+const RampTrajectory Planner::requestTrajectory(const Path p, const int id) 
+{
   ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
   RampTrajectory result = requestTrajectory(tr, id);
   //ROS_INFO("Exiting Planner::requestTrajectory");
@@ -2328,7 +2327,7 @@ const ModificationResult Planner::modification()
 
     // Evaluate the new trajectory
     mod_trajec.at(i) = evaluateTrajectory(mod_trajec.at(i));
-    
+
     // Make a copy of the trajec
     RampTrajectory modded_t = mod_trajec.at(i);
 
@@ -2367,7 +2366,8 @@ const ModificationResult Planner::modification()
 
 
 
-void Planner::stopForDebugging() {
+void Planner::stopForDebugging() 
+{
 
   h_parameters_.setImminentCollision(true); 
 
@@ -2376,7 +2376,8 @@ void Planner::stopForDebugging() {
   imminentCollisionTimer_.stop();
 }
 
-void Planner::restartAfterDebugging() {
+void Planner::restartAfterDebugging() 
+{
   h_parameters_.setImminentCollision(false); 
 
   controlCycleTimer_.start();
@@ -2384,7 +2385,8 @@ void Planner::restartAfterDebugging() {
   imminentCollisionTimer_.start();
 }
 
-void Planner::pause() {
+void Planner::pause() 
+{
   stopForDebugging();
   std::cout<<"\nPress Enter to continue\n";
   std::cin.get();

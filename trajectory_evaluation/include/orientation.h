@@ -8,6 +8,7 @@ class Orientation {
     Orientation();
 
     const double perform();
+    const double getDeltaTheta() const;
     const double getPenalty() const;
 
     double currentTheta_;
