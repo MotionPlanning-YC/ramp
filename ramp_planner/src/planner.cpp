@@ -315,7 +315,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
     movingOn_ = evaluateTrajectory(movingOn_);
   }
   
-  controlCycle_ = ros::Duration(population_.getBest().msg_.t_start);
+  controlCycle_ = ros::Duration(population_.getEarliestStartTime());
   controlCycleTimer_.setPeriod(controlCycle_, false);
   //ROS_INFO("sensing cycle changing CC period to: %f", controlCycle_.toSec());
 
@@ -1849,7 +1849,7 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   //ROS_INFO("Theta 1: %f Theta 2: %f", thetaS1, thetaS2);
   if( fabs(utility_.findDistanceBetweenAngles(thetaS1, thetaS2)) < 0.13 )
   {
-    ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
+    //ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
     return true;
   }
 
@@ -1863,8 +1863,8 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
     // Check duplicate
     if(utility_.positionDistance(a.msg_.positions, b.msg_.positions) < 0.1)
     {
-      ROS_WARN("Will not plan a transition curve because there are duplicate segment points");
-      ROS_WARN("%s\n%s", a.toString().c_str(), b.toString().c_str());
+      //ROS_WARN("Will not plan a transition curve because there are duplicate segment points");
+      //ROS_WARN("%s\n%s", a.toString().c_str(), b.toString().c_str());
       return false;
     }
 
@@ -2124,8 +2124,8 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
   //ROS_INFO("Theta 1: %f Theta 2: %f", thetaS1, thetaS2);
   if( fabs(utility_.findDistanceBetweenAngles(thetaS1, thetaS2)) < 0.13 )
   {
-    ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
-    ROS_WARN("Removing the following point at index 1 of the Path: %s", p.at(1).toString().c_str());
+    //ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
+    //ROS_WARN("Removing the following point at index 1 of the Path: %s", p.at(1).toString().c_str());
     p.all_.erase(p.all_.begin()+1);
   }
   /*else
@@ -2631,7 +2631,6 @@ void Planner::planningCycleCallback()
   //}
   //else
   //{
-    //sendPopulation(population_);
   //}
   //ROS_INFO("population.bestID: %i", population_.calcBestIndex());
 
@@ -2640,6 +2639,8 @@ void Planner::planningCycleCallback()
   //ROS_INFO("Time spent in PC: %f", (ros::Time::now() - t).toSec());*/
 
 
+  sendPopulation(population_);
+  
   pc_durs_.push_back(ros::Time::now() - t_start);
   //ROS_INFO("********************************************************************");
   //ROS_INFO("Generation %i completed", (generation_-1));
