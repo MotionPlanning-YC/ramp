@@ -1170,7 +1170,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   //for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) 
   for (i_kp_ = 1; i_kp_<segments_; i_kp_++) 
   {
-    ROS_INFO("i_kp_: %i", (int)i_kp_);
+    //ROS_INFO("i_kp_: %i", (int)i_kp_);
     reflexxesData_.resultValue = 0;
 
     // Push the initial state onto trajectory
@@ -1182,9 +1182,9 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     }
     
     double theta = utility_.findAngleFromAToB(prevKP_.positions, path_.points.at(i_kp_).motionState.positions);;
-    ROS_INFO("path_.points.at(%i): %s", i_kp_, utility_.toString(path_.points.at(i_kp_)).c_str());
+    /*ROS_INFO("path_.points.at(%i): %s", i_kp_, utility_.toString(path_.points.at(i_kp_)).c_str());
     ROS_INFO("prevKP: %s", utility_.toString(prevKP_).c_str());
-    ROS_INFO("theta: %f", theta);
+    ROS_INFO("theta: %f", theta);*/
 
 
     double x_dot, y_dot;
@@ -1207,14 +1207,14 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       path_.points.at(i_kp_).motionState.velocities.push_back(x_dot);
       path_.points.at(i_kp_).motionState.velocities.push_back(y_dot);
     }
-    ROS_INFO("x_dot: %f y_dot: %f", x_dot, y_dot);
+    //ROS_INFO("x_dot: %f y_dot: %f", x_dot, y_dot);
 
     // *** Set the new target ***
     setMaxV(x_dot, y_dot);
     setTarget(path_.points.at(i_kp_).motionState);
-    ROS_INFO("After setting new target:");
+    /*ROS_INFO("After setting new target:");
     ROS_INFO("Prev KP: %s", utility_.toString(prevKP_).c_str());
-    ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());
+    ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());*/
 
 
 
@@ -1272,7 +1272,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     // Else if straight-line segment
     else 
     {
-      ROS_INFO("In else, straight-line segment");
+      //ROS_INFO("In else, straight-line segment");
 
       // Get rotation if needed
       double trajec_size = res.trajectory.trajectory.points.size();
@@ -1283,11 +1283,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       trajectory_msgs::JointTrajectoryPoint next_knot =
             utility_.getTrajectoryPoint(path_.points.at(i_kp_).motionState);
 
-      ROS_INFO("=== Orientation Information ===");
+      /*ROS_INFO("=== Orientation Information ===");
       ROS_INFO("last: %s", utility_.toString(last).c_str());
       ROS_INFO("next_knot: %s", utility_.toString(next_knot).c_str());
       ROS_INFO("utility_.findAngleFromAToB(last, next_knot): %f", utility_.findAngleFromAToB(last, next_knot));
-      ROS_INFO("utility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)): %f", utility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)));
+      ROS_INFO("utility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)): %f", utility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)));*/
 
 
       // Check for goal because the robot should not rotate
@@ -1315,12 +1315,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
             res.trajectory.trajectory.points.push_back(rotate_points.at(p));
           } // end for
 
-
-          // Do not add another knot point for self-rotation
-          /*if(timeFromStart_ < timeCutoff_) 
-          {
-            res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
-          }*/
 
           setSelectionVector();
           reflexxesData_.resultValue = 0;
@@ -1364,11 +1358,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
           res.trajectory.trajectory.points.push_back(p);
         } // end while
 
-        // Once we reached the target, we set that the latest point is a knotpoint
-        if(timeFromStart_ < timeCutoff_) 
-        {
-          res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
-        }
+        res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
       } // end if different points
 
       // Else if there's only 2 points and the current point and next knot point are the same
@@ -1408,6 +1398,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       ////ROS_INFO("Reached target: %s \nAt state: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str(), utility_.toString(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1)).c_str());
   } // end for each knot point (outer-most loop)
  
+  // Check that the last point is a knot point
+  if(res.trajectory.trajectory.points.size() != res.trajectory.i_knotPoints.at(res.trajectory.i_knotPoints.size()-1))
+  {
+    res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size()-1);
+  }
 
   return true;
 } // End trajectoryRequest callback
