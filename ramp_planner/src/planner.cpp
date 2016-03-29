@@ -315,8 +315,6 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
     movingOn_ = evaluateTrajectory(movingOn_);
   }
   
-  controlCycle_ = ros::Duration(population_.getEarliestStartTime());
-  controlCycleTimer_.setPeriod(controlCycle_, false);
   //ROS_INFO("sensing cycle changing CC period to: %f", controlCycle_.toSec());
 
   //ROS_INFO("movingOn_ Feasible: %s", movingOn_.msg_.feasible ? "True" : "False");
@@ -363,7 +361,8 @@ const std::vector<Path> Planner::getAdjustedPaths(const MotionState init, const 
   std::vector<Path> result;
 
   // Create n random paths, where n=populationSize
-  for(unsigned int i=0;i<populationSize_;i++) {
+  for(unsigned int i=0;i<populationSize_;i++) 
+  {
     
     // Create the path with the start and goal
     Path temp_path = getAdjustedPath(init, goal);
@@ -1635,7 +1634,7 @@ const std::vector<RampTrajectory> Planner::getTrajectories(std::vector<ramp_msgs
  **/
 void Planner::initPopulation() 
 { 
-  population_ = getPopulation(latestUpdate_, goal_, true);
+  population_ = getPopulation(latestUpdate_, goal_, false);
   for(uint8_t i=0;i<population_.size();i++)
   {
     RampTrajectory temp = population_.get(i);
@@ -2897,7 +2896,6 @@ void Planner::doControlCycle()
   sendPopulation(population_);
   
   controlCycle_         = population_.getEarliestStartTime();
-  //ROS_INFO("Control Cycle: new CC timer: %f", controlCycle_.toSec());
   controlCycleTimer_.setPeriod(controlCycle_, false);
 
   ros::Duration d_cc = ros::Time::now() - t;
