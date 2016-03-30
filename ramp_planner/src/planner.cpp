@@ -387,7 +387,7 @@ const Path Planner::getRandomPath(const MotionState s, const MotionState g) cons
 
   // Each trajectory will have a random number of knot points
   // Put a max of 3 knot points for practicality...
-  uint8_t n = (rand() % 3)+1;
+  uint8_t n = (rand() % 4)+1;
 
   // Create n knot points 
   for(uint8_t i=0;i<n;i++) 
@@ -438,8 +438,8 @@ const Path Planner::getAdjustedPath(const MotionState s, const MotionState g) co
   Path result(s, g);
   
   // Each trajectory will have a random number of knot points
-  // Put a max of 3 knot points for practicality...
-  uint8_t n = (rand() % 3)+1;
+  // Put a max of 4 knot points for practicality...
+  uint8_t n = (rand() % 4)+1;
 
   while(result.size() < (n+2))
   {
@@ -611,14 +611,14 @@ const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionSt
 
     // For each trajectory
     for(uint8_t i=0;i<pop.size();i++) {
-      //ROS_INFO("Path: %s", pop.paths_.at(i).toString().c_str());
-      //ROS_INFO("Get Path: %s", pop.get(i).getNonHolonomicPath().toString().c_str());
+      ROS_INFO("Path: %s", pop.paths_.at(i).toString().c_str());
+      ROS_INFO("Get Path: %s", pop.get(i).getNonHolonomicPath().toString().c_str());
       Path temp = pop.paths_.at(i);
 
       // Track how many knot points we get rid of
       // Initialize to 1 to always remove starting position
       unsigned int throwaway=getNumThrowawayPoints(pop.get(i), dur);
-      //ROS_INFO("throwaway: %i", (int)throwaway);
+      ROS_INFO("throwaway: %i", (int)throwaway);
 
       
       // If the whole path has been passed, adjust throwaway so that 
@@ -628,12 +628,6 @@ const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionSt
         //ROS_INFO("Decrementing throwaway");
         throwaway = pop.paths_.at(i).size()-1;
       }
-
-
-      // Print the knot points being removed
-      /*for(int c=0;c<throwaway;c++) {
-        //ROS_INFO("\nRemoving point: %s", (*(pop.paths_.at(i).all_.begin()+c)).toString().c_str());
-      }*/
 
       // Erase the amount of throwaway points (points we have already passed)
       temp.all_.erase( 
@@ -645,7 +639,7 @@ const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionSt
 
       // Set start_ to be the new starting configuration of the path
       temp.start_ = start;
-      //ROS_INFO("After adapting Path: %s", temp.toString().c_str());
+      ROS_INFO("After adapting Path: %s", temp.toString().c_str());
 
       result.push_back(temp);
     } // end outer for
@@ -876,7 +870,7 @@ const std::vector<ramp_msgs::BezierCurve> Planner::adaptCurves(const Population 
   // Go through each trajectory 
   for(uint16_t i=0;i<pop.size();i++) 
   {
-    //ROS_INFO("Curve %i", (int)i);
+    ROS_INFO("Trajectory %i", (int)i);
     
     // If the trajectory has a curve
     // Don't check for best trajec here b/c we want to push on the same curve if we haven't moved on it, not a blank 
@@ -888,7 +882,7 @@ const std::vector<ramp_msgs::BezierCurve> Planner::adaptCurves(const Population 
       // Set curve
       ramp_msgs::BezierCurve curve = pop.get(i).msg_.curves.size() > 1 ? pop.get(i).msg_.curves.at(1) :
                                                                         pop.get(i).msg_.curves.at(0) ;
-      //ROS_INFO("Set curve to: %s", utility_.toString(curve).c_str());
+      ROS_INFO("Set curve to: %s", utility_.toString(curve).c_str());
 
       ////ROS_INFO("pop.getBestIndex: %i", (int)pop.calcBestIndex());
       // If moving on this curve, update u
@@ -896,7 +890,7 @@ const std::vector<ramp_msgs::BezierCurve> Planner::adaptCurves(const Population 
             (curve.u_0 > 0. ||
              estimateIfOnCurve(ms, curve) == 2))
       {
-        //ROS_INFO("Moving on this curve");
+        ROS_INFO("Moving on this curve");
 
         // Get the new u_0 value
         curve.u_0 = updateCurvePos(pop.get(i), d);
@@ -906,15 +900,15 @@ const std::vector<ramp_msgs::BezierCurve> Planner::adaptCurves(const Population 
       }  //end if moving on curve
       else if(i != pop.calcBestIndex())
       {
-        //ROS_INFO("Not moving on curve, erase it and start with new segment points");
+        ROS_INFO("Not moving on curve, erase it and start with new segment points");
         curve = blank;
       }
       else
       {
-        //ROS_INFO("Curve is for best trajectory, but not yet moving on curve");
+        ROS_INFO("Curve is for best trajectory, but not yet moving on curve");
       }
 
-     
+
       /* Separate checking if on the curve and if done with curve
            because we could be done before ever incrementing u_0 */
       // Check if done with current curve
@@ -925,17 +919,17 @@ const std::vector<ramp_msgs::BezierCurve> Planner::adaptCurves(const Population 
       } // end if done with 1st curve
       else
       {
-        //ROS_INFO("Not done with curve");
+        ROS_INFO("Not done with curve");
       }
 
-      //ROS_INFO("Curve after adapting: %s", utility_.toString(curve).c_str());
+      ROS_INFO("Curve after adapting: %s", utility_.toString(curve).c_str());
       result.push_back(curve);
     } // end if trajectory has curve
 
     // Else if there is no curve, push on a blank one
     else 
     {
-      //ROS_INFO("No curve");
+      ROS_INFO("No curve");
       result.push_back(blank);
     } // end else no curve
   } // end for
@@ -973,8 +967,11 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
   ////ROS_INFO("curveD: %f", curveD.toSec());
  
   // Adapt the paths and curves
-  std::vector<Path> paths                     = adaptPaths  (pop, ms, d);
-  //std::vector<ramp_msgs::BezierCurve> curves  = adaptCurves (pop, ms, d);
+  std::vector<Path> paths                       = adaptPaths  (pop, ms, d);
+  if(population_.type_ != HOLONOMIC)
+  {
+    std::vector<ramp_msgs::BezierCurve> curves  = adaptCurves (pop, ms, d);
+  }
 
   result.paths_ = paths;
 
@@ -2827,7 +2824,7 @@ void Planner::doControlCycle()
   startPlanning_ = m_cc_;
   ////ROS_INFO("New startPlanning_: %s", startPlanning_.toString().c_str());
 
-  //ROS_INFO("Before adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", population_.size(), population_.toString().c_str());
+  ROS_INFO("Before adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", population_.size(), population_.toString().c_str());
   //ROS_INFO("transPop.bestID: %i", population_.calcBestIndex());
 
   // Adapt and evaluate population
@@ -2850,7 +2847,7 @@ void Planner::doControlCycle()
     ROS_WARN("Pop best: %s", population_.getBest().toString().c_str());
   }
   
-  //ROS_INFO("After adaptation and evaluation, pop size: %i pop: \n%s\nDone printing pop", population_.size(), population_.toString().c_str());
+  ROS_INFO("After adaptation and evaluation, pop size: %i pop: \n%s\nDone printing pop", population_.size(), population_.toString().c_str());
   ////ROS_INFO("Time spent adapting: %f", d_adapt.toSec());
  
   //if(population_.calcBestIndex() != population_.calcBestIndex())

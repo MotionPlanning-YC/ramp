@@ -70,16 +70,29 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       std::cout<<"\nRobot 0 has no trajectory!\n";
   }*/
   
-  uint16_t i_stop;
+  // Find the point that ends the trajectory's non-holonomic section
+  uint16_t i_stop = 0;
+
+  // If there are no curves
+  // If there is a curve and only two knot points (curve ends traj)
   if(   trajectory_.curves.size() == 0 ||
       ( trajectory_.curves.size() == 1 && trajectory_.i_knotPoints.size() == 2) )
   {
     i_stop = trajectory_.i_knotPoints.at(1);
   }
   
+  // If there's only one curve 
+  //  (If no transition traj, then two segments)
+  //  (If transition traj, then only one segment)
+  else if(trajectory_.curves.size() == 1)
+  {
+    i_stop = trajectory_.i_knotPoints.at(3);
+  }
+
+  // If there's two curves
   else
   {
-    i_stop = trajectory_.i_knotPoints.at(2);
+    i_stop = trajectory_.i_knotPoints.at(4);
   }
   
 

@@ -1399,7 +1399,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   } // end for each knot point (outer-most loop)
  
   // Check that the last point is a knot point
-  if(res.trajectory.trajectory.points.size() != res.trajectory.i_knotPoints.at(res.trajectory.i_knotPoints.size()-1))
+  if(res.trajectory.trajectory.points.size()-1 != res.trajectory.i_knotPoints.at(res.trajectory.i_knotPoints.size()-1))
   {
     res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size()-1);
   }

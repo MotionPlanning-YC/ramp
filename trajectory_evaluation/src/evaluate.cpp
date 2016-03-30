@@ -28,22 +28,24 @@ bool Evaluate::performFeasibility()
   CollisionDetection::QueryResult qr = cd_.perform();
   trajectory_.feasible = !qr.collision_;
 
+  ROS_INFO("getDeltaTheta: %f", fabs(orientation_.getDeltaTheta()));
   // Check orientation
-  //if(orientation_.getDeltaTheta() > (PI/3))
-  //{
   if(fabs(orientation_.getDeltaTheta()) > 0.25)
   {
+    ROS_INFO("In if");
     if(trajectory_.i_knotPoints.size() > 2 && trajectory_.curves.size() < 2)
     {
+      ROS_INFO("In inner if, i_knotPoints.size(): %i curves.size(): %i", (int)trajectory_.i_knotPoints.size(), 
+          (int)trajectory_.curves.size());
       trajectory_.feasible = false;
     }
     else if(trajectory_.i_knotPoints.size() == 2 && trajectory_.curves.size() < 1)
     {
+      ROS_INFO("In inner else if, i_knotPoints.size(): %i curves.size(): %i", (int)trajectory_.i_knotPoints.size(), 
+          (int)trajectory_.curves.size());
       trajectory_.feasible = false;
     }
   }
-    //trajectory_.feasible = false;
-  //}
   
   // If not feasible, set t_firstCollision
   if(!trajectory_.feasible)
