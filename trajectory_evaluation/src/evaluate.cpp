@@ -17,6 +17,7 @@ void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request req)
   cd_.trajectory_ = req.trajectory;
   orientation_.trajectory_ = trajectory_;
   orientation_.currentTheta_ = currentTheta_;
+  orientation_.theta_at_cc_ = req.theta_cc;
 } //End setRequest
 
 
@@ -28,10 +29,26 @@ bool Evaluate::performFeasibility()
   CollisionDetection::QueryResult qr = cd_.perform();
   trajectory_.feasible = !qr.collision_;
 
+  bool moving_on_curve = 
+    trajectory_.curves.size() > 0 && 
+    (trajectory_.curves.at(0).u_0 > 0.000001 ||
+    (utility_.positionDistance(trajectory_.trajectory.points.at(0).positions, 
+       trajectory_.curves.at(0).controlPoints.at(0).positions) < 0.01) ) ?
+    true
+    :
+    false;
+
+
   ROS_INFO("getDeltaTheta: %f", fabs(orientation_.getDeltaTheta()));
   // Check orientation
-  if(fabs(orientation_.getDeltaTheta()) > 0.25)
+  if(fabs(orientation_.getDeltaTheta()) > 0.25 && !moving_on_curve)
   {
+
+    /*if(trajectory_.i_knotPoints.size() == 2 && trajectory_.curves.size() < 1)
+    {
+      trajectory_.feasible = false;
+    }*/
+
     ROS_INFO("In if");
     if(trajectory_.i_knotPoints.size() > 2 && trajectory_.curves.size() < 2)
     {

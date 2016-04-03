@@ -7,7 +7,7 @@
 
 Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(1.5f), 
   cc_started_(false), c_pc_(0), transThreshold_(1./50.), num_cc_(0), L_(0.33), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), 
- delta_t_switch_(0.2), stop_(false), moving_on_coll_(false), print_enter_exit_(false)
+ delta_t_switch_(0.2), stop_(false), moving_on_coll_(false), print_enter_exit_(true)
 {
   imminentCollisionCycle_ = ros::Duration(1.f / 10.f);
   generationsPerCC_       = controlCycle_.toSec() / planningCycle_.toSec();
@@ -968,9 +968,10 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
  
   // Adapt the paths and curves
   std::vector<Path> paths                       = adaptPaths  (pop, ms, d);
+  std::vector<ramp_msgs::BezierCurve> curves;
   if(population_.type_ != HOLONOMIC)
   {
-    std::vector<ramp_msgs::BezierCurve> curves  = adaptCurves (pop, ms, d);
+    curves                                      = adaptCurves (pop, ms, d);
   }
 
   result.paths_ = paths;
@@ -986,11 +987,15 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
     RampTrajectory temp, tempTraj = pop.get(i);
     ////ROS_INFO("Getting trajectory %i", (int)i);
       
+    // Add on the curve if necessary
     std::vector<ramp_msgs::BezierCurve> c;
-    //c.push_back(curves.at(i));
+    if(population_.type_ != HOLONOMIC)
+    {
+      c.push_back(curves.at(i));
+    }
 
     ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(paths.at(i), c);
-    //tr.request.segments = 2;
+    tr.request.segments = 2;
 
     /* Get the trajectory */
     temp = requestTrajectory(tr, result.get(i).msg_.id);
@@ -1087,14 +1092,16 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
   ramp_msgs::EvaluationRequest result;
 
   result.request.trajectory   = trajec.msg_;
-  //if(population_.size() > 0)
-  //{
-    //result.request.currentTheta = population_.getBest().getDirection();
-  //}
-  //else
-  //{
-    result.request.currentTheta = latestUpdate_.msg_.positions.at(2);
-  //}
+  result.request.currentTheta = latestUpdate_.msg_.positions.at(2);
+  if(movingOn_.msg_.trajectory.points.size() > 0)
+  {
+    result.request.theta_cc     = 
+      movingOn_.msg_.trajectory.points.at(movingOn_.msg_.trajectory.points.size()-1).positions.at(2);
+  }
+  else
+  {
+    result.request.theta_cc = result.request.currentTheta;
+  }
 
   for(uint8_t i=0;i<ob_trajectory_.size();i++)
   {
@@ -1723,8 +1730,8 @@ const RampTrajectory Planner::computeFullSwitch(const RampTrajectory from, const
     T_new                           = requestEvaluation(er);
 
     // Set misc members
-    T_new.transitionTraj_   = trajecs.at(0).msg_;
-    T_new.holonomic_path_             = p;
+    T_new.transitionTraj_ = trajecs.at(0).msg_;
+    T_new.holonomic_path_ = p;
 
     // Set result
     result                  = T_new;
@@ -2824,7 +2831,11 @@ void Planner::doControlCycle()
   startPlanning_ = m_cc_;
   ////ROS_INFO("New startPlanning_: %s", startPlanning_.toString().c_str());
 
-  ROS_INFO("Before adaptation and evaluation, pop size: %i pop: %s\nDone printing pop", population_.size(), population_.toString().c_str());
+  ROS_INFO("Before adaptation and evaluation, pop size: %i", population_.size());
+  for(uint8_t i=0;i<populationSize_;i++)
+  {
+    ROS_INFO("Trajectory %i: %s", i, population_.get(i).toString().c_str());
+  }
   //ROS_INFO("transPop.bestID: %i", population_.calcBestIndex());
 
   // Adapt and evaluate population
@@ -2868,9 +2879,10 @@ void Planner::doControlCycle()
   trans_durs_.push_back(d_trans);
   
   //ROS_INFO("After finding transition population, controlCycle period: %f", controlCycle_.toSec());
-  //ROS_INFO("New transPop: %s\n\n%s", 
-      //population_.get(0).toString().c_str(),
-      //population_.get(1).toString().c_str());
+  ROS_INFO("New transPop: %s\n\n%s\n\n%s", 
+      population_.get(0).toString().c_str(),
+      population_.get(1).toString().c_str(),
+      population_.get(2).toString().c_str());
   //ROS_INFO("Time spent getting trans pop: %f", d_trans.toSec());
 
   population_at_cc_  = population_;

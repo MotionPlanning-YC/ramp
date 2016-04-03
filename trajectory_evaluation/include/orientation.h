@@ -12,6 +12,7 @@ class Orientation {
     const double getPenalty() const;
 
     double currentTheta_;
+    double theta_at_cc_;
     ramp_msgs::RampTrajectory trajectory_;
 
     double Q_;

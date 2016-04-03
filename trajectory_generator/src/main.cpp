@@ -54,7 +54,7 @@ bool checkGoal(ramp_msgs::TrajectoryRequest::Request req)
 bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
                       ramp_msgs::TrajectoryRequest::Response& res) 
 {
-  //ROS_INFO("Request Received: %s", utility.toString(req).c_str());
+  ROS_INFO("Request Received: %s", utility.toString(req).c_str());
 
   /*
    * Check for start == goal
@@ -93,7 +93,7 @@ bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
   }
 
   //ROS_INFO("Trajectory Done");
-  //ROS_INFO("Response: %s", utility.toString(res).c_str());
+  ROS_INFO("Response: %s", utility.toString(res).c_str());
  
   return true;
 }

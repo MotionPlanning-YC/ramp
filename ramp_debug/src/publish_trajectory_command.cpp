@@ -34,9 +34,9 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(0.782093); // 0.70455
-  c1.motionState.positions.push_back(0.458063); // 0.4026
-  c1.motionState.positions.push_back(-2.03751); // 0.519146
+  c1.motionState.positions.push_back(2.15823); // 0.70455
+  c1.motionState.positions.push_back(0.475515); // 0.4026
+  c1.motionState.positions.push_back(1.1533); // 0.519146
   
   ramp_msgs::KnotPoint c2;
   c2.motionState.positions.push_back(3.5); // 0.70455
@@ -82,8 +82,8 @@ int main(int argc, char** argv) {
   c9.motionState.positions.push_back(PI/4);
   
   // Velocities
-  /*c1.motionState.velocities.push_back(0.);  //.151426
-  c1.motionState.velocities.push_back(0.); //-.297903
+  c1.motionState.velocities.push_back(0.132707);  //.151426
+  c1.motionState.velocities.push_back(0.301655); //-.297903
   c1.motionState.velocities.push_back(0.); //-.118126*/
  
   c2.motionState.velocities.push_back(0.);  //.151426
@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
   c5.motionState.accelerations.push_back(0.); //.0746295
   
   ramp_msgs::Path p;
-  p.points.push_back(zero);
+  //p.points.push_back(zero);
   p.points.push_back(c1);
   p.points.push_back(c2);
   //p.points.push_back(c3);
@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
   sp1.accelerations.push_back(0);*/
 
   ramp_msgs::MotionState sp2;
-  sp2 = p.points.at(2).motionState;
+  //sp2 = p.points.at(2).motionState;
   //sp2 = p.points.at(1).motionState;
   //sp2 = c3.motionState;
 
@@ -384,7 +384,7 @@ int main(int argc, char** argv) {
 
 
   std::vector<ramp_msgs::BezierCurve> curves;
-  curves.push_back(bi);
+  //curves.push_back(bi);
   //curves.push_back(bi2);
   
   ramp_msgs::TrajectoryRequest tr;
@@ -408,8 +408,9 @@ int main(int argc, char** argv) {
   }
 
 
-  /*ramp_msgs::EvaluationRequest er;
+  ramp_msgs::EvaluationRequest er;
   er.request.trajectory = tr.response.trajectory;
+  er.request.currentTheta = 0.85f;//p.points.at(0).motionState.positions.at(2);
   
   if(client_eval.call(er)) {
     std::cout<<"\nEvaluated traj, fitness: "<<er.response.fitness;
@@ -421,7 +422,7 @@ int main(int argc, char** argv) {
   std::cin.get();
 
 
-  er.request.trajectory.t_start = ros::Duration(2.0);
+  /*er.request.trajectory.t_start = ros::Duration(2.0);
   
   std::cout<<"\nSetting t_start to "<<2.0;
   if(client_eval.call(er)) {
