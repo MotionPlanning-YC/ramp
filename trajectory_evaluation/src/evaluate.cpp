@@ -29,6 +29,10 @@ bool Evaluate::performFeasibility()
   CollisionDetection::QueryResult qr = cd_.perform();
   trajectory_.feasible = !qr.collision_;
 
+  bool moving = fabs( sqrt( pow(trajectory_.trajectory.points.at(0).velocities.at(0), 2) +
+                            pow(trajectory_.trajectory.points.at(0).velocities.at(1), 2))) > 0 ?
+                true : false;
+
   bool moving_on_curve = 
     trajectory_.curves.size() > 0 && 
     (trajectory_.curves.at(0).u_0 > 0.000001 ||
@@ -41,7 +45,7 @@ bool Evaluate::performFeasibility()
 
   ROS_INFO("getDeltaTheta: %f", fabs(orientation_.getDeltaTheta()));
   // Check orientation
-  if(fabs(orientation_.getDeltaTheta()) > 0.25 && !moving_on_curve)
+  if(moving && fabs(orientation_.getDeltaTheta()) > 0.25 && !moving_on_curve)
   {
 
     /*if(trajectory_.i_knotPoints.size() == 2 && trajectory_.curves.size() < 1)
