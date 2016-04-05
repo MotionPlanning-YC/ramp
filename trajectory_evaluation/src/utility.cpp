@@ -219,14 +219,18 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
   std::ostringstream result;
 
   //Positions
-  result<<"\n       Positions: ("<<p.positions.at(0);
-  for(unsigned int k=1;k<p.positions.size();k++) {
-    result<<", "<<p.positions.at(k);
+  if(p.positions.size() > 0)
+  {
+    result<<"\n       Positions: ("<<p.positions.at(0);
+    for(unsigned int k=1;k<p.positions.size();k++) {
+      result<<", "<<p.positions.at(k);
+    }
+    result<<")";
   }
-  result<<")";
 
   //Velocities
-  if(p.velocities.size() > 0) {
+  if(p.velocities.size() > 0) 
+  {
     result<<"\n       Velocities: ("<<p.velocities.at(0);
     for(unsigned int k=1;k<p.velocities.size();k++) {
       result<<", "<<p.velocities.at(k);
@@ -235,7 +239,8 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
   }
   
   //Accelerations
-  if(p.accelerations.size() > 0) {
+  if(p.accelerations.size() > 0) 
+  {
     result<<"\n       Accelerations: ("<<p.accelerations.at(0);
     for(unsigned int k=1;k<p.accelerations.size();k++) {
       result<<", "<<p.accelerations.at(k);
@@ -277,20 +282,23 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
   std::ostringstream result;
 
   result<<"\n Knot Points:";
+  ROS_INFO("total points: %i", (int)traj.trajectory.points.size());
+  ROS_INFO("i_knotPoints.size(): %i", (int)traj.i_knotPoints.size());
 
   for(unsigned int i=0;i<traj.i_knotPoints.size();i++) {
-    
+    ROS_INFO("i: %i knotpoint: %i", i, traj.i_knotPoints.at(i)); 
     result<<"\n   "<<i<<":";
     
     unsigned int index = traj.i_knotPoints.at(i);
-    if(index > traj.trajectory.points.size()-1) {
+    if(index > traj.trajectory.points.size()-1) 
+    {
       ROS_ERROR("index: %i, traj.points.size(): %i", (int)index, (int)traj.trajectory.points.size());
     }
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);
     
     result<<"\n       "<<toString(p);
   }
-  //ROS_INFO("Done with knot points");
+  ROS_INFO("Done with knot points");
 
 
   /*result<<"\n Points:";

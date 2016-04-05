@@ -244,11 +244,18 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
   std::ostringstream result;
 
   //Positions
-  result<<"\n       Positions: ("<<p.positions.at(0);
-  for(unsigned int k=1;k<p.positions.size();k++) {
-    result<<", "<<p.positions.at(k);
+  if(p.positions.size() > 0)
+  {
+    result<<"\n       Positions: ("<<p.positions.at(0);
+    for(unsigned int k=1;k<p.positions.size();k++) {
+      result<<", "<<p.positions.at(k);
+    }
+    result<<")";
   }
-  result<<")";
+  else
+  {
+    ROS_ERROR("Point has no position!");
+  }
 
   //Velocities
   if(p.velocities.size() > 0) {
@@ -305,14 +312,17 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
 
   result<<"\n Knot Points:";
 
+  ROS_INFO("knotpoints.size(): %i", (int)traj.i_knotPoints.size());
   for(unsigned int i=0;i<traj.i_knotPoints.size();i++) {
     result<<"\n   "<<i<<":";
     
     unsigned int index = traj.i_knotPoints.at(i);
+    ROS_INFO("i: %i index: %i size: %i", i, index, (int)traj.trajectory.points.size());
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);
     
     result<<"\n       "<<toString(p);
   }
+  ROS_INFO("Done getting knot points");
 
 
   result<<"\n Points:";
@@ -323,11 +333,13 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
   
     result<<"\n"<<toString(p);
   }
+  ROS_INFO("Done getting points");
 
   result<<"\nCurves: ";
   for(uint8_t i=0;i<traj.curves.size();i++) {
     result<<"\n"<<i<<": "<<toString(traj.curves.at(i));
-  }
+  } 
+  ROS_INFO("Done getting curves");
 
   return result.str();
 }

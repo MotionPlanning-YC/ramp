@@ -16,6 +16,7 @@ class Evaluate {
     
     void setRequest(const ramp_msgs::EvaluationRequest::Request req);
 
+    const ramp_msgs::EvaluationRequest::Response perform();
     bool performFeasibility();
     const double performFitness(bool feasible);
 
@@ -23,8 +24,10 @@ class Evaluate {
     EuclideanDistance eucDist_;
     Orientation orientation_;
 
+    ramp_msgs::EvaluationRequest::Response res_;
     
     CollisionDetection cd_;
+    CollisionDetection::QueryResult qr_;
 
     //Information sent by the request
     ramp_msgs::RampTrajectory trajectory_;

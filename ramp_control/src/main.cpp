@@ -27,7 +27,7 @@ void init_advertisers_subscribers(MobileRobot& robot, ros::NodeHandle& handle, b
 
   if(simulation) 
   {
-    robot.pub_cmd_vel_ = handle.advertise<geometry_msgs::Twist>("cmd_vel", 1000);
+    robot.pub_cmd_vel_ = handle.advertise<geometry_msgs::Twist>("/robot_0/cmd_vel", 1000);
   }
  
   // Subscribers
@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
   std::cout<<"\nrobot.orientation: "<<robot.initial_theta_;
 
   bool sim=false;
-  handle_local.param("simulation", sim, false);
+  handle_local.param("simulation", sim, true);
   std::cout<<"\nsim: "<<sim<<"\n";
   robot.sim_ = sim;
  

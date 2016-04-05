@@ -21,13 +21,32 @@ void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request req)
 } //End setRequest
 
 
+const ramp_msgs::EvaluationRequest::Response Evaluate::perform()
+{
+  res_.feasible = performFeasibility();
+
+  if(!res_.feasible)
+  {
+    res_.t_firstCollision = ros::Duration(qr_.t_firstCollision_);
+  }
+  else
+  {
+    res_.t_firstCollision = ros::Duration(9999.f);
+  }
+
+  res_.fitness = performFitness(res_.feasible);
+
+  return res_;
+}
+
+
 bool Evaluate::performFeasibility() 
 {
   bool result=true;
 
   // Check collision
-  CollisionDetection::QueryResult qr = cd_.perform();
-  trajectory_.feasible = !qr.collision_;
+  qr_ = cd_.perform();
+  trajectory_.feasible = !qr_.collision_;
 
   bool moving = fabs( sqrt( pow(trajectory_.trajectory.points.at(0).velocities.at(0), 2) +
                             pow(trajectory_.trajectory.points.at(0).velocities.at(1), 2))) > 0 ?
@@ -67,11 +86,14 @@ bool Evaluate::performFeasibility()
       trajectory_.feasible = false;
     }
   }
-  
+
   // If not feasible, set t_firstCollision
   if(!trajectory_.feasible)
   {
-    trajectory_.t_firstCollision = ros::Duration(qr.t_firstCollision_);
+    ROS_INFO("traj.t_firstCollision: %f", trajectory_.t_firstCollision.toSec());
+    ROS_INFO("qr_.t_firstCollision: %f", qr_.t_firstCollision_);
+    trajectory_.t_firstCollision = ros::Duration(qr_.t_firstCollision_);
+    ROS_INFO("traj.t_firstCollision: %f", trajectory_.t_firstCollision.toSec());
   }
 
 

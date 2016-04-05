@@ -15,32 +15,7 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
   ROS_INFO("Robot Evaluating trajectory: %s", u.toString(req.trajectory).c_str());
 
   ev.setRequest(req);
-
-  //cd.obstacle_trjs_ = req.obstacle_trjs;
-  
-  // Make a QueryResult object
-  //CollisionDetection::QueryResult qr;
-
-  // If there are obstacles, do collision detection
-  //if(received_ob) {
-    //cd.trajectory_  = req.trajectory;
-    //qr = cd.perform();
-  //}
-  // Else, set collision to false
-  //else {
-    //qr.collision_ = 0;
-    //qr.t_firstCollision_ = 9999.0f; 
-  //}
-
-  // Set response
-  //res.feasible = !qr.collision_;
-  //res.t_firstCollision = ros::Duration(qr.t_firstCollision_);
-
-  res.feasible = ev.performFeasibility();
- 
-
-  // Do fitness
-  res.fitness = ev.performFitness(res.feasible);
+  res = ev.perform();
 
   ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
   return true;

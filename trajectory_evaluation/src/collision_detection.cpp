@@ -58,7 +58,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
 
   double t_start = trajectory_.t_start.toSec();
   int j_offset = t_start * 10.f;
-  //ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
+  ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
 
   CollisionDetection::QueryResult result;
   uint8_t t_checkColl = 3;
@@ -95,10 +95,9 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     i_stop = trajectory_.i_knotPoints.at(4);
   }
   
-
   int j_start;
   
-  //ROS_INFO("i_stop: %i", i_stop);
+  ROS_INFO("i_stop: %i", i_stop);
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
   float radius = 0.25f;
@@ -153,14 +152,14 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // there is collision
       if( dist <= radius*2 ) 
       {
-        /*ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+        ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
             p_i.positions.at(0),
             p_i.positions.at(1),
             p_ob.positions.at(0),
             p_ob.positions.at(1),
             dist,
             (int)i,
-            (int)j);*/
+            (int)j);
         result.collision_ = true;
         result.t_firstCollision_ = p_i.time_from_start.toSec();
         i = i_stop;
@@ -169,8 +168,8 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     } // end for
   } // end for
 
-
-  //ROS_INFO("Exiting CollisionDetection::query");
+  ROS_INFO("result: %s", result.collision_ ? "True" : "False");
+  ROS_INFO("Exiting CollisionDetection::query");
   return result;
 } //End query
 

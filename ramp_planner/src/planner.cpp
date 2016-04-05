@@ -1150,8 +1150,11 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
       if(moving_on_coll_ && movingOn_.msg_.t_firstCollision.toSec() < 0.5f)
         // Consider t_collision of best trajectory
       {
-        //ROS_WARN("Imminent Collision Robot: %i dist: %f", id_, dist);
-        //ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.at(i).toString().c_str());
+        ROS_WARN("IC: moving_on_coll_: %s t_firstCollision: %f", moving_on_coll_ ? "True" : "False", 
+            movingOn_.msg_.t_firstCollision.toSec());
+        ROS_WARN("Imminent Collision Robot: %i dist: %f", id_, dist);
+        ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.at(i).toString().c_str());
+        ROS_WARN("Robot trajectory: %s", movingOn_.toString().c_str());
 
         ic.data = true;
         break;
