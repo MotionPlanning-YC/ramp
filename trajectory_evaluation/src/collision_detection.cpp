@@ -86,13 +86,13 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   //  (If transition traj, then only one segment)
   else if(trajectory_.curves.size() == 1)
   {
-    i_stop = trajectory_.i_knotPoints.at(3);
+    i_stop = trajectory_.i_knotPoints.at(2);
   }
 
   // If there's two curves
   else
   {
-    i_stop = trajectory_.i_knotPoints.at(4);
+    i_stop = trajectory_.i_knotPoints.at(3);
   }
   
   int j_start;

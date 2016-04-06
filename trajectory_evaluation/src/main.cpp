@@ -237,11 +237,12 @@ int main(int argc, char** argv) {
   std::cout<<"\n"<<u.displaceAngle(PI/2, 7*PI/4);*/
 
 
-  ros::AsyncSpinner spinner(8);
+  //ros::AsyncSpinner spinner(8);
   std::cout<<"\nWaiting for requests...\n";
-  spinner.start();
-  ros::waitForShutdown();
+  //spinner.start();
+  //ros::waitForShutdown();
 
+  ros::spin();
 
   std::cout<<"\nExiting Normally\n";
   return 0;
