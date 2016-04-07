@@ -1,4 +1,4 @@
-population_size: 3
+population_size: 5
 
 sub_populations: false 
 
@@ -18,7 +18,7 @@ sensing_cycle_rate: 20
 
 error_reduction: true 
 
-num_of_obstacles: 1
+num_of_obstacles: 2
 
 #obstacle_odoms: ['/obstacle_1/odom', '/obstacle_2/odom', '/obstacle_3/odom']
 #obstacle_vels: ['/obstacle_1/mobile_base/commands/velocity', '/obstacle_2/mobile_base/commands/velocity', '/obstacle_3/mobile_base/commands/velocity']

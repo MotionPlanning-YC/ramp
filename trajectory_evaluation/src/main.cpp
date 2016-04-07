@@ -14,8 +14,19 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
 {
   ROS_INFO("Robot Evaluating trajectory: %s", u.toString(req.trajectory).c_str());
 
-  ev.setRequest(req);
-  res = ev.perform();
+  // If more than one point
+  if(req.trajectory.trajectory.points.size() > 1)
+  {
+    ev.setRequest(req);
+    res = ev.perform();
+  }
+  // Else we only have one point (goal point)
+  else
+  {
+    res.fitness = 0.f;
+    res.feasible = true;
+    res.t_firstCollision = ros::Duration(9999.f);
+  }
 
   ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
   return true;

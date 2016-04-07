@@ -69,7 +69,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     else  
       std::cout<<"\nRobot 0 has no trajectory!\n";
   }*/
-  
+ 
   // Find the point that ends the trajectory's non-holonomic section
   uint16_t i_stop = 0;
 
@@ -78,6 +78,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   if(   trajectory_.curves.size() == 0 ||
       ( trajectory_.curves.size() == 1 && trajectory_.i_knotPoints.size() == 2) )
   {
+    ROS_INFO("In 1st if");
     i_stop = trajectory_.i_knotPoints.at(1);
   }
   
@@ -86,17 +87,19 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   //  (If transition traj, then only one segment)
   else if(trajectory_.curves.size() == 1)
   {
+    ROS_INFO("In 2nd if");
     i_stop = trajectory_.i_knotPoints.at(2);
   }
 
   // If there's two curves
   else
   {
+    ROS_INFO("In 3rd if");
     i_stop = trajectory_.i_knotPoints.at(3);
   }
-  
+ 
   int j_start;
-  
+ 
   ROS_INFO("i_stop: %i", i_stop);
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
