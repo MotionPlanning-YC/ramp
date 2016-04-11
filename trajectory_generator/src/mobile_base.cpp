@@ -91,8 +91,7 @@ void MobileBase::initReflexxes()
 
 /** Initialize class object with a request */
 // TODO: change 3 booleans to 1 enum
-void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) 
-{
+void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) {
   ////ROS_INFO("Entered MobileBase::init");
   //std::cout<<"\nRequest received: "<<utility_.toString(req)<<"\n";
 
@@ -139,14 +138,14 @@ void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req)
 void MobileBase::setTarget(const ramp_msgs::MotionState ms) 
 {
   ////ROS_INFO("In MobileBase::setTarget");
- 
+  
   // For each DOF, set the targets for the knot point
   for(unsigned int i=0;i<reflexxesData_.NUMBER_OF_DOFS;i++) 
   {
     reflexxesData_.inputParameters->TargetPositionVector->VecData[i] = ms.positions.at(i);
     if(ms.velocities.size() > i) 
     {
-
+      
       // If the target velocity == 0, Reflexxes throws an error so check for that
       if(fabs(ms.velocities.at(i)) < 0.000001)
       {
@@ -157,7 +156,7 @@ void MobileBase::setTarget(const ramp_msgs::MotionState ms)
         reflexxesData_.inputParameters->TargetVelocityVector->VecData[i] = ms.velocities.at(i);
       }
 
-      //ROS_INFO("fabs( reflexxesData_.inputParameters->TargetVelocityVector->VecData[i] - reflexxesData_.inputParameters->MaxVelocityVector->VecData[i]: %f", fabs( reflexxesData_.inputParameters->TargetVelocityVector->VecData[i] - reflexxesData_.inputParameters->MaxVelocityVector->VecData[i]) );
+      ////ROS_INFO("fabs( reflexxesData_.inputParameters->TargetVelocityVector->VecData[i] - reflexxesData_.inputParameters->MaxVelocityVector->VecData[i]: %f", fabs( reflexxesData_.inputParameters->TargetVelocityVector->VecData[i] - reflexxesData_.inputParameters->MaxVelocityVector->VecData[i]) );
 
       // Also check if there is some small floating point difference between target and max
       if( fabs( reflexxesData_.inputParameters->TargetVelocityVector->VecData[i] -
@@ -168,8 +167,8 @@ void MobileBase::setTarget(const ramp_msgs::MotionState ms)
     } //end if target has velocities
   } // end for
 
-  //ROS_INFO("Target V now: (%f, %f, %f", reflexxesData_.inputParameters->TargetVelocityVector->VecData[0], reflexxesData_.inputParameters->TargetVelocityVector->VecData[1], reflexxesData_.inputParameters->TargetVelocityVector->VecData[2]);
-
+  ////ROS_INFO("Target V now: (%f, %f, %f", reflexxesData_.inputParameters->TargetVelocityVector->VecData[0], reflexxesData_.inputParameters->TargetVelocityVector->VecData[1], reflexxesData_.inputParameters->TargetVelocityVector->VecData[2]);
+  
   // Phase sync makes the orientation correct to drive in a straight line
   reflexxesData_.flags.SynchronizationBehavior = 
     RMLPositionFlags::PHASE_SYNCHRONIZATION_IF_POSSIBLE;
@@ -212,7 +211,7 @@ void MobileBase::setMaxV(const double x_dot, const double y_dot, const double th
   {
     reflexxesData_.inputParameters->MaxVelocityVector->VecData[2] = theta_dot;
   }
- 
+  
 
 
   // Check the current V to see if it is within a threshold of max V
@@ -235,7 +234,7 @@ void MobileBase::setMaxV(const double x_dot, const double y_dot, const double th
   } // end for
 
   ////ROS_INFO("Max V: (%f, %f, %f): ", reflexxesData_.inputParameters->MaxVelocityVector->VecData[0], reflexxesData_.inputParameters->MaxVelocityVector->VecData[1], reflexxesData_.inputParameters->MaxVelocityVector->VecData[2]);
- 
+  
   ////ROS_INFO("Exiting MobileBa::setMaxV");
 } // End setMaxV
 
@@ -797,8 +796,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
 
 /** Print Reflexxes input and output for the latest call */
-void MobileBase::printReflexxesSpinInfo() const 
-{
+void MobileBase::printReflexxesSpinInfo() const {
   std::cout<<"\n\n*****************************************************************************";
   std::cout<<"\nCalled reflexxes with input:";
   
@@ -900,15 +898,13 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce()
 
 
 /** Given Reflexxes data, return a trajectory point */
-const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const ReflexxesData data) 
-{
+const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(const ReflexxesData data) {
   trajectory_msgs::JointTrajectoryPoint point;
 
 
 
 
-  for(unsigned int i=0;i<reflexxesData_.NUMBER_OF_DOFS;i++) 
-  {
+  for(unsigned int i=0;i<reflexxesData_.NUMBER_OF_DOFS;i++) {
       
     // If Reflexxes has not been called yet
     if(data.outputParameters->NewPositionVector->VecData[0] == -99) 
@@ -1167,7 +1163,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   }
 
  
-  //ROS_INFO("About to start generating points, segments_: %i", segments_);
+  ////ROS_INFO("About to start generating points, segments_: %i", segments_);
   uint8_t c=0;
   // Go through every knotpoint in the path
   // (or until timeCutoff has been reached)
@@ -1185,7 +1181,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       prevKP_ = res.trajectory.trajectory.points.at(0);
     }
     
-    double theta = utility_.findAngleFromAToB(prevKP_.positions, path_.points.at(i_kp_).motionState.positions);
+    double theta = utility_.findAngleFromAToB(prevKP_.positions, path_.points.at(i_kp_).motionState.positions);;
     /*ROS_INFO("path_.points.at(%i): %s", i_kp_, utility_.toString(path_.points.at(i_kp_)).c_str());
     ROS_INFO("prevKP: %s", utility_.toString(prevKP_).c_str());
     ROS_INFO("theta: %f", theta);*/
@@ -1204,7 +1200,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       x_dot = fabs(MAX_SPEED * cos(theta));
       y_dot = fabs(MAX_SPEED * sin(theta));
     }
-    //ROS_INFO("x_dot: %f y_dot: %f", x_dot, y_dot);
+    ////ROS_INFO("x_dot: %f y_dot: %f", x_dot, y_dot);
 
     if(path_.points.at(i_kp_).motionState.velocities.size() == 0)
     {

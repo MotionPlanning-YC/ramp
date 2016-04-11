@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
   ramp_msgs::KnotPoint zero;
   zero.motionState.positions.push_back(0);
   zero.motionState.positions.push_back(0);
-  zero.motionState.positions.push_back(0.52983);
+  zero.motionState.positions.push_back(0);
   zero.motionState.velocities.push_back(0);
   zero.motionState.velocities.push_back(0);
   zero.motionState.velocities.push_back(0);
@@ -129,11 +129,11 @@ int main(int argc, char** argv) {
   c5.motionState.accelerations.push_back(0.); //.0746295
   
   ramp_msgs::Path p;
-  //p.points.push_back(zero);
-  p.points.push_back(c1);
-  p.points.push_back(c2);
+  p.points.push_back(zero);
+  //p.points.push_back(c1);
+  //p.points.push_back(c2);
   //p.points.push_back(c3);
-  //p.points.push_back(c4);
+  p.points.push_back(c4);
   //p.points.push_back(c5);
   //p.points.push_back(c6);
   //p.points.push_back(c7);
@@ -409,9 +409,9 @@ int main(int argc, char** argv) {
   }
 
 
-  ramp_msgs::EvaluationRequest er;
+  /*ramp_msgs::EvaluationRequest er;
 
-  er.request.trajectory = tr.response.trajectory;
+  er.request.trajectory = tr.response.trajectory;*/
 
   /*er.request.trajectory.trajectory.points.resize(17);
   er.request.trajectory.i_knotPoints.pop_back();
@@ -420,8 +420,8 @@ int main(int argc, char** argv) {
   er.request.trajectory.curves.clear();
   std::cout<<"\nNew trajec: "<<u.toString(er.request.trajectory)<<"\n";*/
 
-  er.request.currentTheta = er.request.trajectory.trajectory.points.at(0).positions.at(2);
-  er.request.theta_cc = 1.04839;
+  //er.request.currentTheta = er.request.trajectory.trajectory.points.at(0).positions.at(2);
+  //er.request.theta_cc = 1.04839;
 
 
   // Build any obstacle trajectories
@@ -443,7 +443,7 @@ int main(int argc, char** argv) {
   ob2.motionState.velocities.push_back(-0.105661); // 0.4026
   ob2.motionState.velocities.push_back(0.64); // 0.519146*/
 
-  ramp_msgs::Path obp;
+  //ramp_msgs::Path obp;
   //obp.points.push_back(ob1);
   //obp.points.push_back(ob2);
 
@@ -462,11 +462,11 @@ int main(int argc, char** argv) {
   er.request.obstacle_trjs.push_back(obt);*/
 
   // Evaluate trajectory
-  if(client_eval.call(er)) 
+  /*if(client_eval.call(er)) 
   {
     std::cout<<"\nEvaluated traj, fitness: "<<er.response.fitness;
     std::cout<<"\nEvaluated traj, feasible: "<<er.response.feasible;
-  }
+  }*/
 
 
   std::cout<<"\n\nPress Enter to Publish population\n";
