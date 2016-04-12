@@ -90,13 +90,13 @@ int main(int argc, char** argv) {
   c2.motionState.velocities.push_back(0.298742); //-.297903
   c2.motionState.velocities.push_back(0.); //-.118126
 
-  c3.motionState.velocities.push_back(0.301175);
+  /*c3.motionState.velocities.push_back(0.301175);
   c3.motionState.velocities.push_back(0.134885);
-  c3.motionState.velocities.push_back(0.);
+  c3.motionState.velocities.push_back(0.);*/
 
+  /*c4.motionState.velocities.push_back(0.23);
   c4.motionState.velocities.push_back(0);
-  c4.motionState.velocities.push_back(0);
-  c4.motionState.velocities.push_back(0);
+  c4.motionState.velocities.push_back(0);*/
  
 
   c5.motionState.velocities.push_back(0);
@@ -116,13 +116,13 @@ int main(int argc, char** argv) {
   c2.motionState.accelerations.push_back(0.);  //-.10465
   c2.motionState.accelerations.push_back(0.); //.0746295
 
+  /*c3.motionState.accelerations.push_back(0.);
   c3.motionState.accelerations.push_back(0.);
-  c3.motionState.accelerations.push_back(0.);
-  c3.motionState.accelerations.push_back(0.);
+  c3.motionState.accelerations.push_back(0.);*/
 
+  /*c4.motionState.accelerations.push_back(0.);
   c4.motionState.accelerations.push_back(0.);
-  c4.motionState.accelerations.push_back(0.);
-  c4.motionState.accelerations.push_back(0.);
+  c4.motionState.accelerations.push_back(0.);*/
   
   c5.motionState.accelerations.push_back(0.); //.0114877
   c5.motionState.accelerations.push_back(0.);  //-.10465
@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
   p.points.push_back(zero);
   //p.points.push_back(c1);
   //p.points.push_back(c2);
-  //p.points.push_back(c3);
+  p.points.push_back(c3);
   p.points.push_back(c4);
   //p.points.push_back(c5);
   //p.points.push_back(c6);
@@ -390,7 +390,7 @@ int main(int argc, char** argv) {
   
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
-  tr.request.type = PARTIAL_BEZIER;
+  tr.request.type = ALL_STRAIGHT_SEGMENTS;
   tr.request.print = true;
   tr.request.bezierCurves = curves;
   tr.request.segments = 0;

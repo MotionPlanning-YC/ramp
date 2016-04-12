@@ -27,7 +27,7 @@ void init_advertisers_subscribers(MobileRobot& robot, ros::NodeHandle& handle, b
 
   if(simulation) 
   {
-    robot.pub_cmd_vel_ = handle.advertise<geometry_msgs::Twist>("/robot_0/cmd_vel", 1000);
+    robot.pub_cmd_vel_ = handle.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
   }
  
   // Subscribers
@@ -51,8 +51,8 @@ int main(int argc, char** argv) {
   ros::NodeHandle handle_local("~");
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1, trajCallback);
  
-  handle.param("ramp_control/orientation", robot.initial_theta_, 0.785);
-  //handle_local.param("orientation", robot.initial_theta_, 0.);
+  //handle.param("ramp_control/orientation", robot.initial_theta_, 0.785);
+  handle_local.param("orientation", robot.initial_theta_, 0.);
   std::cout<<"\nrobot.orientation: "<<robot.initial_theta_;
 
   bool sim=false;

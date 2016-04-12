@@ -69,13 +69,17 @@ private:
 
   double MAX_SPEED;
 
+  const uint8_t i_XDOF_;
+  const uint8_t i_THETADOF_;
+
   /***** Methods *****/
   // Initialize everything
   void init(const ramp_msgs::TrajectoryRequest::Request req);
 
   // Set the target of the Reflexxes library
   void setTarget(const ramp_msgs::MotionState ms);
-  void setMaxV(const double x_dot, const double y_dot, const double theta_dot=3.f*PI/4.f);
+  void setMaxV(const double x_dot, const double theta_dot=3.f*PI/4.f);
+  //void setMaxV(const double x_dot, const double y_dot, const double theta_dot=3.f*PI/4.f);
 
   // Set the selection vector for a path
   void setSelectionVector();

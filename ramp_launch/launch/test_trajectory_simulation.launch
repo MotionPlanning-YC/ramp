@@ -17,10 +17,10 @@
 <node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/world/single_robot.world" />
 <node name="ramp_control" pkg="ramp_control" type="ramp_control" output="screen">
   <remap from="odometry" to="odom" />
-  <remap from="/cmd_vel" to="/mobile_base/commands/velocity" />
+  <!-- <remap from="/cmd_vel" to="/mobile_base/commands/velocity" /> -->
   <param name="simulation" value="true" />
   <param name="check_imminent_coll" value="false" />
-  <param name="orientation" type="double" value="1.9635" />
+  <param name="orientation" type="double" value="0" />
 </node>
 
 </launch>
