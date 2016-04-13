@@ -18,7 +18,8 @@
 
 #define CYCLE_TIME_IN_SECONDS 0.1
 
-enum TrajectoryType {
+enum TrajectoryType 
+{
   HOLONOMIC             = 0,
   HYBRID                = 1,
   TRANSITION            = 2,

@@ -132,9 +132,9 @@ int main(int argc, char** argv) {
   p.points.push_back(zero);
   //p.points.push_back(c1);
   //p.points.push_back(c2);
-  p.points.push_back(c3);
-  p.points.push_back(c4);
-  //p.points.push_back(c5);
+  //p.points.push_back(c3);
+  //p.points.push_back(c4);
+  p.points.push_back(c5);
   //p.points.push_back(c6);
   //p.points.push_back(c7);
   //p.points.push_back(c8);
@@ -242,9 +242,9 @@ int main(int argc, char** argv) {
   cp2.positions.push_back(-0.415944);
   
   // *** Push on the Control points ***
-  bi.controlPoints.push_back(cp0);
+  /*bi.controlPoints.push_back(cp0);
   bi.controlPoints.push_back(cp1);
-  bi.controlPoints.push_back(cp2);
+  bi.controlPoints.push_back(cp2);*/
 
 
   /** Why 0 initial velocity? **/
@@ -288,7 +288,7 @@ int main(int argc, char** argv) {
   //bi.u_target = 0.972221;
   //bi.u_dot_0 = 1.38889;
   //bi.u_dot_max = 0.; 
-  bi.l = 0.1;
+  //bi.l = 0.1;
 
 
 
@@ -390,7 +390,7 @@ int main(int argc, char** argv) {
   
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
-  tr.request.type = ALL_STRAIGHT_SEGMENTS;
+  tr.request.type = PARTIAL_BEZIER;
   tr.request.print = true;
   tr.request.bezierCurves = curves;
   tr.request.segments = 0;

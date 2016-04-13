@@ -1,5 +1,5 @@
 ramp_msgs/Path path
-int8 type 
+uint8 type 
 bool print
 ramp_msgs/BezierCurve[] bezierCurves
 int8 segments
