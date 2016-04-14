@@ -96,7 +96,7 @@ private:
   
 
   // Execute one iteration of the Reflexxes control function
-  const trajectory_msgs::JointTrajectoryPoint spinOnce();
+  const trajectory_msgs::JointTrajectoryPoint spinOnce(bool vertical_line=false);
 
   // Returns true if the target has been reached
   bool finalStateReached() const;
@@ -104,6 +104,8 @@ private:
 
   // Use Reflexxes to generate a rotation trajectory
   const std::vector<trajectory_msgs::JointTrajectoryPoint> rotate(const double start, const double goal, const double start_v, const double start_a);
+
+  const std::vector<trajectory_msgs::JointTrajectoryPoint> verticalLine(ramp_msgs::MotionState start, ramp_msgs::MotionState goal);
 
   // Set the Selection Vector for rotation
   void setSelectionVectorRotation();
@@ -115,7 +117,7 @@ private:
   const bool lambdaOkay(const std::vector<ramp_msgs::MotionState> segment_points, const double lambda) const;
 
   // Build a JointTrajectoryPoint from Reflexxes data
-  const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const ReflexxesData data);
+  const trajectory_msgs::JointTrajectoryPoint buildTrajectoryPoint(const ReflexxesData data, bool vertical_line=false);
 
   // Print Current and Next vectors
   void printReflexxesSpinInfo() const;
