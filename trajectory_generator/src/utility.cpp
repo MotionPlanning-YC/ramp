@@ -318,23 +318,29 @@ const std::string Utility::toString(const trajectory_msgs::JointTrajectoryPoint 
 }
 
 
-const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const {
+const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
+{
   std::ostringstream result;
 
   result<<"\n Knot Points:";
-  for(unsigned int i=0;i<traj.i_knotPoints.size();i++) {
-    
+  for(unsigned int i=0;i<traj.i_knotPoints.size();i++) 
+  {
+    ROS_INFO("i: %i i_knotPoints size: %i", i, (int)traj.i_knotPoints.size()); 
     result<<"\n   "<<i<<":";
     
     unsigned int index = traj.i_knotPoints.at(i);
+
+    ROS_INFO("index: %i points.size(): %i", index, (int)traj.trajectory.points.size());
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(index);
     
     result<<"\n       "<<toString(p);
   }
 
+  ROS_INFO("Done with knot points");
 
   result<<"\n Points:";
-  for(unsigned int i=0;i<traj.trajectory.points.size();i++) {
+  for(unsigned int i=0;i<traj.trajectory.points.size();i++) 
+  {
     result<<"\n\n   Point "<<i<<":";
     
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);

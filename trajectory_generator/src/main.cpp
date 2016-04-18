@@ -92,7 +92,7 @@ bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
     prediction.trajectoryRequest(req, res);
   }
 
-  //ROS_INFO("Trajectory Done");
+  ROS_INFO("Trajectory Done");
   ROS_INFO("Response: %s", utility.toString(res).c_str());
  
   return true;
