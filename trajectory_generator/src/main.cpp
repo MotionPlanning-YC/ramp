@@ -69,9 +69,9 @@ bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
 
 
   // Why req.segments == 1?
-  if(req.type != PREDICTION && (req.path.points.size() < 3 || req.segments == 1))
+  if(req.type != PREDICTION && req.type != TRANSITION && (req.path.points.size() < 3 || req.segments == 1))
   {
-    //ROS_WARN("Changing type to HOLONOMIC");
+    ROS_WARN("Changing type to HOLONOMIC");
     req.type = HOLONOMIC;
     req.segments++;
   }

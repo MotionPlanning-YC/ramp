@@ -27,7 +27,7 @@
 <!-- Simulation -->
 <node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/world/full_simulation.world" /> 
 <node name="ramp_control" pkg="ramp_control" type="ramp_control" >
-  <remap from="odometry" to="odom" />
+  <remap from="odometry" to="robot_0/odom" />
   <remap from="cmd_vel" to="robot_0/cmd_vel" />
   <param name="simulation" value="true" />
   <param name="orientation" type="double" value="0.785" />

@@ -34,14 +34,14 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(0.0730118); // 0.70455
-  c1.motionState.positions.push_back(1.07786); // 0.4026
-  c1.motionState.positions.push_back(0.298516); // 0.519146
+  c1.motionState.positions.push_back(0.319191); // 0.70455
+  c1.motionState.positions.push_back(0.367659); // 0.4026
+  c1.motionState.positions.push_back(0.855847); // 0.519146
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(0.0136164); // 0.70455
-  c2.motionState.positions.push_back(3.40403); // 0.4026
-  c2.motionState.positions.push_back(1.23866); // 0.519146
+  c2.motionState.positions.push_back(2.00623); // 0.70455
+  c2.motionState.positions.push_back(2.51971); // 0.4026
+  c2.motionState.positions.push_back(-1.01966); // 0.519146
 
 
   ramp_msgs::KnotPoint c3;
@@ -82,12 +82,12 @@ int main(int argc, char** argv) {
   c9.motionState.positions.push_back(PI/4);
   
   // Velocities
-  c1.motionState.velocities.push_back(0.189167);  //.151426
-  c1.motionState.velocities.push_back(0.269703); //-.297903
-  c1.motionState.velocities.push_back(0.0989024); //-.118126*/
+  c1.motionState.velocities.push_back(0.216341);  //.151426
+  c1.motionState.velocities.push_back(0.249192); //-.297903
+  c1.motionState.velocities.push_back(0.); //-.118126*/
  
-  c2.motionState.velocities.push_back(0.138931);  //.151426
-  c2.motionState.velocities.push_back(0.298742); //-.297903
+  c2.motionState.velocities.push_back(0.);  //.151426
+  c2.motionState.velocities.push_back(0.); //-.297903
   c2.motionState.velocities.push_back(0.); //-.118126
 
   /*c3.motionState.velocities.push_back(0.301175);
@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
   c5.motionState.accelerations.push_back(0.); //.0746295
   
   ramp_msgs::Path p;
-  p.points.push_back(zero);
+  //p.points.push_back(zero);
   p.points.push_back(c1);
   p.points.push_back(c2);
   //p.points.push_back(c3);
@@ -390,7 +390,7 @@ int main(int argc, char** argv) {
   
   ramp_msgs::TrajectoryRequest tr;
   tr.request.path = p;
-  tr.request.type = ALL_STRAIGHT_SEGMENTS;
+  tr.request.type = PARTIAL_BEZIER;
   tr.request.print = true;
   tr.request.bezierCurves = curves;
   tr.request.segments = 0;
