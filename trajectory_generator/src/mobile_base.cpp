@@ -985,12 +985,73 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
     if(data.outputParameters->NewPositionVector->VecData[0] == -99) 
     {
       ROS_INFO("In if");
-      point.positions.push_back(data.inputParameters->CurrentPositionVector->VecData[i]);
-      point.velocities.push_back(data.inputParameters->CurrentVelocityVector->VecData[i]);
-      point.accelerations.push_back(data.inputParameters->CurrentAccelerationVector->VecData[i]);
+      if(i==i_THETADOF_)
+      {
+        point.positions.push_back(data.inputParameters->CurrentPositionVector->VecData[i]);
+        point.velocities.push_back(data.inputParameters->CurrentVelocityVector->VecData[i]);
+        point.accelerations.push_back(data.inputParameters->CurrentAccelerationVector->VecData[i]);
+      }
       
+      else
+      {
+        if(x_diff_greater)
+        {
+          ROS_INFO("In x_diff_greater");
+          point.positions.push_back(data.inputParameters->CurrentPositionVector->VecData[i]);
+          point.velocities.push_back(data.inputParameters->CurrentVelocityVector->VecData[i]);
+          point.accelerations.push_back(data.inputParameters->CurrentAccelerationVector->VecData[i]);
+          
+          
+          // Compute y from x
+          double b = path_.points.at(i_kp_-1).motionState.positions.at(1) - 
+                      (path_.points.at(i_kp_-1).motionState.positions.at(0)*slope);
+          double y = slope*point.positions.at(0) + b;
+          double y_dot = point.velocities.at(0) * tan(theta);
+          double y_ddot = 0;
+          
+          
+          point.positions.push_back(y);
+          point.velocities.push_back(y_dot);
+          point.accelerations.push_back(y_ddot);
+        }
+        else
+        {
+          ROS_INFO("In y_diff_greater");
+          double y = data.inputParameters->CurrentPositionVector->VecData[i];
+          double y_dot = data.inputParameters->CurrentVelocityVector->VecData[i];
+          double y_ddot = data.inputParameters->CurrentAccelerationVector->VecData[i];
+          double b, x, x_dot, x_ddot;
+
+          // Compute x from y
+          if(isinf(slope))
+          {
+            ROS_INFO("In if isinf(slope), point: %s", utility_.toString(path_.points.at(0).motionState).c_str());
+            x = path_.points.at(0).motionState.positions.at(0);
+            x_dot = 0.f;
+            x_ddot = 0.f;
+          }
+          else
+          {
+            ROS_INFO("In else");
+            b = path_.points.at(i_kp_-1).motionState.positions.at(1) - 
+                        (path_.points.at(i_kp_-1).motionState.positions.at(0)*slope);
+            x = (y - b) / slope;
+            x_dot = y_dot / tan(theta);
+            x_ddot = 0;
+          }
+
+          ROS_INFO("b: %f y: %f y_dot: %f y_ddot: %f", b, y, y_dot, y_ddot);
+          
+          point.positions.push_back(x);
+          point.positions.push_back(y);
+          point.velocities.push_back(x_dot);
+          point.velocities.push_back(y_dot);
+          point.accelerations.push_back(x_ddot);
+          point.accelerations.push_back(y_ddot);
+        } // end else if y_diff>x_diff
+      }
       // Compute y from x
-      if(i == i_XDOF_)
+      /*if(i == i_XDOF_)
       {
         ROS_INFO("slope: %f theta: %f path_points.at(i_kp-1): %f", slope, theta, 
             path_.points.at(i_kp_-1).motionState.positions.at(1));
@@ -1001,7 +1062,7 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
         point.positions.push_back(y);
         point.velocities.push_back(y_dot);
         point.accelerations.push_back(y_ddot);
-      }
+      }*/
     } // end if reflexxes not called yet
 
     // If selection vector is true
@@ -1406,6 +1467,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   {
     segments_ = path_.points.size();
   }
+
 
  
   //ROS_INFO("About to start generating points, segments_: %i", segments_);

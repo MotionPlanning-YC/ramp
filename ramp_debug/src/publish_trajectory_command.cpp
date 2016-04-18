@@ -51,8 +51,8 @@ int main(int argc, char** argv) {
 
 
   ramp_msgs::KnotPoint c4;
-  c4.motionState.positions.push_back(3.5f);
-  c4.motionState.positions.push_back(0.f);
+  c4.motionState.positions.push_back(1.f);
+  c4.motionState.positions.push_back(-1.f);
   c4.motionState.positions.push_back(PI/4);
 
 
