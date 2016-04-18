@@ -124,7 +124,7 @@ void MobileRobot::updateCallback(const ros::TimerEvent& e) {
 void MobileRobot::updateTrajectory(const ramp_msgs::RampTrajectory msg) 
 {
   //ROS_INFO("Received RampTrajectory");
-  //std::cout<<"\nTrajectory: "<<utility_.toString(msg);
+  ROS_INFO("Trajectory: %s", utility_.toString(msg).c_str());
   
   // Update data members
   restart_        = true;
@@ -191,11 +191,13 @@ void MobileRobot::calculateSpeedsAndTime () {
     }
     trajectory_msgs::JointTrajectoryPoint current = trajectory_.trajectory.points.at(i);
     trajectory_msgs::JointTrajectoryPoint next    = trajectory_.trajectory.points.at(i+1);
-    //std::cout<<"\nPoint "<<i;
+    std::cout<<"\nPoint "<<i;
 
-    double vx = (next.positions.at(0) - current.positions.at(0)) / 0.1;
-    double vy = (next.positions.at(1) - current.positions.at(1)) / 0.1;
-    //ROS_INFO("t: %f v: %f vx: %f vy: %f", current.time_from_start.toSec(), sqrt(vx*vx+vy*vy), vx, vy);
+    //double vx = (next.positions.at(0) - current.positions.at(0)) / 0.1;
+    //double vy = (next.positions.at(1) - current.positions.at(1)) / 0.1;
+    double vx = next.velocities.at(0);
+    double vy = next.velocities.at(1);
+    ROS_INFO("t: %f v: %f vx: %f vy: %f", current.time_from_start.toSec(), sqrt(vx*vx+vy*vy), vx, vy);
 
     speeds_linear_.push_back( sqrt( pow(vx,2)
                                   + pow(vy,2) ));
@@ -209,7 +211,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   }
 
 
-  //printVectors();
+  printVectors();
 } // End calculateSpeedsAndTime
 
 
@@ -313,7 +315,7 @@ void MobileRobot::moveOnTrajectory()
   // Execute the trajectory
   while(ros::ok() && (num_traveled_+1) < num_) 
   {
-    //ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
+    ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
     //ROS_INFO("At state: %s", utility_.toString(motion_state_).c_str());
     s = ros::Time::now();
     restart_ = false;
@@ -356,11 +358,11 @@ void MobileRobot::moveOnTrajectory()
         //ROS_INFO("initial_theta_: %f motion_state_.positions.at(2): %f", initial_theta_, motion_state_.positions.at(2));
         float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
         float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
-        ROS_INFO("actual_theta: %f orientations[%i]: %f dist: %f", actual_theta, num_traveled_, orientations_.at(num_traveled_), dist);
+        //ROS_INFO("actual_theta: %f orientations[%i]: %f dist: %f", actual_theta, num_traveled_, orientations_.at(num_traveled_), dist);
         twist_.angular.z = dist;
       }
 
-      //ROS_INFO("twist.linear.x: %f twist.angular.z: %f", twist_.linear.x, twist_.angular.z);
+      ROS_INFO("twist.linear.x: %f twist.angular.z: %f", twist_.linear.x, twist_.angular.z);
 
       // Send the twist_message to move the robot
       sendTwist();
