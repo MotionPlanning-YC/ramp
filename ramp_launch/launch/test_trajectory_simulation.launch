@@ -20,7 +20,7 @@
   <!-- <remap from="/cmd_vel" to="/mobile_base/commands/velocity" /> -->
   <param name="simulation" value="true" />
   <param name="check_imminent_coll" value="false" />
-  <param name="orientation" type="double" value="0" />
+  <param name="orientation" type="double" value="0.785" />
 </node>
 
 </launch>
