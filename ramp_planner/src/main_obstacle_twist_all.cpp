@@ -148,7 +148,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
   /*
    * Set motion for Obstacle 1
    */
-  if(index == 1)
+  if(index == -1)
   {
     
     

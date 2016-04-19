@@ -48,15 +48,16 @@ bool Evaluate::performFeasibility()
   qr_ = cd_.perform();
   trajectory_.feasible = !qr_.collision_;
 
-  bool moving = fabs( sqrt( pow(trajectory_.trajectory.points.at(0).velocities.at(0), 2) +
-                            pow(trajectory_.trajectory.points.at(0).velocities.at(1), 2))) > 0 ?
+  bool moving = (fabs( sqrt( pow(trajectory_.trajectory.points.at(0).velocities.at(0), 2) +
+                            pow(trajectory_.trajectory.points.at(0).velocities.at(1), 2))) > 0)
+                || (fabs(trajectory_.trajectory.points.at(0).velocities.at(2)) > 0) ?
                 true : false;
 
   bool moving_on_curve = 
     trajectory_.curves.size() > 0 && 
     (trajectory_.curves.at(0).u_0 > 0.000001 ||
     (utility_.positionDistance(trajectory_.trajectory.points.at(0).positions, 
-       trajectory_.curves.at(0).controlPoints.at(0).positions) < 0.01) ) ?
+       trajectory_.curves.at(0).controlPoints.at(0).positions) < 0.0001) ) ?
     true
     :
     false;

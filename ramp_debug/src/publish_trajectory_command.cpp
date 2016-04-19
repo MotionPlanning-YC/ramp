@@ -34,14 +34,14 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(0.318814); // 0.70455
-  c1.motionState.positions.push_back(0.36794); // 0.4026
-  c1.motionState.positions.push_back(0.856809); // 0.519146
+  c1.motionState.positions.push_back(0.346127); // 0.70455
+  c1.motionState.positions.push_back(0.346127); // 0.4026
+  c1.motionState.positions.push_back(0.78529); // 0.519146
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(2.9703); // 0.70455
-  c2.motionState.positions.push_back(3.27223); // 0.4026
-  c2.motionState.positions.push_back(-2.92375); // 0.519146
+  c2.motionState.positions.push_back(0.287455); // 0.70455
+  c2.motionState.positions.push_back(0.432534); // 0.4026
+  c2.motionState.positions.push_back(0.785398); // 0.519146
 
 
   ramp_msgs::KnotPoint c3;
@@ -82,8 +82,8 @@ int main(int argc, char** argv) {
   c9.motionState.positions.push_back(PI/4);
   
   // Velocities
-  c1.motionState.velocities.push_back(0.216101);  //.151426
-  c1.motionState.velocities.push_back(0.2494); //-.297903
+  c1.motionState.velocities.push_back(0.233345);  //.151426
+  c1.motionState.velocities.push_back(0.233345); //-.297903
   c1.motionState.velocities.push_back(0.); //-.118126*/
  
   c2.motionState.velocities.push_back(0.);  //.151426
@@ -132,11 +132,11 @@ int main(int argc, char** argv) {
   //p.points.push_back(zero);
   p.points.push_back(c1);
   p.points.push_back(c2);
-  p.points.push_back(c3);
-  p.points.push_back(c4);
-  p.points.push_back(c5);
-  p.points.push_back(c6);
-  p.points.push_back(c7);
+  //p.points.push_back(c3);
+  //p.points.push_back(c4);
+  //p.points.push_back(c5);
+  //p.points.push_back(c6);
+  //p.points.push_back(c7);
   //p.points.push_back(c8);
   p.points.push_back(c9);
   
@@ -409,18 +409,11 @@ int main(int argc, char** argv) {
   }
 
 
-  /*ramp_msgs::EvaluationRequest er;
+  ramp_msgs::EvaluationRequest er;
 
-  er.request.trajectory = tr.response.trajectory;*/
+  er.request.trajectory = tr.response.trajectory;
 
-  /*er.request.trajectory.trajectory.points.resize(17);
-  er.request.trajectory.i_knotPoints.pop_back();
-  er.request.trajectory.i_knotPoints.push_back(er.request.trajectory.trajectory.points.size()-1);
-  
-  er.request.trajectory.curves.clear();
-  std::cout<<"\nNew trajec: "<<u.toString(er.request.trajectory)<<"\n";*/
-
-  //er.request.currentTheta = er.request.trajectory.trajectory.points.at(0).positions.at(2);
+  er.request.currentTheta = er.request.trajectory.trajectory.points.at(0).positions.at(2);
   //er.request.theta_cc = 1.04839;
 
 
@@ -473,13 +466,13 @@ int main(int argc, char** argv) {
   std::cin.get();
 
 
-  /*er.request.trajectory.t_start = ros::Duration(2.0);
+  er.request.trajectory.t_start = ros::Duration(2.0);
   
   std::cout<<"\nSetting t_start to "<<2.0;
   if(client_eval.call(er)) {
     std::cout<<"\nEvaluated traj, fitness: "<<er.response.fitness;
     std::cout<<"\nEvaluated traj, feasible: "<<er.response.feasible;
-  }*/
+  }
 
 
   // Create Population to send to trajectory_visualization

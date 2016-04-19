@@ -115,6 +115,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     if(ob_trajectory.trajectory.points.size() == 1)
     {
       j_start = 0;
+      t_checkColl = 0;
     }
     else if(i <= t_checkColl)
     {
