@@ -103,7 +103,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   ROS_INFO("i_stop: %i", i_stop);
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
-  float radius = 0.25f;
+  float radius = 0.225f;
   for(uint16_t i=0;i<i_stop;i++) 
   {
     
