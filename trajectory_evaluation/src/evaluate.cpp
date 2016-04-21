@@ -1,6 +1,6 @@
 #include "evaluate.h"
 
-Evaluate::Evaluate() : Q(1000.f) {}
+Evaluate::Evaluate() : Q(1000.f), orientation_infeasible_(0) {}
 
 
 Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) : Q(1000.) 
@@ -79,12 +79,14 @@ bool Evaluate::performFeasibility()
       ROS_INFO("In inner if, i_knotPoints.size(): %i curves.size(): %i", (int)trajectory_.i_knotPoints.size(), 
           (int)trajectory_.curves.size());
       trajectory_.feasible = false;
+      orientation_infeasible_ = true;
     }
     else if(trajectory_.i_knotPoints.size() == 2 && trajectory_.curves.size() < 1)
     {
       ROS_INFO("In inner else if, i_knotPoints.size(): %i curves.size(): %i", (int)trajectory_.i_knotPoints.size(), 
           (int)trajectory_.curves.size());
       trajectory_.feasible = false;
+      orientation_infeasible_ = true;
     }
   }
 
@@ -132,13 +134,17 @@ const double Evaluate::performFitness(bool feasible)
     // Add the Penalty for being infeasible
     if(trajectory_.t_firstCollision.toSec() > 0 && trajectory_.t_firstCollision.toSec() < 10.0f)
     {
-      //penalties += (Q / trajectory_.t_firstCollision.toSec());
+      penalties += (Q / trajectory_.t_firstCollision.toSec());
     }
-    else
+    /*else
     {
-      //penalties += Q;
+      penalties += Q;
+    }*/
+
+    if(orientation_infeasible_)
+    {
+      penalties += Q*orientation_.getDeltaTheta();
     }
-    penalties += Q;
   }
 
   result = (1. / (cost + penalties));

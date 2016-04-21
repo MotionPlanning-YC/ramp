@@ -183,7 +183,7 @@ class Planner {
     bool seedPopulation_;
     
     const double updateCurvePos(const RampTrajectory traj, const ros::Duration d) const;
-  private:
+  //private:
     /** These are (mostly) utility members that are only used by Planner and should not be used by other classes */
 
 

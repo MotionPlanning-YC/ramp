@@ -37,6 +37,7 @@ class Evaluate {
 
   private:
     Utility utility_;
+    bool orientation_infeasible_;
 };
 
 #endif

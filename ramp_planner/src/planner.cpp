@@ -1147,12 +1147,13 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
 
       //ROS_WARN("latestUpdate_: %s\nob_point: %s", latestUpdate_.toString().c_str(), utility_.toString(ob).c_str());
 
-      if(moving_on_coll_ && movingOn_.msg_.t_firstCollision.toSec() < 0.5f)
+      if(moving_on_coll_ && (movingOn_.msg_.t_firstCollision.toSec() < 0.5f))
+       // || (movingOn_.msg_.t_firstCollision.toSec()-ros::Time::now().toSec()-t_prevCC_.toSec())  < 0.5f))
         // Consider t_collision of best trajectory
       {
         ROS_WARN("IC: moving_on_coll_: %s t_firstCollision: %f", moving_on_coll_ ? "True" : "False", 
             movingOn_.msg_.t_firstCollision.toSec());
-        ROS_WARN("Imminent Collision Robot: %i dist: %f", id_, dist);
+        ROS_WARN("Imminent Collision Robot: %i t_firstCollision: %f", id_, movingOn_.msg_.t_firstCollision.toSec());
         ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.at(i).toString().c_str());
         ROS_WARN("Robot trajectory: %s", movingOn_.toString().c_str());
 
@@ -1162,8 +1163,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
 
       else 
       {
-        //ROS_INFO("No imminent collision, dist: %f", dist);
-        //ROS_INFO("startPlanning: %s", startPlanning_.toString().c_str());
+        ROS_INFO("No imminent collision, t_firstCollision: %f", movingOn_.msg_.t_firstCollision.toSec());
         ic.data = false;
       }
     }
@@ -2861,7 +2861,11 @@ void Planner::doControlCycle()
     ROS_WARN("Pop best: %s", population_.getBest().toString().c_str());
   }
   
-  ROS_INFO("After adaptation and evaluation, pop size: %i pop: \n%s\nDone printing pop", population_.size(), population_.toString().c_str());
+  ROS_INFO("After adaptation and evaluation:");
+  for(int i=0;i<population_.size();i++)
+  {
+    ROS_INFO("%s", population_.get(i).toString().c_str());
+  }
   ////ROS_INFO("Time spent adapting: %f", d_adapt.toSec());
  
   //if(population_.calcBestIndex() != population_.calcBestIndex())
@@ -2882,10 +2886,11 @@ void Planner::doControlCycle()
   trans_durs_.push_back(d_trans);
   
   //ROS_INFO("After finding transition population, controlCycle period: %f", controlCycle_.toSec());
-  ROS_INFO("New transPop: %s\n\n%s\n\n%s", 
-      population_.get(0).toString().c_str(),
-      population_.get(1).toString().c_str(),
-      population_.get(2).toString().c_str());
+  ROS_INFO("New transPop:"); 
+  for(int i=0;i<population_.size();i++)
+  {
+    ROS_INFO("%s", population_.get(i).toString().c_str());
+  }
   //ROS_INFO("Time spent getting trans pop: %f", d_trans.toSec());
 
   population_at_cc_  = population_;

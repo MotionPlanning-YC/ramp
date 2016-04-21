@@ -68,7 +68,7 @@ corobot
 (
   name "r3"
   color "red"
-  pose [3.5 0 0 135]
+  pose [2 0 0 135]
   size [0.25 0.25 0.5]
 )
 corobot
