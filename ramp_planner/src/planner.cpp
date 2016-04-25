@@ -1765,7 +1765,7 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
 {
   if(print_enter_exit_)
   {
-    ROS_INFO("In Planner::predictTransition");
+    ROS_INFO("In Planner::predictTransition, t: %f", t);
   }
 
   if(to.msg_.trajectory.points.size() == 0)
@@ -1780,8 +1780,8 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   MotionState ms_endOfMovingOn = to.msg_.trajectory.points.size() > 0 ? 
     to.msg_.trajectory.points.at(0) : 
     from.msg_.trajectory.points.at(from.msg_.trajectory.points.size()-1);
-  //ROS_INFO("ms_startTrans: %s", ms_startTrans.toString().c_str());
-  //ROS_INFO("ms_endOfMovingOn: %s", ms_endOfMovingOn.toString().c_str());
+  ROS_INFO("ms_startTrans: %s", ms_startTrans.toString().c_str());
+  ROS_INFO("ms_endOfMovingOn: %s", ms_endOfMovingOn.toString().c_str());
 
  
   /*
@@ -1821,7 +1821,7 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   // 2) the 2nd segment will be much longer 
   MotionState g(to.msg_.trajectory.points.at(to.msg_.i_knotPoints.at(i_goal)));
 
-  //ROS_INFO("g: %s", g.toString().c_str());
+  ROS_INFO("g: %s", g.toString().c_str());
 
   segmentPoints.push_back(g);
 
@@ -1838,11 +1838,11 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
     return false;
   }
 
-  /*ROS_INFO("Segment Points:");
+  ROS_INFO("Segment Points:");
   for(uint8_t i=0;i<segmentPoints.size();i++)
   {
     ROS_INFO("Segment Point %i: %s", i, segmentPoints.at(i).toString().c_str());
-  }*/
+  }
 
   /*
    * After getting both segments, check if they have the same orientation
@@ -1852,7 +1852,7 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
                                               segmentPoints.at(1).msg_.positions);
   double thetaS2 = utility_.findAngleFromAToB(segmentPoints.at(1).msg_.positions, 
                                               segmentPoints.at(2).msg_.positions);
-  //ROS_INFO("Theta 1: %f Theta 2: %f", thetaS1, thetaS2);
+  ROS_INFO("Theta 1: %f Theta 2: %f", thetaS1, thetaS2);
   if( fabs(utility_.findDistanceBetweenAngles(thetaS1, thetaS2)) < 0.13 )
   {
     //ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
@@ -1869,36 +1869,15 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
     // Check duplicate
     if(utility_.positionDistance(a.msg_.positions, b.msg_.positions) < 0.1)
     {
-      //ROS_WARN("Will not plan a transition curve because there are duplicate segment points");
-      //ROS_WARN("%s\n%s", a.toString().c_str(), b.toString().c_str());
+      ROS_WARN("Will not plan a transition curve because there are duplicate segment points");
+      ROS_WARN("%s\n%s", a.toString().c_str(), b.toString().c_str());
       return false;
-    }
-
-    if( a.msg_.velocities.size() > 0 &&
-        fabs(a.msg_.velocities.at(0)) > 0.0001 &&
-        fabs(a.msg_.velocities.at(1)) > 0.0001)
-    {
-      // Check speed
-      double delta_x = fabs(segmentPoints.at(i+1).msg_.positions.at(0) - 
-        segmentPoints.at(i).msg_.positions.at(0));
-      double delta_y = fabs(segmentPoints.at(i+1).msg_.positions.at(1) - 
-        segmentPoints.at(i).msg_.positions.at(1));
-
-      double max_gain_x = fabs(segmentPoints.at(i).msg_.velocities.at(0)) * 0.1;
-      double max_gain_y = fabs(segmentPoints.at(i).msg_.velocities.at(1)) * 0.1;
-
-      if( (max_gain_x > delta_x) ||
-          (max_gain_y > delta_y) )
-      {
-        ROS_ERROR("The speed of the first knot point is too high to not overshoot next knot point, setting res.error=1");
-        return false;
-      }
     }
   } // end for
 
 
-  //ROS_INFO("Done checking segments");
-  
+  ROS_INFO("Done checking segments");
+ 
 
 
   /*
@@ -1908,12 +1887,12 @@ bool Planner::predictTransition(const RampTrajectory from, const RampTrajectory 
   BezierCurve curve;
   for(float lambda=0.1;lambda < 0.85;lambda+=0.1f)
   {
+    ROS_INFO("lambda: %f", lambda);
     curve.init(segmentPoints, lambda, ms_startTrans);
     if(curve.verify())
     {
-  
-      //ROS_INFO("Curve formed for prediction: %s", utility_.toString(curve.getMsg()).c_str());
-      //ROS_INFO("Exiting Planner::predictTransition");
+      ROS_INFO("Curve formed for prediction: %s", utility_.toString(curve.getMsg()).c_str());
+      ROS_INFO("Exiting Planner::predictTransition");
       return true;
     }
   }
@@ -1947,20 +1926,20 @@ const std::vector<RampTrajectory> Planner::switchTrajectory(const RampTrajectory
   uint8_t deltasPerCC = (t_fixed_cc_+0.0001) / delta_t_switch_;
 
   uint8_t delta_t_now = (ros::Time::now() - t_prevCC_).toSec() / delta_t_switch_;
-  //ROS_INFO("(ros::Time::now() - t_prevCC_): %f", (ros::Time::now() - t_prevCC_).toSec());
+  ROS_INFO("(ros::Time::now() - t_prevCC_): %f", (ros::Time::now() - t_prevCC_).toSec());
   double  delta_t     = ((deltasPerCC+1)*delta_t_switch_);
   //ROS_INFO("deltasPerCC: %i delta_t_now: %i delta_t: %f", deltasPerCC, delta_t_now, delta_t);
   
   for(int i_delta_t=deltasPerCC-1; i_delta_t > (delta_t_now+1); i_delta_t--)
   {
     double t_pc = i_delta_t * delta_t_switch_;
-    //ROS_INFO("i_delta_t: %i delta_t_switch_: %f t_pc: %f", i_delta_t, delta_t_switch_, t_pc);
+    ROS_INFO("i_delta_t: %i delta_t_switch_: %f t_pc: %f", i_delta_t, delta_t_switch_, t_pc);
 
     MotionState ms = from.getPointAtTime(t_pc);
 
     if(predictTransition(from, to, t_pc))
     {
-      //ROS_INFO("Prediction successful - stopping at t_pc: %f", t_pc);
+      ROS_INFO("Prediction successful - stopping at t_pc: %f", t_pc);
       delta_t = t_pc;
       break;
     }

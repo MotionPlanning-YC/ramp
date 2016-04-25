@@ -256,19 +256,21 @@ void loadParameters(const ros::NodeHandle handle)
 
 void testSwitch()
 {
-  MotionState ms1; 
-  ms1.msg_.positions.push_back(1.09132);
-  ms1.msg_.positions.push_back(0.708403);
-  ms1.msg_.positions.push_back(1.26168);
 
-  ms1.msg_.velocities.push_back(0.100392);
-  ms1.msg_.velocities.push_back(0.0214714);
+  // "From" traj
+  MotionState ms1; 
+  ms1.msg_.positions.push_back(0.);
+  ms1.msg_.positions.push_back(0.);
+  ms1.msg_.positions.push_back(PI/4.f);
+
+  ms1.msg_.velocities.push_back(0.);
+  ms1.msg_.velocities.push_back(0.);
   ms1.msg_.velocities.push_back(0.);
   
   MotionState ms2; 
-  ms2.msg_.positions.push_back(3.29001);
-  ms2.msg_.positions.push_back(1.17865);
-  ms2.msg_.positions.push_back(-1.3891);
+  ms2.msg_.positions.push_back(2.53178);
+  ms2.msg_.positions.push_back(3.05217);
+  ms2.msg_.positions.push_back(0.488008);
   
   MotionState ms3; 
   ms3.msg_.positions.push_back(3.5);
@@ -286,30 +288,32 @@ void testSwitch()
   RampTrajectory traj = my_planner.requestTrajectory(tr); 
   ROS_INFO("Response traj: %s", traj.toString().c_str());
 
+  RampTrajectory from = traj.getSubTrajectory(1.6f);
 
-  // Build the trajectory that we are switching from
+
+  // Build the trajectory that we are switching to 
   
   MotionState ms1_from; 
-  ms1_from.msg_.positions.push_back(0.852674);
-  ms1_from.msg_.positions.push_back(0.305472);
-  ms1_from.msg_.positions.push_back(0.344007);
+  ms1_from.msg_.positions.push_back(0.310342);
+  ms1_from.msg_.positions.push_back(0.37413);
+  ms1_from.msg_.positions.push_back(0.878324);
 
-  ms1_from.msg_.velocities.push_back(0.310666);
-  ms1_from.msg_.velocities.push_back(0.111296);
+  ms1_from.msg_.velocities.push_back(0.210686);
+  ms1_from.msg_.velocities.push_back(0.253991);
   ms1_from.msg_.velocities.push_back(0.);
   
   MotionState ms2_from; 
-  ms2_from.msg_.positions.push_back(0.976941);
-  ms2_from.msg_.positions.push_back(0.34999);
-  ms2_from.msg_.positions.push_back(0.344007);
+  ms2_from.msg_.positions.push_back(0.0625118);
+  ms2_from.msg_.positions.push_back(0.872318);
+  ms2_from.msg_.positions.push_back(0.849804);
   
   MotionState ms3_from; 
-  ms3_from.msg_.positions.push_back(1.85457);
-  ms3_from.msg_.positions.push_back(3.0984);
-  ms3_from.msg_.positions.push_back(1.26171);
+  ms3_from.msg_.positions.push_back(3.5);
+  ms3_from.msg_.positions.push_back(3.5);
+  ms3_from.msg_.positions.push_back(PI/4.f);
   
-  ms3_from.msg_.velocities.push_back(0.100383);
-  ms3_from.msg_.velocities.push_back(0.314362);
+  ms3_from.msg_.velocities.push_back(0.);
+  ms3_from.msg_.velocities.push_back(0.);
   ms3_from.msg_.velocities.push_back(0.);
 
   std::vector<MotionState> ms_vec_from;
@@ -321,12 +325,12 @@ void testSwitch()
  
   // Get transition part
   ramp_msgs::TrajectoryRequest tr_from = my_planner.buildTrajectoryRequest(p_from);
-  tr.request.type = TRANSITION;
+  tr.request.type = HYBRID;
   RampTrajectory traj_from = my_planner.requestTrajectory(tr_from); 
   ROS_INFO("Response traj_from: %s", traj_from.toString().c_str());
   
   
-  RampTrajectory full = my_planner.computeFullSwitch(traj_from, traj);
+  RampTrajectory full = my_planner.computeFullSwitch(traj, traj_from);
   ROS_INFO("full: %s", full.toString().c_str());
 
   RampTrajectory eval = my_planner.evaluateTrajectory(full);
@@ -366,8 +370,8 @@ int main(int argc, char** argv) {
   std::cout<<"\nGoal: "<<my_planner.goal_.toString();
 
   
-  //testSwitch();
-  //exit(1);
+  testSwitch();
+  exit(1);
  
  
   /******* Start the planner *******/

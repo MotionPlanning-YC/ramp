@@ -19,7 +19,7 @@ public:
 
   const std::vector<MotionState> generateCurve();
 
-  const bool verify() const;
+  const bool verify();
  
 
   double A_, B_, C_, D_       ;
@@ -57,6 +57,8 @@ private:
   double        x_dot_prev_, y_dot_prev_;
   double        theta_prev_             ;
   double        theta_dot_prev_         ;
+  
+  double        MAX_SPEED_;
 
 
   void initReflexxes()    ;

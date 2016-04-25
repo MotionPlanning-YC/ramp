@@ -90,7 +90,7 @@ void BezierCurve::init(const ramp_msgs::BezierCurve bi, const ramp_msgs::MotionS
   }
   else 
   {
-    //ROS_INFO("Setting ms_begin to control point 0: %s", utility_.toString(controlPoints_.at(0)).c_str());
+    ROS_INFO("Setting ms_begin to control point 0: %s", utility_.toString(controlPoints_.at(0)).c_str());
     ms_begin_ = controlPoints_.at(0);
   }
   x_prev_         = ms_begin_.positions.at(0);
@@ -129,11 +129,11 @@ const bool BezierCurve::verify() const
   double v_rmin = sqrt(pow(x_dot,2) + pow(y_dot,2));
   double w_rmin = v_rmin / R_min_;
   
-  //////ROS_INFO("u_dot_max: %f", u_dot_max);
-  //////ROS_INFO("x_dot: %f y_dot: %f", x_dot, y_dot);
-  //////ROS_INFO("w_rmin: %f v_rmin: %f R_min: %f t_R_min: %f x_dot: %f y_dot: %f", w_rmin, v_rmin, R_min_, t_R_min_, x_dot, y_dot);
-  //////ROS_INFO("w_rmin <= w_max: %s", w_rmin <= w_max ? "True" : "False");
-  //////ROS_INFO("l_: %f", l_);
+  ROS_INFO("u_dot_max: %f", u_dot_max);
+  ROS_INFO("x_dot: %f y_dot: %f", x_dot, y_dot);
+  ROS_INFO("w_rmin: %f v_rmin: %f R_min: %f t_R_min: %f x_dot: %f y_dot: %f", w_rmin, v_rmin, R_min_, t_R_min_, x_dot, y_dot);
+  ROS_INFO("w_rmin <= w_max: %s", w_rmin <= w_max ? "True" : "False");
+  ROS_INFO("l_: %f", l_);
   
 
   return ( l_ < 1. && (t_R_min_ >= 0 && t_R_min_ <= 1) && (w_rmin <= w_max) );
@@ -170,12 +170,12 @@ void BezierCurve::printReflexxesInfo() const
 
 const double BezierCurve::findVelocity(const uint8_t i, const double l, const double theta) const 
 {
-  ////////ROS_INFO("In BezierCurve::findVelocity");
-  ////////ROS_INFO("i: %i l: %f theta: %f", i, l, theta);
+  ROS_INFO("In BezierCurve::findVelocity");
+  ROS_INFO("i: %i l: %f theta: %f", i, l, theta);
 
   // s = s_0 + v_0*t + 1/2*a*t^2
   // t = (v - v_0) / a;
-  //////ROS_INFO("theta: %f", theta);
+  ROS_INFO("theta: %f", theta);
 
   
   // Use 2/3 of max acceleration
@@ -191,7 +191,7 @@ const double BezierCurve::findVelocity(const uint8_t i, const double l, const do
   double v_max = sqrt( pow(ms_max_.velocities.at(0),2) + pow(ms_max_.velocities.at(1),2) );
   double v_target = i == 0 ? cos(theta) * v_max : sin(theta) * v_max;
 
-  ////////ROS_INFO("v_0: %f a: %f radicand: %f v: %f v_max: %f v_target: %f", v_0, a, radicand, v, v_max, v_target);
+  ROS_INFO("v_0: %f a: %f radicand: %f v: %f v_max: %f v_target: %f", v_0, a, radicand, v, v_max, v_target);
 
  
 
@@ -205,7 +205,7 @@ const double BezierCurve::findVelocity(const uint8_t i, const double l, const do
     v = -v_target;
   }
 
-
+  ROS_INFO("v: %f", v);
   return v;
 } // End findVelocity
 
@@ -215,7 +215,7 @@ const double BezierCurve::findVelocity(const uint8_t i, const double l, const do
 
 const ramp_msgs::MotionState BezierCurve::getInitialState() 
 {
-  //ROS_INFO("In BezierCurve::getInitialState()");
+  ROS_INFO("In BezierCurve::getInitialState()");
 
   ramp_msgs::MotionState result;
   for(uint8_t i=0;i<3;i++) {
@@ -237,7 +237,7 @@ const ramp_msgs::MotionState BezierCurve::getInitialState()
       segmentPoints_.at(0).positions, 
       segmentPoints_.at(1).positions);
   
-  //ROS_INFO("ryse: %f run: %f slope: %f l: %f", ryse, run, slope, l);
+  ROS_INFO("ryse: %f run: %f slope: %f theta: %f l: %f", ryse, run, slope, theta, l);
 
   double v_max = MAX_SPEED;
 
@@ -343,12 +343,12 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const
   // Need the max accelerations
   double x_ddot_max = ms_max_.accelerations.at(0);
   double y_ddot_max = ms_max_.accelerations.at(1);
-  ////ROS_INFO("x_ddot_max: %f y_ddot_max: %f", x_ddot_max, y_ddot_max);
+  ROS_INFO("x_ddot_max: %f y_ddot_max: %f", x_ddot_max, y_ddot_max);
 
   // New method
   double u_dot_max_x = sqrt( fabs(x_ddot_max / A_) );
   double u_dot_max_y = sqrt( fabs(y_ddot_max / B_) );
-  ////ROS_INFO("x_ddot_max: %f A_: %f x_ddot_max / A_: %f y_ddot_max: %f B_: %f y_ddot_max / B_: %f", x_ddot_max, A_, (x_ddot_max / A_), y_ddot_max, B_, (y_ddot_max / B_));
+  ROS_INFO("x_ddot_max: %f A_: %f x_ddot_max / A_: %f y_ddot_max: %f B_: %f y_ddot_max / B_: %f", x_ddot_max, A_, (x_ddot_max / A_), y_ddot_max, B_, (y_ddot_max / B_));
 
 
   /*//if(print_) {
@@ -386,21 +386,21 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const
   // Test greater
   else if(satisfiesConstraints(greater, u_x, u_y)) 
   {
-    ////ROS_INFO("Setting u_dot_max to %f", greater);
+    ROS_INFO("Setting u_dot_max to %f", greater);
     u_dot_max = greater;
   }
 
   // If greater too large, test lesser
   else if(satisfiesConstraints(lesser, u_x, u_y)) 
   {
-    ////ROS_INFO("Setting u_dot_max to %f", lesser);
+    ROS_INFO("Setting u_dot_max to %f", lesser);
     u_dot_max = lesser;    
   }
 
   // Else, set it to initial u_dot
   else 
   {
-    ////ROS_INFO("Setting u_dot_max to u_dot_0: %f", u_dot_0);
+    ROS_INFO("Setting u_dot_max to u_dot_0: %f", u_dot_0);
     u_dot_max = u_dot_0;
   }
 
@@ -414,15 +414,15 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const
 
 const double BezierCurve::getUDotInitial() const 
 {
-  ////ROS_INFO("In BezierCurve::getUDotInitial");
+  ROS_INFO("In BezierCurve::getUDotInitial");
 
   double x_dot_0 = (ms_begin_.velocities.size() > 0) ?  ms_begin_.velocities.at(0) : 
                                                         ms_init_.velocities.at(0);
   double y_dot_0 = (ms_begin_.velocities.size() > 0) ?  ms_begin_.velocities.at(1) : 
                                                         ms_init_.velocities.at(1);
   
-  ////ROS_INFO("ms_begin: %s", utility_.toString(ms_begin_).c_str());
-  ////ROS_INFO("ms_init: %s", utility_.toString(ms_init_).c_str());
+  ROS_INFO("ms_begin: %s", utility_.toString(ms_begin_).c_str());
+  ROS_INFO("ms_init: %s", utility_.toString(ms_init_).c_str());
   
   double u_dot_0_x = fabs(x_dot_0 / (A_*u_0_+C_));
   double u_dot_0_y = fabs(y_dot_0 / (B_*u_0_+D_));
@@ -436,7 +436,7 @@ const double BezierCurve::getUDotInitial() const
   }
 
 
-  ////ROS_INFO("x_dot_0: %f y_dot_0: %f u_dot_0_x: %f u_dot_0_y: %f", x_dot_0, y_dot_0, u_dot_0_x, u_dot_0_y);
+  ROS_INFO("x_dot_0: %f y_dot_0: %f u_dot_0_x: %f u_dot_0_y: %f", x_dot_0, y_dot_0, u_dot_0_x, u_dot_0_y);
 
 
   // Set a greater and lesser value
