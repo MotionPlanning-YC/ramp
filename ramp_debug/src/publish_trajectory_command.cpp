@@ -34,14 +34,14 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(0.18393); // 0.70455
-  c1.motionState.positions.push_back(0.221735); // 0.4026
-  c1.motionState.positions.push_back(0.878324); // 0.519146
+  c1.motionState.positions.push_back(1.40505); // 0.70455
+  c1.motionState.positions.push_back(0.308328); // 0.4026
+  c1.motionState.positions.push_back(0.989949); // 0.519146
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(0.310342); // 0.70455
-  c2.motionState.positions.push_back(0.37413); // 0.4026
-  c2.motionState.positions.push_back(0.878324); // 0.519146
+  c2.motionState.positions.push_back(3.49998); // 0.70455
+  c2.motionState.positions.push_back(3.49998); // 0.4026
+  c2.motionState.positions.push_back(0.989949); // 0.519146
 
 
   ramp_msgs::KnotPoint c3;
@@ -82,13 +82,13 @@ int main(int argc, char** argv) {
   c9.motionState.positions.push_back(PI/4);
   
   // Velocities
-  c1.motionState.velocities.push_back(0.210686);  //.151426
-  c1.motionState.velocities.push_back(0.253991); //-.297903
+  c1.motionState.velocities.push_back(0.181082);  //.151426
+  c1.motionState.velocities.push_back(0.275879); //-.297903
   c1.motionState.velocities.push_back(0.f); //-.118126*/
  
-  c2.motionState.velocities.push_back(-0.126351);  //.151426
-  c2.motionState.velocities.push_back(0.253991); //-.297903
-  c2.motionState.velocities.push_back(0.); //-.118126
+  c2.motionState.velocities.push_back(0.00461308);  //.151426
+  c2.motionState.velocities.push_back(0.00702806); //-.297903
+  c2.motionState.velocities.push_back(-0.); //-.118126
 
   c3.motionState.velocities.push_back(-0.146698);
   c3.motionState.velocities.push_back(0.29546);
@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
   c1.motionState.accelerations.push_back(0.);
   
   c2.motionState.accelerations.push_back(0.); //.0114877
-  c2.motionState.accelerations.push_back(0.);  //-.10465
+  c2.motionState.accelerations.push_back(-1);  //-.10465
   c2.motionState.accelerations.push_back(0.); //.0746295
 
   /*c3.motionState.accelerations.push_back(0.);
@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
   //p.points.push_back(zero);
   p.points.push_back(c1);
   p.points.push_back(c2);
-  p.points.push_back(c3);
+  //p.points.push_back(c3);
   //p.points.push_back(c4);
   //p.points.push_back(c5);
   //p.points.push_back(c6);
@@ -149,8 +149,8 @@ int main(int argc, char** argv) {
   ramp_msgs::BezierCurve bi;
   
   ramp_msgs::MotionState sp0;
-  //sp0 = p.points.at(0).motionState;
-  sp0 = zero.motionState;
+  sp0 = p.points.at(0).motionState;
+  //sp0 = zero.motionState;
   
   /*sp0.positions.push_back(0.);
   sp0.positions.push_back(1.5);
@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
   sp1.accelerations.push_back(0);*/
 
   ramp_msgs::MotionState sp2;
-  sp2 = p.points.at(2).motionState;
+  //sp2 = p.points.at(2).motionState;
   //sp2 = p.points.at(1).motionState;
   //sp2 = c3.motionState;
 
@@ -407,14 +407,22 @@ int main(int argc, char** argv) {
   else {
     std::cout<<"\nSome error getting trajectory\n";
   }
+   
 
-
-  ramp_msgs::EvaluationRequest er;
+  /*ramp_msgs::EvaluationRequest er;
 
   er.request.trajectory = tr.response.trajectory;
+  er.request.trajectory.trajectory.points.resize(17);
+  //er.request.trajectory.trajectory.points.erase(
+      //er.request.trajectory.trajectory.points.begin()+16);
+  er.request.trajectory.i_knotPoints.pop_back();
+  er.request.trajectory.i_knotPoints.push_back(er.request.trajectory.trajectory.points.size()-1);
+  er.request.trajectory.curves.clear();
 
   er.request.currentTheta = er.request.trajectory.trajectory.points.at(0).positions.at(2);
   //er.request.theta_cc = 1.04839;
+    
+  std::cout<<"\nEval: Sending Trajectory "<<u.toString(er.request.trajectory)<<"\n";*/
 
 
   // Build any obstacle trajectories
@@ -459,16 +467,13 @@ int main(int argc, char** argv) {
   {
     std::cout<<"\nEvaluated traj, fitness: "<<er.response.fitness;
     std::cout<<"\nEvaluated traj, feasible: "<<er.response.feasible;
-  }*/
+  }
 
 
   std::cout<<"\n\nPress Enter to Publish population\n";
-  std::cin.get();
+  std::cin.get();*/
 
 
-  er.request.trajectory.t_start = ros::Duration(2.0);
-  
-  std::cout<<"\nSetting t_start to "<<2.0;
   /*if(client_eval.call(er)) {
     std::cout<<"\nEvaluated traj, fitness: "<<er.response.fitness;
     std::cout<<"\nEvaluated traj, feasible: "<<er.response.feasible;

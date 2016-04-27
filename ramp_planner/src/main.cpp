@@ -370,8 +370,8 @@ int main(int argc, char** argv) {
   std::cout<<"\nGoal: "<<my_planner.goal_.toString();
 
   
-  testSwitch();
-  exit(1);
+  //testSwitch();
+  //exit(1);
  
  
   /******* Start the planner *******/

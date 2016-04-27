@@ -14,7 +14,7 @@ void CollisionDetection::init(ros::NodeHandle& h) {}
 /** Returns true if trajectory_ is in collision with any of the objects */
 const CollisionDetection::QueryResult CollisionDetection::perform() const 
 {
-  //ROS_INFO("In CollisionDetection::perform()");
+  ROS_INFO("In CollisionDetection::perform()");
 
   CollisionDetection::QueryResult result;
   
@@ -48,7 +48,7 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const
  */
 const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::RampTrajectory ob_trajectory) const 
 {
-  //ROS_INFO("In CollisionDetection::query"); 
+  ROS_INFO("In CollisionDetection::query"); 
   //ROS_INFO("trajectory.points.size(): %i", (int)trajectory_.trajectory.points.size());
   //ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.trajectory.points.size());
   /*if(ob_trajectory.trajectory.points.size() > 2)
@@ -75,10 +75,15 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
 
   // If there are no curves
   // If there is a curve and only two knot points (curve ends traj)
-  if(   trajectory_.curves.size() == 0 ||
-      ( trajectory_.curves.size() == 1 && trajectory_.i_knotPoints.size() == 2) )
+  if(t_start < 0.01)
   {
     ROS_INFO("In 1st if");
+    i_stop = trajectory_.i_knotPoints.at(trajectory_.i_knotPoints.size()-1);
+  }
+  else if(   trajectory_.curves.size() == 0 ||
+      ( trajectory_.curves.size() == 1 && trajectory_.i_knotPoints.size() == 2) )
+  {
+    ROS_INFO("In 2nd if");
     i_stop = trajectory_.i_knotPoints.at(1);
   }
   
@@ -87,14 +92,14 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   //  (If transition traj, then only one segment)
   else if(trajectory_.curves.size() == 1)
   {
-    ROS_INFO("In 2nd if");
+    ROS_INFO("In 3rd if");
     i_stop = trajectory_.i_knotPoints.at(2);
   }
 
   // If there's two curves
   else
   {
-    ROS_INFO("In 3rd if");
+    ROS_INFO("In 4th if");
     i_stop = trajectory_.i_knotPoints.at(3);
   }
  

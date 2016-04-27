@@ -313,6 +313,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
     temp_mo = evaluateTrajectory(temp_mo);
     moving_on_coll_ = !temp_mo.msg_.feasible;*/
     movingOn_ = evaluateTrajectory(movingOn_);
+    moving_on_coll_ = !movingOn_.msg_.feasible;
   }
   
   //ROS_INFO("sensing cycle changing CC period to: %f", controlCycle_.toSec());
@@ -1137,41 +1138,26 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
 
   double dist_threshold = 0.5;
 
-  for(uint8_t i=0;i<ob_trajectory_.size();i++)
+  if(moving_on_coll_ && (movingOn_.msg_.t_firstCollision.toSec() < 0.5f
+    || (movingOn_.msg_.t_firstCollision.toSec() - (ros::Time::now().toSec()-t_prevCC_.toSec())) < 0.5f))
   {
-    
-    if(ob_trajectory_.at(i).msg_.trajectory.points.size() > 0)
+    ROS_WARN("IC: moving_on_coll_: %s t_firstCollision: %f", moving_on_coll_ ? "True" : "False", 
+        movingOn_.msg_.t_firstCollision.toSec());
+    ROS_WARN("Imminent Collision Robot: %i t_firstCollision: %f", id_, movingOn_.msg_.t_firstCollision.toSec());
+    for(int o=0;o<3;o++)
     {
-      trajectory_msgs::JointTrajectoryPoint ob = ob_trajectory_.at(i).msg_.trajectory.points.at(0);
-      double dist = utility_.positionDistance(ob.positions, latestUpdate_.msg_.positions);
-
-      //ROS_WARN("latestUpdate_: %s\nob_point: %s", latestUpdate_.toString().c_str(), utility_.toString(ob).c_str());
-
-      if(moving_on_coll_ && (movingOn_.msg_.t_firstCollision.toSec() < 0.5f))
-       // || (movingOn_.msg_.t_firstCollision.toSec()-ros::Time::now().toSec()-t_prevCC_.toSec())  < 0.5f))
-        // Consider t_collision of best trajectory
-      {
-        ROS_WARN("IC: moving_on_coll_: %s t_firstCollision: %f", moving_on_coll_ ? "True" : "False", 
-            movingOn_.msg_.t_firstCollision.toSec());
-        ROS_WARN("Imminent Collision Robot: %i t_firstCollision: %f", id_, movingOn_.msg_.t_firstCollision.toSec());
-        ROS_WARN("Obstacle trajectory: %s", ob_trajectory_.at(i).toString().c_str());
-        ROS_WARN("Robot trajectory: %s", movingOn_.toString().c_str());
-
-        ic.data = true;
-        break;
-      }
-
-      else 
-      {
-        ROS_INFO("No imminent collision, t_firstCollision: %f", movingOn_.msg_.t_firstCollision.toSec());
-        ic.data = false;
-      }
+      ROS_WARN("Obstacle trajectory %i: %s", o, ob_trajectory_.at(o).toString().c_str());
     }
-    else
-    {
-      ic.data = false;
-    }
-  } // end for
+    ROS_WARN("Robot trajectory: %s", movingOn_.toString().c_str());
+
+    ic.data = true;
+  }
+
+  else 
+  {
+    ROS_INFO("No imminent collision, t_firstCollision: %f", movingOn_.msg_.t_firstCollision.toSec());
+    ic.data = false;
+  }
 
   h_control_->sendIC(ic);
 
@@ -2803,7 +2789,7 @@ void Planner::doControlCycle()
   movingOn_.msg_.t_start  = ros::Duration(0);
   movingOn_               = evaluateTrajectory(movingOn_);
   moving_on_coll_         = !movingOn_.msg_.feasible;
-  //ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
+  ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
 
 
   // The motion state that we should reach by the next control cycle

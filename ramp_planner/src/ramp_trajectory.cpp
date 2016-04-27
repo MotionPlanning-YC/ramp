@@ -447,7 +447,7 @@ const std::string RampTrajectory::toString() const
   std::ostringstream result;
   
   result<<"\nTrajectory ID: "<<msg_.id<<"\nTrajec: "<<utility_.toString(msg_);
-  result<<"\n Fitness: "<<msg_.fitness<<" Feasible: "<<(int)msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
+  result<<"\n Fitness: "<<msg_.fitness<<" Collision Time: "<<msg_.t_firstCollision<<" Feasible: "<<(int)msg_.feasible;
   result<<"\n   Transition traj size: "<<transitionTraj_.trajectory.points.size();
   
   return result.str();

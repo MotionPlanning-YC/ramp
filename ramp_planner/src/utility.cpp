@@ -348,7 +348,7 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
   }
 
   result<<"\nt_start: "<<traj.t_start.toSec();
-  result<<"\nFitness: "<<traj.fitness<<" Feasible: "<<traj.feasible<<" t_firstCollision: "<<traj.t_firstCollision;
+  result<<"\nFitness: "<<traj.fitness<<" t_firstCollision: "<<traj.t_firstCollision<<" Feasible: "<<(int)traj.feasible;
 
   return result.str();
 }
