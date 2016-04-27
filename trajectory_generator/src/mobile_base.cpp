@@ -994,7 +994,7 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce(bool vertical_l
   /** Build the JointTrajectoryPoint object that will be used to build the trajectory */
   trajectory_msgs::JointTrajectoryPoint point = buildTrajectoryPoint(reflexxesData_, vertical_line);
 
-  ////printReflexxesSpinInfo();
+  printReflexxesSpinInfo();
 
 
   // The input of the next iteration is the output of this one
@@ -1531,7 +1531,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
   //for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) 
   for (i_kp_ = 1; i_kp_<segments_; i_kp_++) 
   {
-    //ROS_INFO("i_kp_: %i", (int)i_kp_);
+    ROS_INFO("i_kp_: %i", (int)i_kp_);
     reflexxesData_.resultValue = 0;
 
     // Push the initial state onto trajectory
@@ -1550,15 +1550,15 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
     double x_dot, y_dot;
     if(path_.points.at(i_kp_).motionState.velocities.size() > 0 &&
-        (fabs(path_.points.at(i_kp_).motionState.velocities.at(0)) > 0.0001) )
+        (fabs(path_.points.at(i_kp_).motionState.velocities.at(0)) > 0.01) )
     {
-      //////ROS_INFO("x_dot and y_dot = specified velocities");
+      ROS_INFO("x_dot and y_dot = specified velocities");
       x_dot = fabs(path_.points.at(i_kp_).motionState.velocities.at(0));
       y_dot = fabs(path_.points.at(i_kp_).motionState.velocities.at(1));
     }
     else
     {
-      //////ROS_INFO("calculating x_dot and y_dot");
+      ROS_INFO("calculating x_dot and y_dot");
       x_dot = fabs(MAX_SPEED * cos(theta));
       y_dot = x_dot*tan(theta);
     }
@@ -1570,11 +1570,12 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       path_.points.at(i_kp_).motionState.velocities.push_back(y_dot);
       path_.points.at(i_kp_).motionState.velocities.push_back(0);
     }
-    //////ROS_INFO("x_dot: %f y_dot: %f", x_dot, y_dot);
   
     double y_diff = path_.points.at(i_kp_).motionState.positions.at(1) - prevKP_.positions.at(1);
     double x_diff = path_.points.at(i_kp_).motionState.positions.at(0) - prevKP_.positions.at(0);
     bool x_diff_greater = fabs(x_diff) > fabs(y_diff);
+    
+    ROS_INFO("x_dot: %f y_dot: %f x_diff: %f y_diff: %f x_diff_greater: %s", x_dot, y_dot, x_diff, y_diff, x_diff_greater ? "True" : "False");
 
     // *** Set the new target ***
     if(x_diff_greater)
@@ -1642,7 +1643,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
     // Else if straight-line segment
     else 
     {
-      //ROS_INFO("In else, straight-line segment");
+      ROS_INFO("In else, straight-line segment");
 
       // Get rotation if needed
       double trajec_size = res.trajectory.trajectory.points.size();
@@ -1700,8 +1701,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
       }*/
 
       setTarget(path_.points.at(i_kp_).motionState);
-      ////ROS_INFO("Prev KP: %s", utility_.toString(prevKP_).c_str());
-      ////ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());
+      ROS_INFO("Prev KP: %s", utility_.toString(prevKP_).c_str());
+      ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());
 
       // Check they are not the same point
       if(utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, 
@@ -1715,10 +1716,10 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, r
 
           trajectory_msgs::JointTrajectoryPoint p = spinOnce();
           //////////ROS_INFO("p: %s", utility_.toString(p).c_str());
-          //////////ROS_INFO("result: %i", reflexxesData_.resultValue);
+          //ROS_INFO("result: %i", reflexxesData_.resultValue);
           if(reflexxesData_.resultValue == -100)
           {
-            //ROS_ERROR("An error occurred in Reflexxes, setting res.error=1 and returning");
+            ROS_ERROR("An error occurred in Reflexxes, setting res.error=1 and returning");
             res.error = true;
             return false;
           }
