@@ -115,6 +115,8 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     // Get the ith point on the trajectory
     trajectory_msgs::JointTrajectoryPoint p_i = trajectory_.trajectory.points.at(i);
 
+    //ROS_INFO("p_i: %s", utility_.toString(p_i).c_str());
+
     
     // Compute which point on the obstacle trajectory to start doing collision checking
     if(ob_trajectory.trajectory.points.size() == 1)
@@ -130,6 +132,8 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     {
       j_start = (i-t_checkColl)+j_offset;
     }
+
+    ROS_INFO("j_start: %i", j_start);
 
     // *** Test position i for collision against some points on obstacle's trajectory ***
     // Obstacle trajectory should already be in world coordinates!

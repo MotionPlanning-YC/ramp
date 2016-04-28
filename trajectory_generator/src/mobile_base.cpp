@@ -994,7 +994,7 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::spinOnce(bool vertical_l
   /** Build the JointTrajectoryPoint object that will be used to build the trajectory */
   trajectory_msgs::JointTrajectoryPoint point = buildTrajectoryPoint(reflexxesData_, vertical_line);
 
-  printReflexxesSpinInfo();
+  //printReflexxesSpinInfo();
 
 
   // The input of the next iteration is the output of this one

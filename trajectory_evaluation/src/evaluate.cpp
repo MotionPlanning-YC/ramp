@@ -109,6 +109,7 @@ bool Evaluate::performFeasibility()
 /** This method computes the fitness of the trajectory_ member */
 const double Evaluate::performFitness(bool feasible) 
 {
+  ROS_INFO("In Evaluate::performFitness");
   double result=0;
   double cost=0;
   double penalties = 0;
@@ -118,22 +119,23 @@ const double Evaluate::performFitness(bool feasible)
   
   if(feasible)
   {
+    ROS_INFO("In if(feasible)");
     double T = trajectory_.trajectory.points.at(trajectory_.trajectory.points.size()-1).time_from_start.toSec();
     double A = 0;//orientation_.perform();
+    ROS_INFO("T: %f A: %f", T, A);
     cost = T + A;
   }
 
-  //double A = 0.;
-
-  //ROS_INFO("T: %f A: %f", T, A);
 
   else
   {
     //penalties += orientation_.getPenalty();
     
-    // Add the Penalty for being infeasible
-    if(trajectory_.t_firstCollision.toSec() > 0 && trajectory_.t_firstCollision.toSec() < 10.0f)
+    ROS_INFO("In else(infeasible)"); 
+    // Add the Penalty for being infeasible, at some point i was limiting the time to 10s, but i don't know why
+    if(trajectory_.t_firstCollision.toSec() > 0)
     {
+      ROS_INFO("In if t_firstCollision: %f", trajectory_.t_firstCollision.toSec());
       penalties += (Q / trajectory_.t_firstCollision.toSec());
     }
     /*else
@@ -143,10 +145,12 @@ const double Evaluate::performFitness(bool feasible)
 
     if(orientation_infeasible_)
     {
+      ROS_INFO("In if orientation_infeasible_: %f", orientation_.getDeltaTheta());
       penalties += Q*orientation_.getDeltaTheta();
     }
   }
 
+  ROS_INFO("cost: %f penalties: %f", cost, penalties);
   result = (1. / (cost + penalties));
 
   return result;
