@@ -11,7 +11,7 @@ const double Orientation::getDeltaTheta() const
 
     trajectory_msgs::JointTrajectoryPoint a = trajectory_.trajectory.points.at(0);
     trajectory_msgs::JointTrajectoryPoint b = trajectory_.trajectory.points.at(trajectory_.i_knotPoints.at(1));
-    ROS_INFO("a: %s\nb: %s", utility_.toString(a).c_str(), utility_.toString(b).c_str());
+    //ROS_INFO("a: %s\nb: %s", utility_.toString(a).c_str(), utility_.toString(b).c_str());
     
     double thetaNec = utility_.findAngleFromAToB(a, b);
     
@@ -24,7 +24,7 @@ const double Orientation::getDeltaTheta() const
       result          = fabs( utility_.findDistanceBetweenAngles(theta_at_cc_, thetaNec) );
     }
 
-    ROS_INFO("thetaNec: %f result: %f", thetaNec, result);
+    //ROS_INFO("thetaNec: %f result: %f", thetaNec, result);
   }
 
   return result;

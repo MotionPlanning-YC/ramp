@@ -63,7 +63,7 @@ bool Evaluate::performFeasibility()
     false;
 
 
-  ROS_INFO("getDeltaTheta: %f", fabs(orientation_.getDeltaTheta()));
+  //ROS_INFO("getDeltaTheta: %f", fabs(orientation_.getDeltaTheta()));
   // Check orientation
   if(moving && fabs(orientation_.getDeltaTheta()) > 0.25 && !moving_on_curve)
   {
@@ -73,18 +73,18 @@ bool Evaluate::performFeasibility()
       trajectory_.feasible = false;
     }*/
 
-    ROS_INFO("In if");
+    //ROS_INFO("In if");
     if(trajectory_.i_knotPoints.size() > 2 && trajectory_.curves.size() < 2)
     {
-      ROS_INFO("In inner if, i_knotPoints.size(): %i curves.size(): %i", (int)trajectory_.i_knotPoints.size(), 
-          (int)trajectory_.curves.size());
+      //ROS_INFO("In inner if, i_knotPoints.size(): %i curves.size(): %i", (int)trajectory_.i_knotPoints.size(), 
+          //(int)trajectory_.curves.size());
       trajectory_.feasible = false;
       orientation_infeasible_ = true;
     }
     else if(trajectory_.i_knotPoints.size() == 2 && trajectory_.curves.size() < 1)
     {
-      ROS_INFO("In inner else if, i_knotPoints.size(): %i curves.size(): %i", (int)trajectory_.i_knotPoints.size(), 
-          (int)trajectory_.curves.size());
+      //ROS_INFO("In inner else if, i_knotPoints.size(): %i curves.size(): %i", (int)trajectory_.i_knotPoints.size(), 
+          //(int)trajectory_.curves.size());
       trajectory_.feasible = false;
       orientation_infeasible_ = true;
     }
@@ -93,10 +93,10 @@ bool Evaluate::performFeasibility()
   // If not feasible, set t_firstCollision
   if(!trajectory_.feasible)
   {
-    ROS_INFO("traj.t_firstCollision: %f", trajectory_.t_firstCollision.toSec());
-    ROS_INFO("qr_.t_firstCollision: %f", qr_.t_firstCollision_);
+    //ROS_INFO("traj.t_firstCollision: %f", trajectory_.t_firstCollision.toSec());
+    //ROS_INFO("qr_.t_firstCollision: %f", qr_.t_firstCollision_);
     trajectory_.t_firstCollision = ros::Duration(qr_.t_firstCollision_);
-    ROS_INFO("traj.t_firstCollision: %f", trajectory_.t_firstCollision.toSec());
+    //ROS_INFO("traj.t_firstCollision: %f", trajectory_.t_firstCollision.toSec());
   }
 
 
@@ -109,7 +109,7 @@ bool Evaluate::performFeasibility()
 /** This method computes the fitness of the trajectory_ member */
 const double Evaluate::performFitness(bool feasible) 
 {
-  ROS_INFO("In Evaluate::performFitness");
+  //ROS_INFO("In Evaluate::performFitness");
   double result=0;
   double cost=0;
   double penalties = 0;
@@ -119,10 +119,10 @@ const double Evaluate::performFitness(bool feasible)
   
   if(feasible)
   {
-    ROS_INFO("In if(feasible)");
+    //ROS_INFO("In if(feasible)");
     double T = trajectory_.trajectory.points.at(trajectory_.trajectory.points.size()-1).time_from_start.toSec();
     double A = 0;//orientation_.perform();
-    ROS_INFO("T: %f A: %f", T, A);
+    //ROS_INFO("T: %f A: %f", T, A);
     cost = T + A;
   }
 
@@ -131,11 +131,11 @@ const double Evaluate::performFitness(bool feasible)
   {
     //penalties += orientation_.getPenalty();
     
-    ROS_INFO("In else(infeasible)"); 
+    //ROS_INFO("In else(infeasible)"); 
     // Add the Penalty for being infeasible, at some point i was limiting the time to 10s, but i don't know why
     if(trajectory_.t_firstCollision.toSec() > 0)
     {
-      ROS_INFO("In if t_firstCollision: %f", trajectory_.t_firstCollision.toSec());
+      //ROS_INFO("In if t_firstCollision: %f", trajectory_.t_firstCollision.toSec());
       penalties += (Q / trajectory_.t_firstCollision.toSec());
     }
     /*else
@@ -145,12 +145,12 @@ const double Evaluate::performFitness(bool feasible)
 
     if(orientation_infeasible_)
     {
-      ROS_INFO("In if orientation_infeasible_: %f", orientation_.getDeltaTheta());
+      //ROS_INFO("In if orientation_infeasible_: %f", orientation_.getDeltaTheta());
       penalties += Q*orientation_.getDeltaTheta();
     }
   }
 
-  ROS_INFO("cost: %f penalties: %f", cost, penalties);
+  //ROS_INFO("cost: %f penalties: %f", cost, penalties);
   result = (1. / (cost + penalties));
 
   return result;

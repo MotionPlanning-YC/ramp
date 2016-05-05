@@ -56,7 +56,7 @@ add_dependencies(obstacle_trajectory ramp_msgs_generate_messages_cpp)
 
 
 ## Declare a cpp executable
-add_executable(obstacle_twist_all src/main_obstacle_twist_all.cpp)
+add_executable(obstacle_twist_all src/main_obstacle_twist_all.cpp src/range.cpp src/utility.cpp)
 
 # Add the -std argument to compile enum
 set_target_properties(obstacle_twist_all PROPERTIES COMPILE_FLAGS -std=c++0x)

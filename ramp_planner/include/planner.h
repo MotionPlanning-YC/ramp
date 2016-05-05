@@ -309,6 +309,13 @@ class Planner {
     void reportData() ;
 
 
+    ros::Time t_prevObIC_;
+    ros::Timer ob_dists_timer_;
+    double ob_dists_timer_dur_;
+    void obICCallback(const ros::TimerEvent& e);
+    std::vector<double> ob_dists_;
+
+
     /***** Data members *****/
 
     // Utility instance

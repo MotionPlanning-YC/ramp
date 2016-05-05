@@ -87,6 +87,7 @@ int main(int argc, char** argv)
     ROS_ERROR("ramp_sensing: Could not find sensing_cycle_rate rosparam!");
   }
 
+  // Create subscribers
   std::vector< ros::Subscriber > subs_obs;
   for(uint8_t i=0;i<ob_odoms.size();i++)
   {

@@ -1,6 +1,8 @@
-#include <ros/ros.h>
+#include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
-
+#include "ramp_msgs/MotionState.h"
+#include "ramp_msgs/ObstacleList.h"
+#include "utility.h"
 
 int num_obs;
 std::vector< std::string > ob_odoms;
@@ -10,8 +12,10 @@ std::vector< double > ob_delays;
 std::vector< ros::Duration > dur_delays;
 std::vector< ros::Timer > ob_timers;
 ros::Time node_start;
+Utility utility;
 
-ros::Publisher corobot_pub;
+std::vector<ros::Subscriber> sub_ob_ic;
+std::vector<bool> ob_ic;
 
 void getObstacleParams(const ros::NodeHandle handle)
 {
@@ -118,10 +122,15 @@ void driveStraight(const int index, const double v, const double t)
   twist.angular.y = 0.f;
   twist.angular.z = 0.f;
  
+  int i=0;
   // Drive forward
   ros::Time start = ros::Time::now();
-  while(ros::ok() && ros::Time::now() - start < d)
+  while(ros::ok() && (ros::Time::now() - start < d) && !ob_ic.at(index))
   {
+    if(i % 50 == 0)
+    {
+      ROS_INFO("ob_ic[%i]: %s", index, ob_ic[index] ? "True" : "False");
+    }
     ob_pubs.at(index).publish(twist);
     r.sleep();
   } // end while
@@ -156,7 +165,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
     
     //d = ros::Duration(4);
 
-    //twist.angular.z = (index == 1) ? 0.64 : 0.8;
+    //twist.angular.z = (index == 1) ? 0.32 : 0.4;
     // Drive forward
     /*ros::Time t = ros::Time::now();
     while(ros::Time::now() - t < d)
@@ -172,7 +181,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
  
     // Drive forward
     ros::Time t = ros::Time::now();
-    while(ros::ok() && ros::Time::now() - t < d)
+    while(ros::ok() && (ros::Time::now() - t < d) && !ob_ic.at(index))
     {
       ob_pubs.at(index).publish(twist);
       r.sleep();
@@ -200,9 +209,9 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     d = ros::Duration(1.75);
     t = ros::Time::now();
-    while(ros::ok() && ros::Time::now() - t < d)
+    while(ros::ok() && (ros::Time::now() - t < d) && !ob_ic.at(index))
     {
-      twist.angular.z = (index == 1) ? -0.64 : -0.8;
+      twist.angular.z = (index == 1) ? -0.32 : -0.4;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }
@@ -210,13 +219,13 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     // Self rotate
     twist.linear.x = 0.28;
-    //twist.angular.z = 0.8;
+    //twist.angular.z = 0.4;
 
     d = ros::Duration(2.5);
     t = ros::Time::now();
-    while(ros::ok() && ros::Time::now() - t < d)
+    while(ros::ok() && (ros::Time::now() - t < d) && !ob_ic.at(index))
     {
-      twist.angular.z = (index == 1) ? 0.64 : 0.8;
+      twist.angular.z = (index == 1) ? 0.32 : 0.4;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }
@@ -224,13 +233,13 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     // Self rotate
     twist.linear.x = 0.28;
-    //twist.angular.z = 0.8;
+    //twist.angular.z = 0.4;
 
     d = ros::Duration(3);
     t = ros::Time::now();
-    while(ros::ok() && ros::Time::now() - t < d)
+    while(ros::ok() && (ros::Time::now() - t < d) && !ob_ic.at(index))
     {
-      twist.angular.z = (index == 1) ? -0.8 : -0.64;
+      twist.angular.z = (index == 1) ? -0.4 : -0.32;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }
@@ -238,13 +247,13 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
     // Self rotate
     twist.linear.x = 0.28;
-    //twist.angular.z = 0.8;
+    //twist.angular.z = 0.4;
 
     d = ros::Duration(2.25);
     t = ros::Time::now();
-    while(ros::ok() && ros::Time::now() - t < d)
+    while(ros::ok() && (ros::Time::now() - t < d) && !ob_ic.at(index))
     {
-      twist.angular.z = (index == 1) ? 0.64 : 0.8;
+      twist.angular.z = (index == 1) ? 0.32 : 0.4;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }
@@ -261,6 +270,17 @@ void publishToOb(const ros::TimerEvent e, const int index)
   }
 }
 
+
+void setDists(const ramp_msgs::ObstacleList obs)
+{
+  for(uint8_t i=0;i<obs.obstacles.size();i++)
+  {
+    // Make sure dists is already populated
+    
+    std::vector<double> ob_loc;
+  }
+}
+
 void publishToAllObs(const geometry_msgs::Twist twist)
 {
   for(uint8_t i=0;i<ob_pubs.size();i++)
@@ -269,6 +289,23 @@ void publishToAllObs(const geometry_msgs::Twist twist)
   }
 }
 
+
+void obIcCb(const std_msgs::Bool::ConstPtr data, const int index)
+{
+  if(index < ob_ic.size())
+  {
+    ob_ic.at(index) = data->data;
+  }
+  else
+  {
+    ob_ic.push_back(data->data);
+  }
+  ROS_INFO("In obIcCb:");
+  for(uint8_t i=0;i<ob_ic.size();i++)
+  {
+    ROS_INFO("ob_ic[%i]: %s", i, ob_ic.at(i) ? "True" : "False");
+  }
+}
 
 int main(int argc, char** argv)
 {
@@ -284,11 +321,14 @@ int main(int argc, char** argv)
   std::cin.get();
   
   // Create publishers
-  for(uint8_t i=0;i<ob_odoms.size();i++)
+  for(uint8_t i=0;i<num_obs;i++)
   {
     ros::Publisher pub_twist = handle.advertise<geometry_msgs::Twist>(ob_vels.at(i), 1000);
     ob_pubs.push_back(pub_twist);
   }
+
+
+
   ROS_INFO("Waiting for /ramp/cc_started=true...");
 
   // Wait for ramp to start moving the robot
@@ -300,7 +340,6 @@ int main(int argc, char** argv)
     r.sleep();
     ros::spinOnce();
   }
-
   //ROS_INFO("Press Enter to begin obstacle movement");
 
   //std::cin.get();
@@ -309,13 +348,23 @@ int main(int argc, char** argv)
  
 
   // Start timers
-  for(uint8_t i=0;i<ob_odoms.size();i++)
+  for(uint8_t i=0;i<num_obs;i++)
   {
     ros::Timer temp = handle.createTimer(ros::Duration(ob_delays.at(i)), boost::bind(publishToOb, _1, i), true, true);
     ob_timers.push_back(temp);
   }
 
-  
+ 
+ for(uint8_t i=0;i<num_obs;i++)
+ {
+   ROS_INFO("In for, i: %i", i);
+   ob_ic.push_back(false);
+   std::stringstream topic_str;
+   topic_str<<"/obstacle_"<<(int)i<<"/ob_imminent_collision";
+   ROS_INFO("topic_str: %s", topic_str.str().c_str());
+   ros::Subscriber sub = handle.subscribe<std_msgs::Bool>(topic_str.str(), 10, boost::bind(obIcCb, _1, i));
+   sub_ob_ic.push_back(sub);
+ }
 
   ROS_INFO("Starting obstacle motion!");
 

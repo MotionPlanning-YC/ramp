@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(1.5f), 
+Planner::Planner() : resolutionRate_(1.f / 10.f), ob_dists_timer_dur_(0.1), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(1.5f), 
   cc_started_(false), c_pc_(0), transThreshold_(1./50.), num_cc_(0), L_(0.33), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), 
  delta_t_switch_(0.2), stop_(false), moving_on_coll_(false), print_enter_exit_(true)
 {
@@ -312,6 +312,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
     temp_mo.msg_.t_start = ros::Duration(0);
     temp_mo = evaluateTrajectory(temp_mo);
     moving_on_coll_ = !temp_mo.msg_.feasible;*/
+    ROS_INFO("Evaluating movingOn_...");
     movingOn_ = evaluateTrajectory(movingOn_);
     moving_on_coll_ = !movingOn_.msg_.feasible;
   }
@@ -1128,7 +1129,40 @@ void Planner::setT_base_w(std::vector<double> base_pos) {
 const unsigned int Planner::getIRT() { return i_rt++; }
 
 
-
+void Planner::obICCallback(const ros::TimerEvent& e)
+{
+  ROS_INFO("Time since last obICCallback: %f", (ros::Time::now() - t_prevObIC_).toSec());
+  t_prevObIC_ = ros::Time::now();
+  ROS_INFO("In Planner::obICCallback");
+  double dist_theshold = 1.f;
+  std_msgs::Bool ob_ic;
+  for(uint8_t i=0;i<ob_trajectory_.size();i++)
+  {
+    double dist = utility_.positionDistance(ob_trajectory_.at(i).msg_.trajectory.points.at(0).positions, latestUpdate_.msg_.positions);
+    ROS_INFO("ob %i dist: %f", (int)i, dist);
+    if(i < ob_dists_.size())
+    {
+      ob_dists_.at(i) = dist;
+    }
+    else
+    {
+      ob_dists_.push_back(dist);
+    }
+    if(fabs(ob_dists_.at(i)) < dist_theshold)
+    {
+      ROS_INFO("Ob IC: True");
+      ob_ic.data = true;
+    }
+    else
+    {
+      ROS_INFO("Ob IC: False");
+      ob_ic.data = false;
+    }
+    h_control_->sendObIC(i, ob_ic);
+  }
+  
+  ROS_INFO("Exiting Planner::obICCallback");
+}
 
 /** Check if there is imminent collision in the best trajectory */
 void Planner::imminentCollisionCallback(const ros::TimerEvent& t) 
@@ -1136,9 +1170,9 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
   //ROS_INFO("In imminentCollisionCallback");
   std_msgs::Bool ic;
 
-  double dist_threshold = 0.5;
+  double time_threshold = 0.5;
 
-  if(moving_on_coll_ && (movingOn_.msg_.t_firstCollision.toSec() < 0.5f
+  if(moving_on_coll_ && (movingOn_.msg_.t_firstCollision.toSec() < time_threshold
     || (movingOn_.msg_.t_firstCollision.toSec() - (ros::Time::now().toSec()-t_prevCC_.toSec())) < 0.5f))
   {
     ROS_WARN("IC: moving_on_coll_: %s t_firstCollision: %f", moving_on_coll_ ? "True" : "False", 
@@ -1270,6 +1304,9 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
   imminentCollisionTimer_ = h.createTimer(ros::Duration(imminentCollisionCycle_), 
                                           &Planner::imminentCollisionCallback, this);
   imminentCollisionTimer_.stop();
+
+  ob_dists_timer_ = h.createTimer(ros::Duration(ob_dists_timer_dur_), &Planner::obICCallback, this);
+  ob_dists_timer_.stop();
 
 
 
@@ -2826,11 +2863,11 @@ void Planner::doControlCycle()
     ROS_WARN("Pop best: %s", population_.getBest().toString().c_str());
   }
   
-  ROS_INFO("After adaptation and evaluation:");
+  /*ROS_INFO("After adaptation and evaluation:");
   for(int i=0;i<population_.size();i++)
   {
     ROS_INFO("%s", population_.get(i).toString().c_str());
-  }
+  }*/
   ////ROS_INFO("Time spent adapting: %f", d_adapt.toSec());
  
   //if(population_.calcBestIndex() != population_.calcBestIndex())
@@ -3297,6 +3334,7 @@ void Planner::go()
   // Start the control cycles
   controlCycleTimer_.start();
   imminentCollisionTimer_.start();
+  ob_dists_timer_.start();
 
   //ROS_INFO("CCs started");
 
@@ -3322,6 +3360,7 @@ void Planner::go()
   controlCycleTimer_.stop();
   planningCycleTimer_.stop();
   imminentCollisionTimer_.stop();
+  ob_dists_timer_.stop();
 
   
   // Send an empty trajectory

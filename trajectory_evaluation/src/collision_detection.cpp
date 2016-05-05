@@ -14,7 +14,7 @@ void CollisionDetection::init(ros::NodeHandle& h) {}
 /** Returns true if trajectory_ is in collision with any of the objects */
 const CollisionDetection::QueryResult CollisionDetection::perform() const 
 {
-  ROS_INFO("In CollisionDetection::perform()");
+  //ROS_INFO("In CollisionDetection::perform()");
 
   CollisionDetection::QueryResult result;
   
@@ -48,7 +48,7 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const
  */
 const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs::RampTrajectory ob_trajectory) const 
 {
-  ROS_INFO("In CollisionDetection::query"); 
+  //ROS_INFO("In CollisionDetection::query"); 
   //ROS_INFO("trajectory.points.size(): %i", (int)trajectory_.trajectory.points.size());
   //ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.trajectory.points.size());
   /*if(ob_trajectory.trajectory.points.size() > 2)
@@ -58,7 +58,7 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
 
   double t_start = trajectory_.t_start.toSec();
   int j_offset = t_start * 10.f;
-  ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
+  //ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
 
   CollisionDetection::QueryResult result;
   uint8_t t_checkColl = 3;
@@ -77,13 +77,13 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   // If there is a curve and only two knot points (curve ends traj)
   if(t_start < 0.01)
   {
-    ROS_INFO("In 1st if");
+    //ROS_INFO("In 1st if");
     i_stop = trajectory_.i_knotPoints.at(trajectory_.i_knotPoints.size()-1);
   }
   else if(   trajectory_.curves.size() == 0 ||
       ( trajectory_.curves.size() == 1 && trajectory_.i_knotPoints.size() == 2) )
   {
-    ROS_INFO("In 2nd if");
+    //ROS_INFO("In 2nd if");
     i_stop = trajectory_.i_knotPoints.at(1);
   }
   
@@ -92,20 +92,20 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
   //  (If transition traj, then only one segment)
   else if(trajectory_.curves.size() == 1)
   {
-    ROS_INFO("In 3rd if");
+    //ROS_INFO("In 3rd if");
     i_stop = trajectory_.i_knotPoints.at(2);
   }
 
   // If there's two curves
   else
   {
-    ROS_INFO("In 4th if");
+    //ROS_INFO("In 4th if");
     i_stop = trajectory_.i_knotPoints.at(3);
   }
  
   int j_start;
  
-  ROS_INFO("i_stop: %i", i_stop);
+  //ROS_INFO("i_stop: %i", i_stop);
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
   float radius = 0.25f;
@@ -133,13 +133,13 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       j_start = (i-t_checkColl)+j_offset;
     }
 
-    ROS_INFO("j_start: %i", j_start);
+    //ROS_INFO("j_start: %i", j_start);
 
     // *** Test position i for collision against some points on obstacle's trajectory ***
     // Obstacle trajectory should already be in world coordinates!
-    for(int j = j_start; 
-        j<=(i+t_checkColl+j_offset) && j<ob_trajectory.trajectory.points.size(); 
-        j++) 
+    for(int j = j_start;
+        j<=(i+t_checkColl+j_offset) && j<ob_trajectory.trajectory.points.size();
+        j++)
     {
     /*if(ob_trajectory.trajectory.points.size() > 2)
     {
@@ -165,14 +165,14 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
       // there is collision
       if( dist <= radius*2 ) 
       {
-        ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+        /*ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
             p_i.positions.at(0),
             p_i.positions.at(1),
             p_ob.positions.at(0),
             p_ob.positions.at(1),
             dist,
             (int)i,
-            (int)j);
+            (int)j);*/
         result.collision_ = true;
         result.t_firstCollision_ = p_i.time_from_start.toSec();
         i = i_stop;
@@ -181,8 +181,8 @@ const CollisionDetection::QueryResult CollisionDetection::query(const ramp_msgs:
     } // end for
   } // end for
 
-  ROS_INFO("result: %s", result.collision_ ? "True" : "False");
-  ROS_INFO("Exiting CollisionDetection::query");
+  //ROS_INFO("result: %s", result.collision_ ? "True" : "False");
+  //ROS_INFO("Exiting CollisionDetection::query");
   return result;
 } //End query
 

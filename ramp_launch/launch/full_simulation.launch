@@ -43,7 +43,7 @@
 <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" />
 
 
-<node name="obstacles" pkg="ramp_planner" type="obstacle_twist_all" />
+<node name="obstacles" pkg="ramp_planner" type="obstacle_twist_all" output="screen" />
 
 
 

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <signal.h>
 #include "evaluate.h"
 #include "tf/transform_datatypes.h"
 #include "ramp_msgs/Obstacle.h"
@@ -6,12 +7,13 @@
 Evaluate ev;
 Utility u;
 bool received_ob = false;
-
+std::vector<ros::Duration> t_data;
 
 /** Srv callback to evaluate a trajectory */
 bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
                    ramp_msgs::EvaluationRequest::Response& res) 
 {
+  ros::Time t_start = ros::Time::now();
   ROS_INFO("Robot Evaluating trajectory: %s", u.toString(req.trajectory).c_str());
 
   // If more than one point
@@ -28,10 +30,27 @@ bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
     res.t_firstCollision = ros::Duration(9999.f);
   }
 
+  ros::Duration t_elapsed = ros::Time::now() - t_start;
+  t_data.push_back(t_elapsed);
   ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
   return true;
 } //End handleRequest
 
+
+void reportData(int sig)
+{
+  double avg = t_data.at(0).toSec();
+  for(int i=1;i<t_data.size();i++)
+  {
+    avg += t_data.at(i).toSec();
+    if(i % 5 == 0)
+    {
+      ROS_INFO("traj_eval dur: %f", t_data.at(i).toSec());
+    }
+  }
+  avg /= t_data.size();
+  ROS_INFO("Average traj_eval duration: %f", avg);
+}
 
 int main(int argc, char** argv) {
 
@@ -42,6 +61,7 @@ int main(int argc, char** argv) {
  
   ros::ServiceServer service    = handle.advertiseService("trajectory_evaluation", handleRequest);
 
+  signal(SIGINT, reportData);
   //cd.pub_population = handle.advertise<ramp_msgs::Population>("/robot_1/population", 1000);
 
   /** ***Testing*** */
@@ -248,13 +268,13 @@ int main(int argc, char** argv) {
   std::cout<<"\n"<<u.displaceAngle(PI/2, 7*PI/4);*/
 
 
-  //ros::AsyncSpinner spinner(8);
+  ros::AsyncSpinner spinner(8);
   std::cout<<"\nWaiting for requests...\n";
-  //spinner.start();
-  //ros::waitForShutdown();
+  spinner.start();
+  ros::waitForShutdown();
 
-  ros::spin();
+  //ros::spin();
 
-  std::cout<<"\nExiting Normally\n";
+  printf("\nTrajectory Evaluation exiting normally\n");
   return 0;
 }
