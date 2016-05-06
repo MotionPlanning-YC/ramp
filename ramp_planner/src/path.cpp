@@ -75,15 +75,17 @@ const KnotPoint Path::at(const uint8_t i) const {
   return all_.at(i);
 }
 
+// TODO: Why am I only offsetting the intermediate knot points?
 void Path::offsetPositions(const MotionState diff)
 {
-  for(uint8_t i=1;i<all_.size()-1;i++)
+  //for(uint8_t i=1;i<all_.size()-1;i++)
+  for(uint8_t i=0;i<all_.size()-1;i++)
   {
     all_.at(i).motionState_ = all_.at(i).motionState_.subtractPosition(diff);
   }
 
-  start_  = all_.at(0);
-  goal_   = all_.at(all_.size()-1);
+  //start_  = all_.at(0);
+  //goal_   = all_.at(all_.size()-1);
 }
 
 void Path::addBeforeGoal(const KnotPoint kp) {
@@ -120,7 +122,7 @@ const ramp_msgs::Path Path::buildPathMsg() const {
 
     //Build the motion state msg
     ramp_msgs::KnotPoint mp = all_.at(i).buildKnotPointMsg();
-    
+
     //Push the msg onto K
     result.points.push_back(mp);
   }

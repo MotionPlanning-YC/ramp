@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 
   ros::ServiceServer service = handle.advertiseService("path_modification", handleRequest); 
 
-  /*Utility u;
+  Utility u;
 
   ramp_msgs::Path p1;
   for(unsigned int i=0;i<10;i++) {
@@ -66,14 +66,18 @@ int main(int argc, char** argv) {
     p1.points.push_back(kp);
   }
   
-  std::cout<<"\nPath p1:"<<u.toString(p1);
+  ROS_INFO("Path before modification: %s", u.toString(p1).c_str());
 
   // Test change
   //Change change(p1);
   //change.perform();
-  Swap swap(p1);
-  swap.perform();
-  std::cout<<"\nPath after change: "<<u.toString(swap.path_);*/
+  //Swap swap(p1);
+  //swap.perform();
+  Move m(p1);
+  m.dir_ = -2.35;
+  m.perform();
+
+  ROS_INFO("Path after modification: %s", u.toString(p1).c_str());
 
 /*  ramp_msgs::Path p2;
   for(unsigned int i=5;i>0;i--) {

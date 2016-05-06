@@ -365,7 +365,7 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
 void RampTrajectory::offsetPositions(const MotionState diff)
 {
   //ROS_INFO("In RampTrajectory::offsetPositions");
-  
+ 
   // Go through all the points and subtract diff
   for(uint16_t i=0;i<msg_.trajectory.points.size();i++)
   {
@@ -396,7 +396,7 @@ void RampTrajectory::offsetPositions(const MotionState diff)
     ROS_WARN("temp.path_: %s", path_.toString().c_str());
     ROS_WARN("temp.curve.at(0): %s", utility_.toString(msg_.curves.at(0)).c_str());
   }*/
-    
+
   for(uint8_t c=0;c<msg_.curves.size() && holonomic_path_.size() > 2;c++)
   {
     /*ROS_INFO("Fixing curve %i, holonomic_path_.size(): %i segmentPoints.size(): %i controlPoints.size(): %i", 
@@ -407,11 +407,11 @@ void RampTrajectory::offsetPositions(const MotionState diff)
 
     msg_.curves.at(c).segmentPoints.at(1) = holonomic_path_.at(1).motionState_.msg_;
     msg_.curves.at(c).segmentPoints.at(2) = holonomic_path_.at(2).motionState_.msg_;
-    
+
     MotionState c0(msg_.curves.at(c).controlPoints.at(0));
     MotionState c1(msg_.curves.at(c).controlPoints.at(1));
     MotionState c2(msg_.curves.at(c).controlPoints.at(2));
-    
+
     msg_.curves.at(c).controlPoints.at(0) = c0.subtractPosition(diff).msg_;
     msg_.curves.at(c).controlPoints.at(1) = c1.subtractPosition(diff).msg_;
     msg_.curves.at(c).controlPoints.at(2) = c2.subtractPosition(diff).msg_;

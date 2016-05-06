@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), ob_dists_timer_dur_(0.1), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(1.5f), 
+Planner::Planner() : resolutionRate_(1.f / 10.f), ob_dists_timer_dur_(0.1), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(1.5f), 
   cc_started_(false), c_pc_(0), transThreshold_(1./50.), num_cc_(0), L_(0.33), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), 
  delta_t_switch_(0.2), stop_(false), moving_on_coll_(false), print_enter_exit_(true)
 {
@@ -316,6 +316,20 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
     movingOn_ = evaluateTrajectory(movingOn_);
     moving_on_coll_ = !movingOn_.msg_.feasible;
   }
+
+  // Find direction of closest obstacle for "move" operator
+  uint8_t i_closest=0;
+  for(uint8_t i=1;i<msg.obstacles.size();i++)
+  {
+    if(fabs(utility_.positionDistance(latestUpdate_.msg_.positions, ob_trajectory_.at(i).msg_.trajectory.points.at(0).positions)) < fabs(utility_.positionDistance(latestUpdate_.msg_.positions, ob_trajectory_.at(i_closest).msg_.trajectory.points.at(0).positions)))
+    {
+      i_closest = i; 
+    }
+  }
+
+  double dir = utility_.findAngleFromAToB(latestUpdate_.msg_.positions, 
+      ob_trajectory_.at(i_closest).msg_.trajectory.points.at(0).positions);
+  modifier_->dir_ = -dir;
   
   //ROS_INFO("sensing cycle changing CC period to: %f", controlCycle_.toSec());
 
@@ -1185,12 +1199,14 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
     ROS_WARN("Robot trajectory: %s", movingOn_.toString().c_str());
 
     ic.data = true;
+    imminent_collision_ = true;
   }
 
   else 
   {
     ROS_INFO("No imminent collision, t_firstCollision: %f", movingOn_.msg_.t_firstCollision.toSec());
     ic.data = false;
+    imminent_collision_ = false;
   }
 
   h_control_->sendIC(ic);
@@ -2520,7 +2536,7 @@ void Planner::planningCycleCallback()
   // c_pc < total number of PC's per CC
   // errorReduction is true
   // Driving straight
-  if(errorReduction_ && cc_started_ && generation_ % 5 == 0 &&
+  if(!imminent_collision_ && errorReduction_ && cc_started_ && generation_ % 5 == 0 &&
       fabs(latestUpdate_.msg_.velocities.at(2)) < 0.1)
   {
     ros::Time t_start_error = ros::Time::now();
@@ -2533,23 +2549,22 @@ void Planner::planningCycleCallback()
         ( population_.getBest().msg_.curves.size() > 0  && 
           population_.getBest().msg_.curves.at(0).u_0 < 0.0001))
     {
-      //ROS_INFO("Doing error correction");
-      //ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
+      ROS_INFO("Doing error correction");
+      ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
       // Do error correction
       ros::Duration t_since_cc = ros::Time::now() - t_prevCC_;
-      //ROS_INFO("t_since_cc: %f", t_since_cc.toSec());
-      //ROS_INFO("movingOnCC_: %s", movingOnCC_.toString().c_str());
+      ROS_INFO("t_since_cc: %f", t_since_cc.toSec());
+      ROS_INFO("movingOnCC_: %s", movingOnCC_.toString().c_str());
       diff = movingOnCC_.getPointAtTime(t_since_cc.toSec());
       //ROS_INFO("movingOnCC_ at t_since_cc: %s", diff.toString().c_str());
       diff = diff.subtractPosition(latestUpdate_, true);
       startPlanning_ = errorCorrection();
-      //ROS_INFO("diff: %s", diff.toString().c_str());
+      ROS_INFO("diff: %s", diff.toString().c_str());
 
       ////ROS_INFO("Updating movingOn");
-      Path p(latestUpdate_, startPlanning_);
       movingOn_ = movingOnCC_;
       movingOn_.offsetPositions(diff);
-      
+
       /*//ROS_INFO("Corrected startPlanning_: %s", startPlanning_.toString().c_str());
       //ROS_INFO("Corrected movingOn_: %s", movingOn_.toString().c_str());*/
 
@@ -2830,7 +2845,14 @@ void Planner::doControlCycle()
 
 
   // The motion state that we should reach by the next control cycle
-  m_cc_ = bestT.getPointAtTime(t_fixed_cc_);
+  if(imminent_collision_)
+  {
+    m_cc_ = latestUpdate_;
+  }
+  else
+  {
+    m_cc_ = bestT.getPointAtTime(t_fixed_cc_);
+  }
 
   // At CC, startPlanning is assumed to be perfect (no motion error accounted for yet)
   startPlanning_ = m_cc_;
@@ -2845,7 +2867,7 @@ void Planner::doControlCycle()
 
   // Adapt and evaluate population
   //ROS_INFO("About to adapt, controlCycle_: %f", controlCycle_.toSec());
-  
+ 
   ros::Time t_startAdapt = ros::Time::now();
   population_ = adaptPopulation(population_, startPlanning_, ros::Duration(t_fixed_cc_));
   population_ = evaluatePopulation(population_);

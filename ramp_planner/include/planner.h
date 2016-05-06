@@ -396,6 +396,9 @@ class Planner {
     bool stop_;
 
 
+    bool imminent_collision_;
+
+
     bool moving_on_coll_;
 
 

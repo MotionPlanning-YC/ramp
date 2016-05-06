@@ -6,6 +6,7 @@
 #include "change.h"
 #include "crossover.h"
 #include "swap.h"
+#include "move.h"
 
 
 class Modifier {

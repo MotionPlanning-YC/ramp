@@ -57,7 +57,7 @@ const std::string Modifier::getOperator() const
 
     // Stop
     case 5:
-      result = "stop";
+      result = "move";
       break;
   }
  
@@ -117,6 +117,8 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest(const Po
         pop.paths_.at(targets.at(i)).buildPathMsg());
   }
 
+  result.request.move_dir = dir_;
+
   return result;
 } // End buildModificationRequest
 
@@ -134,30 +136,18 @@ const std::vector<Path> Modifier::perform(const Population pop)
   ramp_msgs::ModificationRequest mr = buildModificationRequest(pop); 
   //ROS_INFO("ModificationResult built"); 
 
-  // Check if the operation changes the path
-  if(mr.request.op == "stop") 
-  {
-    // Call stop with the path chosen by buildModificationRequest
-    //Path temp = stop(mr.request.paths.at(0));
-    //result.push_back(temp);
-  }
-
-  else 
+  // If the request was successful
+  if(h_mod_req_->request(mr)) 
   {
 
-    // If the request was successful
-    if(h_mod_req_->request(mr)) 
+    ros::Time t_m = ros::Time::now();
+    // Push on the modified paths
+    for(unsigned int i=0;i<mr.response.mod_paths.size();i++) 
     {
-
-      ros::Time t_m = ros::Time::now();
-      // Push on the modified paths
-      for(unsigned int i=0;i<mr.response.mod_paths.size();i++) 
-      {
-        Path temp(mr.response.mod_paths.at(i));
-        result.push_back(temp);
-      }
-    } // end inner if 
-  } // end if operator != stop
+      Path temp(mr.response.mod_paths.at(i));
+      result.push_back(temp);
+    }
+  } // end inner if 
 
   //ROS_INFO("Exiting Modifier::perform");
   return result;

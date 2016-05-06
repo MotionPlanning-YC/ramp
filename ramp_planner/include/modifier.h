@@ -17,6 +17,7 @@ class Modifier {
 
     // Data members
     unsigned int num_ops;
+    double dir_;
 
   private:
     const std::string getOperator() const;
