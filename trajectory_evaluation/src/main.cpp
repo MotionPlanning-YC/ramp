@@ -10,29 +10,35 @@ bool received_ob = false;
 std::vector<ros::Duration> t_data;
 
 /** Srv callback to evaluate a trajectory */
-bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
-                   ramp_msgs::EvaluationRequest::Response& res) 
+bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
+                   ramp_msgs::EvaluationSrv::Response& resps) 
 {
   ros::Time t_start = ros::Time::now();
-  ROS_INFO("Robot Evaluating trajectory: %s", u.toString(req.trajectory).c_str());
-
-  // If more than one point
-  if(req.trajectory.trajectory.points.size() > 1)
+  for(uint8_t i=0;i<reqs.reqs.size();i++)
   {
-    ev.setRequest(req);
-    res = ev.perform();
-  }
-  // Else we only have one point (goal point)
-  else
-  {
-    res.fitness = 0.f;
-    res.feasible = true;
-    res.t_firstCollision = ros::Duration(9999.f);
-  }
+    ramp_msgs::EvaluationSrv::Request req = reqs.reqs.at(i);
+    ramp_msgs::EvaluationSrv::Response res;
+    ROS_INFO("Robot Evaluating trajectory: %s", u.toString(req.trajectory).c_str());
 
+    // If more than one point
+    if(req.trajectory.trajectory.points.size() > 1)
+    {
+      ev.setRequest(req);
+      res = ev.perform();
+    }
+    // Else we only have one point (goal point)
+    else
+    {
+      res.fitness = 0.f;
+      res.feasible = true;
+      res.t_firstCollision = ros::Duration(9999.f);
+    }
+
+    ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
+    resps.resps.push_back(res);
+  }
   ros::Duration t_elapsed = ros::Time::now() - t_start;
   t_data.push_back(t_elapsed);
-  ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
   return true;
 } //End handleRequest
 

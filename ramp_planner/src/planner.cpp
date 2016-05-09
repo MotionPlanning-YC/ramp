@@ -1099,7 +1099,25 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
 }
 
 
+const ramp_msgs::EvaluationSrv Planner::buildEvaluationSrv(const RampTrajectory trajec)
+{
+  std::vector<RampTrajectory> t;
+  t.push_back(trajec);
+  return buildEvaluationSrv(t);
+}
 
+const ramp_msgs::EvaluationSrv Planner::buildEvaluationSrv(const std::vector<RampTrajectory> trajecs)
+{
+  ramp_msgs::EvaluationSrv result;
+  std::vector<ramp_msgs::EvaluationRequest> reqs;
+  for(uint8_t i=0;i<trajecs.size();i++)
+  {
+    reqs.push_back(buildEvaluationRequest(trajecs.at(i)));
+  }
+
+  result.request.reqs = reqs;
+  return result;
+}
 
 
 /** Build an EvaluationRequest srv */
@@ -1107,21 +1125,21 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
 {
   ramp_msgs::EvaluationRequest result;
 
-  result.request.trajectory   = trajec.msg_;
-  result.request.currentTheta = latestUpdate_.msg_.positions.at(2);
+  result.trajectory   = trajec.msg_;
+  result.currentTheta = latestUpdate_.msg_.positions.at(2);
   if(movingOn_.msg_.trajectory.points.size() > 0)
   {
-    result.request.theta_cc     = 
+    result.theta_cc     = 
       movingOn_.msg_.trajectory.points.at(movingOn_.msg_.trajectory.points.size()-1).positions.at(2);
   }
   else
   {
-    result.request.theta_cc = result.request.currentTheta;
+    result.theta_cc = result.currentTheta;
   }
 
   for(uint8_t i=0;i<ob_trajectory_.size();i++)
   {
-    result.request.obstacle_trjs.push_back(ob_trajectory_.at(i).msg_);
+    result.obstacle_trjs.push_back(ob_trajectory_.at(i).msg_);
   }
 
   return result;
@@ -2239,7 +2257,7 @@ const RampTrajectory Planner::requestTrajectory(const Path p, const int id)
 
 
 /** Request an evaluation */
-const RampTrajectory Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er) 
+const RampTrajectory Planner::requestEvaluation(ramp_msgs::EvaluationSrv& er) 
 {
   //ROS_INFO("In Planner::requestEvaluation");
   RampTrajectory result = er.request.trajectory; 

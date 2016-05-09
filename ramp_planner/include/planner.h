@@ -226,6 +226,10 @@ class Planner {
     const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
               const Path path, const int id=0) const;
 
+    const ramp_msgs::EvaluationSrv buildEvaluationSrv(
+              const RampTrajectory trajec)      ;
+    const ramp_msgs::EvaluationSrv buildEvaluationSrv(
+              const std::vector<RampTrajectory> trajecs)      ;
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(
               const RampTrajectory trajec)      ;
 
