@@ -2255,19 +2255,46 @@ const RampTrajectory Planner::requestTrajectory(const Path p, const int id)
 }
 
 
+const std::vector<RampTrajectory> Planner::requestEvaluation(std::vector<RampTrajectory> trajecs)
+{
+  std::vector<RampTrajectory> result;
+
+  ramp_msgs::EvaluationSrv srv = buildEvaluationSrv(trajecs);
+
+  if(h_eval_req_->request(srv))
+  {
+    for(uint8_t i=0;i<trajecs.size();i++)
+    {
+      RampTrajectory rt = srv.request.reqs.at(i).trajectory;
+      rt.msg_.fitness = srv.response.resps.at(i).fitness;
+      rt.msg_.feasible = srv.response.resps.at(i).feasible;
+      rt.msg_.t_firstCollision = srv.response.resps.at(i).t_firstCollision;
+      result.push_back(rt);
+    }
+  } 
+  else 
+  {
+    ROS_ERROR("An error occurred when evaluating a trajectory");
+  }
+
+  return result;
+}
 
 /** Request an evaluation */
-const RampTrajectory Planner::requestEvaluation(ramp_msgs::EvaluationSrv& er) 
+const RampTrajectory Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er) 
 {
   //ROS_INFO("In Planner::requestEvaluation");
-  RampTrajectory result = er.request.trajectory; 
+  RampTrajectory result = er.trajectory; 
   //ROS_INFO("result.t_start: %f", result.msg_.t_start.toSec());
   
-  if(h_eval_req_->request(er)) 
+  ramp_msgs::EvaluationSrv srv;
+  srv.request.reqs.push_back(er);
+
+  if(h_eval_req_->request(srv)) 
   {
-    result.msg_.fitness           = er.response.fitness;
-    result.msg_.feasible          = er.response.feasible;
-    result.msg_.t_firstCollision  = er.response.t_firstCollision;
+    result.msg_.fitness           = srv.response.resps.at(0).fitness;
+    result.msg_.feasible          = srv.response.resps.at(0).feasible;
+    result.msg_.t_firstCollision  = srv.response.resps.at(0).t_firstCollision;
   }
   else 
   {
@@ -2286,7 +2313,6 @@ const RampTrajectory Planner::requestEvaluation(const RampTrajectory traj)
 
   // Set non-evaluation related members
   result.holonomic_path_                = traj.holonomic_path_;
-  //result.bezierPath_          = traj.bezierPath_;
   result.msg_.i_subPopulation = traj.msg_.i_subPopulation; 
 
   return result;
@@ -3127,12 +3153,15 @@ const Population Planner::evaluatePopulation(const Population pop)
   Population result = pop;
   //ROS_INFO("Before evaluating, pop: %s", pop.fitnessFeasibleToString().c_str());
   
+  std::vector<RampTrajectory> evaled_pop = requestEvaluation(pop.getTrajectories());
+  result.replaceAll(evaled_pop);
+
   // Go through each trajectory in the population and evaluate it
-  for(uint16_t i=0;i<result.size();i++) 
+  /*for(uint16_t i=0;i<result.size();i++) 
   {
     ////ROS_INFO("i: %i", (int)i);
-    result.replace(i, evaluateTrajectory(result.get(i)));
-  } // end for
+    result.replace(i, evaled_pop.at(i));
+  } // end for*/
   //ROS_INFO("After evaluating, pop: %s", result.fitnessFeasibleToString().c_str());
  
 

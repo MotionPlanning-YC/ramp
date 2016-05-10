@@ -133,6 +133,7 @@ class Planner {
     // Cannot make the request srvs const because they have no serialize/deserialize
     const RampTrajectory requestTrajectory(ramp_msgs::TrajectoryRequest& tr, const int id=-1);
     const RampTrajectory requestTrajectory(const Path p, const int id=-1);
+    const std::vector<RampTrajectory> requestEvaluation(std::vector<RampTrajectory> trajecs);
     const RampTrajectory requestEvaluation(ramp_msgs::EvaluationRequest& er);
     const RampTrajectory requestEvaluation(const RampTrajectory traj);
 
