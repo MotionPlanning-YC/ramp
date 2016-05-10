@@ -4,7 +4,7 @@
 #include "ramp_msgs/Path.h"
 #include "utility.h"
 #include "ramp_msgs/TrajectoryRequest.h"
-#include "ramp_msgs/EvaluationRequest.h"
+#include "ramp_msgs/EvaluationSrv.h"
 #include "ramp_msgs/Population.h"
 #include "ramp_msgs/BezierCurve.h"
 
@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
   ros::Publisher pub_traj = handle.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
   ros::Publisher pub_pop = handle.advertise<ramp_msgs::Population>("/robot_0/population", 1000);
   ros::ServiceClient clientTrajGen  = handle.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");
-  ros::ServiceClient clientTrajEval = handle.serviceClient<ramp_msgs::EvaluationRequest>("trajectory_evaluation");
+  ros::ServiceClient clientTrajEval = handle.serviceClient<ramp_msgs::EvaluationSrv>("trajectory_evaluation");
 
 
 
@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
   std::cout<<"\nContinuously drawing the trajectory\n";
   while(ros::ok()) {
  
-    ramp_msgs::EvaluationRequest er;
+    ramp_msgs::EvaluationSrv er;
     er.request.trajectory = trajectory;
  
     // Evaluate the trajectory

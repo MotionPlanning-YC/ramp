@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
 
   ros::Publisher pub_traj = handle.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
   ros::ServiceClient client_traj = handle.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");
-  ros::ServiceClient client_eval = handle.serviceClient<ramp_msgs::EvaluationRequest>("trajectory_evaluation");
+  ros::ServiceClient client_eval = handle.serviceClient<ramp_msgs::EvaluationSrv>("trajectory_evaluation");
 
   ramp_msgs::RampTrajectory traj1;
   ramp_msgs::RampTrajectory traj2;
@@ -132,11 +132,11 @@ int main(int argc, char** argv) {
   /********** Evaluate the trajectories **********/
   /***********************************************/
   
-  ramp_msgs::EvaluationRequest er1;
+  ramp_msgs::EvaluationSrv er1;
   er1.request.trajectory = traj1;
   
   
-  ramp_msgs::EvaluationRequest er2;
+  ramp_msgs::EvaluationSrv er2;
   er2.request.trajectory = traj2;
 
 

@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "ramp_msgs/TrajectoryRequest.h"
-#include "ramp_msgs/EvaluationRequest.h"
+#include "ramp_msgs/EvaluationSrv.h"
 #include <tf/transform_datatypes.h>
 #include <ros/console.h>
 #include "ramp_msgs/Range.h"
