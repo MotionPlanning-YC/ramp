@@ -13,12 +13,12 @@ public:
   ~Prediction();
 
   // Service callback, the input is a path and the output a trajectory
-  bool trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res);
+  bool trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs::TrajectoryResponse& res);
 private:
 
   ramp_msgs::Path path_;
 
-  void init(const ramp_msgs::TrajectoryRequest::Request req);
+  void init(const ramp_msgs::TrajectoryRequest req);
 
   Utility utility_;
 };

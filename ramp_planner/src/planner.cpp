@@ -2228,10 +2228,12 @@ const RampTrajectory Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr
     result.holonomic_path_        = tr.request.path;
 
     // Set the ID of the trajectory
-    if(id != -1) {
+    if(id != -1) 
+    {
       result.msg_.id = id;
     }
-    else {
+    else 
+    {
       result.msg_.id = getIRT();
     }
   }

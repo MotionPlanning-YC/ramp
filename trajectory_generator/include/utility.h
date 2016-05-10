@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include "ramp_msgs/TrajectoryRequest.h"
+#include "ramp_msgs/TrajectorySrv.h"
 #include "ramp_msgs/Path.h"
 #include <tf/transform_datatypes.h>
 #include <ros/console.h>
@@ -63,8 +63,9 @@ class Utility {
     const std::string toString(const ramp_msgs::BezierCurve bi) const;
     const std::string toString(const ramp_msgs::RampTrajectory traj) const;
     const std::string toString(const trajectory_msgs::JointTrajectoryPoint p) const;
-    const std::string toString(const ramp_msgs::TrajectoryRequest::Request tr) const;
-    const std::string toString(const ramp_msgs::TrajectoryRequest::Response tr) const;
+    const std::string toString(const ramp_msgs::TrajectoryRequest tr) const;
+    const std::string toString(const ramp_msgs::TrajectoryResponse tr) const;
+    const std::string toString(const ramp_msgs::TrajectorySrv srv) const;
 };
 
 

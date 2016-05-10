@@ -4,7 +4,11 @@ bool print
 ramp_msgs/BezierCurve[] bezierCurves
 int8 segments
 
+TrajectoryRequest[] reqs
+
 ---
 
 RampTrajectory trajectory
 bool error
+
+TrajectoryResponse[] resps

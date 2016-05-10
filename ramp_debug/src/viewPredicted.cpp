@@ -184,12 +184,15 @@ const ramp_msgs::RampTrajectory getPredictedTrajectory(const ramp_msgs::Obstacle
 
   // Now build a Trajectory Request 
   ramp_msgs::TrajectoryRequest tr;
-    tr.request.path = getObstaclePath(ob, motion_type);
-    tr.request.type = PREDICTION;
+    tr.path = getObstaclePath(ob, motion_type);
+    tr.type = PREDICTION;
+
+  ramp_msgs::TrajectorySrv tr_srv;
+  tr_srv.request.reqs.push_back(tr);
 
   // Get trajectory
-  if(h_traj_req_->request(tr)) {
-    result = tr.response.trajectory;
+  if(h_traj_req_->request(tr_srv)) {
+    result = tr_srv.response.resps.at(0).trajectory;
   }
 
   return result;

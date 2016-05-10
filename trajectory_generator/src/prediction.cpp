@@ -7,7 +7,7 @@ Prediction::~Prediction() {}
 
 
 
-void Prediction::init(const ramp_msgs::TrajectoryRequest::Request req) 
+void Prediction::init(const ramp_msgs::TrajectoryRequest req) 
 {
 
   path_ = req.path; 
@@ -15,7 +15,7 @@ void Prediction::init(const ramp_msgs::TrajectoryRequest::Request req)
 }
 
 
-bool Prediction::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) 
+bool Prediction::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs::TrajectoryResponse& res) 
 {
   //ROS_INFO("In Prediction::trajectoryRequest");
   res.trajectory.i_knotPoints.push_back(0);

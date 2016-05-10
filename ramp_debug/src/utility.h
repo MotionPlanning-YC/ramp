@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include "ramp_msgs/TrajectoryRequest.h"
+#include "ramp_msgs/TrajectorySrv.h"
 #include "ramp_msgs/EvaluationSrv.h"
 #include <tf/transform_datatypes.h>
 #include <ros/console.h>

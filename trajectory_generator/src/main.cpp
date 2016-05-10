@@ -12,7 +12,7 @@
 Utility utility;
 
 
-void fixDuplicates(ramp_msgs::TrajectoryRequest::Request& req)
+void fixDuplicates(ramp_msgs::TrajectoryRequest& req)
 {
   int i=0;
   while(i<req.path.points.size()-1)
@@ -37,7 +37,7 @@ void fixDuplicates(ramp_msgs::TrajectoryRequest::Request& req)
 }
 
 
-bool checkGoal(ramp_msgs::TrajectoryRequest::Request req)
+bool checkGoal(ramp_msgs::TrajectoryRequest req)
 {
   ramp_msgs::MotionState a = req.path.points.at(0).motionState;
   ramp_msgs::MotionState b = req.path.points.at(1).motionState;
@@ -51,50 +51,54 @@ bool checkGoal(ramp_msgs::TrajectoryRequest::Request req)
 }
 
 
-bool requestCallback( ramp_msgs::TrajectoryRequest::Request& req,
-                      ramp_msgs::TrajectoryRequest::Response& res) 
+bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
+                      ramp_msgs::TrajectorySrv::Response& res) 
 {
-  ROS_INFO("Request Received: %s", utility.toString(req).c_str());
 
-  /*
-   * Check for start == goal
-   */
-  if(req.path.points.size() == 2 && checkGoal(req))
+  for(uint8_t i=0;i<req.reqs.size();i++)
   {
-    res.trajectory.trajectory.points.push_back(utility.getTrajectoryPoint(req.path.points.at(0).motionState));
-    res.trajectory.i_knotPoints.push_back(0);
-    return true;
-  }
+    ramp_msgs::TrajectoryRequest treq = req.reqs.at(i); 
+    ramp_msgs::TrajectoryResponse tres;
+    ROS_INFO("trequest Received: %s", utility.toString(treq).c_str());
 
-
-
-  // Why req.segments == 1?
-  if(req.type != PREDICTION && req.type != TRANSITION && (req.path.points.size() < 3 || req.segments == 1))
-  {
-    ROS_WARN("Changing type to HOLONOMIC");
-    req.type = HOLONOMIC;
-    req.segments++;
-  }
-
-  if(req.type != PREDICTION) 
-  {
-    fixDuplicates(req);
-    
-    MobileBase mobileBase;
-    if(!mobileBase.trajectoryRequest(req, res))
+    /*
+     * Check for start == goal
+     */
+    if(treq.path.points.size() == 2 && checkGoal(treq))
     {
-      res.error = true;
+      res.trajectory.trajectory.points.push_back(utility.getTrajectoryPoint(treq.path.points.at(0).motionState));
+      res.trajectory.i_knotPoints.push_back(0);
+      return true;
     }
-  }
-  else if(req.path.points.size() > 0) 
-  {
-    Prediction prediction;
-    prediction.trajectoryRequest(req, res);
-  }
 
-  //ROS_INFO("Trajectory Done");
-  //ROS_INFO("Response: %s", utility.toString(res).c_str());
- 
+    // Why treq.segments == 1?
+    if(treq.type != PREDICTION && treq.type != TRANSITION && (treq.path.points.size() < 3 || treq.segments == 1))
+    {
+      ROS_WARN("Changing type to HOLONOMIC");
+      treq.type = HOLONOMIC;
+      treq.segments++;
+    }
+
+    if(treq.type != PREDICTION) 
+    {
+      fixDuplicates(treq);
+      
+      MobileBase mobileBase;
+      if(!mobileBase.trajectoryRequest(treq, tres))
+      {
+        res.error = true;
+      }
+    }
+    else if(treq.path.points.size() > 0) 
+    {
+      Prediction prediction;
+      prediction.trajectoryRequest(treq, tres);
+    }
+
+    //ROS_INFO("Trajectory Done");
+    //ROS_INFO("Response: %s", utility.toString(res).c_str());
+  
+  }
   return true;
 }
 

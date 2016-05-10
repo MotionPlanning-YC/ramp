@@ -16,7 +16,7 @@ public:
   ~MobileBase();
 
   // Service callback, the input is a path and the output a trajectory
-  bool trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req,ramp_msgs::TrajectoryRequest::Response& res);
+  bool trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs::TrajectoryResponse& res);
 
 
   // Get Bezier curves over the path
@@ -59,7 +59,7 @@ private:
 
   bool bezierStart;
 
-  ramp_msgs::TrajectoryRequest::Request req_;
+  ramp_msgs::TrajectoryRequest req_;
   
   // Hold the curve indices
   std::vector<uint8_t> i_cs;
@@ -74,7 +74,7 @@ private:
 
   /***** Methods *****/
   // Initialize everything
-  void init(const ramp_msgs::TrajectoryRequest::Request req);
+  void init(const ramp_msgs::TrajectoryRequest req);
 
   // Set the target of the Reflexxes library
   void setTarget(const ramp_msgs::MotionState ms);
@@ -90,8 +90,8 @@ private:
 
   // Insert a point to the back of the trajectory
   // and set Reflexxes to reflect the new state
-  void insertPoint(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryRequest::Response& res);
-  void insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ramp_msgs::TrajectoryRequest::Response& res);
+  void insertPoint(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryResponse& res);
+  void insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ramp_msgs::TrajectoryResponse& res);
 
   
 

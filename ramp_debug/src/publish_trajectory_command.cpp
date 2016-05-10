@@ -3,7 +3,7 @@
 #include "ramp_msgs/RampTrajectory.h"
 #include "ramp_msgs/Path.h"
 #include "utility.h"
-#include "ramp_msgs/TrajectoryRequest.h"
+#include "ramp_msgs/TrajectorySrv.h"
 #include "ramp_msgs/EvaluationSrv.h"
 #include "ramp_msgs/Population.h"
 #include "ramp_msgs/BezierCurve.h"
@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 
   ros::Publisher pub_traj = handle.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
   ros::Publisher pub_pop = handle.advertise<ramp_msgs::Population>("population", 1000);
-  ros::ServiceClient client_ = handle.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");
+  ros::ServiceClient client_ = handle.serviceClient<ramp_msgs::TrajectorySrv>("trajectory_generator");
   ros::ServiceClient client_eval = handle.serviceClient<ramp_msgs::EvaluationSrv>("trajectory_evaluation");
 
 
@@ -389,39 +389,43 @@ int main(int argc, char** argv) {
   //curves.push_back(bi2);
   
   ramp_msgs::TrajectoryRequest tr;
-  tr.request.path = p;
-  tr.request.type = TRANSITION;
-  tr.request.print = true;
-  tr.request.bezierCurves = curves;
-  tr.request.segments = 0;
+  tr.path = p;
+  tr.type = TRANSITION;
+  tr.print = true;
+  tr.bezierCurves = curves;
+  tr.segments = 0;
+
+  ramp_msgs::TrajectorySrv tr_srv;
+  tr_srv.request.reqs.push_back(tr);
 
   std::cout<<"\nPress Enter to request and send the trajectory\n";
   std::cin.get();
 
   // Get and publish trajectory
-  if(client_.call(tr)) 
+  if(client_.call(tr_srv)) 
   {
-    std::cout<<"\nSending Trajectory "<<u.toString(tr.response.trajectory)<<"\n";
-    pub_traj.publish(tr.response.trajectory);
+    std::cout<<"\nSending Trajectory "<<u.toString(tr_srv.response.resps.at(0).trajectory)<<"\n";
+    pub_traj.publish(tr_srv.response.resps.at(0).trajectory);
   }
   else {
     std::cout<<"\nSome error getting trajectory\n";
   }
    
 
-  ramp_msgs::EvaluationSrv er;
+  ramp_msgs::EvaluationSrv er_srv;
+  ramp_msgs::EvaluationRequest er;
 
-  er.request.trajectory = tr.response.trajectory;
+  er.trajectory = tr_srv.response.resps.at(0).trajectory;
   
-  /*er.request.trajectory.trajectory.points.resize(17);
-  er.request.trajectory.i_knotPoints.pop_back();
-  er.request.trajectory.i_knotPoints.push_back(er.request.trajectory.trajectory.points.size()-1);
-  er.request.trajectory.curves.clear();*/
+  /*er.trajectory.trajectory.points.resize(17);
+  er.trajectory.i_knotPoints.pop_back();
+  er.trajectory.i_knotPoints.push_back(er.trajectory.trajectory.points.size()-1);
+  er.trajectory.curves.clear();*/
 
-  er.request.currentTheta = er.request.trajectory.trajectory.points.at(0).positions.at(2);
-  //er.request.theta_cc = 1.04839;
+  er.currentTheta = er.trajectory.trajectory.points.at(0).positions.at(2);
+  //er.theta_cc = 1.04839;
     
-  std::cout<<"\nEval: Sending Trajectory "<<u.toString(er.request.trajectory)<<"\n";
+  std::cout<<"\nEval: Sending Trajectory "<<u.toString(er.trajectory)<<"\n";
 
 
   // Build any obstacle trajectories
@@ -448,24 +452,28 @@ int main(int argc, char** argv) {
   //obp.points.push_back(ob2);
 
   ramp_msgs::TrajectoryRequest obtr;
-  obtr.request.path = obp;
-  obtr.request.type = 3;
+  obtr.path = obp;
+  obtr.type = 3;
 
-  if(!client_.call(obtr))
+  ramp_msgs::TrajectorySrv obtr_srv;
+
+  if(!client_.call(obtr_srv))
   {
     ROS_ERROR("Some error getting obstacle trajectory");
   }
 
-  ramp_msgs::RampTrajectory obt = obtr.response.trajectory;
+  ramp_msgs::RampTrajectory obt = obtr_srv.response.resps.at(0).trajectory;
 
   // Add obstacle trajectory to ER
-  er.request.obstacle_trjs.push_back(obt);
+  er.obstacle_trjs.push_back(obt);
+
+  er_srv.request.reqs.push_back(er);
 
   // Evaluate trajectory
-  if(client_eval.call(er)) 
+  if(client_eval.call(er_srv)) 
   {
-    std::cout<<"\nEvaluated traj, fitness: "<<er.response.fitness;
-    std::cout<<"\nEvaluated traj, feasible: "<<er.response.feasible;
+    std::cout<<"\nEvaluated traj, fitness: "<<er_srv.response.resps.at(0).fitness;
+    std::cout<<"\nEvaluated traj, feasible: "<<er_srv.response.resps.at(1).feasible;
   }
 
 
@@ -481,7 +489,7 @@ int main(int argc, char** argv) {
 
   // Create Population to send to trajectory_visualization
   ramp_msgs::Population pop;
-  pop.population.push_back(tr.response.trajectory);
+  pop.population.push_back(tr_srv.response.resps.at(0).trajectory);
   
   pub_pop.publish(pop);
   

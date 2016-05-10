@@ -94,7 +94,7 @@ void MobileBase::initReflexxes()
 
 /** Initialize class object with a request */
 // TODO: change 3 booleans to 1 enum
-void MobileBase::init(const ramp_msgs::TrajectoryRequest::Request req) 
+void MobileBase::init(const ramp_msgs::TrajectoryRequest req) 
 {
   ////////ROS_INFO("Entered MobileBase::init");
   //std::cout<<"\nRequest received: "<<utility_.toString(req)<<"\n";
@@ -403,7 +403,7 @@ void MobileBase::setInitialMotion()
 
 
 /** Inserts a MotionState into the response trajectory */
-void MobileBase::insertPoint(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryRequest::Response& res) 
+void MobileBase::insertPoint(const ramp_msgs::MotionState ms, ramp_msgs::TrajectoryResponse& res) 
 {
   trajectory_msgs::JointTrajectoryPoint jp = utility_.getTrajectoryPoint(ms);
   jp.time_from_start = timeFromStart_;
@@ -412,7 +412,7 @@ void MobileBase::insertPoint(const ramp_msgs::MotionState ms, ramp_msgs::Traject
 
 
 /** Inserts a JointTrajectoryPoint at the back of response trajectory and sets Reflexxes to that point */
-void MobileBase::insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ramp_msgs::TrajectoryRequest::Response& res) 
+void MobileBase::insertPoint(const trajectory_msgs::JointTrajectoryPoint jp, ramp_msgs::TrajectoryResponse& res) 
 {
   res.trajectory.trajectory.points.push_back(jp);
 
@@ -1380,7 +1380,7 @@ bool MobileBase::checkSpeed(const ramp_msgs::Path p, const std::vector<uint8_t> 
 
 
 // Service callback, the input is a path and the output a trajectory
-bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res) 
+bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs::TrajectoryResponse& res) 
 {
   ROS_INFO("In MobileBase::trajectoryRequest");
   ROS_INFO("type_: %i HOLONOMIC: %i", req.type, HOLONOMIC); 

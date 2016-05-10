@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
   ros::NodeHandle handle;
 
   ros::Publisher pub_traj = handle.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
-  ros::ServiceClient client_traj = handle.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");
+  ros::ServiceClient client_traj = handle.serviceClient<ramp_msgs::TrajectorySrv>("trajectory_generator");
   ros::ServiceClient client_eval = handle.serviceClient<ramp_msgs::EvaluationSrv>("trajectory_evaluation");
 
   ramp_msgs::RampTrajectory traj1;
@@ -109,22 +109,22 @@ int main(int argc, char** argv) {
 
 
   ramp_msgs::TrajectoryRequest tr1;
-  tr1.request.path = p1;
+  tr1.path = p1;
 
   ramp_msgs::TrajectoryRequest tr2;
-  tr2.request.path = p2;
+  tr2.path = p2;
 
+  ramp_msgs::TrajectorySrv tr_srv;
+  tr_srv.request.reqs.push_back(tr1);
+  tr_srv.request.reqs.push_back(tr2);
 
   /************************************************/
   /************* Get the trajectories *************/
   /************************************************/
 
-  if(client_traj.call(tr1)) {
-    traj1 = tr1.response.trajectory;
-  }
-
-  if(client_traj.call(tr2)) {
-    traj2 = tr2.response.trajectory;
+  if(client_traj.call(tr_srv)) {
+    traj1 = tr_srv.response.resps.at(0).trajectory;
+    traj2 = tr_srv.response.resps.at(1).trajectory;
   }
 
 
@@ -132,27 +132,29 @@ int main(int argc, char** argv) {
   /********** Evaluate the trajectories **********/
   /***********************************************/
   
-  ramp_msgs::EvaluationSrv er1;
-  er1.request.trajectory = traj1;
+  ramp_msgs::EvaluationSrv er_srv1;
+  ramp_msgs::EvaluationRequest er1;
+  er1.trajectory = traj1;
   
   
-  ramp_msgs::EvaluationSrv er2;
-  er2.request.trajectory = traj2;
+  ramp_msgs::EvaluationRequest er2;
+  er2.trajectory = traj2;
 
+  er_srv1.request.reqs.push_back(er1);
+  er_srv1.request.reqs.push_back(er2);
 
-  client_eval.call(er1);
-  client_eval.call(er2);
+  client_eval.call(er_srv1);
     
 
 
   std::cout<<"\n************** Trajectory 1: ****************";
-  std::cout<<"\nFeasible: "<<er1.response.feasible;
-  std::cout<<"\nFitness: "<<er1.response.fitness;
+  std::cout<<"\nFeasible: "<<er_srv1.response.resps.at(0).feasible;
+  std::cout<<"\nFitness: "<<er_srv1.response.resps.at(0).fitness;
   std::cout<<"\n*********************************************";
   
   std::cout<<"\n************** Trajectory 2: ****************";
-  std::cout<<"\nFeasible: "<<er2.response.feasible;
-  std::cout<<"\nFitness: "<<er2.response.fitness;
+  std::cout<<"\nFeasible: "<<er_srv1.response.resps.at(1).feasible;
+  std::cout<<"\nFitness: "<<er_srv1.response.resps.at(1).fitness;
   std::cout<<"\n*********************************************";
   
 

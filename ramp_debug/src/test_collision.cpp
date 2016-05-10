@@ -3,7 +3,7 @@
 #include "ramp_msgs/RampTrajectory.h"
 #include "ramp_msgs/Path.h"
 #include "utility.h"
-#include "ramp_msgs/TrajectoryRequest.h"
+#include "ramp_msgs/TrajectorySrv.h"
 #include "ramp_msgs/EvaluationSrv.h"
 #include "ramp_msgs/Population.h"
 #include "ramp_msgs/BezierCurve.h"
@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 
   ros::Publisher pub_traj = handle.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
   ros::Publisher pub_pop = handle.advertise<ramp_msgs::Population>("/robot_0/population", 1000);
-  ros::ServiceClient clientTrajGen  = handle.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");
+  ros::ServiceClient clientTrajGen  = handle.serviceClient<ramp_msgs::TrajectorySrv>("trajectory_generator");
   ros::ServiceClient clientTrajEval = handle.serviceClient<ramp_msgs::EvaluationSrv>("trajectory_evaluation");
 
 
@@ -54,10 +54,12 @@ int main(int argc, char** argv) {
   p.points.push_back(c1);
  
   ramp_msgs::TrajectoryRequest tr;
-  tr.request.path = p;
-  tr.request.type = PARTIAL_BEZIER;
-  tr.request.print = true;
+  tr.path = p;
+  tr.type = PARTIAL_BEZIER;
+  tr.print = true;
 
+  ramp_msgs::TrajectorySrv tr_srv;
+  tr_srv.request.reqs.push_back(tr);
 
   std::cout<<"\nPress Enter to request and send the trajectory\n";
   std::cin.get();
@@ -65,9 +67,10 @@ int main(int argc, char** argv) {
   ramp_msgs::RampTrajectory trajectory;
 
   // Get and publish trajectory
-  if(clientTrajGen.call(tr)) {
-    std::cout<<"\nSending Trajectory "<<u.toString(tr.response.trajectory);
-    trajectory = tr.response.trajectory;
+  if(clientTrajGen.call(tr_srv))
+  {
+    std::cout<<"\nSending Trajectory "<<u.toString(tr_srv.response.resps.at(0).trajectory);
+    trajectory = tr_srv.response.resps.at(0).trajectory;
   }
   else {
     std::cout<<"\nSome error getting trajectory\n";
@@ -80,15 +83,18 @@ int main(int argc, char** argv) {
   std::cout<<"\nContinuously drawing the trajectory\n";
   while(ros::ok()) {
  
-    ramp_msgs::EvaluationSrv er;
-    er.request.trajectory = trajectory;
+    ramp_msgs::EvaluationSrv er_srv;
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = trajectory;
+
+    er_srv.request.reqs.push_back(er);
  
     // Evaluate the trajectory
-    if(clientTrajEval.call(er)) {
+    if(clientTrajEval.call(er_srv)) {
       //std::cout<<"\nEvaluating Trajectory "<<u.toString(tr.response.trajectory);
-      trajectory.feasible = er.response.feasible;
-      trajectory.fitness = er.response.fitness;
-      trajectory.t_firstCollision = er.response.t_firstCollision;
+      trajectory.feasible = er_srv.response.resps.at(0).feasible;
+      trajectory.fitness = er_srv.response.resps.at(0).fitness;
+      trajectory.t_firstCollision = er_srv.response.resps.at(0).t_firstCollision;
       std::cout<<"\nFitness: "<<trajectory.fitness<<" Feasible: "<<(int)trajectory.feasible;
       if(!trajectory.feasible) {
         std::cout<<" t_firstCollision: "<<trajectory.t_firstCollision;

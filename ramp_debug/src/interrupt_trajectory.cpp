@@ -2,7 +2,7 @@
 #include "ros/ros.h"
 #include "ramp_msgs/Path.h"
 #include "utility.h"
-#include "ramp_msgs/TrajectoryRequest.h"
+#include "ramp_msgs/TrajectorySrv.h"
 #include "ramp_msgs/Population.h"
 
 ramp_msgs::Population pop;
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
   ros::Publisher pub_traj = handle.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
   ros::Publisher pub_pop = handle.advertise<ramp_msgs::Population>("population", 1000);
   ros::Subscriber sub_start = handle.subscribe("update", 1000, &updateCallback);
-  ros::ServiceClient client_ = handle.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");
+  ros::ServiceClient client_ = handle.serviceClient<ramp_msgs::TrajectorySrv>("trajectory_generator");
 
 
   std::cout<<"\nPress Enter to publish first trajectory\n";
@@ -78,12 +78,15 @@ int main(int argc, char** argv) {
   p.points.push_back(c3);
 
   ramp_msgs::TrajectoryRequest tr;
-  tr.request.path = p;
+  tr.path = p;
+
+  ramp_msgs::TrajectorySrv tr_srv;
+  tr_srv.request.reqs.push_back(tr);
 
   // Request and send trajectory
-  client_.call(tr);
-  ramp_msgs::RampTrajectory trj = tr.response.trajectory;
-  pub_traj.publish(tr.response.trajectory);
+  client_.call(tr_srv);
+  ramp_msgs::RampTrajectory trj = tr_srv.response.resps.at(0).trajectory;
+  pub_traj.publish(tr_srv.response.resps.at(0).trajectory);
 
   
   // Push trajectory onto population 
@@ -134,11 +137,13 @@ int main(int argc, char** argv) {
   
   // Create new trajectory request  
   ramp_msgs::TrajectoryRequest tr2;
-  tr2.request.path = p2;
+  tr2.path = p2;
+  ramp_msgs::TrajectorySrv tr_srv2;
+  tr_srv2.request.reqs.push_back(tr2);
 
   // Request trajectory, but don't send yet
-  client_.call(tr2);
-  ramp_msgs::RampTrajectory trj2 = tr2.response.trajectory;
+  client_.call(tr_srv2);
+  ramp_msgs::RampTrajectory trj2 = tr_srv2.response.resps.at(0).trajectory;
 
   std::cout<<"\nTrajectory 2: "<<u.toString(trj2);
   
@@ -168,11 +173,14 @@ int main(int argc, char** argv) {
 
   // Create new trajectory request  
   ramp_msgs::TrajectoryRequest tr3;
-  tr3.request.path = p3;
+  tr3.path = p3;
+
+  ramp_msgs::TrajectorySrv tr_srv3;
+  tr_srv3.request.reqs.push_back(tr3);
 
   // Request trajectory, but don't send yet
-  client_.call(tr3);
-  ramp_msgs::RampTrajectory trj3 = tr3.response.trajectory;
+  client_.call(tr_srv3);
+  ramp_msgs::RampTrajectory trj3 = tr_srv3.response.resps.at(0).trajectory;
   
   // Push trajectory onto population 
   // and publish population

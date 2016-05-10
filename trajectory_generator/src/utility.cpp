@@ -373,7 +373,7 @@ std::ostringstream result;
 
 
 
-const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request tr) const {
+const std::string Utility::toString(const ramp_msgs::TrajectoryRequest tr) const {
   std::ostringstream result;
 
   result<<"\nTrajectory Request:\n";
@@ -407,7 +407,7 @@ const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Request 
 }
 
 
-const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Response tr) const
+const std::string Utility::toString(const ramp_msgs::TrajectoryResponse tr) const
 {
   std::ostringstream result;
 
@@ -417,3 +417,13 @@ const std::string Utility::toString(const ramp_msgs::TrajectoryRequest::Response
   return result.str();
 }
 
+const std::string Utility::toString(const ramp_msgs::TrajectorySrv srv) const
+{
+  std::ostringstream result;
+  for(uint8_t i=0;i<srv.request.reqs.size();i++)
+  {
+    result<<"\nRequest: "<<toString(srv.request.reqs.at(i));
+    result<<"\nResponse: "<<toString(srv.response.resps.at(i));
+  }
+  return result.str();
+}
