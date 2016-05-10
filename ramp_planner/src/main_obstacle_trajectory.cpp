@@ -10,7 +10,7 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "obstacle");
   ros::NodeHandle handle;
 
-  ros::ServiceClient client = handle.serviceClient<ramp_msgs::TrajectoryRequest>("/trajectory_generator");
+  ros::ServiceClient client = handle.serviceClient<ramp_msgs::TrajectorySrv>("/trajectory_generator");
   ros::Publisher pub_traj = handle.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
   ros::Publisher pub_pop = handle.advertise<ramp_msgs::Population>("/population", 1000);  
   Utility u;
@@ -47,21 +47,24 @@ int main(int argc, char** argv)
   pred.all_.push_back(s);
 
   ramp_msgs::TrajectoryRequest tr;
-  tr.request.path = pred.buildPathMsg();
-  tr.request.type = PREDICTION;
+  tr.path = pred.buildPathMsg();
+  tr.type = PREDICTION;
 
   ramp_msgs::BezierCurve curve;
   /*curve.segmentPoints.push_back(p.at(0).motionState_.msg_);
   curve.segmentPoints.push_back(p.at(1).motionState_.msg_);
   curve.segmentPoints.push_back(p.at(2).motionState_.msg_);*/
 
-  tr.request.bezierCurves.push_back(curve);
+  tr.bezierCurves.push_back(curve);
   
   ROS_INFO("Press Enter to request and send the trajectory\n");
   std::cin.get();
 
+  ramp_msgs::TrajectorySrv tr_srv;
+  tr_srv.request.reqs.push_back(tr);
+
   // Get and publish trajectory
-  if(client.call(tr)) 
+  if(client.call(tr_srv)) 
   {
     ROS_INFO("Got obstacle trajectory!");
   }
@@ -84,16 +87,16 @@ int main(int argc, char** argv)
   ros::Rate rs(7);
   rs.sleep();
 
-  ROS_INFO("Publishing trajectory: %s", u.toString(tr.response.trajectory).c_str());
-  pub_traj.publish(tr.response.trajectory);
-  pub_traj.publish(tr.response.trajectory);
-  pub_traj.publish(tr.response.trajectory);
-  pub_traj.publish(tr.response.trajectory);
-  pub_traj.publish(tr.response.trajectory);
+  ROS_INFO("Publishing trajectory: %s", u.toString(tr_srv.response.resps.at(0).trajectory).c_str());
+  pub_traj.publish(tr_srv.response.resps.at(0).trajectory);
+  pub_traj.publish(tr_srv.response.resps.at(0).trajectory);
+  pub_traj.publish(tr_srv.response.resps.at(0).trajectory);
+  pub_traj.publish(tr_srv.response.resps.at(0).trajectory);
+  pub_traj.publish(tr_srv.response.resps.at(0).trajectory);
   
   // Create Population to send to trajectory_visualization
   ramp_msgs::Population pop;
-  pop.population.push_back(tr.response.trajectory);
+  pop.population.push_back(tr_srv.response.resps.at(0).trajectory);
   
   pub_pop.publish(pop);
 

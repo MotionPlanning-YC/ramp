@@ -284,8 +284,8 @@ void testSwitch()
 
   Path p(ms_vec);
   
-  ramp_msgs::TrajectoryRequest tr = my_planner.buildTrajectoryRequest(p);
-  RampTrajectory traj = my_planner.requestTrajectory(tr); 
+  ramp_msgs::TrajectorySrv tr_srv = my_planner.buildTrajectorySrv(p);
+  RampTrajectory traj = my_planner.requestTrajectory(tr_srv).at(0); 
   ROS_INFO("Response traj: %s", traj.toString().c_str());
 
   RampTrajectory from = traj.getSubTrajectory(1.6f);
@@ -324,9 +324,9 @@ void testSwitch()
   Path p_from(ms_vec_from);
  
   // Get transition part
-  ramp_msgs::TrajectoryRequest tr_from = my_planner.buildTrajectoryRequest(p_from);
-  tr.request.type = HYBRID;
-  RampTrajectory traj_from = my_planner.requestTrajectory(tr_from); 
+  ramp_msgs::TrajectorySrv tr_from = my_planner.buildTrajectorySrv(p_from);
+  tr_from.request.type = HYBRID;
+  RampTrajectory traj_from = my_planner.requestTrajectory(tr_from).at(0); 
   ROS_INFO("Response traj_from: %s", traj_from.toString().c_str());
   
   

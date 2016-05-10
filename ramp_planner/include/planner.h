@@ -129,10 +129,38 @@ class Planner {
     const std::vector<Path> modifyPath();
     const std::vector<RampTrajectory> modifyTrajec();
 
+
+
+    // Msg building methods 
+    const ramp_msgs::TrajectorySrv buildTrajectorySrv(
+      const Path path, const std::vector<ramp_msgs::BezierCurve> curves,
+                    const int id=-1) const;
+    const ramp_msgs::TrajectorySrv buildTrajectorySrv(
+        const Path path, const int id=0) const;
+
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
+              const Path path, const std::vector<ramp_msgs::BezierCurve> curves,
+              const int id=-1) const;
+    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
+              const Path path, const int id=0) const;
+
+
+
+    const ramp_msgs::EvaluationSrv buildEvaluationSrv(
+              const RampTrajectory trajec)      ;
+    const ramp_msgs::EvaluationSrv buildEvaluationSrv(
+              const std::vector<RampTrajectory> trajecs)      ;
+    const ramp_msgs::EvaluationRequest buildEvaluationRequest(
+              const RampTrajectory trajec)      ;
+
+
     // Request information from other packages
     // Cannot make the request srvs const because they have no serialize/deserialize
-    const RampTrajectory requestTrajectory(ramp_msgs::TrajectoryRequest& tr, const int id=-1);
+    const std::vector<RampTrajectory> requestTrajectory(ramp_msgs::TrajectorySrv& tr, const int id=-1);
+    const std::vector<RampTrajectory> requestTrajectory(std::vector<ramp_msgs::TrajectoryRequest> trs); 
     const RampTrajectory requestTrajectory(const Path p, const int id=-1);
+    const RampTrajectory requestTrajectory(ramp_msgs::TrajectoryRequest tr);
+
     const std::vector<RampTrajectory> requestEvaluation(std::vector<RampTrajectory> trajecs);
     const RampTrajectory requestEvaluation(ramp_msgs::EvaluationRequest& er);
     const RampTrajectory requestEvaluation(const RampTrajectory traj);
@@ -219,21 +247,10 @@ class Planner {
     //void planningCycleCallback    (const ros::TimerEvent& t);
     void planningCycleCallback    ();
     void imminentCollisionCallback(const ros::TimerEvent& t);
-
-    // Msg building methods
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
-              const Path path, const std::vector<ramp_msgs::BezierCurve> curves,
-              const int id=-1) const;
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
-              const Path path, const int id=0) const;
-
-    const ramp_msgs::EvaluationSrv buildEvaluationSrv(
-              const RampTrajectory trajec)      ;
-    const ramp_msgs::EvaluationSrv buildEvaluationSrv(
-              const std::vector<RampTrajectory> trajecs)      ;
-    const ramp_msgs::EvaluationRequest buildEvaluationRequest(
-              const RampTrajectory trajec)      ;
-
+    
+    
+    
+   
     // Misc
     const MotionState randomizeMSPositions(const MotionState ms)        const ;
           void checkTrajChange()                                        ;

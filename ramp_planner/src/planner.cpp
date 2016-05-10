@@ -135,14 +135,16 @@ const ramp_msgs::RampTrajectory Planner::getPredictedTrajectory(const ramp_msgs:
 
   // Now build a Trajectory Request 
   ramp_msgs::TrajectoryRequest tr;
-    tr.request.path = getObstaclePath(ob, tf, motion_type);
-    tr.request.type = PREDICTION;  // Prediction
-
+    tr.path = getObstaclePath(ob, tf, motion_type);
+    tr.type = PREDICTION;  // Prediction
+  
+  ramp_msgs::TrajectorySrv tr_srv;
+  tr_srv.request.reqs.push_back(tr);
 
   // Get trajectory
-  if(h_traj_req_->request(tr)) 
+  if(h_traj_req_->request(tr_srv))
   {
-    result = tr.response.trajectory;
+    result = tr_srv.response.resps.at(0).trajectory;
   }
 
   return result;
@@ -993,13 +995,14 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
   result.paths_ = paths;
 
   // Create the vector to hold updated trajectories
-  std::vector<RampTrajectory> updatedTrajecs;
+  std::vector<ramp_msgs::TrajectoryRequest> tr_reqs;
 
   /*//ROS_INFO("pop.calcBestIndex(): %i", pop.calcBestIndex());
   //ROS_INFO("paths.size(): %i", (int)paths.size());
   //ROS_INFO("curves.size(): %i", (int)curves.size());*/
   // For each path, get a trajectory
-  for(uint16_t i=0;i<pop.size();i++) {
+  for(uint16_t i=0;i<pop.size();i++) 
+  {
     RampTrajectory temp, tempTraj = pop.get(i);
     ////ROS_INFO("Getting trajectory %i", (int)i);
       
@@ -1011,24 +1014,20 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
     }
 
     ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(paths.at(i), c);
-    tr.request.segments = 2;
+    tr.segments = 2;
 
-    /* Get the trajectory */
-    temp = requestTrajectory(tr, result.get(i).msg_.id);
+    tr_reqs.push_back(tr);
+  }
 
-    //ROS_INFO("Temp before: %s", temp.toString().c_str());
-    //temp = temp.concatenate(pop.get(i), 4);
-    //ROS_INFO("Temp now: %s", temp.toString().c_str());
+  
+  std::vector<RampTrajectory> updatedTrajecs = requestTrajectory(tr_reqs);
+  for(uint16_t i=0;i<updatedTrajecs.size();i++)
+  {
 
-    // Set temporary evaluation results - need to actually call requestEvaluation to get actual fitness
-    temp.msg_.fitness   = result.get(i).msg_.fitness;
-    temp.msg_.feasible  = result.get(i).msg_.feasible;
-    temp.msg_.t_start   = ros::Duration(t_fixed_cc_);
-
-    ////ROS_INFO("Finished adapting trajectory %i, t_start: %f", i, temp.msg_.t_start.toSec());
-
-    // Push onto updatedTrajecs
-    updatedTrajecs.push_back(temp);
+      // Set temporary evaluation results - need to actually call requestEvaluation to get actual fitness
+    updatedTrajecs.at(i).msg_.fitness = result.get(i).msg_.fitness;
+    updatedTrajecs.at(i).msg_.feasible = result.get(i).msg_.feasible;
+    updatedTrajecs.at(i).msg_.t_start = ros::Duration(t_fixed_cc_);
   } // end for
 
   ////ROS_INFO("updatedTrajecs size: %i", (int)updatedTrajecs.size());
@@ -1048,6 +1047,22 @@ const Population Planner::adaptPopulation(const Population pop, const MotionStat
 
 
 
+const ramp_msgs::TrajectorySrv Planner::buildTrajectorySrv(const Path path, const int id) const 
+{
+  std::vector<ramp_msgs::BezierCurve> curves;
+  return buildTrajectorySrv(path, curves, id);
+}
+
+
+
+const ramp_msgs::TrajectorySrv Planner::buildTrajectorySrv(const Path path, const std::vector<ramp_msgs::BezierCurve> curves, const int id) const 
+{
+  ramp_msgs::TrajectorySrv result;
+  result.request.reqs.push_back(buildTrajectoryRequest(path, curves, id));
+  return result;
+}
+
+
 
 // TODO: Clean up
 /** Build a TrajectoryRequest srv */
@@ -1056,8 +1071,8 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
   //ROS_INFO("In buildTrajectoryRequest");
   ramp_msgs::TrajectoryRequest result;
 
-  result.request.path           = path.buildPathMsg();
-  result.request.type           = population_.type_;
+  result.path           = path.buildPathMsg();
+  result.type           = population_.type_;
 
   // If path size > 2, assign a curve
   if(path.size() > 2) 
@@ -1076,13 +1091,13 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
         temp.segmentPoints.push_back( path.all_.at(1).motionState_.msg_ );
         temp.segmentPoints.push_back( path.all_.at(2).motionState_.msg_ );
         
-        result.request.bezierCurves.push_back(temp);
+        result.bezierCurves.push_back(temp);
       }
     }
     else 
     {
       //ROS_INFO("In else if path.size < 3");
-      result.request.bezierCurves = curves;
+      result.bezierCurves = curves;
     } // end else
   } // end if
 
@@ -1629,7 +1644,8 @@ const RampTrajectory Planner::replanTrajec(const RampTrajectory trajec, const Mo
 
   ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(result.holonomic_path_, result.msg_.curves, trajec.msg_.id);
 
-  result = requestTrajectory(tr, result.msg_.id);
+  //result = requestTrajectory(tr, result.msg_.id);
+  result = requestTrajectory(tr);
 
   //ROS_INFO("Replanned Trajec: %s", result.toString().c_str());
 
@@ -2183,7 +2199,7 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
 
   // Build request and get trajectory
   ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
-  tr.request.type = TRANSITION;
+  tr.type = TRANSITION;
 
   RampTrajectory trj_transition = requestTrajectory(tr);
 
@@ -2207,36 +2223,42 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
 
 /** Request a trajectory */
 // Not const because it calls getIRT() to get an index for the trajectory if an id is not passed in
-const RampTrajectory Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr, const int id) 
+const std::vector<RampTrajectory> Planner::requestTrajectory(ramp_msgs::TrajectorySrv& tr, const int id) 
 {
-  RampTrajectory result;
+  std::vector<RampTrajectory> result;
   //std::cout<<"\nid: "<<id;
-
   
   ros::Time t_start = ros::Time::now();
   if(h_traj_req_->request(tr)) 
   {
     trajec_durs_.push_back(ros::Time::now() - t_start);
     
-    // Set the actual trajectory msg
-    result.msg_         = tr.response.trajectory;
-
-    // Set things the traj_gen does not have
-    result.msg_.t_start = ros::Duration(t_fixed_cc_);
-
-    // Set the paths (straight-line and bezier)
-    result.holonomic_path_        = tr.request.path;
-
-    // Set the ID of the trajectory
-    if(id != -1) 
+    for(uint8_t i=0;i<tr.request.reqs.size();i++)
     {
-      result.msg_.id = id;
-    }
-    else 
-    {
-      result.msg_.id = getIRT();
-    }
-  }
+      RampTrajectory temp;
+
+      // Set the actual trajectory msg
+      temp.msg_         = tr.response.trajectory;
+
+      // Set things the traj_gen does not have
+      temp.msg_.t_start = ros::Duration(t_fixed_cc_);
+
+      // Set the paths (straight-line and bezier)
+      temp.holonomic_path_        = tr.request.path;
+
+      // Set the ID of the trajectory
+      if(id != -1) 
+      {
+        temp.msg_.id = id;
+      }
+      else 
+      {
+        temp.msg_.id = getIRT();
+      }
+
+      result.push_back(temp);
+    } // end for
+  } // end if
   else 
   {
     ROS_ERROR("An error occurred when requesting a trajectory");
@@ -2246,14 +2268,36 @@ const RampTrajectory Planner::requestTrajectory(ramp_msgs::TrajectoryRequest& tr
   return result;
 }
 
+const std::vector<RampTrajectory> Planner::requestTrajectory(std::vector<ramp_msgs::TrajectoryRequest> trs)
+{
+  std::vector<RampTrajectory> result;
+  ramp_msgs::TrajectorySrv srv;
 
+  for(uint8_t i=0;i<trs.size();i++)
+  {
+    srv.request.reqs.push_back(trs.at(i));
+  }
+
+  result = requestTrajectory(srv);
+
+  return result;
+}
+
+
+const RampTrajectory Planner::requestTrajectory(ramp_msgs::TrajectoryRequest tr)
+{
+  ramp_msgs::TrajectorySrv srv;
+  srv.request.reqs.push_back(tr);
+
+  std::vector<RampTrajectory> vec = requestTrajectory(srv);
+  return vec.at(0);
+}
 
 const RampTrajectory Planner::requestTrajectory(const Path p, const int id) 
 {
-  ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(p);
-  RampTrajectory result = requestTrajectory(tr, id);
-  //ROS_INFO("Exiting Planner::requestTrajectory");
-  return result;
+  ramp_msgs::TrajectorySrv tr = buildTrajectorySrv(p);
+  std::vector<RampTrajectory> vec = requestTrajectory(tr, id);
+  return vec.at(0);
 }
 
 
