@@ -1,6 +1,6 @@
 #ifndef EVALUATE_H
 #define EVALUATE_H
-#include "ramp_msgs/EvaluationRequest.h"
+#include "ramp_msgs/EvaluationSrv.h"
 #include "euclidean_distance.h"
 #include "orientation.h"
 #include "collision_detection.h"
@@ -12,11 +12,11 @@
 class Evaluate {
   public:
     Evaluate();
-    Evaluate(const ramp_msgs::EvaluationRequest::Request& req);
+    Evaluate(const ramp_msgs::EvaluationRequest& req);
     
-    void setRequest(const ramp_msgs::EvaluationRequest::Request req);
+    void setRequest(const ramp_msgs::EvaluationRequest req);
 
-    const ramp_msgs::EvaluationRequest::Response perform();
+    const ramp_msgs::EvaluationResponse perform();
     bool performFeasibility();
     const double performFitness(bool feasible);
 
@@ -24,7 +24,7 @@ class Evaluate {
     EuclideanDistance eucDist_;
     Orientation orientation_;
 
-    ramp_msgs::EvaluationRequest::Response res_;
+    ramp_msgs::EvaluationResponse res_;
     
     CollisionDetection cd_;
     CollisionDetection::QueryResult qr_;

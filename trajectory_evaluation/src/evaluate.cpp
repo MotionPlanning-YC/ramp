@@ -3,13 +3,13 @@
 Evaluate::Evaluate() : Q(1000.f), orientation_infeasible_(0) {}
 
 
-Evaluate::Evaluate(const ramp_msgs::EvaluationRequest::Request& req) : Q(1000.) 
+Evaluate::Evaluate(const ramp_msgs::EvaluationRequest& req) : Q(1000.) 
 {
   setRequest(req);
 }
 
 /** This method accepts an EvaluationRequest and sets the appropriate members for evaluation */
-void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request req) 
+void Evaluate::setRequest(const ramp_msgs::EvaluationRequest req) 
 {
   trajectory_ = req.trajectory;
   currentTheta_ = req.currentTheta;
@@ -21,7 +21,7 @@ void Evaluate::setRequest(const ramp_msgs::EvaluationRequest::Request req)
 } //End setRequest
 
 
-const ramp_msgs::EvaluationRequest::Response Evaluate::perform()
+const ramp_msgs::EvaluationResponse Evaluate::perform()
 {
   res_.feasible = performFeasibility();
 

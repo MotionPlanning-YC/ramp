@@ -16,8 +16,8 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
   ros::Time t_start = ros::Time::now();
   for(uint8_t i=0;i<reqs.reqs.size();i++)
   {
-    ramp_msgs::EvaluationSrv::Request req = reqs.reqs.at(i);
-    ramp_msgs::EvaluationSrv::Response res;
+    ramp_msgs::EvaluationRequest req = reqs.reqs.at(i);
+    ramp_msgs::EvaluationResponse res;
     ROS_INFO("Robot Evaluating trajectory: %s", u.toString(req.trajectory).c_str());
 
     // If more than one point

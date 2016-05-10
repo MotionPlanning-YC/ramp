@@ -4,7 +4,7 @@
 #include "ramp_msgs/Path.h"
 #include "utility.h"
 #include "ramp_msgs/TrajectoryRequest.h"
-#include "ramp_msgs/EvaluationRequest.h"
+#include "ramp_msgs/EvaluationSrv.h"
 #include "ramp_msgs/Population.h"
 #include "ramp_msgs/BezierCurve.h"
 
@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
   ros::Publisher pub_traj = handle.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
   ros::Publisher pub_pop = handle.advertise<ramp_msgs::Population>("population", 1000);
   ros::ServiceClient client_ = handle.serviceClient<ramp_msgs::TrajectoryRequest>("trajectory_generator");
-  ros::ServiceClient client_eval = handle.serviceClient<ramp_msgs::EvaluationRequest>("trajectory_evaluation");
+  ros::ServiceClient client_eval = handle.serviceClient<ramp_msgs::EvaluationSrv>("trajectory_evaluation");
 
 
   ramp_msgs::KnotPoint zero;
@@ -409,7 +409,7 @@ int main(int argc, char** argv) {
   }
    
 
-  ramp_msgs::EvaluationRequest er;
+  ramp_msgs::EvaluationSrv er;
 
   er.request.trajectory = tr.response.trajectory;
   
