@@ -18,7 +18,7 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
   {
     ramp_msgs::EvaluationRequest req = reqs.reqs.at(i);
     ramp_msgs::EvaluationResponse res;
-    ROS_INFO("Robot Evaluating trajectory: %s", u.toString(req.trajectory).c_str());
+    //ROS_INFO("Robot Evaluating trajectory: %s", u.toString(req.trajectory).c_str());
 
     // If more than one point
     if(req.trajectory.trajectory.points.size() > 1)
@@ -34,7 +34,7 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
       res.t_firstCollision = ros::Duration(9999.f);
     }
 
-    ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
+    //ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
     resps.resps.push_back(res);
   }
   ros::Duration t_elapsed = ros::Time::now() - t_start;
@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
  
   ros::ServiceServer service    = handle.advertiseService("trajectory_evaluation", handleRequest);
 
-  signal(SIGINT, reportData);
+  //signal(SIGINT, reportData);
   //cd.pub_population = handle.advertise<ramp_msgs::Population>("/robot_1/population", 1000);
 
   /** ***Testing*** */

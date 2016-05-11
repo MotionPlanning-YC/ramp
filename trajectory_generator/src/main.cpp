@@ -59,15 +59,15 @@ bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
   {
     ramp_msgs::TrajectoryRequest treq = req.reqs.at(i); 
     ramp_msgs::TrajectoryResponse tres;
-    ROS_INFO("Trajectory Request Received: %s", utility.toString(treq).c_str());
+    //ROS_INFO("Trajectory Request Received: %s", utility.toString(treq).c_str());
 
     /*
      * Check for start == goal
      */
     if(treq.path.points.size() == 2 && checkGoal(treq))
     {
-      res.trajectory.trajectory.points.push_back(utility.getTrajectoryPoint(treq.path.points.at(0).motionState));
-      res.trajectory.i_knotPoints.push_back(0);
+      tres.trajectory.trajectory.points.push_back(utility.getTrajectoryPoint(treq.path.points.at(0).motionState));
+      tres.trajectory.i_knotPoints.push_back(0);
       return true;
     }
 
@@ -95,8 +95,7 @@ bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
       prediction.trajectoryRequest(treq, tres);
     }
 
-    ROS_INFO("Response: %s", utility.toString(tres).c_str());
-    ROS_INFO("Trajectory Done");
+    //ROS_INFO("Response: %s", utility.toString(tres).c_str());
   
     res.resps.push_back(tres);
   }
