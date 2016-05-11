@@ -68,8 +68,8 @@ const std::string Modifier::getOperator() const
 /** This method generates the random paths to use for the modification operator passed in as op argument */
 const std::vector<int> Modifier::getTargets(const std::string op, const Population pop) 
 {
-  //ROS_INFO("In Modifier::getTargets");
-  //ROS_INFO("op: %s", op.c_str());
+  ROS_INFO("In Modifier::getTargets");
+  ROS_INFO("op: %s", op.c_str());
   std::vector<int> result;
 
   // Get random path(s) to modify
@@ -91,7 +91,7 @@ const std::vector<int> Modifier::getTargets(const std::string op, const Populati
   } // end if crossover 
 
 
-  //ROS_INFO("In Modifier::getTargets");
+  ROS_INFO("In Modifier::getTargets");
   return result;
 } // End getTargets
 
@@ -109,10 +109,11 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest(const Po
 
   // Push the target paths onto the modification request
   std::vector<int> targets = getTargets(result.request.op, pop);
+  ROS_INFO("targets.size(): %i", (int)targets.size());
   for(unsigned int i=0;i<targets.size();i++) 
   {
-    //std::cout<<"\nTarget index: "<<targets.at(i);
-    //std::cout<<"\nPath "<<targets.at(i)<<" size: "<<pop.paths_.at(targets.at(i)).size()<<"\n";
+    std::cout<<"\nTarget index: "<<targets.at(i);
+    std::cout<<"\nPath "<<targets.at(i)<<" size: "<<pop.paths_.at(targets.at(i)).size()<<"\n";
     result.request.paths.push_back(
         pop.paths_.at(targets.at(i)).buildPathMsg());
   }
@@ -128,19 +129,19 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest(const Po
 /** This method performs all the tasks for path modification */
 const std::vector<Path> Modifier::perform(const Population pop) 
 {
-  //ROS_INFO("In Modifier::perform");
+  ROS_INFO("In Modifier::perform");
   std::vector<Path> result;
  
   // Build a modification request srv 
   ros::Time t_b = ros::Time::now();
   ramp_msgs::ModificationRequest mr = buildModificationRequest(pop); 
-  //ROS_INFO("ModificationResult built"); 
+  ROS_INFO("ModificationResult built, pop size: %i # of paths: %i", (int)pop.size(), (int)mr.response.mod_paths.size()); 
 
   // If the request was successful
   if(h_mod_req_->request(mr)) 
   {
-
     ros::Time t_m = ros::Time::now();
+    
     // Push on the modified paths
     for(unsigned int i=0;i<mr.response.mod_paths.size();i++) 
     {

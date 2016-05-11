@@ -6,7 +6,7 @@ RampTrajectory::RampTrajectory(unsigned int id)
   msg_.feasible = true;
   msg_.fitness = -1;  
   msg_.t_firstCollision = ros::Duration(9999.f);
-  msg_.t_start          = ros::Duration(2.0f);
+  msg_.t_start          = ros::Duration(0.f);
   msg_.trajectory.points.reserve(100);
 }
 

@@ -25,12 +25,14 @@ const ramp_msgs::EvaluationResponse Evaluate::perform()
 {
   res_.feasible = performFeasibility();
 
-  if(!res_.feasible)
+  if(qr_.collision_)
   {
+    ROS_INFO("Not feasible");
     res_.t_firstCollision = ros::Duration(qr_.t_firstCollision_);
   }
   else
   {
+    ROS_INFO("Feasible");
     res_.t_firstCollision = ros::Duration(9999.f);
   }
 
