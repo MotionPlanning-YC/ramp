@@ -939,8 +939,6 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
   double theta  = utility_.findAngleFromAToB(x_prev_, y_prev_, x, y);
   //ROS_INFO("x_prev_: %f x: %f y_prev_: %f y: %f", x_prev_, x, y_prev_, y); 
 
-  double x2     = (pow((1-0),2) * X0) + ((2*0)*(1-0)*X1) + (pow(0,2)*X2);
-  double y2     = (pow((1-0),2) * Y0) + ((2*0)*(1-0)*Y1) + (pow(0,2)*Y2);
   
   // Velocity
   double x_dot = ((A_*u) + C_)*u_dot;
