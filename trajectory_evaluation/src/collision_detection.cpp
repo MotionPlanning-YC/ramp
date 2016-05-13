@@ -42,6 +42,46 @@ const CollisionDetection::QueryResult CollisionDetection::perform() const
 
 
 
+const CollisionDetection::QueryResult CollisionDetection::queryAnalytical(const ramp_msgs::RampTrajectory ob_trajectory) const
+{
+  CollisionDetection::QueryResult result;
+
+  /* Line - Line */
+
+  // Line 1
+  std::vector<double> l1_p1 = trajectory_.trajectory.points.at(0).positions;
+  std::vector<double> l1_p2 = trajectory_.trajectory.points.at(1).positions;
+
+  double l1_slope = (l1_p2.at(1) - l1_p1.at(1)) / (l1_p2.at(0) - l1_p1.at(0));
+  double l1_b = l1_p2.at(1) - (l1_slope*l1_p2.at(0));
+
+  // Line 2
+  std::vector<double> l2_p1 = ob_trajectory.trajectory.points.at(0).positions;
+  std::vector<double> l2_p2 = ob_trajectory.trajectory.points.at(1).positions;
+
+  double l2_slope = (l2_p2.at(1) - l2_p1.at(1)) / (l2_p2.at(0) - l2_p1.at(0));
+  double l2_b = l2_p2.at(1) - (l2_slope*l2_p2.at(0));
+  
+  // Parallel lines
+  if( fabs(l2_slope - l1_slope) < 0.01 )
+  {
+  }
+  else
+  {
+    double x_intersect = (-(l1_b - l2_b)) / (l1_slope - l2_slope);
+    double l1_x_max = trajectory_.trajectory.points.at(trajectory_.trajectory.points.size()-1).positions.at(0);
+    double l2_x_max = ob_trajectory.trajectory.points.at(ob_trajectory.trajectory.points.size()-1).positions.at(0);
+
+    if( l1_x_max < x_intersect && l2_x_max < x_intersect )
+    {
+      result.collision_ = true;
+    }
+  }
+
+
+  return result;
+}
+
 /** 
  * This method returns true if there is collision between trajectory_ and the obstacle's trajectory, false otherwise 
  * The robots are treated as circles for simple collision detection

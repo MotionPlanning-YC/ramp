@@ -35,6 +35,8 @@ class CollisionDetection
     const QueryResult           query(const ramp_msgs::RampTrajectory ob_trajectory) const;
 
 
+    const QueryResult queryAnalytical(const ramp_msgs::RampTrajectory ob_trajectory) const;
+
     /***** Data Members ****/
     ramp_msgs::RampTrajectory trajectory_;
     std::vector<ramp_msgs::RampTrajectory> obstacle_trjs_;
