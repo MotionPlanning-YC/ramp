@@ -130,7 +130,7 @@ int main(int argc, char** argv) {
   
   ramp_msgs::Path p;
   p.points.push_back(zero);
-  p.points.push_back(c1);
+  //p.points.push_back(c1);
   //p.points.push_back(c2);
   //p.points.push_back(c3);
   //p.points.push_back(c4);
@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
   sp1.accelerations.push_back(0);*/
 
   ramp_msgs::MotionState sp2;
-  sp2 = p.points.at(2).motionState;
+  //sp2 = p.points.at(2).motionState;
   //sp2 = p.points.at(1).motionState;
   //sp2 = c3.motionState;
 
@@ -435,25 +435,25 @@ int main(int argc, char** argv) {
   // Build any obstacle trajectories
   ramp_msgs::KnotPoint ob1;
   ob1.motionState.positions.push_back(3.5); // 0.70455
-  ob1.motionState.positions.push_back(3.5); // 0.4026
-  ob1.motionState.positions.push_back(-2.35); // 0.519146
+  ob1.motionState.positions.push_back(0.); // 0.4026
+  ob1.motionState.positions.push_back(2.35); // 0.519146
   
-  ob1.motionState.velocities.push_back(0.); // 0.70455
-  ob1.motionState.velocities.push_back(0.); // 0.4026
+  ob1.motionState.velocities.push_back(-0.33); // 0.70455
+  ob1.motionState.velocities.push_back(0.33); // 0.4026
   ob1.motionState.velocities.push_back(0.); // 0.519146
   
   ramp_msgs::KnotPoint ob2;
-  ob2.motionState.positions.push_back(1.50251); // 0.70455
-  ob2.motionState.positions.push_back(3.27769); // 0.4026
-  ob2.motionState.positions.push_back(0.79718); // 0.519146
+  ob2.motionState.positions.push_back(0.); // 0.70455
+  ob2.motionState.positions.push_back(3.5); // 0.4026
+  ob2.motionState.positions.push_back(0.); // 0.519146
   
-  ob2.motionState.velocities.push_back(-0.258783); // 0.70455
-  ob2.motionState.velocities.push_back(-0.105661); // 0.4026
-  ob2.motionState.velocities.push_back(0.64); // 0.519146
+  ob2.motionState.velocities.push_back(-0.33); // 0.70455
+  ob2.motionState.velocities.push_back(0.33); // 0.4026
+  ob2.motionState.velocities.push_back(0.); // 0.519146
 
   ramp_msgs::Path obp, obp2;
   obp.points.push_back(ob1);
-  obp2.points.push_back(ob2);
+  obp.points.push_back(ob2);
 
   ramp_msgs::TrajectoryRequest obtr, obtr2;
   obtr.path = obp;
@@ -464,7 +464,7 @@ int main(int argc, char** argv) {
 
   ramp_msgs::TrajectorySrv obtr_srv;
   obtr_srv.request.reqs.push_back(obtr);
-  obtr_srv.request.reqs.push_back(obtr2);
+  //obtr_srv.request.reqs.push_back(obtr2);
 
   if(!client_.call(obtr_srv))
   {
@@ -472,13 +472,17 @@ int main(int argc, char** argv) {
   }
 
   ramp_msgs::RampTrajectory obt = obtr_srv.response.resps.at(0).trajectory;
-  ramp_msgs::RampTrajectory obt2 = obtr_srv.response.resps.at(1).trajectory;
+  //ramp_msgs::RampTrajectory obt2 = obtr_srv.response.resps.at(1).trajectory;
 
   // Add obstacle trajectory to ER
   er.obstacle_trjs.push_back(obt);
-  er.obstacle_trjs.push_back(obt2);
+  er.obstacle_trjs.push_back(obt);
+  er.obstacle_trjs.push_back(obt);
+  //er.obstacle_trjs.push_back(obt2);
 
   er_srv.request.reqs.push_back(er);
+
+
 
   // Evaluate trajectory
   if(client_eval.call(er_srv)) 
@@ -490,12 +494,6 @@ int main(int argc, char** argv) {
 
   std::cout<<"\n\nPress Enter to Publish population\n";
   std::cin.get();
-
-
-  /*if(client_eval.call(er)) {
-    std::cout<<"\nEvaluated traj, fitness: "<<er.response.fitness;
-    std::cout<<"\nEvaluated traj, feasible: "<<er.response.feasible;
-  }*/
 
 
   // Create Population to send to trajectory_visualization

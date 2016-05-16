@@ -7,9 +7,9 @@ class Orientation {
   public:
     Orientation();
 
-    const double perform();
-    const double getDeltaTheta() const;
-    const double getPenalty() const;
+    const double perform(const ramp_msgs::RampTrajectory& trj);
+    const double getDeltaTheta(const ramp_msgs::RampTrajectory& trj) const;
+    const double getPenalty(const ramp_msgs::RampTrajectory& trj) const;
 
     double currentTheta_;
     double theta_at_cc_;

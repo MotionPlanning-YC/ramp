@@ -3,19 +3,19 @@
 Orientation::Orientation() : Q_(1000. / PI) {}
 
 
-const double Orientation::getDeltaTheta() const
+const double Orientation::getDeltaTheta(const ramp_msgs::RampTrajectory& trj) const
 {
   double result = 0.f;
-  if(trajectory_.i_knotPoints.size() > 1) 
+  if(trj.i_knotPoints.size() > 1) 
   {
 
-    trajectory_msgs::JointTrajectoryPoint a = trajectory_.trajectory.points.at(0);
-    trajectory_msgs::JointTrajectoryPoint b = trajectory_.trajectory.points.at(trajectory_.i_knotPoints.at(1));
+    trajectory_msgs::JointTrajectoryPoint a = trj.trajectory.points.at(0);
+    trajectory_msgs::JointTrajectoryPoint b = trj.trajectory.points.at(trj.i_knotPoints.at(1));
     //ROS_INFO("a: %s\nb: %s", utility_.toString(a).c_str(), utility_.toString(b).c_str());
     
     double thetaNec = utility_.findAngleFromAToB(a, b);
     
-    if(trajectory_.t_start.toSec() < 0.01)
+    if(trj.t_start.toSec() < 0.01)
     {
       result          = fabs( utility_.findDistanceBetweenAngles(currentTheta_, thetaNec) );
     }
@@ -31,7 +31,7 @@ const double Orientation::getDeltaTheta() const
 }
 
 
-const double Orientation::perform() 
+const double Orientation::perform(const ramp_msgs::RampTrajectory& trj) 
 {
   double result = 0.;
 
@@ -40,8 +40,8 @@ const double Orientation::perform()
   if(trajectory_.i_knotPoints.size() > 1) 
   {
 
-    trajectory_msgs::JointTrajectoryPoint a = trajectory_.trajectory.points.at(0);
-    trajectory_msgs::JointTrajectoryPoint b = trajectory_.trajectory.points.at(trajectory_.i_knotPoints.at(1));
+    trajectory_msgs::JointTrajectoryPoint a = trj.trajectory.points.at(0);
+    trajectory_msgs::JointTrajectoryPoint b = trj.trajectory.points.at(trj.i_knotPoints.at(1));
     //ROS_INFO("a: %s\nb: %s", utility_.toString(a).c_str(), utility_.toString(b).c_str());
     
     double thetaNec = utility_.findAngleFromAToB(a, b);   
@@ -61,18 +61,18 @@ const double Orientation::perform()
 }
 
 
-const double Orientation::getPenalty() const 
+const double Orientation::getPenalty(const ramp_msgs::RampTrajectory& trj) const 
 {
   double result = 0.;
 
-  if(trajectory_.i_knotPoints.size() > 1) 
+  if(trj.i_knotPoints.size() > 1) 
   {
-    double thetaNec = utility_.findAngleFromAToB(trajectory_.trajectory.points.at(0),
-      trajectory_.trajectory.points.at( trajectory_.i_knotPoints.at(1) ));   
+    double thetaNec = utility_.findAngleFromAToB(trj.trajectory.points.at(0),
+      trj.trajectory.points.at( trj.i_knotPoints.at(1) ));   
     double deltaTheta = fabs( utility_.findDistanceBetweenAngles(currentTheta_, thetaNec) );
 
-    double mag_linear = sqrt( pow(trajectory_.trajectory.points.at(0).velocities.at(0), 2) + 
-        pow(trajectory_.trajectory.points.at(0).velocities.at(1), 2) );
+    double mag_linear = sqrt( pow(trj.trajectory.points.at(0).velocities.at(0), 2) + 
+        pow(trj.trajectory.points.at(0).velocities.at(1), 2) );
 
     //ROS_INFO("thetaNec: %f deltaTheta: %f mag_linear: %f", thetaNec, deltaTheta, mag_linear);
 
@@ -87,10 +87,10 @@ const double Orientation::getPenalty() const
   } // end if > 1 knot point
 
 
-  //ROS_INFO("trajectory.size(): %i", (int)trajectory_.trajectory.points.size());
-  if(trajectory_.trajectory.points.size() > 2)
+  //ROS_INFO("trajectory.size(): %i", (int)trj.trajectory.points.size());
+  if(trj.trajectory.points.size() > 2)
   {
-    trajectory_msgs::JointTrajectoryPoint p = trajectory_.trajectory.points.at(2);
+    trajectory_msgs::JointTrajectoryPoint p = trj.trajectory.points.at(2);
     double v = sqrt( pow(p.velocities.at(0), 2) + pow(p.velocities.at(1), 2) );
     double w = p.velocities.at(2);
 

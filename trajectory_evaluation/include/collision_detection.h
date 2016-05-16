@@ -6,6 +6,7 @@
 #include "tf/transform_datatypes.h"
 #include "ramp_msgs/TrajectoryRequest.h"
 #include "ramp_msgs/Obstacle.h"
+#include <chrono>
 
 
 
@@ -31,15 +32,15 @@ class CollisionDetection
 
     /***** Methods *****/ 
     void                        init(ros::NodeHandle& h);
-    const QueryResult           perform() const;
-    const QueryResult           query(const ramp_msgs::RampTrajectory ob_trajectory) const;
+    void                        perform(const ramp_msgs::RampTrajectory& trajectory, const std::vector<ramp_msgs::RampTrajectory>& obstacle_trjs, QueryResult& qr) const;
+    const QueryResult           query(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory) const;
 
 
-    const QueryResult queryAnalytical(const ramp_msgs::RampTrajectory ob_trajectory) const;
+    void queryAnalytical(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
 
     /***** Data Members ****/
-    ramp_msgs::RampTrajectory trajectory_;
-    std::vector<ramp_msgs::RampTrajectory> obstacle_trjs_;
+    //ramp_msgs::RampTrajectory trajectory_;
+    //std::vector<ramp_msgs::RampTrajectory> obstacle_trjs_;
   
 
     ros::Publisher pub_population;

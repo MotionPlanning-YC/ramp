@@ -14,11 +14,11 @@ class Evaluate {
     Evaluate();
     Evaluate(const ramp_msgs::EvaluationRequest& req);
     
-    void setRequest(const ramp_msgs::EvaluationRequest req);
+    void setRequest(const ramp_msgs::EvaluationRequest& req);
 
-    const ramp_msgs::EvaluationResponse perform();
-    bool performFeasibility();
-    const double performFitness(bool feasible);
+    const void perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationResponse& res);
+    bool performFeasibility(ramp_msgs::EvaluationRequest& er);
+    const double performFitness(ramp_msgs::RampTrajectory& trj);
 
     /** Different evaluation criteria */
     EuclideanDistance eucDist_;
@@ -31,7 +31,7 @@ class Evaluate {
 
     //Information sent by the request
     ramp_msgs::RampTrajectory trajectory_;
-    double currentTheta_;
+    std::vector<ramp_msgs::RampTrajectory> ob_trjs_;
 
     float Q;
 
