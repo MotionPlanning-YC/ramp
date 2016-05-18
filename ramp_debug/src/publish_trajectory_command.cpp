@@ -34,8 +34,8 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(3.4732); // 0.70455
-  c1.motionState.positions.push_back(3.14427); // 0.4026
+  c1.motionState.positions.push_back(1); // 0.70455
+  c1.motionState.positions.push_back(2.5); // 0.4026
   c1.motionState.positions.push_back(2.34237); // 0.519146
   
   ramp_msgs::KnotPoint c2;
@@ -434,26 +434,26 @@ int main(int argc, char** argv) {
 
   // Build any obstacle trajectories
   ramp_msgs::KnotPoint ob1;
-  ob1.motionState.positions.push_back(3.5); // 0.70455
-  ob1.motionState.positions.push_back(0.); // 0.4026
-  ob1.motionState.positions.push_back(2.35); // 0.519146
+  ob1.motionState.positions.push_back(2.); // 0.70455
+  ob1.motionState.positions.push_back(1.); // 0.4026
+  ob1.motionState.positions.push_back(PI/2); // 0.519146
   
-  ob1.motionState.velocities.push_back(-0.33); // 0.70455
-  ob1.motionState.velocities.push_back(0.33); // 0.4026
-  ob1.motionState.velocities.push_back(0.); // 0.519146
+  ob1.motionState.velocities.push_back(0.15); // 0.70455
+  ob1.motionState.velocities.push_back(0.); // 0.4026
+  ob1.motionState.velocities.push_back(0.33); // 0.519146
   
   ramp_msgs::KnotPoint ob2;
   ob2.motionState.positions.push_back(0.); // 0.70455
-  ob2.motionState.positions.push_back(3.5); // 0.4026
+  ob2.motionState.positions.push_back(3.); // 0.4026
   ob2.motionState.positions.push_back(0.); // 0.519146
   
   ob2.motionState.velocities.push_back(-0.33); // 0.70455
-  ob2.motionState.velocities.push_back(0.33); // 0.4026
+  ob2.motionState.velocities.push_back(0.); // 0.4026
   ob2.motionState.velocities.push_back(0.); // 0.519146
 
   ramp_msgs::Path obp, obp2;
   obp.points.push_back(ob1);
-  obp.points.push_back(ob2);
+  //obp.points.push_back(ob2);
 
   ramp_msgs::TrajectoryRequest obtr, obtr2;
   obtr.path = obp;
@@ -476,8 +476,8 @@ int main(int argc, char** argv) {
 
   // Add obstacle trajectory to ER
   er.obstacle_trjs.push_back(obt);
-  er.obstacle_trjs.push_back(obt);
-  er.obstacle_trjs.push_back(obt);
+  //er.obstacle_trjs.push_back(obt);
+  //er.obstacle_trjs.push_back(obt);
   //er.obstacle_trjs.push_back(obt2);
 
   er_srv.request.reqs.push_back(er);

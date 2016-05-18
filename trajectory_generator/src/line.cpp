@@ -95,7 +95,14 @@ const ramp_msgs::MotionState Line::buildMotionState(const ReflexxesData data)
 
 
 
-const bool Line::finalStateReached() {
+const bool Line::finalStateReached() 
+{
+
+
+  bool position_goal_met = fabs( reflexxesData_.inputParameters->TargetPositionVector->VecData[0]- reflexxesData_.inputParameters->CurrentPositionVector->VecData[0] ) < 0.01;
+  bool velocity_goal_met = fabs( reflexxesData_.inputParameters->TargetVelocityVector->VecData[1]- reflexxesData_.inputParameters->CurrentVelocityVector->VecData[1] ) < 0.01;
+  bool goal_reached = position_goal_met && velocity_goal_met;
+
   //return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
   return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED ||
       (timeFromStart_ >= timeCutoff_));

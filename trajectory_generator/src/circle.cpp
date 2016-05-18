@@ -1,35 +1,42 @@
 #include "circle.h"
 
-Circle::Circle() {
+Circle::Circle() 
+{
   reflexxesData_.rml = 0;
   reflexxesData_.inputParameters = 0;
   reflexxesData_.outputParameters = 0;
   timeCutoff_ = ros::Duration(3.5);
 }
 
-Circle::~Circle() {
-  if(reflexxesData_.rml != 0) {
+Circle::~Circle() 
+{
+  if(reflexxesData_.rml != 0) 
+  {
     delete reflexxesData_.rml;
     reflexxesData_.rml = 0;
   }
-  if(reflexxesData_.inputParameters) {
+  if(reflexxesData_.inputParameters) 
+  {
     delete reflexxesData_.inputParameters;
     reflexxesData_.inputParameters = 0;
   }
-  if(reflexxesData_.outputParameters != 0) {
+  if(reflexxesData_.outputParameters != 0) 
+  {
     delete reflexxesData_.outputParameters;
     reflexxesData_.outputParameters = 0;
   }
 }
 
 
-const bool Circle::finalStateReached() {
+const bool Circle::finalStateReached() 
+{
   //return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
   return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED ||
       (timeFromStart_ >= timeCutoff_));
 }
 
-void Circle::init(const ramp_msgs::MotionState s) {
+void Circle::init(const ramp_msgs::MotionState s) 
+{
   //std::cout<<"\nIn init\n";
   start_ = s;
   //std::cout<<"\nstart: "<<utility_.toString(start_)<<"\n";
