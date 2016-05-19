@@ -604,7 +604,7 @@ void BezierCurve::initControlPoints()
 
   double l_s1 = utility_.positionDistance(segmentPoints_.at(1).positions, segmentPoints_.at(0).positions);
   double l_s2 = utility_.positionDistance(segmentPoints_.at(2).positions, segmentPoints_.at(1).positions);
-  //std::cout<<"\nl_s1: "<<l_s1<<" l_s2: "<<l_s2;
+  //ROS_INFO("l_s1: %f l_s2: %f", l_s1, l_s2);
 
   // If 1st segment's length is smaller than 2nd segment's length
   // Compute first control point and call overloaded method

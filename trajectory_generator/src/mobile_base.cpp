@@ -507,12 +507,11 @@ const bool MobileBase::lambdaOkay(const std::vector<ramp_msgs::MotionState> segm
 
 
 /** Returns a lambda value that will lead to defined Bezier equations */
-const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::MotionState> segment_points) const {
+const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::MotionState> segment_points) const 
+{
+  //ROS_INFO("In MobileBase::getControlPointLambda");
+
   std::vector<double> result;
-  
-  double l_s1 = utility_.positionDistance(segment_points.at(1).positions, segment_points.at(0).positions);
-  double l_s2 = utility_.positionDistance(segment_points.at(2).positions, segment_points.at(1).positions);
-  //std::cout<<"\nl_s1: "<<l_s1<<" l_s2: "<<l_s2;
 
   // Start transition trajectories right away,
   // otherwise, try to go straight for a while
@@ -520,7 +519,7 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
 
   double min_lambda = (path_.points.at(0).motionState.positions.at(0) - segment_points.at(0).positions.at(0)) 
                       / (segment_points.at(1).positions.at(0) - segment_points.at(0).positions.at(0));
-  ////////ROS_INFO("min_lambda: %f", min_lambda);
+  //ROS_INFO("min_lambda: %f", min_lambda);
 
   if(min_lambda > 1) 
   {
@@ -553,9 +552,10 @@ const double MobileBase::getControlPointLambda(const std::vector<ramp_msgs::Moti
         loopedOnce = true;
       }
     }
-    ////////ROS_INFO("lambda final: %f", lambda);
+    //ROS_INFO("lambda final: %f", lambda);
   }
 
+  //ROS_INFO("Exiting MobileBase::getControlPointLambda");
   return lambda;
 } // End getControlPointLambda
 

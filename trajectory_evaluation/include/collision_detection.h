@@ -33,12 +33,18 @@ class CollisionDetection
     /***** Methods *****/ 
     void                        init(ros::NodeHandle& h);
     void                        perform(const ramp_msgs::RampTrajectory& trajectory, const std::vector<ramp_msgs::RampTrajectory>& obstacle_trjs, QueryResult& qr) const;
+
     const QueryResult           query(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory) const;
 
+
+
+    bool ControlPolyArc(const std::vector<ramp_msgs::MotionState> con_poly_vert, const std::vector<double> cir_cent, 
+        const double cir_r) const;
 
     void LineLine(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
     void LineArc(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
     void BezierLine(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
+    void BezierArc(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
 
     /***** Data Members ****/
     //ramp_msgs::RampTrajectory trajectory_;

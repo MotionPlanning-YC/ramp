@@ -30,8 +30,14 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
     //CollisionDetection::QueryResult q = queryAnalytical(ob_trajectory);
     //CollisionDetection::QueryResult q = queryAnalytical(obstacle_trjs_.at(i));
     //LineLine(trajectory, obstacle_trjs.at(i), result);
-    LineArc(trajectory, obstacle_trjs.at(i), result);
-    //BezierLine(trajectory, obstacle_trjs.at(i), result);
+    //LineArc(trajectory, obstacle_trjs.at(i), result);
+    BezierLine(trajectory, obstacle_trjs.at(i), result);
+    std::vector<double> cir_cent;
+    cir_cent.push_back(3);
+    cir_cent.push_back(2.5);
+    double r = 1;
+    //ControlPolyArc(trajectory.curves.at(0).controlPoints, cir_cent, r);
+    //BezierArc(trajectory, obstacle_trjs.at(i), result);
   }
 
   //ros::Time t_done = ros::Time::now();
@@ -39,6 +45,150 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
   //ROS_INFO("Exiting CollisionDetection::perform()");
 } //End perform
 
+
+
+void CollisionDetection::BezierArc(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& 
+    ob_trajectory, QueryResult& qr) const
+{
+  double w = ob_trajectory.trajectory.points.at(0).velocities.at(2);
+  double v = sqrt(pow(ob_trajectory.trajectory.points.at(0).velocities.at(0),2) + pow(ob_trajectory.trajectory.points.at(0).velocities.at(1),2) );
+  double r = v / w;
+
+  ROS_INFO("w: %f v: %f r: %f", w, v, r);
+
+  double h, k;
+
+  trajectory_msgs::JointTrajectoryPoint p1 = ob_trajectory.trajectory.points.at(0);
+  trajectory_msgs::JointTrajectoryPoint p2 = ob_trajectory.trajectory.points.at( ob_trajectory.trajectory.points.size() 
+      / 2.f);
+  trajectory_msgs::JointTrajectoryPoint p3 = ob_trajectory.trajectory.points.at( 
+      ob_trajectory.trajectory.points.size()-1);
+
+
+  double q = utility_.positionDistance(p1.positions, p2.positions);
+
+  double x_mid = (p1.positions.at(0) + p2.positions.at(0)) / 2.f;
+  double y_mid = (p1.positions.at(1) + p2.positions.at(1)) / 2.f;
+
+  double x_dir = p1.positions.at(0) - p2.positions.at(0);
+  double y_dir = p1.positions.at(1) - p2.positions.at(1);
+
+  double x_dir_per = y_dir / q;
+  double y_dir_per = -x_dir / q;
+
+  std::vector<double> p_vec0;
+  p_vec0.push_back(x_mid);
+  p_vec0.push_back(y_mid);
+  std::vector<double> r_vec0;
+  r_vec0.push_back(x_dir_per);
+  r_vec0.push_back(y_dir_per);
+
+  // Get second mid line
+  x_mid = (p2.positions.at(0) + p3.positions.at(0)) / 2.f;
+  y_mid = (p2.positions.at(1) + p3.positions.at(1)) / 2.f;
+
+  x_dir = p2.positions.at(0) - p3.positions.at(0);
+  y_dir = p2.positions.at(1) - p3.positions.at(1);
+
+  x_dir_per = y_dir / q;
+  y_dir_per = -x_dir / q;
+  
+  std::vector<double> p_vec1;
+  p_vec1.push_back(x_mid);
+  p_vec1.push_back(y_mid);
+  std::vector<double> r_vec1;
+  r_vec1.push_back(x_dir_per);
+  r_vec1.push_back(y_dir_per);
+
+  // Find intersection of two lines that are in vector form
+  double p0_x = p_vec0.at(0); double p0_y = p_vec0.at(1);
+  double p1_x = p_vec1.at(0); double p1_y = p_vec1.at(1);
+  double r0_x = r_vec0.at(0); double r0_y = r_vec0.at(1);
+  double r1_x = r_vec1.at(0); double r1_y = r_vec1.at(1);
+
+  double s = (r0_y*(p1_x-p0_x) + r0_x*(p0_y-p1_y)) / (r1_y*r0_x - r0_y*r1_x);
+
+  double t = ( p1_x - p0_x +s*r1_x) / r0_x;
+
+  double a_x = p0_x + r0_x*t;
+  double a_y = p0_y + r0_y*t;
+  double b_x = p1_x + r1_x*s;
+  double b_y = p1_y + r1_y*s;
+  
+  ROS_INFO("s: %f t: %f", s, t);
+  ROS_INFO("a_x: %f b_x: %f a_y: %f b_y: %f", a_x, b_x, a_y, b_y);
+  
+
+  // Comment out the "Get second mid line" section for this to work...
+  h = a_x;
+  k = a_y;
+
+  std::vector<double> cir_cent;
+  cir_cent.push_back(h);
+  cir_cent.push_back(k);
+
+  qr.collision_ = ControlPolyArc(trajectory.curves.at(0).controlPoints, cir_cent, r);
+}
+
+bool CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState> con_poly_vert, const 
+    std::vector<double> cir_cent, const double r) const
+{
+  
+  for(int i=0;i<con_poly_vert.size()-1;i++)
+  {
+    ROS_INFO("Segment %i", i);
+    std::vector<double> l_p1;
+    l_p1.push_back(con_poly_vert.at(i).positions.at(0));
+    l_p1.push_back(con_poly_vert.at(i).positions.at(1));
+    
+    std::vector<double> l_p2;
+    l_p2.push_back(con_poly_vert.at(i+1).positions.at(0));
+    l_p2.push_back(con_poly_vert.at(i+1).positions.at(1));
+    
+    double slope = (l_p2.at(1) - l_p1.at(1)) / (l_p2.at(0) - l_p1.at(0));
+    double b = l_p2.at(1) - (slope*l_p2.at(0));
+    double m = slope;
+    double h = cir_cent.at(0);
+    double k = cir_cent.at(1);
+    
+    double A = pow(slope,2) + 1;
+    double B = 2*(m*b - m*k - h);
+    double C = pow(h,2) + pow(b,2) + pow(k,2) - pow(r,2) - 2*b*k;
+    
+    double discriminant = pow(B,2) - 4*A*C;
+    double x_intersect_1 = (-B + sqrt(discriminant)) / (2*A);
+    double x_intersect_2 = (-B - sqrt(discriminant)) / (2*A);
+  
+    double y = slope*x_intersect_1 + b;
+    double y_2 = pow( (x_intersect_1 - h),2 ) + pow( y-k, 2 );
+    
+    ROS_INFO("x_intersect_1: %f y: %f y_2: %f r^2: %f", x_intersect_1, y, y_2, pow(r,2));
+
+    ROS_INFO("discriminant: %f sqrt(discriminant): %f", discriminant, sqrt(discriminant));
+    ROS_INFO("-B + sqrt(discriminant): %f", -B+sqrt(discriminant));
+    ROS_INFO("-B - sqrt(discriminant): %f", -B-sqrt(discriminant));
+    
+    ROS_INFO("2*A: %f", 2*A);
+    ROS_INFO("x_intersect_1: %f x_intersect_2: %f", x_intersect_1, x_intersect_2);
+  
+    double x_min = l_p1.at(0);
+    double x_max = l_p2.at(0);
+    if( x_min > x_max )
+    {
+      double temp = x_min;
+      x_min = x_max;
+      x_max = temp;
+    }
+    if( (x_intersect_1 >= x_min && x_intersect_1 <= x_max) ||
+        (x_intersect_2 >= x_min && x_intersect_2 <= x_max )  )
+    {
+      ROS_INFO("Collision on segment %i", i);
+      return true;
+    }
+  }
+
+  return false;
+}
 
 
 void CollisionDetection::LineLine(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& result) const
@@ -129,10 +279,10 @@ void CollisionDetection::BezierLine(const ramp_msgs::RampTrajectory& trajectory,
   ROS_INFO("(x1, y1): (%f, %f) (x2, y2): (%f, %f)", x1, y1, x2, y2);
 
 
-  Q = y2*( X0 - 2*X1 + X2 ) - y1*( X0 - 2*X1 + X2 );
-  S = x1*( Y0 - 2*Y1 + Y2 ) - x2*( Y0 - 2*Y1 + Y2 );
-  R = y2*( 2*X1 - 2*X0) - y1*( 2*X1 - 2*X0 );
-  T = x1*( 2*Y1 - 2*Y0 ) - x2*( 2*Y1 - 2*Y0 );
+  Q = y2*( X0 - 2*X1 + X2 ) - (y1*( X0 - 2*X1 + X2 ));
+  S = x1*( Y0 - 2*Y1 + Y2 ) - (x2*( Y0 - 2*Y1 + Y2 ));
+  R = y2*( 2*X1 - 2*X0 ) - (y1*( 2*X1 - 2*X0 ));
+  T = x1*( 2*Y1 - 2*Y0 ) - (x2*( 2*Y1 - 2*Y0 ));
 
   ROS_INFO("Q: %f R: %f S: %f T: %f", Q, R, S, T);
 
@@ -144,15 +294,61 @@ void CollisionDetection::BezierLine(const ramp_msgs::RampTrajectory& trajectory,
   ROS_INFO("A: %f B: %f C: %f", A, B, C);
 
   double u_1, u_2;
+  double discriminant = pow(B,2) - (4*A*C);
 
-  ROS_INFO("Discriminant: %f", pow(B,2) - 4*A*C);
-  ROS_INFO("sqrt(Discriminant): %f", sqrt(pow(B,2) - 4*A*C));
+  ROS_INFO("Discriminant: %f", discriminant);
+  ROS_INFO("sqrt(Discriminant): %f", sqrt(discriminant));
 
-  u_1 = (-B + sqrt( pow(B,2) - 4*A*C )) / 2*A;
-  u_2 = (-B - sqrt( pow(B,2) - 4*A*C )) / 2*A;
+  u_1 = (-B + sqrt( discriminant )) / (2*A);
+  u_2 = (-B - sqrt( discriminant )) / (2*A);
+  ROS_INFO("-B: %f discriminant: %f", -B, discriminant);
+  ROS_INFO("-B - sqrt(discriminant): %f", -B - sqrt(discriminant));
+  ROS_INFO("2*A: %f", 2*A);
   
   ROS_INFO("u_1: %f u_2: %f", u_1, u_2);
 
+  double x_min = ob_trajectory.trajectory.points.at(0).positions.at(0);
+  double x_max = ob_trajectory.trajectory.points.at(ob_trajectory.trajectory.points.size()-1).positions.at(0);
+  if(x_min > x_max)
+  {
+    double temp = x_min;
+    x_min = x_max;
+    x_max = temp;
+  }
+  ROS_INFO("x_min: %f x_max: %f", x_min, x_max);
+  if( (u_1 >= 0.f && u_1 <= 1.f) )
+  {
+    double bezier_x = pow( (1-u_1), 2 )*X0 + 2*u_1*(1-u_1)*X1 + pow(u_1,2)*X2;
+    ROS_INFO("bezier_x: %f", bezier_x);
+    if( bezier_x >= x_min && bezier_x <= x_max )
+    {
+      qr.collision_ = true;
+    }
+  }
+
+  else if( (u_2 >= 0.f && u_2 <= 1.f) )
+  {
+    double bezier_x = pow( (1-u_2), 2 )*X0 + 2*u_2*(1-u_2)*X1 + pow(u_2,2)*X2;
+    if( bezier_x >= x_min && bezier_x <= x_max )
+    {
+      qr.collision_ = true;
+    }
+  }
+
+  else
+  {
+    qr.collision_ = false;
+  }
+
+  double test_a = A*pow(u_1,2) + B*u_1 + C;
+  double test_b = A*pow(u_2,2) + B*u_2 + C;
+
+  double bezier_x = pow( (1-u_2), 2 )*X0 + 2*u_2*(1-u_2)*X1 + pow(u_2,2)*X2;
+  double bezier_y = pow( (1-u_2), 2 )*Y0 + 2*u_2*(1-u_2)*Y1 + pow(u_2,2)*Y2;
+
+  ROS_INFO("test_a: %f, test_b: %f", test_a, test_b);
+  ROS_INFO("bezier (x,y): (%f, %f):", bezier_x, bezier_y);
+      
   ROS_INFO("BezierLine time: %f", (ros::Time::now()-t_start).toSec());
 }
 
