@@ -38,6 +38,19 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
     double r = 1;
     //ControlPolyArc(trajectory.curves.at(0).controlPoints, cir_cent, r);
     //BezierArc(trajectory, obstacle_trjs.at(i), result);
+    
+
+
+    std::vector< std::vector<ramp_msgs::MotionState> > subdivide = deCasteljau(trajectory.curves.at(0).controlPoints);
+    ROS_INFO("Left: ");
+    for(int c=0;c<subdivide.at(0).size();c++)
+    {
+      ROS_INFO("Control Point %i: %s", c, utility_.toString(subdivide.at(0).at(c)).c_str());
+    }
+    for(int c=0;c<subdivide.at(1).size();c++)
+    {
+      ROS_INFO("Control Point %i: %s", c, utility_.toString(subdivide.at(1).at(c)).c_str());
+    }
   }
 
   //ros::Time t_done = ros::Time::now();
@@ -127,8 +140,66 @@ void CollisionDetection::BezierArc(const ramp_msgs::RampTrajectory& trajectory, 
   cir_cent.push_back(h);
   cir_cent.push_back(k);
 
+
+  // Start sub-dividing the CP
   qr.collision_ = ControlPolyArc(trajectory.curves.at(0).controlPoints, cir_cent, r);
+  
+  if(qr.collision_)
+  {
+    
+  }
 }
+
+
+
+std::vector< std::vector<ramp_msgs::MotionState> > CollisionDetection::deCasteljau(const 
+    std::vector<ramp_msgs::MotionState> control_poly) const
+{
+  std::vector<ramp_msgs::MotionState> result_left;
+  std::vector<ramp_msgs::MotionState> result_right;
+
+  double t = 0.5f;
+ 
+  double slope_left = (control_poly.at(1).positions.at(1) - control_poly.at(0).positions.at(1)) / 
+    (control_poly.at(1).positions.at(0) - control_poly.at(0).positions.at(0));
+
+  double x_b_1_0 = (1-t)*control_poly.at(0).positions.at(0) + t*control_poly.at(1).positions.at(0);
+  double y_b_1_0 = (1-t)*control_poly.at(0).positions.at(1) + t*control_poly.at(1).positions.at(1);
+
+  double x_b_1_1 = (1-t)*control_poly.at(1).positions.at(0) + t*control_poly.at(2).positions.at(0);
+  double y_b_1_1 = (1-t)*control_poly.at(1).positions.at(1) + t*control_poly.at(2).positions.at(1);
+
+  double x_b_2_0 = (1-t)*x_b_1_0 + t*x_b_1_1;
+  double y_b_2_0 = (1-t)*y_b_1_0 + t*y_b_1_1;
+
+  ramp_msgs::MotionState b_1_0;
+  b_1_0.positions.push_back(x_b_1_0);
+  b_1_0.positions.push_back(y_b_1_0);
+
+  ramp_msgs::MotionState b_1_1;
+  b_1_1.positions.push_back(x_b_1_1);
+  b_1_1.positions.push_back(y_b_1_1);
+
+  ramp_msgs::MotionState b_2_0;
+  b_2_0.positions.push_back(x_b_2_0);
+  b_2_0.positions.push_back(y_b_2_0);
+
+  result_left.push_back( control_poly.at(0) );
+  result_left.push_back( b_1_0 );
+  result_left.push_back( b_2_0 );
+
+  result_right.push_back( b_2_0 );
+  result_right.push_back( b_1_1 );
+  result_right.push_back( control_poly.at(2) );
+
+  std::vector< std::vector<ramp_msgs::MotionState> > result;
+  result.push_back(result_left);
+  result.push_back(result_right);
+  return result;
+}
+
+
+
 
 bool CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState> con_poly_vert, const 
     std::vector<double> cir_cent, const double r) const
