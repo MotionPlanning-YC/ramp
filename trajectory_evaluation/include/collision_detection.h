@@ -37,7 +37,8 @@ class CollisionDetection
     const QueryResult           query(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory) const;
 
 
-
+    std::vector< std::vector<ramp_msgs::MotionState> > buildTree(const std::vector<ramp_msgs::MotionState> 
+        control_poly, const int depth) const;
     std::vector< std::vector<ramp_msgs::MotionState> > deCasteljau(const std::vector<ramp_msgs::MotionState> 
         control_poly) const;
     bool ControlPolyArc(const std::vector<ramp_msgs::MotionState> con_poly_vert, const std::vector<double> cir_cent, 

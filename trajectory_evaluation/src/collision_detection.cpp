@@ -37,7 +37,7 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
     cir_cent.push_back(2.5);
     double r = 1;
     //ControlPolyArc(trajectory.curves.at(0).controlPoints, cir_cent, r);
-    //BezierArc(trajectory, obstacle_trjs.at(i), result);
+    BezierArc(trajectory, obstacle_trjs.at(i), result);
     
 
 
@@ -142,12 +142,100 @@ void CollisionDetection::BezierArc(const ramp_msgs::RampTrajectory& trajectory, 
 
 
   // Start sub-dividing the CP
-  qr.collision_ = ControlPolyArc(trajectory.curves.at(0).controlPoints, cir_cent, r);
   
-  if(qr.collision_)
+  //std::stack< std::vector<ramp_msgs::MotionState> > stack_cont_polys;
+  //stack_cont_polys.push(trajectory.curves.at(0).controlPoints);
+ 
+  int i=0; 
+  bool coll_array[7] = {false, false, false, false, false, false, false};
+  std::vector< std::vector<ramp_msgs::MotionState> > control_poly_tree = buildTree(trajectory.curves.at(0).controlPoints, 2);
+  for(i=0;i<control_poly_tree.size();i++)
   {
+    std::vector<ramp_msgs::MotionState> control_poly = control_poly_tree.at(i);
+    ROS_INFO("control_poly:");
+    for(int j=0;j<control_poly.size();j++)
+    {
+      ROS_INFO("Vertex %i: %s", i, utility_.toString(control_poly.at(j)).c_str());
+    }
+
+    coll_array[i] = ControlPolyArc(control_poly, cir_cent, r);
+    ROS_INFO("collision at %i: %s", i, coll_array[i] ? "True" : "False");
+
+    
+    
     
   }
+  //control_poly_tree.reserve(7);
+  //control_poly_tree.push_back(trajectory.curves.at(0).controlPoints);
+  int j=0;
+  bool coll=false;
+  while(i < control_poly_tree.size())
+  {
+    ROS_INFO("In while, i: %i", i);
+    std::vector<ramp_msgs::MotionState> control_poly = control_poly_tree.at(i);
+    
+    ROS_INFO("control_poly:");
+    for(int j=0;j<control_poly.size();j++)
+    {
+      ROS_INFO("Vertex %i: %s", i, utility_.toString(control_poly.at(j)).c_str());
+    }
+
+    coll_array[i] = ControlPolyArc(control_poly, cir_cent, r);
+    ROS_INFO("collision at %i: %s", i, coll_array[i] ? "True" : "False");
+
+
+    if(coll_array[i] && j < 3 )
+    {
+      ROS_INFO("Sub-dividing");
+      std::vector< std::vector<ramp_msgs::MotionState> > subdivide = deCasteljau(control_poly);
+      //stack_cont_polys.push(subdivide.at(0));
+      //stack_cont_polys.push(subdivide.at(1));
+      //control_poly_tree.at(2*(i+1)) = subdivide.at(0);
+      //control_poly_tree.at(2*(i+1)+1) = subdivide.at(1);
+      control_poly_tree.push_back(subdivide.at(0));
+      control_poly_tree.push_back(subdivide.at(1));
+      ROS_INFO("Size of control_poly_tree: %i", (int)control_poly_tree.size());
+      j++;
+    }
+    i++;
+  }
+
+  ROS_INFO("coll_array after collision checks:");
+  for(int i=0;i<7;i++)
+  {
+    ROS_INFO("coll_array[%i]: %s", i, coll_array[i] ? "True" : "False");
+  }
+
+  if(control_poly_tree.size() > 3)
+  {
+    ROS_INFO("In bottom if, size: %i", (int)control_poly_tree.size());
+    for(int i=3;i<control_poly_tree.size();i++)
+    {
+      if(coll_array[i])
+      {
+        coll = true;
+        break;
+      }
+    }
+  }
+}
+
+
+std::vector< std::vector<ramp_msgs::MotionState> > CollisionDetection::buildTree(const std::vector<ramp_msgs::MotionState> control_poly, const int depth) const
+{
+  std::vector< std::vector<ramp_msgs::MotionState> > result;
+
+  result.push_back(control_poly);
+
+  for(int i=0;i<pow(2,depth+1);i++)
+  {
+    std::vector< std::vector<ramp_msgs::MotionState> > subdivide = deCasteljau(result.at(i));
+
+    result.push_back(subdivide.at(0));
+    result.push_back(subdivide.at(1));
+  }
+
+  return result;
 }
 
 
@@ -159,9 +247,6 @@ std::vector< std::vector<ramp_msgs::MotionState> > CollisionDetection::deCastelj
   std::vector<ramp_msgs::MotionState> result_right;
 
   double t = 0.5f;
- 
-  double slope_left = (control_poly.at(1).positions.at(1) - control_poly.at(0).positions.at(1)) / 
-    (control_poly.at(1).positions.at(0) - control_poly.at(0).positions.at(0));
 
   double x_b_1_0 = (1-t)*control_poly.at(0).positions.at(0) + t*control_poly.at(1).positions.at(0);
   double y_b_1_0 = (1-t)*control_poly.at(0).positions.at(1) + t*control_poly.at(1).positions.at(1);

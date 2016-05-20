@@ -2,6 +2,7 @@
 #define UTILITY_H
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <queue>
 #include <sstream>
 #include <math.h>
