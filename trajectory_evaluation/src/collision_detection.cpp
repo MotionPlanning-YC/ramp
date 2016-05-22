@@ -21,7 +21,7 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
   
   //ROS_INFO("obstacle_trjs_.size(): %i", (int)obstacle_trjs_.size());
   // Predict the obstacle's trajectory
-  for(int i=0;i<s;i++)
+  for(int ob_i=0;ob_i<s;ob_i++)
   {
     //ramp_msgs::RampTrajectory ob_trajectory = obstacle_trjs.at(i);
 
@@ -33,7 +33,32 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
     //LineArc(trajectory, obstacle_trjs.at(i), result);
     //BezierLine(trajectory, obstacle_trjs.at(i), result);
     //ControlPolyArc(trajectory.curves.at(0).controlPoints, cir_cent, r);
-    BezierArc(trajectory, obstacle_trjs.at(i), result);
+    BezierArc(trajectory, obstacle_trjs.at(ob_i), result);
+
+    /*trajectory_msgs::JointTrajectoryPoint ob_a = obstacle_trjs.at(ob_i).trajectory.points.at(0);
+    trajectory_msgs::JointTrajectoryPoint ob_b = obstacle_trjs.at(ob_i).trajectory.points.at( 
+        obstacle_trjs.at(ob_i).trajectory.points.size()-1 );
+    bool ob_trj_line = fabs(utility_.displaceAngle(ob_a.positions.at(2), ob_b.positions.at(2))) > 0.01;
+
+    for(int segment=1;segment<trajectory.i_knotPoints.size();segment++)
+    {
+      // If segment end-points share orientation, it's a straight-line
+      trajectory_msgs::JointTrajectoryPoint a = trajectory.trajectory.points.at( trajectory.i_knotPoints.at(segment-1) );
+      trajectory_msgs::JointTrajectoryPoint b = trajectory.trajectory.points.at( trajectory.i_knotPoints.at(segment) );
+
+      // Straight-line
+      if( fabs(utility_.findDistanceBetweenAngles(a.positions.at(2), b.positions.at(2))) < 0.01 )
+      {
+        // Line-Line
+        if(ob_trj_line)
+        {
+        }
+        // Line-Arc
+        else
+        {
+        }
+      }
+    } // end for*/
     
 
 
@@ -151,7 +176,7 @@ void CollisionDetection::BezierArc(const ramp_msgs::RampTrajectory& trajectory, 
       ROS_INFO("Vertex %i: %s", i, utility_.toString(control_poly.at(j)).c_str());
     }
 
-    coll_array[i] = ControlPolyArc(control_poly, cir_cent, r);
+    coll_array[i] = ControlPolyArc(control_poly, cir_cent, r, ob_trajectory);
     ROS_INFO("collision at %i: %s", i, coll_array[i] ? "True" : "False");
 
     // If no collision with the initial control polygon, return false
@@ -251,9 +276,11 @@ std::vector< std::vector<ramp_msgs::MotionState> > CollisionDetection::deCastelj
 
 
 bool CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState> con_poly_vert, const 
-    std::vector<double> cir_cent, const double r) const
+    std::vector<double> cir_cent, const double r, const ramp_msgs::RampTrajectory& ob_tr) const
 {
+  ROS_INFO("circle center: (%f, %f), r: %f", cir_cent.at(0), cir_cent.at(1), r);
   
+  // Line-Arc for each segment on control polygon
   for(int i=0;i<con_poly_vert.size();i++)
   {
     int start = i;
@@ -295,14 +322,26 @@ bool CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState
   
     double x_min = l_p1.at(0);
     double x_max = l_p2.at(0);
+
+    double ob_x_min = ob_tr.trajectory.points.at(0).positions.at(0);
+    double ob_x_max = ob_tr.trajectory.points.at( ob_tr.trajectory.points.size()/2 ).positions.at(0); 
+    if(ob_x_min > ob_x_max)
+    {
+      double temp = ob_x_min;
+      ob_x_min = ob_x_max;
+      ob_x_max = temp;
+    }
+
     if( x_min > x_max )
     {
       double temp = x_min;
       x_min = x_max;
       x_max = temp;
     }
-    if( (x_intersect_1 >= x_min && x_intersect_1 <= x_max) ||
-        (x_intersect_2 >= x_min && x_intersect_2 <= x_max )  )
+    
+    ROS_INFO("x_min: %f x_max: %f ob_x_min: %f ob_x_max: %f", x_min, x_max, ob_x_min, ob_x_max);
+    if( ((x_intersect_1 >= x_min && x_intersect_1 <= x_max) && (x_intersect_1 >= ob_x_min && x_intersect_1 <= ob_x_max))  ||
+        ((x_intersect_2 >= x_min && x_intersect_2 <= x_max) && (x_intersect_2 >= ob_x_min && x_intersect_2 <= ob_x_max))  )
     {
       ROS_INFO("Collision on segment %i", i);
       return true;
@@ -594,17 +633,27 @@ void CollisionDetection::LineArc(const ramp_msgs::RampTrajectory& trajectory, co
   ROS_INFO("2*A: %f", 2*A);
   ROS_INFO("x_intersect_1: %f x_intersect_2: %f", x_intersect_1, x_intersect_2);
 
-
   double x_min = trajectory.trajectory.points.at(0).positions.at(0);
   double x_max = trajectory.trajectory.points.at(trajectory.trajectory.points.size()-1).positions.at(0);
+  double ob_x_min = ob_trajectory.trajectory.points.at(0).positions.at(0);
+  double ob_x_max = ob_trajectory.trajectory.points.at( ob_trajectory.trajectory.points.size()/2 ).positions.at(0); 
+  if(ob_x_min > ob_x_max)
+  {
+    double temp = ob_x_min;
+    ob_x_min = ob_x_max;
+    ob_x_max = temp;
+  }
+
   if( x_min > x_max )
   {
     double temp = x_min;
     x_min = x_max;
     x_max = temp;
   }
-  if( (x_intersect_1 >= x_min && x_intersect_1 <= x_max) ||
-      (x_intersect_2 >= x_min && x_intersect_2 <= x_max )  )
+  
+  ROS_INFO("x_min: %f x_max: %f ob_x_min: %f ob_x_max: %f", x_min, x_max, ob_x_min, ob_x_max);
+  if( ((x_intersect_1 >= x_min && x_intersect_1 <= x_max) && (x_intersect_1 >= ob_x_min && x_intersect_1 <= ob_x_max))  ||
+      ((x_intersect_2 >= x_min && x_intersect_2 <= x_max) && (x_intersect_2 >= ob_x_min && x_intersect_2 <= ob_x_max))  )
   {
     qr.collision_ = true;
   }
@@ -612,6 +661,7 @@ void CollisionDetection::LineArc(const ramp_msgs::RampTrajectory& trajectory, co
   {
     qr.collision_ = false;
   }
+  
   ROS_INFO("LineArc time: %f", (ros::Time::now()-t_start).toSec());
 } // End LineArc
 

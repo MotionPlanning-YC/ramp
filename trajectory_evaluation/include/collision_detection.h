@@ -42,7 +42,7 @@ class CollisionDetection
     std::vector< std::vector<ramp_msgs::MotionState> > deCasteljau(const std::vector<ramp_msgs::MotionState> 
         control_poly) const;
     bool ControlPolyArc(const std::vector<ramp_msgs::MotionState> con_poly_vert, const std::vector<double> cir_cent, 
-        const double cir_r) const;
+        const double cir_r, const ramp_msgs::RampTrajectory& ob_tr) const;
 
     void LineLine(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
     void LineArc(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
