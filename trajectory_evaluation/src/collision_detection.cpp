@@ -31,11 +31,7 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
     //CollisionDetection::QueryResult q = queryAnalytical(obstacle_trjs_.at(i));
     //LineLine(trajectory, obstacle_trjs.at(i), result);
     //LineArc(trajectory, obstacle_trjs.at(i), result);
-    BezierLine(trajectory, obstacle_trjs.at(i), result);
-    std::vector<double> cir_cent;
-    cir_cent.push_back(3);
-    cir_cent.push_back(2.5);
-    double r = 1;
+    //BezierLine(trajectory, obstacle_trjs.at(i), result);
     //ControlPolyArc(trajectory.curves.at(0).controlPoints, cir_cent, r);
     BezierArc(trajectory, obstacle_trjs.at(i), result);
     
@@ -142,13 +138,10 @@ void CollisionDetection::BezierArc(const ramp_msgs::RampTrajectory& trajectory, 
 
 
   // Start sub-dividing the CP
-  
-  //std::stack< std::vector<ramp_msgs::MotionState> > stack_cont_polys;
-  //stack_cont_polys.push(trajectory.curves.at(0).controlPoints);
- 
   int i=0; 
   bool coll_array[7] = {false, false, false, false, false, false, false};
   std::vector< std::vector<ramp_msgs::MotionState> > control_poly_tree = buildTree(trajectory.curves.at(0).controlPoints, 2);
+  ROS_INFO("control_poly_tree size: %i", (int)control_poly_tree.size());
   for(i=0;i<control_poly_tree.size();i++)
   {
     std::vector<ramp_msgs::MotionState> control_poly = control_poly_tree.at(i);
@@ -161,64 +154,35 @@ void CollisionDetection::BezierArc(const ramp_msgs::RampTrajectory& trajectory, 
     coll_array[i] = ControlPolyArc(control_poly, cir_cent, r);
     ROS_INFO("collision at %i: %s", i, coll_array[i] ? "True" : "False");
 
-    
-    
-    
-  }
-  //control_poly_tree.reserve(7);
-  //control_poly_tree.push_back(trajectory.curves.at(0).controlPoints);
-  int j=0;
-  bool coll=false;
-  while(i < control_poly_tree.size())
-  {
-    ROS_INFO("In while, i: %i", i);
-    std::vector<ramp_msgs::MotionState> control_poly = control_poly_tree.at(i);
-    
-    ROS_INFO("control_poly:");
-    for(int j=0;j<control_poly.size();j++)
+    // If no collision with the initial control polygon, return false
+    if(!coll_array[i] && i == 0)
     {
-      ROS_INFO("Vertex %i: %s", i, utility_.toString(control_poly.at(j)).c_str());
+      ROS_INFO("In 1st if");
+      qr.collision_ = false;
+      break;
     }
-
-    coll_array[i] = ControlPolyArc(control_poly, cir_cent, r);
-    ROS_INFO("collision at %i: %s", i, coll_array[i] ? "True" : "False");
-
-
-    if(coll_array[i] && j < 3 )
+    // If no collision with depth-1 polygons
+    else if(i == 2 && !coll_array[i] && !coll_array[i-1])
     {
-      ROS_INFO("Sub-dividing");
-      std::vector< std::vector<ramp_msgs::MotionState> > subdivide = deCasteljau(control_poly);
-      //stack_cont_polys.push(subdivide.at(0));
-      //stack_cont_polys.push(subdivide.at(1));
-      //control_poly_tree.at(2*(i+1)) = subdivide.at(0);
-      //control_poly_tree.at(2*(i+1)+1) = subdivide.at(1);
-      control_poly_tree.push_back(subdivide.at(0));
-      control_poly_tree.push_back(subdivide.at(1));
-      ROS_INFO("Size of control_poly_tree: %i", (int)control_poly_tree.size());
-      j++;
+      ROS_INFO("In 2nd if");
+      qr.collision_ = false;
+      break;
     }
-    i++;
-  }
-
-  ROS_INFO("coll_array after collision checks:");
-  for(int i=0;i<7;i++)
-  {
-    ROS_INFO("coll_array[%i]: %s", i, coll_array[i] ? "True" : "False");
-  }
-
-  if(control_poly_tree.size() > 3)
-  {
-    ROS_INFO("In bottom if, size: %i", (int)control_poly_tree.size());
-    for(int i=3;i<control_poly_tree.size();i++)
+    // If collision with any depth-n level polygons, return true
+    else if(coll_array[i] && i > 2)
     {
-      if(coll_array[i])
-      {
-        coll = true;
-        break;
-      }
+      ROS_INFO("In 3rd if");
+      qr.collision_ = true;
+      break;
     }
-  }
-}
+    // If no collision with any depth-n level polygons, return false
+    else if(i == control_poly_tree.size()-1 && !coll_array[i])
+    {
+      ROS_INFO("In 4th if");
+      qr.collision_ = false;
+    }
+  } // end for
+} // End BezierArc
 
 
 std::vector< std::vector<ramp_msgs::MotionState> > CollisionDetection::buildTree(const std::vector<ramp_msgs::MotionState> control_poly, const int depth) const
@@ -227,7 +191,7 @@ std::vector< std::vector<ramp_msgs::MotionState> > CollisionDetection::buildTree
 
   result.push_back(control_poly);
 
-  for(int i=0;i<pow(2,depth+1);i++)
+  for(int i=0;i<pow(2,depth);i++)
   {
     std::vector< std::vector<ramp_msgs::MotionState> > subdivide = deCasteljau(result.at(i));
 
@@ -290,16 +254,18 @@ bool CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState
     std::vector<double> cir_cent, const double r) const
 {
   
-  for(int i=0;i<con_poly_vert.size()-1;i++)
+  for(int i=0;i<con_poly_vert.size();i++)
   {
+    int start = i;
+    int end   = (i == con_poly_vert.size()-1) ? 0 : i+1;
     ROS_INFO("Segment %i", i);
     std::vector<double> l_p1;
-    l_p1.push_back(con_poly_vert.at(i).positions.at(0));
-    l_p1.push_back(con_poly_vert.at(i).positions.at(1));
+    l_p1.push_back(con_poly_vert.at(start).positions.at(0));
+    l_p1.push_back(con_poly_vert.at(start).positions.at(1));
     
     std::vector<double> l_p2;
-    l_p2.push_back(con_poly_vert.at(i+1).positions.at(0));
-    l_p2.push_back(con_poly_vert.at(i+1).positions.at(1));
+    l_p2.push_back(con_poly_vert.at(end).positions.at(0));
+    l_p2.push_back(con_poly_vert.at(end).positions.at(1));
     
     double slope = (l_p2.at(1) - l_p1.at(1)) / (l_p2.at(0) - l_p1.at(0));
     double b = l_p2.at(1) - (slope*l_p2.at(0));
