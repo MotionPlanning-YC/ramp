@@ -309,7 +309,7 @@ bool CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState
     double x_intersect_2 = (-B - sqrt(discriminant)) / (2*A);
   
     double y = slope*x_intersect_1 + b;
-    double y_2 = pow( (x_intersect_1 - h),2 ) + pow( y-k, 2 );
+    double y_2 = slope*x_intersect_2 + b;
     
     ROS_INFO("x_intersect_1: %f y: %f y_2: %f r^2: %f", x_intersect_1, y, y_2, pow(r,2));
 
@@ -322,14 +322,42 @@ bool CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState
   
     double x_min = l_p1.at(0);
     double x_max = l_p2.at(0);
+    
+    int i_min = 0;
+    int i_max = ob_tr.trajectory.points.size()-1;
 
-    double ob_x_min = ob_tr.trajectory.points.at(0).positions.at(0);
-    double ob_x_max = ob_tr.trajectory.points.at( ob_tr.trajectory.points.size()/2 ).positions.at(0); 
+    double ob_x_min = ob_tr.trajectory.points.at(i_min).positions.at(0);
+    double ob_x_max = ob_tr.trajectory.points.at(i_max).positions.at(0); 
+    
+    double ob_y_min = ob_tr.trajectory.points.at(i_min).positions.at(1);
+    double ob_y_max = ob_tr.trajectory.points.at(i_max).positions.at(1); 
+  
+  ROS_INFO("Info: x_min: %f x_max: %f ob_x_min: %f ob_x_max: %f ob_y_min: %f ob_y_max: %f", x_min, x_max, ob_x_min, ob_x_max, 
+      ob_y_min, ob_y_max);
+
+    if( fabs(ob_x_max - ob_x_min) < 0.1 )
+    {
+      ob_x_max = ob_tr.trajectory.points.at(i_max/2).positions.at(0);
+      ROS_INFO("ob_x_max == ob_x_min, changing ob_x_max: %f", ob_x_max);
+    }
+    if( fabs(ob_y_max - ob_y_min) < 0.1 )
+    {
+      ob_y_max = ob_tr.trajectory.points.at(i_max/2).positions.at(1);
+      ROS_INFO("ob_y_max == ob_y_min, changing ob_y_max: %f", ob_y_max);
+    }
+
     if(ob_x_min > ob_x_max)
     {
       double temp = ob_x_min;
       ob_x_min = ob_x_max;
       ob_x_max = temp;
+    }
+
+    if(ob_y_min > ob_y_max)
+    {
+      double temp = ob_y_min;
+      ob_y_min = ob_y_max;
+      ob_y_max = temp;
     }
 
     if( x_min > x_max )
@@ -340,8 +368,8 @@ bool CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState
     }
     
     ROS_INFO("x_min: %f x_max: %f ob_x_min: %f ob_x_max: %f", x_min, x_max, ob_x_min, ob_x_max);
-    if( ((x_intersect_1 >= x_min && x_intersect_1 <= x_max) && (x_intersect_1 >= ob_x_min && x_intersect_1 <= ob_x_max))  ||
-        ((x_intersect_2 >= x_min && x_intersect_2 <= x_max) && (x_intersect_2 >= ob_x_min && x_intersect_2 <= ob_x_max))  )
+    if( ((x_intersect_1 >= x_min && x_intersect_1 <= x_max) && ((x_intersect_1 >= ob_x_min && x_intersect_1 <= ob_x_max) && (y >= ob_y_min && y <= ob_y_max)))  ||
+        (((x_intersect_2 >= x_min && x_intersect_2 <= x_max) && ((x_intersect_2 >= ob_x_min && x_intersect_2 <= ob_x_max) && (y_2 >= ob_y_min && y_2 <= ob_y_max)))) )
     {
       ROS_INFO("Collision on segment %i", i);
       return true;
@@ -520,6 +548,7 @@ void CollisionDetection::BezierLine(const ramp_msgs::RampTrajectory& trajectory,
 
 void CollisionDetection::LineArc(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const
 {
+  ROS_INFO("In CollisionDetection::LineArc");
   ros::Time t_start = ros::Time::now();
 
   // Get Line info
@@ -622,7 +651,7 @@ void CollisionDetection::LineArc(const ramp_msgs::RampTrajectory& trajectory, co
   double x_intersect_2 = (-B - sqrt(discriminant)) / (2*A);
 
   double y = slope*x_intersect_1 + b;
-  double y_2 = pow( (x_intersect_1 - h),2 ) + pow( y-k, 2 );
+  double y_2 = slope*x_intersect_2 + b;
   
   ROS_INFO("x_intersect_1: %f y: %f y_2: %f r^2: %f", x_intersect_1, y, y_2, pow(r,2));
 
@@ -633,16 +662,49 @@ void CollisionDetection::LineArc(const ramp_msgs::RampTrajectory& trajectory, co
   ROS_INFO("2*A: %f", 2*A);
   ROS_INFO("x_intersect_1: %f x_intersect_2: %f", x_intersect_1, x_intersect_2);
 
+  // Get range of x for the line segment
   double x_min = trajectory.trajectory.points.at(0).positions.at(0);
   double x_max = trajectory.trajectory.points.at(trajectory.trajectory.points.size()-1).positions.at(0);
-  double ob_x_min = ob_trajectory.trajectory.points.at(0).positions.at(0);
-  double ob_x_max = ob_trajectory.trajectory.points.at( ob_trajectory.trajectory.points.size()/2 ).positions.at(0); 
+
+
+  // Get range of x for the arc
+  int i_min = 0;
+  int i_max = ob_trajectory.trajectory.points.size()-1;
+
+  double ob_x_min = ob_trajectory.trajectory.points.at(i_min).positions.at(0);
+  double ob_x_max = ob_trajectory.trajectory.points.at(i_max).positions.at(0); 
+  
+  double ob_y_min = ob_trajectory.trajectory.points.at(i_min).positions.at(1);
+  double ob_y_max = ob_trajectory.trajectory.points.at(i_max).positions.at(1); 
+  
+  ROS_INFO("Info: x_min: %f x_max: %f ob_x_min: %f ob_x_max: %f ob_y_min: %f ob_y_max: %f", x_min, x_max, ob_x_min, ob_x_max, 
+      ob_y_min, ob_y_max);
+
+  if( fabs(ob_x_max - ob_x_min) < 0.1 )
+  {
+    ob_x_max = ob_trajectory.trajectory.points.at(i_max/2).positions.at(0);
+    ROS_INFO("ob_x_max == ob_x_min, changing ob_x_max: %f", ob_x_max);
+  }
+  if( fabs(ob_y_max - ob_y_min) < 0.1 )
+  {
+    ob_y_max = ob_trajectory.trajectory.points.at(i_max/2).positions.at(1);
+    ROS_INFO("ob_y_max == ob_y_min, changing ob_y_max: %f", ob_y_max);
+  }
+
   if(ob_x_min > ob_x_max)
   {
     double temp = ob_x_min;
     ob_x_min = ob_x_max;
     ob_x_max = temp;
   }
+  
+  if(ob_y_min > ob_y_max)
+  {
+    double temp = ob_y_min;
+    ob_y_min = ob_y_max;
+    ob_y_max = temp;
+  }
+
 
   if( x_min > x_max )
   {
@@ -651,9 +713,8 @@ void CollisionDetection::LineArc(const ramp_msgs::RampTrajectory& trajectory, co
     x_max = temp;
   }
   
-  ROS_INFO("x_min: %f x_max: %f ob_x_min: %f ob_x_max: %f", x_min, x_max, ob_x_min, ob_x_max);
-  if( ((x_intersect_1 >= x_min && x_intersect_1 <= x_max) && (x_intersect_1 >= ob_x_min && x_intersect_1 <= ob_x_max))  ||
-      ((x_intersect_2 >= x_min && x_intersect_2 <= x_max) && (x_intersect_2 >= ob_x_min && x_intersect_2 <= ob_x_max))  )
+  if( ((x_intersect_1 >= x_min && x_intersect_1 <= x_max) && ((x_intersect_1 >= ob_x_min && x_intersect_1 <= ob_x_max) && (y >= ob_y_min && y <= ob_y_max)))  ||
+      (((x_intersect_2 >= x_min && x_intersect_2 <= x_max) && ((x_intersect_2 >= ob_x_min && x_intersect_2 <= ob_x_max) && (y_2 >= ob_y_min && y_2 <= ob_y_max)))) )
   {
     qr.collision_ = true;
   }
