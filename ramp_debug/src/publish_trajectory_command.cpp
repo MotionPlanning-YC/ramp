@@ -183,7 +183,8 @@ int main(int argc, char** argv) {
   sp1.accelerations.push_back(0);*/
 
   ramp_msgs::MotionState sp2;
-  sp2 = p.points.at(2).motionState;
+  if(p.points.size() > 2)
+    sp2 = p.points.at(2).motionState;
   //sp2 = p.points.at(1).motionState;
   //sp2 = c3.motionState;
 
@@ -438,13 +439,13 @@ int main(int argc, char** argv) {
   ob1.motionState.positions.push_back(2.); // 0.4026
   ob1.motionState.positions.push_back(PI); // 0.519146
   
-  ob1.motionState.velocities.push_back(-0.33); // 0.70455
+  ob1.motionState.velocities.push_back(0.33); // 0.70455
   ob1.motionState.velocities.push_back(0.); // 0.4026
   ob1.motionState.velocities.push_back(0.33); // 0.519146
   
   ramp_msgs::KnotPoint ob2;
-  ob2.motionState.positions.push_back(0.5); // 0.70455
-  ob2.motionState.positions.push_back(1.3); // 0.4026
+  ob2.motionState.positions.push_back(3.5); // 0.70455
+  ob2.motionState.positions.push_back(3.5); // 0.4026
   ob2.motionState.positions.push_back(0.); // 0.519146
   
   ob2.motionState.velocities.push_back(-0.33); // 0.70455

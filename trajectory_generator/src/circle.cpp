@@ -31,8 +31,8 @@ Circle::~Circle()
 const bool Circle::finalStateReached() 
 {
   //return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
-  return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED); 
-      //|| (timeFromStart_ >= timeCutoff_));
+  return ((reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED) 
+      || (timeFromStart_ >= timeCutoff_));
 }
 
 void Circle::init(const ramp_msgs::MotionState s) 
