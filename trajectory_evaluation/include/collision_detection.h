@@ -45,8 +45,8 @@ class CollisionDetection
         const double cir_r, const ramp_msgs::RampTrajectory& ob_tr) const;
 
     //void LineLine(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
-    void LineLine(const std::vector<trajectory_msgs::JointTrajectoryPoint>& segment, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
-    void LineArc(const std::vector<trajectory_msgs::JointTrajectoryPoint>& segment, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
+    void LineLine(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
+    void LineArc(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
     void BezierLine(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
     void BezierArc(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
 
