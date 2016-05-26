@@ -32,7 +32,8 @@ class CollisionDetection
 
     /***** Methods *****/ 
     void                        init(ros::NodeHandle& h);
-    void                        perform(const ramp_msgs::RampTrajectory& trajectory, const std::vector<ramp_msgs::RampTrajectory>& obstacle_trjs, QueryResult& qr) const;
+    void                        perform(const ramp_msgs::RampTrajectory& trajectory, const std::vector<ramp_msgs::RampTrajectory>& obstacle_trjs, QueryResult& result); 
+    
 
     const QueryResult           query(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory) const;
 
@@ -45,15 +46,24 @@ class CollisionDetection
         const double cir_r, const ramp_msgs::RampTrajectory& ob_tr) const;
 
     //void LineLine(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
-    void LineLine(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
+    void LineLine
+      (const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
+
     void LineArc(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
+    
     void BezierLine(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
+    
     void BezierArc(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
 
     /***** Data Members ****/
     //ramp_msgs::RampTrajectory trajectory_;
     //std::vector<ramp_msgs::RampTrajectory> obstacle_trjs_;
   
+
+    ros::Time t_for;
+    ros::Duration d_for;
+    ros::Time t_inner_for;
+    ros::Duration d_inner_for;
 
     ros::Publisher pub_population;
 

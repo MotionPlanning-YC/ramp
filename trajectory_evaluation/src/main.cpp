@@ -28,8 +28,7 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
     if(reqs.reqs.at(i).trajectory.trajectory.points.size() > 1)
     {
       ros::Time t_p = ros::Time::now();
-      //ev.setRequest(reqs.reqs.at(i));
-      ev.perform(reqs.reqs.at(i), res);
+      ev.perform(reqs.reqs[i], res);
       d_p = ros::Time::now() - t_p;
     }
     // Else we only have one point (goal point)
@@ -47,10 +46,10 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
     d_for = ros::Time::now() - t_for;
   }
   ros::Duration t_elapsed = ros::Time::now() - t_start;
-  /*ROS_INFO("t_p: %f", d_p.toSec());
+  ROS_INFO("t_p: %f", d_p.toSec());
   ROS_INFO("t_setting: %f", d_setting.toSec());
   ROS_INFO("t_vec: %f", d_vec.toSec());
-  ROS_INFO("t_for: %f", d_for.toSec());*/
+  ROS_INFO("t_for: %f", d_for.toSec());
   ROS_INFO("t_elapsed: %f", t_elapsed.toSec());
   t_data.push_back(t_elapsed);
   return true;

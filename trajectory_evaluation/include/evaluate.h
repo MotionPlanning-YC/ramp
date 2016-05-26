@@ -16,9 +16,9 @@ class Evaluate {
     
     void setRequest(const ramp_msgs::EvaluationRequest& req);
 
-    const void perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationResponse& res);
-    bool performFeasibility(ramp_msgs::EvaluationRequest& er);
-    const double performFitness(ramp_msgs::RampTrajectory& trj);
+    void perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationResponse& res);
+    void performFeasibility(ramp_msgs::EvaluationRequest& er);
+    void performFitness(ramp_msgs::RampTrajectory& trj, double& result);
 
     /** Different evaluation criteria */
     EuclideanDistance eucDist_;

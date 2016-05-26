@@ -25,10 +25,11 @@ void Evaluate::setRequest(const ramp_msgs::EvaluationRequest& req)
 } //End setRequest
 
 
-const void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationResponse& res)
+void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationResponse& res)
 {
   ros::Time t_start = ros::Time::now();
-  res.feasible = performFeasibility(req);
+  performFeasibility(req);
+  //ROS_INFO("performFeasibility: %f", (ros::Time::now()-t_start).toSec());
 
   if(qr_.collision_)
   {
@@ -41,7 +42,9 @@ const void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::Evalu
     res.t_firstCollision = ros::Duration(9999.f);
   }
 
-  res.fitness = performFitness(req.trajectory);
+  t_start = ros::Time::now();
+  performFitness(req.trajectory, res.fitness);
+  //ROS_INFO("performFitness: %f", (ros::Time::now()-t_start).toSec());
 
   //ROS_INFO("t_perform: %f", (ros::Time::now() - t_start).toSec());
 }
@@ -49,32 +52,37 @@ const void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::Evalu
 
 // Redo this method at some point
 // It's modiftying trj AND returning a value
-bool Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er) 
+void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er) 
 {
   ros::Time t_start = ros::Time::now();
-  bool result=true;
 
   // Check collision
   cd_.perform(er.trajectory, er.obstacle_trjs, qr_);
+  //ROS_INFO("t_cd: %f", (ros::Time::now()-t_start).toSec());
   er.trajectory.feasible = !qr_.collision_;
 
   ros::Time t_after = ros::Time::now();
-  ramp_msgs::RampTrajectory trj = er.trajectory;
-  bool moving = (fabs( sqrt( pow(trj.trajectory.points.at(0).velocities.at(0), 2) +
-                            pow(trj.trajectory.points.at(0).velocities.at(1), 2))) > 0)
-                || (fabs(trj.trajectory.points.at(0).velocities.at(2)) > 0) ?
+  ramp_msgs::RampTrajectory* trj = &er.trajectory;
+  bool moving = (fabs( sqrt( pow(trj->trajectory.points.at(0).velocities.at(0), 2) +
+                            pow(trj->trajectory.points.at(0).velocities.at(1), 2))) > 0)
+                || (fabs(trj->trajectory.points.at(0).velocities.at(2)) > 0) ?
                 true : false;
+  //ROS_INFO("t_moving: %f", (ros::Time::now()-t_after).toSec());
+  //ROS_INFO("moving: %s", moving ? "True" : "False");
 
+  t_after = ros::Time::now();
   bool moving_on_curve = 
     er.trajectory.curves.size() > 0 && 
     (er.trajectory.curves.at(0).u_0 > 0.000001 ||
-    (utility_.positionDistance(trj.trajectory.points.at(0).positions, 
+    (utility_.positionDistance(trj->trajectory.points.at(0).positions, 
        er.trajectory.curves.at(0).controlPoints.at(0).positions) < 0.0001) ) ?
     true
     :
     false;
+  //ROS_INFO("t_moving_on_curve: %f", (ros::Time::now()-t_after).toSec());
 
 
+  t_after = ros::Time::now();
   // Check orientation
   if(moving && fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_curve)
   {
@@ -100,7 +108,10 @@ bool Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
       orientation_infeasible_ = true;
     }
   }
+  //ROS_INFO("t_if: %f", (ros::Time::now()-t_after).toSec());
+  
 
+  t_after = ros::Time::now();
   // If not feasible, set t_firstCollision
   if(!er.trajectory.feasible)
   {
@@ -109,23 +120,20 @@ bool Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
     er.trajectory.t_firstCollision = ros::Duration(qr_.t_firstCollision_);
     //ROS_INFO("traj.t_firstCollision: %f", er.trajectory.t_firstCollision.toSec());
   }
+  //ROS_INFO("t_second if: %f", (ros::Time::now()-t_after).toSec());
 
-
-  //result = er.trajectory.feasible;
 
   //ROS_INFO("t_after: %f", (ros::Time::now() - t_after).toSec());
   //ROS_INFO("performFeasibility time: %f", (ros::Time::now() - t_start).toSec());
-  return er.trajectory.feasible;
 }
 
 
 
 /** This method computes the fitness of the trajectory_ member */
-const double Evaluate::performFitness(ramp_msgs::RampTrajectory& trj) 
+void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result) 
 {
   ros::Time t_start = ros::Time::now();
   //ROS_INFO("In Evaluate::performFitness");
-  double result=0;
   double cost=0;
   double penalties = 0;
 
@@ -169,5 +177,4 @@ const double Evaluate::performFitness(ramp_msgs::RampTrajectory& trj)
   result = (1. / (cost + penalties));
 
   //ROS_INFO("performFitness time: %f", (ros::Time::now() - t_start).toSec());
-  return result;
 } //End performFitness

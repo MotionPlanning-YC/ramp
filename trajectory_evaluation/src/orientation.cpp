@@ -5,6 +5,7 @@ Orientation::Orientation() : Q_(1000. / PI) {}
 
 const double Orientation::getDeltaTheta(const ramp_msgs::RampTrajectory& trj) const
 {
+  ros::Time t_start = ros::Time::now();
   double result = 0.f;
   if(trj.i_knotPoints.size() > 1) 
   {
@@ -27,6 +28,7 @@ const double Orientation::getDeltaTheta(const ramp_msgs::RampTrajectory& trj) co
     //ROS_INFO("thetaNec: %f result: %f", thetaNec, result);
   }
 
+  ROS_INFO("t_getDeltaTheta: %f", (ros::Time::now()-t_start).toSec());
   return result;
 }
 
