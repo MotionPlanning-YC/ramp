@@ -48,13 +48,13 @@ const double Utility::findAngleFromAToB(const std::vector<float> a, const std::v
 }
 
 /** This method returns the angle that will form a straight line from position a to position b. a and b are [x, y] vectors. */
-const double Utility::findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const {
+const double Utility::findAngleFromAToB(const std::vector<double>& a, const std::vector<double>& b) const {
   double result;
 
   // Find the distances in x,y directions and Euclidean distance
-  double d_x = b.at(0) - a.at(0);
-  double d_y = b.at(1) - a.at(1);
-  double euc_dist = sqrt( pow(d_x,2) + pow(d_y,2) );
+  double d_x = b[0] - a[0];
+  double d_y = b[1] - a[1];
+  double euc_dist = sqrt( (d_x*d_x) + (d_y*d_y) );
   
   // If the positions are the same,
   // Set the result to the starting orientation if one is provided

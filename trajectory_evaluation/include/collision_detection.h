@@ -55,6 +55,8 @@ class CollisionDetection
     
     void BezierArc(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
 
+    void getCircleInfo(const ramp_msgs::RampTrajectory& traj, double& r, double& h, double& k) const;
+
     /***** Data Members ****/
     //ramp_msgs::RampTrajectory trajectory_;
     //std::vector<ramp_msgs::RampTrajectory> obstacle_trjs_;

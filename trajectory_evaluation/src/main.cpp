@@ -46,8 +46,8 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
     d_for = ros::Time::now() - t_for;
   }
   ros::Duration t_elapsed = ros::Time::now() - t_start;
-  /*ROS_INFO("t_p: %f", d_p.toSec());
-  ROS_INFO("t_setting: %f", d_setting.toSec());
+  ROS_INFO("t_p: %f", d_p.toSec());
+  /*ROS_INFO("t_setting: %f", d_setting.toSec());
   ROS_INFO("t_vec: %f", d_vec.toSec());
   ROS_INFO("t_for: %f", d_for.toSec());*/
   ROS_INFO("t_elapsed: %f", t_elapsed.toSec());

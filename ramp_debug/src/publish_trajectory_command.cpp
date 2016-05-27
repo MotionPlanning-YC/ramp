@@ -484,6 +484,12 @@ int main(int argc, char** argv) {
   er_srv.request.reqs.push_back(er);
 
 
+  std::vector<double> a,b;
+  a.push_back(2);
+  a.push_back(1);
+  b.push_back(-1);
+  b.push_back(-1);
+  ROS_INFO("find angle between: %f", atan2(b[1] - a[1], b[0] - a[0]));
 
   // Evaluate trajectory
   if(client_eval.call(er_srv)) 
