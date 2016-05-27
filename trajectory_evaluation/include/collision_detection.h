@@ -38,24 +38,29 @@ class CollisionDetection
     const QueryResult           query(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory) const;
 
 
-    std::vector< std::vector<ramp_msgs::MotionState> > buildTree(const std::vector<ramp_msgs::MotionState> 
-        control_poly, const int depth) const;
-    std::vector< std::vector<ramp_msgs::MotionState> > deCasteljau(const std::vector<ramp_msgs::MotionState> 
-        control_poly) const;
-    bool ControlPolyArc(const std::vector<ramp_msgs::MotionState> con_poly_vert, const std::vector<double> cir_cent, 
-        const double cir_r, const ramp_msgs::RampTrajectory& ob_tr) const;
+    void buildTree(const std::vector<ramp_msgs::MotionState>& control_poly, const int& depth, std::vector< std::vector<ramp_msgs::MotionState> >& result) const;
+    void deCasteljau(const std::vector<ramp_msgs::MotionState>& control_poly, std::vector< std::vector<ramp_msgs::MotionState> >& result) const;
+
+
+    bool ControlPolyArc(const std::vector<ramp_msgs::MotionState>& con_poly_vert, const ramp_msgs::RampTrajectory& ob_tr) const;
 
     //void LineLine(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
     void LineLine
       (const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
 
-    void LineArc(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
+
+    void LineArc(const std::vector<double> l_p1, const std::vector<double> l_p2, const ramp_msgs::RampTrajectory& ob_trajectory, bool& result) const;
+
+
+    void LineArc(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& result) const;
+    
     
     void BezierLine(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
     
     void BezierArc(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
 
     void getCircleInfo(const ramp_msgs::RampTrajectory& traj, double& r, double& h, double& k) const;
+
 
     /***** Data Members ****/
     //ramp_msgs::RampTrajectory trajectory_;

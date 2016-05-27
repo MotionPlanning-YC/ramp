@@ -27,7 +27,7 @@ void Evaluate::setRequest(const ramp_msgs::EvaluationRequest& req)
 
 void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationResponse& res)
 {
-  ros::Time t_start = ros::Time::now();
+  //ros::Time t_start = ros::Time::now();
   performFeasibility(req);
   //ROS_INFO("performFeasibility: %f", (ros::Time::now()-t_start).toSec());
 
@@ -42,7 +42,7 @@ void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationR
     res.t_firstCollision = ros::Duration(9999.f);
   }
 
-  t_start = ros::Time::now();
+  //t_start = ros::Time::now();
   performFitness(req.trajectory, res.fitness);
   //ROS_INFO("performFitness: %f", (ros::Time::now()-t_start).toSec());
 
@@ -61,16 +61,17 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
   //ROS_INFO("t_cd: %f", (ros::Time::now()-t_start).toSec());
   er.trajectory.feasible = !qr_.collision_;
 
-  ros::Time t_after = ros::Time::now();
+  //ros::Time t_after = ros::Time::now();
   ramp_msgs::RampTrajectory* trj = &er.trajectory;
-  bool moving = (fabs( sqrt( pow(trj->trajectory.points.at(0).velocities.at(0), 2) +
-                            pow(trj->trajectory.points.at(0).velocities.at(1), 2))) > 0)
-                || (fabs(trj->trajectory.points.at(0).velocities.at(2)) > 0) ?
-                true : false;
+  bool moving = (fabs( sqrt( (trj->trajectory.points[0].velocities[0]*trj->trajectory.points[0].velocities[0]) +
+                            (trj->trajectory.points[0].velocities[1]*trj->trajectory.points[0].velocities[1]))) > 0)
+                || (fabs(trj->trajectory.points.at(0).velocities.at(2)) > 0) 
+                ? true 
+                : false;
   //ROS_INFO("t_moving: %f", (ros::Time::now()-t_after).toSec());
   //ROS_INFO("moving: %s", moving ? "True" : "False");
 
-  t_after = ros::Time::now();
+  //t_after = ros::Time::now();
   bool moving_on_curve = 
     er.trajectory.curves.size() > 0 && 
     (er.trajectory.curves.at(0).u_0 > 0.000001 ||
@@ -82,7 +83,7 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
   //ROS_INFO("t_moving_on_curve: %f", (ros::Time::now()-t_after).toSec());
 
 
-  t_after = ros::Time::now();
+  //t_after = ros::Time::now();
   // Check orientation
   if(moving && fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_curve)
   {
@@ -111,7 +112,7 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
   //ROS_INFO("t_if: %f", (ros::Time::now()-t_after).toSec());
   
 
-  t_after = ros::Time::now();
+  //t_after = ros::Time::now();
   // If not feasible, set t_firstCollision
   if(!er.trajectory.feasible)
   {
