@@ -144,7 +144,7 @@ void CollisionDetection::BezierArc(const std::vector<ramp_msgs::MotionState>& co
       ROS_INFO("Vertex %i: %s", i, utility_.toString(control_poly.at(j)).c_str());
     }*/
 
-    coll_array[i] = ControlPolyArc(control_poly_tree[i], ob_trajectory);
+    ControlPolyArc(control_poly_tree[i], ob_trajectory, coll_array[i]);
     //ROS_INFO("collision at %i: %s", i, coll_array[i] ? "True" : "False");
 
     // If no collision with the initial control polygon, return false
@@ -244,12 +244,9 @@ void CollisionDetection::deCasteljau(const std::vector<ramp_msgs::MotionState>& 
 
 
 
-bool CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState>& con_poly_vert, const ramp_msgs::RampTrajectory& ob_trajectory) const
+void CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState>& con_poly_vert, const ramp_msgs::RampTrajectory& ob_trajectory, bool& result) const
 {
-  //ROS_INFO("circle center: (%f, %f), r: %f", cir_cent.at(0), cir_cent.at(1), r);
-  double r, h, k;
-  getCircleInfo(ob_trajectory, r, h, k);
- 
+  
   // Line-Arc for each segment on control polygon
   for(int i=0;i<con_poly_vert.size();i++)
   {
@@ -263,167 +260,13 @@ bool CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState
     std::vector<double> l_p2;
     l_p2.push_back(con_poly_vert.at(end).positions.at(0));
     l_p2.push_back(con_poly_vert.at(end).positions.at(1));
-
+    
     //ROS_INFO("l_p1: (%f, %f)", l_p1.at(0), l_p1.at(1));
     //ROS_INFO("l_p2: (%f, %f)", l_p2.at(0), l_p2.at(1));
 
-    double slope = (l_p2.at(1) - l_p1.at(1)) / (l_p2.at(0) - l_p1.at(0));
-    double b = l_p2.at(1) - (slope*l_p2.at(0));
-    double m = slope;
-    
-    double A = pow(slope,2) + 1;
-    double B = 2*(m*b - m*k - h);
-    double C = pow(h,2) + pow(b,2) + pow(k,2) - pow(r,2) - 2*b*k;
-    
-    double discriminant = pow(B,2) - 4*A*C;
-    double x_intersect_1 = (-B + sqrt(discriminant)) / (2*A);
-    double x_intersect_2 = (-B - sqrt(discriminant)) / (2*A);
-  
-    double y = slope*x_intersect_1 + b;
-    double y_2 = slope*x_intersect_2 + b;
-    
-    /*ROS_INFO("x_intersect_1: %f y: %f y_2: %f r^2: %f", x_intersect_1, y, y_2, pow(r,2));
-
-    ROS_INFO("discriminant: %f sqrt(discriminant): %f", discriminant, sqrt(discriminant));
-    ROS_INFO("-B + sqrt(discriminant): %f", -B+sqrt(discriminant));
-    ROS_INFO("-B - sqrt(discriminant): %f", -B-sqrt(discriminant));
-    
-    ROS_INFO("2*A: %f", 2*A);
-    ROS_INFO("x_intersect_1: %f x_intersect_2: %f", x_intersect_1, x_intersect_2);*/
-  
-    double x_min = l_p1.at(0);
-    double x_max = l_p2.at(0);
-
-    if(x_min > x_max)
-    {
-      double temp = x_min;
-      x_min = x_max;
-      x_max = temp;
-    }
-    
-    // Get range of x for the arc
-    int i_min = 0;
-    int i_max = ob_trajectory.trajectory.points.size()-1;
-
-    std::vector<double> zero;
-    zero.push_back(0);
-    zero.push_back(0);
-    double a = utility_.findAngleFromAToB(zero, ob_trajectory.trajectory.points.at(0).positions);
-    double b_angle = utility_.findAngleFromAToB(zero, ob_trajectory.trajectory.points.at(i_max).positions);
-    double g = fmodf((b_angle - a), (2*PI));
-
-    double L = utility_.positionDistance(ob_trajectory.trajectory.points.at(0).positions, 
-        ob_trajectory.trajectory.points.at(i_max).positions);
-    double H = 2*r*cos(g/2.f);
-    H = sqrt( pow(r,2) - (0.25*pow(L,2)) ); 
-    double W = r - H;
-
-    //ROS_INFO("a: %f b: %f g: %f L: %f H: %f W: %f", a, b_angle, g, L, H, W);
-
-
-    double starting_angle = utility_.findAngleFromAToB(h, k, ob_trajectory.trajectory.points.at(0).positions[0], 
-        ob_trajectory.trajectory.points[0].positions[1]);
-    double next_angle = 0;
-    double min_dist = utility_.findDistanceBetweenAngles(starting_angle, next_angle);
-    std::vector<double> angles;
-    angles.push_back(0);
-    angles.push_back(PI/2.f);
-    angles.push_back(PI);
-    angles.push_back(-PI/2.f);
-    for(int i=1;i<angles.size();i++)
-    {
-      if(fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i))) < min_dist)
-      {
-        min_dist = fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i)));
-        next_angle = angles.at(i);
-      }
-    }
-    //ROS_INFO("next_angle: %f", next_angle);
-
-
-    double angle;
-    if(ob_trajectory.trajectory.points.at(0).velocities.at(2) < 0)
-    {
-      //ROS_INFO("displaceAngle: %f", utility_.findDistanceBetweenAngles(next_angle, starting_angle));
-      angle = utility_.displaceAngle(starting_angle, (utility_.findDistanceBetweenAngles(next_angle, starting_angle)));
-    }
-    else
-    {
-      //ROS_INFO("displaceAngle: %f", utility_.findDistanceBetweenAngles(starting_angle, next_angle));
-      angle = utility_.displaceAngle(starting_angle, utility_.findDistanceBetweenAngles(starting_angle, next_angle));
-    }
-    std::vector<double> p;
-    p.push_back(h + r*cos(angle));
-    p.push_back(k + r*sin(angle));
-
-
-    //ROS_INFO("starting_angle: %f angle: %f p: (%f, %f) i_min: (%f, %f) i_max: (%f, %f)", starting_angle, angle, p.at(0), p.at(1), ob_tr.trajectory.points.at(i_min).positions.at(0), ob_tr.trajectory.points.at(i_min).positions.at(1), ob_tr.trajectory.points.at(i_max).positions.at(0), ob_tr.trajectory.points.at(i_max).positions.at(1));
-
-    std::vector< std::vector<double> > minmax_points;
-    minmax_points.push_back(p);
-    minmax_points.push_back(ob_trajectory.trajectory.points[i_min].positions);
-    minmax_points.push_back(ob_trajectory.trajectory.points[i_max].positions);
-
-    double ob_x_min = minmax_points[0][0];
-    double ob_x_max = minmax_points[0][0];
-    double ob_y_min = minmax_points[0][1];
-    double ob_y_max = minmax_points[0][1];
-    for(int i=1;i<minmax_points.size();i++)
-    {
-      if(minmax_points[i][0] < ob_x_min)
-      {
-        ob_x_min = minmax_points[i][0];
-      }
-      if(minmax_points[i][0] > ob_x_max)
-      {
-        ob_x_max = minmax_points[i][0];
-      }
-      if(minmax_points[i][1] < ob_y_min)
-      {
-        ob_y_min = minmax_points[i][1];
-      }
-      if(minmax_points[i][1] > ob_y_max)
-      {
-        ob_y_max = minmax_points[i][1];
-      }
-    }
-    
-      
-
-    //ROS_INFO("Info: x_min: %f x_max: %f ob_x_min: %f ob_x_max: %f ob_y_min: %f ob_y_max: %f", x_min, x_max, ob_x_min, ob_x_max, ob_y_min, ob_y_max);
-
-    if(ob_x_min > ob_x_max)
-    {
-      double temp = ob_x_min;
-      ob_x_min = ob_x_max;
-      ob_x_max = temp;
-    }
-
-    if(ob_y_min > ob_y_max)
-    {
-      double temp = ob_y_min;
-      ob_y_min = ob_y_max;
-      ob_y_max = temp;
-    }
-
-    if( x_min > x_max )
-    {
-      double temp = x_min;
-      x_min = x_max;
-      x_max = temp;
-    }
-    
-    //ROS_INFO("x_min: %f x_max: %f ob_x_min: %f ob_x_max: %f", x_min, x_max, ob_x_min, ob_x_max);
-    if( ((x_intersect_1 >= x_min && x_intersect_1 <= x_max) && ((x_intersect_1 >= ob_x_min && x_intersect_1 <= ob_x_max) && (y >= ob_y_min && y <= ob_y_max)))  ||
-        (((x_intersect_2 >= x_min && x_intersect_2 <= x_max) && ((x_intersect_2 >= ob_x_min && x_intersect_2 <= ob_x_max) && (y_2 >= ob_y_min && y_2 <= ob_y_max)))) )
-    {
-      //ROS_INFO("Collision on segment %i", i);
-      return true;
-    }
-  }
-
-  return false;
-}
+    LineArc(l_p1, l_p2, ob_trajectory, result);
+  } // end for
+} // End ControlPolyArc 
 
 
 void CollisionDetection::LineLine(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& result) const
@@ -612,6 +455,7 @@ void CollisionDetection::LineArc(const std::vector<double> l_p1, const std::vect
   // Circle info
   double r, h, k;
   getCircleInfo(ob_trajectory, r, h, k);
+  ROS_INFO("Circle info: r: %f h: %f k: %f", r, h, k);
   
   // Line info
   double slope = (l_p2.at(1) - l_p1.at(1)) / (l_p2.at(0) - l_p1.at(0));
@@ -659,16 +503,36 @@ void CollisionDetection::LineArc(const std::vector<double> l_p1, const std::vect
   angles.push_back(PI);
   angles.push_back(-PI/2.f);
   double next_axis_angle = angles[0];
-  double min_dist = utility_.findDistanceBetweenAngles(starting_angle, next_axis_angle);
-  for(int i=1;i<angles.size();i++)
+  if( fabs(fmodf(starting_angle, (PI/2.f))) < 0.0001)
   {
-    if(fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i))) < min_dist)
+   //ROS_INFO("In if");
+    if(ob_trajectory.trajectory.points[0].velocities[2] > 0)
     {
-      min_dist = fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i)));
-      next_axis_angle = angles.at(i);
+      next_axis_angle = utility_.displaceAngle(starting_angle, (PI/2.f));
+    }
+    else
+    {
+      next_axis_angle = utility_.displaceAngle(starting_angle, -(PI/2.f));
     }
   }
-    
+  else
+  {
+    //ROS_INFO("In else");
+    double min_dist = fabs(utility_.findDistanceBetweenAngles(starting_angle, next_axis_angle));
+    //ROS_INFO("next_axis_angle: %f min_dist: %f", next_axis_angle, min_dist);
+    for(int i=1;i<angles.size();i++)
+    {
+      //ROS_INFO("angles[%i]: %f", i, angles[i]);
+      //ROS_INFO("fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i))): %f", fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i))));
+      if(fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i))) < (min_dist-0.01))
+      {
+        min_dist = fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i)));
+        next_axis_angle = angles.at(i);
+      }
+    }
+  }
+  //ROS_INFO("starting_angle: %f next_axis_angle: %f", starting_angle, next_axis_angle);
+
   std::vector<double> p;
   p.push_back(h + r*cos(next_axis_angle));
   p.push_back(k + r*sin(next_axis_angle));
@@ -705,11 +569,15 @@ void CollisionDetection::LineArc(const std::vector<double> l_p1, const std::vect
   
     
 
-  //ROS_INFO("Info: x_min: %f x_max: %f ob_x_min: %f ob_x_max: %f ob_y_min: %f ob_y_max: %f", x_min, x_max, ob_x_min, ob_x_max, ob_y_min, ob_y_max);
+  ROS_INFO("isnan(x_intersect_1): %d isnan(x_intersect_2): %d", isnan(x_intersect_1), isnan(x_intersect_2));
+  ROS_INFO("discriminant: %f x_intersect_1: %f x_intersect_2: %f y: %f y_2: %f", discriminant, x_intersect_1, x_intersect_2, y, y_2);
+  ROS_INFO("Info: x_min: %f x_max: %f ob_x_min: %f ob_x_max: %f ob_y_min: %f ob_y_max: %f", x_min, x_max, ob_x_min, ob_x_max, ob_y_min, ob_y_max);
   
   //ROS_INFO("x_min: %f x_max: %f ob_x_min: %f ob_x_max: %f", x_min, x_max, ob_x_min, ob_x_max);
-  if( ((x_intersect_1 >= x_min && x_intersect_1 <= x_max) && ((x_intersect_1 >= ob_x_min && x_intersect_1 <= ob_x_max) && (y >= ob_y_min && y <= ob_y_max)))  ||
-      (((x_intersect_2 >= x_min && x_intersect_2 <= x_max) && ((x_intersect_2 >= ob_x_min && x_intersect_2 <= ob_x_max) && (y_2 >= ob_y_min && y_2 <= ob_y_max)))) )
+  if(
+      (!isnan(x_intersect_1) && (x_intersect_1 >= x_min && x_intersect_1 <= x_max) && ((x_intersect_1 >= ob_x_min && x_intersect_1 <= ob_x_max) && (y >= ob_y_min && y <= ob_y_max)))  
+      || (!isnan(x_intersect_2) && ((x_intersect_2 >= x_min && x_intersect_2 <= x_max) && ((x_intersect_2 >= ob_x_min && x_intersect_2 <= ob_x_max) && (y_2 >= ob_y_min && y_2 <= ob_y_max)))) 
+    )
   {
     //ROS_INFO("Collision on segment %i", i);
     result = true;
@@ -733,7 +601,9 @@ void CollisionDetection::getCircleInfo(const ramp_msgs::RampTrajectory& traj, do
   // Get circle info
   double w = traj.trajectory.points[0].velocities[2];
   double v = sqrt((traj.trajectory.points[0].velocities[0] * traj.trajectory.points[0].velocities[0]) + (traj.trajectory.points[0].velocities[1]*traj.trajectory.points[0].velocities[1]) );
-  r = v / w;
+  r = fabs(v / w);
+
+  ROS_INFO("v: %f w: %f r: %f", v, w, r);
 
   //ROS_INFO("w: %f v: %f r: %f", w, v, r);
 
@@ -792,7 +662,6 @@ void CollisionDetection::LineArc(const ramp_msgs::RampTrajectory& trajectory, co
   //ROS_INFO("In CollisionDetection::LineArc");
   ros::Time t_start = ros::Time::now();
 
-  {
 
   // Get Line info
   std::vector<double> l_p1;
@@ -809,177 +678,11 @@ void CollisionDetection::LineArc(const ramp_msgs::RampTrajectory& trajectory, co
 
   LineArc(l_p1, l_p2, ob_trajectory, qr.collision_);
 
+  ROS_INFO("qr.collision_: %s", qr.collision_ ? "True" : "False");
+
   //ros::Duration d_lineinfo = ros::Time::now() - t_start;
  
 
-  // Get circle info
-  //ros::Time t_circleinfo = ros::Time::now();
-  double r,h,k;
-  getCircleInfo(ob_trajectory, r, h, k);
-  //ros::Duration d_circleinfo = (ros::Time::now()-t_circleinfo);
-
-  //ros::Time t_solve = ros::Time::now();
-  // Compute quadratic polynomial coefficients
-  double A = slope*slope + 1;
-  double B = 2*(slope*b - slope*k - h);
-  double C = h*h + b*b + k*k - r*r - 2*b*k;
-
-  //ROS_INFO("b: %f slope: %f A: %f B: %f C: %f", b, slope, A, B, C);
-
-  // Solve for x by applying quadratic formula
-  double discriminant = (B*B) - 4*((slope*slope)+1)*C;
-  double x_intersect_1 = (-B + sqrt(discriminant)) / (2*((slope*slope)+1));
-  double x_intersect_2 = (-B - sqrt(discriminant)) / (2*((slope*slope)+1));
-
-  // Compute y values at the values of intersection
-  double y    = slope*x_intersect_1 + b;
-  double y_2  = slope*x_intersect_2 + b;
-
-  //ros::Duration d_solve = ros::Time::now() - t_solve;
-  
-  /*ROS_INFO("x_intersect_1: %f y: %f y_2: %f r^2: %f", x_intersect_1, y, y_2, pow(r,2));
-
-  ROS_INFO("discriminant: %f sqrt(discriminant): %f", discriminant, sqrt(discriminant));
-  ROS_INFO("-B + sqrt(discriminant): %f", -B+sqrt(discriminant));
-  ROS_INFO("-B - sqrt(discriminant): %f", -B-sqrt(discriminant));
-  
-  ROS_INFO("2*A: %f", 2*A);
-  ROS_INFO("x_intersect_1: %f x_intersect_2: %f", x_intersect_1, x_intersect_2);*/
-
-  
-  
-  // Get range of x for the line segment
-  double x_min = trajectory.trajectory.points[ trajectory.i_knotPoints.at(segment-1)].positions[0];
-  double x_max = trajectory.trajectory.points[ trajectory.i_knotPoints.at(segment)].positions[0];
-
-
-  // Get range of x for the arc
-  //ros::Time t_findangle = ros::Time::now();
-  uint16_t  i_max               = ob_trajectory.trajectory.points.size()-1;
-  double    angle_first_point   = atan2( ob_trajectory.trajectory.points[0].positions[1],     ob_trajectory.trajectory.points[0].positions[0]);
-  double    angle_last_point    = atan2( ob_trajectory.trajectory.points[i_max].positions[1], ob_trajectory.trajectory.points[i_max].positions[0]);
-
-  double starting_angle = atan2(ob_trajectory.trajectory.points[0].positions[1] - k, ob_trajectory.trajectory.points[0].positions[0] - h);
-  //ros::Duration d_firstthreecalls = ros::Time::now() - t_findangle;
-
-  //ros::Time t_angle=ros::Time::now();
-  //ros::Duration d_angle = ros::Time::now() - t_angle;
-  //ros::Duration d_findangle = (ros::Time::now() - t_findangle);
-  
-  //ros::Time t_findminmax = ros::Time::now();
-  double next_angle = 0;
-  double min_dist = utility_.findDistanceBetweenAngles(starting_angle, next_angle);
-  std::vector<double> angles;
-  angles.push_back(0);
-  angles.push_back(PI/2.f);
-  angles.push_back(PI);
-  angles.push_back(-PI/2.f);
-  for(int i=1;i<angles.size();i++)
-  {
-    if(fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i))) < min_dist)
-    {
-      min_dist = fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i)));
-      next_angle = angles.at(i);
-    }
-  }
-  //ROS_INFO("next_angle: %f", next_angle);
-
-
-  double angle;
-  if(ob_trajectory.trajectory.points.at(0).velocities.at(2) < 0)
-  {
-    //ROS_INFO("displaceAngle: %f", utility_.findDistanceBetweenAngles(next_angle, starting_angle));
-    angle = utility_.displaceAngle(starting_angle, (utility_.findDistanceBetweenAngles(next_angle, starting_angle)));
-  }
-  else
-  {
-    //ROS_INFO("displaceAngle: %f", utility_.findDistanceBetweenAngles(starting_angle, next_angle));
-    angle = utility_.displaceAngle(starting_angle, utility_.findDistanceBetweenAngles(starting_angle, next_angle));
-  }
-
-  // Create point for the location along the circle 
-  std::vector<double> p;
-  p.push_back(h + r*cos(angle));
-  p.push_back(k + r*sin(angle));
-
-  //ROS_INFO("starting_angle: %f angle: %f p: (%f, %f)", starting_angle, angle, p.at(0), p.at(1));
-
-  // Collect the 3 points, find min and max values for x and y
-  std::vector< std::vector<double> > minmax_points;
-  minmax_points.push_back(p);
-  minmax_points.push_back(ob_trajectory.trajectory.points[0].positions);
-  minmax_points.push_back(ob_trajectory.trajectory.points[i_max].positions);
-
-  double ob_x_min = minmax_points[0][0];
-  double ob_x_max = minmax_points[0][0];
-  double ob_y_min = minmax_points[0][1];
-  double ob_y_max = minmax_points[0][1];
-
-  for(uint8_t i=1;i<minmax_points.size();i++)
-  {
-    if(minmax_points[i][0] < ob_x_min)
-    {
-      ob_x_min = minmax_points[i][0];
-    }
-    if(minmax_points[i][0] > ob_x_max)
-    {
-      ob_x_max = minmax_points[i][0];
-    }
-    if(minmax_points[i][1] < ob_y_min)
-    {
-      ob_y_min = minmax_points[i][1];
-    }
-    if(minmax_points[i][1] > ob_y_max)
-    {
-      ob_y_max = minmax_points[i][1];
-    }
-  }
-  //ros::Duration d_findminmax = (ros::Time::now() - t_findminmax);
-
-  
-  //ROS_INFO("Info: x_min: %f x_max: %f ob_x_min: %f ob_x_max: %f ob_y_min: %f ob_y_max: %f", x_min, x_max, ob_x_min, ob_x_max, ob_y_min, ob_y_max);
-  
-  //ros::Time t_swaps = ros::Time::now();
-  // Check for any necessary swaps
-  if(ob_x_min > ob_x_max)
-  {
-    double temp = ob_x_min;
-    ob_x_min = ob_x_max;
-    ob_x_max = temp;
-  }
-  
-  if(ob_y_min > ob_y_max)
-  {
-    double temp = ob_y_min;
-    ob_y_min = ob_y_max;
-    ob_y_max = temp;
-  }
-
-
-  if( x_min > x_max )
-  {
-    double temp = x_min;
-    x_min = x_max;
-    x_max = temp;
-  }
-  //ros::Duration d_swaps = (ros::Time::now() - t_swaps);
-  
-  //ros::Time t_check = ros::Time::now();
-  // Check if the intersection occurs within the bounds of both the arc and line segment
-  if( ((x_intersect_1 >= x_min && x_intersect_1 <= x_max) && ((x_intersect_1 >= ob_x_min && x_intersect_1 <= ob_x_max) && (y >= ob_y_min && y <= ob_y_max)))  ||
-      (((x_intersect_2 >= x_min && x_intersect_2 <= x_max) && ((x_intersect_2 >= ob_x_min && x_intersect_2 <= ob_x_max) && (y_2 >= ob_y_min && y_2 <= ob_y_max)))) )
-  {
-    qr.collision_ = true;
-  }
-  else
-  {
-    qr.collision_ = false;
-  }
-  //ros::Duration d_check = (ros::Time::now() - t_check);
-  
-  }
-
-  ros::Duration d_linearc = ros::Time::now() - t_start;
   
   /*ROS_INFO("d_firstthreecalls: %f", d_firstthreecalls.toSec());
   ROS_INFO("d_angle: %f", d_angle.toSec());

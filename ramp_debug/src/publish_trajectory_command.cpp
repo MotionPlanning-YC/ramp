@@ -435,13 +435,13 @@ int main(int argc, char** argv) {
 
   // Build any obstacle trajectories
   ramp_msgs::KnotPoint ob1;
-  ob1.motionState.positions.push_back(1.f); // 0.70455
+  ob1.motionState.positions.push_back(0.f); // 0.70455
   ob1.motionState.positions.push_back(1.); // 0.4026
-  ob1.motionState.positions.push_back(PI/2); // 0.519146
+  ob1.motionState.positions.push_back(PI/4); // 0.519146
   
-  ob1.motionState.velocities.push_back(0.); // 0.70455
-  ob1.motionState.velocities.push_back(0.33); // 0.4026
-  ob1.motionState.velocities.push_back(0.33); // 0.519146
+  ob1.motionState.velocities.push_back(0.23); // 0.70455
+  ob1.motionState.velocities.push_back(0.23); // 0.4026
+  ob1.motionState.velocities.push_back(-0.33); // 0.519146
   
   ramp_msgs::KnotPoint ob2;
   ob2.motionState.positions.push_back(3.5); // 0.70455
