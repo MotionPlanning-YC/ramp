@@ -795,18 +795,22 @@ void CollisionDetection::LineArc(const ramp_msgs::RampTrajectory& trajectory, co
   {
 
   // Get Line info
-  double l_p1_x = trajectory.trajectory.points[ trajectory.i_knotPoints[segment-1]].positions[0];
-
-  double l_p1_y = trajectory.trajectory.points[ trajectory.i_knotPoints[segment-1]].positions[1];
+  std::vector<double> l_p1;
+  l_p1.push_back(trajectory.trajectory.points[ trajectory.i_knotPoints[segment-1]].positions[0]);
+  l_p1.push_back(trajectory.trajectory.points[ trajectory.i_knotPoints[segment-1]].positions[1]);
   
-  double l_p2_x = trajectory.trajectory.points[ trajectory.i_knotPoints[segment]].positions[0];
+  std::vector<double> l_p2;
+  l_p2.push_back(trajectory.trajectory.points[ trajectory.i_knotPoints[segment]].positions[0]);
+  l_p2.push_back(trajectory.trajectory.points[ trajectory.i_knotPoints[segment]].positions[1]);
 
-  double l_p2_y = trajectory.trajectory.points[ trajectory.i_knotPoints[segment]].positions[1];
 
-  double slope = (l_p2_y - l_p1_y) / (l_p2_x - l_p1_x);
-  double b = l_p2_y - (slope*l_p2_x);
+  double slope = (l_p2[1] - l_p1[1]) / (l_p2[0] - l_p1[0]);
+  double b = l_p2[1] - (slope*l_p2[0]);
+
+  LineArc(l_p1, l_p2, ob_trajectory, qr.collision_);
 
   //ros::Duration d_lineinfo = ros::Time::now() - t_start;
+ 
 
   // Get circle info
   //ros::Time t_circleinfo = ros::Time::now();
