@@ -104,7 +104,7 @@ const bool Line::finalStateReached()
   bool goal_reached = position_goal_met && velocity_goal_met;
 
   //return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED);
-  return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED ||
+  return (reflexxesData_.resultValue == ReflexxesAPI::RML_FINAL_STATE_REACHED || goal_reached || 
       (timeFromStart_ >= timeCutoff_));
 }
 

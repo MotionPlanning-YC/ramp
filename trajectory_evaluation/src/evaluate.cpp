@@ -125,7 +125,6 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
   //ROS_INFO("t_second if: %f", (ros::Time::now()-t_after).toSec());
 
 
-  ROS_INFO("performFeasibility qr_.collision: %s", qr_.collision_ ? "True" : "False");
   //ROS_INFO("t_after: %f", (ros::Time::now() - t_after).toSec());
   //ROS_INFO("performFeasibility time: %f", (ros::Time::now() - t_start).toSec());
 }
