@@ -130,7 +130,7 @@ int main(int argc, char** argv) {
   
   ramp_msgs::Path p;
   p.points.push_back(zero);
-  //p.points.push_back(c1);
+  p.points.push_back(c1);
   //p.points.push_back(c2);
   //p.points.push_back(c3);
   //p.points.push_back(c4);
@@ -391,7 +391,7 @@ int main(int argc, char** argv) {
   
   ramp_msgs::TrajectoryRequest tr;
   tr.path = p;
-  tr.type = PARTIAL_BEZIER;
+  tr.type = TRANSITION;
   tr.print = true;
   tr.bezierCurves = curves;
   tr.segments = 0;

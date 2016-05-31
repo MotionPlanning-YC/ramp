@@ -42,7 +42,7 @@ class CollisionDetection
     void deCasteljau(const std::vector<ramp_msgs::MotionState>& control_poly, std::vector< std::vector<ramp_msgs::MotionState> >& result) const;
 
 
-    void ControlPolyArc(const std::vector<ramp_msgs::MotionState>& con_poly_vert, const ramp_msgs::RampTrajectory& ob_tr, bool& result) const;
+    void ControlPolyArc(const std::vector<ramp_msgs::MotionState>& con_poly_vert, const ramp_msgs::RampTrajectory& ob_tr, bool& result, std::vector< std::vector<double> >& points_of_collision) const;
 
     //void LineLine(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
     void LineLine
@@ -57,7 +57,7 @@ class CollisionDetection
     
     void BezierLine(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr, std::vector< std::vector<double> >& points_of_collision) const;
     
-    void BezierArc(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const;
+    void BezierArc(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr, std::vector< std::vector<double> >& points_of_collision) const;
 
     void getCircleInfo(const ramp_msgs::RampTrajectory& traj, double& r, double& h, double& k) const;
 

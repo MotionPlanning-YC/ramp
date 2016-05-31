@@ -50,7 +50,7 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
       // Check a point in the middle of the segment for angular velocity
       // If there's no angular velocity, then it's a straight-line, otherwise it's a curve
       ros::Time t_getMisc = ros::Time::now();
-      uint16_t index = (3*trajectory.i_knotPoints[segment-1] + trajectory.i_knotPoints[segment]) / 4.f;
+      uint16_t index = (trajectory.i_knotPoints[segment-1] + trajectory.i_knotPoints[segment]) / 2.f;
 
 
       const trajectory_msgs::JointTrajectoryPoint* c = &trajectory.trajectory.points[index];
@@ -62,7 +62,7 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
 
       // Straight-line
       ros::Time t_if = ros::Time::now();
-      if( v > 0.01 && w*w < 0.0001 )
+      if(segment == 1 || (v > 0.01 && w*w < 0.0001 ))
       {
         //ROS_INFO("t_if: %f", (ros::Time::now()-t_if).toSec());
         //t_if = ros::Time::now();
@@ -97,8 +97,8 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
         // Bezier-Arc
         else
         {
-          //ROS_INFO("Bezier Arc");
-          BezierArc(trajectory.curves[0].controlPoints, obstacle_trjs[ob_i], result); 
+          ROS_INFO("Bezier Arc");
+          BezierArc(trajectory.curves[0].controlPoints, obstacle_trjs[ob_i], result, points_of_collision); 
         }
       }
       //ROS_INFO("Segment %i Collision: %s", segment, result.collision_ ? "True" : "False");
@@ -138,11 +138,18 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
     t.push_back(index / 10.f);
   }
 
-  t_final = (t.size() > 1) ?
-            (t[0] < t[1] ? t[0] : t[1])
-            :
-            t[0];
-  ROS_INFO("t_final: %f", t_final);
+  if(points_of_collision.size()>0)
+  {
+    t_final = (t.size() > 1) ?
+              (t[0] < t[1] ? t[0] : t[1])
+              :
+              t[0];
+    ROS_INFO("t_final: %f", t_final);
+  }
+  else
+  {
+    ROS_INFO("No Collision!");
+  }
 
     
 
@@ -158,7 +165,7 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
 
 
 
-void CollisionDetection::BezierArc(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr) const
+void CollisionDetection::BezierArc(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr, std::vector< std::vector<double> >& points_of_collision) const
 {
   ros::Time t_start = ros::Time::now();
 
@@ -177,18 +184,27 @@ void CollisionDetection::BezierArc(const std::vector<ramp_msgs::MotionState>& co
 
 
   ros::Time t_for = ros::Time::now();
-  //ROS_INFO("control_poly_tree size: %i", (int)control_poly_tree.size());
+  ROS_INFO("control_poly_tree size: %i", (int)control_poly_tree.size());
   for(i=0;i<control_poly_tree.size();i++)
   {
-    //std::vector<ramp_msgs::MotionState> control_poly = control_poly_tree.at(i);
-    /*ROS_INFO("control_poly:");
+    ROS_INFO("Testing collision on control polygon %i", i);
+    std::vector<ramp_msgs::MotionState> control_poly = control_poly_tree.at(i);
+    ROS_INFO("control_poly:");
     for(int j=0;j<control_poly.size();j++)
     {
       ROS_INFO("Vertex %i: %s", i, utility_.toString(control_poly.at(j)).c_str());
-    }*/
+    }
+    if(i > 2)
+    {
+      ControlPolyArc(control_poly_tree[i], ob_trajectory, coll_array[i], points_of_collision);
+    }
+    else
+    {
+      std::vector< std::vector<double> > temp;
+      ControlPolyArc(control_poly_tree[i], ob_trajectory, coll_array[i], temp);
+    }
 
-    ControlPolyArc(control_poly_tree[i], ob_trajectory, coll_array[i]);
-    //ROS_INFO("collision at %i: %s", i, coll_array[i] ? "True" : "False");
+    ROS_INFO("collision at polygon %i: %s", i, coll_array[i] ? "True" : "False");
 
     // If no collision with the initial control polygon, return false
     if(!coll_array[i] && i == 0)
@@ -217,6 +233,8 @@ void CollisionDetection::BezierArc(const std::vector<ramp_msgs::MotionState>& co
       ROS_INFO("In 4th if");
       qr.collision_ = false;
     }
+
+    printf("\n\n\n\n");
   } // end for
   //ros::Duration d_for = ros::Time::now() - t_for;
   //ros::Duration d_total = ros::Time::now() - t_start;
@@ -287,7 +305,7 @@ void CollisionDetection::deCasteljau(const std::vector<ramp_msgs::MotionState>& 
 
 
 
-void CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState>& con_poly_vert, const ramp_msgs::RampTrajectory& ob_trajectory, bool& result) const
+void CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState>& con_poly_vert, const ramp_msgs::RampTrajectory& ob_trajectory, bool& result, std::vector< std::vector<double> >& points_of_collision) const
 {
   
   // Line-Arc for each segment on control polygon
@@ -295,7 +313,7 @@ void CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState
   {
     int start =  i;
     int end   = (i == con_poly_vert.size()-1) ? 0 : i+1;
-    //ROS_INFO("Segment %i", i);
+    ROS_INFO("Control Polygon Edge %i", i);
     std::vector<double> l_p1;
     l_p1.push_back(con_poly_vert.at(start).positions.at(0));
     l_p1.push_back(con_poly_vert.at(start).positions.at(1));
@@ -306,11 +324,12 @@ void CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState
     
     //ROS_INFO("l_p1: (%f, %f)", l_p1.at(0), l_p1.at(1));
     //ROS_INFO("l_p2: (%f, %f)", l_p2.at(0), l_p2.at(1));
-
-    std::vector< std::vector<double> > points_of_collision;
     
     LineArc(l_p1, l_p2, ob_trajectory, result, points_of_collision);
+    ROS_INFO("result: %s", result ? "True" : "False");
   } // end for
+
+  ROS_INFO("\n\n");
 } // End ControlPolyArc 
 
 
@@ -586,7 +605,7 @@ void CollisionDetection::LineArc(const std::vector<double> l_p1, const std::vect
   // Circle info
   double r, h, k;
   getCircleInfo(ob_trajectory, r, h, k);
-  //ROS_INFO("Circle info: r: %f h: %f k: %f", r, h, k);
+  ROS_INFO("Circle info: r: %f h: %f k: %f", r, h, k);
   
   // Line info
   double slope  = (l_p2.at(1) - l_p1.at(1)) / (l_p2.at(0) - l_p1.at(0));
@@ -654,7 +673,7 @@ void CollisionDetection::LineArc(const std::vector<double> l_p1, const std::vect
   double next_axis_angle = angles[0];
   if( fabs(fmodf(starting_angle, (PI/2.f))) < 0.0001)
   {
-   //ROS_INFO("In if");
+    ROS_INFO("In if");
     if(ob_trajectory.trajectory.points[0].velocities[2] > 0)
     {
       next_axis_angle = utility_.displaceAngle(starting_angle, (PI/2.f));
@@ -666,13 +685,25 @@ void CollisionDetection::LineArc(const std::vector<double> l_p1, const std::vect
   }
   else
   {
-    //ROS_INFO("In else");
+    ROS_INFO("In else");
     double min_dist = fabs(utility_.findDistanceBetweenAngles(starting_angle, next_axis_angle));
-    //ROS_INFO("next_axis_angle: %f min_dist: %f", next_axis_angle, min_dist);
+    ROS_INFO("next_axis_angle: %f min_dist: %f", next_axis_angle, min_dist);
     for(int i=1;i<angles.size();i++)
     {
-      //ROS_INFO("angles[%i]: %f", i, angles[i]);
-      //ROS_INFO("fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i))): %f", fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i))));
+      ROS_INFO("angles[%i]: %f", i, angles[i]);
+      ROS_INFO("fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i))): %f", fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i))));
+      if(fabs( fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i))) - min_dist ) < 0.0001)
+      {
+        ROS_INFO("In if equal!");
+        ROS_INFO("utility_.findDistanceBetweenAngles(starting_angle, angles[i]): %f", utility_.findDistanceBetweenAngles(starting_angle, angles[i]));
+        ROS_INFO("ob_trajectory w: %f", ob_trajectory.trajectory.points[0].velocities[2]);
+        if(utility_.findDistanceBetweenAngles(starting_angle, angles[i]) * 
+            ob_trajectory.trajectory.points[0].velocities[2] > 0.f)
+        {
+          ROS_INFO("In if share sign");
+          next_axis_angle = angles[i];
+        }
+      }
       if(fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i))) < (min_dist-0.01))
       {
         min_dist = fabs(utility_.findDistanceBetweenAngles(starting_angle, angles.at(i)));
@@ -680,7 +711,7 @@ void CollisionDetection::LineArc(const std::vector<double> l_p1, const std::vect
       }
     }
   }
-  //ROS_INFO("starting_angle: %f next_axis_angle: %f", starting_angle, next_axis_angle);
+  ROS_INFO("starting_angle: %f next_axis_angle: %f", starting_angle, next_axis_angle);
 
   std::vector<double> p;
   p.push_back(h + r*cos(next_axis_angle));
@@ -758,9 +789,7 @@ void CollisionDetection::getCircleInfo(const ramp_msgs::RampTrajectory& traj, do
   double v = sqrt((traj.trajectory.points[0].velocities[0] * traj.trajectory.points[0].velocities[0]) + (traj.trajectory.points[0].velocities[1]*traj.trajectory.points[0].velocities[1]) );
   r = fabs(v / w);
 
-  //ROS_INFO("v: %f w: %f r: %f", v, w, r);
-
-  //ROS_INFO("w: %f v: %f r: %f", w, v, r);
+  ROS_INFO("v: %f w: %f r: %f", v, w, r);
 
   // Compute circle center!
   const trajectory_msgs::JointTrajectoryPoint* p1 = &traj.trajectory.points[0];
@@ -769,13 +798,16 @@ void CollisionDetection::getCircleInfo(const ramp_msgs::RampTrajectory& traj, do
       traj.trajectory.points.size()-1];
 
 
+  ROS_INFO("p1: (%f,%f) p2: (%f,%f) p3: (%f,%f)", p1->positions[0], p1->positions[1], p2->positions[0], 
+      p2->positions[1], p3->positions[0], p3->positions[1]);
+
   double q = utility_.positionDistance(p1->positions, p2->positions);
 
   double x_mid = (p1->positions[0] + p2->positions[0]) / 2.f;
   double y_mid = (p1->positions[1] + p2->positions[1]) / 2.f;
 
-  double x_dir = p1->positions[0] - p2->positions[0];
-  double y_dir = p1->positions[1] - p2->positions[1];
+  double x_dir = p2->positions[0] - p1->positions[0];
+  double y_dir = p2->positions[1] - p1->positions[1];
 
   double x_dir_per = y_dir / q;
   double y_dir_per = -x_dir / q;
@@ -787,8 +819,8 @@ void CollisionDetection::getCircleInfo(const ramp_msgs::RampTrajectory& traj, do
   x_mid = (p2->positions.at(0) + p3->positions.at(0)) / 2.f;
   y_mid = (p2->positions.at(1) + p3->positions.at(1)) / 2.f;
 
-  x_dir = p2->positions.at(0) - p3->positions.at(0);
-  y_dir = p2->positions.at(1) - p3->positions.at(1);
+  x_dir = p3->positions.at(0) - p2->positions.at(0);
+  y_dir = p3->positions.at(1) - p2->positions.at(1);
 
   x_dir_per = y_dir / q;
   y_dir_per = -x_dir / q;
@@ -800,15 +832,15 @@ void CollisionDetection::getCircleInfo(const ramp_msgs::RampTrajectory& traj, do
   double s = (r0_y*(p1_x-p0_x) + r0_x*(p0_y-p1_y)) / (r1_y*r0_x - r0_y*r1_x);
   double t = ( p1_x - p0_x +s*r1_x) / r0_x;
   
-  //ROS_INFO("s: %f t: %f", s, t);
-  //ROS_INFO("a_x: %f b_x: %f a_y: %f b_y: %f", a_x, b_x, a_y, b_y);
+  ROS_INFO("s: %f t: %f", s, t);
 
-  //ROS_INFO("q: %f mid: (%f, %f) dir: (%f, %f) dir_per: (%f, %f)", q, x_mid, y_mid, x_dir, y_dir, x_dir_per, y_dir_per);
-  //ROS_INFO("h: %f k: %f r: %f", h, k, r);
+  ROS_INFO("q: %f mid: (%f, %f) dir: (%f, %f) dir_per: (%f, %f)", q, x_mid, y_mid, x_dir, y_dir, x_dir_per, y_dir_per);
 
   // Compute h and k
   h = p0_x + r0_x*t;
   k = p0_y + r0_y*t;
+  
+  ROS_INFO("h: %f k: %f r: %f", h, k, r);
 }
 
 
