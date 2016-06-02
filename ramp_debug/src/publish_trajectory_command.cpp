@@ -438,16 +438,16 @@ int main(int argc, char** argv) {
   ob1.motionState.positions.push_back(1.f); // 0.70455
   ob1.motionState.positions.push_back(1.f); // 0.4026
   ob1.motionState.positions.push_back(3*PI/4); // 0.519146
-  
+ 
   ob1.motionState.velocities.push_back(0.); // 0.70455
   ob1.motionState.velocities.push_back(0.33); // 0.4026
   ob1.motionState.velocities.push_back(0.33); // 0.519146
-  
+ 
   ramp_msgs::KnotPoint ob2;
   ob2.motionState.positions.push_back(0.f); // 0.70455
   ob2.motionState.positions.push_back(3.5); // 0.4026
   ob2.motionState.positions.push_back(0.); // 0.519146
-  
+ 
   ob2.motionState.velocities.push_back(-0.33); // 0.70455
   ob2.motionState.velocities.push_back(0.33); // 0.4026
   ob2.motionState.velocities.push_back(0.); // 0.519146
@@ -459,7 +459,7 @@ int main(int argc, char** argv) {
   ramp_msgs::TrajectoryRequest obtr, obtr2;
   obtr.path = obp;
   obtr.type = 3;
-  
+ 
   obtr2.path = obp2;
   obtr2.type = 3;
 
@@ -496,6 +496,7 @@ int main(int argc, char** argv) {
   {
     std::cout<<"\nEvaluated traj, fitness: "<<er_srv.response.resps.at(0).fitness;
     std::cout<<"\nEvaluated traj, feasible: "<<er_srv.response.resps.at(0).feasible;
+    std::cout<<"\nEvaluated traj, t_firstColl: "<<er_srv.response.resps.at(0).t_firstCollision;
   }
 
 
