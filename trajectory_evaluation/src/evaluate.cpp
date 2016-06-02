@@ -18,16 +18,14 @@ void Evaluate::setRequest(const ramp_msgs::EvaluationRequest& req)
   //cd_.obstacle_trjs_ = req.obstacle_trjs;
   //cd_.trajectory_ = req.trajectory;
   //orientation_.trajectory_ = trajectory_;
-  //orientation_.currentTheta_ = req.currentTheta;
-  //orientation_.theta_at_cc_ = req.theta_cc;
-  
-  ROS_INFO("setRequest time: %f", (ros::Time::now() - t_start).toSec());
 } //End setRequest
 
 
 void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationResponse& res)
 {
   //ros::Time t_start = ros::Time::now();
+  orientation_.currentTheta_ = req.currentTheta;
+  orientation_.theta_at_cc_ = req.theta_cc;
   performFeasibility(req);
   res.feasible = !qr_.collision_;
   //ROS_INFO("performFeasibility: %f", (ros::Time::now()-t_start).toSec());
@@ -146,7 +144,7 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result)
   {
     //ROS_INFO("In if(feasible)");
     double T = trj.trajectory.points.at(trj.trajectory.points.size()-1).time_from_start.toSec();
-    double A = 0;//orientation_.perform();
+    double A = orientation_.perform(trj);
     //ROS_INFO("T: %f A: %f", T, A);
     cost = T + A;
   }

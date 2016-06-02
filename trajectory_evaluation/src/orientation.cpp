@@ -28,18 +28,21 @@ const double Orientation::getDeltaTheta(const ramp_msgs::RampTrajectory& trj) co
     //ROS_INFO("thetaNec: %f result: %f", thetaNec, result);
   }
 
-  ROS_INFO("t_getDeltaTheta: %f", (ros::Time::now()-t_start).toSec());
+  //ROS_INFO("t_getDeltaTheta: %f", (ros::Time::now()-t_start).toSec());
   return result;
 }
 
 
 const double Orientation::perform(const ramp_msgs::RampTrajectory& trj) 
 {
+  //ROS_INFO("In Orientation::perform");
+  //ROS_INFO("Trj: %s", utility_.toString(trj).c_str());
+  //ROS_INFO("trajectory_.i_knotPoints.size(): %i", (int)trj.i_knotPoints.size());
   double result = 0.;
 
   // Add the change in orientation needed to move on this trajectory
   // Check if there is more than 1 point
-  if(trajectory_.i_knotPoints.size() > 1) 
+  if(trj.i_knotPoints.size() > 1) 
   {
 
     trajectory_msgs::JointTrajectoryPoint a = trj.trajectory.points.at(0);

@@ -22,7 +22,7 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
     
     ramp_msgs::EvaluationResponse res;
     d_setting = ros::Time::now() - t_for;
-    //ROS_INFO("Robot Evaluating trajectory: %s", u.toString(req.trajectory).c_str());
+    //ROS_INFO("Robot Evaluating trajectory: %s", u.toString(reqs.reqs[i].trajectory).c_str());
 
     // If more than one point
     if(reqs.reqs.at(i).trajectory.trajectory.points.size() > 1)
@@ -50,7 +50,7 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
   /*ROS_INFO("t_setting: %f", d_setting.toSec());
   ROS_INFO("t_vec: %f", d_vec.toSec());
   ROS_INFO("t_for: %f", d_for.toSec());*/
-  ROS_INFO("t_elapsed: %f", t_elapsed.toSec());
+  //ROS_INFO("t_elapsed: %f", t_elapsed.toSec());
   t_data.push_back(t_elapsed);
   return true;
 } //End handleRequest

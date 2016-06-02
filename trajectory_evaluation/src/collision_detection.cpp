@@ -24,12 +24,15 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
   int8_t ob_i;
   std::vector< std::vector<double> > points_of_collision;
   
+  double radius = 0.2f;
+  
+  std::vector<double> t;
+  double t_final;
+  
   //ROS_INFO("obstacle_trjs_.size(): %i", (int)obstacle_trjs_.size());
   // Predict the obstacle's trajectory
   for(ob_i=0;ob_i<s;ob_i++)
   {
-    //t_for = ros::Time::now();
-    //const ramp_msgs::RampTrajectory& ob_trajectory = obstacle_trjs[ob_i];
     
     ros::Time t_points = ros::Time::now();
     const trajectory_msgs::JointTrajectoryPoint& ob_a = obstacle_trjs[ob_i].trajectory.points[0];
@@ -67,14 +70,14 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
         if(ob_trj_line)
         {
           //ROS_INFO("Line Line");
-          LineLine(trajectory, segment, obstacle_trjs[ob_i], result, points_of_collision);
+          LineLine(trajectory, segment, obstacle_trjs[ob_i], points_of_collision);
         }
         // Line-Arc
         else
         {
           //ROS_INFO("Line-Arc");
           ros::Time t_linearc = ros::Time::now();
-          LineArc(trajectory, segment, obstacle_trjs[ob_i], result, points_of_collision);
+          LineArc(trajectory, segment, obstacle_trjs[ob_i], points_of_collision);
           d_linearc = ros::Time::now() - t_linearc;
         }
       }
@@ -85,54 +88,45 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
         if(ob_trj_line)
         {
           //ROS_INFO("Bezier Line");
-          BezierLine(trajectory.curves[0].controlPoints, obstacle_trjs[ob_i], result, points_of_collision);
+          BezierLine(trajectory.curves[0].controlPoints, obstacle_trjs[ob_i], points_of_collision);
         }
         // Bezier-Arc
         else
         {
           //ROS_INFO("Bezier Arc");
-          BezierArc(trajectory.curves[0].controlPoints, obstacle_trjs[ob_i], result, points_of_collision); 
+          BezierArc(trajectory.curves[0].controlPoints, obstacle_trjs[ob_i], points_of_collision); 
         }
       }
       //ROS_INFO("Segment %i Collision: %s", segment, result.collision_ ? "True" : "False");
     } // end for segment
 
+    
+    for(int p=0;p<points_of_collision.size();p++)
+    {
+      std::vector<double>& p_intersect = points_of_collision[p];
+      //ROS_INFO("Point p: (%f, %f)", p_intersect[0], p_intersect[1]);
 
+      int index = findIndexOfCollision(trajectory, p_intersect);
+      //ROS_INFO("index: %d", index);
+
+      trajectory_msgs::JointTrajectoryPoint traj_p_at_coll = trajectory.trajectory.points[index];
+      trajectory_msgs::JointTrajectoryPoint ob_traj_p_at_coll = obstacle_trjs[ob_i].trajectory.points[index];
+      
+      /*ROS_INFO("traj_point: %s", utility_.toString(traj_p_at_coll).c_str());
+      ROS_INFO("ob_traj_point: %s", utility_.toString(ob_traj_p_at_coll).c_str());
+      ROS_INFO("dist: %f", utility_.positionDistance( traj_p_at_coll.positions, ob_traj_p_at_coll.positions ));*/
+
+      if( utility_.positionDistance( traj_p_at_coll.positions, ob_traj_p_at_coll.positions ) < 2.f*radius )
+      {
+        t.push_back(index / 10.f);
+      }
+    }
     //d_inner_for = ros::Time::now()-t_inner_for;
   } // end for obstacle */
     
   //ROS_INFO("points_of_collision.size(): %d", (int)points_of_collision.size());
   
-  std::vector<double> t;
-  double t_final;
-  for(int p=0;p<points_of_collision.size();p++)
-  {
-    std::vector<double>& p_intersect = points_of_collision[p];
-    //ROS_INFO("Point p: (%f, %f)", p_intersect[0], p_intersect[1]);
-
-    int index = (rand() % trajectory.trajectory.points.size());  
-    //ROS_INFO("index: %i", index);
-
-    while(fabs(utility_.positionDistance( trajectory.trajectory.points[index].positions, p_intersect)) > 0.01)
-    {
-      double d_left   = fabs(utility_.positionDistance( trajectory.trajectory.points[index-1].positions, p_intersect));
-      double d_right  = fabs(utility_.positionDistance( trajectory.trajectory.points[index+1].positions, p_intersect));
-      //ROS_INFO("d_left: %f d_right: %f", d_left, d_right);
-      if(d_left < d_right)
-      {
-        index -= ceil(d_left*10);
-      }
-      else
-      {
-        index += ceil(d_right*10);
-      }
-      //ROS_INFO("New index: %d", index);
-    }
-
-    t.push_back(index / 10.f);
-  }
-
-  if(points_of_collision.size()>0)
+  if(t.size()>0)
   {
     t_final = t[0];
     for(uint8_t p=1;p<points_of_collision.size();p++)
@@ -143,7 +137,8 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
       }
     }
 
-    result.t_firstCollision_ = t_final;
+    result.collision_         = true;
+    result.t_firstCollision_  = t_final;
   }
   
 
@@ -160,8 +155,31 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
 } //End perform*/
 
 
+int CollisionDetection::findIndexOfCollision(const ramp_msgs::RampTrajectory& trajectory, std::vector<double>& collision_point) const
+{
+  int index = (rand() % trajectory.trajectory.points.size());  
+  //ROS_INFO("index: %i", index);
 
-void CollisionDetection::BezierArc(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr, std::vector< std::vector<double> >& points_of_collision) const
+  while(fabs(utility_.positionDistance( trajectory.trajectory.points[index].positions, collision_point)) > 0.01)
+  {
+    double d_left   = fabs(utility_.positionDistance( trajectory.trajectory.points[index-1].positions, collision_point));
+    double d_right  = fabs(utility_.positionDistance( trajectory.trajectory.points[index+1].positions, collision_point));
+    //ROS_INFO("d_left: %f d_right: %f", d_left, d_right);
+    if(d_left < d_right)
+    {
+      index -= ceil(d_left*10);
+    }
+    else
+    {
+      index += ceil(d_right*10);
+    }
+    //ROS_INFO("New index: %d", index);
+  }
+
+  return index;
+}
+
+void CollisionDetection::BezierArc(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const
 {
   ros::Time t_start = ros::Time::now();
 
@@ -169,7 +187,7 @@ void CollisionDetection::BezierArc(const std::vector<ramp_msgs::MotionState>& co
 
 
   // Start sub-dividing the CP
-  int i=0; 
+  int i=0;
   bool coll_array[7] = {false, false, false, false, false, false, false};
   
   
@@ -206,28 +224,19 @@ void CollisionDetection::BezierArc(const std::vector<ramp_msgs::MotionState>& co
     if(!coll_array[i] && i == 0)
     {
       //ROS_INFO("In 1st if");
-      qr.collision_ = false;
       break;
     }
     // If no collision with depth-1 polygons
     else if(i == 2 && !coll_array[i] && !coll_array[i-1])
     {
       //ROS_INFO("In 2nd if");
-      qr.collision_ = false;
       break;
     }
     // If collision with any depth-n level polygons, return true
     else if(coll_array[i] && i > 2)
     {
       //ROS_INFO("In 3rd if");
-      qr.collision_ = true;
       break;
-    }
-    // If no collision with any depth-n level polygons, return false
-    else if(i == control_poly_tree.size()-1 && !coll_array[i])
-    {
-      //ROS_INFO("In 4th if");
-      qr.collision_ = false;
     }
   } // end for
   //ros::Duration d_for = ros::Time::now() - t_for;
@@ -319,13 +328,13 @@ void CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState
     //ROS_INFO("l_p1: (%f, %f)", l_p1.at(0), l_p1.at(1));
     //ROS_INFO("l_p2: (%f, %f)", l_p2.at(0), l_p2.at(1));
     
-    LineArc(l_p1, l_p2, ob_trajectory, result, points_of_collision);
+    LineArc(l_p1, l_p2, ob_trajectory, points_of_collision, result);
     //ROS_INFO("result: %s", result ? "True" : "False");
   } // end for
 } // End ControlPolyArc 
 
 
-void CollisionDetection::LineLine(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& result, std::vector< std::vector<double> >& points_of_collision) const
+void CollisionDetection::LineLine(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const
 {
   ros::Time t_start = ros::Time::now();
   double t;
@@ -374,7 +383,7 @@ void CollisionDetection::LineLine(const ramp_msgs::RampTrajectory& trajectory, c
     // Same line
     if( fabs(l1_slope - l2_slope) < 0.01 && fabs(l1_b - l2_b) < 0.01 )
     {
-      result.collision_ = true;
+      points_of_collision.push_back(trajectory.trajectory.points[0].positions);
     }
   }
   else
@@ -404,7 +413,6 @@ void CollisionDetection::LineLine(const ramp_msgs::RampTrajectory& trajectory, c
     if( (x_intersect >= l1_x_min && x_intersect <= l1_x_max) && (x_intersect >= l2_x_min && x_intersect <= l2_x_max) )
     {
       //ROS_INFO("In if lines intersect");
-      result.collision_ = true;
 
       std::vector<double> p_intersect;
       double x_at_inter = x_intersect;
@@ -425,7 +433,7 @@ void CollisionDetection::LineLine(const ramp_msgs::RampTrajectory& trajectory, c
 
 
 
-void CollisionDetection::BezierLine(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr, std::vector< std::vector<double> >& points_of_collision) const
+void CollisionDetection::BezierLine(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const
 {
   //ROS_INFO("In CollisionDetection::BezierLine");
   ros::Time t_start = ros::Time::now();
@@ -531,8 +539,6 @@ void CollisionDetection::BezierLine(const std::vector<ramp_msgs::MotionState>& c
   }
   //ROS_INFO("x_min: %f x_max: %f", x_min, x_max);
   
-  qr.collision_ = false;
-
   for(int i=0;i<u_intersection.size();i++)
   {
     double u = u_intersection[i];
@@ -545,7 +551,6 @@ void CollisionDetection::BezierLine(const std::vector<ramp_msgs::MotionState>& c
       // Check if the intersection value is also on the line segment
       if( bezier_x >= x_min && bezier_x <= x_max )
       {
-        qr.collision_ = true;
         double bezier_y = pow( (1-u), 2 )*Y0 + 2*u*(1-u)*Y1 + pow(u,2)*Y2;
         std::vector<double> p_intersect;
         p_intersect.push_back(bezier_x);
@@ -559,7 +564,7 @@ void CollisionDetection::BezierLine(const std::vector<ramp_msgs::MotionState>& c
 
 
 
-void CollisionDetection::LineArc(const std::vector<double> l_p1, const std::vector<double> l_p2, const ramp_msgs::RampTrajectory& ob_trajectory, bool& result, std::vector< std::vector<double> >& points_of_collision) const
+void CollisionDetection::LineArc(const std::vector<double> l_p1, const std::vector<double> l_p2, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision, bool& result) const
 {
   std::vector<double> x_intersection;
 
@@ -803,7 +808,7 @@ void CollisionDetection::getCircleInfo(const ramp_msgs::RampTrajectory& traj, do
 }
 
 
-void CollisionDetection::LineArc(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& qr, std::vector< std::vector<double> >& points_of_collision) const
+void CollisionDetection::LineArc(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const
 {
   //ROS_INFO("In CollisionDetection::LineArc");
   ros::Time t_start = ros::Time::now();
@@ -823,7 +828,8 @@ void CollisionDetection::LineArc(const ramp_msgs::RampTrajectory& trajectory, co
   double slope = (l_p2[1] - l_p1[1]) / (l_p2[0] - l_p1[0]);
   double b = l_p2[1] - (slope*l_p2[0]);
 
-  LineArc(l_p1, l_p2, ob_trajectory, qr.collision_, points_of_collision);
+  bool temp;
+  LineArc(l_p1, l_p2, ob_trajectory, points_of_collision, temp);
   
   //ros::Duration d_linearc = ros::Time::now() - t_start;
   //ROS_INFO("LineArc time: %f", d_linearc.toSec());
