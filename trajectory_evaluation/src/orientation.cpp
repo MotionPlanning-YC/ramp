@@ -6,7 +6,9 @@ Orientation::Orientation() : Q_(1000. / PI) {}
 const double Orientation::getDeltaTheta(const ramp_msgs::RampTrajectory& trj) const
 {
   ros::Time t_start = ros::Time::now();
+
   double result = 0.f;
+
   if(trj.i_knotPoints.size() > 1) 
   {
 
@@ -56,11 +58,9 @@ const double Orientation::perform(const ramp_msgs::RampTrajectory& trj)
     double normalize = PI;
     deltaTheta /= normalize;
 
-
     // Normalize
     result += deltaTheta;
   }
-
 
   return result;
 }
@@ -82,13 +82,10 @@ const double Orientation::getPenalty(const ramp_msgs::RampTrajectory& trj) const
     //ROS_INFO("thetaNec: %f deltaTheta: %f mag_linear: %f", thetaNec, deltaTheta, mag_linear);
 
     // If delta theta is too high, add a penalty
-    //if(mag_linear > 0 && deltaTheta >= PI/2.f) 
-    //{
-      //ROS_INFO("Adding penalty for deltaTheta: %f", deltaTheta);
-      double normalize = PI;
-      deltaTheta /= normalize;
-      result += (Q_ * normalize);
-    //}
+    //ROS_INFO("Adding penalty for deltaTheta: %f", deltaTheta);
+    double normalize = PI;
+    deltaTheta /= normalize;
+    result += (Q_ * normalize);
   } // end if > 1 knot point
 
 

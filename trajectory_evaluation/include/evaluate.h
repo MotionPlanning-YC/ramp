@@ -12,9 +12,6 @@
 class Evaluate {
   public:
     Evaluate();
-    Evaluate(const ramp_msgs::EvaluationRequest& req);
-    
-    void setRequest(const ramp_msgs::EvaluationRequest& req);
 
     void perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationResponse& res);
     void performFeasibility(ramp_msgs::EvaluationRequest& er);

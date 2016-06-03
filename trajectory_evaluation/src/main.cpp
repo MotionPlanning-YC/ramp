@@ -50,7 +50,7 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
   /*ROS_INFO("t_setting: %f", d_setting.toSec());
   ROS_INFO("t_vec: %f", d_vec.toSec());
   ROS_INFO("t_for: %f", d_for.toSec());*/
-  //ROS_INFO("t_elapsed: %f", t_elapsed.toSec());
+  ROS_INFO("t_elapsed: %f", t_elapsed.toSec());
   t_data.push_back(t_elapsed);
   return true;
 } //End handleRequest
