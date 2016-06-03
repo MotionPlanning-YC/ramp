@@ -1312,7 +1312,9 @@ const RampTrajectory Planner::requestEvaluation(ramp_msgs::EvaluationRequest& er
 const RampTrajectory Planner::requestEvaluation(const RampTrajectory traj) 
 {
   ramp_msgs::EvaluationRequest er = buildEvaluationRequest(traj);
+  ros::Time start = ros::Time::now();
   RampTrajectory result           = requestEvaluation(er);
+  eval_durs_.push_back( ros::Time::now() - start );
 
   // Set non-evaluation related members
   result.holonomic_path_      = traj.holonomic_path_;
@@ -3218,11 +3220,9 @@ void Planner::displayTrajectory(const ramp_msgs::RampTrajectory traj) const
 const RampTrajectory Planner::evaluateTrajectory(const RampTrajectory trajec) 
 {
   //ROS_INFO("In Planner::evaluateTrajectory");
-  ros::Time start = ros::Time::now();
 
   RampTrajectory result = requestEvaluation(trajec);
   ////ROS_INFO("result: %s", result.toString().c_str());
-  eval_durs_.push_back( ros::Time::now() - start );
 
   //ROS_INFO("Leaving Planner::evaluateTrajectory");
   return result;
