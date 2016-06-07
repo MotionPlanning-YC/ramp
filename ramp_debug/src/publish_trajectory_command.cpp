@@ -21,9 +21,9 @@ int main(int argc, char** argv) {
 
 
   ramp_msgs::KnotPoint zero;
-  zero.motionState.positions.push_back(0);
-  zero.motionState.positions.push_back(0);
-  zero.motionState.positions.push_back(1.19f);
+  zero.motionState.positions.push_back(0.);
+  zero.motionState.positions.push_back(0.);
+  zero.motionState.positions.push_back(0.785f);
   zero.motionState.velocities.push_back(0);
   zero.motionState.velocities.push_back(0);
   zero.motionState.velocities.push_back(0);
@@ -391,7 +391,7 @@ int main(int argc, char** argv) {
   
   ramp_msgs::TrajectoryRequest tr;
   tr.path = p;
-  tr.type = TRANSITION;
+  tr.type = PARTIAL_BEZIER;
   tr.print = true;
   tr.bezierCurves = curves;
   tr.segments = 0;
@@ -435,26 +435,26 @@ int main(int argc, char** argv) {
 
   // Build any obstacle trajectories
   ramp_msgs::KnotPoint ob1;
-  ob1.motionState.positions.push_back(1.f); // 0.70455
-  ob1.motionState.positions.push_back(0.f); // 0.4026
-  ob1.motionState.positions.push_back(3*PI/4); // 0.519146
+  ob1.motionState.positions.push_back(3.5f); // 0.70455
+  ob1.motionState.positions.push_back(3.5f); // 0.4026
+  ob1.motionState.positions.push_back(-3*PI/4); // 0.519146
  
-  ob1.motionState.velocities.push_back(-0.23); // 0.70455
-  ob1.motionState.velocities.push_back(0.23); // 0.4026
-  ob1.motionState.velocities.push_back(0.33); // 0.519146
+  ob1.motionState.velocities.push_back(-0.33); // 0.70455
+  ob1.motionState.velocities.push_back(-0.33); // 0.4026
+  ob1.motionState.velocities.push_back(0.); // 0.519146
  
   ramp_msgs::KnotPoint ob2;
   ob2.motionState.positions.push_back(0.f); // 0.70455
-  ob2.motionState.positions.push_back(3.5); // 0.4026
+  ob2.motionState.positions.push_back(0.f); // 0.4026
   ob2.motionState.positions.push_back(0.); // 0.519146
  
   ob2.motionState.velocities.push_back(-0.33); // 0.70455
-  ob2.motionState.velocities.push_back(0.33); // 0.4026
+  ob2.motionState.velocities.push_back(-0.33); // 0.4026
   ob2.motionState.velocities.push_back(0.); // 0.519146
 
   ramp_msgs::Path obp, obp2;
   obp.points.push_back(ob1);
-  //obp.points.push_back(ob2);
+  obp.points.push_back(ob2);
 
   ramp_msgs::TrajectoryRequest obtr, obtr2;
   obtr.path = obp;
@@ -473,6 +473,11 @@ int main(int argc, char** argv) {
   }
 
   ramp_msgs::RampTrajectory obt = obtr_srv.response.resps.at(0).trajectory;
+  /*ramp_msgs::RampTrajectory obt;
+  trajectory_msgs::JointTrajectoryPoint a;
+  a.positions = ob1.motionState.positions;
+  a.velocities = ob1.motionState.velocities;
+  obt.trajectory.points.push_back(a);*/
   //ramp_msgs::RampTrajectory obt2 = obtr_srv.response.resps.at(1).trajectory;
 
   // Add obstacle trajectory to ER
@@ -500,7 +505,8 @@ int main(int argc, char** argv) {
   // Create Population to send to trajectory_visualization
   ramp_msgs::Population pop;
   pop.population.push_back(tr_srv.response.resps.at(0).trajectory);
-  pop.population.push_back(obtr_srv.response.resps.at(0).trajectory);
+  //pop.population.push_back(obtr_srv.response.resps.at(0).trajectory);
+  pop.population.push_back(obt);
   
   pub_pop.publish(pop);
   

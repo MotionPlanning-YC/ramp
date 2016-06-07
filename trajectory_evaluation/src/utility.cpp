@@ -295,11 +295,8 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
   std::ostringstream result;
 
   result<<"\n Knot Points:";
-  ROS_INFO("total points: %i", (int)traj.trajectory.points.size());
-  ROS_INFO("i_knotPoints.size(): %i", (int)traj.i_knotPoints.size());
 
   for(unsigned int i=0;i<traj.i_knotPoints.size();i++) {
-    ROS_INFO("i: %i knotpoint: %i", i, traj.i_knotPoints.at(i)); 
     result<<"\n   "<<i<<":";
     
     unsigned int index = traj.i_knotPoints.at(i);
@@ -313,11 +310,15 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
   }
 
   result<<"\nNumber of curves: "<<traj.curves.size();
+  if(traj.curves.size() > 0)
+  {
+    result<<"\nCurve: "<<toString(traj.curves[0]);
+  }
 
   /*result<<"\n Points:";
   //for(unsigned int i=15;i<27;i++) {
   //for(unsigned int i=0;i<7;i++) {
-  for(unsigned int i=0;i<25 && i<traj.trajectory.points.size();i++) {
+  //for(unsigned int i=0;i<traj.trajectory.points.size();i++) {
   //for(unsigned int i=0;i<traj.trajectory.points.size();i++) {
     //ROS_INFO("i: %i", (int)i);
     result<<"\n\n   Point "<<i<<":";
@@ -325,11 +326,11 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
     trajectory_msgs::JointTrajectoryPoint p = traj.trajectory.points.at(i);
   
     result<<"\n"<<toString(p);
-  }
+  }*/
   //ROS_INFO("Done with points");
 
 
-  for(uint8_t i=0;i<traj.curves.size();i++) {
+  /*for(uint8_t i=0;i<traj.curves.size();i++) {
     //ROS_INFO("curve %i", (int)i);
     result<<"\n Curve "<<(int)i<<"\n"<<toString(traj.curves.at(i));
   }*/

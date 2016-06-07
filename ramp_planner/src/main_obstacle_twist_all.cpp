@@ -127,10 +127,10 @@ void driveStraight(const int index, const double v, const double t)
   ros::Time start = ros::Time::now();
   while(ros::ok() && (ros::Time::now() - start < d) && !ob_ic.at(index))
   {
-    if(i % 50 == 0)
+    /*if(i % 50 == 0)
     {
       ROS_INFO("ob_ic[%i]: %s", index, ob_ic[index] ? "True" : "False");
-    }
+    }*/
     ob_pubs.at(index).publish(twist);
     r.sleep();
   } // end while

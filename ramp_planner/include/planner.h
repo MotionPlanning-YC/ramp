@@ -154,6 +154,11 @@ class Planner {
               const RampTrajectory trajec)      ;
 
 
+    void buildEvaluationSrvOOP(const std::vector<RampTrajectory>& trajecs, ramp_msgs::EvaluationSrv& result);
+    void buildEvaluationSrvOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationSrv& result);
+    void buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result);
+
+
     // Request information from other packages
     // Cannot make the request srvs const because they have no serialize/deserialize
     const std::vector<RampTrajectory> requestTrajectory(ramp_msgs::TrajectorySrv& tr, const int id=-1);

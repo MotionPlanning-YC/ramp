@@ -19,7 +19,8 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
   {
     
     ramp_msgs::EvaluationResponse res;
-    //ROS_INFO("Robot Evaluating trajectory: %s", u.toString(reqs.reqs[i].trajectory).c_str());
+    //ROS_INFO("Robot Evaluating trajectory %i: %s", (int)i, u.toString(reqs.reqs[i].trajectory).c_str());
+    //ROS_INFO("Obstacle size: %i", (int)reqs.reqs[i].obstacle_trjs.size());
 
     // If more than one point
     if(reqs.reqs.at(i).trajectory.trajectory.points.size() > 1)
@@ -39,6 +40,7 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
     resps.resps.push_back(res);
   }
   ros::Duration t_elapsed = ros::Time::now() - t_start;
+  ROS_INFO("t_elapsed: %f", t_elapsed.toSec());
   t_data.push_back(t_elapsed);
   return true;
 } //End handleRequest
@@ -71,12 +73,12 @@ int main(int argc, char** argv) {
   /** ***Testing*** */
 
 
-  ros::AsyncSpinner spinner(8);
+  /*ros::AsyncSpinner spinner(8);
   std::cout<<"\nWaiting for requests...\n";
   spinner.start();
-  ros::waitForShutdown();
+  ros::waitForShutdown();*/
 
-  //ros::spin();
+  ros::spin();
 
   printf("\nTrajectory Evaluation exiting normally\n");
   return 0;
