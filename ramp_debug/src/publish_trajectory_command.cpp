@@ -24,8 +24,8 @@ int main(int argc, char** argv) {
   zero.motionState.positions.push_back(0.);
   zero.motionState.positions.push_back(0.);
   zero.motionState.positions.push_back(0.785f);
-  zero.motionState.velocities.push_back(0);
-  zero.motionState.velocities.push_back(0);
+  zero.motionState.velocities.push_back(0.23);
+  zero.motionState.velocities.push_back(0.23);
   zero.motionState.velocities.push_back(0);
   zero.motionState.accelerations.push_back(0);
   zero.motionState.accelerations.push_back(0);
@@ -407,7 +407,8 @@ int main(int argc, char** argv) {
   {
     ROS_INFO("Resps size: %i", (int)tr_srv.response.resps.size());
     //std::cout<<"\nSending Trajectory "<<u.toString(tr_srv.response.resps.at(0).trajectory)<<"\n";
-    //pub_traj.publish(tr_srv.response.resps.at(0).trajectory);
+    pub_traj.publish(tr_srv.response.resps.at(0).trajectory);
+    handle.setParam("/ramp/cc_started", true); 
   }
   else 
   {
@@ -435,21 +436,21 @@ int main(int argc, char** argv) {
 
   // Build any obstacle trajectories
   ramp_msgs::KnotPoint ob1;
-  ob1.motionState.positions.push_back(3.5f); // 0.70455
-  ob1.motionState.positions.push_back(0.f); // 0.4026
-  ob1.motionState.positions.push_back(3*PI/4); // 0.519146
+  ob1.motionState.positions.push_back(0.f); // 0.70455
+  ob1.motionState.positions.push_back(3.5f); // 0.4026
+  ob1.motionState.positions.push_back(-PI/4); // 0.519146
  
-  ob1.motionState.velocities.push_back(-0.23); // 0.70455
-  ob1.motionState.velocities.push_back(0.23); // 0.4026
+  ob1.motionState.velocities.push_back(0.23); // 0.70455
+  ob1.motionState.velocities.push_back(-0.23); // 0.4026
   ob1.motionState.velocities.push_back(0.); // 0.519146
  
   ramp_msgs::KnotPoint ob2;
-  ob2.motionState.positions.push_back(0.f); // 0.70455
-  ob2.motionState.positions.push_back(3.5f); // 0.4026
+  ob2.motionState.positions.push_back(3.5f); // 0.70455
+  ob2.motionState.positions.push_back(0.f); // 0.4026
   ob2.motionState.positions.push_back(0.); // 0.519146
  
-  ob2.motionState.velocities.push_back(-0.23); // 0.70455
-  ob2.motionState.velocities.push_back(0.23); // 0.4026
+  ob2.motionState.velocities.push_back(0.23); // 0.70455
+  ob2.motionState.velocities.push_back(-0.23); // 0.4026
   ob2.motionState.velocities.push_back(0.); // 0.519146
 
   ramp_msgs::Path obp, obp2;
