@@ -596,7 +596,7 @@ void CollisionDetection::LineLineEndPoints(const std::vector<double>& l1_p1, std
   // Check that they are not the same line!
   if( fabs(l2_slope - l1_slope) < 0.01 )
   {
-    ROS_INFO("Lines are parallel");
+    //ROS_INFO("Lines are parallel");
     
     // Same line
     if( fabs(l1_slope - l2_slope) < 0.01 && fabs(l1_b - l2_b) < 0.01 )
@@ -682,9 +682,9 @@ void CollisionDetection::LineLineFull(const ramp_msgs::RampTrajectory& trajector
 
   double l2_p1_y = ob_trajectory.trajectory.points[ 0 ].positions[1];
   
-  double l2_p2_x = ob_trajectory.trajectory.points[ 1 ].positions[0];
+  double l2_p2_x = ob_trajectory.trajectory.points[ ob_trajectory.trajectory.points.size()-1 ].positions[0];
 
-  double l2_p2_y = ob_trajectory.trajectory.points[ 1 ].positions[1];
+  double l2_p2_y = ob_trajectory.trajectory.points[ ob_trajectory.trajectory.points.size()-1 ].positions[1];
 
   double l2_slope = (l2_p2_y - l2_p1_y) / (l2_p2_x - l2_p1_x);
   double l2_b = l2_p2_y - (l2_slope*l2_p2_x);
@@ -707,12 +707,15 @@ void CollisionDetection::LineLineFull(const ramp_msgs::RampTrajectory& trajector
   l2_p2.push_back(l2_p2_x);
   l2_p2.push_back(l2_p2_y);
 
-  LineLineEndPoints(l1_p1, l1_p2, l2_p1, l2_p2, points_of_collision);
+  //LineLineEndPoints(l1_p1, l1_p2, l2_p1, l2_p2, points_of_collision);
 
   // Get normal to central line
-  double x_com = l1_p2_x - l1_p1_x;
-  double y_com = l1_p2_y - l1_p1_y;
+  
+  ROS_INFO("l2_p1: (%f, %f) l2_p2: (%f, %f)", l2_p1_x, l2_p1_x, l2_p2_x, l2_p2_y);
+  double x_com = l2_p2_x - l2_p1_x;
+  double y_com = l2_p2_y - l2_p1_y;
   double norm = sqrt( (x_com*x_com) + (y_com*y_com) );
+  ROS_INFO("x_com: %f y_com: %f norm: %f", x_com, y_com, norm);
   
   std::vector<double> n_k_pos;
   n_k_pos.push_back(y_com);
@@ -730,15 +733,68 @@ void CollisionDetection::LineLineFull(const ramp_msgs::RampTrajectory& trajector
   unit_k_neg.push_back(n_k_neg[0]/norm);
   unit_k_neg.push_back(n_k_neg[1]/norm);
 
+  ROS_INFO("n_k_pos: (%f, %f) n_k_neg: (%f, %f) unit_k_pos: (%f, %f) unit_k_neg: (%f, %f)", 
+      n_k_pos[0], n_k_pos[1], n_k_neg[0], n_k_neg[1], unit_k_pos[0], unit_k_pos[1], unit_k_neg[0], unit_k_neg[1]);
+
 
   double sum_radii = 0.4;
+  std::vector<double> p_new, p_new_t;
+  p_new.push_back(l2_p1_x + (sum_radii*(unit_k_pos[0])));
+  p_new.push_back(l2_p1_y + (sum_radii*(unit_k_pos[1])));
  
-  double x_new = l1_p1_x + (sum_radii*(x_com/norm)); 
-  double y_new = l1_p1_y + (sum_radii*(y_com/norm)); 
+  p_new_t.push_back(l2_p1_x + (sum_radii*unit_k_neg[0]));
+  p_new_t.push_back(l2_p1_y + (sum_radii*unit_k_neg[1]));
+
+  std::vector< std::vector<double> > rect_points;
+
+  if(p_new[1] > p_new_t[1])
+  {
+    rect_points.push_back(p_new); 
+    rect_points.push_back(l2_p1); 
+    rect_points.push_back(p_new_t);
+  } 
+  else
+  {
+    rect_points.push_back(p_new_t);
+    rect_points.push_back(l2_p1);
+    rect_points.push_back(p_new);
+  }
+
+
+  // Get the last three points
+  std::vector<double> p4, p5, p6;
+
+  double dist = utility_.positionDistance(l2_p1, l2_p2);
+  double theta = utility_.findAngleFromAToB(l2_p1, l2_p2);
+  ROS_INFO("dist: %f theta: %f", dist, theta);
+
+  p4.push_back( rect_points[2][0] + dist*cos(theta) );
+  p4.push_back( rect_points[2][1] + dist*sin(theta) );
+
+  p6.push_back( rect_points[0][0] + dist*cos(theta) );
+  p6.push_back( rect_points[0][1] + dist*sin(theta) );
+
+  rect_points.push_back(p4);
+  rect_points.push_back(l2_p2);
+  rect_points.push_back(p6);
 
   
+  ROS_INFO("rect_points size: %i", (int)rect_points.size());
+  for(uint8_t i=0;i<rect_points.size();i++)
+  {
+    ROS_INFO("p%d: (%f, %f)", (int)i, rect_points[i][0], rect_points[i][1]);
+  }
+  
+  // Central line
+  LineLineEndPoints(l1_p1, l1_p2, rect_points[0], rect_points[5], points_of_collision);
 
+  // Boundaries parallel to central
+  LineLineEndPoints(l1_p1, l1_p2, rect_points[1], rect_points[4], points_of_collision);
+  LineLineEndPoints(l1_p1, l1_p2, rect_points[2], rect_points[3], points_of_collision);
 
+  // Boundaries orthogonal to central
+  LineLineEndPoints(l1_p1, l1_p2, rect_points[3], rect_points[5], points_of_collision);
+  LineLineEndPoints(l1_p1, l1_p2, rect_points[0], rect_points[2], points_of_collision);
 
 
 
