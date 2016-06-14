@@ -4,7 +4,7 @@ Evaluate::Evaluate() : Q(1000.f), orientation_infeasible_(0) {}
 
 void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationResponse& res)
 {
-  ROS_INFO("In Evaluate::perform()");
+  //ROS_INFO("In Evaluate::perform()");
   //ros::Time t_start = ros::Time::now();
   
   // Set orientation members
@@ -36,7 +36,7 @@ void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationR
 // It's modiftying trj AND returning a value
 void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er) 
 {
-  ROS_INFO("In Evaluate::performFeasibility");
+  //ROS_INFO("In Evaluate::performFeasibility");
   ros::Time t_start = ros::Time::now();
 
   // Check collision

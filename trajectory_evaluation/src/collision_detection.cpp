@@ -22,7 +22,7 @@ void CollisionDetection::performNum(const ramp_msgs::RampTrajectory& trajectory,
 /** Returns true if trajectory_ is in collision with any of the objects */
 void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, const std::vector<ramp_msgs::RampTrajectory>& obstacle_trjs, QueryResult& result)  
 {
-  ROS_INFO("In CollisionDetection::perform()");
+  //ROS_INFO("In CollisionDetection::perform()");
   ros::Duration d_points, d_getMisc, d_linearc;
   ros::Time t_start = ros::Time::now();
 
@@ -38,7 +38,7 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
   int8_t ob_i;
   std::vector< std::vector<double> > points_of_collision;
   
-  ROS_INFO("s_segment: %i", (int)s_segment);
+  //ROS_INFO("s_segment: %i", (int)s_segment);
 
   double radius = 0.21f;
   
@@ -50,7 +50,7 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
   // Predict the obstacle's trajectory
   for(ob_i=0;ob_i<s;ob_i++)
   {
-    ROS_INFO("ob_i: %i", (int)ob_i);
+    //ROS_INFO("ob_i: %i", (int)ob_i);
     
     ros::Time t_points = ros::Time::now();
     const trajectory_msgs::JointTrajectoryPoint& ob_a = obstacle_trjs[ob_i].trajectory.points[0];
@@ -63,15 +63,15 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
     double ob_w = ob_a.velocities[2];
     bool ob_moving = (ob_v > 0.01 || ob_w*ob_w > 0.0001);
 
-    ROS_INFO("ob_a: %s", utility_.toString(ob_a).c_str());
+    /*ROS_INFO("ob_a: %s", utility_.toString(ob_a).c_str());
     ROS_INFO("ob_b: %s", utility_.toString(ob_b).c_str());
-    ROS_INFO("ob_v: %f ob_w: %f ob_moving: %s", ob_v, ob_w, ob_moving ? "True" : "False");
+    ROS_INFO("ob_v: %f ob_w: %f ob_moving: %s", ob_v, ob_w, ob_moving ? "True" : "False");*/
 
     //d_for = ros::Time::now()-t_for;
     //t_inner_for = ros::Time::now();
     for(segment=1;segment<s_segment && points_of_collision.size()==0;segment++)
     {
-      ROS_INFO("Segment %i", segment);
+      //ROS_INFO("Segment %i", segment);
 
       // Check a point in the middle of the segment for angular velocity
       // If there's no angular velocity, then it's a straight-line, otherwise it's a curve
@@ -117,12 +117,8 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
         // Line-Line
         if(ob_trj_line)
         {
-          ROS_INFO("Line Line");
+          //ROS_INFO("Line Line");
           LineLineFull(trajectory, segment, obstacle_trjs[ob_i], points_of_collision);
-          if(points_of_collision[0][0] == 9999)
-          {
-            query(trajectory, obstacle_trjs[ob_i], result);
-          }
         }
         // Line-Arc
         else
@@ -150,16 +146,16 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
       ////ROS_INFO("Segment %i Collision: %s", segment, result.collision_ ? "True" : "False");
     } // end for segment
 
-    ROS_INFO("points_of_collision.size(): %d", (int)points_of_collision.size());
+    //ROS_INFO("points_of_collision.size(): %d", (int)points_of_collision.size());
     
     for(int p=0;p<points_of_collision.size();p++)
     {
       std::vector<double>& p_intersect = points_of_collision[p];
-      ROS_INFO("Point p: (%f, %f)", p_intersect[0], p_intersect[1]);
+      //ROS_INFO("Point p: (%f, %f)", p_intersect[0], p_intersect[1]);
 
       int index = findIndexOfCollision(trajectory, p_intersect);
-      int ob_index = findIndexOfCollision(obstacle_trjs[ob_i], p_intersect);
-      ROS_INFO("index: %d ob_index: %i", index, ob_index);
+      //int ob_index = findIndexOfCollision(obstacle_trjs[ob_i], p_intersect);
+      //ROS_INFO("index: %d ob_index: %i", index, ob_index);
 
       trajectory_msgs::JointTrajectoryPoint traj_p_at_coll = trajectory.trajectory.points[index];
 
@@ -175,13 +171,13 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
           ob_traj_p_at_coll = obstacle_trjs[ob_i].trajectory.points[index];
         }
         
-        ROS_INFO("traj_point: %s", utility_.toString(traj_p_at_coll).c_str());
+        /*ROS_INFO("traj_point: %s", utility_.toString(traj_p_at_coll).c_str());
         ROS_INFO("ob_traj_point: %s", utility_.toString(ob_traj_p_at_coll).c_str());
-        ROS_INFO("dist: %f", utility_.positionDistance( traj_p_at_coll.positions, ob_traj_p_at_coll.positions ));
+        ROS_INFO("dist: %f", utility_.positionDistance( traj_p_at_coll.positions, ob_traj_p_at_coll.positions ));*/
 
         if( utility_.positionDistance( traj_p_at_coll.positions, ob_traj_p_at_coll.positions ) < 2.f*radius )
         {
-          ROS_INFO("Pushing on index: %i", index);
+          //ROS_INFO("Pushing on index: %i", index);
           t.push_back(index / 10.f);
         }
       } // end if
@@ -189,7 +185,7 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
     //d_inner_for = ros::Time::now()-t_inner_for;
   } // end for obstacle */
     
-  ROS_INFO("t.size(): %i", (int)t.size());
+  //ROS_INFO("t.size(): %i", (int)t.size());
   
   // Find the minimum time of collision
   if(t.size()>0)
@@ -197,7 +193,7 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
     t_final = t[0];
     for(uint8_t p=1;p<t.size();p++)
     {
-      ROS_INFO("t[%i]: %f", (int)p, t[p]);
+      //ROS_INFO("t[%i]: %f", (int)p, t[p]);
       if(t[p] < t_final)
       {
         t_final = t[p];
@@ -230,7 +226,7 @@ int CollisionDetection::findIndexOfCollision(const ramp_msgs::RampTrajectory& tr
 {
   int index = (rand() % trajectory.trajectory.points.size());  
   int count = 0;
-  ROS_INFO("Collision points: (%f, %f)", collision_point[0], collision_point[1]);
+  //ROS_INFO("Collision points: (%f, %f)", collision_point[0], collision_point[1]);
   //ROS_INFO("index: %i", index);
 
   if(trajectory.trajectory.points.size() == 1)
@@ -655,7 +651,7 @@ void CollisionDetection::LineLineEndPoints(const std::vector<double>& l1_p1, std
 
 void CollisionDetection::LineLineFull(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const
 {
-  ROS_INFO("In CollisionDetection::LineLine");
+  //ROS_INFO("In CollisionDetection::LineLine");
 
   ros::Time t_start = ros::Time::now();
   double t;
@@ -677,7 +673,7 @@ void CollisionDetection::LineLineFull(const ramp_msgs::RampTrajectory& trajector
   double l1_slope = (l1_p2_y - l1_p1_y) / (l1_p2_x - l1_p1_x);
   double l1_b = l1_p2_y - (l1_slope*l1_p2_x);
 
-  ROS_INFO("line 1 - slope: %f b: %f", l1_slope, l1_b);
+  //ROS_INFO("line 1 - slope: %f b: %f", l1_slope, l1_b);
 
   // Line 2
   //std::vector<double> l2_p1 = ob_trajectory.trajectory.points[0].positions;
@@ -693,7 +689,7 @@ void CollisionDetection::LineLineFull(const ramp_msgs::RampTrajectory& trajector
   double l2_slope = (l2_p2_y - l2_p1_y) / (l2_p2_x - l2_p1_x);
   double l2_b = l2_p2_y - (l2_slope*l2_p2_x);
   
-  ROS_INFO("line 2 - slope: %f b: %f", l2_slope, l2_b);
+  //ROS_INFO("line 2 - slope: %f b: %f", l2_slope, l2_b);
   
   std::vector<double> l1_p1; 
   l1_p1.push_back(l1_p1_x);
@@ -715,11 +711,11 @@ void CollisionDetection::LineLineFull(const ramp_msgs::RampTrajectory& trajector
 
   // Get normal to central line
   
-  ROS_INFO("l2_p1: (%f, %f) l2_p2: (%f, %f)", l2_p1_x, l2_p1_x, l2_p2_x, l2_p2_y);
+  //ROS_INFO("l2_p1: (%f, %f) l2_p2: (%f, %f)", l2_p1_x, l2_p1_x, l2_p2_x, l2_p2_y);
   double x_com = l2_p2_x - l2_p1_x;
   double y_com = l2_p2_y - l2_p1_y;
   double norm = sqrt( (x_com*x_com) + (y_com*y_com) );
-  ROS_INFO("x_com: %f y_com: %f norm: %f", x_com, y_com, norm);
+  //ROS_INFO("x_com: %f y_com: %f norm: %f", x_com, y_com, norm);
   
   std::vector<double> n_k_pos;
   n_k_pos.push_back(y_com);
@@ -737,8 +733,8 @@ void CollisionDetection::LineLineFull(const ramp_msgs::RampTrajectory& trajector
   unit_k_neg.push_back(n_k_neg[0]/norm);
   unit_k_neg.push_back(n_k_neg[1]/norm);
 
-  ROS_INFO("n_k_pos: (%f, %f) n_k_neg: (%f, %f) unit_k_pos: (%f, %f) unit_k_neg: (%f, %f)", 
-      n_k_pos[0], n_k_pos[1], n_k_neg[0], n_k_neg[1], unit_k_pos[0], unit_k_pos[1], unit_k_neg[0], unit_k_neg[1]);
+  //ROS_INFO("n_k_pos: (%f, %f) n_k_neg: (%f, %f) unit_k_pos: (%f, %f) unit_k_neg: (%f, %f)", 
+      //n_k_pos[0], n_k_pos[1], n_k_neg[0], n_k_neg[1], unit_k_pos[0], unit_k_pos[1], unit_k_neg[0], unit_k_neg[1]);
 
 
   double sum_radii = 0.4;
@@ -770,7 +766,7 @@ void CollisionDetection::LineLineFull(const ramp_msgs::RampTrajectory& trajector
 
   double dist = utility_.positionDistance(l2_p1, l2_p2);
   double theta = utility_.findAngleFromAToB(l2_p1, l2_p2);
-  ROS_INFO("dist: %f theta: %f", dist, theta);
+  //ROS_INFO("dist: %f theta: %f", dist, theta);
 
   p4.push_back( rect_points[2][0] + dist*cos(theta) );
   p4.push_back( rect_points[2][1] + dist*sin(theta) );
@@ -782,31 +778,49 @@ void CollisionDetection::LineLineFull(const ramp_msgs::RampTrajectory& trajector
   rect_points.push_back(l2_p2);
   rect_points.push_back(p6);
 
-  ROS_INFO("dist between p2 and p3: %f", utility_.positionDistance(rect_points[1], rect_points[2]));
+  //ROS_INFO("dist between p2 and p3: %f", utility_.positionDistance(rect_points[1], rect_points[2]));
 
   
-  ROS_INFO("rect_points size: %i", (int)rect_points.size());
+  /*ROS_INFO("rect_points size: %i", (int)rect_points.size());
   for(uint8_t i=0;i<rect_points.size();i++)
   {
     ROS_INFO("p%d: (%f, %f)", (int)i, rect_points[i][0], rect_points[i][1]);
-  }
+  }*/
   
   // Central line
   LineLineEndPoints(l1_p1, l1_p2, rect_points[0], rect_points[5], points_of_collision);
-  ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
+  //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
 
   // Boundaries parallel to central
   LineLineEndPoints(l1_p1, l1_p2, rect_points[1], rect_points[4], points_of_collision);
-  ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
+  //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
   LineLineEndPoints(l1_p1, l1_p2, rect_points[2], rect_points[3], points_of_collision);
-  ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
+  //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
 
   // Boundaries orthogonal to central
   LineLineEndPoints(l1_p1, l1_p2, rect_points[3], rect_points[5], points_of_collision);
-  ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
+  //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
   LineLineEndPoints(l1_p1, l1_p2, rect_points[0], rect_points[2], points_of_collision);
-  ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
+  //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
 
+  for(uint8_t i=0;i<points_of_collision.size();i++)
+  {
+    if(points_of_collision[i][0] == 9999)
+    {
+      //ROS_INFO("Found 9999");
+      //ROS_INFO("Removing point: (%f, %f)", points_of_collision[i][0], points_of_collision[i][1]);
+      points_of_collision.erase(points_of_collision.begin()+i);
+
+      std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator first = trajectory.trajectory.points.begin() + trajectory.i_knotPoints[segment-1];
+      std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator last = trajectory.trajectory.points.begin() + trajectory.i_knotPoints[segment];
+
+      std::vector<trajectory_msgs::JointTrajectoryPoint> segment(first, last);
+
+      //ROS_INFO("Calling query");
+      query(segment, ob_trajectory.trajectory.points, points_of_collision);
+      //ROS_INFO("Now collision point: (%f, %f)", points_of_collision[ points_of_collision.size()-1 ][0], points_of_collision[ points_of_collision.size()-1 ][1]);
+    }
+  }
 
 
   //ROS_INFO("Exiting CollisionDetection::LineLine");
@@ -1214,6 +1228,65 @@ void CollisionDetection::LineArc(const ramp_msgs::RampTrajectory& trajectory, co
   //ROS_INFO("Exiting CollisionDetection::LineArc");
 } // End LineArc
 
+
+void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajectoryPoint>& segment, const std::vector<trajectory_msgs::JointTrajectoryPoint>& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const
+{
+  ros::Time time_start = ros::Time::now();
+  ////ROS_INFO("In CollisionDetection::query"); 
+  ////ROS_INFO("trajectory.points.size(): %i", (int)trajectory.trajectory.points.size());
+  ////ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.trajectory.points.size());
+  /*if(ob_trajectory.trajectory.points.size() > 2)
+  {
+    //ROS_INFO("ob_trajectory: %s", utility_.toString(ob_trajectory).c_str());
+  }*/
+
+  double  t_start   = segment[0].time_from_start.toSec();
+  int     j_offset  = t_start * 10.f;
+  ////ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
+
+ 
+ 
+  int j_start;
+ 
+  ////ROS_INFO("i_stop: %i", i_stop);
+  
+  // For every point, check circle detection on a subset of the obstacle's trajectory
+  float radius = 0.22f;
+  for(uint16_t i=0;i<segment.size();i++) 
+  {
+    
+    // Get the ith point on the trajectory
+    const trajectory_msgs::JointTrajectoryPoint* p_i = &segment[i];
+
+    ////ROS_INFO("p_i: %s", utility_.toString(p_i).c_str());
+
+    int j = (i+j_offset) >= ob_trajectory.size() ? ob_trajectory.size()-1 : i+j_offset;
+    
+    //ROS_INFO("i: %i j: %i", i, j);
+
+    // Get the jth point of the obstacle's trajectory
+    const trajectory_msgs::JointTrajectoryPoint* p_ob  = &ob_trajectory[j];
+
+    // Get the distance between the centers
+    float dist = sqrt( pow(p_i->positions.at(0) - p_ob->positions.at(0),2) + pow(p_i->positions.at(1) - p_ob->positions.at(1),2) );
+
+    // If the distance between the two centers is less than the sum of the two radii, 
+    // there is collision
+    if( dist <= radius*2 ) 
+    {
+      /*//ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+          p_i.positions.at(0),
+          p_i.positions.at(1),
+          p_ob.positions.at(0),
+          p_ob.positions.at(1),
+          dist,
+          (int)i,
+          (int)j);*/
+      points_of_collision.push_back(p_i->positions);
+      i = segment.size();
+    } // end if
+  } // end for
+}
 
 
 /** 
