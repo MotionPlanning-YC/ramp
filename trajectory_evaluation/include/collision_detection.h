@@ -36,10 +36,16 @@ class CollisionDetection
     void                        performNum(const ramp_msgs::RampTrajectory& trajectory, const std::vector<ramp_msgs::RampTrajectory>& obstacle_trjs, QueryResult& result); 
     
 
+    /**
+     * Brute force method - check each point until collision found or no collision
+     */
     void           query(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& result) const;
     void           query(const std::vector<trajectory_msgs::JointTrajectoryPoint>& segment, const std::vector<trajectory_msgs::JointTrajectoryPoint>& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const;
 
 
+    /**
+     * Analytical methods
+     */
     void buildTree(const std::vector<ramp_msgs::MotionState>& control_poly, const int& depth, std::vector< std::vector<ramp_msgs::MotionState> >& result) const;
     void deCasteljau(const std::vector<ramp_msgs::MotionState>& control_poly, std::vector< std::vector<ramp_msgs::MotionState> >& result) const;
 
@@ -59,17 +65,26 @@ class CollisionDetection
 
 
     // Used by several methods
-    void LineArc(const std::vector<double> l_p1, const std::vector<double> l_p2, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision, bool& result) const;
+    void LineArc(const std::vector<double>& l_p1, const std::vector<double>& l_p2, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision, bool& result) const;
+    
+    void LineArc(const std::vector<double>& l_p1, const std::vector<double>& l_p2, const std::vector<trajectory_msgs::JointTrajectoryPoint>& arc_points, std::vector< std::vector<double> >& points_of_collision, bool& result) const;
 
 
-    void LineArc(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const;
+
+
+    void LineArcFull(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const;
 
 
     void BezierLine(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const;
  
     void BezierArc(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const;
 
-    void getCircleInfo(const ramp_msgs::RampTrajectory& traj, double& r, double& h, double& k) const;
+    /**
+     * Get circle info for methods involving an arc
+     */
+    void getCircleInfoTraj(const ramp_msgs::RampTrajectory& traj, double& r, double& h, double& k) const;
+    void getCircleInfoPoints(const std::vector<trajectory_msgs::JointTrajectoryPoint>& arc_points, double& r, double& h, double& k) const;
+
 
 
     int findIndexOfCollision(const ramp_msgs::RampTrajectory& trajectory, std::vector<double>& collision_point) const;

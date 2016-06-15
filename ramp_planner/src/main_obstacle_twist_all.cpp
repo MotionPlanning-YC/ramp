@@ -161,6 +161,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
   {
     
     
+    turn(index, 0.33, 0.33, 10);
     driveStraight(index, 0.33, 10);
     
     //d = ros::Duration(4);
@@ -318,7 +319,7 @@ int main(int argc, char** argv)
 
   getObstacleParams(handle);
   ROS_INFO("Obtained obstacle rosparams, please review and hit enter to continue");
-  std::cin.get();
+  //std::cin.get();
   
   // Create publishers
   for(uint8_t i=0;i<num_obs;i++)

@@ -1,6 +1,15 @@
 
 <launch>
 
+<!--
+
+Change the topic name in config.yaml (in ramp_planner) to publish on correct cmd_vel
+Change orientation of robot for ramp_control
+Change robot locations in world file
+Change twist messages published to obstacle in main_obstacle_twist (ramp_planner)
+
+-->
+
 <!-- Parameters -->
 <include file="$(find ramp_launch)/launch/planner_parameters.launch" />
 
