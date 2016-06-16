@@ -436,7 +436,7 @@ int main(int argc, char** argv) {
 
   // Build any obstacle trajectories
   ramp_msgs::KnotPoint ob1;
-  ob1.motionState.positions.push_back(1.5f); // 0.70455
+  ob1.motionState.positions.push_back(3.5f); // 0.70455
   ob1.motionState.positions.push_back(0.f); // 0.4026
   ob1.motionState.positions.push_back(PI/2.f); // 0.519146
  
