@@ -26,11 +26,12 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
   ros::Duration d_points, d_getMisc, d_linearc;
   ros::Time t_start = ros::Time::now();
 
+  //ROS_INFO("trajectory.curves.size(): %i", (int)trajectory.curves.size());
   size_t s = obstacle_trjs.size(); 
-  size_t s_segment = trajectory.curves.size() > 1 ? 
-    (2 * trajectory.curves.size() < trajectory.i_knotPoints.size()
+  size_t s_segment = trajectory.curves.size() > 0 ? 
+    (2 * (trajectory.curves.size()+1) < trajectory.i_knotPoints.size()
     ? 
-    2 * trajectory.curves.size() 
+    2 * (trajectory.curves.size()+1) 
     :
     trajectory.i_knotPoints.size())
     : 2;
@@ -101,12 +102,12 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
 
         if(!segment_bezier)
         {
-          //ROS_INFO("Line No Motion");
+          ROS_INFO("Line No Motion");
           LineNoMotion(trajectory, segment, ob_a, points_of_collision);
         }
         else
         {
-          //ROS_INFO("Bezier No Motion");
+          ROS_INFO("Bezier No Motion");
           BezierNoMotion(trajectory.curves[0].controlPoints, ob_a, points_of_collision);
         }
       }
@@ -134,12 +135,12 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
         if(ob_trj_line)
         {
           //ROS_INFO("Bezier Line");
-          BezierLine(trajectory.curves[0].controlPoints, obstacle_trjs[ob_i], points_of_collision);
+          BezierLineFull(trajectory.curves[0].controlPoints, obstacle_trjs[ob_i], points_of_collision);
         }
         // Bezier-Arc
         else
         {
-          ////ROS_INFO("Bezier Arc");
+          //ROS_INFO("Bezier Arc");
           BezierArc(trajectory.curves[0].controlPoints, obstacle_trjs[ob_i], points_of_collision); 
         }
       }
@@ -804,6 +805,7 @@ void CollisionDetection::LineLineFull(const ramp_msgs::RampTrajectory& trajector
   LineLineEndPoints(l1_p1, l1_p2, rect_points[0], rect_points[2], points_of_collision);
   //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
 
+  // Check if any of the points indicate the same line
   for(uint8_t i=0;i<points_of_collision.size();i++)
   {
     if(points_of_collision[i][0] == 9999)
@@ -830,8 +832,112 @@ void CollisionDetection::LineLineFull(const ramp_msgs::RampTrajectory& trajector
 
 
 
+void CollisionDetection::BezierLineFull(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const
+{
 
-void CollisionDetection::BezierLine(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const
+  std::vector<double> l_p1 = ob_trajectory.trajectory.points[0].positions;
+  std::vector<double> l_p2 = ob_trajectory.trajectory.points[ ob_trajectory.trajectory.points.size()-1 ].positions;
+
+
+  double l_p1_x = l_p1[0];
+  double l_p1_y = l_p1[1];
+  double l_p2_x = l_p2[0];
+  double l_p2_y = l_p2[1];
+
+  double x_com = l_p2_x - l_p1_x;
+  double y_com = l_p2_y - l_p1_y;
+  double norm = sqrt( (x_com*x_com) + (y_com*y_com) );
+  
+  std::vector<double> n_k_pos;
+  n_k_pos.push_back(y_com);
+  n_k_pos.push_back(-x_com);
+  
+  std::vector<double> n_k_neg;
+  n_k_neg.push_back(-y_com);
+  n_k_neg.push_back(x_com);
+
+  std::vector<double> unit_k_pos;
+  unit_k_pos.push_back(n_k_pos[0]/norm);
+  unit_k_pos.push_back(n_k_pos[1]/norm);
+
+  std::vector<double> unit_k_neg;
+  unit_k_neg.push_back(n_k_neg[0]/norm);
+  unit_k_neg.push_back(n_k_neg[1]/norm);
+
+
+  //ROS_INFO("n_k_pos: (%f, %f) n_k_neg: (%f, %f) unit_k_pos: (%f, %f) unit_k_neg: (%f, %f)", 
+      //n_k_pos[0], n_k_pos[1], n_k_neg[0], n_k_neg[1], unit_k_pos[0], unit_k_pos[1], unit_k_neg[0], unit_k_neg[1]);
+
+
+  double sum_radii = 0.4;
+  std::vector<double> p_new, p_new_t;
+  p_new.push_back(l_p1_x + (sum_radii*(unit_k_pos[0])));
+  p_new.push_back(l_p1_y + (sum_radii*(unit_k_pos[1])));
+ 
+  p_new_t.push_back(l_p1_x + (sum_radii*unit_k_neg[0]));
+  p_new_t.push_back(l_p1_y + (sum_radii*unit_k_neg[1]));
+
+  std::vector< std::vector<double> > rect_points;
+
+  if(p_new[1] > p_new_t[1])
+  {
+    rect_points.push_back(p_new); 
+    rect_points.push_back(l_p1); 
+    rect_points.push_back(p_new_t);
+  } 
+  else
+  {
+    rect_points.push_back(p_new_t);
+    rect_points.push_back(l_p1);
+    rect_points.push_back(p_new);
+  }
+
+
+  // Get the last three points
+  std::vector<double> p4, p5, p6;
+
+  double dist = utility_.positionDistance(l_p1, l_p2);
+  double theta = utility_.findAngleFromAToB(l_p1, l_p2);
+  //ROS_INFO("dist: %f theta: %f", dist, theta);
+
+  p4.push_back( rect_points[2][0] + dist*cos(theta) );
+  p4.push_back( rect_points[2][1] + dist*sin(theta) );
+
+  p6.push_back( rect_points[0][0] + dist*cos(theta) );
+  p6.push_back( rect_points[0][1] + dist*sin(theta) );
+
+  rect_points.push_back(p4);
+  rect_points.push_back(l_p2);
+  rect_points.push_back(p6);
+
+  //ROS_INFO("dist between p2 and p3: %f", utility_.positionDistance(rect_points[1], rect_points[2]));
+
+  
+  /*ROS_INFO("rect_points size: %i", (int)rect_points.size());
+  for(uint8_t i=0;i<rect_points.size();i++)
+  {
+    ROS_INFO("p%d: (%f, %f)", (int)i, rect_points[i][0], rect_points[i][1]);
+  }*/
+  
+  // Central line
+  BezierLine(control_points, rect_points[0], rect_points[5], points_of_collision);
+  //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
+
+  // Boundaries parallel to central
+  BezierLine(control_points, rect_points[1], rect_points[4], points_of_collision);
+  //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
+  BezierLine(control_points, rect_points[2], rect_points[3], points_of_collision);
+  //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
+
+  // Boundaries orthogonal to central
+  BezierLine(control_points, rect_points[3], rect_points[5], points_of_collision);
+  //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
+  BezierLine(control_points, rect_points[0], rect_points[2], points_of_collision);
+  //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
+  
+}
+
+void CollisionDetection::BezierLine(const std::vector<ramp_msgs::MotionState>& control_points, const std::vector<double> l_p1, const std::vector<double> l_p2, std::vector< std::vector<double> >& points_of_collision) const
 {
   //ROS_INFO("In CollisionDetection::BezierLine");
   ros::Time t_start = ros::Time::now();
@@ -850,10 +956,10 @@ void CollisionDetection::BezierLine(const std::vector<ramp_msgs::MotionState>& c
   //ROS_INFO("Control Points (X0, Y0): (%f, %f) (X1, Y1): (%f, %f) (X2, Y2): (%f, %f)", X0, Y0, X1, Y1, X2, Y2);
 
   // Get values for line segment
-  double x1 = ob_trajectory.trajectory.points[0].positions[0];
-  double y1 = ob_trajectory.trajectory.points[0].positions[1];
-  double x2 = ob_trajectory.trajectory.points[ ob_trajectory.trajectory.points.size()-1 ].positions[0];
-  double y2 = ob_trajectory.trajectory.points[ ob_trajectory.trajectory.points.size()-1 ].positions[1];
+  double x1 = l_p1[0];
+  double y1 = l_p1[1];
+  double x2 = l_p2[0];
+  double y2 = l_p2[1];
 
   double slope = (y2-y1)/(x2-x1);
 
@@ -915,8 +1021,8 @@ void CollisionDetection::BezierLine(const std::vector<ramp_msgs::MotionState>& c
   }
 
   // Check intersection values against bounds
-  double x_min = ob_trajectory.trajectory.points[0].positions[0];
-  double x_max = ob_trajectory.trajectory.points[ob_trajectory.trajectory.points.size()-1].positions[0];
+  double x_min = l_p1[0];
+  double x_max = l_p2[0];
   if(x_min > x_max)
   {
     double temp = x_min;
@@ -1295,7 +1401,6 @@ void CollisionDetection::LineArcFull(const ramp_msgs::RampTrajectory& trajectory
   
   neg_dir = arc_points;
   // Negative translation for new arc points
-  // 2* because we already translated 
   for(uint8_t i=0;i<arc_points.size();i++)
   {
     neg_dir[i].positions[0] -= sum_radii*x_com;

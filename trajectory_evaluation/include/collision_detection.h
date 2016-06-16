@@ -75,7 +75,8 @@ class CollisionDetection
     void LineArcFull(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const;
 
 
-    void BezierLine(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const;
+    void BezierLineFull(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const;
+    void BezierLine(const std::vector<ramp_msgs::MotionState>& control_points, const std::vector<double> l_p1, const std::vector<double> l_p2, std::vector< std::vector<double> >& points_of_collision) const;
  
     void BezierArc(const std::vector<ramp_msgs::MotionState>& control_points, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const;
 
