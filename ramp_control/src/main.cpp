@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
  
   //handle.param("ramp_control/orientation", robot.initial_theta_, 0.785);
   handle_local.param("orientation", robot.initial_theta_, 0.);
-  std::cout<<"\nrobot.orientation: "<<robot.initial_theta_;
+  std::cout<<"\n*********robot.orientation: "<<robot.initial_theta_;
 
   bool sim=false;
   handle_local.param("simulation", sim, true);

@@ -162,7 +162,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
     
     
     turn(index, 0.33, 0.33, 10);
-    driveStraight(index, 0.33, 10);
+    //driveStraight(index, 0.33, 10);
     
     //d = ros::Duration(4);
 

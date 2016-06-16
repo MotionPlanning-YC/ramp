@@ -431,18 +431,18 @@ int main(int argc, char** argv) {
   er.currentTheta = er.trajectory.trajectory.points.at(0).positions.at(2);
   //er.theta_cc = 1.04839;
     
-  std::cout<<"\nEval: Sending Trajectory "<<u.toString(er.trajectory)<<"\n";
+  //std::cout<<"\nEval: Sending Trajectory "<<u.toString(er.trajectory)<<"\n";
 
 
   // Build any obstacle trajectories
   ramp_msgs::KnotPoint ob1;
-  ob1.motionState.positions.push_back(3.5f); // 0.70455
+  ob1.motionState.positions.push_back(1.5f); // 0.70455
   ob1.motionState.positions.push_back(0.f); // 0.4026
-  ob1.motionState.positions.push_back(3*PI/4.f); // 0.519146
+  ob1.motionState.positions.push_back(PI/2.f); // 0.519146
  
-  ob1.motionState.velocities.push_back(-0.23); // 0.70455
-  ob1.motionState.velocities.push_back(0.23); // 0.4026
-  ob1.motionState.velocities.push_back(0.); // 0.519146
+  ob1.motionState.velocities.push_back(0.); // 0.70455
+  ob1.motionState.velocities.push_back(0.33); // 0.4026
+  ob1.motionState.velocities.push_back(0.33); // 0.519146
  
   ramp_msgs::KnotPoint ob2;
   ob2.motionState.positions.push_back(0.f); // 0.70455
@@ -455,7 +455,7 @@ int main(int argc, char** argv) {
 
   ramp_msgs::Path obp, obp2;
   obp.points.push_back(ob1);
-  obp.points.push_back(ob2);
+  //obp.points.push_back(ob2);
 
   ramp_msgs::TrajectoryRequest obtr, obtr2;
   obtr.path = obp;

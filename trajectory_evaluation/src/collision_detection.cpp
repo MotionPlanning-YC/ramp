@@ -461,7 +461,52 @@ void CollisionDetection::ControlPolyArc(const std::vector<ramp_msgs::MotionState
     ////ROS_INFO("l_p1: (%f, %f)", l_p1.at(0), l_p1.at(1));
     ////ROS_INFO("l_p2: (%f, %f)", l_p2.at(0), l_p2.at(1));
     
-    LineArc(l_p1, l_p2, ob_trajectory, points_of_collision, result);
+    std::vector<trajectory_msgs::JointTrajectoryPoint> arc_points, pos_dir, neg_dir;
+    arc_points.push_back(ob_trajectory.trajectory.points[0]);
+
+    arc_points.push_back(ob_trajectory.trajectory.points[
+        ob_trajectory.trajectory.points.size()/2] );
+
+    arc_points.push_back(ob_trajectory.trajectory.points[
+        ob_trajectory.trajectory.points.size()-1] );
+    
+    LineArc(l_p1, l_p2, arc_points, points_of_collision, result);
+
+    double x_com = cos(arc_points[0].positions[2]);
+    double y_com = sin(arc_points[0].positions[2]);
+    //ROS_INFO("x_com: %f y_com: %f norm: %f", x_com, y_com, sqrt( (x_com*x_com) + (y_com*y_com) ));
+
+    double sum_radii = 0.4;
+
+    pos_dir = arc_points;
+    // Positive translation for new arc points
+    for(uint8_t i=0;i<arc_points.size();i++)
+    {
+      pos_dir[i].positions[0] += sum_radii*x_com;
+      pos_dir[i].positions[1] += sum_radii*y_com;
+      //ROS_INFO("New arc point: (%f, %f)", pos_dir[i].positions[0], pos_dir[i].positions[1]);
+    }
+
+    LineArc(l_p1, l_p2, pos_dir, points_of_collision, result);
+    //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
+    
+    neg_dir = arc_points;
+    // Negative translation for new arc points
+    for(uint8_t i=0;i<arc_points.size();i++)
+    {
+      neg_dir[i].positions[0] -= sum_radii*x_com;
+      neg_dir[i].positions[1] -= sum_radii*y_com;
+      //ROS_INFO("New arc point: (%f, %f)", neg_dir[i].positions[0], neg_dir[i].positions[1]);
+     }
+
+    LineArc(l_p1, l_p2, neg_dir, points_of_collision, result);
+  
+    // Boundary lines creating the fan
+    LineLineEndPoints(l_p1, l_p2, pos_dir[0].positions, neg_dir[0].positions, points_of_collision); 
+    //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
+    
+    LineLineEndPoints(l_p1, l_p2, pos_dir[2].positions, neg_dir[2].positions, points_of_collision); 
+    //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
   } // end for
 } // End ControlPolyArc 
 
@@ -1412,6 +1457,7 @@ void CollisionDetection::LineArcFull(const ramp_msgs::RampTrajectory& trajectory
   //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
 
   
+  // Boundary lines creating the fan
   LineLineEndPoints(l_p1, l_p2, pos_dir[0].positions, neg_dir[0].positions, points_of_collision); 
   //ROS_INFO("points_of_collision.size(): %i", (int)points_of_collision.size());
   
