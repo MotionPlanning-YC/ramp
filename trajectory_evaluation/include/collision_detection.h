@@ -70,6 +70,7 @@ class CollisionDetection
     void LineArc(const std::vector<double>& l_p1, const std::vector<double>& l_p2, const std::vector<trajectory_msgs::JointTrajectoryPoint>& arc_points, std::vector< std::vector<double> >& points_of_collision, bool& result) const;
 
 
+    void LineCircle(const std::vector<double>& l_p1, const std::vector<double>& l_p2, const std::vector<double>& cir_center, double& r, std::vector< std::vector<double> >& points_of_collision) const;
 
 
     void LineArcFull(const ramp_msgs::RampTrajectory& trajectory, const int& segment, const ramp_msgs::RampTrajectory& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const;
