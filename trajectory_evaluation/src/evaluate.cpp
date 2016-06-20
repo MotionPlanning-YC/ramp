@@ -40,7 +40,17 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
   ros::Time t_start = ros::Time::now();
 
   // Check collision
+  ros::Time t_numeric_start = ros::Time::now();
+  cd_.performNum(er.trajectory, er.obstacle_trjs, qr_);
+  ros::Duration d_numeric   = ros::Time::now() - t_numeric_start;
+
+  ros::Time t_analy_start = ros::Time::now();
   cd_.perform(er.trajectory, er.obstacle_trjs, qr_);
+  ros::Duration d_analy = ros::Time::now() - t_analy_start;
+
+  t_numeric_.push_back(d_numeric);
+  t_analy_.push_back(d_analy);
+
   
   er.trajectory.feasible            = !qr_.collision_;
   er.trajectory.t_firstCollision    = ros::Duration(qr_.t_firstCollision_);

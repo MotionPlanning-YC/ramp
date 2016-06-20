@@ -18,7 +18,7 @@ sensing_cycle_rate: 20
 
 error_reduction: true 
 
-num_of_obstacles: 0
+num_of_obstacles: 1
 
 # Turtlebot obstacle topics
 #obstacle_odoms: ['/obstacle_1/odom', '/obstacle_2/odom', '/obstacle_3/odom']

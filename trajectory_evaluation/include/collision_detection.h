@@ -103,6 +103,23 @@ class CollisionDetection
     ros::Duration d_for;
     ros::Time t_inner_for;
     ros::Duration d_inner_for;
+    
+    std::vector<ros::Duration> t_ll;
+    std::vector<ros::Duration> t_ll_num;
+
+
+    std::vector<ros::Duration> t_la;
+    std::vector<ros::Duration> t_la_num;
+    
+    std::vector<ros::Duration> t_bl;
+    std::vector<ros::Duration> t_ba;
+    
+    // No obstacle motion
+    std::vector<ros::Duration> t_ln;
+    std::vector<ros::Duration> t_ln_num;
+
+    std::vector<ros::Duration> t_bn;
+    std::vector<ros::Duration> t_bn_num;
 
     ros::Publisher pub_population;
 

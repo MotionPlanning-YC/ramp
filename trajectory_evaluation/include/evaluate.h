@@ -32,6 +32,8 @@ class Evaluate {
 
     float Q;
 
+    std::vector< ros::Duration > t_analy_;
+    std::vector< ros::Duration > t_numeric_;
   private:
     Utility utility_;
     bool orientation_infeasible_;

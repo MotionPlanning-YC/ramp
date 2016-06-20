@@ -40,7 +40,7 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
     resps.resps.push_back(res);
   }
   ros::Duration t_elapsed = ros::Time::now() - t_start;
-  //ROS_INFO("t_elapsed: %f", t_elapsed.toSec());
+  ROS_INFO("t_elapsed: %f", t_elapsed.toSec());
   t_data.push_back(t_elapsed);
   return true;
 } //End handleRequest
@@ -48,7 +48,130 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
 
 void reportData(int sig)
 {
-  double avg = t_data.at(0).toSec();
+
+  double avg = ev.t_analy_[0].toSec();
+  for(int i=1;i<ev.t_analy_.size();i++)
+  {
+    avg += ev.t_analy_[i].toSec();
+    ROS_INFO("t_analy_: %f", ev.t_analy_.at(i).toSec());
+  }
+  avg /= ev.t_analy_.size();
+  ROS_INFO("Average t_analy_ duration: %f", avg);
+  
+
+  avg = ev.t_numeric_[0].toSec();
+  for(int i=1;i<ev.t_numeric_.size();i++)
+  {
+    avg += ev.t_numeric_[i].toSec();
+    ROS_INFO("t_numeric_: %f", ev.t_numeric_.at(i).toSec());
+  }
+  avg /= ev.t_numeric_.size();
+  ROS_INFO("Average t_numeric_ duration: %f", avg);
+
+  
+
+  if(ev.cd_.t_ln.size() > 0)
+  {
+    avg = ev.cd_.t_ln[0].toSec();
+    for(int i=1;i<ev.cd_.t_ln.size();i++)
+    {
+      avg += ev.cd_.t_ln.at(i).toSec();
+      ROS_INFO("ev.cd_.t_ln: %f", ev.cd_.t_ln[i].toSec());
+    }
+    avg /= ev.cd_.t_ln.size();
+    ROS_INFO("Average ev.cd_.t_ln duration: %f", avg);
+  }
+
+  if(ev.cd_.t_bn.size() > 0)
+  {
+    avg = ev.cd_.t_bn[0].toSec();
+    for(int i=1;i<ev.cd_.t_bn.size();i++)
+    {
+      avg += ev.cd_.t_bn.at(i).toSec();
+      ROS_INFO("ev.cd_.t_bn: %f", ev.cd_.t_bn[i].toSec());
+    }
+    avg /= ev.cd_.t_bn.size();
+    ROS_INFO("Average ev.cd_.t_bn duration: %f", avg);
+  }
+  
+
+  if(ev.cd_.t_ll.size() > 0)
+  {
+    avg = ev.cd_.t_ll[0].toSec();
+    for(int i=1;i<ev.cd_.t_ll.size();i++)
+    {
+      avg += ev.cd_.t_ll.at(i).toSec();
+      ROS_INFO("ev.cd_.t_ll: %f", ev.cd_.t_ll[i].toSec());
+    }
+    avg /= ev.cd_.t_ll.size();
+    ROS_INFO("Average ev.cd_.t_ll duration: %f", avg);
+  }
+
+  
+  if(ev.cd_.t_ll_num.size() > 0)
+  {
+    avg = ev.cd_.t_ll_num[0].toSec();
+    for(int i=1;i<ev.cd_.t_ll_num.size();i++)
+    {
+      avg += ev.cd_.t_ll_num.at(i).toSec();
+      ROS_INFO("ev.cd_.t_ll_num: %f", ev.cd_.t_ll_num[i].toSec());
+    }
+    avg /= ev.cd_.t_ll_num.size();
+    ROS_INFO("Average ev.cd_.t_ll_num duration: %f", avg);
+  }
+
+  if(ev.cd_.t_ln_num.size() > 0)
+  {
+    avg = ev.cd_.t_ln_num[0].toSec();
+    for(int i=1;i<ev.cd_.t_ln_num.size();i++)
+    {
+      avg += ev.cd_.t_ln_num.at(i).toSec();
+      ROS_INFO("ev.cd_.t_ln_num: %f", ev.cd_.t_ln_num[i].toSec());
+    }
+    avg /= ev.cd_.t_ln_num.size();
+    ROS_INFO("Average ev.cd_.t_ln_num duration: %f", avg);
+  }
+
+  if(ev.cd_.t_la.size() > 0)
+  {
+    avg = ev.cd_.t_la[0].toSec();
+    for(int i=1;i<ev.cd_.t_la.size();i++)
+    {
+      avg += ev.cd_.t_la.at(i).toSec();
+      ROS_INFO("ev.cd_.t_la: %f", ev.cd_.t_la[i].toSec());
+    }
+    avg /= ev.cd_.t_la.size();
+    ROS_INFO("Average ev.cd_.t_la duration: %f", avg);
+  }
+  
+
+  if(ev.cd_.t_bl.size() > 0)
+  {
+    avg = ev.cd_.t_bl[0].toSec();
+    for(int i=1;i<ev.cd_.t_bl.size();i++)
+    {
+      avg += ev.cd_.t_bl.at(i).toSec();
+      ROS_INFO("ev.cd_.t_bl: %f", ev.cd_.t_bl[i].toSec());
+    }
+    avg /= ev.cd_.t_bl.size();
+    ROS_INFO("Average ev.cd_.t_bl duration: %f", avg);
+  }
+  
+
+  if(ev.cd_.t_ba.size() > 0)
+  {
+    avg = ev.cd_.t_ba[0].toSec();
+    for(int i=1;i<ev.cd_.t_ba.size();i++)
+    {
+      avg += ev.cd_.t_ba.at(i).toSec();
+      ROS_INFO("ev.cd_.t_ba: %f", ev.cd_.t_ba[i].toSec());
+    }
+    avg /= ev.cd_.t_ba.size();
+    ROS_INFO("Average ev.cd_.t_ba duration: %f", avg);
+  }
+
+
+  avg = t_data.at(0).toSec();
   for(int i=1;i<t_data.size();i++)
   {
     avg += t_data.at(i).toSec();
@@ -56,6 +179,9 @@ void reportData(int sig)
   }
   avg /= t_data.size();
   ROS_INFO("Average traj_eval duration: %f", avg);
+
+
+  ROS_INFO("Done reporting");
 }
 
 int main(int argc, char** argv) {

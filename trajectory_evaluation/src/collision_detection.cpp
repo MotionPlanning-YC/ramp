@@ -11,9 +11,11 @@ void CollisionDetection::init(ros::NodeHandle& h) {}
 
 void CollisionDetection::performNum(const ramp_msgs::RampTrajectory& trajectory, const std::vector<ramp_msgs::RampTrajectory>& obstacle_trjs, QueryResult& result)
 {
+  std::vector< std::vector<double> > points_of_collision;
   for(uint8_t i=0;i<obstacle_trjs.size() && !result.collision_;i++)
   {
-    query(trajectory, obstacle_trjs[i], result);
+    //query(trajectory, obstacle_trjs[i], result);
+    query(trajectory.trajectory.points, obstacle_trjs[i].trajectory.points, points_of_collision);
   }
 }
 
@@ -103,12 +105,32 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
         if(!segment_bezier)
         {
           //ROS_INFO("Line No Motion");
+          ros::Time t_start = ros::Time::now();
           LineNoMotion(trajectory, segment, ob_a, points_of_collision);
+          t_ln.push_back(ros::Time::now() - t_start);
+
+          std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator first = 
+            trajectory.trajectory.points.begin() + trajectory.i_knotPoints[segment-1];
+          
+          std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator last = 
+            trajectory.trajectory.points.begin() + trajectory.i_knotPoints[segment];
+
+          std::vector<trajectory_msgs::JointTrajectoryPoint> segment_points(first, last);
+          
+          std::vector<trajectory_msgs::JointTrajectoryPoint> ob;
+          ob.push_back(ob_a);
+
+          t_start = ros::Time::now();
+          query(segment_points, ob, points_of_collision);
+          t_ln_num.push_back(ros::Time::now() - t_start);
+
         }
         else
         {
           //ROS_INFO("Bezier No Motion");
+          ros::Time t_start = ros::Time::now();
           BezierNoMotion(trajectory.curves[0].controlPoints, ob_a, points_of_collision);
+          t_bn.push_back(ros::Time::now() - t_start);
         }
       }
 
@@ -119,13 +141,30 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
         if(ob_trj_line)
         {
           //ROS_INFO("Line Line");
+          ros::Time t_start = ros::Time::now();
           LineLineFull(trajectory, segment, obstacle_trjs[ob_i], points_of_collision);
+          t_ll.push_back(ros::Time::now() - t_start);
+
+          std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator first = 
+            trajectory.trajectory.points.begin() + trajectory.i_knotPoints[segment-1];
+          
+          std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator last = 
+            trajectory.trajectory.points.begin() + trajectory.i_knotPoints[segment];
+
+          std::vector<trajectory_msgs::JointTrajectoryPoint> segment_points(first, last);
+          
+          t_start = ros::Time::now();
+          query(segment_points, obstacle_trjs[ob_i].trajectory.points, points_of_collision);
+          t_ll_num.push_back(ros::Time::now() - t_start);
+         
         }
         // Line-Arc
         else
         {
           //ROS_INFO("Line-Arc");
+          ros::Time t_start = ros::Time::now();
           LineArcFull(trajectory, segment, obstacle_trjs[ob_i], points_of_collision);
+          t_la.push_back(ros::Time::now() - t_start);
         }
       }
       // Bezier curve
@@ -135,13 +174,17 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
         if(ob_trj_line)
         {
           //ROS_INFO("Bezier Line");
+          ros::Time t_start = ros::Time::now();
           BezierLineFull(trajectory.curves[0].controlPoints, obstacle_trjs[ob_i], points_of_collision);
+          t_bl.push_back(ros::Time::now() - t_start);
         }
         // Bezier-Arc
         else
         {
           //ROS_INFO("Bezier Arc");
+          ros::Time t_start = ros::Time::now();
           BezierArc(trajectory.curves[0].controlPoints, obstacle_trjs[ob_i], points_of_collision); 
+          t_ba.push_back(ros::Time::now() - t_start);
         }
       }
       ////ROS_INFO("Segment %i Collision: %s", segment, result.collision_ ? "True" : "False");
@@ -1604,17 +1647,19 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
 
   double  t_start   = segment[0].time_from_start.toSec();
   int     j_offset  = t_start * 10.f;
+
+  // If only 1 point, then set stopping point to end of segment
+  int     j_stop = ob_trajectory.size() > segment.size() ? ob_trajectory.size() : segment.size();
   ////ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
 
- 
- 
-  int j_start;
- 
   ////ROS_INFO("i_stop: %i", i_stop);
+  int i=0, j=0;
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
   float radius = 0.22f;
-  for(uint16_t i=0;i<segment.size();i++) 
+
+  while(i<segment.size())
+  //for(i=0;i<segment.size() && j<j_stop;i++) 
   {
     
     // Get the ith point on the trajectory
@@ -1647,6 +1692,8 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
       points_of_collision.push_back(p_i->positions);
       i = segment.size();
     } // end if
+
+    i++; 
   } // end for
 }
 
