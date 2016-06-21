@@ -236,6 +236,7 @@ const RampTrajectory RampTrajectory::getSubTrajectoryPost(const double t) const
 const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, const uint8_t kp) const 
 {
   //ROS_INFO("In RampTrajectory::concatenate");
+  //ROS_INFO("traj: %s", traj.toString().c_str());
   //ROS_INFO("kp: %i", kp);
   
   RampTrajectory result = clone();
@@ -289,14 +290,15 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
   
   trajectory_msgs::JointTrajectoryPoint endOfFirstSegment = traj.msg_.trajectory.points.at(traj.msg_.i_knotPoints.at( kp+1 ));
 
-  // If there is no curve and
-  // If there is only two knot points and
+  // If there is no curve AND
+  // If there is only two knot points AND
   // If the last segment of this and first segment of traj have the same orientation
   // Remove the last knot point of this trajectory
   // E.g. trajectories (0,0)->(1,0) and (1,0)->(2,0) concatenate to (0,0)->(2,0)
   // *** Assumes that first segment of target does not start a curve ***
   if( msg_.curves.size() == 0 && 
       msg_.i_knotPoints.size() < 3 &&
+      traj.msg_.curves.size() == 0 &&
       utility_.findDistanceBetweenAngles(last.positions.at(2), endOfFirstSegment.positions.at(2)) < 0.01)
   {
     /*ROS_INFO("Last segment of this and first segment of traj have the same orientation");

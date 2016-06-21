@@ -315,6 +315,8 @@ const std::string Utility::toString(const ramp_msgs::RampTrajectory traj) const 
     result<<"\nCurve: "<<toString(traj.curves[0]);
   }
 
+  result<<"\nt_start: "<<traj.t_start;
+
   /*result<<"\n Points:";
   //for(unsigned int i=15;i<27;i++) {
   //for(unsigned int i=0;i<7;i++) {

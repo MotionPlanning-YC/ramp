@@ -11,11 +11,9 @@ void CollisionDetection::init(ros::NodeHandle& h) {}
 
 void CollisionDetection::performNum(const ramp_msgs::RampTrajectory& trajectory, const std::vector<ramp_msgs::RampTrajectory>& obstacle_trjs, QueryResult& result)
 {
-  std::vector< std::vector<double> > points_of_collision;
   for(uint8_t i=0;i<obstacle_trjs.size() && !result.collision_;i++)
   {
-    //query(trajectory, obstacle_trjs[i], result);
-    query(trajectory.trajectory.points, obstacle_trjs[i].trajectory.points, points_of_collision);
+    query(trajectory.trajectory.points, obstacle_trjs[i].trajectory.points, trajectory.t_start.toSec(), result);
   }
 }
 
@@ -1632,6 +1630,74 @@ void CollisionDetection::LineArcFull(const ramp_msgs::RampTrajectory& trajectory
 
   //ROS_INFO("Exiting CollisionDetection::LineArc");
 } // End LineArc
+
+
+
+
+void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajectoryPoint>& segment, const std::vector<trajectory_msgs::JointTrajectoryPoint>& ob_trajectory, const double& traj_start, QueryResult& result) const
+{
+  ros::Time time_start = ros::Time::now();
+
+  ROS_INFO("In CollisionDetection::query"); 
+  ROS_INFO("trajectory.points.size(): %i", (int)segment.size());
+  ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.size());
+  /*if(ob_trajectory.trajectory.points.size() > 2)
+  {
+    //ROS_INFO("ob_trajectory: %s", utility_.toString(ob_trajectory).c_str());
+  }*/
+  
+  // For every point, check circle detection on a subset of the obstacle's trajectory
+  float radius = 0.22f;
+
+  // Trajectories start in the future, obstacle trajectories start at the present time, 
+  // set an offset for obstacle indices to account for this 
+  double  t_start   = traj_start;
+  int     j_offset  = t_start * 10.f;
+  
+  ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
+
+  int i=0, j=0;
+
+  for(i=0;i<segment.size();i++) 
+  {
+    
+    // Get the ith point on the trajectory
+    const trajectory_msgs::JointTrajectoryPoint* p_i = &segment[i];
+
+    ////ROS_INFO("p_i: %s", utility_.toString(p_i).c_str());
+
+    // Set obstacle index. If i+offset > trajectory size, set j to the last point on the obstacle trajectory
+    j = (i+j_offset) >= ob_trajectory.size() ? ob_trajectory.size()-1 : i+j_offset;
+
+    //ROS_INFO("i: %i j: %i", i, j);
+
+    // Get the jth point of the obstacle's trajectory
+    const trajectory_msgs::JointTrajectoryPoint* p_ob  = &ob_trajectory[j];
+
+    // Get the distance between the centers
+    float dist = sqrt( pow(p_i->positions.at(0) - p_ob->positions.at(0),2) + pow(p_i->positions.at(1) - p_ob->positions.at(1),2) );
+
+    // If the distance between the two centers is less than the sum of the two radii, 
+    // there is collision
+    if( dist <= radius*2 ) 
+    {
+      /*//ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+          p_i.positions.at(0),
+          p_i.positions.at(1),
+          p_ob.positions.at(0),
+          p_ob.positions.at(1),
+          dist,
+          (int)i,
+          (int)j);*/
+      
+      result.collision_         = true;
+      result.t_firstCollision_  = p_i->time_from_start.toSec();
+      i                         = segment.size();
+    } // end if
+  } // end for
+
+  ROS_INFO("Exiting CollisionDetection::query");
+} // End query
 
 
 void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajectoryPoint>& segment, const std::vector<trajectory_msgs::JointTrajectoryPoint>& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const

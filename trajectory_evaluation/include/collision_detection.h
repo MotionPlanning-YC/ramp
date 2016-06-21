@@ -41,6 +41,7 @@ class CollisionDetection
      */
     void           query(const ramp_msgs::RampTrajectory& trajectory, const ramp_msgs::RampTrajectory& ob_trajectory, QueryResult& result) const;
     void           query(const std::vector<trajectory_msgs::JointTrajectoryPoint>& segment, const std::vector<trajectory_msgs::JointTrajectoryPoint>& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const;
+    void           query(const std::vector<trajectory_msgs::JointTrajectoryPoint>& segment, const std::vector<trajectory_msgs::JointTrajectoryPoint>& ob_trajectory, const double& traj_start, QueryResult& result) const;
 
 
     /**
