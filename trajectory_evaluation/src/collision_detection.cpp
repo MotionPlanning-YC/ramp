@@ -11,8 +11,10 @@ void CollisionDetection::init(ros::NodeHandle& h) {}
 
 void CollisionDetection::performNum(const ramp_msgs::RampTrajectory& trajectory, const std::vector<ramp_msgs::RampTrajectory>& obstacle_trjs, QueryResult& result)
 {
+  result.collision_ = false;
   for(uint8_t i=0;i<obstacle_trjs.size() && !result.collision_;i++)
   {
+    ROS_INFO("Ob traj: %s", utility_.toString(obstacle_trjs[i]).c_str());
     query(trajectory.trajectory.points, obstacle_trjs[i].trajectory.points, trajectory.t_start.toSec(), result);
   }
 }
@@ -1638,9 +1640,10 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
 {
   ros::Time time_start = ros::Time::now();
 
-  ROS_INFO("In CollisionDetection::query"); 
+  /*ROS_INFO("In CollisionDetection::query"); 
   ROS_INFO("trajectory.points.size(): %i", (int)segment.size());
-  ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.size());
+  ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.size());*/
+
   /*if(ob_trajectory.trajectory.points.size() > 2)
   {
     //ROS_INFO("ob_trajectory: %s", utility_.toString(ob_trajectory).c_str());
@@ -1654,25 +1657,24 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
   double  t_start   = traj_start;
   int     j_offset  = t_start * 10.f;
   
-  ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
+  //ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
 
   int i=0, j=0;
 
   for(i=0;i<segment.size();i++) 
   {
-    
-    // Get the ith point on the trajectory
-    const trajectory_msgs::JointTrajectoryPoint* p_i = &segment[i];
-
-    ////ROS_INFO("p_i: %s", utility_.toString(p_i).c_str());
 
     // Set obstacle index. If i+offset > trajectory size, set j to the last point on the obstacle trajectory
     j = (i+j_offset) >= ob_trajectory.size() ? ob_trajectory.size()-1 : i+j_offset;
 
     //ROS_INFO("i: %i j: %i", i, j);
-
-    // Get the jth point of the obstacle's trajectory
-    const trajectory_msgs::JointTrajectoryPoint* p_ob  = &ob_trajectory[j];
+    
+    // Get the points
+    const trajectory_msgs::JointTrajectoryPoint* p_i    = &segment[i];
+    const trajectory_msgs::JointTrajectoryPoint* p_ob   = &ob_trajectory[j];
+    
+    ROS_INFO("p_i: %s", utility_.toString(*p_i).c_str());
+    ROS_INFO("p_j: %s", utility_.toString(*p_ob).c_str());
 
     // Get the distance between the centers
     float dist = sqrt( pow(p_i->positions.at(0) - p_ob->positions.at(0),2) + pow(p_i->positions.at(1) - p_ob->positions.at(1),2) );
@@ -1681,14 +1683,14 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
     // there is collision
     if( dist <= radius*2 ) 
     {
-      /*//ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
-          p_i.positions.at(0),
-          p_i.positions.at(1),
-          p_ob.positions.at(0),
-          p_ob.positions.at(1),
+      ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+          p_i->positions.at(0),
+          p_i->positions.at(1),
+          p_ob->positions.at(0),
+          p_ob->positions.at(1),
           dist,
           (int)i,
-          (int)j);*/
+          (int)j);
       
       result.collision_         = true;
       result.t_firstCollision_  = p_i->time_from_start.toSec();
@@ -1696,7 +1698,7 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
     } // end if
   } // end for
 
-  ROS_INFO("Exiting CollisionDetection::query");
+  //ROS_INFO("Exiting CollisionDetection::query");
 } // End query
 
 

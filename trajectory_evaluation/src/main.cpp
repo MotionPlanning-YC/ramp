@@ -25,6 +25,7 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
     // If more than one point
     if(reqs.reqs.at(i).trajectory.trajectory.points.size() > 1)
     {
+      ROS_INFO("More than 1 point, performing evaluation");
       ev.perform(reqs.reqs[i], res);
     }
     // Else we only have one point (goal point)

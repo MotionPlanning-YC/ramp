@@ -2739,6 +2739,7 @@ void Planner::planningCycleCallback()
         fabs(latestUpdate_.msg_.velocities.at(2)));
   }*/
 
+  ROS_INFO("Done with error correction!");
 
 
   /*
@@ -2747,11 +2748,11 @@ void Planner::planningCycleCallback()
   if(modifications_) 
   {
     //ROS_INFO("*****************************");
-    //ROS_INFO("Performing modification");
+    ROS_INFO("Performing modification");
     ros::Time t = ros::Time::now();
     ModificationResult mod = modification();
     mutate_durs_.push_back(ros::Time::now() - t);
-    //ROS_INFO("Done with modification");
+    ROS_INFO("Done with modification");
     //ROS_INFO("*****************************");
 
 

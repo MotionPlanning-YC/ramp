@@ -36,29 +36,28 @@ void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationR
 // It's modiftying trj AND returning a value
 void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er) 
 {
-  //ROS_INFO("In Evaluate::performFeasibility");
+  ROS_INFO("In Evaluate::performFeasibility");
   ros::Time t_start = ros::Time::now();
 
   // Check collision
   ros::Time t_numeric_start = ros::Time::now();
   cd_.performNum(er.trajectory, er.obstacle_trjs, qr_);
   ros::Duration d_numeric   = ros::Time::now() - t_numeric_start;
+  t_numeric_.push_back(d_numeric);
 
-  ros::Time t_analy_start = ros::Time::now();
+  ROS_INFO("result.collision: %s", qr_.collision_ ? "True" : "False");
+  /*ros::Time t_analy_start = ros::Time::now();
   cd_.perform(er.trajectory, er.obstacle_trjs, qr_);
   ros::Duration d_analy = ros::Time::now() - t_analy_start;
+  t_analy_.push_back(d_analy);*/
 
-  t_numeric_.push_back(d_numeric);
-  t_analy_.push_back(d_analy);
-
-  
   er.trajectory.feasible            = !qr_.collision_;
   er.trajectory.t_firstCollision    = ros::Duration(qr_.t_firstCollision_);
 
   ramp_msgs::RampTrajectory* trj = &er.trajectory;
   
   bool moving =     (fabs( sqrt(  (trj->trajectory.points[0].velocities[0]*trj->trajectory.points[0].velocities[0]) +
-                              (trj->trajectory.points[0].velocities[1]*trj->trajectory.points[0].velocities[1]))) > 0)
+                                  (trj->trajectory.points[0].velocities[1]*trj->trajectory.points[0].velocities[1]))) > 0)
                 ||  (fabs(trj->trajectory.points.at(0).velocities.at(2)) > 0) 
                 ? true 
                 : false;
