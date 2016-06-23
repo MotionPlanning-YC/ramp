@@ -22,7 +22,7 @@ catkin_package(
 ############
 
 # Specify include directories
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} /opt/ros/kinetic/include)
 
 ## Debugging flag for using gdb
 set (CMAKE_CXX_FLAGS "-g")

@@ -1080,7 +1080,7 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
           double b, x, x_dot, x_ddot;
 
           // Compute x from y
-          if(isinf(slope))
+          if(std::isinf(slope))
           {
             //ROS_INFO("In if isinf(slope), point: %s", utility_.toString(path_.points.at(0).motionState).c_str());
             x = path_.points.at(0).motionState.positions.at(0);
@@ -1167,7 +1167,7 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
           double b, x, x_dot, x_ddot;
 
           // Compute x from y
-          if(isinf(slope))
+          if(std::isinf(slope))
           {
             x = prevKP_.positions.at(0);
             x_dot = 0.f;
@@ -1274,7 +1274,7 @@ const trajectory_msgs::JointTrajectoryPoint MobileBase::buildTrajectoryPoint(con
           double b, x, x_dot, x_ddot;
 
           // Compute x from y
-          if(isinf(slope))
+          if(std::isinf(slope))
           {
             x = prevKP_.positions.at(0);
             x_dot = 0.f;
@@ -1383,7 +1383,7 @@ bool MobileBase::checkSpeed(const ramp_msgs::Path p, const std::vector<uint8_t> 
 bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs::TrajectoryResponse& res) 
 {
   ROS_INFO("In MobileBase::trajectoryRequest");
-  ROS_INFO("type_: %i HOLONOMIC: %i", req.type, HOLONOMIC); 
+  //ROS_INFO("type_: %i HOLONOMIC: %i", req.type, HOLONOMIC); 
 
   // If there's less than 3 points, make it have straight segments
   // if req_.segments == 1
@@ -1470,9 +1470,9 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
   // Use Bezier curves to smooth path
   if(type_ != HOLONOMIC) 
   {
-    ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
+    //ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
     curves = bezier(path_, type_ == TRANSITION);
-    ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
+    //ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
     setInitialMotion();
 
 
@@ -1503,9 +1503,6 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
   // Push 0 onto knot point indices
   res.trajectory.i_knotPoints.push_back(0);
 
-
-
-
   /*if(!checkSpeed(path_, i_cs))
   {
     ////ROS_INFO("Check speed is false! Removing knot point 1");
@@ -1531,7 +1528,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
   //for (i_kp_ = 1; i_kp_<path_.points.size(); i_kp_++) 
   for (i_kp_ = 1; i_kp_<segments_; i_kp_++) 
   {
-    ROS_INFO("i_kp_: %i", (int)i_kp_);
+    //ROS_INFO("i_kp_: %i", (int)i_kp_);
     reflexxesData_.resultValue = 0;
 
     // Push the initial state onto trajectory
@@ -1552,13 +1549,13 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
     if(path_.points.at(i_kp_).motionState.velocities.size() > 0 &&
         (fabs(path_.points.at(i_kp_).motionState.velocities.at(0)) > 0.01) )
     {
-      ROS_INFO("x_dot and y_dot = specified velocities");
+      //ROS_INFO("x_dot and y_dot = specified velocities");
       x_dot = fabs(path_.points.at(i_kp_).motionState.velocities.at(0));
       y_dot = fabs(path_.points.at(i_kp_).motionState.velocities.at(1));
     }
     else
     {
-      ROS_INFO("calculating x_dot and y_dot");
+      //ROS_INFO("calculating x_dot and y_dot");
       x_dot = fabs(MAX_SPEED * cos(theta));
       y_dot = x_dot*tan(theta);
     }
@@ -1575,7 +1572,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
     double x_diff = path_.points.at(i_kp_).motionState.positions.at(0) - prevKP_.positions.at(0);
     bool x_diff_greater = fabs(x_diff) > fabs(y_diff);
     
-    ROS_INFO("x_dot: %f y_dot: %f x_diff: %f y_diff: %f x_diff_greater: %s", x_dot, y_dot, x_diff, y_diff, x_diff_greater ? "True" : "False");
+    //ROS_INFO("x_dot: %f y_dot: %f x_diff: %f y_diff: %f x_diff_greater: %s", x_dot, y_dot, x_diff, y_diff, x_diff_greater ? "True" : "False");
 
     // *** Set the new target ***
     if(x_diff_greater)
@@ -1604,7 +1601,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
 
       // Insert all points on the curves into the trajectory
       // TODO: Why am I not pushing on every point of the curve?
-      for(uint32_t p=1;p<curves.at(c).points_.size();p++) {
+      for(uint32_t p=1;p<curves.at(c).points_.size();p++) 
+      {
         insertPoint(curves.at(c).points_.at(p), res);
 
         // If it's the first or last point on the curve, 
@@ -1614,6 +1612,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
         if(p==curves.at(c).points_.size()-1) //||
             //(c == i_cs.at(0) && p == 1) ) 
         {
+          //ROS_INFO("Pushing on i_knotpoint: %i", (int)res.trajectory.trajectory.points.size()-1);
           res.trajectory.i_knotPoints.push_back(
                           res.trajectory.trajectory.points.size() - 1 );
         } // end if knot point
@@ -1643,7 +1642,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
     // Else if straight-line segment
     else 
     {
-      ROS_INFO("In else, straight-line segment");
+      //ROS_INFO("In else, straight-line segment");
 
       // Get rotation if needed
       double trajec_size = res.trajectory.trajectory.points.size();
@@ -1701,22 +1700,23 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
       }*/
 
       setTarget(path_.points.at(i_kp_).motionState);
-      ROS_INFO("Prev KP: %s", utility_.toString(prevKP_).c_str());
-      ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());
+      //ROS_INFO("Prev KP: %s", utility_.toString(prevKP_).c_str());
+      //ROS_INFO("Target: %s", utility_.toString(path_.points.at(i_kp_).motionState).c_str());
 
       // Check they are not the same point
       if(utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, 
             path_.points.at(i_kp_).motionState.positions) > 0.0001)
       {
-        ////////ROS_INFO("Pushing on points b/c dist: %f", utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, path_.points.at(i_kp_).motionState.positions));
+        //ROS_INFO("Pushing on points b/c dist: %f", utility_.positionDistance(res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size()-1).positions, path_.points.at(i_kp_).motionState.positions));
               
+        size_t t_size = res.trajectory.trajectory.points.size();
         // We go to the next knotpoint only once we reach this one
         while (!finalStateReached()) 
         {
 
           trajectory_msgs::JointTrajectoryPoint p = spinOnce();
-          //////////ROS_INFO("p: %s", utility_.toString(p).c_str());
-          //ROS_INFO("result: %i", reflexxesData_.resultValue);
+          ROS_INFO("p: %s", utility_.toString(p).c_str());
+          ROS_INFO("result: %i", reflexxesData_.resultValue);
           if(reflexxesData_.resultValue == -100)
           {
             ROS_ERROR("An error occurred in Reflexxes, setting res.error=1 and returning");
@@ -1728,14 +1728,19 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
           res.trajectory.trajectory.points.push_back(p);
         } // end while
 
-        res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
+       
+        if(res.trajectory.trajectory.points.size() > t_size)
+        {
+          //ROS_INFO("Pushing on i_knotpoint: %i", (int)res.trajectory.trajectory.points.size()-1);
+          res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size() - 1);
+        }
       } // end if different points
 
       // Else if there's only 2 points and the current point and next knot point are the same
       // It was a path with the same point
       else if(req.path.points.size() == 2) 
       {
-        ////////ROS_INFO("Last position and next knot point are the same position, path size == 2");
+        //ROS_INFO("Last position and next knot point are the same position, path size == 2");
         res.trajectory.trajectory.points.push_back(res.trajectory.trajectory.points.at(0));
       }
       //else {
@@ -1743,7 +1748,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
       //}
     } // end if
 
-    ////ROS_INFO("Outside of while");
+    //ROS_INFO("Outside of while");
     // Set previous knot point
     prevKP_ = res.trajectory.trajectory.points.at(res.trajectory.trajectory.points.size() - 1);
     ////ROS_INFO("After setting new prevKP");
@@ -1776,6 +1781,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
   // Check that the last point is a knot point
   if(res.trajectory.trajectory.points.size()-1 != res.trajectory.i_knotPoints.at(res.trajectory.i_knotPoints.size()-1))
   {
+    //ROS_INFO("Pushing on i_knotpoint: %i", (int)res.trajectory.trajectory.points.size()-1);
     res.trajectory.i_knotPoints.push_back(res.trajectory.trajectory.points.size()-1);
   }
 

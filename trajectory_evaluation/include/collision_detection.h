@@ -31,7 +31,7 @@ class CollisionDetection
     ~CollisionDetection();
 
     /***** Methods *****/ 
-    void                        init(ros::NodeHandle& h);
+    void                        init();
     void                        perform(const ramp_msgs::RampTrajectory& trajectory, const std::vector<ramp_msgs::RampTrajectory>& obstacle_trjs, QueryResult& result); 
     void                        performNum(const ramp_msgs::RampTrajectory& trajectory, const std::vector<ramp_msgs::RampTrajectory>& obstacle_trjs, QueryResult& result); 
     

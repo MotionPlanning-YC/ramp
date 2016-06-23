@@ -157,7 +157,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
   /*
    * Set motion for Obstacle 1
    */
-  if(index == 0)
+  if(index == 1)
   {
     
     
@@ -301,11 +301,11 @@ void obIcCb(const std_msgs::Bool::ConstPtr data, const int index)
   {
     ob_ic.push_back(data->data);
   }
-  ROS_INFO("In obIcCb:");
-  for(uint8_t i=0;i<ob_ic.size();i++)
+  //ROS_INFO("In obIcCb:");
+  /*for(uint8_t i=0;i<ob_ic.size();i++)
   {
     ROS_INFO("ob_ic[%i]: %s", i, ob_ic.at(i) ? "True" : "False");
-  }
+  }*/
 }
 
 int main(int argc, char** argv)

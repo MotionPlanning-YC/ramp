@@ -97,6 +97,10 @@ bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
       prediction.trajectoryRequest(treq, tres);
     }
 
+    if( tres.trajectory.i_knotPoints[0] == tres.trajectory.i_knotPoints[1] )
+    {
+      ROS_WARN("First two knot points are equal!");
+    }
     ROS_INFO("Response: %s", utility.toString(tres).c_str());
   
     res.resps.push_back(tres);

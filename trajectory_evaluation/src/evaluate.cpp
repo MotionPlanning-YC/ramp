@@ -36,7 +36,7 @@ void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationR
 // It's modiftying trj AND returning a value
 void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er) 
 {
-  ROS_INFO("In Evaluate::performFeasibility");
+  //ROS_INFO("In Evaluate::performFeasibility");
   ros::Time t_start = ros::Time::now();
 
   // Check collision
@@ -45,7 +45,7 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
   ros::Duration d_numeric   = ros::Time::now() - t_numeric_start;
   t_numeric_.push_back(d_numeric);
 
-  ROS_INFO("result.collision: %s", qr_.collision_ ? "True" : "False");
+  //ROS_INFO("result.collision: %s", qr_.collision_ ? "True" : "False");
   /*ros::Time t_analy_start = ros::Time::now();
   cd_.perform(er.trajectory, er.obstacle_trjs, qr_);
   ros::Duration d_analy = ros::Time::now() - t_analy_start;

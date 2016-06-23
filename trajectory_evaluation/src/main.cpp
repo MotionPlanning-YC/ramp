@@ -20,23 +20,23 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
     
     ramp_msgs::EvaluationResponse res;
     ROS_INFO("Robot Evaluating trajectory %i: %s", (int)i, u.toString(reqs.reqs[i].trajectory).c_str());
-    //ROS_INFO("Obstacle size: %i", (int)reqs.reqs[i].obstacle_trjs.size());
+    ROS_INFO("Obstacle size: %i", (int)reqs.reqs[i].obstacle_trjs.size());
 
     // If more than one point
     if(reqs.reqs.at(i).trajectory.trajectory.points.size() > 1)
     {
-      ROS_INFO("More than 1 point, performing evaluation");
+      //ROS_INFO("More than 1 point, performing evaluation");
       ev.perform(reqs.reqs[i], res);
     }
     // Else we only have one point (goal point)
     else
     {
-      res.fitness = 0.f;
+      res.fitness = 1.f;
       res.feasible = true;
       res.t_firstCollision = ros::Duration(9999.f);
     }
 
-    ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
+    //ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
     ros::Time t_vec = ros::Time::now();
     resps.resps.push_back(res);
   }
