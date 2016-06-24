@@ -42,6 +42,8 @@ EvaluationRequestHandler::EvaluationRequestHandler	evaluation_request_handler.cp
 EvaluationRequestHandler::request	evaluation_request_handler.cpp	/^const bool EvaluationRequestHandler::request(ramp_msgs::EvaluationSrv& er) $/;"	f	class:EvaluationRequestHandler	signature:(ramp_msgs::EvaluationSrv& er)
 FlagsForFile	.ycm_extra_conf.py	/^def FlagsForFile( filename, **kwargs ):$/;"	f	access:public
 GetCompilationInfoForFile	.ycm_extra_conf.py	/^def GetCompilationInfoForFile( filename ):$/;"	f	access:public
+GetRosIncludeFlags	.ycm_extra_conf.py	/^def GetRosIncludeFlags():$/;"	f	access:public
+GetRosIncludePaths	.ycm_extra_conf.py	/^def GetRosIncludePaths():$/;"	f	access:public
 IsHeaderFile	.ycm_extra_conf.py	/^def IsHeaderFile( filename ):$/;"	f	access:public
 KnotPoint	knot_point.cpp	/^KnotPoint::KnotPoint() : stopTime_(0) {}$/;"	f	class:KnotPoint	signature:()
 KnotPoint	knot_point.cpp	/^KnotPoint::KnotPoint(const MotionState mp) : motionState_(mp), stopTime_(0) {}$/;"	f	class:KnotPoint	signature:(const MotionState mp)
@@ -138,6 +140,7 @@ Planner::doControlCycle	planner.cpp	/^void Planner::doControlCycle() $/;"	f	clas
 Planner::errorCorrection	planner.cpp	/^const MotionState Planner::errorCorrection()  $/;"	f	class:Planner	signature:()
 Planner::estimateIfOnCurve	planner.cpp	/^const int Planner::estimateIfOnCurve(const MotionState ms, const ramp_msgs::BezierCurve curve) const {$/;"	f	class:Planner	signature:(const MotionState ms, const ramp_msgs::BezierCurve curve) const
 Planner::evaluatePopulation	planner.cpp	/^const Population Planner::evaluatePopulation(const Population pop) $/;"	f	class:Planner	signature:(const Population pop)
+Planner::evaluatePopulationOOP	planner.cpp	/^void Planner::evaluatePopulationOOP()$/;"	f	class:Planner	signature:()
 Planner::evaluateTrajectory	planner.cpp	/^const RampTrajectory Planner::evaluateTrajectory(const RampTrajectory trajec) $/;"	f	class:Planner	signature:(const RampTrajectory trajec)
 Planner::findAverageDiff	planner.cpp	/^const MotionState Planner::findAverageDiff() {$/;"	f	class:Planner	signature:()
 Planner::findMotionType	planner.cpp	/^const MotionType Planner::findMotionType(const ramp_msgs::Obstacle ob) const $/;"	f	class:Planner	signature:(const ramp_msgs::Obstacle ob) const
@@ -423,6 +426,7 @@ d_x	utility.cpp	/^  double d_x = b.at(0) - a.at(0);$/;"	l
 d_y	utility.cpp	/^  double d_y = b.at(1) - a.at(1);$/;"	l
 database	.ycm_extra_conf.py	/^  database = None$/;"	v
 database	.ycm_extra_conf.py	/^  database = ycm_core.CompilationDatabase( compilation_database_folder )$/;"	v
+default_flags	.ycm_extra_conf.py	/^default_flags = [$/;"	v
 delimiter	main.cpp	/^    std::string delimiter = ",";$/;"	l
 delimiter	main_testing.cpp	/^    std::string delimiter = ",";$/;"	l
 delta_t	planner.cpp	/^  double  delta_t     = ((deltasPerCC+1)*delta_t_switch_);$/;"	l
@@ -441,7 +445,7 @@ difference	utility.cpp	/^  double difference = a2 - a1;$/;"	l
 displaceAngle	utility.cpp	/^const double Utility::displaceAngle(const double a1, double a2) const {$/;"	f	class:Utility	signature:(const double a1, double a2) const
 displayTrajectory	planner.cpp	/^void Planner::displayTrajectory(const ramp_msgs::RampTrajectory traj) const $/;"	f	class:Planner	signature:(const ramp_msgs::RampTrajectory traj) const
 dist	planner.cpp	/^    double dist = utility_.positionDistance(ob_trajectory_.at(i).msg_.trajectory.points.at(0).positions, latestUpdate_.msg_.positions);$/;"	l
-dist_theshold	planner.cpp	/^  double dist_theshold = 1.f;$/;"	l
+dist_theshold	planner.cpp	/^  double dist_theshold = 0.6f;$/;"	l
 divide	motion_state.cpp	/^const MotionState MotionState::divide(const int num) const {$/;"	f	class:MotionState	signature:(const int num) const
 doControlCycle	planner.cpp	/^void Planner::doControlCycle() $/;"	f	class:Planner	signature:()
 dof_max	main.cpp	/^  std::vector<double> dof_max;$/;"	l
@@ -471,6 +475,7 @@ euc_dist	utility.cpp	/^  double euc_dist = sqrt( pow(d_x,2) + pow(d_y,2) );$/;"	
 eval	main.cpp	/^  RampTrajectory eval = my_planner.evaluateTrajectory(full);$/;"	l
 evaled_pop	planner.cpp	/^  std::vector<RampTrajectory> evaled_pop = requestEvaluation(pop.getTrajectories());$/;"	l
 evaluatePopulation	planner.cpp	/^const Population Planner::evaluatePopulation(const Population pop) $/;"	f	class:Planner	signature:(const Population pop)
+evaluatePopulationOOP	planner.cpp	/^void Planner::evaluatePopulationOOP()$/;"	f	class:Planner	signature:()
 evaluateTrajectory	planner.cpp	/^    new_pop.push_back(evaluateTrajectory(trajec));$/;"	p	file:	signature:(trajec)
 evaluateTrajectory	planner.cpp	/^const RampTrajectory Planner::evaluateTrajectory(const RampTrajectory trajec) $/;"	f	class:Planner	signature:(const RampTrajectory trajec)
 evaluations	main.cpp	/^    std::cout<<"\\nevaluations: "<<evaluations;$/;"	l
@@ -487,7 +492,7 @@ findMotionType	planner.cpp	/^const MotionType Planner::findMotionType(const ramp
 findVelocity	bezier_curve.cpp	/^const double BezierCurve::findVelocity(const uint8_t i, const double l, const double theta) const $/;"	f	class:BezierCurve	signature:(const uint8_t i, const double l, const double theta) const
 fitnessFeasibleToString	planner.cpp	/^    std::cout<<"\\n"<<population_.fitnessFeasibleToString()<<"\\n";$/;"	p	file:	signature:()
 fitnessFeasibleToString	population.cpp	/^const std::string Population::fitnessFeasibleToString() const $/;"	f	class:Population	signature:() const
-flags	.ycm_extra_conf.py	/^flags = [$/;"	v
+flags	.ycm_extra_conf.py	/^flags = default_flags + GetRosIncludeFlags()$/;"	v
 from	main.cpp	/^  RampTrajectory from = traj.getSubTrajectory(1.6f);$/;"	l
 full	main.cpp	/^  RampTrajectory full = my_planner.computeFullSwitch(traj, traj_from);$/;"	l
 full	planner.cpp	/^    RampTrajectory full       = switching.clone();$/;"	l

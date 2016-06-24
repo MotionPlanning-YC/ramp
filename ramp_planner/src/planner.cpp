@@ -1135,7 +1135,7 @@ const ramp_msgs::EvaluationSrv Planner::buildEvaluationSrv(const std::vector<Ram
 
 
 /** Build an EvaluationRequest srv */
-const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTrajectory trajec) 
+const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTrajectory trajec) const
 {
   ramp_msgs::EvaluationRequest result;
 
@@ -1161,17 +1161,40 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
   return result;
 } // End buildEvaluationRequest
 
-void Planner::buildEvaluationSrvOOP(const std::vector<RampTrajectory>& trajecs, ramp_msgs::EvaluationSrv& result)
+void Planner::buildEvaluationSrvOOP(std::vector<RampTrajectory>& trajecs, ramp_msgs::EvaluationSrv& srv) const
 {
+  for(uint16_t i=0;i<trajecs.size();i++)
+  {
+    srv.request.reqs.push_back(buildEvaluationRequest(trajecs[i]));
+  }
 }
 
-void Planner::buildEvaluationSrvOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationSrv& result)
+void Planner::buildEvaluationSrvOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationSrv& result) const
 {
+  std::vector<RampTrajectory> t;
+  t.push_back(trajec);
+  buildEvaluationSrvOOP(t, result);
 }
 
-void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result)
+void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result) const
 {
-  
+  result.trajectory = trajec.msg_;
+  result.currentTheta = latestUpdate_.msg_.positions[2]; 
+
+  if(movingOn_.msg_.trajectory.points.size() > 0)
+  {
+    result.theta_cc = 
+      movingOn_.msg_.trajectory.points[movingOn_.msg_.trajectory.points.size()-1].positions[2];
+  }
+  else
+  {
+    result.theta_cc = result.currentTheta;
+  }
+
+  for(uint8_t i=0;i<ob_trajectory_.size();i++)
+  {
+    result.obstacle_trjs.push_back(ob_trajectory_[i].msg_);
+  }
 }
 
 
@@ -3266,6 +3289,81 @@ const Population Planner::evaluatePopulation(const Population pop)
   //ROS_INFO("Exiting Planner::evaluatePopulation");
   return result;
 } // End evaluatePopulation
+
+
+
+void Planner::requestEvaluationOOP(std::vector<RampTrajectory>& trajecs) const
+{
+  ramp_msgs::EvaluationSrv srv;
+  buildEvaluationSrvOOP(trajecs, srv);
+
+  if(h_eval_req_->request(srv))
+  {
+    for(uint16_t i=0;i<trajecs.size();i++)
+    {
+      trajecs[i].msg_.fitness          = srv.response.resps[i].fitness;
+      trajecs[i].msg_.feasible         = srv.response.resps[i].feasible;
+      trajecs[i].msg_.t_firstCollision = srv.response.resps[i].t_firstCollision;
+    }
+  }
+  else
+  {
+    ROS_ERROR("An error occurred when evaluating a trajectory");
+  }
+}
+
+
+void Planner::requestEvaluationOOP(ramp_msgs::EvaluationRequest& request) const
+{
+  ramp_msgs::EvaluationSrv srv;
+  srv.request.reqs.push_back(request);
+
+  if(h_eval_req_->request(srv))
+  {
+    request.trajectory.fitness          = srv.response.resps[0].fitness;
+    request.trajectory.feasible         = srv.response.resps[0].feasible;
+    request.trajectory.t_firstCollision = srv.response.resps[0].t_firstCollision;
+  }
+  else
+  {
+    ROS_ERROR("An error occurred when evaluating a trajectory");
+  }
+}
+
+
+
+void Planner::requestEvaluationOOP(RampTrajectory& trajec) const
+{
+  ramp_msgs::EvaluationRequest req;
+  buildEvaluationRequestOOP(trajec, req);
+  requestEvaluationOOP(req);
+}
+
+
+
+
+
+void Planner::evaluateTrajectoryOOP(RampTrajectory& t) const
+{
+  //requestEvaluationOOP(t);
+}
+
+
+void Planner::evaluatePopulationOOP()
+{
+  for(uint16_t i=0;i<population_.size();i++)
+  {
+    //evaluateTrajectory(population_.trajectories_[i]);
+  }
+}
+
+
+
+
+
+
+
+
 
 
 

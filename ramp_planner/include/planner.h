@@ -124,6 +124,8 @@ class Planner {
     // Evaluate the population 
     const RampTrajectory  evaluateTrajectory(const RampTrajectory trajec);
     const Population      evaluatePopulation(const Population pop);
+    void evaluateTrajectoryOOP(RampTrajectory& t) const;
+    void evaluatePopulationOOP();
     
     // Modify trajectory or path
     const std::vector<Path> modifyPath();
@@ -151,12 +153,16 @@ class Planner {
     const ramp_msgs::EvaluationSrv buildEvaluationSrv(
               const std::vector<RampTrajectory> trajecs)      ;
     const ramp_msgs::EvaluationRequest buildEvaluationRequest(
-              const RampTrajectory trajec)      ;
+              const RampTrajectory trajec)      const;
 
 
-    void buildEvaluationSrvOOP(const std::vector<RampTrajectory>& trajecs, ramp_msgs::EvaluationSrv& result);
-    void buildEvaluationSrvOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationSrv& result);
-    void buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result);
+    void buildEvaluationSrvOOP(std::vector<RampTrajectory>& trajecs, ramp_msgs::EvaluationSrv& result) const;
+    void buildEvaluationSrvOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationSrv& result) const;
+    void buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result) const;
+
+    void requestEvaluationOOP(std::vector<RampTrajectory>& trajecs) const;
+    void requestEvaluationOOP(ramp_msgs::EvaluationRequest& request) const;
+    void requestEvaluationOOP(RampTrajectory& t) const;
 
 
     // Request information from other packages

@@ -47,8 +47,9 @@ class Population {
     TrajectoryType              type_; 
     unsigned int                maxSize_;
     
-  private:
     std::vector<RampTrajectory> trajectories_;
+    
+  private:
     std::vector<Population>     subPopulations_;
     bool                        isSubPopulation_;
     Utility                     utility_;
