@@ -23,10 +23,10 @@ int main(int argc, char** argv) {
   ramp_msgs::KnotPoint zero;
   zero.motionState.positions.push_back(0.);
   zero.motionState.positions.push_back(0.);
-  zero.motionState.positions.push_back(0.785f);
-  zero.motionState.velocities.push_back(0.23);
-  zero.motionState.velocities.push_back(0.23);
-  zero.motionState.velocities.push_back(0);
+  zero.motionState.positions.push_back(0.f);
+  zero.motionState.velocities.push_back(0.);
+  zero.motionState.velocities.push_back(0.);
+  zero.motionState.velocities.push_back(0.45);
   zero.motionState.accelerations.push_back(0);
   zero.motionState.accelerations.push_back(0);
   zero.motionState.accelerations.push_back(0);
@@ -34,8 +34,8 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(0.478783); // 0.70455
-  c1.motionState.positions.push_back(0.446242); // 0.4026
+  c1.motionState.positions.push_back(1.5); // 0.70455
+  c1.motionState.positions.push_back(0.75); // 0.4026
   c1.motionState.positions.push_back(0.925287); // 0.519146
   
   ramp_msgs::KnotPoint c2;
@@ -129,16 +129,16 @@ int main(int argc, char** argv) {
   c5.motionState.accelerations.push_back(0.); //.0746295
   
   ramp_msgs::Path p;
-  //p.points.push_back(zero);
+  p.points.push_back(zero);
   p.points.push_back(c1);
-  p.points.push_back(c2);
-  p.points.push_back(c3);
+  //p.points.push_back(c2);
+  //p.points.push_back(c3);
   //p.points.push_back(c4);
   //p.points.push_back(c5);
   //p.points.push_back(c6);
   //p.points.push_back(c7);
   //p.points.push_back(c8);
-  //p.points.push_back(c9);
+  p.points.push_back(c9);
   
 
   /***************************************************/
@@ -391,7 +391,7 @@ int main(int argc, char** argv) {
   
   ramp_msgs::TrajectoryRequest tr;
   tr.path = p;
-  tr.type = TRANSITION;
+  tr.type = PARTIAL_BEZIER;
   tr.print = true;
   tr.bezierCurves = curves;
   tr.segments = 0;
@@ -430,6 +430,7 @@ int main(int argc, char** argv) {
 
   er.currentTheta = er.trajectory.trajectory.points.at(0).positions.at(2);
   //er.theta_cc = 1.04839;
+  
     
   //std::cout<<"\nEval: Sending Trajectory "<<u.toString(er.trajectory)<<"\n";
 

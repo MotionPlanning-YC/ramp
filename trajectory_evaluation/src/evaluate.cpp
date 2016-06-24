@@ -11,6 +11,8 @@ void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationR
   orientation_.currentTheta_  = req.currentTheta;
   orientation_.theta_at_cc_   = req.theta_cc;
 
+  imminent_collision_ = req.imminent_collision;
+  ROS_INFO("imminent_collision_: %s", imminent_collision_ ? "True" : "False");
 
   performFeasibility(req);
   res.feasible = !qr_.collision_;
@@ -72,22 +74,22 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
   //ROS_INFO("t_moving_on_curve: %f", (ros::Time::now()-t_after).toSec());
 
 
+  ROS_INFO("moving: %s moving_on_curve: %s", moving ? "True" : "False", moving_on_curve ? "True" : "False");
+
   // Check orientation for feasibility
   if(moving && fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_curve)
   {
-    //ROS_INFO("In if");
+    ROS_INFO("In if");
     
     if(er.trajectory.i_knotPoints.size() > 2 && er.trajectory.curves.size() < 2)
     {
-      //ROS_INFO("In inner if, i_knotPoints.size(): %i curves.size(): %i", (int)er.trajectory.i_knotPoints.size(), 
-          //(int)er.trajectory.curves.size());
+      ROS_INFO("In inner if, i_knotPoints.size(): %i curves.size(): %i", (int)er.trajectory.i_knotPoints.size(), (int)er.trajectory.curves.size());
       er.trajectory.feasible  = false;
       orientation_infeasible_ = true;
     }
     else if(er.trajectory.i_knotPoints.size() == 2 && er.trajectory.curves.size() < 1)
     {
-      //ROS_INFO("In inner else if, i_knotPoints.size(): %i curves.size(): %i", (int)er.trajectory.i_knotPoints.size(), 
-          //(int)er.trajectory.curves.size());
+      ROS_INFO("In inner else if, i_knotPoints.size(): %i curves.size(): %i", (int)er.trajectory.i_knotPoints.size(), (int)er.trajectory.curves.size());
       er.trajectory.feasible  = false;
       orientation_infeasible_ = true;
     }
@@ -101,7 +103,7 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
 /** This method computes the fitness of the trajectory_ member */
 void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result) 
 {
-  //ROS_INFO("In Evaluate::performFitness");
+  ROS_INFO("In Evaluate::performFitness");
   ros::Time t_start = ros::Time::now();
   
   double cost=0;
@@ -124,16 +126,22 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result)
     
     //ROS_INFO("trj.t_firstColl: %f", trj.t_firstCollision.toSec());
 
-    // Add the Penalty for being infeasible, at some point i was limiting the time to 10s, but i don't know why
+    // Add the Penalty for being infeasible due to collision, at some point i was limiting the time to 10s, but i don't know why
     if(trj.t_firstCollision.toSec() > 0)
     {
       //ROS_INFO("In if t_firstCollision: %f", trj.t_firstCollision.toSec());
       penalties += (Q / trj.t_firstCollision.toSec());
     }
-
-    if(orientation_infeasible_)
+    else
     {
-      //ROS_INFO("In if orientation_infeasible_: %f", orientation_.getDeltaTheta(trj));
+      penalties += Q;
+    }
+
+    // If infeasible due to orientation change
+    // If there is imminent collision, do not add this penalty (it's okay to stop and rotate)
+    if(orientation_infeasible_ && !imminent_collision_)
+    {
+      ROS_INFO("In if orientation_infeasible_: %f", orientation_.getDeltaTheta(trj));
       penalties += Q*orientation_.getDeltaTheta(trj);
     }
   }

@@ -32,6 +32,8 @@ class Evaluate {
 
     float Q;
 
+    bool imminent_collision_;
+
     std::vector< ros::Duration > t_analy_;
     std::vector< ros::Duration > t_numeric_;
   private:

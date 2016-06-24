@@ -1156,6 +1156,8 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
     result.obstacle_trjs.push_back(ob_trajectory_.at(i).msg_);
   }
 
+  result.imminent_collision = imminent_collision_;
+
   return result;
 } // End buildEvaluationRequest
 
@@ -1349,15 +1351,15 @@ const unsigned int Planner::getIRT() { return i_rt++; }
 
 void Planner::obICCallback(const ros::TimerEvent& e)
 {
-  //ROS_INFO("Time since last obICCallback: %f", (ros::Time::now() - t_prevObIC_).toSec());
+  ROS_INFO("Time since last obICCallback: %f", (ros::Time::now() - t_prevObIC_).toSec());
   t_prevObIC_ = ros::Time::now();
-  //ROS_INFO("In Planner::obICCallback");
-  double dist_theshold = 0.5f;
+  ROS_INFO("In Planner::obICCallback");
+  double dist_theshold = 0.6f;
   std_msgs::Bool ob_ic;
   for(uint8_t i=0;i<ob_trajectory_.size();i++)
   {
     double dist = utility_.positionDistance(ob_trajectory_.at(i).msg_.trajectory.points.at(0).positions, latestUpdate_.msg_.positions);
-    //ROS_INFO("ob %i dist: %f", (int)i, dist);
+    ROS_INFO("ob %i dist: %f", (int)i, dist);
     if(i < ob_dists_.size())
     {
       ob_dists_.at(i) = dist;
@@ -1368,12 +1370,12 @@ void Planner::obICCallback(const ros::TimerEvent& e)
     }
     if(fabs(ob_dists_.at(i)) < dist_theshold)
     {
-      //ROS_INFO("Ob IC: True");
+      ROS_INFO("Ob IC: True");
       ob_ic.data = true;
     }
     else
     {
-      //ROS_INFO("Ob IC: False");
+      ROS_INFO("Ob IC: False");
       ob_ic.data = false;
     }
     h_control_->sendObIC(i, ob_ic);
@@ -1385,22 +1387,23 @@ void Planner::obICCallback(const ros::TimerEvent& e)
 /** Check if there is imminent collision in the best trajectory */
 void Planner::imminentCollisionCallback(const ros::TimerEvent& t) 
 {
-  //ROS_INFO("In imminentCollisionCallback");
+  ROS_INFO("In imminentCollisionCallback");
   std_msgs::Bool ic;
 
   double time_threshold = 0.5;
+    
+  ROS_WARN("Robot trajectory: %s", movingOn_.toString().c_str());
+  for(int o=0;o<ob_trajectory_.size();o++)
+  {
+    ROS_WARN("Obstacle trajectory %i: %s", o, ob_trajectory_.at(o).toString().c_str());
+  }
 
   if(ob_trajectory_.size() > 0 && moving_on_coll_ && (movingOn_.msg_.t_firstCollision.toSec() < time_threshold
-    || (movingOn_.msg_.t_firstCollision.toSec() - (ros::Time::now().toSec()-t_prevCC_.toSec())) < 0.5f))
+    || (movingOn_.msg_.t_firstCollision.toSec() - (ros::Time::now().toSec()-t_prevCC_.toSec())) < time_threshold))
   {
-    ROS_WARN("IC: moving_on_coll_: %s t_firstCollision: %f", moving_on_coll_ ? "True" : "False", 
-        movingOn_.msg_.t_firstCollision.toSec());
+    ROS_WARN("IC: moving_on_coll_: %s t_firstCollision: %f Elapsed time: %f", moving_on_coll_ ? "True" : "False", 
+        movingOn_.msg_.t_firstCollision.toSec(), (ros::Time::now().toSec()-t_prevCC_.toSec()));
     ROS_WARN("Imminent Collision Robot: %i t_firstCollision: %f", id_, movingOn_.msg_.t_firstCollision.toSec());
-    for(int o=0;o<ob_trajectory_.size();o++)
-    {
-      ROS_WARN("Obstacle trajectory %i: %s", o, ob_trajectory_.at(o).toString().c_str());
-    }
-    ROS_WARN("Robot trajectory: %s", movingOn_.toString().c_str());
 
     ic.data = true;
     imminent_collision_ = true;
@@ -1408,15 +1411,14 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
 
   else 
   {
-    //ROS_INFO("No imminent collision, t_firstCollision: %f", movingOn_.msg_.t_firstCollision.toSec());
-    //ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
+    ROS_INFO("No imminent collision, t_firstCollision: %f", movingOn_.msg_.t_firstCollision.toSec());
     ic.data = false;
     imminent_collision_ = false;
   }
 
   h_control_->sendIC(ic);
 
-  //std::cout<<"\nAfter imminentCollisionCycle_\n";
+  ROS_INFO("Exiting Planner::imminentCollisionCallback");
 }
 
 
