@@ -7,45 +7,42 @@ Move::Move(const ramp_msgs::Path p) : path_(p) {}
 
 const ramp_msgs::Path Move::perform() 
 {
-  ROS_INFO("Before: %s", utility_.toString(path_).c_str()); 
+  //ROS_INFO("Before: %s", utility_.toString(path_).c_str()); 
 
   if(path_.points.size() > 2) 
   {
+    double dir = orientation_;
+    double min = PI/2.f;
+    double max = (3.f*PI)/2.f;
+
+    double displacement = ((float)rand() / (float)RAND_MAX);
+    //ROS_INFO("displacement: %f", displacement);
+    
+    displacement *= (max-min);
+    
+    //ROS_INFO("displacement: %f", displacement);
+
+    displacement += PI/2.f;
+
+    
+    dir = utility_.displaceAngle(dir, displacement);
+    //ROS_INFO("orientation_: %f displacement: %f dir: %f", orientation_, displacement, dir);
 
     // Randomly choose a knot point to change
     double dist = (double)rand() / RAND_MAX;
-    ROS_INFO("dist: %f", dist);
+    //ROS_INFO("dist: %f", dist);
     
 
     // Create point
-    double x = cos(dir_) * dist;
-    double y = sin(dir_) * dist;
+    double x = cos(dir) * dist;
+    double y = sin(dir) * dist;
     ramp_msgs::KnotPoint kp;
     kp.motionState.positions.push_back(x);
     kp.motionState.positions.push_back(y);
 
     path_.points.at(1) = kp;
-
-    
-    /*while(!checkConstraints_.validKPForPath(kp, tempPath))
-    {
-      // Generate new, random values for the positions
-      kp.motionState.positions.clear();
-      for(unsigned int i=0;i<path_.points.at(0).motionState.positions.size();i++) 
-      {
-        
-        // Generate a random value for each K in the specified range
-        double  min = utility_.standardRanges_.at(i).min;
-        double  max = utility_.standardRanges_.at(i).max;
-        float temp = (min == 0 && max == 0) ? 0 :      
-              ( min + (float)rand() / ((float)RAND_MAX / (max - min)) );
-
-        // Push the new value onto positions
-        kp.motionState.positions.push_back(temp);
-      } // end for
-    } // end while*/
   } // end if points.size()>2
 
-  ROS_INFO("After: %s", utility_.toString(path_).c_str()); 
+  //ROS_INFO("After: %s", utility_.toString(path_).c_str()); 
   return path_;
 }

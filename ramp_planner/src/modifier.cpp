@@ -119,7 +119,7 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest(const Po
         pop.paths_.at(targets.at(i)).buildPathMsg());
   }
 
-  result.request.move_dir = dir_;
+  result.request.orientation = PI/2;
 
   return result;
 } // End buildModificationRequest

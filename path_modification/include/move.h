@@ -11,7 +11,7 @@ class Move {
     const ramp_msgs::Path perform();
 
     ramp_msgs::Path path_;
-    double dir_;
+    double orientation_;
 
   private:
     Constraints checkConstraints_;

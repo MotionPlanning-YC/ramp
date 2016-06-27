@@ -17,6 +17,11 @@ class Utility {
 
     std::vector<ramp_msgs::Range> standardRanges_;
 
+    
+    const double findDistanceBetweenAngles(const double a1, const double a2) const;
+    
+    const double displaceAngle(const double a1, double a2) const;
+
     const std::string toString(const ramp_msgs::Path p) const;    
 };
 #endif

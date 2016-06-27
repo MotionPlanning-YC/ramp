@@ -10,6 +10,52 @@ Utility::Utility() {
 }
 
 
+
+/** This method returns distance between orientations a1 and a2. The distance is in the range [-PI, PI]. */
+const double Utility::findDistanceBetweenAngles(const double a1, const double a2) const 
+{
+  double result;
+  double difference = a2 - a1;
+  
+  // If difference > pi, the result should be in [-PI,0] range
+  if(difference > PI) 
+  {
+    difference = fmodf(difference, PI);
+    result = difference - PI;
+  }
+
+  // If difference < -pi, the result should be in [0,PI] range
+  else if(difference < -PI) 
+  {
+    result = difference + (2*PI);
+  }
+
+  // Else, the difference is fine
+  else 
+  {
+    result = difference;
+  }
+
+  return result;
+} // End findDistanceBetweenAngles
+
+
+
+const double Utility::displaceAngle(const double a1, double a2) const {
+
+  a2 = fmodf(a2, 2*PI);
+
+  if(a2 > PI) 
+  {
+    a2 = fmodf(a2,PI) - PI;
+  }
+
+  return findDistanceBetweenAngles(-a1, a2);
+} // End displaceAngle
+
+
+
+
 const std::string Utility::toString(const ramp_msgs::Path path) const {
   std::ostringstream result;
 
