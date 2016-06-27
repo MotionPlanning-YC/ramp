@@ -301,8 +301,9 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   } // end for
 
   ros::Time s = ros::Time::now();
-  //population_       = evaluatePopulation(population_);
-  population_  = evaluatePopulation(population_);
+  //population_  = evaluatePopulation(population_);
+  evaluatePopulationOOP();
+
   //ROS_INFO("Time to evaluate population: %f", (ros::Time::now() - s).toSec());
   //ROS_INFO("Pop now: %s", population_.toString().c_str());
   
@@ -1410,7 +1411,10 @@ void Planner::obICCallback(const ros::TimerEvent& e)
 /** Check if there is imminent collision in the best trajectory */
 void Planner::imminentCollisionCallback(const ros::TimerEvent& t) 
 {
+  ros::Duration d = ros::Time::now() - t_prevIC_;
+  t_prevIC_ = ros::Time::now();
   ROS_INFO("In imminentCollisionCallback");
+  ROS_INFO("Time since last: %f", d.toSec());
   std_msgs::Bool ic;
 
   double time_threshold = 0.5;
@@ -2693,10 +2697,11 @@ void Planner::planningCycleCallback()
    * Error correction
    */
   // Must have started control cycles
-  // c_pc < total number of PC's per CC
   // errorReduction is true
   // Driving straight
-  if(!imminent_collision_ && errorReduction_ && cc_started_ && generation_ % 5 == 0 &&
+  //if(!imminent_collision_ && errorReduction_ && cc_started_ && generation_ % 5 == 0 &&
+      //fabs(latestUpdate_.msg_.velocities.at(2)) < 0.1)
+  if(errorReduction_ && cc_started_ && generation_ % 5 == 0 &&
       fabs(latestUpdate_.msg_.velocities.at(2)) < 0.1)
   {
     ros::Time t_start_error = ros::Time::now();
@@ -2714,19 +2719,23 @@ void Planner::planningCycleCallback()
       
       // Do error correction
       ros::Duration t_since_cc = ros::Time::now() - t_prevCC_;
-      //ROS_INFO("t_since_cc: %f", t_since_cc.toSec());
-      //ROS_INFO("movingOnCC_: %s", movingOnCC_.toString().c_str());
+      ROS_INFO("t_since_cc: %f", t_since_cc.toSec());
+      ROS_INFO("movingOnCC_: %s", movingOnCC_.toString().c_str());
+     
       diff = movingOnCC_.getPointAtTime(t_since_cc.toSec());
-      //ROS_INFO("movingOnCC_ at t_since_cc: %s", diff.toString().c_str());
+      
+      ROS_INFO("movingOnCC_ at t_since_cc: %s", diff.toString().c_str());
+      ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
+
       diff = diff.subtractPosition(latestUpdate_, true);
       startPlanning_ = errorCorrection();
-      //ROS_INFO("diff: %s", diff.toString().c_str());
+      ROS_INFO("diff: %s", diff.toString().c_str());
 
       ////ROS_INFO("Updating movingOn");
       movingOn_ = movingOnCC_;
       movingOn_.offsetPositions(diff);
 
-      /*//ROS_INFO("Corrected startPlanning_: %s", startPlanning_.toString().c_str());
+      ROS_INFO("Corrected startPlanning_: %s", startPlanning_.toString().c_str());
       //ROS_INFO("Corrected movingOn_: %s", movingOn_.toString().c_str());*/
 
       /*//ROS_INFO("Before offset, pop: %s\n%stransPop: %s\n%s", 
@@ -2737,7 +2746,8 @@ void Planner::planningCycleCallback()
 
       population_  = offsetPopulation(population_at_cc_, diff);
 
-      population_  = evaluatePopulation(population_);
+      //population_  = evaluatePopulation(population_);
+      evaluatePopulationOOP();
 
       /*//ROS_INFO("After doing error correction, new pop: %s\n%s\n\n\nnew trans pop: %s\n%s", 
           population_.get(0).toString().c_str(),
@@ -2981,7 +2991,8 @@ void Planner::doControlCycle()
 
   ros::Time t = ros::Time::now();
 
-  population_ = evaluatePopulation(population_);
+  //population_ = evaluatePopulation(population_);
+  evaluatePopulationOOP();
 
   // Set the bestT
   RampTrajectory bestT = population_.getBest();
@@ -3035,7 +3046,8 @@ void Planner::doControlCycle()
  
   ros::Time t_startAdapt = ros::Time::now();
   population_ = adaptPopulation(population_, startPlanning_, ros::Duration(t_fixed_cc_));
-  population_ = evaluatePopulation(population_);
+  //population_ = evaluatePopulation(population_);
+  evaluatePopulationOOP();
   ros::Duration d_adapt = ros::Time::now() - t_startAdapt;
   adapt_durs_.push_back(d_adapt);
 
@@ -3070,7 +3082,8 @@ void Planner::doControlCycle()
   // Find the transition (non-holonomic) population and set new control cycle time
   ros::Time t_startTrans = ros::Time::now();
   population_           = getTransPop(population_, movingOn_);
-  population_           = evaluatePopulation(population_);
+  //population_           = evaluatePopulation(population_);
+  evaluatePopulationOOP();
   ros::Duration d_trans = ros::Time::now() - t_startTrans;
   trans_durs_.push_back(d_trans);
   
@@ -3345,16 +3358,17 @@ void Planner::requestEvaluationOOP(RampTrajectory& trajec) const
 
 void Planner::evaluateTrajectoryOOP(RampTrajectory& t) const
 {
-  //requestEvaluationOOP(t);
+  requestEvaluationOOP(t);
 }
 
 
 void Planner::evaluatePopulationOOP()
 {
-  for(uint16_t i=0;i<population_.size();i++)
+  requestEvaluation(population_.trajectories_);
+  /*for(uint16_t i=0;i<population_.size();i++)
   {
-    //evaluateTrajectory(population_.trajectories_[i]);
-  }
+    evaluateTrajectory(population_.trajectories_[i]);
+  }*/
 }
 
 

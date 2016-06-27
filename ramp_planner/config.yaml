@@ -8,7 +8,7 @@ evaluations: true
 
 seed_population: false 
 
-gens_before_control_cycle: 10 
+gens_before_control_cycle: 20
 
 pop_traj_type: 1 #0=holonomic, 1=hybrid
 
