@@ -9,13 +9,13 @@ CollisionDetection::~CollisionDetection()
 void CollisionDetection::init() {}
 
 
-void CollisionDetection::performNum(const ramp_msgs::RampTrajectory& trajectory, const std::vector<ramp_msgs::RampTrajectory>& obstacle_trjs, QueryResult& result)
+void CollisionDetection::performNum(const ramp_msgs::RampTrajectory& trajectory, const std::vector<ramp_msgs::RampTrajectory>& obstacle_trjs, const double& coll_dist, QueryResult& result)
 {
   result.collision_ = false;
   for(uint8_t i=0;i<obstacle_trjs.size() && !result.collision_;i++)
   {
     //ROS_INFO("Ob traj: %s", utility_.toString(obstacle_trjs[i]).c_str());
-    query(trajectory.trajectory.points, obstacle_trjs[i].trajectory.points, trajectory.t_start.toSec(), result);
+    query(trajectory.trajectory.points, obstacle_trjs[i].trajectory.points, trajectory.t_start.toSec(), coll_dist, result);
   }
 }
 
@@ -1636,7 +1636,7 @@ void CollisionDetection::LineArcFull(const ramp_msgs::RampTrajectory& trajectory
 
 
 
-void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajectoryPoint>& segment, const std::vector<trajectory_msgs::JointTrajectoryPoint>& ob_trajectory, const double& traj_start, QueryResult& result) const
+void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajectoryPoint>& segment, const std::vector<trajectory_msgs::JointTrajectoryPoint>& ob_trajectory, const double& traj_start, const double& coll_dist, QueryResult& result) const
 {
   ros::Time time_start = ros::Time::now();
 
@@ -1650,7 +1650,7 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
   }*/
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
-  float radius = 0.22f;
+  float dist_threshold = coll_dist > 0.4 ? coll_dist : 0.4;
 
   // Trajectories start in the future, obstacle trajectories start at the present time, 
   // set an offset for obstacle indices to account for this 
@@ -1681,7 +1681,7 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
 
     // If the distance between the two centers is less than the sum of the two radii, 
     // there is collision
-    if( dist <= radius*2 ) 
+    if( dist <= dist_threshold) 
     {
       /*ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
           p_i->positions.at(0),

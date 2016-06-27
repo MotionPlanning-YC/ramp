@@ -11,6 +11,9 @@ Planner::Planner() : resolutionRate_(1.f / 10.f), ob_dists_timer_dur_(0.1), gene
 {
   imminentCollisionCycle_ = ros::Duration(1.f / 10.f);
   generationsPerCC_       = controlCycle_.toSec() / planningCycle_.toSec();
+
+  COLL_DISTS.push_back(0.5);
+  COLL_DISTS.push_back(0.42);
 }
 
 Planner::~Planner() 
@@ -1158,6 +1161,7 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
   }
 
   result.imminent_collision = imminent_collision_;
+  result.coll_dist = imminent_collision_ ? COLL_DISTS[1] : COLL_DISTS[0];
 
   return result;
 } // End buildEvaluationRequest
@@ -1196,6 +1200,9 @@ void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs:
   {
     result.obstacle_trjs.push_back(ob_trajectory_[i].msg_);
   }
+  
+  result.imminent_collision = imminent_collision_;
+  result.coll_dist = imminent_collision_ ? COLL_DISTS[1] : COLL_DISTS[0];
 }
 
 

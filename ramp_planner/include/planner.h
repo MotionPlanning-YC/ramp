@@ -86,6 +86,7 @@ class Planner {
     // Robot ID
     int id_;
 
+    std::vector<double> COLL_DISTS;
 
     
     

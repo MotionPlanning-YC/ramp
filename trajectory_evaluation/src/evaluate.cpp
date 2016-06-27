@@ -43,7 +43,7 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
 
   // Check collision
   ros::Time t_numeric_start = ros::Time::now();
-  cd_.performNum(er.trajectory, er.obstacle_trjs, qr_);
+  cd_.performNum(er.trajectory, er.obstacle_trjs, er.coll_dist, qr_);
   ros::Duration d_numeric   = ros::Time::now() - t_numeric_start;
   t_numeric_.push_back(d_numeric);
 
