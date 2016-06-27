@@ -157,7 +157,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
   /*
    * Set motion for Obstacle 1
    */
-  if(index == 1)
+  if(index == 2)
   {
     
     
@@ -205,7 +205,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
 
     // Translate+rotate
-    twist.linear.x = 0.33;
+    twist.linear.x = 0.25;
     //twist.angular.z = -0.68;
 
     d = ros::Duration(1.75);
@@ -219,7 +219,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
 
     // Self rotate
-    twist.linear.x = 0.28;
+    twist.linear.x = 0.2;
     //twist.angular.z = 0.4;
 
     d = ros::Duration(2.5);
@@ -233,7 +233,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
 
     // Self rotate
-    twist.linear.x = 0.28;
+    twist.linear.x = 0.25;
     //twist.angular.z = 0.4;
 
     d = ros::Duration(3);
@@ -247,7 +247,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
 
 
     // Self rotate
-    twist.linear.x = 0.28;
+    twist.linear.x = 0.22;
     //twist.angular.z = 0.4;
 
     d = ros::Duration(2.25);

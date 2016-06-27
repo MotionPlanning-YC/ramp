@@ -87,6 +87,7 @@ class Planner {
     int id_;
 
     std::vector<double> COLL_DISTS;
+    int i_COLL_DISTS_;
 
     
     

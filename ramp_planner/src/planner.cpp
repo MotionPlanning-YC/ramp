@@ -5,7 +5,7 @@
  ************ Constructors and destructor ************
  *****************************************************/
 
-Planner::Planner() : resolutionRate_(1.f / 10.f), ob_dists_timer_dur_(0.1), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(5), D_(1.5f), 
+Planner::Planner() : resolutionRate_(1.f / 10.f), ob_dists_timer_dur_(0.1), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(1.5f), 
   cc_started_(false), c_pc_(0), transThreshold_(1./50.), num_cc_(0), L_(0.33), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), 
  delta_t_switch_(0.2), stop_(false), moving_on_coll_(false), print_enter_exit_(false)
 {
@@ -1161,7 +1161,7 @@ const ramp_msgs::EvaluationRequest Planner::buildEvaluationRequest(const RampTra
   }
 
   result.imminent_collision = imminent_collision_;
-  result.coll_dist = imminent_collision_ ? COLL_DISTS[1] : COLL_DISTS[0];
+  result.coll_dist = COLL_DISTS[i_COLL_DISTS_];
 
   return result;
 } // End buildEvaluationRequest
@@ -1202,7 +1202,7 @@ void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs:
   }
   
   result.imminent_collision = imminent_collision_;
-  result.coll_dist = imminent_collision_ ? COLL_DISTS[1] : COLL_DISTS[0];
+  result.coll_dist = COLL_DISTS[i_COLL_DISTS_];
 }
 
 
@@ -1387,6 +1387,8 @@ void Planner::obICCallback(const ros::TimerEvent& e)
   ROS_INFO("In Planner::obICCallback");
   double dist_theshold = 0.6f;
   std_msgs::Bool ob_ic;
+  double min_dist = utility_.positionDistance(ob_trajectory_.at(0).msg_.trajectory.points.at(0).positions, latestUpdate_.msg_.positions);
+ 
   for(uint8_t i=0;i<ob_trajectory_.size();i++)
   {
     double dist = utility_.positionDistance(ob_trajectory_.at(i).msg_.trajectory.points.at(0).positions, latestUpdate_.msg_.positions);
@@ -1409,7 +1411,21 @@ void Planner::obICCallback(const ros::TimerEvent& e)
       ROS_INFO("Ob IC: False");
       ob_ic.data = false;
     }
+
+    if(dist < min_dist)
+    {
+      min_dist = dist;
+    }
     h_control_->sendObIC(i, ob_ic);
+  }
+
+  if(min_dist > COLL_DISTS[0])
+  {
+    i_COLL_DISTS_ = 0; 
+  }
+  else
+  {
+    i_COLL_DISTS_ = 1;
   }
   
   //ROS_INFO("Exiting Planner::obICCallback");
@@ -1441,6 +1457,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
 
     ic.data = true;
     imminent_collision_ = true;
+    num_ops_ = 6;
   }
 
   else 
@@ -1448,6 +1465,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
     ROS_INFO("No imminent collision, t_firstCollision: %f", movingOn_.msg_.t_firstCollision.toSec());
     ic.data = false;
     imminent_collision_ = false;
+    num_ops_ = 5;
   }
 
   h_control_->sendIC(ic);

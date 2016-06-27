@@ -142,7 +142,8 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result)
     if(orientation_infeasible_ && !imminent_collision_)
     {
       ROS_INFO("In if orientation_infeasible_: %f", orientation_.getDeltaTheta(trj));
-      penalties += Q*orientation_.getDeltaTheta(trj);
+
+      penalties += Q * (orientation_.getDeltaTheta(trj) / PI);
     }
   }
 
