@@ -283,7 +283,8 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 
   ros::Time start = ros::Time::now();
 
-  //Population pop_obs;
+  Population pop_obs;
+  Population copy = population_;
 
   // For each obstacle, predict its trajectory
   for(uint8_t i=0;i<msg.obstacles.size();i++)
@@ -298,7 +299,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
       ob_trajectory_.at(i) = ob_temp_trj;
     }
 
-    //pop_obs.add(ob_temp_trj);
+    copy.trajectories_.push_back(ob_temp_trj);
     //ROS_INFO("Time to get obstacle trajectory: %f", (ros::Time::now() - start).toSec());
     //ROS_INFO("ob_trajectory_: %s", ob_temp_trj.toString().c_str());
   } // end for
@@ -337,14 +338,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 
   sc_durs_.push_back( ros::Time::now() - start );
   
-  //if(cc_started_)
-  //{
-    sendPopulation(population_);
-  //}
-  //else
-  //{
-    //sendPopulation(population_);
-  //}
+  sendPopulation(copy);
 
   //sendPopulation(pop_obs);
 
@@ -1407,12 +1401,12 @@ void Planner::obICCallback(const ros::TimerEvent& e)
     }
     if(fabs(ob_dists_.at(i)) < dist_theshold)
     {
-      //ROS_INFO("Ob IC: True");
+      ROS_INFO("Ob IC: True");
       ob_ic.data = true;
     }
     else
     {
-      //ROS_INFO("Ob IC: False");
+      ROS_INFO("Ob IC: False");
       ob_ic.data = false;
     }
 
@@ -2555,6 +2549,8 @@ const ModificationResult Planner::modification()
     
     if(index > -1)
     {
+      ROS_INFO("Adding trajectory at index %i \n%s", index, mod_trajec[i].toString().c_str());
+      ROS_INFO("Population Previously: %s", popCopy.toString().c_str());
       popCopy.replace(index, modded_t);
       result.i_modified_.push_back(index);
     }

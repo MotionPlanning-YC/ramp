@@ -6,7 +6,7 @@ MobileBase::MobileBase() : planning_full_(false), i_XDOF_(0), i_THETADOF_(1)
   reflexxesData_.rml = 0;
   reflexxesData_.inputParameters = 0;
   reflexxesData_.outputParameters = 0;
-  MAX_SPEED = 0.33f;
+  MAX_SPEED = 0.25f;
 } 
 
 
@@ -1642,7 +1642,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
     // Else if straight-line segment
     else 
     {
-      //ROS_INFO("In else, straight-line segment");
+      ROS_INFO("In else, straight-line segment");
 
       // Get rotation if needed
       double trajec_size = res.trajectory.trajectory.points.size();
@@ -1653,11 +1653,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
       trajectory_msgs::JointTrajectoryPoint next_knot =
             utility_.getTrajectoryPoint(path_.points.at(i_kp_).motionState);
 
-      /*////ROS_INFO("=== Orientation Information ===");
-      ////ROS_INFO("last: %s", utility_.toString(last).c_str());
-      ////ROS_INFO("next_knot: %s", utility_.toString(next_knot).c_str());
-      ////ROS_INFO("utility_.findAngleFromAToB(last, next_knot): %f", utility_.findAngleFromAToB(last, next_knot));
-      ////ROS_INFO("utility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)): %f", utility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)));*/
+      ROS_INFO("=== Orientation Information ===");
+      ROS_INFO("last: %s", utility_.toString(last).c_str());
+      ROS_INFO("next_knot: %s", utility_.toString(next_knot).c_str());
+      ROS_INFO("utility_.findAngleFromAToB(last, next_knot): %f", utility_.findAngleFromAToB(last, next_knot));
+      ROS_INFO("utility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)): %f", utility_.findDistanceBetweenAngles(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot)));
 
 
       // Check for goal because the robot should not rotate
@@ -1667,7 +1667,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
 
         // Set orientation threshold that requires a rotation 
         // before continuing to the next knot point
-        double threshold = 0.25; 
+        double threshold = 0.3f; 
         //////ROS_INFO("threshold: %f", threshold);
 
         // If we need to rotate towards the next knot point
@@ -1675,7 +1675,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
         if(fabs(utility_.findDistanceBetweenAngles(last.positions.at(2), 
                 utility_.findAngleFromAToB(last, next_knot))) > threshold) 
         {
-          //////ROS_INFO("Calling rotate");
+          ROS_INFO("Calling rotate");
           std::vector<trajectory_msgs::JointTrajectoryPoint> rotate_points = 
             rotate(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot),
                     last.velocities.at(2), last.accelerations.at(2));

@@ -65,21 +65,21 @@ corobot
   size [0.18 0.18 0.5]
 )
 
-corobot
-(
-  name "r2"
-  color "red"
-  pose [0 3.5 0 -45]
-  size [0.18 0.18 0.5]
-)
+#corobot
+#(
+#  name "r2"
+#  color "red"
+#  pose [0 3.5 0 -45]
+#  size [0.18 0.18 0.5]
+#)
 
-corobot
-(
-  name "r3"
-  color "red"
-  pose [2 0 0 135]
-  size [0.18 0.18 0.5]
-)
+#corobot
+#(
+#  name "r3"
+#  color "red"
+#  pose [2 0 0 135]
+#  size [0.18 0.18 0.5]
+#)
 
 
   #pose [ 1.5 3.5 0 -90 ] 

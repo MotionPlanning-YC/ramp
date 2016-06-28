@@ -419,8 +419,8 @@ const int Population::calcBestIndex() const
   }
  
   // Find the index of the trajectory with the highest fitness value
-  unsigned int i_max = 0;
-  for(unsigned int i=1;i<trajectories_.size();i++) {
+  int i_max = 0;
+  for(int i=1;i<trajectories_.size();i++) {
     if(trajectories_.at(i).msg_.fitness > trajectories_.at(i_max).msg_.fitness) {
       i_max = i;
     }
