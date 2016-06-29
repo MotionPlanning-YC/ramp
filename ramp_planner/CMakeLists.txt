@@ -68,3 +68,7 @@ target_link_libraries(obstacle_twist_all ${catkin_LIBRARIES} yaml-cpp)
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(obstacle_twist_all ramp_msgs_generate_messages_cpp)
 
+
+add_executable(generate_world_state src/main_world_state_generation.cpp src/knot_point.cpp src/motion_state.cpp src/path.cpp src/range.cpp src/ramp_trajectory.cpp src/utility.cpp)
+set_target_properties(generate_world_state PROPERTIES COMPILE_FLAGS -std=c++0x)
+target_link_libraries(generate_world_state ${catkin_LIBRARIES} yaml-cpp)
