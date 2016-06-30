@@ -1385,7 +1385,10 @@ void Planner::obICCallback(const ros::TimerEvent& e)
   //ROS_INFO("In Planner::obICCallback");
   double dist_theshold = 0.6f;
   std_msgs::Bool ob_ic;
-  double min_dist = utility_.positionDistance(ob_trajectory_.at(0).msg_.trajectory.points.at(0).positions, latestUpdate_.msg_.positions);
+
+  double min_dist;
+  if(ob_trajectory_.size() > 0)
+    min_dist = utility_.positionDistance(ob_trajectory_.at(0).msg_.trajectory.points.at(0).positions, latestUpdate_.msg_.positions);
  
   for(uint8_t i=0;i<ob_trajectory_.size();i++)
   {
@@ -1401,12 +1404,12 @@ void Planner::obICCallback(const ros::TimerEvent& e)
     }
     if(fabs(ob_dists_.at(i)) < dist_theshold)
     {
-      ROS_INFO("Ob IC: True");
+      //ROS_INFO("Ob IC: True");
       ob_ic.data = true;
     }
     else
     {
-      ROS_INFO("Ob IC: False");
+      //ROS_INFO("Ob IC: False");
       ob_ic.data = false;
     }
 
