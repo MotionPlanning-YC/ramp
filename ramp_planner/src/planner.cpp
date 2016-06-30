@@ -669,6 +669,65 @@ const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionSt
 } // End adaptPaths
 
 
+void Planner::adaptPathsOOP(const MotionState& ms, const ros::Duration& d, std::vector<Path>& result)
+{
+  if(print_enter_exit_)
+  {
+    ROS_INFO("In Planner::adaptPathsOOP");
+  }
+
+  result.clear();
+
+  //ROS_INFO("pop.paths.size(): %i", (int)pop.paths_.size());
+  //ROS_INFO("dur.toSec(): %f", dur.toSec());
+
+  // Check that time has passed
+  if(d.toSec() > 0) 
+  {
+
+    // For each trajectory
+    for(uint8_t i=0;i<population_.size();i++) {
+      ROS_INFO("Path: %s", population_.paths_.at(i).toString().c_str());
+      ROS_INFO("Get Path: %s", population_.get(i).getNonHolonomicPath().toString().c_str());
+      Path temp = population_.paths_.at(i);
+
+      // Track how many knot points we get rid of
+      // Initialize to 1 to always remove starting position
+      unsigned int throwaway=getNumThrowawayPoints(population_.get(i), d);
+      //ROS_INFO("throwaway: %i", (int)throwaway);
+
+      
+      // If the whole path has been passed, adjust throwaway so that 
+      //  we are left with a path that is: {new_start_, goal_}
+      if( throwaway >= temp.size() ) 
+      { 
+        ////ROS_INFO("Decrementing throwaway");
+        throwaway = temp.size()-1;
+      }
+
+      // Erase the amount of throwaway points (points we have already passed)
+      temp.all_.erase( 
+          temp.all_.begin(), 
+          temp.all_.begin()+throwaway );
+
+      // Insert the new starting configuration
+      temp.all_.insert( temp.all_.begin(), ms);
+
+      // Set start_ to be the new starting configuration of the path
+      temp.start_ = ms;
+      ROS_INFO("After adapting Path: %s", temp.toString().c_str());
+
+      result.push_back(temp);
+    } // end outer for
+  } // end if dur > 0
+
+  if(print_enter_exit_)
+  {
+    ROS_INFO("Exiting adaptPathsOOP");
+  }
+} // End adaptPathsOOP
+
+
 
 
 
@@ -959,6 +1018,65 @@ const std::vector<ramp_msgs::BezierCurve> Planner::adaptCurves(const Population 
 
 
 
+void Planner::adaptPopulationOOP(const MotionState& ms, const ros::Duration& d)
+{
+  if(print_enter_exit_)
+  {
+    ROS_INFO("In adaptPopulation");
+  }
+
+  //std::vector<Path> paths = adaptPaths(population_, ms, d);
+  std::vector<Path> paths;
+  adaptPathsOOP(ms, d, paths);
+  std::vector<ramp_msgs::BezierCurve> curves;
+  if(population_.type_ != HOLONOMIC)
+  {
+    curves = adaptCurves(population_, ms, d);
+  }
+  
+  // Create the vector to hold updated trajectories
+  std::vector<ramp_msgs::TrajectoryRequest> tr_reqs;
+  
+  // For each path, get a trajectory request
+  for(uint16_t i=0;i<population_.size();i++) 
+  {
+      
+    // Add on the curve if necessary
+    std::vector<ramp_msgs::BezierCurve> c;
+    if(population_.type_ != HOLONOMIC)
+    {
+      c.push_back(curves.at(i));
+    }
+
+    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(paths.at(i), c);
+    tr.segments = 2;
+
+    tr_reqs.push_back(tr);
+  }
+  
+  // Get the new trajectories
+  std::vector<RampTrajectory> updatedTrajecs = requestTrajectory(tr_reqs);
+
+  for(uint16_t i=0;i<updatedTrajecs.size();i++)
+  {
+    //ROS_INFO("In for, i: %i", i);
+      // Set temporary evaluation results - need to actually call requestEvaluation to get actual fitness
+    updatedTrajecs.at(i).msg_.fitness   = population_.get(i).msg_.fitness;
+    updatedTrajecs.at(i).msg_.feasible  = population_.get(i).msg_.feasible;
+    updatedTrajecs.at(i).msg_.t_start   = ros::Duration(t_fixed_cc_);
+  } // end for
+  
+  ////ROS_INFO("updatedTrajecs size: %i", (int)updatedTrajecs.size());
+  // Replace the population's trajectories_ with the updated trajectories
+  population_.replaceAll(updatedTrajecs);
+  
+  ////ROS_INFO("Done adapting, pop now: %s", population_.toString().c_str());
+  
+  if(print_enter_exit_)
+  {
+    ROS_INFO("Exiting adaptPopulationOOP");
+  }
+}
 
 /** This method updates the population with the current configuration 
  *  The duration is used to determine which knot points still remain in the trajectory */
@@ -3078,9 +3196,12 @@ void Planner::doControlCycle()
   //ROS_INFO("About to adapt, controlCycle_: %f", controlCycle_.toSec());
  
   ros::Time t_startAdapt = ros::Time::now();
-  population_ = adaptPopulation(population_, startPlanning_, ros::Duration(t_fixed_cc_));
+  //population_ = adaptPopulation(population_, startPlanning_, ros::Duration(t_fixed_cc_));
   //population_ = evaluatePopulation(population_);
+  
+  adaptPopulationOOP(startPlanning_, ros::Duration(t_fixed_cc_));
   evaluatePopulationOOP();
+
   ros::Duration d_adapt = ros::Time::now() - t_startAdapt;
   adapt_durs_.push_back(d_adapt);
 

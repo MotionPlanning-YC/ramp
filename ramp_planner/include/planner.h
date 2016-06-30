@@ -183,6 +183,21 @@ class Planner {
     const Population adaptPopulation( const Population pop, 
                                       const MotionState ms, 
                                       const ros::Duration d );
+    // Updates the paths in P(t) so we can get new trajectories
+    const uint8_t getNumThrowawayPoints(const RampTrajectory traj, const ros::Duration dur) const;
+    const std::vector<Path>                   adaptPaths( const Population pop,
+                                                          const MotionState start, 
+                                                          const ros::Duration dur) const;
+
+    const std::vector<ramp_msgs::BezierCurve> adaptCurves( const Population pop,
+                                                                          const MotionState ms,
+                                                                          const ros::Duration d) const;
+
+    const ramp_msgs::BezierCurve               handleCurveEnd(const RampTrajectory traj) const;
+    
+
+    void adaptPathsOOP(const MotionState& ms, const ros::Duration& d, std::vector<Path>& result);
+    void adaptPopulationOOP(const MotionState& ms, const ros::Duration& d);
 
     // Display all of the paths
     const std::string pathsToString() const;
@@ -237,17 +252,6 @@ class Planner {
     // Initialize start and goal
     void initStartGoal(const MotionState s, const MotionState g);
     
-    // Updates the paths in P(t) so we can get new trajectories
-    const uint8_t getNumThrowawayPoints(const RampTrajectory traj, const ros::Duration dur) const;
-    const std::vector<Path>                   adaptPaths( const Population pop,
-                                                          const MotionState start, 
-                                                          const ros::Duration dur) const;
-
-    const std::vector<ramp_msgs::BezierCurve> adaptCurves( const Population pop,
-                                                                          const MotionState ms,
-                                                                          const ros::Duration d) const;
-
-    const ramp_msgs::BezierCurve               handleCurveEnd(const RampTrajectory traj) const;
 
     // Returns a unique id for a RampTrajectory 
     const unsigned int getIRT();
