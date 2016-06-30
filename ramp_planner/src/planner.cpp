@@ -929,6 +929,92 @@ const double Planner::updateCurvePos(const RampTrajectory traj, const ros::Durat
 } // End updateCurvePos
 
 
+
+
+void Planner::adaptCurvesOOP(const MotionState& ms, const ros::Duration& d, std::vector<ramp_msgs::BezierCurve>& result)
+{
+  if(print_enter_exit_)
+  {
+    ROS_INFO("In Planner::adaptCurvesOOP");
+  }
+
+  ramp_msgs::BezierCurve blank;
+
+  // Go through each trajectory 
+  for(uint16_t i=0;i<population_.size();i++) 
+  {
+    //ROS_INFO("Trajectory %i", (int)i);
+    
+    // If the trajectory has a curve
+    // Don't check for best trajec here b/c we want to push on the same curve if we haven't moved on it, not a blank 
+    // curve
+    if(population_.get(i).msg_.curves.size() > 0) 
+    {
+      //////ROS_INFO("In if trajectory has curve");
+
+      // Set curve
+      ramp_msgs::BezierCurve curve = population_.get(i).msg_.curves.size() > 1 ? population_.get(i).msg_.curves.at(1) :
+                                                                        population_.get(i).msg_.curves.at(0) ;
+      //ROS_INFO("Set curve to: %s", utility_.toString(curve).c_str());
+
+      //////ROS_INFO("population_.getBestIndex: %i", (int)population_.calcBestIndex());
+      // If moving on this curve, update u
+      if( i == population_.calcBestIndex() && 
+            (curve.u_0 > 0. ||
+             estimateIfOnCurve(ms, curve) == 2))
+      {
+        //ROS_INFO("Moving on this curve");
+
+        // Get the new u_0 value
+        curve.u_0 = updateCurvePos(population_.get(i), d);
+
+        // Set the new ms_begin
+        curve.ms_begin = ms.msg_;
+      }  //end if moving on curve
+      else if(i != population_.calcBestIndex())
+      {
+        //ROS_INFO("Not moving on curve, erase it and start with new segment points");
+        curve = blank;
+      }
+      else
+      {
+        //ROS_INFO("Curve is for best trajectory, but not yet moving on curve");
+      }
+
+
+      /* Separate checking if on the curve and if done with curve
+           because we could be done before ever incrementing u_0 */
+      // Check if done with current curve
+      if( i == population_.calcBestIndex() && (curve.u_0 > curve.u_target || estimateIfOnCurve(ms, curve) == 3) )
+      {
+        //ROS_INFO("Done with curve, u_0: %f", curve.u_0);
+        curve = handleCurveEnd(population_.get(i));
+      } // end if done with 1st curve
+      else
+      {
+        //ROS_INFO("Not done with curve");
+      }
+
+      //ROS_INFO("Curve after adapting: %s", utility_.toString(curve).c_str());
+      result.push_back(curve);
+    } // end if trajectory has curve
+
+    // Else if there is no curve, push on a blank one
+    else 
+    {
+      //ROS_INFO("No curve");
+      result.push_back(blank);
+    } // end else no curve
+  } // end for
+
+  if(print_enter_exit_)
+  {
+    ROS_INFO("Exiting Planner::adaptCurvesOOP");
+  }
+} // End adaptCurvesOOP
+
+
+
 /** Updates the curve u_0 and ms_begin */
 // TODO: Only need to update the bestTrajec's curve
 const std::vector<ramp_msgs::BezierCurve> Planner::adaptCurves(const Population pop, const MotionState ms, const ros::Duration d) const 
@@ -1031,7 +1117,8 @@ void Planner::adaptPopulationOOP(const MotionState& ms, const ros::Duration& d)
   std::vector<ramp_msgs::BezierCurve> curves;
   if(population_.type_ != HOLONOMIC)
   {
-    curves = adaptCurves(population_, ms, d);
+    //curves = adaptCurves(population_, ms, d);
+    adaptCurvesOOP(ms, d, curves);
   }
   
   // Create the vector to hold updated trajectories

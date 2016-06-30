@@ -196,8 +196,9 @@ class Planner {
     const ramp_msgs::BezierCurve               handleCurveEnd(const RampTrajectory traj) const;
     
 
-    void adaptPathsOOP(const MotionState& ms, const ros::Duration& d, std::vector<Path>& result);
-    void adaptPopulationOOP(const MotionState& ms, const ros::Duration& d);
+    void adaptCurvesOOP     (const MotionState& ms, const ros::Duration& d, std::vector<ramp_msgs::BezierCurve>& result);
+    void adaptPathsOOP      (const MotionState& ms, const ros::Duration& d, std::vector<Path>& result);
+    void adaptPopulationOOP (const MotionState& ms, const ros::Duration& d);
 
     // Display all of the paths
     const std::string pathsToString() const;
