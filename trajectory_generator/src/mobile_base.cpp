@@ -1715,8 +1715,8 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
         {
 
           trajectory_msgs::JointTrajectoryPoint p = spinOnce();
-          ROS_INFO("p: %s", utility_.toString(p).c_str());
-          ROS_INFO("result: %i", reflexxesData_.resultValue);
+          //ROS_INFO("p: %s", utility_.toString(p).c_str());
+          //ROS_INFO("result: %i", reflexxesData_.resultValue);
           if(reflexxesData_.resultValue == -100)
           {
             ROS_ERROR("An error occurred in Reflexxes, setting res.error=1 and returning");

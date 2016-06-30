@@ -64,21 +64,23 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
                 ? true 
                 : false;
 
-  bool moving_on_curve = 
+  // Use index 1 in case we are switching from a curve
+  // If we are switching from a curve, then we may be stopping to rotate right after the first point
+  bool moving_on_this_curve = 
       er.trajectory.curves.size()     > 0 && 
     ( er.trajectory.curves.at(0).u_0  > 0.000001 ||
-    (utility_.positionDistance(trj->trajectory.points.at(0).positions, 
+    (utility_.positionDistance(trj->trajectory.points.at(1).positions, 
        er.trajectory.curves.at(0).controlPoints.at(0).positions) < 0.0001) ) 
     ? true
     : false;
   //ROS_INFO("t_moving_on_curve: %f", (ros::Time::now()-t_after).toSec());
 
 
-  ROS_INFO("moving: %s moving_on_curve: %s", moving ? "True" : "False", moving_on_curve ? "True" : "False");
+  ROS_INFO("moving: %s moving_on_this_curve: %s", moving ? "True" : "False", moving_on_this_curve ? "True" : "False");
 
   // Check orientation for feasibility
   //if(moving && fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_curve)
-  if(fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_curve)
+  if(fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_this_curve)
   {
     ROS_INFO("In if");
     

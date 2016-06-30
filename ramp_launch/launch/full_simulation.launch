@@ -18,14 +18,13 @@ Change robot locations in world file
 
 
 <!-- Trajectory Generator -->
-<node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" output="log" />
+<node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" output="screen" />
 
 <!-- Path Modification -->
 <node name="path_modification" pkg="path_modification" type="path_modification" />
 
 <!-- Trajectory Evaluation -->
-<node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="log" />
-
+<node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen" />
 
 <!-- Planner -->
 <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" /> 
@@ -34,7 +33,7 @@ Change robot locations in world file
 
 <!-- Simulation -->
 <node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/world/full_simulation.world" /> 
-<node name="ramp_control" pkg="ramp_control" type="ramp_control" >
+<node name="ramp_control" pkg="ramp_control" type="ramp_control" output="screen" >
   <remap from="odometry" to="robot_0/odom" />
   <remap from="cmd_vel" to="robot_0/cmd_vel" />
   <param name="simulation" value="true" />
@@ -51,7 +50,7 @@ Change robot locations in world file
 <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" />
 
 
-<node name="obstacles" pkg="ramp_planner" type="obstacle_twist_all" output="screen" />
+<node name="obstacles" pkg="ramp_planner" type="obstacle_twist_all" />
 
 
 

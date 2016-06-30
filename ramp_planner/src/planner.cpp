@@ -307,6 +307,11 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   ros::Time s = ros::Time::now();
   //population_  = evaluatePopulation(population_);
   evaluatePopulationOOP();
+  
+  // Make sure control cycle time is updated
+  controlCycle_ = population_.getEarliestStartTime();
+  controlCycleTimer_.setPeriod(controlCycle_, false);
+  
 
   //ROS_INFO("Time to evaluate population: %f", (ros::Time::now() - s).toSec());
   //ROS_INFO("Pop now: %s", population_.toString().c_str());
@@ -621,8 +626,8 @@ const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionSt
 
     // For each trajectory
     for(uint8_t i=0;i<pop.size();i++) {
-      //ROS_INFO("Path: %s", pop.paths_.at(i).toString().c_str());
-      //ROS_INFO("Get Path: %s", pop.get(i).getNonHolonomicPath().toString().c_str());
+      ROS_INFO("Path: %s", pop.paths_.at(i).toString().c_str());
+      ROS_INFO("Get Path: %s", pop.get(i).getNonHolonomicPath().toString().c_str());
       Path temp = pop.paths_.at(i);
 
       // Track how many knot points we get rid of
@@ -649,7 +654,7 @@ const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionSt
 
       // Set start_ to be the new starting configuration of the path
       temp.start_ = start;
-      //ROS_INFO("After adapting Path: %s", temp.toString().c_str());
+      ROS_INFO("After adapting Path: %s", temp.toString().c_str());
 
       result.push_back(temp);
     } // end outer for
@@ -1452,9 +1457,9 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
   if(ob_trajectory_.size() > 0 && moving_on_coll_ && (movingOn_.msg_.t_firstCollision.toSec() < time_threshold
     || (movingOn_.msg_.t_firstCollision.toSec() - (ros::Time::now().toSec()-t_prevCC_.toSec())) < time_threshold))
   {
-    /*ROS_WARN("IC: moving_on_coll_: %s t_firstCollision: %f Elapsed time: %f", moving_on_coll_ ? "True" : "False", 
+    ROS_WARN("IC: moving_on_coll_: %s t_firstCollision: %f Elapsed time: %f", moving_on_coll_ ? "True" : "False", 
         movingOn_.msg_.t_firstCollision.toSec(), (ros::Time::now().toSec()-t_prevCC_.toSec()));
-    ROS_WARN("Imminent Collision Robot: %i t_firstCollision: %f", id_, movingOn_.msg_.t_firstCollision.toSec());*/
+    ROS_WARN("Imminent Collision Robot: %i t_firstCollision: %f", id_, movingOn_.msg_.t_firstCollision.toSec());
 
     ic.data = true;
     imminent_collision_ = true;
@@ -1463,7 +1468,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
 
   else 
   {
-    //ROS_INFO("No imminent collision, t_firstCollision: %f", movingOn_.msg_.t_firstCollision.toSec());
+    ROS_INFO("No imminent collision, t_firstCollision: %f", movingOn_.msg_.t_firstCollision.toSec());
     ic.data = false;
     imminent_collision_ = false;
     num_ops_ = 5;
@@ -1483,7 +1488,9 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
  * updates are relative to odometry frame
  * */
 void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
-  ////ROS_INFO("In Planner::updateCallback");
+  t_prev_update_ = ros::Time::now();
+  ROS_INFO("In Planner::updateCallback");
+  ROS_INFO("Time since last: %f", (ros::Time::now()-t_prev_update_).toSec());
 
  
   if(msg.positions.size() < 3 ||
@@ -1512,10 +1519,10 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
     latestUpdate_.msg_.accelerations.at(1) = msg.accelerations.at(0) * 
                                              sin(latestUpdate_.msg_.positions.at(2));
 
-    ////ROS_INFO("New latestUpdate_: %s", latestUpdate_.toString().c_str());
+    ROS_INFO("New latestUpdate_: %s", latestUpdate_.toString().c_str());
   } // end else
   
-  ////ROS_INFO("Exiting Planner::updateCallback");
+  ROS_INFO("Exiting Planner::updateCallback");
 } // End updateCallback
 
 
@@ -2726,9 +2733,7 @@ void Planner::planningCycleCallback()
    */
   // Must have started control cycles
   // errorReduction is true
-  // Driving straight
-  //if(!imminent_collision_ && errorReduction_ && cc_started_ && generation_ % 5 == 0 &&
-      //fabs(latestUpdate_.msg_.velocities.at(2)) < 0.1)
+  // Not driving on straight line
   if(errorReduction_ && cc_started_ && generation_ % 5 == 0 &&
       !(fabs(latestUpdate_.msg_.velocities.at(2)) > 0.1 && sqrt(pow(latestUpdate_.msg_.velocities[0],2) + pow(latestUpdate_.msg_.velocities[1],2)) > 0.01))
   {
