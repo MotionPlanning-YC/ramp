@@ -188,6 +188,7 @@ class Planner {
     const std::vector<Path>                   adaptPaths( const Population pop,
                                                           const MotionState start, 
                                                           const ros::Duration dur) const;
+    const double updateCurvePos(const RampTrajectory& traj, const ros::Duration& d) const;
 
     const std::vector<ramp_msgs::BezierCurve> adaptCurves( const Population pop,
                                                                           const MotionState ms,
@@ -240,14 +241,13 @@ class Planner {
     bool evaluations_;
     bool seedPopulation_;
     
-    const double updateCurvePos(const RampTrajectory traj, const ros::Duration d) const;
   //private:
     /** These are (mostly) utility members that are only used by Planner and should not be used by other classes */
 
 
     /***** Methods *****/
 
-    const Path getRandomPath(const MotionState s, const MotionState g) const;
+    const Path getRandomPath  (const MotionState s, const MotionState g) const;
     const Path getAdjustedPath(const MotionState s, const MotionState g) const;
     
     // Initialize start and goal
@@ -287,9 +287,17 @@ class Planner {
 
 
 
-    const std::vector<RampTrajectory> switchTrajectory( const RampTrajectory from, 
-                                                        const RampTrajectory to );
-    const RampTrajectory computeFullSwitch(const RampTrajectory from, const RampTrajectory to);
+    const std::vector<RampTrajectory> switchTrajectory( const RampTrajectory& from, 
+                                                        const RampTrajectory& to );
+    const RampTrajectory computeFullSwitch(const RampTrajectory& from, const RampTrajectory& to);
+    
+
+    void getTransPopOOP(const Population& pop, const RampTrajectory& movingOn, Population& result);
+    void getTransitionTrajectoryOOP(const RampTrajectory& movingOn, const RampTrajectory& trgt_traj, const double& t, RampTrajectory& result);
+    void switchTrajectoryOOP(const RampTrajectory& from, const RampTrajectory& to, std::vector<RampTrajectory>& result);
+    void computeFullSwitchOOP(const RampTrajectory& from, const RampTrajectory& to, RampTrajectory& result);
+    
+    
     const bool checkIfSwitchCurveNecessary(const RampTrajectory from, const RampTrajectory to)
       const;
     
