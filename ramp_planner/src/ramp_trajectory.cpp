@@ -364,7 +364,7 @@ const RampTrajectory RampTrajectory::concatenate(const RampTrajectory traj, cons
  * path_ is mutated in this method! The knot points of the Path are also offset by diff
  * The BezierCurves have their segment and control points offset
  */
-void RampTrajectory::offsetPositions(const MotionState diff)
+void RampTrajectory::offsetPositions(const MotionState& diff)
 {
   ////ROS_INFO("In RampTrajectory::offsetPositions");
  
@@ -372,7 +372,7 @@ void RampTrajectory::offsetPositions(const MotionState diff)
   for(uint16_t i=0;i<msg_.trajectory.points.size();i++)
   {
     MotionState temp(msg_.trajectory.points.at(i));
-    temp = temp.subtractPosition(diff);
+    temp = temp.add(diff);
 
     // Set new positions
     for(uint8_t j=0;j<msg_.trajectory.points.at(i).positions.size();j++)

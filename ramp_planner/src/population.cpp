@@ -46,7 +46,7 @@ const int Population::getIndexFromId(const uint16_t id) const
 
 
 
-void Population::replace(const uint8_t i, const RampTrajectory trajec) 
+void Population::replace(const uint8_t i, const RampTrajectory& trajec) 
 {
   if(i < trajectories_.size()) 
   {
@@ -63,7 +63,7 @@ void Population::replace(const uint8_t i, const RampTrajectory trajec)
 
 
 
-void Population::replaceAll(const std::vector<RampTrajectory> new_pop) 
+void Population::replaceAll(const std::vector<RampTrajectory>& new_pop) 
 {
   
   // Set trajectories vector
@@ -106,7 +106,7 @@ const double Population::getMinFitness() const {
 
 
 
-const bool Population::contains(const RampTrajectory rt) const 
+const bool Population::contains(const RampTrajectory& rt) const 
 {
   for(uint8_t i=0;i<size();i++) 
   {
@@ -164,7 +164,7 @@ const bool Population::infeasibleExists() const
 
 
 /** This method checks if a trajectory can replace an existing trajectory in the population */
-const bool Population::replacementPossible(const RampTrajectory rt) const 
+const bool Population::replacementPossible(const RampTrajectory& rt) const 
 {
   //ROS_INFO("In Population::replacementPossible");
   ////ROS_INFO("rt: %s", rt.toString().c_str());
@@ -255,7 +255,7 @@ const bool Population::replacementPossible(const RampTrajectory rt) const
 
 
 /** This method returns true if rt can replace the trajectory at index i */
-const bool Population::canReplace(const RampTrajectory rt, const int i) const 
+const bool Population::canReplace(const RampTrajectory& rt, const int& i) const 
 {
   //ROS_INFO("In Population::canReplace");
   ////ROS_INFO("i: %i feasible: %s", i, trajectories_.at(i).msg_.feasible ? "True" : "False");
@@ -324,7 +324,7 @@ const bool Population::canReplace(const RampTrajectory rt, const int i) const
 * A result of -1 means no trajectories could be removed
 * - Will happen if rt is infeasible and the rest are feasible
 * - or if each sub-population has <= 1 trajectory */
-const int Population::getReplacementID(const RampTrajectory rt) const 
+const int Population::getReplacementID(const RampTrajectory& rt) const 
 {
   //ROS_INFO("In Population::getReplacementID");
   //std::cout<<"\nIn getReplacementID\n";
@@ -359,7 +359,7 @@ const int Population::getReplacementID(const RampTrajectory rt) const
 /** This method adds a trajectory to the population. 
  *  If the population is full, a random trajectory (that isn't the best one) is replaced
  *  Returns the index that the trajectory is added at */
-const int Population::add(const RampTrajectory rt) 
+const int Population::add(const RampTrajectory& rt) 
 {
   //ROS_INFO("In Population::add");
   ////ROS_INFO("rt: %s", rt.toString().c_str());

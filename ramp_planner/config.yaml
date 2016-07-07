@@ -16,7 +16,7 @@ fixed_control_cycle_rate: 1.6
 
 sensing_cycle_rate: 20
 
-error_reduction: true 
+error_reduction: true
 
 num_of_obstacles: 1
 

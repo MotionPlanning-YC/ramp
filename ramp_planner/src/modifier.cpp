@@ -66,7 +66,7 @@ const std::string Modifier::getOperator() const
 
 
 /** This method generates the random paths to use for the modification operator passed in as op argument */
-const std::vector<int> Modifier::getTargets(const std::string op, const Population pop) 
+const std::vector<int> Modifier::getTargets(const std::string& op, const Population& pop) 
 {
   //ROS_INFO("In Modifier::getTargets");
   //ROS_INFO("Pop: %s", pop.toString().c_str());
@@ -102,9 +102,8 @@ const std::vector<int> Modifier::getTargets(const std::string op, const Populati
  * This method builds a ModificationRequest srv 
  * For stop operator, the path can be retreived from srv
  * */
-const ramp_msgs::ModificationRequest Modifier::buildModificationRequest(const Population pop) 
+void Modifier::buildModificationRequest(const Population& pop, ramp_msgs::ModificationRequest& result)
 {
-  ramp_msgs::ModificationRequest result;
 
   result.request.op = getOperator();
 
@@ -119,23 +118,23 @@ const ramp_msgs::ModificationRequest Modifier::buildModificationRequest(const Po
         pop.paths_.at(targets.at(i)).buildPathMsg());
   }
 
-  result.request.orientation = PI/2;
+  //result.request.orientation = PI/2;
 
-  return result;
 } // End buildModificationRequest
 
 
 
 
 /** This method performs all the tasks for path modification */
-const std::vector<Path> Modifier::perform(const Population pop) 
+const std::vector<Path> Modifier::perform(const Population& pop) 
 {
   //ROS_INFO("In Modifier::perform");
   std::vector<Path> result;
  
   // Build a modification request srv 
   ros::Time t_b = ros::Time::now();
-  ramp_msgs::ModificationRequest mr = buildModificationRequest(pop); 
+  ramp_msgs::ModificationRequest mr;
+  buildModificationRequest(pop, mr); 
   //ROS_INFO("ModificationResult built, pop size: %i # of paths: %i", (int)pop.size(), (int)mr.response.mod_paths.size()); 
 
   //ROS_INFO("Requesting modification");

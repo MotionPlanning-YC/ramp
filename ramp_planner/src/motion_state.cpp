@@ -48,6 +48,25 @@ const MotionState MotionState::zero(const uint8_t size) const {
   return result;
 }
 
+void MotionState::zero()
+{
+
+  for(uint8_t i=0;i<msg_.positions.size();i++) {
+    msg_.positions[i] = 0;
+  }
+
+  for(uint8_t i=0;i<msg_.positions.size();i++) {
+    msg_.velocities[i] = 0;
+  }
+
+  for(uint8_t i=0;i<msg_.accelerations.size();i++) {
+    msg_.accelerations[i] = 0;
+  }
+
+  for(uint8_t i=0;i<msg_.jerks.size();i++) {
+    msg_.jerks[i] = 0;
+  }
+}
     
 const trajectory_msgs::JointTrajectoryPoint MotionState::getJTP() const
 {

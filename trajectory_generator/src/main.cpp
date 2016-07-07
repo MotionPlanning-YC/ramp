@@ -75,7 +75,7 @@ bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
     // Why treq.segments == 1?
     if(treq.type != PREDICTION && treq.type != TRANSITION && (treq.path.points.size() < 3 || treq.segments == 1))
     {
-      ROS_WARN("Changing type to HOLONOMIC");
+      //ROS_WARN("Changing type to HOLONOMIC");
       treq.type = HOLONOMIC;
       treq.segments++;
     }
@@ -92,14 +92,14 @@ bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
     }
     else if(treq.path.points.size() > 0) 
     {
-      ROS_INFO("In prediction");
+      //ROS_INFO("In prediction");
       Prediction prediction;
       prediction.trajectoryRequest(treq, tres);
     }
 
     if( tres.trajectory.i_knotPoints[0] == tres.trajectory.i_knotPoints[1] )
     {
-      ROS_WARN("First two knot points are equal!");
+      //ROS_WARN("First two knot points are equal!");
     }
     ROS_INFO("Response: %s", utility.toString(tres).c_str());
   

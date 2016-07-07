@@ -120,7 +120,7 @@ class Planner {
     void sendBest();
     
     // Send the whole population to the trajectory viewer
-    void sendPopulation(const Population pop) const;
+    void sendPopulation(const Population& pop) const;
     void displayTrajectory(const ramp_msgs::RampTrajectory traj) const;
 
     // Evaluate the population 
@@ -132,6 +132,8 @@ class Planner {
     // Modify trajectory or path
     const std::vector<Path> modifyPath();
     const std::vector<RampTrajectory> modifyTrajec();
+
+    void modifyTrajecOOP(std::vector<RampTrajectory>& result);
 
 
 
@@ -208,7 +210,7 @@ class Planner {
     void setT_base_w(std::vector<double> base_pos);
 
     // Sets the m_i vector
-    const std::vector<MotionState> setMi(const RampTrajectory trj_current) const;
+    const std::vector<MotionState> setMi(const RampTrajectory& trj_current) const;
 
     void setOb_T_w_odom();
     std::vector<tf::Transform> ob_T_w_odom_;
@@ -259,13 +261,14 @@ class Planner {
 
     // Modification procedure
     const ModificationResult modification();
+    void modificationOOP();
 
     // Callback methods for ros::Timers
     void controlCycleCallback     (const ros::TimerEvent& t);
-    //void planningCycleCallback    (const ros::TimerEvent& t);
     void planningCycleCallback    ();
     void imminentCollisionCallback(const ros::TimerEvent& t);
     
+    bool EC, mod_worked, modded_two;
     
     
    
@@ -310,8 +313,8 @@ class Planner {
     const ramp_msgs::BezierCurve replanCurve(const RampTrajectory trajec, const MotionState ms_start) const;
     const RampTrajectory replanTrajec(const RampTrajectory trajec, const MotionState ms_start);
     const std::vector<RampTrajectory> replanTrajecs(const std::vector<RampTrajectory> trajecs, const MotionState ms_start);
-    const std::vector<RampTrajectory> getTrajectories(const std::vector<Path> p);
-    const std::vector<RampTrajectory> getTrajectories(std::vector<ramp_msgs::TrajectoryRequest> tr);
+    const std::vector<RampTrajectory> getTrajectories(const std::vector<Path>& p);
+    const std::vector<RampTrajectory> getTrajectories(std::vector<ramp_msgs::TrajectoryRequest>& tr);
     void updatePathsStart(const MotionState s);
 
 
@@ -352,7 +355,13 @@ class Planner {
     const RampTrajectory offsetTrajectory(const RampTrajectory t, const MotionState diff) const;
     const Population offsetPopulation(const Population pop, const MotionState diff) const;
 
-    bool predictTransition(const RampTrajectory from, const RampTrajectory to, const double t);
+    void offsetTrajectoryOOP(RampTrajectory&  t   ,   const MotionState& diff) ;
+    void offsetPopulationOOP(const MotionState& diff) ;
+    
+    MotionState diff_;
+    
+    bool predictTransition(const RampTrajectory& from, const RampTrajectory& to, const double& t);
+
 
     void reportData() ;
 
