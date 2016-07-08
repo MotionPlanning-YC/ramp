@@ -1,6 +1,6 @@
 #ifndef LINE_H
 #define LINE_H
-#include "utility.h"
+#include "orig_utility.h"
 
 #define CYCLE_TIME_IN_SECONDS 0.1
 
@@ -20,7 +20,7 @@ private:
   ramp_msgs::MotionState start_, goal_;
   ros::Duration timeFromStart_;
   ros::Duration timeCutoff_;
-  Utility utility_;
+  Orig_Utility utility_;
 
   const ramp_msgs::MotionState buildMotionState(const ReflexxesData data);
 

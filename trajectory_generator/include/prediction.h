@@ -2,7 +2,7 @@
 #define PREDICTION_H
 #include "line.h"
 #include "circle.h"
-#include "utility.h"
+#include "orig_utility.h"
 
 
 
@@ -20,7 +20,7 @@ private:
 
   void init(const ramp_msgs::TrajectoryRequest req);
 
-  Utility utility_;
+  Orig_Utility utility_;
 };
 
 #endif

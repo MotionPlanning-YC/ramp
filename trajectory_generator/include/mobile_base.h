@@ -4,7 +4,7 @@
 #include "ramp_msgs/TrajectoryRequest.h"
 #include "tf/transform_datatypes.h"
 #include "bezier_curve.h"
-#include "utility.h"
+#include "orig_utility.h"
 
 
 
@@ -54,7 +54,7 @@ private:
   trajectory_msgs::JointTrajectoryPoint prevKP_;
 
   // Utility
-  Utility utility_;
+  Orig_Utility utility_;
 
 
   bool bezierStart;

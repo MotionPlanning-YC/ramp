@@ -9,7 +9,7 @@
 #include "bezier_curve.h"
 #include "ramp_msgs/Population.h"
 
-Utility utility;
+Orig_Utility utility;
 
 
 void fixDuplicates(ramp_msgs::TrajectoryRequest& req)

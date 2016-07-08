@@ -1,7 +1,7 @@
 #ifndef BEZIER_CURVE
 #define BEZIER_CURVE
 
-#include "utility.h"
+#include "orig_utility.h"
 
 
 class BezierCurve {
@@ -42,7 +42,7 @@ public:
   double u_0_, u_dot_0_, u_dot_max_, u_target_;
 private:
 
-  Utility       utility_            ;
+  Orig_Utility       utility_            ;
   ReflexxesData reflexxesData_      ;
   bool          initialized_        ;
   bool          deallocated_        ;

@@ -13,6 +13,8 @@
 #include "parameter_handler.h"
 #include "bezier_curve.h"
 #include <type_traits>
+#include "../../trajectory_generator/include/mobile_base.h"
+#include "../../trajectory_generator/include/reflexxes_data.h"
 
 struct ModificationResult 
 {

@@ -2464,6 +2464,11 @@ bool Planner::predictTransition(const RampTrajectory& from, const RampTrajectory
   //ROS_INFO("Done checking segments");
  
 
+  std::vector<ramp_msgs::MotionState> sp;
+  sp.push_back(segmentPoints[0].msg_);
+  sp.push_back(segmentPoints[1].msg_);
+  sp.push_back(segmentPoints[2].msg_);
+
 
   /*
    * See if a curve can be planned
@@ -2473,7 +2478,13 @@ bool Planner::predictTransition(const RampTrajectory& from, const RampTrajectory
   for(float lambda=0.1;lambda < 0.85;lambda+=0.1f)
   {
     //ROS_INFO("lambda: %f", lambda);
-    curve.init(segmentPoints, lambda, ms_startTrans);
+    ramp_msgs::BezierCurve c;
+    c.segmentPoints = sp;
+    c.l = lambda;
+    c.ms_begin = ms_startTrans.msg_;
+
+    //curve.init(segmentPoints, lambda, ms_startTrans);
+    curve.init(c, ms_startTrans.msg_);
     if(curve.verify())
     {
       //ROS_INFO("Curve formed for prediction: %s", utility_.toString(curve.getMsg()).c_str());

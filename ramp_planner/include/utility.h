@@ -17,16 +17,17 @@
 #include "std_msgs/Bool.h"
 #include <tf/transform_datatypes.h>
 #include <ros/console.h>
+#include "reflexxes_data.h"
 
 #define PI 3.14159f
 
-enum TrajectoryType 
+/*enum TrajectoryType 
 {
   HOLONOMIC             = 0,
   HYBRID                = 1,
   TRANSITION            = 2,
   PREDICTION            = 3
-};
+};*/
 
 
 class Utility {

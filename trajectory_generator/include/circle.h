@@ -1,6 +1,6 @@
 #ifndef CIRCLE_H
 #define CIRCLE_H
-#include "utility.h"
+#include "orig_utility.h"
 
 #define CYCLE_TIME_IN_SECONDS 0.1
 
@@ -16,7 +16,7 @@ private:
   ReflexxesData reflexxesData_;
   ros::Duration timeFromStart_;
   ros::Duration timeCutoff_;
-  Utility utility_;
+  Orig_Utility utility_;
 
   void initReflexxes();
 
