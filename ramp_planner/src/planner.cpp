@@ -1387,7 +1387,7 @@ void Planner::buildEvaluationSrvOOP(const RampTrajectory& trajec, ramp_msgs::Eva
 
 void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result) const
 {
-  ROS_INFO("In Planner::buildEvaluationRequestOOP");
+  //ROS_INFO("In Planner::buildEvaluationRequestOOP");
   result.trajectory = trajec.msg_;
   result.currentTheta = latestUpdate_.msg_.positions[2]; 
 
@@ -1406,11 +1406,11 @@ void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs:
     result.obstacle_trjs.push_back(ob_trajectory_[i].msg_);
   }
 
-  ROS_INFO("imminent_collision: %s", imminent_collision_ ? "True" : "False");
+  //ROS_INFO("imminent_collision: %s", imminent_collision_ ? "True" : "False");
   
   result.imminent_collision = imminent_collision_;
   result.coll_dist = COLL_DISTS[i_COLL_DISTS_];
-  ROS_INFO("Exiting Planner::buildEvaluationRequestOOP");
+  //ROS_INFO("Exiting Planner::buildEvaluationRequestOOP");
 }
 
 
@@ -2978,7 +2978,10 @@ const std::vector<RampTrajectory> Planner::modifyTrajec()
     
     // Get trajectory
     //RampTrajectory temp = requestTrajectory(modded_paths.at(i));
+    t_p = ros::Time::now();
     result.push_back(requestTrajectory(modded_paths[i]));
+    ros::Time t_m = ros::Time::now();
+    ROS_INFO("t_m: %f", (t_m-t_p).toSec());
   } // end for
   
   //ROS_INFO("Exiting Planner::modifyTrajec");
@@ -3007,7 +3010,7 @@ void Planner::modifyTrajecOOP(std::vector<RampTrajectory>& result)
     ros::Time t_for = ros::Time::now();
     result.push_back(requestTrajectory(modded_paths[i]));
     ros::Time t_a = ros::Time::now();
-    ROS_INFO("t_a: %f", (t_a-t_for).toSec());
+    ROS_INFO("t_mod_oop: %f", (t_a-t_for).toSec());
   } // end for
   
   //ROS_INFO("Exiting Planner::modifyTrajec");

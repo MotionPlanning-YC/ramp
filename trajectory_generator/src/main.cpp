@@ -55,11 +55,12 @@ bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
                       ramp_msgs::TrajectorySrv::Response& res) 
 {
 
+  ros::Time t_start = ros::Time::now();
   for(uint8_t i=0;i<req.reqs.size();i++)
   {
     ramp_msgs::TrajectoryRequest treq = req.reqs.at(i); 
     ramp_msgs::TrajectoryResponse tres;
-    ROS_INFO("Trajectory Request Received: %s", utility.toString(treq).c_str());
+    //ROS_INFO("Trajectory Request Received: %s", utility.toString(treq).c_str());
 
     /*
      * Check for start == goal
@@ -101,10 +102,13 @@ bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
     {
       //ROS_WARN("First two knot points are equal!");
     }
-    ROS_INFO("Response: %s", utility.toString(tres).c_str());
+    //ROS_INFO("Response: %s", utility.toString(tres).c_str());
   
     res.resps.push_back(tres);
   }
+
+  ros::Time t_end = ros::Time::now();
+  ROS_INFO("t_end: %f", (t_end-t_start).toSec());
   return true;
 }
 

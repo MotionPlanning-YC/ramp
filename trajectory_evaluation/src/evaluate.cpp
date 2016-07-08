@@ -14,8 +14,12 @@ void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationR
   imminent_collision_ = req.imminent_collision;
   ROS_INFO("imminent_collision_: %s", imminent_collision_ ? "True" : "False");
 
+
+  orientation_infeasible_ = false;
+
   performFeasibility(req);
-  res.feasible = !qr_.collision_;
+  ROS_INFO("qr_.collision: %s orientation_infeasible_: %s", qr_.collision_ ? "True" : "False", orientation_infeasible_ ? "True" : "False");
+  res.feasible = !qr_.collision_ && !orientation_infeasible_;
   //ROS_INFO("performFeasibility: %f", (ros::Time::now()-t_start).toSec());
 
   if(qr_.collision_)
@@ -53,6 +57,7 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
   ros::Duration d_analy = ros::Time::now() - t_analy_start;
   t_analy_.push_back(d_analy);*/
 
+  ROS_INFO("feasible: %s", er.trajectory.feasible ? "True" : "False");
   er.trajectory.feasible            = !qr_.collision_;
   er.trajectory.t_firstCollision    = ros::Duration(qr_.t_firstCollision_);
 
@@ -76,7 +81,9 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
   //ROS_INFO("t_moving_on_curve: %f", (ros::Time::now()-t_after).toSec());
 
 
+  ROS_INFO("qr_.collision: %s feasible: %s", qr_.collision_ ? "True" : "False", er.trajectory.feasible ? "True" : "False");
   ROS_INFO("moving: %s moving_on_this_curve: %s", moving ? "True" : "False", moving_on_this_curve ? "True" : "False");
+  ROS_INFO("getDeltaTheta: %f", fabs(orientation_.getDeltaTheta(er.trajectory)));
 
   // Check orientation for feasibility
   //if(moving && fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_curve)
@@ -114,7 +121,7 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result)
 
   if(trj.feasible)
   {
-    //ROS_INFO("In if(feasible)");
+    ROS_INFO("In if(feasible)");
     double T = trj.trajectory.points.at(trj.trajectory.points.size()-1).time_from_start.toSec();
     double A = orientation_.perform(trj);
     //ROS_INFO("T: %f A: %f", T, A);
@@ -123,7 +130,7 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result)
 
   else
   {
-    //ROS_INFO("In else(infeasible)"); 
+    ROS_INFO("In else(infeasible)"); 
     
     // penalties += orientation_.getPenalty();
     
