@@ -1429,7 +1429,50 @@ const std::vector<RampTrajectory> Planner::requestTrajectory(ramp_msgs::Trajecto
   //std::cout<<"\nid: "<<id;
   
   ros::Time t_start = ros::Time::now();
-  if(h_traj_req_->request(tr)) 
+
+  for(uint16_t i=0;i<tr.request.reqs.size();i++)
+  {
+    MobileBase mobileBase;
+    
+    ros::Time t_start = ros::Time::now();
+    ramp_msgs::TrajectoryResponse resp;
+    mobileBase.trajectoryRequest(tr.request.reqs[i], resp);
+
+    RampTrajectory temp = resp.trajectory;
+    tr.response.resps.push_back(resp);
+    
+    // Set things the traj_gen does not have
+    temp.msg_.t_start = ros::Duration(t_fixed_cc_);
+
+    // Set the paths (straight-line and bezier)
+    temp.holonomic_path_ = tr.request.reqs.at(i).path;
+
+    // Set the ID of the trajectory
+    if(id != -1) 
+    {
+      temp.msg_.id = id;
+    }
+    else 
+    {
+      temp.msg_.id = getIRT();
+    }
+    ros::Time t_a = ros::Time::now();
+    ROS_INFO("t_a: %f", (t_a-t_start).toSec());
+
+
+    result.push_back(temp);
+  }
+
+
+
+
+
+
+
+
+
+
+  /*if(h_traj_req_->request(tr)) 
   {
     trajec_durs_.push_back(ros::Time::now() - t_start);
     
@@ -1464,7 +1507,7 @@ const std::vector<RampTrajectory> Planner::requestTrajectory(ramp_msgs::Trajecto
   else 
   {
     ROS_ERROR("An error occurred when requesting a trajectory");
-  }
+  }*/
 
   //ROS_INFO("Exiting Planner::requestTrajectory, t_start: %f", result.msg_.t_start.toSec());
   return result;
@@ -2483,6 +2526,16 @@ bool Planner::predictTransition(const RampTrajectory& from, const RampTrajectory
     c.l = lambda;
     c.ms_begin = ms_startTrans.msg_;
 
+    
+    c.ms_maxVA.velocities.push_back(0.33);
+    c.ms_maxVA.velocities.push_back(0.33);
+    c.ms_maxVA.velocities.push_back(PI/2.f);
+    c.ms_maxVA.accelerations.push_back(1);
+    c.ms_maxVA.accelerations.push_back(1);
+    c.ms_maxVA.accelerations.push_back(3.f*PI/4.f);
+
+    
+
     //curve.init(segmentPoints, lambda, ms_startTrans);
     curve.init(c, ms_startTrans.msg_);
     if(curve.verify())
@@ -3018,7 +3071,7 @@ void Planner::modifyTrajecOOP(std::vector<RampTrajectory>& result)
     ros::Time t_for = ros::Time::now();
     result.push_back(requestTrajectory(modded_paths[i]));
     ros::Time t_a = ros::Time::now();
-    ROS_INFO("t_a: %f", (t_a-t_for).toSec());
+    ROS_INFO("t_p: %f", (t_a-t_for).toSec());
   } // end for
   
   //ROS_INFO("Exiting Planner::modifyTrajec");
@@ -3106,7 +3159,7 @@ void Planner::modificationOOP()
   std::vector<RampTrajectory> mod_trajec;
   modifyTrajecOOP(mod_trajec);
   ros::Time t_p = ros::Time::now();
-  ROS_INFO("t_p: %f", (t_p-now).toSec());
+  ROS_INFO("t_mod: %f", (t_p-now).toSec());
   //ROS_INFO("Modification trajectories obtained: %i", (int)mod_trajec.size());
   
   if(mod_trajec.size()>1)
