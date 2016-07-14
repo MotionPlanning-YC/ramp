@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
   zero.motionState.positions.push_back(0.f);
   zero.motionState.velocities.push_back(0.);
   zero.motionState.velocities.push_back(0.);
-  zero.motionState.velocities.push_back(0.45);
+  zero.motionState.velocities.push_back(0.);
   zero.motionState.accelerations.push_back(0);
   zero.motionState.accelerations.push_back(0);
   zero.motionState.accelerations.push_back(0);
@@ -34,25 +34,25 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(0.135); // 0.70455
-  c1.motionState.positions.push_back(0.376); // 0.4026
+  c1.motionState.positions.push_back(0.); // 0.70455
+  c1.motionState.positions.push_back(1.); // 0.4026
   c1.motionState.positions.push_back(1.24); // 0.519146
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(1.067); // 0.70455
-  c2.motionState.positions.push_back(2.974); // 0.4026
+  c2.motionState.positions.push_back(1.); // 0.70455
+  c2.motionState.positions.push_back(1.); // 0.4026
   c2.motionState.positions.push_back(2.419); // 0.519146
 
 
   ramp_msgs::KnotPoint c3;
-  c3.motionState.positions.push_back(3.311); // 0.857146
-  c3.motionState.positions.push_back(2.52064); // 0.71115
+  c3.motionState.positions.push_back(2.); // 0.857146
+  c3.motionState.positions.push_back(1.); // 0.71115
   c3.motionState.positions.push_back(0.625932);  // 1.11151
 
 
   ramp_msgs::KnotPoint c4;
-  c4.motionState.positions.push_back(2.11916f);
-  c4.motionState.positions.push_back(0.399425f);
+  c4.motionState.positions.push_back(2.);
+  c4.motionState.positions.push_back(2.);
   c4.motionState.positions.push_back(PI/4);
 
 
@@ -129,16 +129,16 @@ int main(int argc, char** argv) {
   c5.motionState.accelerations.push_back(0.); //.0746295
   
   ramp_msgs::Path p;
-  //p.points.push_back(zero);
+  p.points.push_back(zero);
   p.points.push_back(c1);
   p.points.push_back(c2);
   p.points.push_back(c3);
-  //p.points.push_back(c4);
+  p.points.push_back(c4);
   //p.points.push_back(c5);
   //p.points.push_back(c6);
   //p.points.push_back(c7);
   //p.points.push_back(c8);
-  //p.points.push_back(c9);
+  p.points.push_back(c9);
   
 
   /***************************************************/

@@ -1982,6 +1982,11 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
           /*std::vector<trajectory_msgs::JointTrajectoryPoint> rotate_points = 
             rotate(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot),
                     last.velocities.at(2), last.accelerations.at(2));*/
+
+          if(c >= i_cs.size())
+          {
+            break;
+          }
           rotateOOP(last.positions[2], utility_.findAngleFromAToB(last, next_knot),
                     last.velocities.at(2), last.accelerations.at(2), res.trajectory.trajectory.points);
 
