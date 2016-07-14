@@ -15,6 +15,7 @@ void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationR
   ROS_INFO("imminent_collision_: %s", imminent_collision_ ? "True" : "False");
 
 
+  // Reset orientation_infeasible for new trajectory
   orientation_infeasible_ = false;
 
   performFeasibility(req);
@@ -63,9 +64,8 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
 
   ramp_msgs::RampTrajectory* trj = &er.trajectory;
   
-  bool moving =     (fabs( sqrt(  (trj->trajectory.points[0].velocities[0]*trj->trajectory.points[0].velocities[0]) +
+  bool moving_forward =     (fabs( sqrt(  (trj->trajectory.points[0].velocities[0]*trj->trajectory.points[0].velocities[0]) +
                                   (trj->trajectory.points[0].velocities[1]*trj->trajectory.points[0].velocities[1]))) > 0)
-                ||  (fabs(trj->trajectory.points.at(0).velocities.at(2)) > 0) 
                 ? true 
                 : false;
 
@@ -82,12 +82,12 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
 
 
   ROS_INFO("qr_.collision: %s feasible: %s", qr_.collision_ ? "True" : "False", er.trajectory.feasible ? "True" : "False");
-  ROS_INFO("moving: %s moving_on_this_curve: %s", moving ? "True" : "False", moving_on_this_curve ? "True" : "False");
+  ROS_INFO("moving_forward: %s moving_on_this_curve: %s", moving_forward ? "True" : "False", moving_on_this_curve ? "True" : "False");
   ROS_INFO("getDeltaTheta: %f", fabs(orientation_.getDeltaTheta(er.trajectory)));
 
   // Check orientation for feasibility
-  //if(moving && fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_curve)
-  if(fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_this_curve)
+  if(moving_forward && fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_this_curve)
+  //if(fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_this_curve)
   {
     ROS_INFO("In if");
     

@@ -108,7 +108,7 @@ bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
   }
 
   ros::Time t_end = ros::Time::now();
-  ROS_INFO("t_end: %f", (t_end-t_start).toSec());
+  //ROS_INFO("t_end: %f", (t_end-t_start).toSec());
   return true;
 }
 

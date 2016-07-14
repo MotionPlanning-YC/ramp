@@ -34,14 +34,14 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(2.97); // 0.70455
-  c1.motionState.positions.push_back(2.74); // 0.4026
-  c1.motionState.positions.push_back(0.691); // 0.519146
+  c1.motionState.positions.push_back(0.135); // 0.70455
+  c1.motionState.positions.push_back(0.376); // 0.4026
+  c1.motionState.positions.push_back(1.24); // 0.519146
   
   ramp_msgs::KnotPoint c2;
-  c2.motionState.positions.push_back(0.565405); // 0.70455
-  c2.motionState.positions.push_back(0.545848); // 0.4026
-  c2.motionState.positions.push_back(0.925287); // 0.519146
+  c2.motionState.positions.push_back(1.067); // 0.70455
+  c2.motionState.positions.push_back(2.974); // 0.4026
+  c2.motionState.positions.push_back(2.419); // 0.519146
 
 
   ramp_msgs::KnotPoint c3;
@@ -82,13 +82,13 @@ int main(int argc, char** argv) {
   c9.motionState.positions.push_back(PI/4);
   
   // Velocities
-  c1.motionState.velocities.push_back(0.15);  //.151426
-  c1.motionState.velocities.push_back(0.19); //-.297903
+  c1.motionState.velocities.push_back(0.0844);  //.151426
+  c1.motionState.velocities.push_back(0.2352); //-.297903
   c1.motionState.velocities.push_back(0.); //-.118126*/
  
-  c2.motionState.velocities.push_back(0.216555);  //.151426
+  /*c2.motionState.velocities.push_back(0.216555);  //.151426
   c2.motionState.velocities.push_back(0.156548); //-.297903
-  c2.motionState.velocities.push_back(0.); //-.118126
+  c2.motionState.velocities.push_back(0.); //-.118126*/
 
   c3.motionState.velocities.push_back(0.267438);
   c3.motionState.velocities.push_back(0.193331);
@@ -131,14 +131,14 @@ int main(int argc, char** argv) {
   ramp_msgs::Path p;
   //p.points.push_back(zero);
   p.points.push_back(c1);
-  //p.points.push_back(c2);
-  //p.points.push_back(c3);
+  p.points.push_back(c2);
+  p.points.push_back(c3);
   //p.points.push_back(c4);
   //p.points.push_back(c5);
   //p.points.push_back(c6);
   //p.points.push_back(c7);
   //p.points.push_back(c8);
-  p.points.push_back(c9);
+  //p.points.push_back(c9);
   
 
   /***************************************************/
@@ -402,9 +402,11 @@ int main(int argc, char** argv) {
   std::cout<<"\nPress Enter to request and send the trajectory\n";
   std::cin.get();
 
+  ros::Time t_end, t_start = ros::Time::now();
   // Get and publish trajectory
   if(client_.call(tr_srv)) 
   {
+    t_end = ros::Time::now();
     ROS_INFO("Resps size: %i", (int)tr_srv.response.resps.size());
     //std::cout<<"\nSending Trajectory "<<u.toString(tr_srv.response.resps.at(0).trajectory)<<"\n";
     handle.setParam("/ramp/cc_started", true); 
@@ -513,6 +515,8 @@ int main(int argc, char** argv) {
   pub_pop.publish(pop);
   
 
+
+  ROS_INFO("Time to get trajec: %f", (t_end-t_start).toSec());
 
 
   std::cout<<"\nExiting Normally\n";

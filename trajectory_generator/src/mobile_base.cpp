@@ -1793,14 +1793,14 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
   }
 
   // Print curves
-  if(print_) {
+  /*if(print_) {
     for(int c=0;c<curves.size();c++) {
       std::cout<<"\nCurve "<<c<<": ";
       for(int p=0;p<curves.at(c).points_.size();p++) {
         std::cout<<"\n"<<utility_.toString(curves.at(c).points_.at(p));
       }
     }
-  }
+  }*/
  
 
   // Push 0 onto knot point indices

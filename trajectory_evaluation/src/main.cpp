@@ -17,7 +17,7 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
   int s = reqs.reqs.size();
   for(uint8_t i=0;i<s;i++)
   {
-    
+
     ramp_msgs::EvaluationResponse res;
     ROS_INFO("Robot Evaluating trajectory %i: %s", (int)i, u.toString(reqs.reqs[i].trajectory).c_str());
     ROS_INFO("Obstacle size: %i", (int)reqs.reqs[i].obstacle_trjs.size());

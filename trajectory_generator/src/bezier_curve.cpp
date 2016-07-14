@@ -1004,7 +1004,7 @@ const ramp_msgs::MotionState BezierCurve::buildMotionState(const ReflexxesData d
   
   if(print_) 
   {
-    printf("\n");
+    //printf("\n");
     ////ROS_INFO("u: %f u_dot: %f u_dot_dot: %f", u, u_dot, u_dot_dot);
     ////ROS_INFO("x: %f             y: %f", x, y);
     ////ROS_INFO("x_dot: %f         y_dot: %f       theta_dot: %f", x_dot, y_dot, theta_dot);
@@ -1076,7 +1076,7 @@ void BezierCurve::buildMotionStateOOP(const ReflexxesData& data, ramp_msgs::Moti
   
   if(print_) 
   {
-    printf("\n");
+    //printf("\n");
     ////ROS_INFO("u: %f u_dot: %f u_dot_dot: %f", u, u_dot, u_dot_dot);
     ////ROS_INFO("x: %f             y: %f", x, y);
     ////ROS_INFO("x_dot: %f         y_dot: %f       theta_dot: %f", x_dot, y_dot, theta_dot);

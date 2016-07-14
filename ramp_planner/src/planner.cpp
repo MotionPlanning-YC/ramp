@@ -3691,8 +3691,6 @@ void Planner::doControlCycle()
   //ROS_INFO("About to adapt, controlCycle_: %f", controlCycle_.toSec());
  
   ros::Time t_startAdapt = ros::Time::now();
-  //population_ = adaptPopulation(population_, startPlanning_, ros::Duration(t_fixed_cc_));
-  //population_ = evaluatePopulation(population_);
   
   adaptPopulationOOP(startPlanning_, ros::Duration(t_fixed_cc_));
   evaluatePopulationOOP();
@@ -3730,10 +3728,10 @@ void Planner::doControlCycle()
  
   // Find the transition (non-holonomic) population and set new control cycle time
   ros::Time t_startTrans = ros::Time::now();
+ 
   getTransPopOOP(population_, movingOn_, population_);
-  //population_           = getTransPop(population_, movingOn_);
-  //population_           = evaluatePopulation(population_);
   evaluatePopulationOOP();
+  
   ros::Duration d_trans = ros::Time::now() - t_startTrans;
   trans_durs_.push_back(d_trans);
   
