@@ -152,6 +152,26 @@ class Planner {
 
 
 
+    // Build a srv for 1 trajectory with 1-2 curves
+    void buildTrajectorySrvOOP(const Path path, const std::vector<ramp_msgs::BezierCurve> curves, ramp_msgs::TrajectorySrv& result, const int id=-1) const;
+
+    // Build a srv for 1 trajectory with no curves
+    void buildTrajectorySrvOOP(const Path path, ramp_msgs::TrajectorySrv& result, const int id=-1) const;
+
+
+    // Build a request for 1 trajectory with 1-2 curves
+    void buildTrajectoryRequestOOP(const Path path, const std::vector<ramp_msgs::BezierCurve> curves, ramp_msgs::TrajectoryRequest& result, const int id=-1) const;
+
+    // Build a request for 1 trajectory with 0 curves
+    void buildTrajectoryRequestOOP(const Path path, ramp_msgs::TrajectoryRequest& result, const int id=-1) const;
+
+    
+
+
+
+
+
+
     const ramp_msgs::EvaluationSrv buildEvaluationSrv(
               const RampTrajectory trajec)      ;
     const ramp_msgs::EvaluationSrv buildEvaluationSrv(

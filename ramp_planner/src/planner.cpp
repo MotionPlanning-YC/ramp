@@ -1317,6 +1317,67 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
 }
 
 
+
+// Build a srv for 1 trajectory with 1-2 curves
+void Planner::buildTrajectorySrvOOP(const Path path, const std::vector<ramp_msgs::BezierCurve> curves, ramp_msgs::TrajectorySrv& result, const int id) const
+{
+  result.request.reqs.push_back(buildTrajectoryRequest(path, curves, id));
+}
+
+// Build a srv for 1 trajectory with no curves
+void Planner::buildTrajectorySrvOOP(const Path path, ramp_msgs::TrajectorySrv& result, const int id) const
+{
+  std::vector<ramp_msgs::BezierCurve> curves;
+  buildTrajectorySrvOOP(path, curves, result, id);
+}
+
+
+// Build a request for 1 trajectory with 1-2 curves
+void Planner::buildTrajectoryRequestOOP(const Path path, const std::vector<ramp_msgs::BezierCurve> curves, ramp_msgs::TrajectoryRequest& result, const int id) const
+{
+  result.path           = path.buildPathMsg();
+  result.type           = population_.type_;
+
+  // If path size > 2, assign a curve
+  if(path.size() > 2) 
+  {
+    //ROS_INFO("In if path.size() > 2)");
+
+    // If it's the first time getting a curve 
+    if(curves.size() == 0 || curves.at(0).segmentPoints.size() == 0) 
+    {
+      if(path.size() > 2) 
+      {
+        //ROS_INFO("In temp curve");
+        ramp_msgs::BezierCurve temp;
+        
+        temp.segmentPoints.push_back( path.all_.at(0).motionState_.msg_ );
+        temp.segmentPoints.push_back( path.all_.at(1).motionState_.msg_ );
+        temp.segmentPoints.push_back( path.all_.at(2).motionState_.msg_ );
+        
+        result.bezierCurves.push_back(temp);
+      }
+    }
+    else 
+    {
+      //ROS_INFO("In else if path.size < 3");
+      result.bezierCurves = curves;
+    } // end else
+  } // end if
+
+
+  //ROS_INFO("result.path: %s", utility_.toString(result.path).c_str());
+  //ROS_INFO("Exiting Planner::buildTrajectoryRequestOOP");
+}
+
+// Build a request for 1 trajectory with 0 curves
+void Planner::buildTrajectoryRequestOOP(const Path path, ramp_msgs::TrajectoryRequest& result, const int id) const
+{
+  std::vector<ramp_msgs::BezierCurve> curves;
+  buildTrajectoryRequestOOP(path, curves, result, id);
+}
+
+
 const ramp_msgs::EvaluationSrv Planner::buildEvaluationSrv(const RampTrajectory trajec)
 {
   std::vector<RampTrajectory> t;
