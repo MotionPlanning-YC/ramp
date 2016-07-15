@@ -20,7 +20,10 @@ const bool RampTrajectory::equals(const RampTrajectory& other) const
     return true;
   }
 
-  return holonomic_path_.equals(other.holonomic_path_);
+  Path templ(msg_.holonomic_path);
+  Path tempr(other.msg_.holonomic_path);
+
+  return templ.equals(tempr);
 }
 
 
@@ -401,9 +404,9 @@ void RampTrajectory::offsetPositions(const MotionState& diff)
 
   for(uint8_t c=0;c<msg_.curves.size() && holonomic_path_.size() > 2;c++)
   {
-    /*//ROS_INFO("Fixing curve %i, holonomic_path_.size(): %i segmentPoints.size(): %i controlPoints.size(): %i", 
+    /*//ROS_INFO("Fixing curve %i, holonomic_path_..size(): %i segmentPoints.size(): %i controlPoints.size(): %i", 
         c, 
-        holonomic_path_.size(), 
+        holonomic_path_..size(), 
         (int)msg_.curves.at(c).segmentPoints.size(), 
         (int)msg_.curves.at(c).controlPoints.size());*/
 
