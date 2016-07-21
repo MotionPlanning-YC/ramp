@@ -379,7 +379,7 @@ const double BezierCurve::getUDotMax(const double u_dot_0) const
   // If both are zero
   if(u_dot_max_x == 0 && u_dot_max_y == 0) 
   {
-    //ROS_ERROR("u_dot_max_x == 0 && u_dot_max_y == 0");
+    ROS_ERROR("u_dot_max_x == 0 && u_dot_max_y == 0");
     u_dot_max = 0;
   }
 
@@ -496,7 +496,7 @@ const double BezierCurve::getUDotDotMax(const double u_dot_max) const {
     result = fabs( (ms_max_.accelerations.at(1) - B_*u_dot_max) / (B_*u_y+D_) );
   }
   else {
-    //ROS_ERROR("Neither u acceleration equations are defined!");
+    ROS_ERROR("Neither u acceleration equations are defined!");
     result = 0.1;
   }
 
@@ -560,10 +560,19 @@ void BezierCurve::initReflexxes()
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 
     getUDotDotMax(u_dot_max);
 
+
+  /*
+   * THIS PART CAN LEAD TO BAD TRAJECTORIES
+   * If num_uDotMax is 1 too short, robot has to stop and rotate at the end of curve
+   * If num_uDotMax is 1 too large, robot has to loop back around 
+   */
+
   // # of u_dot_max's to reach 1
   // Round it off the nearest tenth
   double num_uDotMax = 1./u_dot_max;
-  float num_uDotMaxRounded = round(num_uDotMax*10) / 10;
+
+  //ROS_INFO("u_dot_max: %f", u_dot_max);
+  //ROS_INFO("num_uDotMax: %f", num_uDotMax);
   
   // # of cycles to reach 1
   // num_cycles should be an int, but C++ was giving me the incorrect value as an int
@@ -572,9 +581,18 @@ void BezierCurve::initReflexxes()
 
   // Position if moving at max velocity
   double p_maxv = u_dot_max*CYCLE_TIME_IN_SECONDS * num_cycles;
-  
 
-  ////////ROS_INFO("num_udotmax: %f num_cycles: %f p_maxv: %f", num_uDotMax, num_cycles, p_maxv);
+  //ROS_INFO("p_maxv: %f p_maxv+(u_dot_max/10.f): %f", p_maxv, (p_maxv+(u_dot_max/10.f)));
+
+  if(p_maxv + (u_dot_max / 10.f) < 1.0001)
+  {
+    //ROS_INFO("Undershooting: Adding another cycle");
+    //ROS_INFO("p_maxv before: %f p_maxv after: %f", p_maxv, (p_maxv+(u_dot_max/10.f)));
+    p_maxv += (u_dot_max/10.f);
+  }
+ 
+
+  //ROS_INFO("num_udotmax: %f num_cycles: %f p_maxv: %f", num_uDotMax, num_cycles, p_maxv);
  
  
   // Set targets
@@ -881,7 +899,17 @@ const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve()
   }
   //printReflexxesInfo();
 
-  if(initialized_) {
+  
+
+  std::cout<<"\nControl Points:";
+  for(int i=0;i<controlPoints_.size();i++) {
+    std::cout<<"\n"<<utility_.toString(controlPoints_.at(i));
+  }
+  std::cout<<"\n";
+
+
+  if(initialized_) 
+  {
 
     reflexxesData_.resultValue = 0;
    
@@ -901,11 +929,11 @@ const std::vector<ramp_msgs::MotionState> BezierCurve::generateCurve()
 
   
 
-  /*////////ROS_INFO("After generating curve, u_values:");
+  //ROS_INFO("After generating curve, u_values:");
   for(int i=0;i<u_values_.size();i++)
   {
-    ////////ROS_INFO("u_values_[%i]: %f", i, u_values_.at(i));
-  }*/
+    //ROS_INFO("u_values_[%i]: %f", i, u_values_.at(i));
+  }
 
   //////ROS_INFO("Exiting BezierCurve::generateCurve()");
   return points_;
@@ -918,9 +946,16 @@ void BezierCurve::generateCurveOOP()
   ////ROS_INFO("Points so far: ");
   for(uint8_t i=0;i<points_.size();i++)
   {
-    ////ROS_INFO("Point %i, %s", i, utility_.toString(points_.at(i)).c_str());
+    //ROS_INFO("Point %i, %s", i, utility_.toString(points_.at(i)).c_str());
   }
   //printReflexxesInfo();
+  
+
+  std::cout<<"\nControl Points:";
+  for(int i=0;i<controlPoints_.size();i++) {
+    std::cout<<"\n"<<utility_.toString(controlPoints_.at(i));
+  }
+  std::cout<<"\n";
 
   if(initialized_) {
 
@@ -1104,7 +1139,7 @@ void BezierCurve::buildMotionStateOOP(const ReflexxesData& data, ramp_msgs::Moti
 // TODO: Clean up?
 const ramp_msgs::MotionState BezierCurve::spinOnce() 
 {
-  ////ROS_INFO("In BezierCurve::spinOnce()");
+  //ROS_INFO("In BezierCurve::spinOnce()");
   ramp_msgs::MotionState result;
 
 
@@ -1119,26 +1154,26 @@ const ramp_msgs::MotionState BezierCurve::spinOnce()
   // If not, adjust the target position based on how far we've moved
   if(!reachedVMax_)
   {
-    ////ROS_INFO("Adjusting target position");
+    //ROS_INFO("Adjusting target position");
     double a = reflexxesData_.inputParameters->MaxVelocityVector->VecData[0] * 
                   CYCLE_TIME_IN_SECONDS;
     double b = reflexxesData_.outputParameters->NewPositionVector->VecData[0] - 
                   reflexxesData_.inputParameters->CurrentPositionVector->VecData[0];
 
-    ////ROS_INFO("a: %f b: %f a-b: %f", a, b, a-b);
-    ////ROS_INFO("Current Target: %f", reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
+    //ROS_INFO("a: %f b: %f a-b: %f", a, b, a-b);
+    //ROS_INFO("Current Target: %f", reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
 
 
     // Adjust target position
     reflexxesData_.inputParameters->TargetPositionVector->VecData[0] -= (a-b);
-    ////ROS_INFO("New Target: %f", reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
+    //ROS_INFO("New Target: %f", reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
     
     if(reflexxesData_.inputParameters->TargetPositionVector->VecData[0] < 
         reflexxesData_.inputParameters->CurrentPositionVector->VecData[0])
     {
-      //ROS_ERROR("Adjustment to target position makes target less than the current position");
-      //ROS_ERROR("Current u: %f Target u: %f", reflexxesData_.inputParameters->CurrentPositionVector->VecData[0], reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
-      //ROS_ERROR("Setting resultValue=1 to stop planning");
+      ROS_ERROR("Adjustment to target position makes target less than the current position");
+      ROS_ERROR("Current u: %f Target u: %f", reflexxesData_.inputParameters->CurrentPositionVector->VecData[0], reflexxesData_.inputParameters->TargetPositionVector->VecData[0]);
+      ROS_ERROR("Setting resultValue=1 to stop planning");
       reflexxesData_.resultValue = 1;
     }
     else 
@@ -1171,6 +1206,6 @@ const ramp_msgs::MotionState BezierCurve::spinOnce()
   *reflexxesData_.inputParameters->CurrentAccelerationVector = 
     *reflexxesData_.outputParameters->NewAccelerationVector;
 
-  ////ROS_INFO("Exiting BezierCurve::spinOnce()");
+  //ROS_INFO("Exiting BezierCurve::spinOnce()");
   return result;
 } // End spinOnce

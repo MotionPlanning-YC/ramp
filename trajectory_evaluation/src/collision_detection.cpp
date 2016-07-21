@@ -14,7 +14,7 @@ void CollisionDetection::performNum(const ramp_msgs::RampTrajectory& trajectory,
   result.collision_ = false;
   for(uint8_t i=0;i<obstacle_trjs.size() && !result.collision_;i++)
   {
-    //ROS_INFO("Ob traj: %s", utility_.toString(obstacle_trjs[i]).c_str());
+    ROS_INFO("Ob traj: %s", utility_.toString(obstacle_trjs[i]).c_str());
     query(trajectory.trajectory.points, obstacle_trjs[i].trajectory.points, trajectory.t_start.toSec(), coll_dist, result);
   }
 }
@@ -1640,9 +1640,9 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
 {
   ros::Time time_start = ros::Time::now();
 
-  /*ROS_INFO("In CollisionDetection::query"); 
+  ROS_INFO("In CollisionDetection::query"); 
   ROS_INFO("trajectory.points.size(): %i", (int)segment.size());
-  ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.size());*/
+  ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.size());
 
   /*if(ob_trajectory.trajectory.points.size() > 2)
   {
@@ -1662,6 +1662,7 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
   int i=0, j=0;
 
   for(i=0;i<segment.size();i++) 
+  //for(i=0;i<49;i++) 
   {
 
     // Set obstacle index. If i+offset > trajectory size, set j to the last point on the obstacle trajectory
@@ -1683,14 +1684,14 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
     // there is collision
     if( dist <= dist_threshold) 
     {
-      /*ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+      ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
           p_i->positions.at(0),
           p_i->positions.at(1),
           p_ob->positions.at(0),
           p_ob->positions.at(1),
           dist,
           (int)i,
-          (int)j);*/
+          (int)j);
       
       result.collision_         = true;
       result.t_firstCollision_  = p_i->time_from_start.toSec();

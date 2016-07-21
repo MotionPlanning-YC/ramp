@@ -123,8 +123,55 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result)
   {
     ROS_INFO("In if(feasible)");
     double T = trj.trajectory.points.at(trj.trajectory.points.size()-1).time_from_start.toSec();
+
+    trajectory_msgs::JointTrajectoryPoint p = trj.trajectory.points.at(trj.trajectory.points.size()-1);
+    //ROS_INFO("p: %s", utility_.toString(p).c_str());
+    uint16_t i_end=0;
+
+    // Find knot point index where non-holonomic segment ends
+    for(uint16_t i=0;i<trj.holonomic_path.points.size();i++)
+    {
+      double dist = utility_.positionDistance(trj.holonomic_path.points[i].motionState.positions, p.positions);
+      //ROS_INFO("trj.holonomic_path[%i]: %s", (int)i, utility_.toString(trj.holonomic_path.points[i].motionState).c_str());
+      //ROS_INFO("dist: %f", dist);
+
+      if( dist*dist < 0.01 )
+      {
+        i_end = i; 
+        break;
+      }
+    } // end for
+
+    //ROS_INFO("i_end: %i", (int)i_end);
+    double dist=0;
+    double delta_theta=0;
+    double last_theta = p.positions[2];
+    for(uint8_t i=i_end;i<trj.holonomic_path.points.size()-1;i++)
+    {
+      dist += utility_.positionDistance(trj.holonomic_path.points[i].motionState.positions, trj.holonomic_path.points[i+1].motionState.positions);
+      
+      double theta = utility_.findAngleFromAToB(trj.holonomic_path.points[i].motionState.positions, trj.holonomic_path.points[i+1].motionState.positions);
+      
+      delta_theta += fabs(utility_.findDistanceBetweenAngles(last_theta, theta));
+      
+      last_theta = theta;
+    }
+    //ROS_INFO("dist: %f delta_theta: %f", dist, delta_theta);
+
+    double max_v=0.33;
+    double max_w=PI/2.f;
+
+    double estimated_linear   = dist / max_v;
+    double estimated_rotation = delta_theta / max_w;
+
+    //ROS_INFO("estimated_timed: %f estimated_angle: %f", estimated_time, estimated_angle);
+
+    T += (estimated_linear + estimated_rotation);
+
+    // Orientation
     double A = orientation_.perform(trj);
-    //ROS_INFO("T: %f A: %f", T, A);
+    
+    ROS_INFO("T: %f A: %f", T, A);
     cost = T + A;
   }
 
