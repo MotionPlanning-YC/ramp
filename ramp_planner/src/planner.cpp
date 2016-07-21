@@ -1135,14 +1135,16 @@ void Planner::adaptPopulationOOP(const MotionState& ms, const ros::Duration& d)
       c.push_back(curves.at(i));
     }
 
-    ramp_msgs::TrajectoryRequest tr = buildTrajectoryRequest(paths.at(i), c);
+    ramp_msgs::TrajectoryRequest tr;
+    buildTrajectoryRequestOOP(paths.at(i), c, tr);
     tr.segments = 2;
 
     tr_reqs.push_back(tr);
   }
   
   // Get the new trajectories
-  std::vector<RampTrajectory> updatedTrajecs = requestTrajectory(tr_reqs);
+  std::vector<RampTrajectory> updatedTrajecs;
+  requestTrajectoryOOP(tr_reqs, updatedTrajecs);
 
   for(uint16_t i=0;i<updatedTrajecs.size();i++)
   {
@@ -1449,7 +1451,7 @@ void Planner::buildEvaluationSrvOOP(const RampTrajectory& trajec, ramp_msgs::Eva
 void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result) const
 {
   //ROS_INFO("In Planner::buildEvaluationRequestOOP");
-  result.trajectory = trajec.msg_;
+  result.trajectory   = trajec.msg_;
   result.currentTheta = latestUpdate_.msg_.positions[2]; 
 
   if(movingOn_.msg_.trajectory.points.size() > 0)
@@ -1531,6 +1533,56 @@ const std::vector<RampTrajectory> Planner::requestTrajectory(ramp_msgs::Trajecto
   return result;
 }
 
+void Planner::requestTrajectoryOOP(ramp_msgs::TrajectorySrv& tr, std::vector<RampTrajectory>& result, const int id)
+{
+  //ROS_INFO("In Planner::requestTrajectory(ramp_msgs::TrajectorySrv)");
+  //std::cout<<"\nid: "<<id;
+  
+  ros::Time t_start = ros::Time::now();
+  if(h_traj_req_->request(tr)) 
+  {
+    trajec_durs_.push_back(ros::Time::now() - t_start);
+    
+    //ROS_INFO("tr.request.reqs.size(): %i", (int)tr.request.reqs.size());
+    //ROS_INFO("tr.resps.size(): %i", (int)tr.response.resps.size());
+    for(uint8_t i=0;i<tr.response.resps.size();i++)
+    {
+      RampTrajectory temp;
+
+      // Set the actual trajectory msg
+      temp.msg_             = tr.response.resps.at(i).trajectory;
+
+      // Set things the traj_gen does not have
+      temp.msg_.t_start     = ros::Duration(t_fixed_cc_);
+
+      // Set the paths (straight-line and bezier)
+      temp.holonomic_path_  = tr.request.reqs.at(i).path;
+
+      // Set the ID of the trajectory
+      if(id != -1) 
+      {
+        temp.msg_.id = id;
+      }
+      else 
+      {
+        temp.msg_.id = getIRT();
+      }
+
+      result.push_back(temp);
+    } // end for
+  } // end if
+  else 
+  {
+    ROS_ERROR("An error occurred when requesting a trajectory");
+  }
+
+  //ROS_INFO("Exiting Planner::requestTrajectory, t_start: %f", result.msg_.t_start.toSec());
+}
+
+
+
+
+
 const std::vector<RampTrajectory> Planner::requestTrajectory(std::vector<ramp_msgs::TrajectoryRequest> trs)
 {
   //ROS_INFO("In Planner::requestTrajectory(vector<ramp_msgs::TrajectoryRequest>)");
@@ -1548,6 +1600,23 @@ const std::vector<RampTrajectory> Planner::requestTrajectory(std::vector<ramp_ms
 }
 
 
+
+void Planner::requestTrajectoryOOP(std::vector<ramp_msgs::TrajectoryRequest>& trs, std::vector<RampTrajectory>& result)
+{
+  //ROS_INFO("In Planner::requestTrajectory(vector<ramp_msgs::TrajectoryRequest>)");
+  ramp_msgs::TrajectorySrv srv;
+
+  for(uint8_t i=0;i<trs.size();i++)
+  {
+    srv.request.reqs.push_back(trs.at(i));
+  }
+
+  requestTrajectoryOOP(srv, result);
+}
+
+
+
+
 const RampTrajectory Planner::requestTrajectory(ramp_msgs::TrajectoryRequest tr)
 {
   ramp_msgs::TrajectorySrv srv;
@@ -1557,6 +1626,21 @@ const RampTrajectory Planner::requestTrajectory(ramp_msgs::TrajectoryRequest tr)
   return vec.at(0);
 }
 
+
+
+void Planner::requestTrajectoryOOP(ramp_msgs::TrajectoryRequest& tr, RampTrajectory& result)
+{
+  ramp_msgs::TrajectorySrv srv;
+  srv.request.reqs.push_back(tr);
+
+  std::vector<RampTrajectory> vec;
+  requestTrajectoryOOP(srv, vec);
+  
+  result = vec.at(0);
+}
+
+
+
 const RampTrajectory Planner::requestTrajectory(const Path p, const int id) 
 {
   //ROS_INFO("In Planner::requestTrajectory(Path p, int id");
@@ -1565,6 +1649,21 @@ const RampTrajectory Planner::requestTrajectory(const Path p, const int id)
   std::vector<RampTrajectory> vec = requestTrajectory(tr, id);
   return vec.at(0);
 }
+
+
+void Planner::requestTrajectoryOOP(const Path p, RampTrajectory& result, const int id)
+{
+  ramp_msgs::TrajectorySrv tr;
+  buildTrajectorySrvOOP(p, tr);
+
+  std::vector<RampTrajectory> vec;
+  requestTrajectoryOOP(tr, vec, id);
+  
+  result = vec.at(0);
+}
+
+
+
 
 
 const std::vector<RampTrajectory> Planner::requestEvaluation(std::vector<RampTrajectory> trajecs)
@@ -3151,7 +3250,7 @@ const ModificationResult Planner::modification()
 void Planner::modificationOOP()
 {
   ros::Time t_m = ros::Time::now();
-  //ROS_INFO("In Planner::modification()");
+  ROS_INFO("In Planner::modificationOOP()");
   ModificationResult result;
 
   // Modify 1 or more trajectories
@@ -3160,7 +3259,7 @@ void Planner::modificationOOP()
   modifyTrajecOOP(mod_trajec);
   ros::Time t_p = ros::Time::now();
   ROS_INFO("t_p: %f", (t_p-now).toSec());
-  //ROS_INFO("Modification trajectories obtained: %i", (int)mod_trajec.size());
+  ROS_INFO("Modification trajectories obtained: %i", (int)mod_trajec.size());
   
   if(mod_trajec.size()>1)
     modded_two=true;
@@ -3170,19 +3269,24 @@ void Planner::modificationOOP()
   // and update the planner and the modifier on the new paths
   for(unsigned int i=0;i<mod_trajec.size();i++) 
   {
-    //ROS_INFO("Modified trajectory: %s", mod_trajec.at(i).toString().c_str());
+    ROS_INFO("i: %i", i);
+    ROS_INFO("Modified trajectory: %s", mod_trajec.at(i).toString().c_str());
+    ROS_INFO("Path size: %i", mod_trajec[i].holonomic_path_.size());
     //std::cout<<"\nramp_planner: Evaluating trajectory "<<(int)i<<"\n";
 
     // Evaluate the new trajectory
     //mod_trajec.at(i) = evaluateTrajectory(mod_trajec.at(i));
     evaluateTrajectoryOOP(mod_trajec[i]);
-    //ROS_INFO("Done evaluating");
+    ROS_INFO("Done evaluating");
+    ROS_INFO("Path size: %i", mod_trajec[i].holonomic_path_.size());
 
     // Add the new trajectory to the population
     // Index is where the trajectory was added in the population (may replace another)
     // If it was successfully added, push its index onto the result
     ros::Time t_start = ros::Time::now();
+    ROS_INFO("Adding to pop, mod_trajec.size(): %i", (int)mod_trajec.size());
     int index = population_.add(mod_trajec[i]);
+    ROS_INFO("Done adding to pop");
     
     if(index > -1)
     {
@@ -3354,11 +3458,11 @@ const MotionState Planner::errorCorrection()
 void Planner::planningCycleCallback() 
 {
   ros::Time t_start = ros::Time::now();
-  //ROS_INFO("*************************************************");
-  //ROS_INFO("Planning cycle occurring, generation %i", generation_);
+  ROS_INFO("*************************************************");
+  ROS_INFO("Planning cycle occurring, generation %i", generation_);
   //ROS_INFO("  e.last_expected: %f\n  e.last_real: %f\n  current_expected: %f\n  current_real: %f\n  profile.last_duration: %f", e.last_expected.toSec(), e.last_real.toSec(), e.current_expected.toSec(), e.current_real.toSec(), e.profile.last_duration.toSec());
   //ROS_INFO("Time since last: %f", (e.current_real - e.last_real).toSec());
-  //ROS_INFO("*************************************************");
+  ROS_INFO("*************************************************");
  
   //ROS_INFO("Time since last CC: %f", (ros::Time::now()-t_prevCC_).toSec());
 
@@ -3373,7 +3477,7 @@ void Planner::planningCycleCallback()
   // Must have started control cycles
   // errorReduction is true
   // Not driving on straight line
-  if(errorReduction_ && cc_started_ && generation_ % 3 == 0 &&
+  /*if(errorReduction_ && cc_started_ && generation_ % 3 == 0 &&
       !(fabs(latestUpdate_.msg_.velocities.at(2)) > 0.1 && sqrt(pow(latestUpdate_.msg_.velocities[0],2) + pow(latestUpdate_.msg_.velocities[1],2)) > 0.01))
   {
     ros::Time t_start_error = ros::Time::now();
@@ -3415,13 +3519,7 @@ void Planner::planningCycleCallback()
       movingOn_.offsetPositions(temp);
 
       //ROS_INFO("Corrected startPlanning_: %s", startPlanning_.toString().c_str());
-      //ROS_INFO("Corrected movingOn_: %s", movingOn_.toString().c_str());*/
-
-      /*//ROS_INFO("Before offset, pop: %s\n%stransPop: %s\n%s", 
-          population_.get(0).toString().c_str(),
-          population_.get(1).toString().c_str(),
-          population_.get(0).toString().c_str(),
-          population_.get(1).toString().c_str());*/
+      //ROS_INFO("Corrected movingOn_: %s", movingOn_.toString().c_str());
 
       //population_  = offsetPopulation(population_at_cc_, diff);
       offsetPopulationOOP(temp);
@@ -3431,19 +3529,14 @@ void Planner::planningCycleCallback()
 
       EC=true;
 
-      /*//ROS_INFO("After doing error correction, new pop: %s\n%s\n\n\nnew trans pop: %s\n%s", 
-          population_.get(0).toString().c_str(),
-          population_.get(1).toString().c_str(),
-          population_.get(0).toString().c_str(),
-          population_.get(1).toString().c_str());*/
 
     } // end if doing error correction
-    /*else
-    {
+    //else
+    //{
       //ROS_INFO("Not doing error correction");
       //ROS_INFO("c_pc: %i population_.getBest().msg_.curves.size(): %i", c_pc_, (int)population_.getBest().msg_.curves.size());
       //ROS_INFO("population_.getBest().msg_.curves.at(0).u_0: %f", population_.getBest().msg_.curves.at(0).u_0); 
-    }*/
+    //}
 
     //error_correct_durs_.push_back(ros::Time::now() - t_start_error);
   } // end if doing error correction 
@@ -3465,12 +3558,12 @@ void Planner::planningCycleCallback()
   if(modifications_) 
   {
     //ROS_INFO("*****************************");
-    //ROS_INFO("Performing modification");
+    ROS_INFO("Performing modification");
     ros::Time t = ros::Time::now();
     //ModificationResult mod = modification();
     modificationOOP();
     mutate_durs_.push_back(ros::Time::now() - t);
-    //ROS_INFO("Done with modification");
+    ROS_INFO("Done with modification");
     //ROS_INFO("*****************************");
 
 
@@ -4057,9 +4150,12 @@ void Planner::requestEvaluationOOP(ramp_msgs::EvaluationRequest& request) const
 
 void Planner::requestEvaluationOOP(RampTrajectory& trajec) const
 {
+  ROS_INFO("Path size: %i", trajec.holonomic_path_.size());
   ramp_msgs::EvaluationRequest req;
   buildEvaluationRequestOOP(trajec, req);
+  ROS_INFO("Path size: %i", trajec.holonomic_path_.size());
   requestEvaluationOOP(req);
+  ROS_INFO("Path size: %i", trajec.holonomic_path_.size());
 }
 
 

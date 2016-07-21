@@ -196,6 +196,21 @@ class Planner {
     const RampTrajectory requestTrajectory(const Path p, const int id=-1);
     const RampTrajectory requestTrajectory(ramp_msgs::TrajectoryRequest tr);
 
+
+    // Many trajectories
+    void requestTrajectoryOOP(ramp_msgs::TrajectorySrv& tr, std::vector<RampTrajectory>& result, const int id=-1);
+
+    // Many trajectories
+    void requestTrajectoryOOP(std::vector<ramp_msgs::TrajectoryRequest>& trs, std::vector<RampTrajectory>& result);
+
+    void requestTrajectoryOOP(ramp_msgs::TrajectoryRequest& tr, RampTrajectory& result);
+    
+    void requestTrajectoryOOP(const Path p, RampTrajectory& result, const int id=-1);
+
+
+
+
+
     const std::vector<RampTrajectory> requestEvaluation(std::vector<RampTrajectory> trajecs);
     const RampTrajectory requestEvaluation(ramp_msgs::EvaluationRequest& er);
     const RampTrajectory requestEvaluation(const RampTrajectory traj);

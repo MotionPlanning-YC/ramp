@@ -38,6 +38,8 @@ Path::Path(const std::vector<MotionState> all) {
 
 
 Path::Path(const ramp_msgs::Path p) {
+  ROS_INFO("In Path::Path");
+  ROS_INFO("p.size(): %i", (int)p.points.size());
 
   KnotPoint s(p.points.at(0));
   start_ = s;
@@ -49,6 +51,8 @@ Path::Path(const ramp_msgs::Path p) {
     KnotPoint kp(p.points.at(i));
     all_.push_back(kp);
   }
+  
+  ROS_INFO("Exiting Path::Path");
 }
 
 Path::~Path() {}
@@ -56,7 +60,10 @@ Path::~Path() {}
 
 const bool Path::equals(const Path& p) const {
 
+  ROS_INFO("In Path::equals");
+  
   if(size() != p.size()) {
+    ROS_INFO("Exiting Path::equals");
     return false;
   }
 
@@ -64,10 +71,12 @@ const bool Path::equals(const Path& p) const {
   {
     if(!all_.at(i).equals(p.all_.at(i))) 
     {
+      ROS_INFO("Exiting Path::equals");
       return false;
     }
   }
 
+  ROS_INFO("Exiting Path::equals");
   return true;
 }
 

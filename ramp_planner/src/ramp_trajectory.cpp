@@ -15,15 +15,18 @@ RampTrajectory::RampTrajectory(const ramp_msgs::RampTrajectory msg) : msg_(msg) 
 
 const bool RampTrajectory::equals(const RampTrajectory& other) const 
 {
+  ROS_INFO("In RampTrajectory::equals");
   if(msg_.id == other.msg_.id) 
   {
     return true;
   }
 
-  Path templ(msg_.holonomic_path);
-  Path tempr(other.msg_.holonomic_path);
+  //Path templ(msg_.holonomic_path);
+  //Path tempr(other.msg_.holonomic_path);
 
-  return templ.equals(tempr);
+  ROS_INFO("Exiting RampTrajectory::equals");
+  return holonomic_path_.equals(other.holonomic_path_);
+  //return templ.equals(tempr);
 }
 
 
