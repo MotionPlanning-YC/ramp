@@ -319,7 +319,8 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   if(cc_started_)
   {
     //ROS_INFO("Evaluating movingOn_ in SC");
-    movingOn_       = evaluateTrajectory(movingOn_);
+    //movingOn_       = evaluateTrajectory(movingOn_);
+    evaluateTrajectoryOOP(movingOn_);
     moving_on_coll_ = !movingOn_.msg_.feasible;
   }
 
@@ -1448,7 +1449,7 @@ void Planner::buildEvaluationSrvOOP(const RampTrajectory& trajec, ramp_msgs::Eva
   buildEvaluationSrvOOP(t, result);
 }
 
-void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result) const
+void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result, bool full) const
 {
   //ROS_INFO("In Planner::buildEvaluationRequestOOP");
   result.trajectory   = trajec.msg_;
@@ -1473,6 +1474,8 @@ void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs:
   
   result.imminent_collision = imminent_collision_;
   result.coll_dist = COLL_DISTS[i_COLL_DISTS_];
+
+  result.full_eval = full;
   //ROS_INFO("Exiting Planner::buildEvaluationRequestOOP");
 }
 
@@ -3812,9 +3815,14 @@ void Planner::doControlCycle()
   movingOnCC_             = bestT.getSubTrajectory(t_fixed_cc_);
   movingOnCC_.msg_.curves = bestT.msg_.curves;
   movingOnCC_.msg_.t_start  = ros::Duration(0);
-  movingOnCC_               = evaluateTrajectory(movingOnCC_);
+
+  // Evaluate movingOnCC
+  evaluateTrajectoryOOP(movingOnCC_, false);
+  //movingOnCC_               = evaluateTrajectory(movingOnCC_);
+  
   //ROS_INFO("movingOnCC_: %s", movingOnCC_.toString().c_str());
   //ROS_INFO("Evaluating movingOn in CC");
+  
   movingOn_               = movingOnCC_;
   moving_on_coll_         = !movingOn_.msg_.feasible;
   //ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
@@ -4148,23 +4156,21 @@ void Planner::requestEvaluationOOP(ramp_msgs::EvaluationRequest& request) const
 
 
 
-void Planner::requestEvaluationOOP(RampTrajectory& trajec) const
+void Planner::requestEvaluationOOP(RampTrajectory& trajec, bool full) const
 {
-  ROS_INFO("Path size: %i", trajec.holonomic_path_.size());
   ramp_msgs::EvaluationRequest req;
-  buildEvaluationRequestOOP(trajec, req);
-  ROS_INFO("Path size: %i", trajec.holonomic_path_.size());
+  
+  buildEvaluationRequestOOP(trajec, req, full);
   requestEvaluationOOP(req);
-  ROS_INFO("Path size: %i", trajec.holonomic_path_.size());
 }
 
 
 
 
 
-void Planner::evaluateTrajectoryOOP(RampTrajectory& t) const
+void Planner::evaluateTrajectoryOOP(RampTrajectory& t, bool full) const
 {
-  requestEvaluationOOP(t);
+  requestEvaluationOOP(t, full);
 }
 
 
