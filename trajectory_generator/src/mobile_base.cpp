@@ -1978,14 +1978,16 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
         if(fabs(utility_.findDistanceBetweenAngles(last.positions.at(2), 
                 utility_.findAngleFromAToB(last, next_knot))) > threshold) 
         {
-          //ROS_INFO("Calling rotate");
+          ROS_INFO("Calling rotate");
+          ROS_INFO("c: %i i_cs.size(): %i", c, (int)i_cs.size());
           /*std::vector<trajectory_msgs::JointTrajectoryPoint> rotate_points = 
             rotate(last.positions.at(2), utility_.findAngleFromAToB(last, next_knot),
                     last.velocities.at(2), last.accelerations.at(2));*/
 
           // If we have reached the end of the non-holonomic segment, 
           // stop generating points
-          if(c >= i_cs.size())
+          //if(c >= i_cs.size())
+          if(i_kp_ > 1)
           {
             break;
           }

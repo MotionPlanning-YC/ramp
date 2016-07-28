@@ -37,7 +37,12 @@ void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationR
 
   if(req.full_eval)
   {
+    ROS_INFO("Requesting fitness!");
     performFitness(req.trajectory, res.fitness);
+  }
+  else
+  {
+    ROS_INFO("NOT Requesting fitness!");
   }
   //ROS_INFO("performFitness: %f", (ros::Time::now()-t_start).toSec());
 }
@@ -165,8 +170,8 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result)
     }
     ROS_INFO("dist: %f delta_theta: %f", dist, delta_theta);
 
-    double max_v=0.33;
-    double max_w=PI/2.f;
+    double max_v=0.225;
+    double max_w=PI/8.f;
 
     double estimated_linear   = dist / max_v;
     double estimated_rotation = delta_theta / max_w;

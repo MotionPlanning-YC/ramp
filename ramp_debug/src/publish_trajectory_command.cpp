@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
   ramp_msgs::KnotPoint zero;
   zero.motionState.positions.push_back(0.);
   zero.motionState.positions.push_back(0.);
-  zero.motionState.positions.push_back(0.f);
+  zero.motionState.positions.push_back(0.785f);
   zero.motionState.velocities.push_back(0.);
   zero.motionState.velocities.push_back(0.);
   zero.motionState.velocities.push_back(0.);
@@ -34,9 +34,9 @@ int main(int argc, char** argv) {
 
   // Build a Path
   ramp_msgs::KnotPoint c1;
-  c1.motionState.positions.push_back(1.); // 0.70455
-  c1.motionState.positions.push_back(0.); // 0.4026
-  c1.motionState.positions.push_back(1.24); // 0.519146
+  c1.motionState.positions.push_back(2.26861); // 0.70455
+  c1.motionState.positions.push_back(0.846369); // 0.4026
+  c1.motionState.positions.push_back(-0.370777); // 0.519146
   
   ramp_msgs::KnotPoint c2;
   c2.motionState.positions.push_back(1.); // 0.70455
@@ -45,21 +45,21 @@ int main(int argc, char** argv) {
 
 
   ramp_msgs::KnotPoint c3;
-  c3.motionState.positions.push_back(2.); // 0.857146
-  c3.motionState.positions.push_back(1.); // 0.71115
-  c3.motionState.positions.push_back(0.625932);  // 1.11151
+  c3.motionState.positions.push_back(1.33287); // 0.857146
+  c3.motionState.positions.push_back(0.239707); // 0.71115
+  c3.motionState.positions.push_back(-1.10624);  // 1.11151
 
 
   ramp_msgs::KnotPoint c4;
-  c4.motionState.positions.push_back(2.);
-  c4.motionState.positions.push_back(2.);
-  c4.motionState.positions.push_back(PI/4);
+  c4.motionState.positions.push_back(2.59145);
+  c4.motionState.positions.push_back(2.8256);
+  c4.motionState.positions.push_back(1.69508);
 
 
   ramp_msgs::KnotPoint c5;
-  c5.motionState.positions.push_back(2.37364);
-  c5.motionState.positions.push_back(1.03114);
-  c5.motionState.positions.push_back(0.684925);
+  c5.motionState.positions.push_back(2.80326);
+  c5.motionState.positions.push_back(3.25184);
+  c5.motionState.positions.push_back(-2.66846);
 
   ramp_msgs::KnotPoint c6;
   c6.motionState.positions.push_back(2.11916);
@@ -131,10 +131,10 @@ int main(int argc, char** argv) {
   ramp_msgs::Path p;
   p.points.push_back(zero);
   p.points.push_back(c1);
-  p.points.push_back(c2);
+  //p.points.push_back(c2);
   p.points.push_back(c3);
   p.points.push_back(c4);
-  //p.points.push_back(c5);
+  p.points.push_back(c5);
   //p.points.push_back(c6);
   //p.points.push_back(c7);
   //p.points.push_back(c8);

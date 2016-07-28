@@ -320,7 +320,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   {
     //ROS_INFO("Evaluating movingOn_ in SC");
     //movingOn_       = evaluateTrajectory(movingOn_);
-    evaluateTrajectoryOOP(movingOn_);
+    evaluateTrajectoryOOP(movingOn_, false);
     moving_on_coll_ = !movingOn_.msg_.feasible;
   }
 
@@ -505,7 +505,9 @@ const Population Planner::getPopulation( const MotionState init, const MotionSta
 
   // Evaluate the population 
   //ROS_INFO("Calling evaluatePopulation in getPopulation");
-  result = evaluatePopulation(result);
+  //result = evaluatePopulation(result);
+  //population_ = result;
+  //evaluatePopulationOOP();
 
   ////ROS_INFO("Exiting Planner::getRandomPopulation");
   return result;
@@ -1438,7 +1440,10 @@ void Planner::buildEvaluationSrvOOP(std::vector<RampTrajectory>& trajecs, ramp_m
 {
   for(uint16_t i=0;i<trajecs.size();i++)
   {
-    srv.request.reqs.push_back(buildEvaluationRequest(trajecs[i]));
+    ramp_msgs::EvaluationRequest req;
+    buildEvaluationRequestOOP(trajecs[i], req);
+    srv.request.reqs.push_back(req);
+    //srv.request.reqs.push_back(buildEvaluationRequest(trajecs[i]));
   }
 }
 
@@ -2292,6 +2297,8 @@ const std::vector<RampTrajectory> Planner::getTrajectories(const std::vector<Pat
     tr_srv.request.reqs.push_back(tr);
   } // end for
   ROS_INFO("Outside of for-loop");
+
+  //requestTrajectoryOOP(tr_srv, result);
 
   result = requestTrajectory(tr_srv);
   ROS_INFO("Done with requestTrajectory");
@@ -4176,7 +4183,7 @@ void Planner::evaluateTrajectoryOOP(RampTrajectory& t, bool full) const
 
 void Planner::evaluatePopulationOOP()
 {
-  requestEvaluation(population_.trajectories_);
+  requestEvaluationOOP(population_.trajectories_);
   /*for(uint16_t i=0;i<population_.size();i++)
   {
     evaluateTrajectory(population_.trajectories_[i]);
@@ -4350,6 +4357,7 @@ void Planner::go()
   
   // initialize population
   initPopulation();
+  evaluatePopulationOOP();
   ROS_INFO("Population Initialized");
   std::cin.get();
   sendPopulation(population_);
@@ -4387,6 +4395,7 @@ void Planner::go()
     population_.createSubPopulations();
     std::cout<<"\nSub-transPopulations created\n";
   }
+
 
   // Initialize transtransPopulation
   population_       = population_;
