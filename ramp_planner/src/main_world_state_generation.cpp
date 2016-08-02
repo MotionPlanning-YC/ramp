@@ -9,81 +9,41 @@
 #include "tf/transform_datatypes.h"
 
 
+
 /*
- * Indices of "ranges" argument should be:
- * 0 - x position range
- * 1 - y position range
- * 2 - orientation position range
- * 3 - linear velocity range
- * 4 - angular velocity range
+ * p_x and p_y are the position values,                 range: [0, 3.5]
+ * v_mag is the magnitude of the linear velocity,       range: [0, 0.25]
+ * v_direction is the direction of the linear velocity, range: [0, pi]
+ * w is the angular velocity (not a vector),            range: [-pi/4, pi/4]
  */
-const ramp_msgs::Obstacle buildObstacleMsg(const std::vector<Range> ranges)
+const ramp_msgs::Obstacle buildObstacleMsg(const double& p_x, const double& p_y, const double& v_mag, const double& v_direction, const double& w)
 {
+  ROS_INFO("p_x: %f p_y: %f, v_mag: %f v_direction: %f w: %f", p_x, p_y, v_mag, v_direction, w);
+
   ramp_msgs::Obstacle result;
 
+  // odom_msg describes the obstacle's position and velocity
   nav_msgs::Odometry odom_msg;
 
   // Set the x,y position
-  odom_msg.pose.pose.position.x = ranges[0].random(); 
-  odom_msg.pose.pose.position.y = ranges[1].random(); 
+  odom_msg.pose.pose.position.x = p_x;
+  odom_msg.pose.pose.position.y = p_y; 
   odom_msg.pose.pose.position.z = 0;
 
   // Set orientation
-  double theta                    = ranges[2].random();
-  odom_msg.pose.pose.orientation  = tf::createQuaternionMsgFromYaw(theta);
+  odom_msg.pose.pose.orientation  = tf::createQuaternionMsgFromYaw(v_direction);
   
-  // Get random values for linear and angular velocities
-  double v = ranges[3].random();
-  double w = ranges[4].random();
-
   // For linear velocity, calculate x and y components
-  double v_x = v*cos(tf::getYaw(odom_msg.pose.pose.orientation));
-  double v_y = v*sin(tf::getYaw(odom_msg.pose.pose.orientation));;
+  double v_x = v_mag*cos(v_direction);
+  double v_y = v_mag*sin(v_direction);
 
   // Set velocities
   odom_msg.twist.twist.linear.x   = v_x;
   odom_msg.twist.twist.linear.y   = v_y;
-  odom_msg.twist.twist.angular.z  = ranges[5].random();
+  odom_msg.twist.twist.angular.z  = w;
 
+  // Set odom_msg and return result
   result.odom_t = odom_msg;
-  return result;
-}
-
-
-
-
-/*
- * Indices of "ranges" argument should be:
- * 0 - x position range
- * 1 - y position range
- * 2 - orientation position range
- * 3 - linear velocity range
- * 4 - angular velocity range
- */
-const ramp_msgs::TrajectoryRequest buildObstacleTrajReq(const std::vector<Range> ranges)
-{
-  ramp_msgs::TrajectoryRequest result;
-
-  // Get random position
-  KnotPoint kp;
-  kp.motionState_.msg_.positions.push_back(ranges[0].random());
-  kp.motionState_.msg_.positions.push_back(ranges[1].random());
-  kp.motionState_.msg_.positions.push_back(ranges[2].random());
-
-  // Generate random velocities
-  double v = ranges[3].random();
-  double w = ranges[4].random();
-
-  double v_x = v*cos(kp.motionState_.msg_.positions[2]);
-  double v_y = v*sin(kp.motionState_.msg_.positions[2]);
-
-  kp.motionState_.msg_.velocities.push_back(v_x);
-  kp.motionState_.msg_.velocities.push_back(v_y);
-  kp.motionState_.msg_.velocities.push_back(w);
-
-  result.path.points.push_back(kp.buildKnotPointMsg());
-  result.type = PREDICTION;
-
   return result;
 }
 
@@ -96,36 +56,34 @@ int main(int argc, char** argv)
   Utility utility;
 
   srand(time(NULL));
-    
-  // Create Ranges for each dimension
-  Range x_pos(0, 3.5);
-  Range y_pos(0, 3.5);
-  Range theta_pos(-PI, PI);
-  Range linear_vels(-0.33, 0.33);
-  Range angular_vels(-PI/4.f, PI/4.f);
-
-  // Push those Ranges onto a vector
-  std::vector<Range> ranges;
-  ranges.push_back(x_pos);
-  ranges.push_back(y_pos);
-  ranges.push_back(theta_pos);
-  ranges.push_back(linear_vels);
-  ranges.push_back(angular_vels);
 
   // Set the number of obstacles (given by command line argument)
   const int NUM_OBSTACLES = argc > 1 ? atoi(argv[1]) : 1;
-
   ROS_INFO("NUM_OBSTACLES: %i", NUM_OBSTACLES);
+    
+
+  // Create Ranges for each dimension to generate random values
+  Range x_pos(0, 3.5);
+  Range y_pos(0, 3.5);
+  Range v_mag(0, 0.33);
+  Range v_direction(0, PI);
+  Range w(-PI/4.f, PI/4.f);
+
 
   /*
-   * Population an ObstacleList object
+   * Populate an ObstacleList object
    * Create x number of random obstacles, x=NUM_OBSTACLES
    */
   ramp_msgs::ObstacleList obs;
   for(uint8_t i=0;i<NUM_OBSTACLES;i++)
   {
-    obs.obstacles.push_back( buildObstacleMsg(ranges) ); 
+    // Build Obstacle msg
+    ramp_msgs::Obstacle ob = buildObstacleMsg( x_pos.random(), y_pos.random(), v_mag.random(), v_direction.random(), w.random() );
+
+    // Push new Obstacle msg onto ObstacleList obstacles vector
+    obs.obstacles.push_back(ob); 
   }
+
   ROS_INFO("obs.obstacles.size(): %i", (int)obs.obstacles.size());
 
   // Create Publisher for the ObstacleList
@@ -137,53 +95,7 @@ int main(int argc, char** argv)
 
   // Publish the list of obstacles
   pub_obs.publish(obs);
-  //pub_obs.publish(obs);
 
-
-
-
-
-
-
-  /*
-   * Below is code to generate the trajectories and work with the trajectories directly
-   * The trajectory_generator node MUST BE RUNNING OR THIS WILL FAIL
-   * In a separate terminal, run "rosrun trajectory_generator trajectory_generator" to start that node
-   */
-
-  /*
-
-  // Populate the srv message with TrajectoryRequests
-  ramp_msgs::TrajectorySrv tr_srv;
-  for(uint i=0;i<NUM_OBSTACLES;i++)
-  {
-    tr_srv.request.reqs.push_back( buildObstacleTrajReq(ranges) );
-  }
-
-  // Create a service client to call the trajectory generator
-  ros::ServiceClient traj_client = handle.serviceClient<ramp_msgs::TrajectorySrv>("/trajectory_generator");
-
-  // Create vector to hold obstacle trajectories
-  std::vector<RampTrajectory> ob_trajecs;
-
-  // Call the trajectory_generator package
-  if(traj_client.call(tr_srv))
-  {
-    for(uint8_t i=0;i<tr_srv.response.resps.size();i++)
-    {
-      ob_trajecs.push_back(tr_srv.response.resps[i].trajectory);
-    }
-  }
-  else
-  {
-    ROS_ERROR("Some error(s) getting trajectories");
-  }
-
-
-  // If no errors, then the trajectories are in ob_trajecs
-
-  */
-   
-
+  ROS_INFO("Exiting normally");
   return 0;
 }

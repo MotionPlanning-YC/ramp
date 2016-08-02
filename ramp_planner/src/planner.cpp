@@ -648,12 +648,14 @@ const std::vector<Path> Planner::adaptPaths(const Population pop, const MotionSt
       }
 
       // Erase the amount of throwaway points (points we have already passed)
-      temp.all_.erase( 
-          temp.all_.begin(), 
-          temp.all_.begin()+throwaway );
+      temp.msg_.points.erase( 
+          temp.msg_.points.begin(), 
+          temp.msg_.points.begin()+throwaway );
+
+      KnotPoint kp(start);
 
       // Insert the new starting configuration
-      temp.all_.insert( temp.all_.begin(), start);
+      temp.msg_.points.insert( temp.msg_.points.begin(), kp.buildKnotPointMsg() );
 
       // Set start_ to be the new starting configuration of the path
       temp.start_ = start;
@@ -709,12 +711,14 @@ void Planner::adaptPathsOOP(const MotionState& ms, const ros::Duration& d, std::
       }
 
       // Erase the amount of throwaway points (points we have already passed)
-      temp.all_.erase( 
-          temp.all_.begin(), 
-          temp.all_.begin()+throwaway );
+      temp.msg_.points.erase( 
+          temp.msg_.points.begin(), 
+          temp.msg_.points.begin()+throwaway );
+
+      KnotPoint kp(ms);
 
       // Insert the new starting configuration
-      temp.all_.insert( temp.all_.begin(), ms);
+      temp.msg_.points.insert( temp.msg_.points.begin(), kp.buildKnotPointMsg() );
 
       // Set start_ to be the new starting configuration of the path
       temp.start_ = ms;
@@ -1294,9 +1298,9 @@ const ramp_msgs::TrajectoryRequest Planner::buildTrajectoryRequest(const Path pa
         //ROS_INFO("In temp curve");
         ramp_msgs::BezierCurve temp;
         
-        temp.segmentPoints.push_back( path.all_.at(0).motionState_.msg_ );
-        temp.segmentPoints.push_back( path.all_.at(1).motionState_.msg_ );
-        temp.segmentPoints.push_back( path.all_.at(2).motionState_.msg_ );
+        temp.segmentPoints.push_back( path.msg_.points.at(0).motionState );
+        temp.segmentPoints.push_back( path.msg_.points.at(1).motionState );
+        temp.segmentPoints.push_back( path.msg_.points.at(2).motionState );
         
         result.bezierCurves.push_back(temp);
       }
@@ -1356,9 +1360,9 @@ void Planner::buildTrajectoryRequestOOP(const Path path, const std::vector<ramp_
         //ROS_INFO("In temp curve");
         ramp_msgs::BezierCurve temp;
         
-        temp.segmentPoints.push_back( path.all_.at(0).motionState_.msg_ );
-        temp.segmentPoints.push_back( path.all_.at(1).motionState_.msg_ );
-        temp.segmentPoints.push_back( path.all_.at(2).motionState_.msg_ );
+        temp.segmentPoints.push_back( path.msg_.points.at(0).motionState );
+        temp.segmentPoints.push_back( path.msg_.points.at(1).motionState );
+        temp.segmentPoints.push_back( path.msg_.points.at(2).motionState );
         
         result.bezierCurves.push_back(temp);
       }
@@ -1456,7 +1460,9 @@ void Planner::buildEvaluationSrvOOP(const RampTrajectory& trajec, ramp_msgs::Eva
 
 void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result, bool full) const
 {
-  //ROS_INFO("In Planner::buildEvaluationRequestOOP");
+  ROS_INFO("In Planner::buildEvaluationRequestOOP(const RampTrajectory&, EvaluationRequest&, bool)");
+  ROS_INFO("full: %s", full ? "True" : "False");
+
   result.trajectory   = trajec.msg_;
   result.currentTheta = latestUpdate_.msg_.positions[2]; 
 
@@ -1481,7 +1487,7 @@ void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs:
   result.coll_dist = COLL_DISTS[i_COLL_DISTS_];
 
   result.full_eval = full;
-  //ROS_INFO("Exiting Planner::buildEvaluationRequestOOP");
+  ROS_INFO("Exiting Planner::buildEvaluationRequestOOP(const RampTrajectory&, EvaluationRequest&, bool)");
 }
 
 
@@ -2179,8 +2185,8 @@ const ramp_msgs::BezierCurve Planner::replanCurve(const RampTrajectory trajec, c
   ramp_msgs::BezierCurve result = trajec.msg_.curves.at(0);
 
   // Get length of original curve's first segment
-  double delta_x = trajec.holonomic_path_.all_.at(1).motionState_.msg_.positions.at(0) - result.segmentPoints.at(0).positions.at(0);
-  double delta_y = trajec.holonomic_path_.all_.at(1).motionState_.msg_.positions.at(1) - result.segmentPoints.at(0).positions.at(1);
+  double delta_x = trajec.holonomic_path_.msg_.points.at(1).motionState.positions.at(0) - result.segmentPoints.at(0).positions.at(0);
+  double delta_y = trajec.holonomic_path_.msg_.points.at(1).motionState.positions.at(1) - result.segmentPoints.at(0).positions.at(1);
   double l = sqrt( pow(delta_x, 2) + pow(delta_y, 2) );
 
   double theta = ms_start.msg_.positions.at(2);
@@ -2216,12 +2222,15 @@ const RampTrajectory Planner::replanTrajec(const RampTrajectory trajec, const Mo
   //ROS_INFO("Test my ID: pop best ID: %i", population_.getBest().msg_.id);
   //ROS_INFO("result: %s", result.toString().c_str());
   //ROS_INFO("result.curves.size: %i", (int)result.msg_.curves.size());
+  
+  ramp_msgs::KnotPoint kp_start;
+  kp_start.motionState = ms_start.msg_;
 
-  result.holonomic_path_.start_ = ms_start;
+  result.holonomic_path_.start_ = kp_start;
   //ROS_INFO("ms_start: %s", ms_start.toString().c_str());
 
-  result.holonomic_path_.all_.erase( result.holonomic_path_.all_.begin() );
-  result.holonomic_path_.all_.insert( result.holonomic_path_.all_.begin(), ms_start);
+  result.holonomic_path_.msg_.points.erase(   result.holonomic_path_.msg_.points.begin() );
+  result.holonomic_path_.msg_.points.insert(  result.holonomic_path_.msg_.points.begin(), kp_start);
 
   double v = sqrt(  pow( ms_start.msg_.velocities.at(0), 2) + 
                     pow( ms_start.msg_.velocities.at(1), 2) );
@@ -2234,9 +2243,10 @@ const RampTrajectory Planner::replanTrajec(const RampTrajectory trajec, const Mo
       result.msg_.curves.at(0).u_0 < 0.001      ) 
   {
     result.msg_.curves.at(0) = replanCurve( trajec, ms_start );
-    result.holonomic_path_.all_.erase(result.holonomic_path_.all_.begin()+1);
-    MotionState m(result.msg_.curves.at(0).segmentPoints.at(1));
-    result.holonomic_path_.all_.insert(result.holonomic_path_.all_.begin()+1, m);
+    result.holonomic_path_.msg_.points.erase(result.holonomic_path_.msg_.points.begin()+1);
+
+    KnotPoint m(result.msg_.curves.at(0).segmentPoints.at(1));
+    result.holonomic_path_.msg_.points.insert(result.holonomic_path_.msg_.points.begin()+1, m.buildKnotPointMsg());
    
   }
   else 
@@ -2432,10 +2442,11 @@ void Planner::computeFullSwitchOOP(const RampTrajectory& from, const RampTraject
     RampTrajectory T_new = trajecs.at(1);
     Path p = T_new.holonomic_path_;
     ////ROS_INFO("Before eval, T_new.path: %s", T_new.path_.toString().c_str());
+    ROS_INFO("to.msg.holonomic_path: %s", utility_.toString(to.msg_.holonomic_path).c_str());;
 
     // Evaluate T_new
-    ramp_msgs::EvaluationRequest er = buildEvaluationRequest(T_new);
-    T_new                           = requestEvaluation(er);
+    //ramp_msgs::EvaluationRequest er = buildEvaluationRequest(T_new);
+    requestEvaluationOOP(T_new);
 
     // Set misc members
     T_new.transitionTraj_ = trajecs.at(0).msg_;
@@ -2953,13 +2964,13 @@ void Planner::getTransitionTrajectoryOOP(const RampTrajectory& trj_movingOn, con
   {
     ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
     ROS_WARN("Removing the following point at index 1 of the Path: %s", p.at(1).toString().c_str());
-    p.all_.erase(p.all_.begin()+1);
+    p.msg_.points.erase(p.msg_.points.begin()+1);
   }
 
   if(fabs(ms_endOfMovingOn.msg_.velocities[2]) > 0.1 && fabs(g.msg_.velocities[2]) > 0.1)
   {
     ROS_WARN("Segment 2 is actually a curve, stopping transition trajectory at first segment");
-    //p.all_.erase(p.all_.begin()+1);
+    //p.msg_.points.erase(p.msg_.points.begin()+1);
     RampTrajectory blank;
     result = blank;
     return;
@@ -3079,13 +3090,13 @@ const RampTrajectory Planner::getTransitionTrajectory(const RampTrajectory trj_m
   {
     ROS_WARN("Segments have the same orientation - no need to plan a transition curve, use a straight-line trajectory");
     ROS_WARN("Removing the following point at index 1 of the Path: %s", p.at(1).toString().c_str());
-    p.all_.erase(p.all_.begin()+1);
+    p.msg_.points.erase(p.msg_.points.begin()+1);
   }
 
   if(fabs(ms_endOfMovingOn.msg_.velocities[2]) > 0.1 && fabs(g.msg_.velocities[2]) > 0.1)
   {
     ROS_WARN("Segment 2 is actually a curve, stopping transition trajectory at first segment");
-    //p.all_.erase(p.all_.begin()+1);
+    //p.msg_.points.erase(p.msg_.points.begin()+1);
     RampTrajectory blank;
     return blank;
   }
@@ -3361,12 +3372,14 @@ void Planner::pause()
 void Planner::updatePathsStart(const MotionState s) 
 {
   //ROS_INFO("In Planner::updatePathsStart");
+  
+  KnotPoint kp_s(s);
 
   for(unsigned int i=0;i<population_.paths_.size();i++) {
     population_.paths_.at(i).start_ = s;
 
-    population_.paths_.at(i).all_.erase (population_.paths_.at(i).all_.begin());
-    population_.paths_.at(i).all_.insert(population_.paths_.at(i).all_.begin(), s);
+    population_.paths_.at(i).msg_.points.erase (population_.paths_.at(i).msg_.points.begin());
+    population_.paths_.at(i).msg_.points.insert(population_.paths_.at(i).msg_.points.begin(), kp_s.buildKnotPointMsg());
   }
 
   //ROS_INFO("Exiting Planner::updatePathsStart");
@@ -3899,6 +3912,7 @@ void Planner::doControlCycle()
   ros::Time t_startTrans = ros::Time::now();
  
   getTransPopOOP(population_, movingOn_, population_);
+  ROS_INFO("Evaluating transPop");
   evaluatePopulationOOP();
   
   ros::Duration d_trans = ros::Time::now() - t_startTrans;
@@ -4165,10 +4179,13 @@ void Planner::requestEvaluationOOP(ramp_msgs::EvaluationRequest& request) const
 
 void Planner::requestEvaluationOOP(RampTrajectory& trajec, bool full) const
 {
+  ROS_INFO("In Planner::requestEvaluationOOP(RampTrajectory&, bool)");
+  ROS_INFO("full: %s", full ? "True" : "False");
   ramp_msgs::EvaluationRequest req;
   
   buildEvaluationRequestOOP(trajec, req, full);
   requestEvaluationOOP(req);
+  ROS_INFO("Exiting Planner::requestEvaluationOOP(RampTrajectory&, bool)");
 }
 
 
