@@ -142,6 +142,7 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result)
     {
       ROS_INFO("i: %i trj.holonomic_path.points.size(): %i", (int)i, (int)trj.holonomic_path.points.size());
       double dist = utility_.positionDistance(trj.holonomic_path.points[i].motionState.positions, p.positions);
+
       ROS_INFO("trj.holonomic_path[%i]: %s", (int)i, utility_.toString(trj.holonomic_path.points[i].motionState).c_str());
       //ROS_INFO("dist: %f", dist);
 

@@ -131,10 +131,10 @@ int main(int argc, char** argv) {
   ramp_msgs::Path p;
   p.points.push_back(zero);
   p.points.push_back(c1);
-  //p.points.push_back(c2);
-  p.points.push_back(c3);
-  p.points.push_back(c4);
-  p.points.push_back(c5);
+  p.points.push_back(c2);
+  //p.points.push_back(c3);
+  //p.points.push_back(c4);
+  //p.points.push_back(c5);
   //p.points.push_back(c6);
   //p.points.push_back(c7);
   //p.points.push_back(c8);
