@@ -17,7 +17,6 @@ class Path {
     // Data members
     KnotPoint start_;
     KnotPoint goal_;
-    std::vector<KnotPoint> all_;
 
     ramp_msgs::Path msg_;
 

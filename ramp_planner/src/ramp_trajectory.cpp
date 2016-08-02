@@ -21,12 +21,12 @@ const bool RampTrajectory::equals(const RampTrajectory& other) const
     return true;
   }
 
-  //Path templ(msg_.holonomic_path);
-  //Path tempr(other.msg_.holonomic_path);
+  Path templ(msg_.holonomic_path);
+  Path tempr(other.msg_.holonomic_path);
 
   ROS_INFO("Exiting RampTrajectory::equals");
-  return holonomic_path_.equals(other.holonomic_path_);
-  //return templ.equals(tempr);
+  //return msg_.holonomic_path.equals(other.msg_.holonomic_path);
+  return templ.equals(tempr);
 }
 
 
@@ -43,12 +43,13 @@ const Path RampTrajectory::getNonHolonomicPath() const
   {
 
     MotionState ms(msg_.trajectory.points.at( msg_.i_knotPoints.at(i)));
-  
-    result.all_.push_back(ms);
+    KnotPoint kp_ms(ms);
+
+    result.msg_.points.push_back(kp_ms.buildKnotPointMsg());
   }
 
-  result.start_ = result.all_.at(0);
-  result.goal_  = result.all_.at( result.all_.size()-1 );
+  result.start_ = result.msg_.points[0];
+  result.goal_  = result.msg_.points[ result.msg_.points.size()-1 ];
   
   return result;
 }
@@ -84,9 +85,9 @@ const trajectory_msgs::JointTrajectoryPoint RampTrajectory::getPointAtTime(const
 const double RampTrajectory::getDirection() const 
 {
   //std::cout<<"\nIn getDirection\n";
-  std::vector<double> a = holonomic_path_.start_.motionState_.msg_.positions;
+  std::vector<double> a = msg_.holonomic_path.points[0].motionState.positions;
 
-  std::vector<double> b = holonomic_path_.all_.at(1).motionState_.msg_.positions;
+  std::vector<double> b = msg_.holonomic_path.points[1].motionState.positions;
 
     //msg_.trajectory.points.at(msg_.i_knotPoints.at(2)) :
     //msg_.trajectory.points.at(msg_.i_knotPoints.at(1)) ;
@@ -388,9 +389,12 @@ void RampTrajectory::offsetPositions(const MotionState& diff)
   } // end outter for
   ////ROS_INFO("Done offsetting points");
 
-  if(holonomic_path_.size() > 0)
+  if(msg_.holonomic_path.points.size() > 0)
   {
-    holonomic_path_.offsetPositions(diff);
+    Path temp(msg_.holonomic_path);
+    temp.offsetPositions(diff);
+    msg_.holonomic_path = temp.msg_;
+    //msg_.holonomic_path.offsetPositions(diff);
   }
   else
   {
@@ -405,16 +409,16 @@ void RampTrajectory::offsetPositions(const MotionState& diff)
     //ROS_WARN("temp.curve.at(0): %s", utility_.toString(msg_.curves.at(0)).c_str());
   }*/
 
-  for(uint8_t c=0;c<msg_.curves.size() && holonomic_path_.size() > 2;c++)
+  for(uint8_t c=0;c<msg_.curves.size() && msg_.holonomic_path.points.size() > 2;c++)
   {
-    /*//ROS_INFO("Fixing curve %i, holonomic_path_..size(): %i segmentPoints.size(): %i controlPoints.size(): %i", 
+    /*//ROS_INFO("Fixing curve %i, msg_.holonomic_path..size(): %i segmentPoints.size(): %i controlPoints.size(): %i", 
         c, 
-        holonomic_path_..size(), 
+        msg_.holonomic_path..size(), 
         (int)msg_.curves.at(c).segmentPoints.size(), 
         (int)msg_.curves.at(c).controlPoints.size());*/
 
-    msg_.curves.at(c).segmentPoints.at(1) = holonomic_path_.at(1).motionState_.msg_;
-    msg_.curves.at(c).segmentPoints.at(2) = holonomic_path_.at(2).motionState_.msg_;
+    msg_.curves.at(c).segmentPoints.at(1) = msg_.holonomic_path.points.at(1).motionState;
+    msg_.curves.at(c).segmentPoints.at(2) = msg_.holonomic_path.points.at(2).motionState;
 
     MotionState c0(msg_.curves.at(c).controlPoints.at(0));
     MotionState c1(msg_.curves.at(c).controlPoints.at(1));
@@ -443,7 +447,7 @@ const std::string RampTrajectory::fitnessFeasibleToString() const
   std::ostringstream result;
  
   result<<"\nTrajectory ID: "<<msg_.id;
-  result<<"\n Holonomic Path: "<<holonomic_path_.toString();
+  result<<"\n Holonomic Path: "<<utility_.toString(msg_.holonomic_path).c_str();
   result<<"\n Non-holonomic Path: "<<getNonHolonomicPath().toString();
   result<<"\n t_start: "<<msg_.t_start.toSec()<<" Fitness: "<<msg_.fitness<<" Feasible: "<<(bool)msg_.feasible<<" Collision Time: "<<msg_.t_firstCollision;
 

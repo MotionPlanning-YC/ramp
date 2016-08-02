@@ -80,7 +80,7 @@ const bool Path::equals(const Path& p) const
   for(uint8_t i=0;i<size();i++) 
   {
     KnotPoint temp(msg_.points[i]);
-    if(!temp.equals(p.all_[i])) 
+    if(!temp.equals(p.msg_.points[i])) 
     {
       ROS_INFO("Exiting Path::equals");
       return false;
@@ -160,7 +160,7 @@ const std::string Path::toString() const
 {
   std::ostringstream result;
 
-  for(unsigned int i=0;i<all_.size();i++) 
+  for(unsigned int i=0;i<msg_.points.size();i++) 
   {
     result<<"\n  "<<i<<": "<<utility_.toString(msg_.points[i]).c_str();
   }
