@@ -3754,6 +3754,185 @@ const uint8_t Planner::computeSwitchPC(const Population pop, const RampTrajector
 }
 
 
+
+double Planner::getEarliestStartTime(const RampTrajectory& from)
+{
+  ROS_INFO("In Planner::getEarliestStartTime");
+  ROS_INFO("From: %s", from.toString().c_str());
+  double result;
+
+  std::vector<double> times;
+  for(int i=0;i<population_.size();i++)
+  {
+    RampTrajectory traj = population_.get(i);
+
+    uint8_t deltasPerCC = (t_fixed_cc_+0.0001) / delta_t_switch_;
+    uint8_t delta_t_now = (ros::Time::now() - t_prevCC_).toSec() / delta_t_switch_;
+    double  delta_t     = ((deltasPerCC+1)*delta_t_switch_);
+    for(int i_delta_t=deltasPerCC-1; i_delta_t > (delta_t_now+1); i_delta_t--)
+    {
+      double t = i_delta_t * delta_t_switch_;
+
+      MotionState ms = traj.getPointAtTime(t);
+      if(predictTransition(from, traj, t))
+      {
+        times.push_back(t); 
+        break;
+      } // end if
+    } // end for starting times
+    // what if no switch
+  } // end for each trajectory
+
+  if(times.size() == 0)
+  {
+    result = t_fixed_cc_;
+  }
+  else
+  {
+    // Get earliest time
+    result = times[0];
+    for(int i=1;i<times.size();i++)
+    {
+      if(times[i] < result)
+      {
+        result = times[i];
+      }
+    } // end for
+  } // end else
+
+  ROS_INFO("Exiting Planner::getEarliestStartTime");
+  return result;
+} // End getEarliestStartTime
+
+
+
+void Planner::computeFullSwitchOOP(const RampTrajectory& from, const RampTrajectory& to, const double& t_start, RampTrajectory& result)
+{
+  ROS_INFO("In Planner::computeFullSwitchOOP");
+  //ROS_INFO("to: %s", to.toString().c_str());
+
+  // Get transition trajectory
+  ros::Time tt = ros::Time::now();
+  std::vector<RampTrajectory> trajecs;
+  switchTrajectoryOOP(from, to, t_start, trajecs);
+  ////ROS_INFO("Time spent getting switch trajectory: %f", (ros::Time::now()-tt).toSec());
+
+  // If a switch was possible
+  if(trajecs.size() > 0)
+  {
+    RampTrajectory T_new = trajecs.at(1);
+    Path p = T_new.msg_.holonomic_path;
+    ////ROS_INFO("Before eval, T_new.path: %s", T_new.path_.toString().c_str());
+    ROS_INFO("to.msg.holonomic_path: %s", utility_.toString(to.msg_.holonomic_path).c_str());;
+
+    // Evaluate T_new
+    //ramp_msgs::EvaluationRequest er = buildEvaluationRequest(T_new);
+    requestEvaluationOOP(T_new);
+
+    // Set misc members
+    T_new.transitionTraj_ = trajecs.at(0).msg_;
+    T_new.msg_.holonomic_path = p.msg_;
+
+    // Set result
+    result                  = T_new;
+    result.transitionTraj_  = trajecs.at(0).msg_;
+    ////ROS_INFO("result.transitionTraj.size(): %i", (int)result.transitionTraj_.trajectory.points.size());
+
+    ////ROS_INFO("After eval, T_new.path: %s", T_new.path_.toString().c_str());
+  }
+
+  // If a switch was not possible, just return
+  // the holonomic trajectory
+  else
+  {
+    ////ROS_WARN("A switch was not possible, returning \"to\" trajectory: %s", to.toString().c_str());
+    result = to;
+  }
+
+  //ROS_INFO("Full switch result: %s", result.toString().c_str());
+  ROS_INFO("Exiting Planner::computeFullSwitchOOP");
+}
+    
+void Planner::switchTrajectoryOOP(const RampTrajectory& from, const RampTrajectory& to, const double& t_start, std::vector<RampTrajectory>& result)
+{
+
+  /*
+   * Call getTransitionTrajectory
+   * if we can find one before next CC
+   */
+  //if(delta_t  < ((deltasPerCC+1)*delta_t_switch_))
+  //{
+  RampTrajectory switching, full;
+  getTransitionTrajectoryOOP(from, to, t_start, switching);
+  full = switching;
+  //ROS_INFO("Switching trajectory: %s", switching.toString().c_str());
+
+  // If robot is at goal, full should only be 1 point,
+  // check for this to prevent crashing
+  if(full.msg_.i_knotPoints.size() > 1)
+  {
+    // Keep a counter for the knot points
+    // Start at 1 because that should be the starting knot point of the curve
+    int c_kp = 1;
+    
+    //ROS_INFO("c_kp: %i", c_kp);
+    //ROS_INFO("c_kp: %i i_knotPoints.size(): %i", c_kp, (int)to.msg_.i_knotPoints.size());
+    
+    //ROS_INFO("full.path: %s", full.msg_.holonomic_path.toString().c_str());
+
+    // Set full as the concatenating of switching and to
+    full        = switching.concatenate(to, c_kp);
+    
+    //ROS_INFO("full.path: %s", full.msg_.holonomic_path.toString().c_str());
+
+
+    // Set the proper ID, path, and t_starts
+    full.msg_.id              = to.msg_.id;
+    full.msg_.holonomic_path  = to.msg_.holonomic_path;
+
+    full.msg_.t_start       = ros::Duration(t_start);
+    switching.msg_.t_start  = full.msg_.t_start;
+
+    full.transitionTraj_    = switching.msg_;
+
+    result.push_back(switching);
+    result.push_back(full);
+  } // end if size > 1
+  //} // end if switch possible
+ 
+
+  if(print_enter_exit_)
+  {
+    ROS_INFO("Exiting Planner::switchTrajectoryOOP");
+  }
+}
+
+
+
+void Planner::getTransPopOOP(const Population& pop, const RampTrajectory& movingOn, const double& t_start, Population& result)
+{
+  ROS_INFO("In Planner::getTransPopOOP");
+  ////ROS_INFO("pop: %s", pop.toString().c_str());
+  result = pop;
+
+  if(result.type_ != HOLONOMIC)
+  {
+    // Go through the population and get:
+    // 1) planning cycle to switch at
+    // 2) transition trajectory
+    for(uint8_t i=0;i<pop.size();i++)
+    {
+      //ROS_INFO("i: %i", i);
+      RampTrajectory temp;
+      computeFullSwitchOOP(movingOn_, pop.get(i), t_start, temp);
+      result.replace(i, temp);
+    }
+  }
+  ////ROS_INFO("Trans pop full: %s", result.toString().c_str());
+
+  ROS_INFO("Exiting Planner::getTransPopOOP");
+}
+
 void Planner::getTransPopOOP(const Population& pop, const RampTrajectory& movingOn, Population& result)
 {
   ROS_INFO("In Planner::getTransPopOOP");
@@ -3777,6 +3956,8 @@ void Planner::getTransPopOOP(const Population& pop, const RampTrajectory& moving
 
   ROS_INFO("Exiting Planner::getTransPopOOP");
 } // End getTransPopOOP
+
+
 
 const Population Planner::getTransPop(const Population pop, const RampTrajectory movingOn)
 {
@@ -3924,8 +4105,12 @@ void Planner::doControlCycle()
  
   // Find the transition (non-holonomic) population and set new control cycle time
   ros::Time t_startTrans = ros::Time::now();
+
+  double t_start = getEarliestStartTime(movingOn_);
+  ROS_INFO("t_start: %f", t_start);
+  getTransPopOOP(population_, movingOn_, t_start, population_);
  
-  getTransPopOOP(population_, movingOn_, population_);
+  //getTransPopOOP(population_, movingOn_, population_);
   ROS_INFO("Evaluating transPop");
   evaluatePopulationOOP();
   

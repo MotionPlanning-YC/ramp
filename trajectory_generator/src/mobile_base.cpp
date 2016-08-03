@@ -1987,7 +1987,7 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
           // If we have reached the end of the non-holonomic segment, 
           // stop generating points
           //if(c >= i_cs.size())
-          if(i_kp_ > 1)
+          if(i_kp_ > 1 && type_ == HYBRID)
           {
             break;
           }

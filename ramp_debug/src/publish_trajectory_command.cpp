@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   
   ramp_msgs::KnotPoint c2;
   c2.motionState.positions.push_back(1.); // 0.70455
-  c2.motionState.positions.push_back(1.); // 0.4026
+  c2.motionState.positions.push_back(0.5); // 0.4026
   c2.motionState.positions.push_back(2.419); // 0.519146
 
 
@@ -138,7 +138,7 @@ int main(int argc, char** argv) {
   //p.points.push_back(c6);
   //p.points.push_back(c7);
   //p.points.push_back(c8);
-  p.points.push_back(c9);
+  //p.points.push_back(c9);
   
 
   /***************************************************/
@@ -391,7 +391,7 @@ int main(int argc, char** argv) {
   
   ramp_msgs::TrajectoryRequest tr;
   tr.path = p;
-  tr.type = PARTIAL_BEZIER;
+  tr.type = TRANSITION;
   tr.print = true;
   tr.bezierCurves = curves;
   tr.segments = 0;
