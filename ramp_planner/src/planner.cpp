@@ -3825,7 +3825,7 @@ void Planner::doControlCycle()
   // Set the bestT
   RampTrajectory bestT = population_.getBest();
 
-  //ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
+  ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
 
   // Send the best trajectory and set movingOn
   ////ROS_INFO("Sending best");
@@ -3856,6 +3856,7 @@ void Planner::doControlCycle()
   {
     m_cc_ = latestUpdate_;
   }
+  // If trajectory does not reach t_fixed_cc, last point will be returned
   else
   {
     m_cc_ = bestT.getPointAtTime(t_fixed_cc_);
@@ -3863,7 +3864,7 @@ void Planner::doControlCycle()
 
   // At CC, startPlanning is assumed to be perfect (no motion error accounted for yet)
   startPlanning_ = m_cc_;
-  ////ROS_INFO("New startPlanning_: %s", startPlanning_.toString().c_str());
+  ROS_INFO("New startPlanning_: %s", startPlanning_.toString().c_str());
 
   ROS_INFO("Before adaptation and evaluation, pop size: %i", population_.size());
   for(uint8_t i=0;i<populationSize_;i++)
@@ -3877,7 +3878,17 @@ void Planner::doControlCycle()
  
   ros::Time t_startAdapt = ros::Time::now();
   
-  adaptPopulationOOP(startPlanning_, ros::Duration(t_fixed_cc_));
+  // Adapt population
+  // Check if bestT time reaches t_fixed_cc
+  if(bestT.getT() <= t_fixed_cc_)
+  {
+    adaptPopulationOOP(startPlanning_, ros::Duration(t_fixed_cc_));
+  }
+  else
+  {
+    adaptPopulationOOP(startPlanning_, ros::Duration(bestT.getT()));
+  }
+
   evaluatePopulationOOP();
 
   ros::Duration d_adapt = ros::Time::now() - t_startAdapt;
@@ -3951,6 +3962,8 @@ void Planner::doControlCycle()
   
   controlCycle_         = population_.getEarliestStartTime();
   controlCycleTimer_.setPeriod(controlCycle_, false);
+
+  ROS_INFO("Next CC Time: %f", controlCycle_.toSec());
 
   ros::Duration d_cc = ros::Time::now() - t;
   cc_durs_.push_back(d_cc);

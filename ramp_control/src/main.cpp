@@ -1,4 +1,5 @@
 #include "ros/ros.h"
+#include <signal.h>
 #include "mobile_robot.h"
 #include "ramp_msgs/MotionState.h"
 
@@ -41,15 +42,28 @@ void init_advertisers_subscribers(MobileRobot& robot, ros::NodeHandle& handle, b
 
 
 
+void reportData(int sig)
+{
+  double sum = 0;
+  for(int i=0;i<robot.t_points_.size();i++)
+  {
+    sum += robot.t_points_[i].toSec();
+  }
+  ROS_INFO("Average point time: %f", (sum / robot.t_points_.size()));
+}
 
 
 
 int main(int argc, char** argv) {
 
   ros::init(argc, argv, "ramp_control");
+
+
   ros::NodeHandle handle;  
   ros::NodeHandle handle_local("~");
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1, trajCallback);
+
+  setvbuf(stdout, NULL, _IOLBF, 4096);
  
   //handle.param("ramp_control/orientation", robot.initial_theta_, 0.785);
   handle_local.param("orientation", robot.initial_theta_, 0.);
@@ -73,6 +87,8 @@ int main(int argc, char** argv) {
   // Make a blank ramp_msgs::RampTrajectory
   ramp_msgs::RampTrajectory init;
   robot.trajectory_ = init;
+  
+  signal(SIGINT, reportData);
 
   // Put a rate on the while loop to prevent high CPU usage
   // With no rate, CPU usage is ~110%
@@ -86,6 +102,7 @@ int main(int argc, char** argv) {
     ros::spinOnce();
   }
 
+  fflush(stdout);
 
   std::cout<<"\nExiting Normally\n";
   return 0;
