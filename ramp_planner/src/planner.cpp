@@ -3147,13 +3147,11 @@ const std::vector<RampTrajectory> Planner::modifyTrajec()
 {
   //ROS_INFO("In Planner::modifyTrajec");
   std::vector<RampTrajectory> result;
-  
 
   // The process begins by modifying one or more paths
   ros::Time t_p = ros::Time::now();
   std::vector<Path> modded_paths = modifyPath();
   //ROS_INFO("Number of modified paths: %i", (int)modded_paths.size());
-
 
   // For each targeted path,
   for(unsigned int i=0;i<modded_paths.size();i++) 
@@ -3299,8 +3297,14 @@ void Planner::modificationOOP()
     //std::cout<<"\nramp_planner: Evaluating trajectory "<<(int)i<<"\n";
 
     // Evaluate the new trajectory
-    //mod_trajec.at(i) = evaluateTrajectory(mod_trajec.at(i));
-    evaluateTrajectoryOOP(mod_trajec[i]);
+    //evaluateTrajectoryOOP(mod_trajec[i]);
+    
+    // Compute full switch (method evaluates the trajectory)
+    RampTrajectory& traj_final = mod_trajec[i];
+    if(cc_started_)
+    {
+      computeFullSwitchOOP(movingOn_, mod_trajec[i], controlCycle_.toSec(), traj_final);
+    }
     ROS_INFO("Done evaluating");
     ROS_INFO("Path size: %i", (int)mod_trajec[i].msg_.holonomic_path.points.size());
 
@@ -3308,16 +3312,18 @@ void Planner::modificationOOP()
     // Index is where the trajectory was added in the population (may replace another)
     // If it was successfully added, push its index onto the result
     ros::Time t_start = ros::Time::now();
-    ROS_INFO("Adding to pop, mod_trajec.size(): %i", (int)mod_trajec.size());
-    int index = population_.add(mod_trajec[i]);
-    ROS_INFO("Done adding to pop");
+    //ROS_INFO("Adding to pop, mod_trajec.size(): %i", (int)mod_trajec.size());
+    int index = population_.add(traj_final);
+    //int index = population_.add(mod_trajec[i]);
+    //ROS_INFO("Done adding to pop");
     
+    // No longer need to reset CC time because trajs should have same t_start
     if(index > -1)
     {
       //ROS_INFO("Adding trajectory at index %i \n%s", index, mod_trajec[i].toString().c_str());
       //ROS_INFO("Population Previously: %s", popCopy.toString().c_str());
-      controlCycle_ = population_.getEarliestStartTime();
-      controlCycleTimer_.setPeriod(controlCycle_, false);
+      //controlCycle_ = population_.getEarliestStartTime();
+      //controlCycleTimer_.setPeriod(controlCycle_, false);
       mod_worked=true;
     }
 
@@ -3333,7 +3339,7 @@ void Planner::modificationOOP()
 
   ////ROS_INFO("After modification, pop now: %s", result.popNew_.toString().c_str());
   //ROS_INFO("Exiting Planner::modification");
-}
+} // End modificationOOP
 
 
 
