@@ -1461,6 +1461,7 @@ void Planner::buildEvaluationSrvOOP(const RampTrajectory& trajec, ramp_msgs::Eva
 void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result, bool full) const
 {
   ROS_INFO("In Planner::buildEvaluationRequestOOP(const RampTrajectory&, EvaluationRequest&, bool)");
+  ROS_INFO("trajec: %s", trajec.toString().c_str());
   ROS_INFO("full: %s", full ? "True" : "False");
 
   result.trajectory   = trajec.msg_;
@@ -1486,7 +1487,14 @@ void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs:
   result.imminent_collision = imminent_collision_;
   result.coll_dist = COLL_DISTS[i_COLL_DISTS_];
 
+  // full_eval is for predicting segments that are not generated
   result.full_eval = full;
+
+  // consider_trans for trajs including switches
+  result.consider_trans = true;
+  result.trans_possible = trajec.transitionTraj_.trajectory.points.size() > 0;
+
+  ROS_INFO("transitionTraj: %s", utility_.toString(trajec.transitionTraj_).c_str());
   ROS_INFO("Exiting Planner::buildEvaluationRequestOOP(const RampTrajectory&, EvaluationRequest&, bool)");
 }
 
@@ -2507,7 +2515,6 @@ const RampTrajectory Planner::computeFullSwitch(const RampTrajectory& from, cons
 
     // Set result
     result                  = T_new;
-    result.transitionTraj_  = trajecs.at(0).msg_;
     ////ROS_INFO("result.transitionTraj.size(): %i", (int)result.transitionTraj_.trajectory.points.size());
 
     ////ROS_INFO("After eval, T_new.path: %s", T_new.path_.toString().c_str());
@@ -2753,7 +2760,10 @@ void Planner::switchTrajectoryOOP(const RampTrajectory& from, const RampTrajecto
       full.msg_.t_start       = ros::Duration(delta_t);
       switching.msg_.t_start  = full.msg_.t_start;
 
-      full.transitionTraj_    = switching.msg_;
+      if(full.transitionTraj_.curves.size() > 0)
+      {
+        full.transitionTraj_    = switching.msg_;
+      }
 
       result.push_back(switching);
       result.push_back(full);
@@ -3836,12 +3846,14 @@ void Planner::computeFullSwitchOOP(const RampTrajectory& from, const RampTraject
     requestEvaluationOOP(T_new);
 
     // Set misc members
-    T_new.transitionTraj_ = trajecs.at(0).msg_;
+    if(trajecs[0].msg_.curves.size() > 0 || trajecs[0].msg_.i_knotPoints.size() == 2)
+    {
+      T_new.transitionTraj_ = trajecs.at(0).msg_;
+    }
     T_new.msg_.holonomic_path = p.msg_;
 
     // Set result
     result                  = T_new;
-    result.transitionTraj_  = trajecs.at(0).msg_;
     ////ROS_INFO("result.transitionTraj.size(): %i", (int)result.transitionTraj_.trajectory.points.size());
 
     ////ROS_INFO("After eval, T_new.path: %s", T_new.path_.toString().c_str());
@@ -3899,7 +3911,10 @@ void Planner::switchTrajectoryOOP(const RampTrajectory& from, const RampTrajecto
     full.msg_.t_start       = ros::Duration(t_start);
     switching.msg_.t_start  = full.msg_.t_start;
 
-    full.transitionTraj_    = switching.msg_;
+    if(full.transitionTraj_.curves.size() > 0 || full.transitionTraj_.i_knotPoints.size() == 2)
+    {
+      full.transitionTraj_    = switching.msg_;
+    }
 
     result.push_back(switching);
     result.push_back(full);
@@ -4076,6 +4091,8 @@ void Planner::doControlCycle()
     adaptPopulationOOP(startPlanning_, ros::Duration(bestT.getT()));
   }
 
+  // Why do this here? Non-hybrids are replaced by hybrids and 
+  // hybrids are evaluated after created
   evaluatePopulationOOP();
 
   ros::Duration d_adapt = ros::Time::now() - t_startAdapt;
