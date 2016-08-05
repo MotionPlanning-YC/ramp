@@ -529,6 +529,7 @@ class Planner {
 
 
     bool print_enter_exit_;
+    int num_mods_;
 };
 
 #endif

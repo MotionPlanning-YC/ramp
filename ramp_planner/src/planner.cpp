@@ -3303,20 +3303,24 @@ void Planner::modificationOOP()
   {
     ROS_INFO("i: %i", i);
     ROS_INFO("Modified trajectory: %s", mod_trajec.at(i).toString().c_str());
-    ROS_INFO("Path size: %i", (int)mod_trajec[i].msg_.holonomic_path.points.size());
+    //ROS_INFO("Path size: %i", (int)mod_trajec[i].msg_.holonomic_path.points.size());
     //std::cout<<"\nramp_planner: Evaluating trajectory "<<(int)i<<"\n";
 
     // Evaluate the new trajectory
     //evaluateTrajectoryOOP(mod_trajec[i]);
     
     // Compute full switch (method evaluates the trajectory)
-    RampTrajectory& traj_final = mod_trajec[i];
+    RampTrajectory traj_final = mod_trajec[i];
     if(cc_started_)
     {
       computeFullSwitchOOP(movingOn_, mod_trajec[i], controlCycle_.toSec(), traj_final);
     }
+    else
+    {
+      evaluateTrajectoryOOP(traj_final);
+    }
     ROS_INFO("Done evaluating");
-    ROS_INFO("Path size: %i", (int)mod_trajec[i].msg_.holonomic_path.points.size());
+    ROS_INFO("traj_final: %s", traj_final.fitnessFeasibleToString().c_str());
 
     // Add the new trajectory to the population
     // Index is where the trajectory was added in the population (may replace another)
@@ -3334,6 +3338,10 @@ void Planner::modificationOOP()
       //ROS_INFO("Population Previously: %s", popCopy.toString().c_str());
       //controlCycle_ = population_.getEarliestStartTime();
       //controlCycleTimer_.setPeriod(controlCycle_, false);
+      num_mods_++;
+      if(cc_started_)
+      {
+      }
       mod_worked=true;
     }
 
@@ -3832,18 +3840,24 @@ void Planner::computeFullSwitchOOP(const RampTrajectory& from, const RampTraject
   std::vector<RampTrajectory> trajecs;
   switchTrajectoryOOP(from, to, t_start, trajecs);
   ////ROS_INFO("Time spent getting switch trajectory: %f", (ros::Time::now()-tt).toSec());
+  
+  ROS_INFO("trajecs.size(): %i", (int)trajecs.size());
 
   // If a switch was possible
   if(trajecs.size() > 0)
   {
-    RampTrajectory T_new = trajecs.at(1);
-    Path p = T_new.msg_.holonomic_path;
+    ROS_INFO("Switch was possible");
+    RampTrajectory T_new  = trajecs.at(1);
+    Path p                = T_new.msg_.holonomic_path;
     ////ROS_INFO("Before eval, T_new.path: %s", T_new.path_.toString().c_str());
     ROS_INFO("to.msg.holonomic_path: %s", utility_.toString(to.msg_.holonomic_path).c_str());;
+    
+    ROS_INFO("T_new.fitness before: %f", T_new.msg_.fitness);
 
     // Evaluate T_new
     //ramp_msgs::EvaluationRequest er = buildEvaluationRequest(T_new);
     requestEvaluationOOP(T_new);
+    ROS_INFO("T_new.fitness after: %f", T_new.msg_.fitness);
 
     // Set misc members
     if(trajecs[0].msg_.curves.size() > 0 || trajecs[0].msg_.i_knotPoints.size() == 2)
@@ -3854,6 +3868,7 @@ void Planner::computeFullSwitchOOP(const RampTrajectory& from, const RampTraject
 
     // Set result
     result                  = T_new;
+    ROS_INFO("result: %s", result.toString().c_str());
     ////ROS_INFO("result.transitionTraj.size(): %i", (int)result.transitionTraj_.trajectory.points.size());
 
     ////ROS_INFO("After eval, T_new.path: %s", T_new.path_.toString().c_str());
@@ -3863,7 +3878,7 @@ void Planner::computeFullSwitchOOP(const RampTrajectory& from, const RampTraject
   // the holonomic trajectory
   else
   {
-    ////ROS_WARN("A switch was not possible, returning \"to\" trajectory: %s", to.toString().c_str());
+    ROS_WARN("A switch was not possible, returning \"to\" trajectory: %s", to.toString().c_str());
     result = to;
   }
 
@@ -4384,11 +4399,13 @@ void Planner::requestEvaluationOOP(std::vector<RampTrajectory>& trajecs) const
 
 void Planner::requestEvaluationOOP(ramp_msgs::EvaluationRequest& request) const
 {
+  ROS_INFO("In Planner::requestEvaluationOOP(EvaluationRequest&)");
   ramp_msgs::EvaluationSrv srv;
   srv.request.reqs.push_back(request);
 
   if(h_eval_req_->request(srv))
   {
+    ROS_INFO("Setting fitness: %f", srv.response.resps[0].fitness);
     request.trajectory.fitness          = srv.response.resps[0].fitness;
     request.trajectory.feasible         = srv.response.resps[0].feasible;
     request.trajectory.t_firstCollision = srv.response.resps[0].t_firstCollision;
@@ -4397,6 +4414,7 @@ void Planner::requestEvaluationOOP(ramp_msgs::EvaluationRequest& request) const
   {
     ROS_ERROR("An error occurred when evaluating a trajectory");
   }
+  ROS_INFO("Exiting Planner::requestEvaluationOOP(EvaluationRequest&)");
 }
 
 
@@ -4409,6 +4427,11 @@ void Planner::requestEvaluationOOP(RampTrajectory& trajec, bool full) const
   
   buildEvaluationRequestOOP(trajec, req, full);
   requestEvaluationOOP(req);
+  
+  trajec.msg_.fitness           = req.trajectory.fitness;
+  trajec.msg_.feasible          = req.trajectory.feasible;
+  trajec.msg_.t_firstCollision  = req.trajectory.t_firstCollision;
+  ROS_INFO("trajec.fitness: %f", trajec.msg_.fitness);
   ROS_INFO("Exiting Planner::requestEvaluationOOP(RampTrajectory&, bool)");
 }
 
@@ -4582,6 +4605,9 @@ void Planner::reportData()
   }
   avg_error_correct_val_or_ = sum / error_correct_val_or_.size();
   ROS_INFO("Average orientation error: %f", avg_error_correct_val_or_);
+
+
+  ROS_INFO("num_mods_: %i", num_mods_);
 }
 
 

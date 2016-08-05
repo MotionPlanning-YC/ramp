@@ -182,7 +182,7 @@ const bool Population::replacementPossible(const RampTrajectory& rt) const
   // If the fitness is not higher than the minimum fitness
   if(rt.msg_.fitness <= getMinFitness()) 
   {
-    //std::cout<<"\nfitness < min fitness, not possible\n";
+    ROS_INFO("Fitness < Minimum Fitness, %f < %f, returning false", rt.msg_.fitness, getMinFitness());
     return false;
   }
   
@@ -191,7 +191,7 @@ const bool Population::replacementPossible(const RampTrajectory& rt) const
   // trajectories can be replaced
   if(!rt.msg_.feasible && !infeasibleExists()) 
   {
-    //std::cout<<"\nrt infeasible, no other infeasible, not possible\n";
+    ROS_INFO("rt is infeasible, no other infeasible trajecs, returning false");
     return false;
   }
 
@@ -246,8 +246,8 @@ const bool Population::replacementPossible(const RampTrajectory& rt) const
     } // end if rt is infeasible
   } // end if sub-populations are used
 
-  //ROS_INFO("Replace is possible");
-  //ROS_INFO("Exiting Population::replacementPossible");
+  ROS_INFO("Replacement is possible");
+  ROS_INFO("Exiting Population::replacementPossible");
   return true;
 } // End replacementPossible
 

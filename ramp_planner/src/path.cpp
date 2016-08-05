@@ -61,7 +61,7 @@ Path::Path(const ramp_msgs::Path p)
     msg_.points.push_back(kp.buildKnotPointMsg());
   }
   
-  ROS_INFO("Exiting Path::Path");
+  //ROS_INFO("Exiting Path::Path");
 }
 
 Path::~Path() {}
@@ -69,11 +69,10 @@ Path::~Path() {}
 
 const bool Path::equals(const Path& p) const 
 {
-
-  ROS_INFO("In Path::equals");
+  //ROS_INFO("In Path::equals");
   
   if(size() != p.size()) {
-    ROS_INFO("Exiting Path::equals");
+    //ROS_INFO("Exiting Path::equals");
     return false;
   }
 
@@ -82,12 +81,12 @@ const bool Path::equals(const Path& p) const
     KnotPoint temp(msg_.points[i]);
     if(!temp.equals(p.msg_.points[i])) 
     {
-      ROS_INFO("Exiting Path::equals");
+      //ROS_INFO("Exiting Path::equals");
       return false;
     }
   }
 
-  ROS_INFO("Exiting Path::equals");
+  //ROS_INFO("Exiting Path::equals");
   return true;
 }
 
