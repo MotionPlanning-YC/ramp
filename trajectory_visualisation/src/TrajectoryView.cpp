@@ -265,7 +265,7 @@ void TrajectoryView::drawPopulation() {
         //ROS_INFO("i_end: %i", (int)i_end);
         //ROS_INFO("trj.holonomic_path.points.size(): %i", (int)trj.holonomic_path.points.size());
 
-        penTraj = QPen( QColor(0,0,255,100) );
+        penTraj = QPen( QColor(100,100,100,100) );
         
         for(int i=i_end;i<(int)trj.holonomic_path.points.size()-1;i++)
         {

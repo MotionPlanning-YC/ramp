@@ -489,8 +489,13 @@ int main(int argc, char** argv) {
   //er.obstacle_trjs.push_back(obt);
   //er.obstacle_trjs.push_back(obt);
   //er.obstacle_trjs.push_back(obt2);
-
+    
   er_srv.request.reqs.push_back(er);
+
+  /*for(int i=0;i<12;i++)
+  {
+    er_srv.request.reqs.push_back(er);
+  }*/
 
 
   // Evaluate trajectory

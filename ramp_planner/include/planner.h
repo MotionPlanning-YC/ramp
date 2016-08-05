@@ -184,7 +184,7 @@ class Planner {
     void buildEvaluationSrvOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationSrv& result) const;
     void buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result, bool full=true) const;
 
-    void requestEvaluationOOP(std::vector<RampTrajectory>& trajecs) const;
+    void requestEvaluationOOP(std::vector<RampTrajectory>& trajecs);
     void requestEvaluationOOP(ramp_msgs::EvaluationRequest& request) const;
     void requestEvaluationOOP(RampTrajectory& t, bool full=true) const;
 
