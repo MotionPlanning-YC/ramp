@@ -3525,7 +3525,7 @@ void Planner::planningCycleCallback()
   // Must have started control cycles
   // errorReduction is true
   // Not driving on straight line
-  /*if(errorReduction_ && cc_started_ && generation_ % 3 == 0 &&
+  if(errorReduction_ && cc_started_ && generation_ % 3 == 0 &&
       !(fabs(latestUpdate_.msg_.velocities.at(2)) > 0.1 && sqrt(pow(latestUpdate_.msg_.velocities[0],2) + pow(latestUpdate_.msg_.velocities[1],2)) > 0.01))
   {
     ros::Time t_start_error = ros::Time::now();
@@ -3595,7 +3595,7 @@ void Planner::planningCycleCallback()
         cc_started_ ? "True" : "False", generation_,
         errorReduction_ ? "True" : "False", 
         fabs(latestUpdate_.msg_.velocities.at(2)));
-  }*/
+  }
 
   ////ROS_INFO("Done with error correction!");
 
