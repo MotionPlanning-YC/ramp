@@ -24,16 +24,16 @@ Change robot locations in world file
 <node name="path_modification" pkg="path_modification" type="path_modification" />
 
 <!-- Trajectory Evaluation -->
-<node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="log" />
+<node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen" />
 
 <!-- Planner -->
-<node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="log" /> 
+<node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" /> 
 
 
 
 <!-- Simulation -->
 <node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/world/full_simulation.world" /> 
-<node name="ramp_control" pkg="ramp_control" type="ramp_control" output="log" >
+<node name="ramp_control" pkg="ramp_control" type="ramp_control" output="screen" >
   <remap from="odometry" to="robot_0/odom" />
   <remap from="cmd_vel" to="robot_0/cmd_vel" />
   <param name="simulation" value="true" />

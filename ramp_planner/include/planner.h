@@ -302,6 +302,8 @@ class Planner {
     void controlCycleCallback     (const ros::TimerEvent& t);
     void planningCycleCallback    ();
     void imminentCollisionCallback(const ros::TimerEvent& t);
+
+    void resetStart();
     
     bool EC, mod_worked, modded_two;
     
@@ -528,6 +530,7 @@ class Planner {
            avg_eval_dur_, avg_error_correct_dur_, avg_sc_dur_;
 
 
+    bool reset_;
     bool print_enter_exit_;
     int num_mods_;
 };

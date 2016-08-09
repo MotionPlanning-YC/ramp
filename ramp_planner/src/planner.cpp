@@ -9,7 +9,7 @@ Planner::Planner() : resolutionRate_(1.f / 10.f), ob_dists_timer_dur_(0.1), gene
   cc_started_(false), c_pc_(0), transThreshold_(1./50.), num_cc_(0), L_(0.33), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), 
  delta_t_switch_(0.2), stop_(false), moving_on_coll_(false), print_enter_exit_(true)
 {
-  imminentCollisionCycle_ = ros::Duration(1.f / 10.f);
+  imminentCollisionCycle_ = ros::Duration(1.f / 20.f);
   generationsPerCC_       = controlCycle_.toSec() / planningCycle_.toSec();
 
   COLL_DISTS.push_back(0.42);
@@ -678,7 +678,7 @@ void Planner::adaptPathsOOP(const MotionState& ms, const ros::Duration& d, std::
 {
   if(print_enter_exit_)
   {
-    //ROS_INFO("In Planner::adaptPathsOOP");
+    ROS_INFO("In Planner::adaptPathsOOP");
   }
 
   result.clear();
@@ -730,7 +730,7 @@ void Planner::adaptPathsOOP(const MotionState& ms, const ros::Duration& d, std::
 
   if(print_enter_exit_)
   {
-    //ROS_INFO("Exiting adaptPathsOOP");
+    ROS_INFO("Exiting adaptPathsOOP");
   }
 } // End adaptPathsOOP
 
@@ -870,7 +870,7 @@ const double Planner::updateCurvePos(const RampTrajectory& traj, const ros::Dura
 {
   if(print_enter_exit_)
   {
-    //ROS_INFO("In Planner::updateCurvePos");
+    ROS_INFO("In Planner::updateCurvePos");
     //ROS_INFO("d: %f", d.toSec());
   }
 
@@ -929,7 +929,7 @@ const double Planner::updateCurvePos(const RampTrajectory& traj, const ros::Dura
 
   if(print_enter_exit_)
   {
-    //ROS_INFO("Exiting Planner::updateCurvePos");
+    ROS_INFO("Exiting Planner::updateCurvePos");
   }
 
   return result;
@@ -942,7 +942,7 @@ void Planner::adaptCurvesOOP(const MotionState& ms, const ros::Duration& d, std:
 {
   if(print_enter_exit_)
   {
-    //ROS_INFO("In Planner::adaptCurvesOOP");
+    ROS_INFO("In Planner::adaptCurvesOOP");
   }
 
   ramp_msgs::BezierCurve blank;
@@ -1016,7 +1016,7 @@ void Planner::adaptCurvesOOP(const MotionState& ms, const ros::Duration& d, std:
 
   if(print_enter_exit_)
   {
-    //ROS_INFO("Exiting Planner::adaptCurvesOOP");
+    ROS_INFO("Exiting Planner::adaptCurvesOOP");
   }
 } // End adaptCurvesOOP
 
@@ -1115,7 +1115,7 @@ void Planner::adaptPopulationOOP(const MotionState& ms, const ros::Duration& d)
 {
   if(print_enter_exit_)
   {
-    //ROS_INFO("In adaptPopulation");
+    ROS_INFO("In adaptPopulation");
   }
 
   //std::vector<Path> paths = adaptPaths(population_, ms, d);
@@ -1124,16 +1124,17 @@ void Planner::adaptPopulationOOP(const MotionState& ms, const ros::Duration& d)
   std::vector<ramp_msgs::BezierCurve> curves;
   if(population_.type_ != HOLONOMIC)
   {
-    //curves = adaptCurves(population_, ms, d);
     adaptCurvesOOP(ms, d, curves);
   }
   
   // Create the vector to hold updated trajectories
   std::vector<ramp_msgs::TrajectoryRequest> tr_reqs;
   
+  //ROS_INFO("paths.size(): %i curves.size(): %i", (int)paths.size(), (int)curves.size());
   // For each path, get a trajectory request
   for(uint16_t i=0;i<population_.size();i++) 
   {
+    //ROS_INFO("In 1st for, i: %i", (int)i);
       
     // Add on the curve if necessary
     std::vector<ramp_msgs::BezierCurve> c;
@@ -1155,7 +1156,7 @@ void Planner::adaptPopulationOOP(const MotionState& ms, const ros::Duration& d)
 
   for(uint16_t i=0;i<updatedTrajecs.size();i++)
   {
-    ////ROS_INFO("In for, i: %i", i);
+    //ROS_INFO("In 2nd for, i: %i", (int)i);
       // Set temporary evaluation results - need to actually call requestEvaluation to get actual fitness
     updatedTrajecs.at(i).msg_.fitness   = population_.get(i).msg_.fitness;
     updatedTrajecs.at(i).msg_.feasible  = population_.get(i).msg_.feasible;
@@ -1170,7 +1171,7 @@ void Planner::adaptPopulationOOP(const MotionState& ms, const ros::Duration& d)
   
   if(print_enter_exit_)
   {
-    //ROS_INFO("Exiting adaptPopulationOOP");
+    ROS_INFO("Exiting adaptPopulationOOP");
   }
 }
 
@@ -1824,16 +1825,33 @@ void Planner::obICCallback(const ros::TimerEvent& e)
   ////ROS_INFO("Exiting Planner::obICCallback");
 }
 
+
+
+void Planner::resetStart() 
+{
+
+  ROS_INFO("In Planner::resetStart");
+  ROS_INFO("Pop: %s", population_.toString().c_str());
+  startPlanning_ = latestUpdate_;
+  adaptPopulationOOP(startPlanning_, ros::Duration(0.0001));
+  ROS_INFO("After reset, Pop: %s", population_.toString().c_str());
+  ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
+  reset_ = true;
+
+}
+
+
 /** Check if there is imminent collision in the best trajectory */
 void Planner::imminentCollisionCallback(const ros::TimerEvent& t) 
 {
   ros::Duration d = ros::Time::now() - t_prevIC_;
   t_prevIC_ = ros::Time::now();
-  //ROS_INFO("In imminentCollisionCallback");
-  //ROS_INFO("Time since last: %f", d.toSec());
+  ROS_INFO("In imminentCollisionCallback");
+  ROS_INFO("Time since last: %f", d.toSec());
+
   std_msgs::Bool ic;
 
-  double time_threshold = 0.5;
+  double time_threshold = controlCycle_.toSec();
     
   /*//ROS_WARN("Robot trajectory: %s", movingOn_.toString().c_str());
   for(int o=0;o<ob_trajectory_.size();o++)
@@ -1844,20 +1862,25 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
   if(ob_trajectory_.size() > 0 && moving_on_coll_ && (movingOn_.msg_.t_firstCollision.toSec() < time_threshold
     || (movingOn_.msg_.t_firstCollision.toSec() - (ros::Time::now().toSec()-t_prevCC_.toSec())) < time_threshold))
   {
-    //ROS_WARN("IC: moving_on_coll_: %s t_firstCollision: %f Elapsed time: %f", moving_on_coll_ ? "True" : "False", movingOn_.msg_.t_firstCollision.toSec(), (ros::Time::now().toSec()-t_prevCC_.toSec()));
-    //ROS_WARN("Imminent Collision Robot: %i t_firstCollision: %f", id_, movingOn_.msg_.t_firstCollision.toSec());
+    ROS_WARN("IC: moving_on_coll_: %s t_firstCollision: %f Elapsed time: %f", moving_on_coll_ ? "True" : "False", movingOn_.msg_.t_firstCollision.toSec(), (ros::Time::now().toSec()-t_prevCC_.toSec()));
 
     ic.data = true;
     imminent_collision_ = true;
+
+    if(!reset_ && sqrt( pow( latestUpdate_.msg_.velocities[0], 2) + pow( latestUpdate_.msg_.velocities[1], 2) ) < 0.01 && fabs( latestUpdate_.msg_.velocities[2] ) < 0.01)
+    {
+      resetStart();
+    }
     num_ops_ = 6;
   }
 
+  // Do not set any imminent collision values
   else 
   {
-    //ROS_INFO("No imminent collision, t_firstCollision: %f", movingOn_.msg_.t_firstCollision.toSec());
-    ic.data = false;
+    ROS_INFO("No imminent collision, t_firstCollision: %f", movingOn_.msg_.t_firstCollision.toSec());
+    //ic.data = false;
     imminent_collision_ = false;
-    num_ops_ = 5;
+    //num_ops_ = 5;
   }
 
   h_control_->sendIC(ic);
@@ -3525,7 +3548,7 @@ void Planner::planningCycleCallback()
   // Must have started control cycles
   // errorReduction is true
   // Not driving on straight line
-  if(errorReduction_ && cc_started_ && generation_ % 3 == 0 &&
+  if(errorReduction_ && !imminent_collision_ && cc_started_ && generation_ % 3 == 0 &&
       !(fabs(latestUpdate_.msg_.velocities.at(2)) > 0.1 && sqrt(pow(latestUpdate_.msg_.velocities[0],2) + pow(latestUpdate_.msg_.velocities[1],2)) > 0.01))
   {
     ros::Time t_start_error = ros::Time::now();
@@ -4026,12 +4049,18 @@ const Population Planner::getTransPop(const Population pop, const RampTrajectory
 void Planner::doControlCycle() 
 {
   ////ROS_WARN("Control Cycle %i occurring at Time: %f", num_cc_, ros::Time::now().toSec());
-  //ROS_INFO("controlCycle_: %f", controlCycle_.toSec());
+  ROS_INFO("controlCycle_: %f", controlCycle_.toSec());
   //ROS_INFO("Time between control cycles: %f", (ros::Time::now() - t_prevCC_).toSec());
   t_prevCC_ = ros::Time::now();
   ////ROS_INFO("Number of planning cycles that occurred between CC's: %i", c_pc_);
 
   ros::Time t = ros::Time::now();
+
+  // Set all of the trajectory t_start values to 0 b/c they would be starting now
+  for(int i=0;i<population_.size();i++)
+  {
+    population_.trajectories_[i].msg_.t_firstCollision = ros::Duration(0);
+  }
 
   //population_ = evaluatePopulation(population_);
   evaluatePopulationOOP();
@@ -4039,11 +4068,11 @@ void Planner::doControlCycle()
   // Set the bestT
   RampTrajectory bestT = population_.getBest();
 
-  //ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
+  ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
 
   // Send the best trajectory and set movingOn
   //////ROS_INFO("Sending best");
-  //ROS_INFO("bestT: %s", bestT.toString().c_str());
+  ROS_INFO("bestT: %s", bestT.toString().c_str());
   sendBest();
   //////ROS_INFO("After sendBest");
 
@@ -4054,27 +4083,49 @@ void Planner::doControlCycle()
   movingOnCC_.msg_.t_start  = ros::Duration(0);
 
   // Evaluate movingOnCC
+  ROS_INFO("Evaluting movingOnCC");
   evaluateTrajectoryOOP(movingOnCC_, false);
   //movingOnCC_               = evaluateTrajectory(movingOnCC_);
   
-  ////ROS_INFO("movingOnCC_: %s", movingOnCC_.toString().c_str());
+  //ROS_INFO("movingOnCC_: %s", movingOnCC_.toString().c_str());
   ////ROS_INFO("Evaluating movingOn in CC");
   
   movingOn_               = movingOnCC_;
   moving_on_coll_         = !movingOn_.msg_.feasible;
-  ////ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
+  ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
+  
+  ROS_INFO("movingOn_.t_firstCollision: %f", movingOn_.msg_.t_firstCollision.toSec());
+  if(!(ob_trajectory_.size() > 0 && moving_on_coll_ && (movingOn_.msg_.t_firstCollision.toSec() < controlCycle_.toSec()
+    || (movingOn_.msg_.t_firstCollision.toSec() - (ros::Time::now().toSec()-t_prevCC_.toSec())) < controlCycle_.toSec())))
+  {
+    ROS_INFO("No IC");
+    imminent_collision_ = false;
+  }
+  else
+  {
+    ROS_INFO("IC Detected in CC Callback");
+  }
 
 
   // The motion state that we should reach by the next control cycle
   if(imminent_collision_)
   {
+    ROS_INFO("imminent_collision_: True");
     m_cc_ = latestUpdate_;
+    startPlanning_ = m_cc_;
+    reset_ = true;
   }
   // If trajectory does not reach t_fixed_cc, last point will be returned
   else
   {
+    ROS_INFO("Setting ic.data = false and imminent_collision = false");
+    std_msgs::Bool ic;
+    ic.data = false;
+    h_control_->sendIC(ic);
+    imminent_collision_ = false;
     m_cc_ = bestT.getPointAtTime(t_fixed_cc_);
-  }
+    reset_ = false;
+  
 
   // At CC, startPlanning is assumed to be perfect (no motion error accounted for yet)
   startPlanning_ = m_cc_;
@@ -4173,6 +4224,10 @@ void Planner::doControlCycle()
   if(subPopulations_) 
   {
     population_.createSubPopulations();
+  }
+
+
+  // End if no imminent collision
   }
  
   // Send the population to trajectory_visualization
@@ -4382,11 +4437,11 @@ void Planner::requestEvaluationOOP(std::vector<RampTrajectory>& trajecs)
     eval_durs_.push_back( ros::Time::now() - t_start );
     if(eval_durs_[eval_durs_.size()-1].toSec() > 0.01)
     {
-      ROS_INFO("(Planner) Long Eval Request (%i total evals): ", (int)trajecs.size());
-      for(int i=0;i<trajecs.size();i++)
+      //ROS_INFO("(Planner) Long Eval Request (%i total evals): ", (int)trajecs.size());
+      /*for(int i=0;i<trajecs.size();i++)
       {
         ROS_INFO("trajec i: %s", trajecs[i].toString().c_str());
-      }
+      }*/
     }
     for(uint16_t i=0;i<trajecs.size();i++)
     {

@@ -1719,9 +1719,8 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
 
   // If only 1 point, then set stopping point to end of segment
   int     j_stop = ob_trajectory.size() > segment.size() ? ob_trajectory.size() : segment.size();
-  //////ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
+  ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
 
-  //////ROS_INFO("i_stop: %i", i_stop);
   int i=0, j=0;
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
@@ -1750,14 +1749,14 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
     // there is collision
     if( dist <= radius*2 ) 
     {
-      /*////ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
-          p_i.positions.at(0),
-          p_i.positions.at(1),
-          p_ob.positions.at(0),
-          p_ob.positions.at(1),
+      ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+          p_i->positions[0],
+          p_i->positions[1],
+          p_ob->positions[0],
+          p_ob->positions[1],
           dist,
           (int)i,
-          (int)j);*/
+          (int)j);
       points_of_collision.push_back(p_i->positions);
       i = segment.size();
     } // end if

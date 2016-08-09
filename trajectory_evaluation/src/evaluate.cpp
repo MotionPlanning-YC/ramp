@@ -12,25 +12,25 @@ void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationR
   orientation_.theta_at_cc_   = req.theta_cc;
 
   imminent_collision_ = req.imminent_collision;
-  //ROS_INFO("imminent_collision_: %s", imminent_collision_ ? "True" : "False");
+  ROS_INFO("imminent_collision_: %s", imminent_collision_ ? "True" : "False");
 
 
   // Reset orientation_infeasible for new trajectory
   orientation_infeasible_ = false;
 
   performFeasibility(req);
-  //ROS_INFO("qr_.collision: %s orientation_infeasible_: %s", qr_.collision_ ? "True" : "False", orientation_infeasible_ ? "True" : "False");
+  ROS_INFO("qr_.collision: %s orientation_infeasible_: %s", qr_.collision_ ? "True" : "False", orientation_infeasible_ ? "True" : "False");
   res.feasible = !qr_.collision_ && !orientation_infeasible_;
   ////ROS_INFO("performFeasibility: %f", (ros::Time::now()-t_start).toSec());
 
   if(qr_.collision_)
   {
-    ////ROS_INFO("Not feasible");
+    ROS_INFO("Not feasible");
     res.t_firstCollision = ros::Duration(qr_.t_firstCollision_);
   }
   else
   {
-    ////ROS_INFO("Feasible");
+    ROS_INFO("Feasible");
     res.t_firstCollision = ros::Duration(9999.f);
   }
 
@@ -52,7 +52,7 @@ void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationR
 // It's modiftying trj AND returning a value
 void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er) 
 {
-  ////ROS_INFO("In Evaluate::performFeasibility");
+  ROS_INFO("In Evaluate::performFeasibility");
   ros::Time t_start = ros::Time::now();
 
   // Check collision
@@ -61,13 +61,13 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
   ros::Duration d_numeric   = ros::Time::now() - t_numeric_start;
   t_numeric_.push_back(d_numeric);
 
-  ////ROS_INFO("result.collision: %s", qr_.collision_ ? "True" : "False");
+  ROS_INFO("result.collision: %s", qr_.collision_ ? "True" : "False");
   /*ros::Time t_analy_start = ros::Time::now();
   cd_.perform(er.trajectory, er.obstacle_trjs, qr_);
   ros::Duration d_analy = ros::Time::now() - t_analy_start;
   t_analy_.push_back(d_analy);*/
 
-  //ROS_INFO("feasible: %s", er.trajectory.feasible ? "True" : "False");
+  ROS_INFO("feasible: %s", er.trajectory.feasible ? "True" : "False");
   er.trajectory.feasible            = !qr_.collision_;
   er.trajectory.t_firstCollision    = ros::Duration(qr_.t_firstCollision_);
 
