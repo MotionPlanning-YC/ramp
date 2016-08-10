@@ -1640,7 +1640,7 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
 {
   ros::Time time_start = ros::Time::now();
 
-  //ROS_INFO("In CollisionDetection::query"); 
+  ROS_INFO("In CollisionDetection::query"); 
   //ROS_INFO("trajectory.points.size(): %i", (int)segment.size());
   //ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.size());
 
@@ -1657,7 +1657,7 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
   double  t_start   = traj_start;
   int     j_offset  = t_start * 10.f;
   
-  ////ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
+  ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
 
   int i=0, j=0;
 
@@ -1684,14 +1684,14 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
     // there is collision
     if( dist <= dist_threshold) 
     {
-      /*ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+      ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
           p_i->positions.at(0),
           p_i->positions.at(1),
           p_ob->positions.at(0),
           p_ob->positions.at(1),
           dist,
           (int)i,
-          (int)j);*/
+          (int)j);
       
       result.collision_         = true;
       result.t_firstCollision_  = p_i->time_from_start.toSec();
@@ -1706,7 +1706,7 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
 void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajectoryPoint>& segment, const std::vector<trajectory_msgs::JointTrajectoryPoint>& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const
 {
   ros::Time time_start = ros::Time::now();
-  //////ROS_INFO("In CollisionDetection::query"); 
+  ROS_INFO("In CollisionDetection::query"); 
   //////ROS_INFO("trajectory.points.size(): %i", (int)trajectory.trajectory.points.size());
   //////ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.trajectory.points.size());
   /*if(ob_trajectory.trajectory.points.size() > 2)
@@ -1883,7 +1883,7 @@ void CollisionDetection::query(const ramp_msgs::RampTrajectory& trajectory, cons
       // there is collision
       if( dist <= radius*2 ) 
       {
-        /*////ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+        /*ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
             p_i.positions.at(0),
             p_i.positions.at(1),
             p_ob.positions.at(0),

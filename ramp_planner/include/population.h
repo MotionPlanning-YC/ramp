@@ -46,6 +46,8 @@ class Population {
     std::vector<Path>           paths_;
     TrajectoryType              type_; 
     unsigned int                maxSize_;
+
+    double                      t_start_;
     
     std::vector<RampTrajectory> trajectories_;
     

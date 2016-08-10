@@ -309,8 +309,8 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   evaluatePopulationOOP();
   
   // Make sure control cycle time is updated
-  controlCycle_ = population_.getEarliestStartTime();
-  controlCycleTimer_.setPeriod(controlCycle_, false);
+  //controlCycle_ = population_.getEarliestStartTime();
+  //controlCycleTimer_.setPeriod(controlCycle_, false);
   
 
   ////ROS_INFO("Time to evaluate population: %f", (ros::Time::now() - s).toSec());
@@ -4059,7 +4059,7 @@ void Planner::doControlCycle()
   // Set all of the trajectory t_start values to 0 b/c they would be starting now
   for(int i=0;i<population_.size();i++)
   {
-    population_.trajectories_[i].msg_.t_firstCollision = ros::Duration(0);
+    population_.trajectories_[i].msg_.t_start = ros::Duration(0);
   }
 
   //population_ = evaluatePopulation(population_);
@@ -4113,7 +4113,15 @@ void Planner::doControlCycle()
     ROS_INFO("imminent_collision_: True");
     m_cc_ = latestUpdate_;
     startPlanning_ = m_cc_;
+    controlCycle_ = ros::Duration(t_fixed_cc_);
+    sendPopulation(population_);
     reset_ = true;
+
+    // Set all of the trajectory t_start values to 0 b/c they would be starting now
+    for(int i=0;i<population_.size();i++)
+    {
+      population_.trajectories_[i].msg_.t_start = ros::Duration(t_fixed_cc_);
+    }
   }
   // If trajectory does not reach t_fixed_cc, last point will be returned
   else
@@ -4170,10 +4178,11 @@ void Planner::doControlCycle()
     //ROS_WARN("Pop best: %s", population_.getBest().toString().c_str());
   }
   
-  //ROS_INFO("After adaptation and evaluation:");
+  ROS_INFO("After adaptation and evaluation:");
+  ROS_INFO("Pop earliest time: %f", population_.getEarliestStartTime().toSec());
   for(int i=0;i<population_.size();i++)
   {
-    //ROS_INFO("%s", population_.get(i).toString().c_str());
+    ROS_INFO("%s", population_.get(i).toString().c_str());
   }
   //////ROS_INFO("Time spent adapting: %f", d_adapt.toSec());
  
@@ -4202,10 +4211,11 @@ void Planner::doControlCycle()
   trans_durs_.push_back(d_trans);
   
   ////ROS_INFO("After finding transition population, controlCycle period: %f", controlCycle_.toSec());
-  //ROS_INFO("New transPop:"); 
+  ROS_INFO("New transPop:"); 
+  ROS_INFO("Pop earliest time: %f", population_.getEarliestStartTime().toSec());
   for(int i=0;i<population_.size();i++)
   {
-    //ROS_INFO("%s", population_.get(i).toString().c_str());
+    ROS_INFO("%s", population_.get(i).toString().c_str());
   }
   ////ROS_INFO("Time spent getting trans pop: %f", d_trans.toSec());
 
@@ -4236,7 +4246,7 @@ void Planner::doControlCycle()
   controlCycle_         = population_.getEarliestStartTime();
   controlCycleTimer_.setPeriod(controlCycle_, false);
 
-  //ROS_INFO("Next CC Time: %f", controlCycle_.toSec());
+  ROS_INFO("Next CC Time: %f", controlCycle_.toSec());
 
   ros::Duration d_cc = ros::Time::now() - t;
   cc_durs_.push_back(d_cc);
