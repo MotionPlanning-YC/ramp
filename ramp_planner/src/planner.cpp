@@ -699,7 +699,7 @@ void Planner::adaptPathsOOP(const MotionState& ms, const ros::Duration& d, std::
       // Track how many knot points we get rid of
       // Initialize to 1 to always remove starting position
       unsigned int throwaway=getNumThrowawayPoints(population_.get(i), d);
-      ////ROS_INFO("throwaway: %i", (int)throwaway);
+      ROS_INFO("throwaway: %i", (int)throwaway);
 
       
       // If the whole path has been passed, adjust throwaway so that 
@@ -722,7 +722,7 @@ void Planner::adaptPathsOOP(const MotionState& ms, const ros::Duration& d, std::
 
       // Set start_ to be the new starting configuration of the path
       temp.start_ = ms;
-      //ROS_INFO("After adapting Path: %s", temp.toString().c_str());
+      ROS_INFO("After adapting Path: %s", temp.toString().c_str());
 
       result.push_back(temp);
     } // end outer for
@@ -3332,7 +3332,7 @@ void Planner::modificationOOP()
     
     // Compute full switch (method evaluates the trajectory)
     RampTrajectory traj_final = mod_trajec[i];
-    if(cc_started_)
+    if(cc_started_ && !imminent_collision_)
     {
       computeFullSwitchOOP(movingOn_, mod_trajec[i], controlCycle_.toSec(), traj_final);
     }
@@ -3355,7 +3355,7 @@ void Planner::modificationOOP()
     // No longer need to reset CC time because trajs should have same t_start
     if(index > -1)
     {
-      ////ROS_INFO("Adding trajectory at index %i \n%s", index, mod_trajec[i].toString().c_str());
+      ROS_INFO("Adding trajectory at index %i \n%s", index, traj_final.toString().c_str());
       ////ROS_INFO("Population Previously: %s", popCopy.toString().c_str());
       //controlCycle_ = population_.getEarliestStartTime();
       //controlCycleTimer_.setPeriod(controlCycle_, false);
@@ -4122,6 +4122,7 @@ void Planner::doControlCycle()
     {
       population_.trajectories_[i].msg_.t_start = ros::Duration(t_fixed_cc_);
     }
+    ROS_INFO("population_: %s", population_.toString().c_str());
   }
   // If trajectory does not reach t_fixed_cc, last point will be returned
   else
