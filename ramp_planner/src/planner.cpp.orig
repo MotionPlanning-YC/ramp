@@ -4699,7 +4699,9 @@ void Planner::go()
   //ROS_INFO("Population Initialized");
   std::cin.get();
   sendPopulation(population_);
-  std::cin.get(); 
+  std::cout<<"\ntransPopulation initialized! Press enter to continue\n";
+  //std::cin.get();
+ 
 
 
   if(seedPopulation_) 
@@ -4732,44 +4734,64 @@ void Planner::go()
     std::cout<<"\nSub-transPopulations created\n";
   }
 
+
+  // Initialize transtransPopulation
+  population_       = population_;
+  population_at_cc_ = population_;
+
+  t_start_ = ros::Time::now();
+
+  //ROS_INFO("Planning Cycles started!");
+
+  // Start the planning cycles
+  planningCycleTimer_.start();
+    
+  
   h_parameters_.setCCStarted(false); 
 
-  // Execute 1 control cycle to adapt the population
-  doControlCycle();
 
-  // Get the time until next control cycle, t_{i+1}
-  double t_next_cc = controlCycle_.toSec();
-  ROS_INFO("t_next_cc: %f", t_next_cc);
-
-  int i = t_next_cc*10;
-  ROS_INFO("i: %i", i);
-
-  ROS_INFO("movingOn_: %s", movingOn_.toString().c_str());
-  
-  trajectory_msgs::JointTrajectoryPoint p_next_cc = movingOn_.msg_.trajectory.points.at(t_next_cc*10);
-  ROS_INFO("p_next_cc: %s", utility_.toString(p_next_cc).c_str());
-
+  int num_pc = generationsBeforeCC_; 
+  if(num_pc < 0)
+  {
+    ////ROS_WARN("num_pc is less than zero: %i - Setting num_pc = 0", num_pc);
+    num_pc = 0;
+  }
+  //ROS_INFO("generationsBeforeCC_: %i generationsPerCC_: %i num_pc: %i", generationsBeforeCC_, generationsPerCC_, num_pc);
 
   ros::Rate r(20);
+  // Wait for the specified number of generations before starting CC's
+  while(generation_ < num_pc) {planningCycleCallback(); r.sleep(); ros::spinOnce();}
+ 
+  //ROS_INFO("Starting CCs at t: %f", ros::Time::now().toSec());
 
+  // Right before starting CC, make sure transtransPopulation is updated
+  population_ = population_;
+
+  diff_ = diff_.zero(3);
+  
+  // Start the control cycles
+  controlCycleTimer_.start();
   imminentCollisionTimer_.start();
+  ob_dists_timer_.start();
+
+  ////ROS_INFO("CCs started");
 
  
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
   ros::Time t_start = ros::Time::now();
   goalThreshold_ = 0.5;
-  //while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) 
-  while( (ros::Time::now() - t_start).toSec() < 5.f && ros::ok()) 
+  while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) 
   {
     planningCycleCallback();
     r.sleep();
     ros::spinOnce(); 
   } // end while
   ros::Duration t_execution = ros::Time::now() - t_start;
-  ROS_INFO("Total execution time: %f", t_execution.toSec());
+  reportData();
+  //ROS_INFO("Total execution time: %f", t_execution.toSec());
 
-  ROS_INFO("Planning done!");
+  ////ROS_INFO("Planning done!");
   ////ROS_INFO("latestUpdate_: %s\ngoal: %s", latestUpdate_.toString().c_str(), goal_.toString().c_str());
   
   // Stop timer
@@ -4788,5 +4810,5 @@ void Planner::go()
  
   ////ROS_INFO("Total number of planning cycles: %i", generation_-1);
   ////ROS_INFO("Total number of control cycles:  %i", num_cc_);
-  ROS_INFO("Exiting Planner::go");
+  ////ROS_INFO("Exiting Planner::go");
 } // End go
