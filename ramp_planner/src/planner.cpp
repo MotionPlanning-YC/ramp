@@ -4115,7 +4115,7 @@ void Planner::doControlCycle()
     startPlanning_ = m_cc_;
     controlCycle_ = ros::Duration(t_fixed_cc_);
     sendPopulation(population_);
-    reset_ = true;
+    reset_ = false;
 
     // Set all of the trajectory t_start values to 0 b/c they would be starting now
     for(int i=0;i<population_.size();i++)
