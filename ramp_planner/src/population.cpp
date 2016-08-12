@@ -176,7 +176,7 @@ const bool Population::replacementPossible(const RampTrajectory& rt) const
   /*////ROS_INFO("Trajec 1 fit: %f feasible: %s t_coll: %f", trajectories_.at(1).msg_.fitness, 
       trajectories_.at(1).msg_.feasible ? "True" : "False", trajectories_.at(1).msg_.t_firstCollision);*/
 
-  //////ROS_INFO("getMinFitness(): %f", getMinFitness());
+  ROS_INFO("getMinFitness(): %f", getMinFitness());
 
   // If the fitness is not higher than the minimum fitness
   if(rt.msg_.fitness <= getMinFitness()) 
@@ -363,6 +363,7 @@ const int Population::getReplacementID(const RampTrajectory& rt) const
 const int Population::add(const RampTrajectory& rt) 
 {
   ROS_INFO("In Population::add");
+  ROS_INFO("Pop: %s", toString().c_str());
   ROS_INFO("rt: %s", rt.toString().c_str());
   ROS_INFO("Pop best id: %i", calcBestIndex());
 
