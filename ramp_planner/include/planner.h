@@ -98,7 +98,7 @@ class Planner {
 
     
     // Start planning
-    void go();
+    void go(float sec=-1);
     
     // Initialization 
     void initPopulation();

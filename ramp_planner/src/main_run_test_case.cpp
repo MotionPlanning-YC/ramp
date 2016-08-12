@@ -373,7 +373,7 @@ int main(int argc, char** argv) {
   std::cout<<"\nPress Enter to start the planner\n";
   std::cin.get(); 
   
-  my_planner.go();
+  my_planner.go(4.f);
 
   
   //****MotionState exp_results = my_planner.findAverageDiff();

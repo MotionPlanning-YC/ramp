@@ -176,7 +176,7 @@ const bool Population::replacementPossible(const RampTrajectory& rt) const
   /*////ROS_INFO("Trajec 1 fit: %f feasible: %s t_coll: %f", trajectories_.at(1).msg_.fitness, 
       trajectories_.at(1).msg_.feasible ? "True" : "False", trajectories_.at(1).msg_.t_firstCollision);*/
 
-  //////ROS_INFO("getMinFitness(): %f", getMinFitness());
+  ROS_INFO("getMinFitness(): %f", getMinFitness());
 
   // If the fitness is not higher than the minimum fitness
   if(rt.msg_.fitness <= getMinFitness()) 
@@ -415,15 +415,17 @@ const int Population::calcBestIndex() const
 {
   if(size() == 0)
   {
-    //ROS_ERROR("Calling Population::calcBestIndex(), but Population is empty");
+    ROS_ERROR("Calling Population::calcBestIndex(), but Population is empty");
     //ROS_INFO("Pop: %s", toString().c_str());
     return -1;
   }
  
   // Find the index of the trajectory with the highest fitness value
   int i_max = 0;
-  for(int i=1;i<trajectories_.size();i++) {
-    if(trajectories_.at(i).msg_.fitness > trajectories_.at(i_max).msg_.fitness) {
+  for(int i=1;i<trajectories_.size();i++) 
+  {
+    if(trajectories_.at(i).msg_.fitness > trajectories_.at(i_max).msg_.fitness) 
+    {
       i_max = i;
     }
   } //end for

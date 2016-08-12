@@ -4687,7 +4687,7 @@ void Planner::reportData()
  *******************************************************/
 
 
-void Planner::go() 
+void Planner::go(float sec) 
 {
 
   // t=0
@@ -4759,13 +4759,33 @@ void Planner::go()
   // D = 0.4 if considering mobile base, 0.2 otherwise
   ros::Time t_start = ros::Time::now();
   goalThreshold_ = 0.5;
-  //while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) 
-  while( (ros::Time::now() - t_start).toSec() < 5.f && ros::ok()) 
+
+
+  if(sec > 0)
   {
-    planningCycleCallback();
-    r.sleep();
-    ros::spinOnce(); 
-  } // end while
+    ROS_INFO("Sec > 0, %f", sec);
+    std::cin.get();
+    while( (ros::Time::now() - t_start).toSec() < sec && ros::ok()) 
+    {
+      planningCycleCallback();
+      r.sleep();
+      ros::spinOnce(); 
+    } // end while
+  } // end if sec > 0
+
+  else
+  {
+    ROS_INFO("Sec <= 0, %f", sec);
+    std::cin.get();
+    while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) 
+    {
+      planningCycleCallback();
+      r.sleep();
+      ros::spinOnce(); 
+    } // end while
+  }
+
+
   ros::Duration t_execution = ros::Time::now() - t_start;
   ROS_INFO("Total execution time: %f", t_execution.toSec());
 
