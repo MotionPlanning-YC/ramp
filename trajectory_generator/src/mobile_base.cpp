@@ -608,7 +608,7 @@ const ramp_msgs::MotionState MobileBase::getMaxMS() const {
 /** */
 const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool only_curve) 
 {
-  ROS_INFO("Entered MobileBase::bezier");
+  //////ROS_INFO("Entered MobileBase::bezier");
 
   std::vector<BezierCurve> result;
 
@@ -617,7 +617,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
   // Set the index of which knot point to stop at
   //int stop = (req_.type == TRANSITION) ? 3 : 2; 
   int stop = req_.bezierCurves.size()+1;
-  std::cout<<"\nstop: "<<stop;
+  //std::cout<<"\nstop: "<<stop;
 
   // TODO: Add a check to see if a curve exists in the request to prevent index out of bounds crashes
 
@@ -627,10 +627,10 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
           req_.bezierCurves.at(0).segmentPoints.at(1).positions) > 0.01;
   int inc = 2;
   while(!differentPoint && inc < p_copy.points.size()) {
-    std::cout<<"\nPoints 0 and 1 are the same";
+    /*std::cout<<"\nPoints 0 and 1 are the same";
     std::cout<<"\nPath: "<<utility_.toString(p)<<"\n";
     std::cout<<"\nSegment point 0: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(0));
-    std::cout<<"\nSegment point 1: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1))<<"\n";
+    std::cout<<"\nSegment point 1: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1))<<"\n";*/
     req_.bezierCurves.at(0).segmentPoints.at(1) = p_copy.points.at(inc).motionState;
     differentPoint = utility_.positionDistance(req_.bezierCurves.at(0).segmentPoints.at(0).positions, 
           req_.bezierCurves.at(0).segmentPoints.at(1).positions) > 0.01;
@@ -639,7 +639,7 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
     if(inc == p_copy.points.size()) 
     {
-      ROS_INFO("Cannot plan Bezier, returning same path");
+      ////////ROS_INFO("Cannot plan Bezier, returning same path");
       type_ = HOLONOMIC;
       return result;
     }
@@ -652,10 +652,10 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
   inc = 3;
   while(!differentPoint && inc < p_copy.points.size()) 
   {
-    std::cout<<"\nPoints 1 and 2 are the same";
+    /*std::cout<<"\nPoints 1 and 2 are the same";
     std::cout<<"\nPath: "<<utility_.toString(p);
     std::cout<<"\nSegment point 1: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1));
-    std::cout<<"\nSegment point 2: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(2))<<"\n";
+    std::cout<<"\nSegment point 2: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(2))<<"\n";*/
     req_.bezierCurves.at(0).segmentPoints.at(2) = p_copy.points.at(inc).motionState;
     //std::cin.get();
     differentPoint = utility_.positionDistance(req_.bezierCurves.at(0).segmentPoints.at(1).positions, 
@@ -664,13 +664,13 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
     if(inc == p_copy.points.size()) 
     {
-      ROS_INFO("Cannot plan Bezier, returning same path loop 2");
+      ////////ROS_INFO("Cannot plan Bezier, returning same path loop 2");
       type_ = HOLONOMIC;
       return result;
     }
   }
 
-  ROS_INFO("stop: %i", stop);
+  //////ROS_INFO("stop: %i", stop);
 
   // Go through the path's knot points
   //std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
@@ -912,14 +912,14 @@ const std::vector<BezierCurve> MobileBase::bezier(ramp_msgs::Path& p, const bool
 
 void MobileBase::bezierOOP(ramp_msgs::Path& p, bool only_curve, std::vector<BezierCurve>& result)
 {
-  ROS_INFO("Entered MobileBase::bezierOOP");
+  //////ROS_INFO("Entered MobileBase::bezier");
 
   ramp_msgs::Path p_copy = p;
 
   // Set the index of which knot point to stop at
   //int stop = (req_.type == TRANSITION) ? 3 : 2; 
   int stop = req_.bezierCurves.size()+1;
-  std::cout<<"\nstop: "<<stop;
+  //std::cout<<"\nstop: "<<stop;
 
   // TODO: Add a check to see if a curve exists in the request to prevent index out of bounds crashes
 
@@ -929,10 +929,10 @@ void MobileBase::bezierOOP(ramp_msgs::Path& p, bool only_curve, std::vector<Bezi
           req_.bezierCurves.at(0).segmentPoints.at(1).positions) > 0.01;
   int inc = 2;
   while(!differentPoint && inc < p_copy.points.size()) {
-    std::cout<<"\nPoints 0 and 1 are the same";
+    /*std::cout<<"\nPoints 0 and 1 are the same";
     std::cout<<"\nPath: "<<utility_.toString(p)<<"\n";
     std::cout<<"\nSegment point 0: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(0));
-    std::cout<<"\nSegment point 1: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1))<<"\n";
+    std::cout<<"\nSegment point 1: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1))<<"\n";*/
     req_.bezierCurves.at(0).segmentPoints.at(1) = p_copy.points.at(inc).motionState;
     differentPoint = utility_.positionDistance(req_.bezierCurves.at(0).segmentPoints.at(0).positions, 
           req_.bezierCurves.at(0).segmentPoints.at(1).positions) > 0.01;
@@ -941,7 +941,7 @@ void MobileBase::bezierOOP(ramp_msgs::Path& p, bool only_curve, std::vector<Bezi
 
     if(inc == p_copy.points.size()) 
     {
-      ROS_INFO("Cannot plan Bezier, returning same path");
+      ////////ROS_INFO("Cannot plan Bezier, returning same path");
       type_ = HOLONOMIC;
       return;
     }
@@ -954,10 +954,10 @@ void MobileBase::bezierOOP(ramp_msgs::Path& p, bool only_curve, std::vector<Bezi
   inc = 3;
   while(!differentPoint && inc < p_copy.points.size()) 
   {
-    std::cout<<"\nPoints 1 and 2 are the same";
+    /*std::cout<<"\nPoints 1 and 2 are the same";
     std::cout<<"\nPath: "<<utility_.toString(p);
     std::cout<<"\nSegment point 1: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(1));
-    std::cout<<"\nSegment point 2: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(2))<<"\n";
+    std::cout<<"\nSegment point 2: "<<utility_.toString(req_.bezierCurves.at(0).segmentPoints.at(2))<<"\n";*/
     req_.bezierCurves.at(0).segmentPoints.at(2) = p_copy.points.at(inc).motionState;
     //std::cin.get();
     differentPoint = utility_.positionDistance(req_.bezierCurves.at(0).segmentPoints.at(1).positions, 
@@ -966,18 +966,17 @@ void MobileBase::bezierOOP(ramp_msgs::Path& p, bool only_curve, std::vector<Bezi
 
     if(inc == p_copy.points.size()) 
     {
-      ROS_INFO("Cannot plan Bezier, returning same path loop 2");
+      ////////ROS_INFO("Cannot plan Bezier, returning same path loop 2");
       type_ = HOLONOMIC;
       return;
     }
   }
 
-  ROS_INFO("stop: %i", stop);
+  //////ROS_INFO("stop: %i", stop);
 
   // Go through the path's knot points
   //std::cout<<"\np.points.size(): "<<p.points.size()<<"\n";
-  for(uint8_t i=1;i<stop;i++) 
-  {
+  for(uint8_t i=1;i<stop;i++) {
     //std::cout<<"\n---i: "<<(int)i<<"---\n";
 
     // Check that all of the points are different
@@ -986,7 +985,7 @@ void MobileBase::bezierOOP(ramp_msgs::Path& p, bool only_curve, std::vector<Bezi
         (utility_.positionDistance(req_.bezierCurves.at(i-1).segmentPoints.at(1).positions, 
           req_.bezierCurves.at(i-1).segmentPoints.at(2).positions) > 0.01) )
     {
-      ROS_INFO("In if");
+      //////ROS_INFO("In if");
 
       BezierCurve bc;
       bc.print_ = print_;
@@ -1004,7 +1003,7 @@ void MobileBase::bezierOOP(ramp_msgs::Path& p, bool only_curve, std::vector<Bezi
       // control points, so we have all the info now
       if(req_.bezierCurves.at(0).u_0 > 0 && i==1) 
       {
-        std::cout<<"\nIn if transition or bezierStart\n";
+        //std::cout<<"\nIn if transition or bezierStart\n";
         
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
         
@@ -1030,12 +1029,12 @@ void MobileBase::bezierOOP(ramp_msgs::Path& p, bool only_curve, std::vector<Bezi
       // If a "normal" bezier trajectory,
       else 
       {
-        ROS_INFO("In else a normal trajectory");
+        //////ROS_INFO("In else a normal trajectory");
 
         // Get lambda value for segment points
         lambda = (req_.bezierCurves.at(i-1).controlPoints.size() > 0) ?  req_.bezierCurves.at(i-1).l :
                                                         getControlPointLambda(segment_points);
-        ROS_INFO("lambda: %f", lambda);
+        //////ROS_INFO("lambda: %f", lambda);
 
         ramp_msgs::MotionState ms_maxVA = getMaxMS();
 
@@ -1093,7 +1092,7 @@ void MobileBase::bezierOOP(ramp_msgs::Path& p, bool only_curve, std::vector<Bezi
       
       else if(type_ == TRANSITION) 
       {
-        ROS_INFO("Curve not verified, doing a transition so setting 0 velocity for KP: %s", utility_.toString(path_.points.at(1).motionState).c_str());
+        //////ROS_INFO("Curve not verified, doing a transition so setting 0 velocity for KP: %s", utility_.toString(path_.points.at(1).motionState).c_str());
 
         uint8_t num_dof = path_.points.at(1).motionState.velocities.size();
         for(uint8_t i_v=0;i_v<num_dof;i_v++) 
@@ -1105,18 +1104,18 @@ void MobileBase::bezierOOP(ramp_msgs::Path& p, bool only_curve, std::vector<Bezi
       } // end else if transition
       else 
       {
-        ROS_INFO("Curve not verified, but not a transition trajectory");
+        //////ROS_INFO("Curve not verified, but not a transition trajectory");
         type_ = HOLONOMIC;
       }
     } // end if
     else 
     {
-      ROS_WARN("Two of the three segment points for Bezier curve are too close");
+      //ROS_WARN("Two of the three segment points for Bezier curve are too close");
       type_ = HOLONOMIC;
     }
   } // end for
 
-  ROS_INFO("Outside of for");
+  //////ROS_INFO("Outside of for");
 
   // Set Path p's knot point indices
   if(type_ != HOLONOMIC) 
@@ -1773,12 +1772,10 @@ bool MobileBase::trajectoryRequest(ramp_msgs::TrajectoryRequest& req, ramp_msgs:
   // Use Bezier curves to smooth path
   if(type_ != HOLONOMIC) 
   {
-    ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
+    //ROS_INFO("Path before Bezier: %s", utility_.toString(path_).c_str());
     //curves = bezier(path_, type_ == TRANSITION);
     bezierOOP(path_, type_ == TRANSITION, curves);
-
-    path_.points.erase(path_.points.begin()+3, path_.points.begin()+5);
-    ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
+    //ROS_INFO("Path after Bezier: %s", utility_.toString(path_).c_str());
     setInitialMotion();
 
 
