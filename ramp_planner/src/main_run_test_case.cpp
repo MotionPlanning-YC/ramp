@@ -339,33 +339,132 @@ void testSwitch()
 }
 
 
-struct TestCase {
+
+enum Group 
+{
+  EXTERIOR = 0,
+  INTERIOR = 1,
+  CRITICAL = 2,
+  MIX      = 3
+};
+
+
+struct ObInfo
+{
   double x;
   double y;
   double v;
   double w;
   double relative_direction;
-  double duration;
+  double d;
+  ramp_msgs::Obstacle msg;
+  
+  bool faster;
+};
+
+struct TestCase {
+  std::vector<ObInfo> obs;
+  ramp_msgs::ObstacleList ob_list;
+  Group group;
+
+  bool success;
 };
 
 
-TestCase generateTestCase()
+ObInfo generateObInfoA(const MotionState robot_state)
 {
-  TestCase result;
+  ObInfo result;
 
-  Range x(0, 3.5);
-  Range y(0, 3.5);
-  Range v(0,0.33);
-  Range w(0, PI/2.f);
-  Range rela_dir(PI/6.f, 5.f*PI/6.f);
-  Range dur(0.f, 5.f);
+  Range dist(0, 3.5);
 
-  result.x                  = x.random();
-  result.y                  = y.random();
+  Range v(0, 0.5);
+  Range w       (0      ,  PI/2.f);
+  Range rela_dir(PI/6.f ,  5.f*PI/6.f);
+  
+  
   result.v                  = v.random();
   result.w                  = w.random();
   result.relative_direction = rela_dir.random();
-  result.duration           = dur.random();
+  
+  
+  result.d    = dist.random();
+  double ob_x = robot_state.msg_.positions[0] + result.d*cos(result.relative_direction);
+  double ob_y = robot_state.msg_.positions[1] + result.d*sin(result.relative_direction);
+
+  if(ob_x > 3.5)
+    ob_x = 3.5;
+  else if(ob_x < 0)
+    ob_x = 0.;
+  if(ob_y > 3.5)
+    ob_y = 3.5;
+  else if(ob_y < 0)
+    ob_y = 0.;
+
+  result.x = ob_x;
+  result.y = ob_y;
+
+  result.faster = result.v > sqrt(pow(robot_state.msg_.velocities[0],2) + pow(robot_state.msg_.velocities[1],2));
+
+  return result;
+}
+
+ObInfo generateObInfo(const MotionState robot_state, Group g, bool faster)
+{
+  ObInfo result;
+
+  Range exterior_dist(1.5 , 3.5);
+  Range interior_dist(0.5 , 1.5);
+  Range critical_dist(0   , 0.5);
+
+  Range v_slower(0      ,  0.33);
+  Range v_faster(0.33   ,  1.f);
+  Range w       (0      ,  PI/2.f);
+  Range rela_dir(PI/6.f ,  5.f*PI/6.f);
+
+
+  if(faster)
+  {
+    result.v = v_faster.random();
+  }
+  else
+  {
+    result.v = v_slower.random();
+  }
+
+  result.w                  = w.random();
+  result.relative_direction = rela_dir.random();
+  
+  
+  double d;
+  if(g == EXTERIOR)
+  {
+    d = exterior_dist.random();
+  }
+  else if(g == INTERIOR)
+  {
+    d = interior_dist.random();
+  }
+  else
+  {
+    d = critical_dist.random();
+  }
+  double ob_x = robot_state.msg_.positions[0] + d*cos(result.relative_direction);
+  double ob_y = robot_state.msg_.positions[1] + d*sin(result.relative_direction);
+  if(ob_x > 3.5)
+    ob_x = 3.5;
+  else if(ob_x < 0)
+    ob_x = 0.;
+  if(ob_y > 3.5)
+    ob_y = 3.5;
+  else if(ob_y < 0)
+    ob_y = 0.;
+
+  result.x = ob_x;
+  result.y = ob_y;
+
+  ROS_INFO("d: %f", d);
+
+
 
   return result;
 }
@@ -409,6 +508,24 @@ const ramp_msgs::Obstacle buildObstacleMsg(const double& p_x, const double& p_y,
 }
 
 
+TestCase generateTestCase(const MotionState robot_state, double inner_r, double outter_r, int num_obs)
+{
+  TestCase result;
+
+  // Generate all obstacles and push them onto test case
+  for(int i=0;i<num_obs;i++)
+  {
+    ObInfo temp = generateObInfoA(robot_state);
+
+    temp.msg = buildObstacleMsg(temp.x, temp.y, temp.v, temp.relative_direction, temp.w);
+    
+    result.obs.push_back(temp);
+    result.ob_list.obstacles.push_back(temp.msg);
+  }
+
+  return result;
+}
+
 int main(int argc, char** argv) {
   srand( time(0));
 
@@ -428,39 +545,57 @@ int main(int argc, char** argv) {
   ROS_INFO("Parameters loaded. Please review them and press Enter to continue");
   std::cin.get();
  
-  /** Initialize the Planner's handlers */ 
+  /** Initialize the Planner */ 
   my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, ob_tfs, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction); 
   my_planner.modifications_   = modifications;
   my_planner.evaluations_     = evaluations;
   my_planner.seedPopulation_  = seedPopulation;
 
-  std::cout<<"\nStart: "<<my_planner.start_.toString();
-  std::cout<<"\nGoal: "<<my_planner.goal_.toString();
-
   
-  /******* Start the planner *******/
-  std::cout<<"\nPress Enter to start the planner\n";
-  std::cin.get(); 
 
-  TestCase tc = generateTestCase(); 
-  
-  // Find more specific things based on this TC
-  ramp_msgs::Obstacle = buildObstacleMsg(tc.x, tc.y, tc.v, tc.relative_direction, tc.w);
 
+  /*
+   *
+   * Generate a test case
+   *
+   */
+  ramp_msgs::ObstacleList ob_list;
+
+  MotionState initial_state;
+  my_planner.randomMS(initial_state);
+  ROS_INFO("Initial state: %s", initial_state.toString().c_str());
+  my_planner.start_ = initial_state;
+  trajectory_msgs::JointTrajectoryPoint p_next_cc = my_planner.prepareForTestCase();
+
+  double inner_r  = utility.positionDistance(initial_state.msg_.positions, p_next_cc.positions);
+  double outter_r = inner_r + 1.f;
+
+
+  TestCase tc = generateTestCase(initial_state, inner_r, outter_r, 3); 
+
+
+  // Publish ObstacleList msg
+  ros::Publisher pub_obs = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
+  pub_obs.publish(tc.ob_list);
   
-  my_planner.go(4.f);
+  
+  ROS_INFO("Press Enter to run planner");
+  std::cin.get();
+
+  // Run the planner for a certain time
+  double execution_time = 1.f;
+  my_planner.go(execution_time);
 
   ROS_INFO("Done running planner");
+  my_planner.sendPopulation(my_planner.population_);
 
-  bool success = my_planner.population_.getBest().msg_.feasible;
+  ROS_INFO("Moving On: %s", my_planner.movingOn_.toString().c_str());
 
-  ROS_INFO("Best trajectory: %s Test case: %s", success ? "Feasible" : "Infeasible", success ? "Success" : "Failure");
+  //tc.success = my_planner.population_.getBest().msg_.feasible;
+  tc.success = my_planner.population_.feasibleExists();
 
-  
-  //****MotionState exp_results = my_planner.findAverageDiff();
-  //****std::cout<<"\n\nAverage Difference: "<<exp_results.toString();
-  
-  
+  ROS_INFO("Best trajectory: %s Test case: %s", tc.success ? "Feasible" : "Infeasible", tc.success ? "Success" : "Failure");
+
   std::cout<<"\n\nExiting Normally\n";
   ros::shutdown();
   return 0;

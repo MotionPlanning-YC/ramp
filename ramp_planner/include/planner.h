@@ -98,6 +98,7 @@ class Planner {
 
     
     // Start planning
+    trajectory_msgs::JointTrajectoryPoint prepareForTestCase();
     void go(float sec=-1);
     
     // Initialization 
@@ -310,7 +311,8 @@ class Planner {
     
    
     // Misc
-    const MotionState randomizeMSPositions(const MotionState ms)        const ;
+    const MotionState randomizeMSPositions(const MotionState ms)  const ;
+          void randomMS(MotionState& result)                      const ;
           void checkTrajChange()                                        ;
           void seedPopulation()                                         ;
           void seedPopulationTwo()                                      ;

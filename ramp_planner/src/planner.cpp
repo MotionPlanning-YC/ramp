@@ -278,7 +278,7 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
 
 void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 {
-  //ROS_INFO("In sensingCycleCallback");
+  ROS_INFO("In sensingCycleCallback");
   ////ROS_INFO("msg: %s", utility_.toString(msg).c_str());
 
   ros::Time start = ros::Time::now();
@@ -301,7 +301,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 
     copy.trajectories_.push_back(ob_temp_trj);
     ////ROS_INFO("Time to get obstacle trajectory: %f", (ros::Time::now() - start).toSec());
-    ////ROS_INFO("ob_trajectory_: %s", ob_temp_trj.toString().c_str());
+    ROS_INFO("ob_trajectory_: %s", ob_temp_trj.toString().c_str());
   } // end for
 
   ros::Time s = ros::Time::now();
@@ -345,6 +345,11 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   sc_durs_.push_back( ros::Time::now() - start );
   
   sendPopulation(copy);
+  
+  /*ROS_INFO("Pausing in Sensing Cycle");
+  ros::Duration d(1);
+  d.sleep();
+  std::cin.get();*/
 
   //sendPopulation(pop_obs);
 
@@ -1950,6 +1955,33 @@ const MotionState Planner::randomizeMSPositions(const MotionState ms) const {
 
   return result;
 } // End randomizeMotionState
+
+
+void Planner::randomMS(MotionState& result) const
+{
+  result.msg_.positions.clear();
+  result.msg_.velocities.clear();
+
+  // Push on random positions
+  for(int i=0;i<ranges_.size();i++)
+  {
+    result.msg_.positions.push_back(ranges_[i].random());
+  }
+
+  // Make speed range
+  Range speed(0, 0.33);
+  Range w_range(-PI/2.f, PI/2.f);
+
+  double v = speed.random();
+  double x_dot = v*cos(result.msg_.positions[2]);
+  double y_dot = v*sin(result.msg_.positions[2]);
+  //double w = w_range.random();
+
+  result.msg_.velocities.push_back(x_dot);
+  result.msg_.velocities.push_back(y_dot);
+  result.msg_.velocities.push_back(0);
+
+}
 
 
 /****************************************************
@@ -3618,7 +3650,7 @@ void Planner::planningCycleCallback()
         cc_started_ ? "True" : "False", generation_,
         errorReduction_ ? "True" : "False", 
         fabs(latestUpdate_.msg_.velocities.at(2)));
-  }
+  }*/
 
   ////ROS_INFO("Done with error correction!");
 
@@ -3680,8 +3712,14 @@ void Planner::planningCycleCallback()
   /*////ROS_INFO("Exiting PC at time: %f", ros::Time::now().toSec());
   ////ROS_INFO("Time spent in PC: %f", (ros::Time::now() - t).toSec());*/
 
+  Population copy = population_; 
+  for(int i=0;i<ob_trajectory_.size();i++)
+  {
+    copy.trajectories_.push_back(ob_trajectory_[i]);
+  }
 
-  sendPopulation(population_);
+  //sendPopulation(population_);
+  sendPopulation(copy);
   
   ros::Duration d = ros::Time::now() - t_start; 
   //ROS_INFO("d: %f EC: %s mod_worked: %s modded_two: %s", d.toSec(), EC ? "True" : "False", mod_worked ? "True" : "False", modded_two ? "True" : "False");
@@ -4687,14 +4725,14 @@ void Planner::reportData()
  *******************************************************/
 
 
-void Planner::go(float sec) 
+trajectory_msgs::JointTrajectoryPoint Planner::prepareForTestCase()
 {
-
   // t=0
   generation_ = 0;
   
   // initialize population
-  initPopulation();
+  //initPopulation();
+  population_ = getPopulation(start_, goal_, false);
   evaluatePopulationOOP();
   //ROS_INFO("Population Initialized");
   std::cin.get();
@@ -4749,6 +4787,12 @@ void Planner::go(float sec)
   trajectory_msgs::JointTrajectoryPoint p_next_cc = movingOn_.msg_.trajectory.points.at(t_next_cc*10);
   ROS_INFO("p_next_cc: %s", utility_.toString(p_next_cc).c_str());
 
+  return p_next_cc;
+}
+
+
+void Planner::go(float sec) 
+{
 
   ros::Rate r(20);
 
@@ -4761,51 +4805,25 @@ void Planner::go(float sec)
   goalThreshold_ = 0.5;
 
 
-  if(sec > 0)
+  //ROS_INFO("Sec > 0, %f", sec);
+  //std::cin.get();
+  while( (ros::Time::now() - t_start).toSec() < controlCycle_.toSec() && ros::ok()) 
   {
-    ROS_INFO("Sec > 0, %f", sec);
-    std::cin.get();
-    while( (ros::Time::now() - t_start).toSec() < sec && ros::ok()) 
-    {
-      planningCycleCallback();
-      r.sleep();
-      ros::spinOnce(); 
-    } // end while
-  } // end if sec > 0
-
-  else
-  {
-    ROS_INFO("Sec <= 0, %f", sec);
-    std::cin.get();
-    while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) 
-    {
-      planningCycleCallback();
-      r.sleep();
-      ros::spinOnce(); 
-    } // end while
-  }
+    planningCycleCallback();
+    r.sleep();
+    ros::spinOnce(); 
+  } // end while
 
 
   ros::Duration t_execution = ros::Time::now() - t_start;
   ROS_INFO("Total execution time: %f", t_execution.toSec());
 
-  ROS_INFO("Planning done!");
-  ////ROS_INFO("latestUpdate_: %s\ngoal: %s", latestUpdate_.toString().c_str(), goal_.toString().c_str());
-  
   // Stop timer
   controlCycleTimer_.stop();
   planningCycleTimer_.stop();
   imminentCollisionTimer_.stop();
   ob_dists_timer_.stop();
 
-  
-  // Send an empty trajectory
-  ramp_msgs::RampTrajectory empty;
-  h_control_->send(empty);
-  h_control_->send(empty);
-  h_control_->send(empty);
- 
- 
   ////ROS_INFO("Total number of planning cycles: %i", generation_-1);
   ////ROS_INFO("Total number of control cycles:  %i", num_cc_);
   ROS_INFO("Exiting Planner::go");
