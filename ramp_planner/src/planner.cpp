@@ -2063,7 +2063,9 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
 /*
  * For testing, seed with a trajectory in direction of robot's orientation
  */
-void Planner::seedPopulation() {
+void Planner::seedPopulation() 
+{
+  ROS_INFO("In seedPopulation");
 
   /**** Create the Paths ****/
   ramp_msgs::KnotPoint kp;
@@ -2142,9 +2144,8 @@ void Planner::seedPopulation() {
   /************************************/
 
   /**** Get trajectories ****/  
-  std::vector<RampTrajectory> new_pop;
-  population_.clear();
-  for(uint8_t i=0;i<paths.size();i++) {
+  for(uint8_t i=0;i<paths.size();i++) 
+  {
   
     // Make request
     RampTrajectory trajec = requestTrajectory(paths.at(i));
@@ -3361,7 +3362,7 @@ const ModificationResult Planner::modification()
 void Planner::modificationOOP()
 {
   ros::Time t_m = ros::Time::now();
-  //ROS_INFO("In Planner::modificationOOP()");
+  ROS_INFO("In Planner::modificationOOP()");
   ModificationResult result;
 
   // Modify 1 or more trajectories
@@ -3370,7 +3371,7 @@ void Planner::modificationOOP()
   modifyTrajecOOP(mod_trajec);
   ros::Time t_p = ros::Time::now();
   //ROS_INFO("t_p: %f", (t_p-now).toSec());
-  //ROS_INFO("Modification trajectories obtained: %i", (int)mod_trajec.size());
+  ROS_INFO("Modification trajectories obtained: %i", (int)mod_trajec.size());
   
   if(mod_trajec.size()>1)
     modded_two=true;
@@ -3380,7 +3381,7 @@ void Planner::modificationOOP()
   // and update the planner and the modifier on the new paths
   for(unsigned int i=0;i<mod_trajec.size();i++) 
   {
-    //ROS_INFO("i: %i", i);
+    ROS_INFO("i: %i", i);
     //ROS_INFO("Modified trajectory: %s", mod_trajec.at(i).toString().c_str());
     ////ROS_INFO("Path size: %i", (int)mod_trajec[i].msg_.holonomic_path.points.size());
     //std::cout<<"\nramp_planner: Evaluating trajectory "<<(int)i<<"\n";
@@ -3398,7 +3399,7 @@ void Planner::modificationOOP()
     {
       evaluateTrajectoryOOP(traj_final);
     }
-    //ROS_INFO("Done evaluating");
+    ROS_INFO("Done switching and evaluating");
     //ROS_INFO("traj_final: %s", traj_final.fitnessFeasibleToString().c_str());
 
     // Add the new trajectory to the population
@@ -3408,7 +3409,7 @@ void Planner::modificationOOP()
     ////ROS_INFO("Adding to pop, mod_trajec.size(): %i", (int)mod_trajec.size());
     int index = population_.add(traj_final);
     //int index = population_.add(mod_trajec[i]);
-    ////ROS_INFO("Done adding to pop");
+    ROS_INFO("Done adding to pop");
     
     // No longer need to reset CC time because trajs should have same t_start
     if(index > -1)
@@ -4203,10 +4204,10 @@ void Planner::doControlCycle()
   startPlanning_ = m_cc_;
   //ROS_INFO("New startPlanning_: %s", startPlanning_.toString().c_str());
 
-  //ROS_INFO("Before adaptation and evaluation, pop size: %i", population_.size());
+  ROS_INFO("Before adaptation and evaluation, pop size: %i", population_.size());
   for(uint8_t i=0;i<populationSize_;i++)
   {
-    //ROS_INFO("Trajectory %i: %s", i, population_.get(i).toString().c_str());
+    ROS_INFO("Trajectory %i: %s", i, population_.get(i).toString().c_str());
   }
   ////ROS_INFO("transPop.bestID: %i", population_.calcBestIndex());
 

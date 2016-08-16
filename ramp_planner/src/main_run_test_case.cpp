@@ -551,6 +551,7 @@ int main(int argc, char** argv) {
   int num_tests = 15;
   int num_successful_tests = 0;
   std::vector<int> num_generations;
+  std::vector<TestCase> test_cases;
 
   for(int i=0;i<num_tests;i++)
   {
@@ -572,11 +573,12 @@ int main(int argc, char** argv) {
 
     // Use p_next_cc to determine the inner and outter radii
     double inner_r  = utility.positionDistance(initial_state.msg_.positions, p_next_cc.positions);
-    double outter_r = inner_r + 1.f;
+    double outter_r = inner_r + 1.5f;
 
     // Generate the test case
     int num_obs = 3;
     TestCase tc = generateTestCase(initial_state, inner_r, outter_r, num_obs);
+    test_cases.push_back(tc);
 
     // Publish ObstacleList msg
     ros::Publisher pub_obs = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
