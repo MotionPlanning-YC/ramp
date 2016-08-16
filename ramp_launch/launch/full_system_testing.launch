@@ -19,19 +19,18 @@
 
 
 <!-- Planner -->
-<node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" />
+<node name="ramp_planner" pkg="ramp_planner" type="run_test_case" output="screen" /> 
 
-<!-- Sensing -->
-<node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" /> 
+<!-- <node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" /> -->
 
 
 <!-- Simulation -->
 <node name="stageros" pkg="stage_ros" type="stageros" args="/home/sterlingm/ros_workspace/src/ramp/ramp_launch/launch/world/single_robot.world" /> 
-<node name="ramp_control" pkg="ramp_control" type="ramp_control" output="log" >
+<!-- <node name="ramp_control" pkg="ramp_control" type="ramp_control" output="log" >
   <remap from="odometry" to="odom" />
   <param name="simulation" value="true" />
   <param name="orientation" type="double" value="0.785" />
-</node>
+</node> -->
 
 
 <!-- Trajectory Visualization -->
