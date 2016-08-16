@@ -591,7 +591,7 @@ int main(int argc, char** argv) {
     double execution_time = my_planner.controlCycle_.toSec();
 
     ROS_INFO("Running planner for %f", execution_time);
-    my_planner.go(execution_time);
+    my_planner.goTest(execution_time);
 
     ROS_INFO("Done running planner");
     my_planner.sendPopulation(my_planner.population_);

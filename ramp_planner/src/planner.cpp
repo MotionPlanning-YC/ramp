@@ -4803,7 +4803,7 @@ trajectory_msgs::JointTrajectoryPoint Planner::prepareForTestCase()
 }
 
 
-void Planner::go(float sec) 
+void Planner::goTest(float sec) 
 {
 
   ros::Rate r(20);
@@ -4839,4 +4839,133 @@ void Planner::go(float sec)
   ////ROS_INFO("Total number of planning cycles: %i", generation_-1);
   ////ROS_INFO("Total number of control cycles:  %i", num_cc_);
   ROS_INFO("Exiting Planner::go");
+} // End goTest
+
+
+
+
+void Planner::go() 
+{
+
+  // t=0
+  generation_ = 0;
+  
+  // initialize population
+  initPopulation();
+  evaluatePopulationOOP();
+  //ROS_INFO("Population Initialized");
+  std::cin.get();
+  sendPopulation(population_);
+  std::cout<<"\ntransPopulation initialized! Press enter to continue\n";
+  //std::cin.get();
+ 
+
+
+  if(seedPopulation_) 
+  {
+    std::cout<<"\nSeeding transPopulation\n";
+    seedPopulation();
+    i_best_prev_ = population_.calcBestIndex();
+    std::cout<<"\ntransPopulation seeded!\n";
+    std::cout<<"\n"<<population_.fitnessFeasibleToString()<<"\n";
+    std::cout<<"\n** transPop **:"<<population_.toString();
+
+    // Evaluate after seeding
+    population_ = evaluatePopulation(population_);
+
+    // Set movingOn
+    movingOn_ = population_.get(population_.calcBestIndex()).getSubTrajectory(controlCycle_.toSec());
+    ////ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
+    
+
+    sendPopulation(population_);
+    std::cout<<"\ntransPopulation seeded! Press enter to continue\n";
+    std::cin.get();
+  }
+
+
+  // Create sub-transPops if enabled
+  if(subPopulations_) 
+  {
+    population_.createSubPopulations();
+    std::cout<<"\nSub-transPopulations created\n";
+  }
+
+
+  // Initialize transtransPopulation
+  population_       = population_;
+  population_at_cc_ = population_;
+
+  t_start_ = ros::Time::now();
+
+  //ROS_INFO("Planning Cycles started!");
+
+  // Start the planning cycles
+  planningCycleTimer_.start();
+    
+  
+  h_parameters_.setCCStarted(false); 
+
+
+  int num_pc = generationsBeforeCC_; 
+  if(num_pc < 0)
+  {
+    ////ROS_WARN("num_pc is less than zero: %i - Setting num_pc = 0", num_pc);
+    num_pc = 0;
+  }
+  //ROS_INFO("generationsBeforeCC_: %i generationsPerCC_: %i num_pc: %i", generationsBeforeCC_, generationsPerCC_, num_pc);
+
+  ros::Rate r(20);
+  // Wait for the specified number of generations before starting CC's
+  while(generation_ < num_pc) {planningCycleCallback(); r.sleep(); ros::spinOnce();}
+ 
+  //ROS_INFO("Starting CCs at t: %f", ros::Time::now().toSec());
+
+  // Right before starting CC, make sure transtransPopulation is updated
+  population_ = population_;
+
+  diff_ = diff_.zero(3);
+  
+  // Start the control cycles
+  controlCycleTimer_.start();
+  imminentCollisionTimer_.start();
+  ob_dists_timer_.start();
+
+  ////ROS_INFO("CCs started");
+
+ 
+  // Do planning until robot has reached goal
+  // D = 0.4 if considering mobile base, 0.2 otherwise
+  ros::Time t_start = ros::Time::now();
+  goalThreshold_ = 0.5;
+  while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) 
+  {
+    planningCycleCallback();
+    r.sleep();
+    ros::spinOnce(); 
+  } // end while
+  ros::Duration t_execution = ros::Time::now() - t_start;
+  reportData();
+  //ROS_INFO("Total execution time: %f", t_execution.toSec());
+
+  ////ROS_INFO("Planning done!");
+  ////ROS_INFO("latestUpdate_: %s\ngoal: %s", latestUpdate_.toString().c_str(), goal_.toString().c_str());
+  
+  // Stop timer
+  controlCycleTimer_.stop();
+  planningCycleTimer_.stop();
+  imminentCollisionTimer_.stop();
+  ob_dists_timer_.stop();
+
+  
+  // Send an empty trajectory
+  ramp_msgs::RampTrajectory empty;
+  h_control_->send(empty);
+  h_control_->send(empty);
+  h_control_->send(empty);
+ 
+ 
+  ////ROS_INFO("Total number of planning cycles: %i", generation_-1);
+  ////ROS_INFO("Total number of control cycles:  %i", num_cc_);
+  ////ROS_INFO("Exiting Planner::go");
 } // End go

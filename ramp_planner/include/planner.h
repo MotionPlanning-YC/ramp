@@ -99,7 +99,8 @@ class Planner {
     
     // Start planning
     trajectory_msgs::JointTrajectoryPoint prepareForTestCase();
-    void go(float sec=-1);
+    void go();
+    void goTest(float sec=-1);
     
     // Initialization 
     void initPopulation();
