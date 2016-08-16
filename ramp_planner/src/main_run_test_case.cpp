@@ -548,8 +548,9 @@ int main(int argc, char** argv) {
   my_planner.seedPopulation_  = seedPopulation;
 
   
-  int num_tests = 25;
+  int num_tests = 15;
   int num_successful_tests = 0;
+  std::vector<int> num_generations;
 
   for(int i=0;i<num_tests;i++)
   {
@@ -586,6 +587,8 @@ int main(int argc, char** argv) {
 
     // Run the planner for a certain time
     double execution_time = my_planner.controlCycle_.toSec();
+
+    ROS_INFO("Running planner for %f", execution_time);
     my_planner.go(execution_time);
 
     ROS_INFO("Done running planner");
@@ -602,9 +605,18 @@ int main(int argc, char** argv) {
 
     ROS_INFO("Best trajectory: %s Test case: %s", tc.success ? "Feasible" : "Infeasible", tc.success ? "Success" : "Failure");
 
+    num_generations.push_back(my_planner.generation_);
   }
 
-  ROS_INFO("Num tests: %d Num success: %d", num_tests, num_successful_tests);
+  ROS_INFO("Num tests: %d Num success: %d Percent: %d", num_tests, num_successful_tests, (num_successful_tests / num_tests*10));
+  
+  int count = num_generations[0];
+  for(int i=1;i<num_generations.size();i++)
+  {
+    count+=num_generations[i];
+  }
+  ROS_INFO("Average number of planning cycles: %f", (float)count / num_generations.size());
+
 
   std::cout<<"\n\nExiting Normally\n";
   ros::shutdown();

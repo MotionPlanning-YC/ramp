@@ -2060,18 +2060,24 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
 
 
 
-/** Place code to seed population here */
+/*
+ * For testing, seed with a trajectory in direction of robot's orientation
+ */
 void Planner::seedPopulation() {
 
   /**** Create the Paths ****/
   ramp_msgs::KnotPoint kp;
   
-  kp.motionState.positions.push_back(2.);
-  kp.motionState.positions.push_back(2.);
-  kp.motionState.positions.push_back(0.785); // 26 degrees 
+  double theta = start_.msg_.positions[2];
+  double x = start_.msg_.positions[0] + cos(theta);
+  double y = start_.msg_.positions[1] + sin(theta);
+
+  kp.motionState.positions.push_back(x);
+  kp.motionState.positions.push_back(y);
+  kp.motionState.positions.push_back(theta); // 26 degrees 
   
-  kp.motionState.velocities.push_back(0);
-  kp.motionState.velocities.push_back(0);
+  kp.motionState.velocities.push_back(start_.msg_.velocities[0]);
+  kp.motionState.velocities.push_back(start_.msg_.velocities[1]);
   kp.motionState.velocities.push_back(0);
   
   ramp_msgs::KnotPoint kp1;
@@ -2093,7 +2099,7 @@ void Planner::seedPopulation() {
   Path p1(all);
 
 
-  ramp_msgs::KnotPoint kp2;
+  /*ramp_msgs::KnotPoint kp2;
   
   kp2.motionState.positions.push_back(0.);
   kp2.motionState.positions.push_back(3.);
@@ -2124,15 +2130,15 @@ void Planner::seedPopulation() {
   all3.push_back(kp3);
   all3.push_back(goal_);
 
-  Path p3(all3);
+  Path p3(all3);*/
   /****************************/
 
   /**** Create the vector of Paths ****/
 
   std::vector<Path> paths;
   paths.push_back(p1);
-  paths.push_back(p2);
-  paths.push_back(p3);
+  //paths.push_back(p2);
+  //paths.push_back(p3);
   /************************************/
 
   /**** Get trajectories ****/  
@@ -2143,8 +2149,14 @@ void Planner::seedPopulation() {
     // Make request
     RampTrajectory trajec = requestTrajectory(paths.at(i));
     trajec = requestEvaluation(trajec);
-    ////ROS_INFO("Seede trajec: %s", trajec.toString().c_str());
-    population_.add(trajec); 
+    evaluateTrajectoryOOP(trajec);
+    ROS_INFO("Seeded trajec: %s", trajec.toString().c_str());
+    population_.replace(0, trajec);
+    //int index = population_.add(trajec); 
+    /*if(index > -1)
+    {
+      ROS_INFO("Seeded trajectory added at index %i", index);
+    }*/
   
   } // end for
   /************************************/
@@ -3576,7 +3588,7 @@ void Planner::planningCycleCallback()
 {
   ros::Time t_start = ros::Time::now();
   //ROS_INFO("*************************************************");
-  //ROS_INFO("Planning cycle occurring, generation %i", generation_);
+  ROS_INFO("Planning cycle occurring, generation %i", generation_);
   ////ROS_INFO("  e.last_expected: %f\n  e.last_real: %f\n  current_expected: %f\n  current_real: %f\n  profile.last_duration: %f", e.last_expected.toSec(), e.last_real.toSec(), e.current_expected.toSec(), e.current_real.toSec(), e.profile.last_duration.toSec());
   ////ROS_INFO("Time since last: %f", (e.current_real - e.last_real).toSec());
   //ROS_INFO("*************************************************");
@@ -3675,7 +3687,7 @@ void Planner::planningCycleCallback()
   if(modifications_) 
   {
     ////ROS_INFO("*****************************");
-    //ROS_INFO("Performing modification");
+    ROS_INFO("Performing modification");
     ros::Time t = ros::Time::now();
     //ModificationResult mod = modification();
     modificationOOP();
@@ -3702,6 +3714,7 @@ void Planner::planningCycleCallback()
     {
       //ROS_INFO("No trajectory added");
     }*/
+    ROS_INFO("Modification complete");
   } // end if modifications
 
 
@@ -3739,7 +3752,7 @@ void Planner::planningCycleCallback()
   //ROS_INFO("d: %f EC: %s mod_worked: %s modded_two: %s", d.toSec(), EC ? "True" : "False", mod_worked ? "True" : "False", modded_two ? "True" : "False");
   pc_durs_.push_back(d);
   ////ROS_INFO("********************************************************************");
-  ////ROS_INFO("Generation %i completed", (generation_-1));
+  ROS_INFO("Generation %i completed", (generation_-1));
   ////ROS_INFO("********************************************************************");
 } // End planningCycleCallback
 
@@ -4752,28 +4765,13 @@ trajectory_msgs::JointTrajectoryPoint Planner::prepareForTestCase()
   ROS_INFO("Population Initialized: %s", population_.toString().c_str());
   sendPopulation(population_);
 
-
-  if(seedPopulation_) 
-  {
-    std::cout<<"\nSeeding transPopulation\n";
-    seedPopulation();
-    i_best_prev_ = population_.calcBestIndex();
-    std::cout<<"\ntransPopulation seeded!\n";
-    std::cout<<"\n"<<population_.fitnessFeasibleToString()<<"\n";
-    std::cout<<"\n** transPop **:"<<population_.toString();
-
-    // Evaluate after seeding
-    population_ = evaluatePopulation(population_);
-
-    // Set movingOn
-    movingOn_ = population_.get(population_.calcBestIndex()).getSubTrajectory(controlCycle_.toSec());
-    ////ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
-    
-
-    sendPopulation(population_);
-    std::cout<<"\ntransPopulation seeded! Press enter to continue\n";
-    std::cin.get();
-  }
+  seedPopulation();
+  evaluatePopulationOOP();
+  sendPopulation(population_);
+  ROS_INFO("Pop seeded");
+  //ros::Duration d(1);
+  //d.sleep();
+  //std::cin.get();
 
 
   // Create sub-transPops if enabled

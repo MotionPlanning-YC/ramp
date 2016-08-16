@@ -179,11 +179,11 @@ const bool Population::replacementPossible(const RampTrajectory& rt) const
   ROS_INFO("getMinFitness(): %f", getMinFitness());
 
   // If the fitness is not higher than the minimum fitness
-  if(rt.msg_.fitness <= getMinFitness()) 
+  /*if(rt.msg_.fitness <= getMinFitness()) 
   {
     ROS_INFO("Fitness < Minimum Fitness, %f < %f, returning false", rt.msg_.fitness, getMinFitness());
     return false;
-  }
+  }*/
   
   // If the trajectory is infeasible and
   // no infeasible trajectories exist, no

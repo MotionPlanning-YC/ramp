@@ -1,4 +1,4 @@
-population_size: 3
+population_size: 15
 
 sub_populations: false 
 
@@ -16,7 +16,7 @@ fixed_control_cycle_rate: 1.6
 
 sensing_cycle_rate: 20
 
-error_reduction: true
+error_reduction: false
 
 num_of_obstacles: 3
 
