@@ -3966,8 +3966,6 @@ void Planner::switchTrajectoryOOP(const RampTrajectory& from, const RampTrajecto
    * Call getTransitionTrajectory
    * if we can find one before next CC
    */
-  //if(delta_t  < ((deltasPerCC+1)*delta_t_switch_))
-  //{
   RampTrajectory switching, full;
   getTransitionTrajectoryOOP(from, to, t_start, switching);
   full = switching;
@@ -3987,7 +3985,7 @@ void Planner::switchTrajectoryOOP(const RampTrajectory& from, const RampTrajecto
     ////ROS_INFO("full.path: %s", full.msg_.holonomic_path.toString().c_str());
 
     // Set full as the concatenating of switching and to
-    full        = switching.concatenate(to, c_kp);
+    full = switching.concatenate(to, c_kp);
     
     ////ROS_INFO("full.path: %s", full.msg_.holonomic_path.toString().c_str());
 
@@ -4007,7 +4005,6 @@ void Planner::switchTrajectoryOOP(const RampTrajectory& from, const RampTrajecto
     result.push_back(switching);
     result.push_back(full);
   } // end if size > 1
-  //} // end if switch possible
  
 
   if(print_enter_exit_)
@@ -4747,12 +4744,13 @@ trajectory_msgs::JointTrajectoryPoint Planner::prepareForTestCase()
   
   // initialize population
   //initPopulation();
+  population_.trajectories_.clear();
+  population_.paths_.clear();
   population_ = getPopulation(start_, goal_, false);
   evaluatePopulationOOP();
   
   ROS_INFO("Population Initialized: %s", population_.toString().c_str());
   sendPopulation(population_);
-  std::cin.get(); 
 
 
   if(seedPopulation_) 

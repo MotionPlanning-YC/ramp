@@ -531,19 +531,15 @@ int main(int argc, char** argv) {
 
   ros::init(argc, argv, "ramp_planner");
   ros::NodeHandle handle;
-
-  std::cout<<"\nHandle namespace: "<<handle.getNamespace();
   
-  ros::Subscriber sub_sc_ = handle.subscribe("obstacles", 1, &Planner::sensingCycleCallback, &my_planner);
-
-
-  // Load ros parameters
+  // Load ros parameters and obstacle transforms
   loadParameters(handle);
-
   loadObstacleTF();
-
+  
   ROS_INFO("Parameters loaded. Please review them and press Enter to continue");
   std::cin.get();
+  
+  ros::Subscriber sub_sc_ = handle.subscribe("obstacles", 1, &Planner::sensingCycleCallback, &my_planner);
  
   /** Initialize the Planner */ 
   my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, ob_tfs, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction); 
@@ -552,50 +548,63 @@ int main(int argc, char** argv) {
   my_planner.seedPopulation_  = seedPopulation;
 
   
+  int num_tests = 25;
+  int num_successful_tests = 0;
 
+  for(int i=0;i<num_tests;i++)
+  {
 
-  /*
-   *
-   * Generate a test case
-   *
-   */
-  ramp_msgs::ObstacleList ob_list;
+    /*
+     *
+     * Generate a test case
+     *
+     */
 
-  MotionState initial_state;
-  my_planner.randomMS(initial_state);
-  ROS_INFO("Initial state: %s", initial_state.toString().c_str());
-  my_planner.start_ = initial_state;
-  trajectory_msgs::JointTrajectoryPoint p_next_cc = my_planner.prepareForTestCase();
+    // First, create random initial state and set as start_
+    MotionState initial_state;
+    my_planner.randomMS(initial_state);
+    ROS_INFO("Initial state: %s", initial_state.toString().c_str());
+    my_planner.start_ = initial_state;
+    
+    // Initialize a population, perform a control cycle, and get the point at the end of current trajectory
+    trajectory_msgs::JointTrajectoryPoint p_next_cc = my_planner.prepareForTestCase();
 
-  double inner_r  = utility.positionDistance(initial_state.msg_.positions, p_next_cc.positions);
-  double outter_r = inner_r + 1.f;
+    // Use p_next_cc to determine the inner and outter radii
+    double inner_r  = utility.positionDistance(initial_state.msg_.positions, p_next_cc.positions);
+    double outter_r = inner_r + 1.f;
 
+    // Generate the test case
+    int num_obs = 3;
+    TestCase tc = generateTestCase(initial_state, inner_r, outter_r, num_obs);
 
-  TestCase tc = generateTestCase(initial_state, inner_r, outter_r, 3); 
+    // Publish ObstacleList msg
+    ros::Publisher pub_obs = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
+    pub_obs.publish(tc.ob_list);
+    
+    //ROS_INFO("Press Enter to run planner");
+    //std::cin.get();
 
+    // Run the planner for a certain time
+    double execution_time = my_planner.controlCycle_.toSec();
+    my_planner.go(execution_time);
 
-  // Publish ObstacleList msg
-  ros::Publisher pub_obs = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
-  pub_obs.publish(tc.ob_list);
-  
-  
-  ROS_INFO("Press Enter to run planner");
-  std::cin.get();
+    ROS_INFO("Done running planner");
+    my_planner.sendPopulation(my_planner.population_);
 
-  // Run the planner for a certain time
-  double execution_time = 1.f;
-  my_planner.go(execution_time);
+    ROS_INFO("Final Pop: %s", my_planner.population_.toString().c_str());
+    //ROS_INFO("Moving On: %s", my_planner.movingOn_.toString().c_str());
 
-  ROS_INFO("Done running planner");
-  my_planner.sendPopulation(my_planner.population_);
+    tc.success = my_planner.population_.getBest().msg_.feasible;
+    if(tc.success)
+    {
+      num_successful_tests++;
+    }
 
-  ROS_INFO("Final Pop: %s", my_planner.population_.toString().c_str());
-  //ROS_INFO("Moving On: %s", my_planner.movingOn_.toString().c_str());
+    ROS_INFO("Best trajectory: %s Test case: %s", tc.success ? "Feasible" : "Infeasible", tc.success ? "Success" : "Failure");
 
-  //tc.success = my_planner.population_.getBest().msg_.feasible;
-  tc.success = my_planner.population_.feasibleExists();
+  }
 
-  ROS_INFO("Best trajectory: %s Test case: %s", tc.success ? "Feasible" : "Infeasible", tc.success ? "Success" : "Failure");
+  ROS_INFO("Num tests: %d Num success: %d", num_tests, num_successful_tests);
 
   std::cout<<"\n\nExiting Normally\n";
   ros::shutdown();
