@@ -589,7 +589,8 @@ int main(int argc, char** argv) {
   ROS_INFO("Done running planner");
   my_planner.sendPopulation(my_planner.population_);
 
-  ROS_INFO("Moving On: %s", my_planner.movingOn_.toString().c_str());
+  ROS_INFO("Final Pop: %s", my_planner.population_.toString().c_str());
+  //ROS_INFO("Moving On: %s", my_planner.movingOn_.toString().c_str());
 
   //tc.success = my_planner.population_.getBest().msg_.feasible;
   tc.success = my_planner.population_.feasibleExists();
