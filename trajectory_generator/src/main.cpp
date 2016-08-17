@@ -70,7 +70,7 @@ bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
       tres.trajectory.trajectory.points.push_back(utility.getTrajectoryPoint(treq.path.points.at(0).motionState));
       tres.trajectory.i_knotPoints.push_back(0);
       res.resps.push_back(tres);
-      return true;
+      continue;
     }
 
     // Why treq.segments == 1?

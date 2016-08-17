@@ -1154,10 +1154,13 @@ void Planner::adaptPopulationOOP(const MotionState& ms, const ros::Duration& d)
 
     tr_reqs.push_back(tr);
   }
+  ROS_INFO("tr_reqs.size(): %i", (int)tr_reqs.size());
   
   // Get the new trajectories
   std::vector<RampTrajectory> updatedTrajecs;
   requestTrajectoryOOP(tr_reqs, updatedTrajecs);
+
+  ROS_INFO("updatedTrajecs.size(): %i", (int)updatedTrajecs.size());
 
   for(uint16_t i=0;i<updatedTrajecs.size();i++)
   {
@@ -1580,8 +1583,8 @@ void Planner::requestTrajectoryOOP(ramp_msgs::TrajectorySrv& tr, std::vector<Ram
   {
     trajec_durs_.push_back(ros::Time::now() - t_start);
     
-    ////ROS_INFO("tr.request.reqs.size(): %i", (int)tr.request.reqs.size());
-    ////ROS_INFO("tr.resps.size(): %i", (int)tr.response.resps.size());
+    ROS_INFO("tr.request.reqs.size(): %i", (int)tr.request.reqs.size());
+    ROS_INFO("tr.resps.size(): %i", (int)tr.response.resps.size());
     for(uint8_t i=0;i<tr.response.resps.size();i++)
     {
       RampTrajectory temp;
@@ -1913,7 +1916,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
 void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
   t_prev_update_ = ros::Time::now();
   ROS_INFO("In Planner::updateCallback");
-  //ROS_INFO("Time since last: %f", (ros::Time::now()-t_prev_update_).toSec());
+  ROS_INFO("Time since last: %f", (ros::Time::now()-t_prev_update_).toSec());
 
  
   if(msg.positions.size() < 3 ||
@@ -3283,7 +3286,7 @@ void Planner::modifyTrajecOOP(std::vector<RampTrajectory>& result)
   // The process begins by modifying one or more paths
   ros::Time t_p = ros::Time::now();
   std::vector<Path> modded_paths = modifyPath();
-  ////ROS_INFO("Number of modified paths: %i", (int)modded_paths.size());
+  ROS_INFO("Number of modified paths: %i", (int)modded_paths.size());
 
 
   ros::Time t_for = ros::Time::now();
@@ -4866,6 +4869,9 @@ void Planner::goTest(float sec)
   //while( (ros::Time::now() - t_start).toSec() < controlCycle_.toSec() && ros::ok()) 
   while( (latestUpdate_.comparePosition(relative_goal, false) > goalThreshold_) && ros::ok()) 
   {
+    ROS_INFO("Time since last update: %f", (ros::Time::now()-t_prev_update_).toSec());
+    ROS_INFO("relative_goal: %s \nlatestUpdate: %s", relative_goal.toString().c_str(), latestUpdate_.toString().c_str());
+    ROS_INFO("latestUpdate_.comparePosition(relative_goal, false): %f", latestUpdate_.comparePosition(relative_goal, false));
     planningCycleCallback();
     r.sleep();
     ros::spinOnce(); 
