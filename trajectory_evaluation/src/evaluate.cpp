@@ -98,7 +98,7 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
   ROS_INFO("getDeltaTheta: %f", fabs(orientation_.getDeltaTheta(er.trajectory)));
 
   // Check orientation for feasibility
-  if(moving_forward && fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_this_curve)
+  /*if(moving_forward && fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_this_curve)
   //if(fabs(orientation_.getDeltaTheta(er.trajectory)) > 0.25 && !moving_on_this_curve)
   {
     ROS_INFO("In if");
@@ -115,7 +115,7 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
       er.trajectory.feasible  = false;
       orientation_infeasible_ = true;
     }
-  }
+  }*/
 
   if(er.consider_trans && !er.trans_possible)
   {

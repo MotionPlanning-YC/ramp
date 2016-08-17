@@ -1,5 +1,6 @@
-#include "ros/ros.h"
 #include "planner.h"
+#include <ros/ros.h>
+#include <std_srvs/Empty.h>
  
 
 Utility utility;
@@ -286,8 +287,7 @@ void testSwitch()
   
   ramp_msgs::TrajectorySrv tr_srv = my_planner.buildTrajectorySrv(p);
   RampTrajectory traj = my_planner.requestTrajectory(tr_srv).at(0); 
-  ROS_INFO("Response traj: %s", traj.toString().c_str());
-
+  
   RampTrajectory from = traj.getSubTrajectory(1.6f);
 
 
@@ -366,12 +366,42 @@ struct TestCase {
   std::vector<ObInfo> obs;
   ramp_msgs::ObstacleList ob_list;
   Group group;
+  int history;
 
   bool success;
 };
 
+ramp_msgs::Obstacle getStaticOb(ramp_msgs::Obstacle ob)
+{
+  ramp_msgs::Obstacle result = ob; 
 
-ObInfo generateObInfoA(const MotionState robot_state)
+  result.odom_t.twist.twist.linear.x = 0;
+  result.odom_t.twist.twist.linear.y = 0;
+  result.odom_t.twist.twist.linear.z = 0;
+
+  return result;
+}
+
+ObInfo generateObInfoSimple(const MotionState robot_state)
+{
+  ObInfo result;
+
+  Range v(0,  0.33);
+  Range w(0,  PI/2.f);
+
+  result.v = v.random();
+  result.w = w.random();
+  result.relative_direction = 0;
+
+  result.x = robot_state.msg_.positions[0];
+  result.y = robot_state.msg_.positions[1] + 1;
+
+  result.d = 1;
+  
+  return result;
+}
+
+ObInfo generateObInfo(const MotionState robot_state)
 {
   ObInfo result;
 
@@ -408,66 +438,6 @@ ObInfo generateObInfoA(const MotionState robot_state)
   return result;
 }
 
-ObInfo generateObInfo(const MotionState robot_state, Group g, bool faster)
-{
-  ObInfo result;
-
-  Range exterior_dist(1.5 , 3.5);
-  Range interior_dist(0.5 , 1.5);
-  Range critical_dist(0   , 0.5);
-
-  Range v_slower(0      ,  0.33);
-  Range v_faster(0.33   ,  1.f);
-  Range w       (0      ,  PI/2.f);
-  Range rela_dir(PI/6.f ,  5.f*PI/6.f);
-
-
-  if(faster)
-  {
-    result.v = v_faster.random();
-  }
-  else
-  {
-    result.v = v_slower.random();
-  }
-
-  result.w                  = w.random();
-  result.relative_direction = rela_dir.random();
-  
-  
-  double d;
-  if(g == EXTERIOR)
-  {
-    d = exterior_dist.random();
-  }
-  else if(g == INTERIOR)
-  {
-    d = interior_dist.random();
-  }
-  else
-  {
-    d = critical_dist.random();
-  }
-  double ob_x = robot_state.msg_.positions[0] + d*cos(result.relative_direction);
-  double ob_y = robot_state.msg_.positions[1] + d*sin(result.relative_direction);
-  if(ob_x > 3.5)
-    ob_x = 3.5;
-  else if(ob_x < 0)
-    ob_x = 0.;
-  if(ob_y > 3.5)
-    ob_y = 3.5;
-  else if(ob_y < 0)
-    ob_y = 0.;
-
-  result.x = ob_x;
-  result.y = ob_y;
-
-  ROS_INFO("d: %f", d);
-
-
-
-  return result;
-}
 
 
 /*
@@ -512,17 +482,42 @@ TestCase generateTestCase(const MotionState robot_state, double inner_r, double 
 {
   TestCase result;
 
+  Range history(0,20);
+
   // Generate all obstacles and push them onto test case
   for(int i=0;i<num_obs;i++)
   {
-    ObInfo temp = generateObInfoA(robot_state);
+    //ObInfo temp = generateObInfo(robot_state);
+    ObInfo temp = generateObInfoSimple(robot_state);
 
     temp.msg = buildObstacleMsg(temp.x, temp.y, temp.v, temp.relative_direction, temp.w);
     
     result.obs.push_back(temp);
     result.ob_list.obstacles.push_back(temp.msg);
+
+    result.history = history.random();
   }
 
+  return result;
+}
+
+
+
+
+MotionState getGoal(const MotionState init, const double dim)
+{
+  ROS_INFO("getGoal init: %s", init.toString().c_str());
+
+  double r = sqrt( pow(dim,2) * 2 );
+  double x = init.msg_.positions[0] + r*cos(PI/4.f);
+  double y = init.msg_.positions[1] + r*sin(PI/4.f);
+
+  MotionState result;
+  result.msg_.positions.push_back(x);
+  result.msg_.positions.push_back(y);
+  result.msg_.positions.push_back(init.msg_.positions[2]);
+
+  ROS_INFO("getGoal result: %s", result.toString().c_str());
   return result;
 }
 
@@ -535,20 +530,20 @@ int main(int argc, char** argv) {
   // Load ros parameters and obstacle transforms
   loadParameters(handle);
   loadObstacleTF();
+
+  my_planner.ranges_ = ranges;
   
   ROS_INFO("Parameters loaded. Please review them and press Enter to continue");
   std::cin.get();
   
-  ros::Subscriber sub_sc_ = handle.subscribe("obstacles", 1, &Planner::sensingCycleCallback, &my_planner);
- 
-  /** Initialize the Planner */ 
-  my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, ob_tfs, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction); 
-  my_planner.modifications_   = modifications;
-  my_planner.evaluations_     = evaluations;
-  my_planner.seedPopulation_  = seedPopulation;
+  ros::Subscriber sub_sc_     = handle.subscribe("obstacles", 1, &Planner::sensingCycleCallback,  &my_planner);
+  ros::Subscriber sub_update_ = handle.subscribe("update",    1, &Planner::updateCallback,        &my_planner);
+
+  ros::ServiceClient client_reset = handle.serviceClient<std_srvs::Empty>("reset_positions");
+  std_srvs::Empty reset_srv;
 
   
-  int num_tests = 15;
+  int num_tests = 3;
   int num_successful_tests = 0;
   std::vector<int> num_generations;
   std::vector<TestCase> test_cases;
@@ -565,40 +560,70 @@ int main(int argc, char** argv) {
     // First, create random initial state and set as start_
     MotionState initial_state;
     my_planner.randomMS(initial_state);
-    ROS_INFO("Initial state: %s", initial_state.toString().c_str());
-    my_planner.start_ = initial_state;
+    //my_planner.start_ = initial_state;
+    //my_planner.goal_  = getGoal(initial_state, 1.5f);
     
+    //my_planner.setT_base_w(initial_state.msg_.positions);
+
+   
+    /** Initialize the Planner */ 
+    my_planner.init(id, handle, initial_state, getGoal(initial_state, 1.5f), ranges, population_size, sub_populations, ob_tfs, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction); 
+    my_planner.modifications_   = modifications;
+    my_planner.evaluations_     = evaluations;
+    my_planner.seedPopulation_  = seedPopulation;
+
+    /*
+     * Prep test
+     */
     // Initialize a population, perform a control cycle, and get the point at the end of current trajectory
-    trajectory_msgs::JointTrajectoryPoint p_next_cc = my_planner.prepareForTestCase();
+    auto p_next_cc = my_planner.prepareForTestCase();
+
+    ROS_INFO("Done with prepareForTestCase");
 
     // Use p_next_cc to determine the inner and outter radii
     double inner_r  = utility.positionDistance(initial_state.msg_.positions, p_next_cc.positions);
     double outter_r = inner_r + 1.5f;
 
-    // Generate the test case
-    int num_obs = 3;
+    /*
+     * Generate the test case
+     */
+    int num_obs = 1;
     TestCase tc = generateTestCase(initial_state, inner_r, outter_r, num_obs);
     test_cases.push_back(tc);
 
-    // Publish ObstacleList msg
+    ramp_msgs::ObstacleList obs_stat;
+    for(int i=0;i<tc.obs.size();i++)
+    {
+      obs_stat.obstacles.push_back(getStaticOb(tc.obs[i].msg));
+    }
+
+    // Make an ObstacleList Publisher
     ros::Publisher pub_obs = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
+
+    // Publish static obstacles
+    pub_obs.publish(obs_stat);
+
+    // Do history
+    my_planner.planningCycles(tc.history); 
+
+    // Publish dynamic obstacles
     pub_obs.publish(tc.ob_list);
     
-    //ROS_INFO("Press Enter to run planner");
-    //std::cin.get();
-
     // Run the planner for a certain time
     double execution_time = my_planner.controlCycle_.toSec();
 
-    ROS_INFO("Running planner for %f", execution_time);
+    /*
+     * Run planner
+     */
+    /*my_planner.sendPopulation(my_planner.population_);
+    ROS_INFO("Press Enter to begin test");
+    std::cin.get();*/
+    
     my_planner.goTest(execution_time);
 
-    ROS_INFO("Done running planner");
-    my_planner.sendPopulation(my_planner.population_);
-
-    ROS_INFO("Final Pop: %s", my_planner.population_.toString().c_str());
-    //ROS_INFO("Moving On: %s", my_planner.movingOn_.toString().c_str());
-
+    /*
+     * Set success or failure
+     */
     tc.success = my_planner.population_.getBest().msg_.feasible;
     if(tc.success)
     {
@@ -608,6 +633,9 @@ int main(int argc, char** argv) {
     ROS_INFO("Best trajectory: %s Test case: %s", tc.success ? "Feasible" : "Infeasible", tc.success ? "Success" : "Failure");
 
     num_generations.push_back(my_planner.generation_);
+
+    // Reset Stage positions
+    client_reset.call(reset_srv);
   }
 
   ROS_INFO("Num tests: %d Num success: %d Percent: %d", num_tests, num_successful_tests, (num_successful_tests / num_tests*10));

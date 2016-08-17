@@ -1498,7 +1498,16 @@ void Planner::buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs:
 
   // consider_trans for trajs including switches
   result.consider_trans = true;
-  result.trans_possible = trajec.transitionTraj_.trajectory.points.size() > 0;
+
+  double nec_theta = utility_.findAngleFromAToB(trajec.msg_.trajectory.points[0].positions, trajec.msg_.trajectory.points[ trajec.msg_.i_knotPoints[1] ].positions);
+
+  double end = movingOn_.msg_.trajectory.points.size() > 0 ? movingOn_.msg_.trajectory.points[ movingOn_.msg_.trajectory.points.size()-1 ].positions[2] : latestUpdate_.msg_.positions[2];
+
+  double diff = fabs(utility_.findDistanceBetweenAngles(nec_theta, end));
+  
+  ROS_INFO("nec_theta: %f end: %f diff: %f", nec_theta, end, diff);
+
+  result.trans_possible = trajec.transitionTraj_.trajectory.points.size() > 0 || diff < 0.01;
 
   //ROS_INFO("transitionTraj: %s", utility_.toString(trajec.transitionTraj_).c_str());
   //ROS_INFO("Exiting Planner::buildEvaluationRequestOOP(const RampTrajectory&, EvaluationRequest&, bool)");
@@ -1903,7 +1912,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
  * */
 void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
   t_prev_update_ = ros::Time::now();
-  //ROS_INFO("In Planner::updateCallback");
+  ROS_INFO("In Planner::updateCallback");
   //ROS_INFO("Time since last: %f", (ros::Time::now()-t_prev_update_).toSec());
 
  
@@ -1932,7 +1941,7 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
     latestUpdate_.msg_.accelerations.at(1) = msg.accelerations.at(0) * 
                                              sin(latestUpdate_.msg_.positions.at(2));
 
-    //ROS_INFO("New latestUpdate_: %s", latestUpdate_.toString().c_str());
+    ROS_INFO("New latestUpdate_: %s", latestUpdate_.toString().c_str());
   } // end else
   
   //ROS_INFO("Exiting Planner::updateCallback");
@@ -1944,7 +1953,8 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
 
 
 /** This method sets random values for the position vector of ms */
-const MotionState Planner::randomizeMSPositions(const MotionState ms) const {
+const MotionState Planner::randomizeMSPositions(const MotionState ms) const 
+{
   MotionState result = ms;
   result.msg_.positions.clear();
 
@@ -1962,10 +1972,15 @@ void Planner::randomMS(MotionState& result) const
   result.msg_.positions.clear();
   result.msg_.velocities.clear();
 
+  Range theta_test(0, PI/2.f);
+
   // Push on random positions
   for(int i=0;i<ranges_.size();i++)
   {
-    result.msg_.positions.push_back(ranges_[i].random());
+    if(i<2)
+      result.msg_.positions.push_back(ranges_[i].random());
+    else
+      result.msg_.positions.push_back(theta_test.random());
   }
 
   // Make speed range
@@ -4761,20 +4776,19 @@ trajectory_msgs::JointTrajectoryPoint Planner::prepareForTestCase()
   population_.trajectories_.clear();
   population_.paths_.clear();
   population_ = getPopulation(start_, goal_, false);
-  evaluatePopulationOOP();
-  
-  ROS_INFO("Population Initialized: %s", population_.toString().c_str());
-  sendPopulation(population_);
 
+  // Seed pop
   seedPopulation();
   evaluatePopulationOOP();
   sendPopulation(population_);
-  ROS_INFO("Pop seeded");
-  //ros::Duration d(1);
-  //d.sleep();
-  //std::cin.get();
 
+  ROS_INFO("Population Initialized: %s", population_.toString().c_str());
 
+  ros::Duration d(1);
+  d.sleep();
+  std::cin.get();
+  
+  
   // Create sub-transPops if enabled
   if(subPopulations_) 
   {
@@ -4803,23 +4817,54 @@ trajectory_msgs::JointTrajectoryPoint Planner::prepareForTestCase()
 }
 
 
+void Planner::planningCycles(int num)
+{
+  ros::Rate r(20);
+  while(generation_ < num) {planningCycleCallback(); r.sleep(); ros::spinOnce();}
+}
+
+
 void Planner::goTest(float sec) 
 {
+  ROS_INFO("goTest Start: %s \nGoal: %s", start_.toString().c_str(), goal_.toString().c_str());
 
   ros::Rate r(20);
 
   imminentCollisionTimer_.start();
 
+  MotionState relative_goal = goal_;
+  /*relative_goal.msg_.positions[0] -= start_.msg_.positions[0];
+  relative_goal.msg_.positions[1] -= start_.msg_.positions[1];
+  relative_goal.msg_.positions[2] = utility_.findDistanceBetweenAngles(goal_.msg_.positions[2], start_.msg_.positions[2]);
+
+  // Rotate the (x,y) point based on start_'s initial rotation
+  tf::Transform tf;
+  tf.setOrigin( tf::Vector3(0, 0, 0) );
+  tf.setRotation( tf::createQuaternionFromYaw(-start_.msg_.positions[2]) );
+
+  tf::Vector3 goal_point(relative_goal.msg_.positions[0], relative_goal.msg_.positions[1], 0);
+  ROS_INFO("goal_point: (%f, %f, %f)", goal_point.getX(), goal_point.getY(), goal_point.getZ());
+  tf::Vector3 g = tf * goal_point;
+  ROS_INFO("start: %s \ngoal: %s \nrelative_goal: %s \ng: (%f, %f, %f)", start_.toString().c_str(), goal_.toString().c_str(), relative_goal.toString().c_str(), g.getX(), g.getY(), g.getZ());
+
+  std::cin.get();*/
  
-  // Do planning until robot has reached goal
-  // D = 0.4 if considering mobile base, 0.2 otherwise
+
+  /*
+   *  Do planning until robot has reached goal
+   */
   ros::Time t_start = ros::Time::now();
   goalThreshold_ = 0.5;
+
+  // Start the control cycles
+  controlCycleTimer_.start();
+  imminentCollisionTimer_.start();
 
 
   //ROS_INFO("Sec > 0, %f", sec);
   //std::cin.get();
-  while( (ros::Time::now() - t_start).toSec() < controlCycle_.toSec() && ros::ok()) 
+  //while( (ros::Time::now() - t_start).toSec() < controlCycle_.toSec() && ros::ok()) 
+  while( (latestUpdate_.comparePosition(relative_goal, false) > goalThreshold_) && ros::ok()) 
   {
     planningCycleCallback();
     r.sleep();
@@ -4900,9 +4945,6 @@ void Planner::go()
 
   //ROS_INFO("Planning Cycles started!");
 
-  // Start the planning cycles
-  planningCycleTimer_.start();
-    
   
   h_parameters_.setCCStarted(false); 
 

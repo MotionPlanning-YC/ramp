@@ -99,6 +99,7 @@ class Planner {
     
     // Start planning
     trajectory_msgs::JointTrajectoryPoint prepareForTestCase();
+    void planningCycles(int num);
     void go();
     void goTest(float sec=-1);
     
