@@ -127,46 +127,29 @@ class Planner {
     void displayTrajectory(const ramp_msgs::RampTrajectory traj) const;
 
     // Evaluate the population 
-    const RampTrajectory  evaluateTrajectory(const RampTrajectory trajec);
-    const Population      evaluatePopulation(const Population pop);
-    void evaluateTrajectoryOOP(RampTrajectory& t, bool full=true) const;
-    void evaluatePopulationOOP();
+    void evaluateTrajectory(RampTrajectory& t, bool full=true) const;
+    void evaluatePopulation();
     
     // Modify trajectory or path
     const std::vector<Path> modifyPath();
-    const std::vector<RampTrajectory> modifyTrajec();
 
-    void modifyTrajecOOP(std::vector<RampTrajectory>& result);
+    void modifyTrajec(std::vector<RampTrajectory>& result);
 
-
-
-    // Msg building methods 
-    const ramp_msgs::TrajectorySrv buildTrajectorySrv(
-      const Path path, const std::vector<ramp_msgs::BezierCurve> curves,
-                    const int id=-1) const;
-    const ramp_msgs::TrajectorySrv buildTrajectorySrv(
-        const Path path, const int id=0) const;
-
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
-              const Path path, const std::vector<ramp_msgs::BezierCurve> curves,
-              const int id=-1) const;
-    const ramp_msgs::TrajectoryRequest buildTrajectoryRequest(
-              const Path path, const int id=0) const;
 
 
 
     // Build a srv for 1 trajectory with 1-2 curves
-    void buildTrajectorySrvOOP(const Path path, const std::vector<ramp_msgs::BezierCurve> curves, ramp_msgs::TrajectorySrv& result, const int id=-1) const;
+    void buildTrajectorySrv(const Path path, const std::vector<ramp_msgs::BezierCurve> curves, ramp_msgs::TrajectorySrv& result, const int id=-1) const;
 
     // Build a srv for 1 trajectory with no curves
-    void buildTrajectorySrvOOP(const Path path, ramp_msgs::TrajectorySrv& result, const int id=-1) const;
+    void buildTrajectorySrv(const Path path, ramp_msgs::TrajectorySrv& result, const int id=-1) const;
 
 
     // Build a request for 1 trajectory with 1-2 curves
-    void buildTrajectoryRequestOOP(const Path path, const std::vector<ramp_msgs::BezierCurve> curves, ramp_msgs::TrajectoryRequest& result, const int id=-1) const;
+    void buildTrajectoryRequest(const Path path, const std::vector<ramp_msgs::BezierCurve> curves, ramp_msgs::TrajectoryRequest& result, const int id=-1) const;
 
     // Build a request for 1 trajectory with 0 curves
-    void buildTrajectoryRequestOOP(const Path path, ramp_msgs::TrajectoryRequest& result, const int id=-1) const;
+    void buildTrajectoryRequest(const Path path, ramp_msgs::TrajectoryRequest& result, const int id=-1) const;
 
     
 
@@ -174,72 +157,45 @@ class Planner {
 
 
 
-
-    const ramp_msgs::EvaluationSrv buildEvaluationSrv(
-              const RampTrajectory trajec)      ;
-    const ramp_msgs::EvaluationSrv buildEvaluationSrv(
-              const std::vector<RampTrajectory> trajecs)      ;
-    const ramp_msgs::EvaluationRequest buildEvaluationRequest(
-              const RampTrajectory trajec)      const;
-
-
-    void buildEvaluationSrvOOP(std::vector<RampTrajectory>& trajecs, ramp_msgs::EvaluationSrv& result) const;
-    void buildEvaluationSrvOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationSrv& result) const;
-    void buildEvaluationRequestOOP(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result, bool full=true) const;
-
-    void requestEvaluationOOP(std::vector<RampTrajectory>& trajecs);
-    void requestEvaluationOOP(ramp_msgs::EvaluationRequest& request) const;
-    void requestEvaluationOOP(RampTrajectory& t, bool full=true) const;
+    void buildEvaluationSrv(std::vector<RampTrajectory>& trajecs, ramp_msgs::EvaluationSrv& result) const;
+    void buildEvaluationSrv(const RampTrajectory& trajec, ramp_msgs::EvaluationSrv& result) const;
+    void buildEvaluationRequest(const RampTrajectory& trajec, ramp_msgs::EvaluationRequest& result, bool full=true) const;
 
 
     // Request information from other packages
-    // Cannot make the request srvs const because they have no serialize/deserialize
-    const std::vector<RampTrajectory> requestTrajectory(ramp_msgs::TrajectorySrv& tr, const int id=-1);
-    const std::vector<RampTrajectory> requestTrajectory(std::vector<ramp_msgs::TrajectoryRequest> trs); 
-    const RampTrajectory requestTrajectory(const Path p, const int id=-1);
-    const RampTrajectory requestTrajectory(ramp_msgs::TrajectoryRequest tr);
+
+    // Many trajectories
+    void requestTrajectory(ramp_msgs::TrajectorySrv& tr, std::vector<RampTrajectory>& result, const int id=-1);
+
+    // Many trajectories
+    void requestTrajectory(std::vector<ramp_msgs::TrajectoryRequest>& trs, std::vector<RampTrajectory>& result);
+
+    // One trajectory 
+    void requestTrajectory(ramp_msgs::TrajectoryRequest& tr, RampTrajectory& result);
+    void requestTrajectory(const Path p, RampTrajectory& result, const int id=-1);
 
 
     // Many trajectories
-    void requestTrajectoryOOP(ramp_msgs::TrajectorySrv& tr, std::vector<RampTrajectory>& result, const int id=-1);
+    void requestEvaluation(std::vector<RampTrajectory>& trajecs);
 
-    // Many trajectories
-    void requestTrajectoryOOP(std::vector<ramp_msgs::TrajectoryRequest>& trs, std::vector<RampTrajectory>& result);
-
-    void requestTrajectoryOOP(ramp_msgs::TrajectoryRequest& tr, RampTrajectory& result);
-    
-    void requestTrajectoryOOP(const Path p, RampTrajectory& result, const int id=-1);
+    // One trajectory
+    void requestEvaluation(ramp_msgs::EvaluationRequest& request) const;
+    void requestEvaluation(RampTrajectory& t, bool full=true) const;
 
 
 
-
-
-    const std::vector<RampTrajectory> requestEvaluation(std::vector<RampTrajectory> trajecs);
-    const RampTrajectory requestEvaluation(ramp_msgs::EvaluationRequest& er);
-    const RampTrajectory requestEvaluation(const RampTrajectory traj);
-
-
-    // Update the population 
-    const Population adaptPopulation( const Population pop, 
-                                      const MotionState ms, 
-                                      const ros::Duration d );
     // Updates the paths in P(t) so we can get new trajectories
     const uint8_t getNumThrowawayPoints(const RampTrajectory traj, const ros::Duration dur) const;
-    const std::vector<Path>                   adaptPaths( const Population pop,
-                                                          const MotionState start, 
-                                                          const ros::Duration dur) const;
+    
     const double updateCurvePos(const RampTrajectory& traj, const ros::Duration& d) const;
 
-    const std::vector<ramp_msgs::BezierCurve> adaptCurves( const Population pop,
-                                                                          const MotionState ms,
-                                                                          const ros::Duration d) const;
 
     const ramp_msgs::BezierCurve               handleCurveEnd(const RampTrajectory traj) const;
     
 
-    void adaptCurvesOOP     (const MotionState& ms, const ros::Duration& d, std::vector<ramp_msgs::BezierCurve>& result);
-    void adaptPathsOOP      (const MotionState& ms, const ros::Duration& d, std::vector<Path>& result);
-    void adaptPopulationOOP (const MotionState& ms, const ros::Duration& d);
+    void adaptCurves     (const MotionState& ms, const ros::Duration& d, std::vector<ramp_msgs::BezierCurve>& result);
+    void adaptPaths      (const MotionState& ms, const ros::Duration& d, std::vector<Path>& result);
+    void adaptPopulation (const MotionState& ms, const ros::Duration& d);
 
     // Display all of the paths
     const std::string pathsToString() const;
@@ -298,8 +254,7 @@ class Planner {
     const unsigned int getIRT();
 
     // Modification procedure
-    const ModificationResult modification();
-    void modificationOOP();
+    void modification();
 
     // Callback methods for ros::Timers
     void controlCycleCallback     (const ros::TimerEvent& t);
@@ -390,11 +345,8 @@ class Planner {
 
 
 
-    const RampTrajectory offsetTrajectory(const RampTrajectory t, const MotionState diff) const;
-    const Population offsetPopulation(const Population pop, const MotionState diff) const;
-
-    void offsetTrajectoryOOP(RampTrajectory&  t   ,   const MotionState& diff) ;
-    void offsetPopulationOOP(const MotionState& diff) ;
+    void offsetTrajectory(RampTrajectory&  t   ,   const MotionState& diff) ;
+    void offsetPopulation(const MotionState& diff) ;
     
     MotionState diff_;
     
