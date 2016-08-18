@@ -54,7 +54,7 @@ void reportData(int sig)
 
 
 
-void readParam(ros::NodeHandle& handle)
+/*void readParam(ros::NodeHandle& handle)
 {
   handle_local.param("orientation", robot.initial_theta_, 0.);
   std::cout<<"\n*********robot.orientation: "<<robot.initial_theta_;
@@ -69,7 +69,9 @@ void readParam(ros::NodeHandle& handle)
   handle_local.param("check_imminent_coll", check_imminent_coll, true);
   ROS_INFO("check_imminent_coll: %s", check_imminent_coll ? "True" : "False");
   robot.check_imminent_coll_ = check_imminent_coll;
-}
+}*/
+
+
 
 int main(int argc, char** argv) {
 

@@ -531,7 +531,10 @@ void pubObTrj(const ros::TimerEvent e, const TestCase tc)
 
   int index = d_elapsed.toSec() * 10;
 
-  //double x =
+  trajectory_msgs::JointTrajectoryPoint p = tc.ob_trjs[0].msg_.trajectory.points[index];
+
+  // Build new obstacle msg
+  ramp_msgs::Obstacle ob = buildObstacleMsg(p.positions[0], p.positions[1], tc.obs[0].v, p.positions[2], tc.obs[0].w);
 }
 
 
@@ -633,18 +636,18 @@ int main(int argc, char** argv) {
 
 
     // Set obstacle trajectories
-    tc.ob_trjs = my_planner.obstacle_trjs;
+    tc.ob_trjs = my_planner.ob_trajectory_;
 
     ob_trj_timer = handle.createTimer(ros::Duration(1./20.), boost::bind(pubObTrj, _1, tc));
 
-    tc.begin = ros::Time::now();
+    tc.t_begin = ros::Time::now();
   
 
 
     /*
      * Run planner
      */
-    my_planner.goTest(execution_time);
+    my_planner.goTest();
 
     /*
      * Set success or failure
