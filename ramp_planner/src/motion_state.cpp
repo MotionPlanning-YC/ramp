@@ -195,11 +195,17 @@ const double MotionState::comparePosition(const MotionState& c, const bool base_
 
 
 /** This method returns the new position vector of the Configuration given some transformation matrix */
-tf::Vector3 MotionState::transformBasePosition(const tf::Transform t) {
+tf::Vector3 MotionState::transformBasePosition(const tf::Transform t) 
+{
+  ROS_INFO("In MotionState::transformBasePosition");
+  ROS_INFO("t: (%f, %f) yaw: %f", t.getOrigin().getX(), t.getOrigin().getY(), tf::getYaw(t.getRotation()));
+
+  ROS_INFO("msg: %s", toString().c_str());
 
   tf::Vector3 p(msg_.positions.at(0), msg_.positions.at(1), 0);
   tf::Vector3 result = t * p;
 
+  ROS_INFO("result: (%f, %f)", result.getX(), result.getY());
   return result;
 } //End transformBasePosition
 
@@ -208,7 +214,8 @@ tf::Vector3 MotionState::transformBasePosition(const tf::Transform t) {
 /** This method will transform the configuration by the transformation T
  *  It transforms the position and displaces the orientation by the rotation in T 
  *  The most used source of this method is for updating the robot's configuration */
-void MotionState::transformBase(const tf::Transform t) {
+void MotionState::transformBase(const tf::Transform t) 
+{
 
   // Get the new position
   tf::Vector3 p = transformBasePosition(t);

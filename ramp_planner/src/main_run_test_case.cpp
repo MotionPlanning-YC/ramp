@@ -362,9 +362,12 @@ struct ObInfo
   bool faster;
 };
 
-struct TestCase {
+struct TestCase 
+{
+  ros::Time t_begin;
   std::vector<ObInfo> obs;
   ramp_msgs::ObstacleList ob_list;
+  std::vector<RampTrajectory> ob_trjs;
   Group group;
   int history;
 
@@ -503,7 +506,6 @@ TestCase generateTestCase(const MotionState robot_state, double inner_r, double 
 
 
 
-
 MotionState getGoal(const MotionState init, const double dim)
 {
   ROS_INFO("getGoal init: %s", init.toString().c_str());
@@ -520,6 +522,18 @@ MotionState getGoal(const MotionState init, const double dim)
   ROS_INFO("getGoal result: %s", result.toString().c_str());
   return result;
 }
+
+
+
+void pubObTrj(const ros::TimerEvent e, const TestCase tc)
+{
+  ros::Duration d_elapsed = ros::Time::now() - tc.t_begin;
+
+  int index = d_elapsed.toSec() * 10;
+
+  //double x =
+}
+
 
 int main(int argc, char** argv) {
   srand( time(0));
@@ -542,12 +556,16 @@ int main(int argc, char** argv) {
   ros::ServiceClient client_reset = handle.serviceClient<std_srvs::Empty>("reset_positions");
   std_srvs::Empty reset_srv;
 
+
+  ros::Timer ob_trj_timer;
   
-  int num_tests = 3;
+  int num_tests = 1;
   int num_successful_tests = 0;
   std::vector<int> num_generations;
   std::vector<TestCase> test_cases;
 
+  
+  ros::Duration d(1);
   for(int i=0;i<num_tests;i++)
   {
 
@@ -567,7 +585,7 @@ int main(int argc, char** argv) {
 
    
     /** Initialize the Planner */ 
-    my_planner.init(id, handle, initial_state, getGoal(initial_state, 1.5f), ranges, population_size, sub_populations, ob_tfs, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction); 
+    my_planner.init(id, handle, initial_state, getGoal(initial_state, 1.5f), ranges, population_size, sub_populations, ob_tfs, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction);
     my_planner.modifications_   = modifications;
     my_planner.evaluations_     = evaluations;
     my_planner.seedPopulation_  = seedPopulation;
@@ -608,17 +626,24 @@ int main(int argc, char** argv) {
 
     // Publish dynamic obstacles
     pub_obs.publish(tc.ob_list);
-    
-    // Run the planner for a certain time
-    double execution_time = my_planner.controlCycle_.toSec();
+
+    // Wait for planner to generate obstacle trajectories
+    while(my_planner.ob_trajectory_.size() < num_obs) {}
+
+
+
+    // Set obstacle trajectories
+    tc.ob_trjs = my_planner.obstacle_trjs;
+
+    ob_trj_timer = handle.createTimer(ros::Duration(1./20.), boost::bind(pubObTrj, _1, tc));
+
+    tc.begin = ros::Time::now();
+  
+
 
     /*
      * Run planner
      */
-    /*my_planner.sendPopulation(my_planner.population_);
-    ROS_INFO("Press Enter to begin test");
-    std::cin.get();*/
-    
     my_planner.goTest(execution_time);
 
     /*

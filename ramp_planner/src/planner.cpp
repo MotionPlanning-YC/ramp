@@ -1777,7 +1777,8 @@ const RampTrajectory Planner::requestEvaluation(const RampTrajectory traj)
 
 
 /** This method initializes the T_w_odom_ transform object */
-void Planner::setT_base_w(std::vector<double> base_pos) {
+void Planner::setT_base_w(std::vector<double> base_pos) 
+{
   T_w_odom_.setRotation(tf::createQuaternionFromYaw(base_pos.at(2)));
   T_w_odom_.setOrigin(  tf::Vector3(base_pos.at(0), base_pos.at(1), 0));
 } // End setT_base_w
@@ -1913,7 +1914,8 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
  * and transformes it by T_base_w because 
  * updates are relative to odometry frame
  * */
-void Planner::updateCallback(const ramp_msgs::MotionState& msg) {
+void Planner::updateCallback(const ramp_msgs::MotionState& msg) 
+{
   t_prev_update_ = ros::Time::now();
   ROS_INFO("In Planner::updateCallback");
   ROS_INFO("Time since last: %f", (ros::Time::now()-t_prev_update_).toSec());
@@ -1986,6 +1988,9 @@ void Planner::randomMS(MotionState& result) const
       result.msg_.positions.push_back(theta_test.random());
   }
 
+  // Set orientation to PI/4 for testing 
+  result.msg_.positions[2] = PI/4.f;
+
   // Make speed range
   Range speed(0, 0.33);
   Range w_range(-PI/2.f, PI/2.f);
@@ -2057,6 +2062,8 @@ void Planner::init(const uint8_t i, const ros::NodeHandle& h, const MotionState 
   // Initialize the start and goal
   initStartGoal(s, g);
 
+  ROS_INFO("Start_: %s", start_.toString().c_str());
+  ROS_INFO("Goal_: %s", goal_.toString().c_str());
   // Set the base transformation
   setT_base_w(start_.msg_.positions);
 
