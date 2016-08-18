@@ -2469,7 +2469,6 @@ const std::vector<Path> Planner::modifyPath()
 { 
   //////ROS_INFO("About to modify a path, pop is: %s\n%s", population_.get(0).toString().c_str(), population_.get(1).toString().c_str());
   return modifier_->perform(population_);
-  //return modifier_->perform(population_at_cc_);
 }
 
 
@@ -2755,10 +2754,8 @@ void Planner::planningCycleCallback()
       //////ROS_INFO("Corrected startPlanning_: %s", startPlanning_.toString().c_str());
       //////ROS_INFO("Corrected movingOn_: %s", movingOn_.toString().c_str());
 
-      //population_  = offsetPopulation(population_at_cc_, diff);
       offsetPopulation(temp);
 
-      //population_  = evaluatePopulation(population_);
       evaluatePopulation();
 
       EC=true;
@@ -3254,7 +3251,6 @@ void Planner::doControlCycle()
   }*/
   //////ROS_INFO("Time spent getting trans pop: %f", d_trans.toSec());
 
-  population_at_cc_  = population_;
   diff_.zero();
 
 
@@ -3841,7 +3837,6 @@ void Planner::go()
 
   // Initialize transtransPopulation
   population_       = population_;
-  population_at_cc_ = population_;
 
   t_start_ = ros::Time::now();
 
