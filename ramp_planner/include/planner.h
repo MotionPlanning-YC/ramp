@@ -319,9 +319,6 @@ class Planner {
           void seedPopulation()                                         ;
           void seedPopulationTwo()                                      ;
 
-    const RampTrajectory  getTransitionTrajectory(const RampTrajectory movingOn, 
-                                                  const RampTrajectory trgt_traj,
-                                                  const double t);
     const RampTrajectory getBestTransTrajectory(const RampTrajectory moving,
                                                 const RampTrajectory target);
 
@@ -331,21 +328,18 @@ class Planner {
 
 
 
-    const std::vector<RampTrajectory> switchTrajectory( const RampTrajectory& from, 
-                                                        const RampTrajectory& to );
-    const RampTrajectory computeFullSwitch(const RampTrajectory& from, const RampTrajectory& to);
     
 
     double  getEarliestStartTime(const RampTrajectory& from);
-    void    getTransPopOOP(const Population& pop, const RampTrajectory& movingOn, const double& t_start, Population& result);
-    void    switchTrajectoryOOP(const RampTrajectory& from, const RampTrajectory& to, const double& t_start, std::vector<RampTrajectory>& result);
-    void    computeFullSwitchOOP(const RampTrajectory& from, const RampTrajectory& to, const double& t_start, RampTrajectory& result);
+    void    getTransPop(const Population& pop, const RampTrajectory& movingOn, const double& t_start, Population& result);
+    void    switchTrajectory(const RampTrajectory& from, const RampTrajectory& to, const double& t_start, std::vector<RampTrajectory>& result);
+    void    computeFullSwitch(const RampTrajectory& from, const RampTrajectory& to, const double& t_start, RampTrajectory& result);
 
 
-    void getTransPopOOP(const Population& pop, const RampTrajectory& movingOn, Population& result);
-    void getTransitionTrajectoryOOP(const RampTrajectory& movingOn, const RampTrajectory& trgt_traj, const double& t, RampTrajectory& result);
-    void switchTrajectoryOOP(const RampTrajectory& from, const RampTrajectory& to, std::vector<RampTrajectory>& result);
-    void computeFullSwitchOOP(const RampTrajectory& from, const RampTrajectory& to, RampTrajectory& result);
+    void getTransPop(const Population& pop, const RampTrajectory& movingOn, Population& result);
+    void getTransitionTrajectory(const RampTrajectory& movingOn, const RampTrajectory& trgt_traj, const double& t, RampTrajectory& result);
+    void switchTrajectory(const RampTrajectory& from, const RampTrajectory& to, std::vector<RampTrajectory>& result);
+    void computeFullSwitch(const RampTrajectory& from, const RampTrajectory& to, RampTrajectory& result);
     
     
     const bool checkIfSwitchCurveNecessary(const RampTrajectory from, const RampTrajectory to)
@@ -380,8 +374,6 @@ class Planner {
 
     // Work for CC
     void doControlCycle();
-    const uint8_t computeSwitchPC(const Population pop, const RampTrajectory moving);
-    const uint8_t computeSwitchPC(const RampTrajectory target, const RampTrajectory moving);
 
     // Returns the index in the trajectory's path to start checking if the robot has passed it
     const uint8_t getIndexStartPathAdapting(const RampTrajectory t) const;
@@ -396,7 +388,6 @@ class Planner {
     void pause();
 
 
-    const Population getTransPop(const Population pop, const RampTrajectory movingOn);
 
 
     const RampTrajectory offsetTrajectory(const RampTrajectory t, const MotionState diff) const;
@@ -537,6 +528,7 @@ class Planner {
     bool reset_;
     bool print_enter_exit_;
     int num_mods_;
+    int num_succ_mods_;
 };
 
 #endif

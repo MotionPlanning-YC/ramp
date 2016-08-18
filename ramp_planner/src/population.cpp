@@ -108,18 +108,18 @@ const double Population::getMinFitness() const {
 
 const bool Population::contains(const RampTrajectory& rt) const 
 {
-  ROS_INFO("In Population::contains");
+  //ROS_INFO("In Population::contains");
   for(uint8_t i=0;i<size();i++) 
   {
-    ROS_INFO("i: %i size(): %i", i, size());
+    //ROS_INFO("i: %i size(): %i", i, size());
     if(trajectories_.at(i).equals(rt)) 
     {
-      ROS_INFO("Population contains trajectory at index %i", (int)i);
+      //ROS_INFO("Population contains trajectory at index %i", (int)i);
       return true;
     }
   }
 
-  ROS_INFO("Population does not contain trajectory");
+  //ROS_INFO("Population does not contain trajectory");
   return false;
 }
 
@@ -168,15 +168,15 @@ const bool Population::infeasibleExists() const
 /** This method checks if a trajectory can replace an existing trajectory in the population */
 const bool Population::replacementPossible(const RampTrajectory& rt) const 
 {
-  ROS_INFO("In Population::replacementPossible");
+  //ROS_INFO("In Population::replacementPossible");
   //////ROS_INFO("rt: %s", rt.toString().c_str());
-  ROS_INFO("rt.fitness: %f feasible: %s t_coll: %f", rt.msg_.fitness, rt.msg_.feasible ? "True" : "False", rt.msg_.t_firstCollision.toSec());
+  //ROS_INFO("rt.fitness: %f feasible: %s t_coll: %f", rt.msg_.fitness, rt.msg_.feasible ? "True" : "False", rt.msg_.t_firstCollision.toSec());
   //////ROS_INFO("pop: %s", toString().c_str());
   
   /*////ROS_INFO("Trajec 1 fit: %f feasible: %s t_coll: %f", trajectories_.at(1).msg_.fitness, 
       trajectories_.at(1).msg_.feasible ? "True" : "False", trajectories_.at(1).msg_.t_firstCollision);*/
 
-  ROS_INFO("getMinFitness(): %f", getMinFitness());
+  //ROS_INFO("getMinFitness(): %f", getMinFitness());
 
   // If the fitness is not higher than the minimum fitness
   /*if(rt.msg_.fitness <= getMinFitness()) 
@@ -190,14 +190,14 @@ const bool Population::replacementPossible(const RampTrajectory& rt) const
   // trajectories can be replaced
   if(!rt.msg_.feasible && !infeasibleExists()) 
   {
-    ROS_INFO("rt is infeasible, no other infeasible trajecs, returning false");
+    //ROS_INFO("rt is infeasible, no other infeasible trajecs, returning false");
     return false;
   }
 
   /** IF subpopulations are being used */
   if(subPopulations_.size() > 0) 
   {
-    std::cout<<"\nIn sub-pops\n";
+    //std::cout<<"\nIn sub-pops\n";
     
     // If each subpopulation has <= 1 trajectory,
     // no trajectories can be replaced
@@ -245,7 +245,7 @@ const bool Population::replacementPossible(const RampTrajectory& rt) const
     } // end if rt is infeasible
   } // end if sub-populations are used
 
-  ROS_INFO("Replacement is possible");
+  //ROS_INFO("Replacement is possible");
   //ROS_INFO("Exiting Population::replacementPossible");
   return true;
 } // End replacementPossible
@@ -258,18 +258,18 @@ const bool Population::replacementPossible(const RampTrajectory& rt) const
 /** This method returns true if rt can replace the trajectory at index i */
 const bool Population::canReplace(const RampTrajectory& rt, const int& i) const 
 {
-  ROS_INFO("In Population::canReplace");
-  ROS_INFO("i: %i feasible: %s", i, trajectories_.at(i).msg_.feasible ? "True" : "False");
+  //ROS_INFO("In Population::canReplace");
+  //ROS_INFO("i: %i feasible: %s", i, trajectories_.at(i).msg_.feasible ? "True" : "False");
   
   if(i == calcBestIndex()) 
   {
-    ROS_INFO("i == i_best, returning false");
+    //ROS_INFO("i == i_best, returning false");
     return false;
   }
 
   if(!rt.msg_.feasible && trajectories_.at(i).msg_.feasible) 
   {
-    ROS_INFO("rt infeasible, i feasible, returning false");
+    //ROS_INFO("rt infeasible, i feasible, returning false");
     return false;
   }
 
@@ -308,7 +308,7 @@ const bool Population::canReplace(const RampTrajectory& rt, const int& i) const
     }
   } // end if sub-pops are being used
   
-  ROS_INFO("Returning true");
+  //ROS_INFO("Returning true");
   //ROS_INFO("Exiting Population::canReplace");
   return true;
 } // End canReplace
@@ -362,10 +362,10 @@ const int Population::getReplacementID(const RampTrajectory& rt) const
  *  Returns the index that the trajectory is added at */
 const int Population::add(const RampTrajectory& rt) 
 {
-  ROS_INFO("In Population::add");
+  /*ROS_INFO("In Population::add");
   ROS_INFO("Pop: %s", toString().c_str());
   ROS_INFO("rt: %s", rt.toString().c_str());
-  ROS_INFO("Pop best id: %i", calcBestIndex());
+  ROS_INFO("Pop best id: %i", calcBestIndex());*/
 
   /*if(subPopulations_.size() > 0) 
   {

@@ -197,15 +197,15 @@ const double MotionState::comparePosition(const MotionState& c, const bool base_
 /** This method returns the new position vector of the Configuration given some transformation matrix */
 tf::Vector3 MotionState::transformBasePosition(const tf::Transform t) 
 {
-  ROS_INFO("In MotionState::transformBasePosition");
-  ROS_INFO("t: (%f, %f) yaw: %f", t.getOrigin().getX(), t.getOrigin().getY(), tf::getYaw(t.getRotation()));
+  //ROS_INFO("In MotionState::transformBasePosition");
+  //ROS_INFO("t: (%f, %f) yaw: %f", t.getOrigin().getX(), t.getOrigin().getY(), tf::getYaw(t.getRotation()));
 
-  ROS_INFO("msg: %s", toString().c_str());
+  //ROS_INFO("msg: %s", toString().c_str());
 
   tf::Vector3 p(msg_.positions.at(0), msg_.positions.at(1), 0);
   tf::Vector3 result = t * p;
 
-  ROS_INFO("result: (%f, %f)", result.getX(), result.getY());
+  //ROS_INFO("result: (%f, %f)", result.getX(), result.getY());
   return result;
 } //End transformBasePosition
 

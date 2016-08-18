@@ -330,10 +330,11 @@ void testSwitch()
   ROS_INFO("Response traj_from: %s", traj_from.toString().c_str());
   
   
-  RampTrajectory full = my_planner.computeFullSwitch(traj, traj_from);
+  RampTrajectory full;
+  my_planner.computeFullSwitch(traj, traj_from, full);
   ROS_INFO("full: %s", full.toString().c_str());
 
-  RampTrajectory eval = my_planner.evaluateTrajectory(full);
+  //RampTrajectory eval = my_planner.evaluateTrajectory(full);
   ROS_INFO("full: %s", full.toString().c_str());
 
 }
