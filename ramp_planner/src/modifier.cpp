@@ -55,7 +55,7 @@ const std::string Modifier::getOperator() const
       result = "crossover";
       break;
 
-    // Stop
+    // Move/repair
     case 5:
       result = "move";
       break;
@@ -104,13 +104,24 @@ const std::vector<int> Modifier::getTargets(const std::string& op, const Populat
  * This method builds a ModificationRequest srv 
  * For stop operator, the path can be retreived from srv
  * */
-void Modifier::buildModificationRequest(const Population& pop, ramp_msgs::ModificationRequest& result)
+void Modifier::buildModificationRequest(const Population& pop, bool imminent_collision, ramp_msgs::ModificationRequest& result)
 {
 
-  result.request.op = getOperator();
-
   // Push the target paths onto the modification request
-  std::vector<int> targets = getTargets(result.request.op, pop);
+  std::vector<int> targets;
+
+  if(!imminent_collision)
+  {
+    result.request.op = getOperator();
+    targets           = getTargets(result.request.op, pop);
+  }
+  else
+  {
+    result.request.op = "move";
+    targets.push_back(pop.calcBestIndex());  
+  }
+
+
   //ROS_INFO("targets.size(): %i", (int)targets.size());
   for(unsigned int i=0;i<targets.size();i++) 
   {
@@ -120,7 +131,7 @@ void Modifier::buildModificationRequest(const Population& pop, ramp_msgs::Modifi
         pop.paths_.at(targets.at(i)).buildPathMsg());
   }
 
-  //result.request.orientation = PI/2;
+  result.request.move_dir = move_dir_;
 
 } // End buildModificationRequest
 
@@ -128,7 +139,7 @@ void Modifier::buildModificationRequest(const Population& pop, ramp_msgs::Modifi
 
 
 /** This method performs all the tasks for path modification */
-const std::vector<Path> Modifier::perform(const Population& pop) 
+const std::vector<Path> Modifier::perform(const Population& pop, bool imminent_collision) 
 {
   //ROS_INFO("In Modifier::perform");
   std::vector<Path> result;
@@ -136,7 +147,7 @@ const std::vector<Path> Modifier::perform(const Population& pop)
   // Build a modification request srv 
   ros::Time t_b = ros::Time::now();
   ramp_msgs::ModificationRequest mr;
-  buildModificationRequest(pop, mr); 
+  buildModificationRequest(pop, imminent_collision, mr); 
   //ROS_INFO("ModificationResult built, pop size: %i # of paths: %i", (int)pop.size(), (int)mr.response.mod_paths.size()); 
 
   //ROS_INFO("Requesting modification");

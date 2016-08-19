@@ -7,11 +7,12 @@ Move::Move(const ramp_msgs::Path p) : path_(p) {}
 
 const ramp_msgs::Path Move::perform() 
 {
+  //ROS_INFO("dir_: %f", dir_);
   //ROS_INFO("Before: %s", utility_.toString(path_).c_str()); 
 
   if(path_.points.size() > 2) 
   {
-    double dir = orientation_;
+    double dir = dir_;
     double min = PI/2.f;
     double max = (3.f*PI)/2.f;
 
@@ -26,7 +27,7 @@ const ramp_msgs::Path Move::perform()
 
     
     dir = utility_.displaceAngle(dir, displacement);
-    //ROS_INFO("orientation_: %f displacement: %f dir: %f", orientation_, displacement, dir);
+    //ROS_INFO("dir_: %f displacement: %f dir: %f", dir_, displacement, dir);
 
     // Randomly choose a knot point to change
     double dist = (double)rand() / RAND_MAX;
@@ -36,9 +37,11 @@ const ramp_msgs::Path Move::perform()
     // Create point
     double x = cos(dir) * dist;
     double y = sin(dir) * dist;
+    
     ramp_msgs::KnotPoint kp;
     kp.motionState.positions.push_back(x);
     kp.motionState.positions.push_back(y);
+    kp.motionState.positions.push_back(dir);
 
     path_.points.at(1) = kp;
   } // end if points.size()>2

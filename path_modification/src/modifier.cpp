@@ -11,33 +11,40 @@ const std::vector<ramp_msgs::Path> Modifier::perform() {
 
   if(mod_req.op == "insert") 
   {
-    in.path_ = mod_req.paths.at(0); 
-    result.push_back(in.perform());
+    in_.path_ = mod_req.paths.at(0); 
+    result.push_back(in_.perform());
   }
 
   else if(mod_req.op == "delete") 
   {
-    del.path_ = mod_req.paths.at(0);
-    result.push_back(del.perform());
+    del_.path_ = mod_req.paths.at(0);
+    result.push_back(del_.perform());
   }
   
   else if(mod_req.op == "change") 
   {
-    chg.path_ = mod_req.paths.at(0);
-    result.push_back(chg.perform());
+    chg_.path_ = mod_req.paths.at(0);
+    result.push_back(chg_.perform());
   }
 
-  else if(mod_req.op == "swap") 
+  else if(mod_req.op == "swap_") 
   {
-    swap.path_ = mod_req.paths.at(0);
-    result.push_back(swap.perform());
+    swap_.path_ = mod_req.paths.at(0);
+    result.push_back(swap_.perform());
   }
 
   else if(mod_req.op == "crossover") 
   {
-    cross.path1_ = mod_req.paths.at(0);
-    cross.path2_ = mod_req.paths.at(1);
-    result = cross.perform();
+    cross_.path1_ = mod_req.paths.at(0);
+    cross_.path2_ = mod_req.paths.at(1);
+    result = cross_.perform();
+  }
+
+  else if(mod_req.op == "move")
+  {
+    move_.path_ = mod_req.paths[0];
+    move_.dir_ = mod_req.move_dir;
+    result.push_back(move_.perform());
   }
 
   //std::cout<<"\nModifier returning:"<<u.toString(result.at(0))<<"\n";

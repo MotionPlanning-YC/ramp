@@ -313,7 +313,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   {
     ros::Duration d_since_cc = ros::Time::now() - t_prevCC_;
     double t_start_new = (controlCycle_ - d_since_cc).toSec();
-    ROS_INFO("New t_start: %f", t_start_new);
+    //ROS_INFO("New t_start: %f", t_start_new);
     population_.setStartTime(t_start_new); 
   }
 
@@ -329,19 +329,27 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   }
 
   // Find direction of closest obstacle for "move" operator
-  /*uint8_t i_closest=0;
-  for(uint8_t i=1;i<msg.obstacles.size();i++)
+  if(ob_trajectory_.size() > 0)
   {
-    if(fabs(utility_.positionDistance(latestUpdate_.msg_.positions, ob_trajectory_.at(i).msg_.trajectory.points.at(0).positions)) < fabs(utility_.positionDistance(latestUpdate_.msg_.positions, ob_trajectory_.at(i_closest).msg_.trajectory.points.at(0).positions)))
+    uint8_t i_closest=0;
+    for(uint8_t i=1;i<msg.obstacles.size();i++)
     {
-      i_closest = i; 
+      if(fabs(utility_.positionDistance(latestUpdate_.msg_.positions, ob_trajectory_.at(i).msg_.trajectory.points.at(0).positions)) < fabs(utility_.positionDistance(latestUpdate_.msg_.positions, ob_trajectory_.at(i_closest).msg_.trajectory.points.at(0).positions)))
+      {
+        i_closest = i; 
+      }
     }
+
+    double dir = utility_.findAngleFromAToB(latestUpdate_.msg_.positions, 
+        ob_trajectory_.at(i_closest).msg_.trajectory.points.at(0).positions);
+    modifier_->move_dir_ = -dir;
+  }
+  else
+  {
+    modifier_->move_dir_ = startPlanning_.msg_.positions[2];
   }
 
-  double dir = utility_.findAngleFromAToB(latestUpdate_.msg_.positions, 
-      ob_trajectory_.at(i_closest).msg_.trajectory.points.at(0).positions);
-  modifier_->dir_ = -dir;*/
-  
+
   //////ROS_INFO("sensing cycle changing CC period to: %f", controlCycle_.toSec());
 
   //////ROS_INFO("movingOn_ Feasible: %s", movingOn_.msg_.feasible ? "True" : "False");
@@ -1165,9 +1173,9 @@ void Planner::buildEvaluationRequest(const RampTrajectory& trajec, ramp_msgs::Ev
 
   double diff = fabs(utility_.findDistanceBetweenAngles(nec_theta, end));
   
-  ////ROS_INFO("nec_theta: %f end: %f diff: %f", nec_theta, end, diff);
+  ROS_INFO("nec_theta: %f end: %f diff: %f", nec_theta, end, diff);
 
-  result.trans_possible = trajec.transitionTraj_.trajectory.points.size() > 0 || diff < 0.01;
+  result.trans_possible = trajec.transitionTraj_.trajectory.points.size() > 0 || diff < 0.31;
 
   ////ROS_INFO("transitionTraj: %s", utility_.toString(trajec.transitionTraj_).c_str());
   ////ROS_INFO("Exiting Planner::buildEvaluationRequest(const RampTrajectory&, EvaluationRequest&, bool)");
@@ -1360,18 +1368,17 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
 {
   ros::Duration d = ros::Time::now() - t_prevIC_;
   t_prevIC_ = ros::Time::now();
-  //ROS_INFO("In imminentCollisionCallback");
-  //ROS_INFO("Time since last: %f", d.toSec());
+  ROS_INFO("In imminentCollisionCallback");
+  ROS_INFO("Time since last: %f", d.toSec());
 
   std_msgs::Bool ic;
 
   double time_threshold = controlCycle_.toSec();
     
-  /*////ROS_WARN("Robot trajectory: %s", movingOn_.toString().c_str());
   for(int o=0;o<ob_trajectory_.size();o++)
   {
-    ////ROS_WARN("Obstacle trajectory %i: %s", o, ob_trajectory_.at(o).toString().c_str());
-  }*/
+    ROS_INFO("Ob %i: %f", o, utility_.positionDistance(latestUpdate_.msg_.positions, ob_trajectory_[o].msg_.trajectory.points[0].positions));
+  }
 
   if(ob_trajectory_.size() > 0 && moving_on_coll_ && (movingOn_.msg_.t_firstCollision.toSec() < time_threshold
     || (movingOn_.msg_.t_firstCollision.toSec() - (ros::Time::now().toSec()-t_prevCC_.toSec())) < time_threshold))
@@ -2482,7 +2489,7 @@ void Planner::getTransitionTrajectory(const RampTrajectory& trj_movingOn, const 
 const std::vector<Path> Planner::modifyPath() 
 { 
   //////ROS_INFO("About to modify a path, pop is: %s\n%s", population_.get(0).toString().c_str(), population_.get(1).toString().c_str());
-  return modifier_->perform(population_);
+  return modifier_->perform(population_, imminent_collision_);
 }
 
 
@@ -3100,7 +3107,7 @@ void Planner::getTransPop(const Population& pop, const RampTrajectory& movingOn,
 void Planner::doControlCycle() 
 {
   //////ROS_WARN("Control Cycle %i occurring at Time: %f", num_cc_, ros::Time::now().toSec());
-  //ROS_INFO("controlCycle_: %f", controlCycle_.toSec());
+  ROS_INFO("controlCycle_: %f", controlCycle_.toSec());
   ////ROS_INFO("Time between control cycles: %f", (ros::Time::now() - t_prevCC_).toSec());
   t_prevCC_ = ros::Time::now();
   //////ROS_INFO("Number of planning cycles that occurred between CC's: %i", c_pc_);
@@ -3123,7 +3130,7 @@ void Planner::doControlCycle()
 
   // Send the best trajectory and set movingOn
   ////////ROS_INFO("Sending best");
-  //ROS_INFO("bestT: %s", bestT.toString().c_str());
+  ROS_INFO("bestT: %s", bestT.toString().c_str());
   sendBest();
   ////////ROS_INFO("After sendBest");
 

@@ -11,13 +11,13 @@ class Modifier {
     ~Modifier();
 
     // Methods
-    const std::vector<Path> perform(const Population& pop);
-    void buildModificationRequest(const Population& pop, ramp_msgs::ModificationRequest& result);
+    const std::vector<Path> perform(const Population& pop, bool imminent_collision=false);
+    void buildModificationRequest(const Population& pop, bool imminent_collision, ramp_msgs::ModificationRequest& result);
 
 
     // Data members
     unsigned int num_ops;
-    double dir_;
+    double move_dir_;
 
   private:
     const std::string getOperator() const;

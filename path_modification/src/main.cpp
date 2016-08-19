@@ -8,14 +8,14 @@ Utility u;
 bool handleRequest(ramp_msgs::ModificationRequest::Request& req,
                    ramp_msgs::ModificationRequest::Response& res)
 {
-  //std::cout<<"\npath_modification: In handleRequest\n";
+  /*std::cout<<"\npath_modification: In handleRequest\n";
 
   std::cout<<"\nNumber of paths received: "<<req.paths.size();
   std::cout<<"\nPaths received:";
   for(unsigned int i=0;i<req.paths.size();i++) {
     std::cout<<"\n"<<u.toString(req.paths.at(i));
   }
-  std::cout<<"\noperator: "<<req.op<<"\n";
+  std::cout<<"\noperator: "<<req.op<<"\n";*/
 
   Modifier mod(req);
   res.mod_paths = mod.perform();
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
   //Swap swap(p1);
   //swap.perform();
   Move m(p1);
-  m.orientation_ = 0.137;
+  m.dir_ = 0.137;
   m.perform();
 
   ROS_INFO("Path after modification: %s", u.toString(p1).c_str());

@@ -15,11 +15,12 @@ class Modifier {
     Modifier(ramp_msgs::ModificationRequest::Request& req);
     ~Modifier() {}
     
-    Insert in;
-    Delete del;
-    Change chg;
-    Crossover cross;
-    Swap swap; 
+    Insert in_;
+    Delete del_;
+    Change chg_;
+    Crossover cross_;
+    Swap swap_; 
+    Move move_;
 
     ramp_msgs::ModificationRequest::Request mod_req;
     const std::vector<ramp_msgs::Path> perform();

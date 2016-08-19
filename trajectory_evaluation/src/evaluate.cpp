@@ -1,6 +1,6 @@
 #include "evaluate.h"
 
-Evaluate::Evaluate() : Q(10000.f), orientation_infeasible_(0) {}
+Evaluate::Evaluate() : Q(1000.f), orientation_infeasible_(0) {}
 
 void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationResponse& res)
 {
