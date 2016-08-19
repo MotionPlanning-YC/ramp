@@ -355,6 +355,9 @@ class Planner {
     void reportData() ;
 
 
+    ros::Duration d_IC_;
+    ros::Time t_IC_;
+
     ros::Time t_prev_update_;
     ros::Time t_prevIC_;
     ros::Time t_prevObIC_;

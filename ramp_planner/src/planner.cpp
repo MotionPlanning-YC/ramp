@@ -14,6 +14,9 @@ Planner::Planner() : resolutionRate_(1.f / 10.f), ob_dists_timer_dur_(0.1), gene
 
   COLL_DISTS.push_back(0.42);
   COLL_DISTS.push_back(0.4);
+
+  // Set time to ignore delta theta in evaluation after IC occurs
+  d_IC_ = ros::Duration(10);
 }
 
 Planner::~Planner() 
@@ -1142,6 +1145,11 @@ void Planner::buildEvaluationRequest(const RampTrajectory& trajec, ramp_msgs::Ev
 
   //////ROS_INFO("imminent_collision: %s", imminent_collision_ ? "True" : "False");
   
+  /*if(!imminent_collision_ && (ros::Time::now() - t_IC_) < d_IC_)
+  {
+    result.imminent_collision = true;
+  }*/
+
   result.imminent_collision = imminent_collision_;
   result.coll_dist = COLL_DISTS[i_COLL_DISTS_];
 
@@ -1369,6 +1377,12 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
     || (movingOn_.msg_.t_firstCollision.toSec() - (ros::Time::now().toSec()-t_prevCC_.toSec())) < time_threshold))
   {
     //ROS_WARN("IC: moving_on_coll_: %s t_firstCollision: %f Elapsed time: %f", moving_on_coll_ ? "True" : "False", movingOn_.msg_.t_firstCollision.toSec(), (ros::Time::now().toSec()-t_prevCC_.toSec()));
+    
+    // Check if IC was previously false
+    if(!imminent_collision_)
+    {
+      t_IC_ = ros::Time::now();
+    }
 
     ic.data = true;
     imminent_collision_ = true;
@@ -3093,13 +3107,13 @@ void Planner::doControlCycle()
   ros::Time t = ros::Time::now();
 
   // Set all of the trajectory t_start values to 0 b/c they would be starting now
-  for(int i=0;i<population_.size();i++)
+  /*for(int i=0;i<population_.size();i++)
   {
     population_.trajectories_[i].msg_.t_start = ros::Duration(0);
-  }
+  }*/
 
   //population_ = evaluatePopulation(population_);
-  evaluatePopulation();
+  //evaluatePopulation();
 
   // Set the bestT
   RampTrajectory bestT = population_.getBest();
