@@ -339,10 +339,16 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
         i_closest = i; 
       }
     }
+    ROS_INFO("Closest ob: %s", utility_.toString(ob_trajectory_.at(i_closest).msg_.trajectory.points[0]).c_str());
 
     double dir = utility_.findAngleFromAToB(latestUpdate_.msg_.positions, 
         ob_trajectory_.at(i_closest).msg_.trajectory.points.at(0).positions);
-    modifier_->move_dir_ = -dir;
+    ROS_INFO("SENSING CYCLE dir: %f", dir);
+    if( fabs(dir) < 0.001 )
+    {
+      dir = 0.001;
+    }
+    modifier_->move_dir_ = dir;
   }
   else
   {
@@ -2570,8 +2576,9 @@ void Planner::modification()
     // Index is where the trajectory was added in the population (may replace another)
     // If it was successfully added, push its index onto the result
     ros::Time t_start = ros::Time::now();
-    //////ROS_INFO("Adding to pop, mod_trajec.size(): %i", (int)mod_trajec.size());
+    ROS_INFO("Adding to pop, mod_trajec.size(): %i", (int)mod_trajec.size());
     int index = population_.add(traj_final);
+    ROS_INFO("Done adding");
     
     // No longer need to reset CC time because trajs should have same t_start
     if(index > -1)
