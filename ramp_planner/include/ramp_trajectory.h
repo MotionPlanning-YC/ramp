@@ -14,7 +14,6 @@ class RampTrajectory
     ~RampTrajectory() {}
     
     ramp_msgs::RampTrajectory msg_;
-    //Path                      holonomic_path_;
     ramp_msgs::MotionState    ms_prevSP_;
     ramp_msgs::RampTrajectory transitionTraj_;
 

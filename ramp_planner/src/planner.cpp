@@ -281,7 +281,7 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
 
 void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 {
-  //ROS_INFO("In sensingCycleCallback");
+  ROS_INFO("In sensingCycleCallback");
   //////ROS_INFO("msg: %s", utility_.toString(msg).c_str());
 
   ros::Time start = ros::Time::now();
@@ -308,16 +308,17 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   } // end for
 
   ros::Time s = ros::Time::now();
-  //population_  = evaluatePopulation(population_);
+  
+  if(cc_started_)
+  {
+    ros::Duration d_since_cc = ros::Time::now() - t_prevCC_;
+    double t_start_new = (controlCycle_ - d_since_cc).toSec();
+    ROS_INFO("New t_start: %f", t_start_new);
+    population_.setStartTime(t_start_new); 
+  }
+
   evaluatePopulation();
   
-  // Make sure control cycle time is updated
-  //controlCycle_ = population_.getEarliestStartTime();
-  //controlCycleTimer_.setPeriod(controlCycle_, false);
-  
-
-  //////ROS_INFO("Time to evaluate population: %f", (ros::Time::now() - s).toSec());
-  //////ROS_INFO("Pop now: %s", population_.toString().c_str());
   
   if(cc_started_)
   {
@@ -1108,7 +1109,6 @@ void Planner::buildEvaluationSrv(std::vector<RampTrajectory>& trajecs, ramp_msgs
     ramp_msgs::EvaluationRequest req;
     buildEvaluationRequest(trajecs[i], req);
     srv.request.reqs.push_back(req);
-    //srv.request.reqs.push_back(buildEvaluationRequest(trajecs[i]));
   }
 }
 
@@ -2953,7 +2953,8 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
     ////ROS_INFO("T_new.fitness before: %f", T_new.msg_.fitness);
 
     // Evaluate T_new
-    //ramp_msgs::EvaluationRequest er = buildEvaluationRequest(T_new);
+    // First, set the starting time
+    T_new.msg_.t_start = population_.getEarliestStartTime();
     requestEvaluation(T_new);
     ////ROS_INFO("T_new.fitness after: %f", T_new.msg_.fitness);
 

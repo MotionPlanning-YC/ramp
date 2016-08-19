@@ -447,6 +447,14 @@ const RampTrajectory Population::getBest() const
 }
 
 
+void Population::setStartTime(double t_start) 
+{
+  for(int i=0;i<trajectories_.size();i++)
+  {
+    trajectories_[i].msg_.t_start = ros::Duration(t_start);
+  }
+}
+
 const ros::Duration Population::getEarliestStartTime() const
 {
   ros::Duration result = trajectories_.at(0).msg_.t_start;

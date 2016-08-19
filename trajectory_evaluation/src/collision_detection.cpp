@@ -1706,7 +1706,7 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
 void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajectoryPoint>& segment, const std::vector<trajectory_msgs::JointTrajectoryPoint>& ob_trajectory, std::vector< std::vector<double> >& points_of_collision) const
 {
   ros::Time time_start = ros::Time::now();
-  ROS_INFO("In CollisionDetection::query"); 
+  //ROS_INFO("In CollisionDetection::query"); 
   //////ROS_INFO("trajectory.points.size(): %i", (int)trajectory.trajectory.points.size());
   //////ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.trajectory.points.size());
   /*if(ob_trajectory.trajectory.points.size() > 2)
@@ -1719,7 +1719,7 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
 
   // If only 1 point, then set stopping point to end of segment
   int     j_stop = ob_trajectory.size() > segment.size() ? ob_trajectory.size() : segment.size();
-  ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
+  //ROS_INFO("t_start: %f j_offset: %i", t_start, j_offset);
 
   int i=0, j=0;
   
@@ -1749,14 +1749,14 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
     // there is collision
     if( dist <= radius*2 ) 
     {
-      ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+      /*ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
           p_i->positions[0],
           p_i->positions[1],
           p_ob->positions[0],
           p_ob->positions[1],
           dist,
           (int)i,
-          (int)j);
+          (int)j);*/
       points_of_collision.push_back(p_i->positions);
       i = segment.size();
     } // end if

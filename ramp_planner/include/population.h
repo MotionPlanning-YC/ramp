@@ -33,6 +33,7 @@ class Population {
     const RampTrajectory  getBest() const;
 
     const ros::Duration   getEarliestStartTime() const;
+    void setStartTime(double t_start);
    
     const std::vector<RampTrajectory> getBestFromSubPops() const;
     const std::vector<Population> createSubPopulations(const double delta_theta=PI/18.f);
