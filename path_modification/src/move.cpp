@@ -31,12 +31,25 @@ const ramp_msgs::Path Move::perform()
 
     // Randomly choose a knot point to change
     double dist = (double)rand() / RAND_MAX;
+    dist = 0.5;
     ROS_INFO("dist: %f", dist);
     
 
     // Create point
     double x = cos(dir) * dist;
     double y = sin(dir) * dist;
+
+    // Set bounds on dimensions
+    if(x < 0)
+      x = 0;
+    else if(x > 3.5)
+      x = 3.5;
+    if(y < 0)
+      y = 0;
+    else if(y > 3.5)
+      y = 3.5;
+    
+    
     
     ramp_msgs::KnotPoint kp;
     kp.motionState.positions.push_back(x);
