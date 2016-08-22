@@ -635,7 +635,7 @@ void Planner::adaptPaths(const MotionState& ms, const ros::Duration& d, std::vec
 {
   if(print_enter_exit_)
   {
-    //ROS_INFO("In Planner::adaptPathsOOP");
+    //ROS_INFO("In Planner::adaptPaths");
   }
 
   result.clear();
@@ -649,14 +649,14 @@ void Planner::adaptPaths(const MotionState& ms, const ros::Duration& d, std::vec
 
     // For each trajectory
     for(uint8_t i=0;i<population_.size();i++) {
-      ////ROS_INFO("Path: %s", population_.paths_.at(i).toString().c_str());
-      ////ROS_INFO("Get Path: %s", population_.get(i).getNonHolonomicPath().toString().c_str());
+      ROS_INFO("Path: %s", population_.paths_.at(i).toString().c_str());
+      ROS_INFO("Get Path: %s", population_.get(i).getNonHolonomicPath().toString().c_str());
       Path temp = population_.paths_.at(i);
 
       // Track how many knot points we get rid of
       // Initialize to 1 to always remove starting position
       unsigned int throwaway=getNumThrowawayPoints(population_.get(i), d);
-      //ROS_INFO("throwaway: %i", (int)throwaway);
+      ROS_INFO("throwaway: %i", (int)throwaway);
 
       
       // If the whole path has been passed, adjust throwaway so that 
@@ -679,7 +679,7 @@ void Planner::adaptPaths(const MotionState& ms, const ros::Duration& d, std::vec
 
       // Set start_ to be the new starting configuration of the path
       temp.start_ = ms;
-      //ROS_INFO("After adapting Path: %s", temp.toString().c_str());
+      ROS_INFO("After adapting Path: %s", temp.toString().c_str());
 
       result.push_back(temp);
     } // end outer for
@@ -763,7 +763,7 @@ const int Planner::estimateIfOnCurve(const MotionState ms, const ramp_msgs::Bezi
     ////////ROS_INFO("xPastTwo: %s yPastTwo: %s", xPastTwo ? "True" : "False", yPastTwo ? "True" : "False");
     if(xPastTwo || yPastTwo)
     {
-      ////////ROS_INFO("Returning 3 (after curve)");
+      //ROS_INFO("Returning 3 (after curve)");
       return 3;
     }
   } // end if past segment 1
@@ -914,12 +914,12 @@ void Planner::adaptCurves(const MotionState& ms, const ros::Duration& d, std::ve
     // curve
     if(population_.get(i).msg_.curves.size() > 0) 
     {
-      //////////ROS_INFO("In if trajectory has curve");
+      ROS_INFO("In if trajectory has curve");
 
       // Set curve
       ramp_msgs::BezierCurve curve = population_.get(i).msg_.curves.size() > 1 ? population_.get(i).msg_.curves.at(1) :
                                                                         population_.get(i).msg_.curves.at(0) ;
-      //////ROS_INFO("Set curve to: %s", utility_.toString(curve).c_str());
+      ROS_INFO("Set curve to: %s", utility_.toString(curve).c_str());
 
       //////////ROS_INFO("population_.getBestIndex: %i", (int)population_.calcBestIndex());
       // If moving on this curve, update u
@@ -927,7 +927,7 @@ void Planner::adaptCurves(const MotionState& ms, const ros::Duration& d, std::ve
             (curve.u_0 > 0. ||
              estimateIfOnCurve(ms, curve) == 2))
       {
-        //////ROS_INFO("Moving on this curve");
+        ROS_INFO("Moving on this curve");
 
         // Get the new u_0 value
         curve.u_0 = updateCurvePos(population_.get(i), d);
@@ -937,7 +937,7 @@ void Planner::adaptCurves(const MotionState& ms, const ros::Duration& d, std::ve
       }  //end if moving on curve
       else if(i != population_.calcBestIndex())
       {
-        //////ROS_INFO("Not moving on curve, erase it and start with new segment points");
+        ROS_INFO("Not moving on curve, erase it and start with new segment points");
         curve = blank;
       }
       else
@@ -951,15 +951,15 @@ void Planner::adaptCurves(const MotionState& ms, const ros::Duration& d, std::ve
       // Check if done with current curve
       if( i == population_.calcBestIndex() && (curve.u_0 > curve.u_target || estimateIfOnCurve(ms, curve) == 3) )
       {
-        //////ROS_INFO("Done with curve, u_0: %f", curve.u_0);
+        ROS_INFO("Done with curve, u_0: %f", curve.u_0);
         curve = handleCurveEnd(population_.get(i));
       } // end if done with 1st curve
       else
       {
-        //////ROS_INFO("Not done with curve");
+        ROS_INFO("Not done with curve");
       }
 
-      //////ROS_INFO("Curve after adapting: %s", utility_.toString(curve).c_str());
+      ROS_INFO("Curve after adapting: %s", utility_.toString(curve).c_str());
       result.push_back(curve);
     } // end if trajectory has curve
 
