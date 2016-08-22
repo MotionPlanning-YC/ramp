@@ -28,7 +28,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 set (CMAKE_CXX_FLAGS "-g")
 
 ### Declare a cpp executable
-add_executable(${PROJECT_NAME} src/main.cpp src/change.cpp src/constraints.cpp src/crossover.cpp src/delete.cpp src/insert.cpp src/modifier.cpp src/move.cpp src/swap.cpp src/utility.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/change.cpp src/constraints.cpp src/crossover.cpp src/delete.cpp src/insert.cpp src/modifier.cpp src/move.cpp src/range.cpp src/swap.cpp src/utility.cpp)
 
 
 ### Specify libraries to link a library or executable target against

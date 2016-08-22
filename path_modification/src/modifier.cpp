@@ -44,6 +44,7 @@ const std::vector<ramp_msgs::Path> Modifier::perform() {
   {
     move_.path_ = mod_req.paths[0];
     move_.dir_ = mod_req.move_dir;
+    move_.dist_ = mod_req.move_dist;
     result.push_back(move_.perform());
   }
 

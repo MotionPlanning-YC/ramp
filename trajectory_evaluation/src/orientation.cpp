@@ -37,7 +37,7 @@ const double Orientation::getDeltaTheta(const ramp_msgs::RampTrajectory& trj) co
 
 const double Orientation::perform(const ramp_msgs::RampTrajectory& trj) 
 {
-  //ROS_INFO("In Orientation::perform");
+  ROS_INFO("In Orientation::perform");
   //ROS_INFO("Trj: %s", utility_.toString(trj).c_str());
   //ROS_INFO("trajectory_.i_knotPoints.size(): %i", (int)trj.i_knotPoints.size());
   double result = 0.;
@@ -49,11 +49,11 @@ const double Orientation::perform(const ramp_msgs::RampTrajectory& trj)
 
     trajectory_msgs::JointTrajectoryPoint a = trj.trajectory.points.at(0);
     trajectory_msgs::JointTrajectoryPoint b = trj.trajectory.points.at(trj.i_knotPoints.at(1));
-    //ROS_INFO("a: %s\nb: %s", utility_.toString(a).c_str(), utility_.toString(b).c_str());
+    ROS_INFO("a: %s\nb: %s", utility_.toString(a).c_str(), utility_.toString(b).c_str());
     
     double thetaNec = utility_.findAngleFromAToB(a, b);   
     double deltaTheta = fabs( utility_.findDistanceBetweenAngles(currentTheta_, thetaNec) );
-    //ROS_INFO("thetaNec: %f currentTheta_: %f deltaTheta: %f", thetaNec, currentTheta_, deltaTheta);
+    ROS_INFO("thetaNec: %f currentTheta_: %f deltaTheta: %f", thetaNec, currentTheta_, deltaTheta);
 
     double normalize = PI;
     deltaTheta /= normalize;

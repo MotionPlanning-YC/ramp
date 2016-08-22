@@ -40,7 +40,7 @@ void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationR
   if(req.full_eval)
   {
     ////ROS_INFO("Requesting fitness!");
-    performFitness(req.trajectory, res.fitness);
+    performFitness(req.trajectory, req.offset, res.fitness);
   }
   else
   {
@@ -129,9 +129,9 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
 
 
 /** This method computes the fitness of the trajectory_ member */
-void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result) 
+void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, const double& offset, double& result) 
 {
-  //ROS_INFO("In Evaluate::performFitness");
+  ROS_INFO("In Evaluate::performFitness");
   ros::Time t_start = ros::Time::now();
   
   double cost=0;
@@ -139,7 +139,7 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result)
 
   if(trj.feasible)
   {
-    //ROS_INFO("In if(feasible)");
+    ROS_INFO("In if(feasible)");
     double T = trj.trajectory.points.at(trj.trajectory.points.size()-1).time_from_start.toSec();
 
     trajectory_msgs::JointTrajectoryPoint p = trj.trajectory.points.at(trj.trajectory.points.size()-1);
@@ -155,15 +155,16 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result)
       ////ROS_INFO("trj.holonomic_path[%i]: %s", (int)i, utility_.toString(trj.holonomic_path.points[i].motionState).c_str());
       //////ROS_INFO("dist: %f", dist);
 
-      if( dist*dist < 0.01 )
+      // Account for some offset
+      if( dist*dist < (0.01 + offset) )
       {
         i_end = i; 
         break;
       }
     } // end for
 
-    ////ROS_INFO("i_end: %i", (int)i_end);
-    ////ROS_INFO("trj.holonomic_path.points.size(): %i", (int)trj.holonomic_path.points.size());
+    ROS_INFO("i_end: %i", (int)i_end);
+    ROS_INFO("trj.holonomic_path.points.size(): %i", (int)trj.holonomic_path.points.size());
     double dist=0;
     double delta_theta=0;
     double last_theta = p.positions[2];
@@ -178,22 +179,22 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, double& result)
       
       last_theta = theta;
     }
-    ////ROS_INFO("dist: %f delta_theta: %f", dist, delta_theta);
+    ROS_INFO("dist: %f delta_theta: %f", dist, delta_theta);
 
-    double max_v=0.225;
+    double max_v=0.25/2;
     double max_w=PI/8.f;
 
     double estimated_linear   = dist / max_v;
     double estimated_rotation = delta_theta / max_w;
 
-    //////ROS_INFO("estimated_timed: %f estimated_angle: %f", estimated_time, estimated_angle);
+    ROS_INFO("estimated_linear: %f estimated_rotation: %f", estimated_linear, estimated_rotation);
 
     T += (estimated_linear + estimated_rotation);
 
     // Orientation
     double A = orientation_.perform(trj);
     
-    ////ROS_INFO("T: %f A: %f", T, A);
+    ROS_INFO("T: %f A: %f", T, A);
     cost = T + A;
   }
 

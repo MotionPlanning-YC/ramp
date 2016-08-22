@@ -16,6 +16,19 @@ const ramp_msgs::Path Move::perform()
     double min = PI/2.f;
     double max = (3.f*PI)/2.f;
 
+
+    double cir_theta = utility_.displaceAngle(dir, PI);
+    double cir_displace_pos = utility_.displaceAngle(cir_theta, PI/4.);
+    double cir_displace_neg = utility_.displaceAngle(cir_theta, -PI/4.);
+
+    double robo_x = path_.points[0].motionState.positions[0];
+    double robo_y = path_.points[0].motionState.positions[1];
+
+    double ob_x = robo_x + dist_*cos(cir_theta);
+    double ob_y = robo_y + dist_*sin(cir_theta);
+
+    Range dir_range(min, max);
+
     double displacement = ((float)rand() / (float)RAND_MAX);
     ROS_INFO("displacement: %f", displacement);
     

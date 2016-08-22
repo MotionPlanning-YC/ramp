@@ -2,6 +2,7 @@
 #define MOVE_H
 #include "utility.h"
 #include "constraints.h"
+#include "range.h"
 
 class Move {
   public:
@@ -12,6 +13,7 @@ class Move {
 
     ramp_msgs::Path path_;
     double dir_;
+    double dist_;
 
   private:
     Constraints checkConstraints_;

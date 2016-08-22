@@ -1173,6 +1173,10 @@ void Planner::buildEvaluationRequest(const RampTrajectory& trajec, ramp_msgs::Ev
   // consider_trans for trajs including switches
   result.consider_trans = true;
 
+  if(trajec.msg_.i_knotPoints.size() > 1)
+  {
+    ROS_INFO("trajec.msg_.trajectory.points[0]: %s\n trajec.msg_.trajectory.points[i_knotpoints[1]]: %s", utility_.toString(trajec.msg_.trajectory.points[0]).c_str(), utility_.toString(trajec.msg_.trajectory.points[ trajec.msg_.i_knotPoints[1] ]).c_str());
+  }
   double nec_theta = utility_.findAngleFromAToB(trajec.msg_.trajectory.points[0].positions, trajec.msg_.trajectory.points[ trajec.msg_.i_knotPoints[1] ].positions);
 
   double end = movingOn_.msg_.trajectory.points.size() > 0 ? movingOn_.msg_.trajectory.points[ movingOn_.msg_.trajectory.points.size()-1 ].positions[2] : latestUpdate_.msg_.positions[2];
@@ -1182,6 +1186,12 @@ void Planner::buildEvaluationRequest(const RampTrajectory& trajec, ramp_msgs::Ev
   ROS_INFO("nec_theta: %f end: %f diff: %f", nec_theta, end, diff);
 
   result.trans_possible = trajec.transitionTraj_.trajectory.points.size() > 0 || diff < 0.31;
+
+  // Set offset for eval req
+  if(diff_.msg_.positions.size() > 0)
+  {
+    result.offset = sqrt( diff_.msg_.positions[0]*diff_.msg_.positions[0] + diff_.msg_.positions[1]*diff_.msg_.positions[1] );
+  }
 
   ////ROS_INFO("transitionTraj: %s", utility_.toString(trajec.transitionTraj_).c_str());
   ////ROS_INFO("Exiting Planner::buildEvaluationRequest(const RampTrajectory&, EvaluationRequest&, bool)");
@@ -2764,11 +2774,13 @@ void Planner::planningCycleCallback()
       //////ROS_INFO("movingOnCC_ at t_since_cc: %s", diff.toString().c_str());
       //////ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
 
+      // Find offset for thisPC
       diff = diff.subtractPosition(latestUpdate_, true);
       MotionState temp = diff_.subtractPosition(diff);
       //////ROS_INFO("num_cc: %i", (int)num_cc_);
       //////ROS_INFO("diff_: %s diff: %s temp: %s", diff_.toString().c_str(), diff.toString().c_str(), temp.toString().c_str());
       
+      // diff_ is the overall offset of pop since last CC
       diff_ = diff_.subtractPosition(temp);
 
       //////ROS_INFO("m_cc_: %s", m_cc_.toString().c_str());
@@ -3239,12 +3251,12 @@ void Planner::doControlCycle()
     ////ROS_WARN("Pop best: %s", population_.getBest().toString().c_str());
   }
   
-  /*//ROS_INFO("After adaptation and evaluation:");
+  ROS_INFO("After adaptation and evaluation:");
   //ROS_INFO("Pop earliest time: %f", population_.getEarliestStartTime().toSec());
   for(int i=0;i<population_.size();i++)
   {
-    //ROS_INFO("%s", population_.get(i).toString().c_str());
-  }*/
+    ROS_INFO("%s", population_.get(i).toString().c_str());
+  }
   ////////ROS_INFO("Time spent adapting: %f", d_adapt.toSec());
  
   //if(population_.calcBestIndex() != population_.calcBestIndex())
@@ -3272,12 +3284,12 @@ void Planner::doControlCycle()
   trans_durs_.push_back(d_trans);
   
   //////ROS_INFO("After finding transition population, controlCycle period: %f", controlCycle_.toSec());
-  /*//ROS_INFO("New transPop:"); 
+  ROS_INFO("New transPop:"); 
   //ROS_INFO("Pop earliest time: %f", population_.getEarliestStartTime().toSec());
   for(int i=0;i<population_.size();i++)
   {
-    //ROS_INFO("%s", population_.get(i).toString().c_str());
-  }*/
+    ROS_INFO("%s", population_.get(i).toString().c_str());
+  }
   //////ROS_INFO("Time spent getting trans pop: %f", d_trans.toSec());
 
   diff_.zero();
