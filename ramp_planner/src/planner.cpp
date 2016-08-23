@@ -348,7 +348,8 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
     {
       dir = 0.001;
     }
-    modifier_->move_dir_ = dir;
+    modifier_->move_dir_  = dir;
+    modifier_->move_dist_ = fabs(utility_.positionDistance(latestUpdate_.msg_.positions, ob_trajectory_.at(i_closest).msg_.trajectory.points.at(0).positions));
   }
   else
   {
@@ -2547,7 +2548,7 @@ void Planner::modifyTrajec(std::vector<RampTrajectory>& result)
 void Planner::modification()
 {
   ros::Time t_m = ros::Time::now();
-  //ROS_INFO("In Planner::modification()");
+  ROS_INFO("In Planner::modification()");
   ModificationResult result;
 
   // Modify 1 or more trajectories
@@ -2610,7 +2611,7 @@ void Planner::modification()
 
   num_mods_++;
   ////////ROS_INFO("After modification, pop now: %s", result.popNew_.toString().c_str());
-  //////ROS_INFO("Exiting Planner::modification");
+  ROS_INFO("Exiting Planner::modification");
 } // End modification
 
 

@@ -5,6 +5,7 @@
 #include <time.h>
 #include <string>
 #include <sstream>
+#include <math.h>
 #include "ramp_msgs/Path.h"
 #include "ramp_msgs/Range.h"
 #include <ros/console.h>

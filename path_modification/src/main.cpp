@@ -74,7 +74,8 @@ int main(int argc, char** argv) {
   //Swap swap(p1);
   //swap.perform();
   Move m(p1);
-  m.dir_ = 0.137;
+  m.dir_ = PI/4.;
+  m.dist_ = 1;
   m.perform();
 
   ROS_INFO("Path after modification: %s", u.toString(p1).c_str());

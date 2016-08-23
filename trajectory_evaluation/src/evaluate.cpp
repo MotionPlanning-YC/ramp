@@ -82,13 +82,13 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
 
   // Use index 1 in case we are switching from a curve
   // If we are switching from a curve, then we may be stopping to rotate right after the first point
-  bool moving_on_this_curve = 
+  /*bool moving_on_this_curve = 
       er.trajectory.curves.size()     > 0 && 
     ( er.trajectory.curves.at(0).u_0  > 0.000001 ||
     (utility_.positionDistance(trj->trajectory.points.at(1).positions, 
        er.trajectory.curves.at(0).controlPoints.at(0).positions) < 0.0001) ) 
     ? true
-    : false;
+    : false;*/
   ////ROS_INFO("t_moving_on_curve: %f", (ros::Time::now()-t_after).toSec());
 
 
@@ -117,7 +117,7 @@ void Evaluate::performFeasibility(ramp_msgs::EvaluationRequest& er)
     }
   }*/
 
-  if(er.consider_trans && !er.trans_possible)
+  if(!er.imminent_collision && er.consider_trans && !er.trans_possible)
   {
     //ROS_INFO("In final if statement");
     orientation_infeasible_ = true;
