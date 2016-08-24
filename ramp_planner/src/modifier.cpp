@@ -110,7 +110,7 @@ void Modifier::buildModificationRequest(const Population& pop, bool imminent_col
   // Push the target paths onto the modification request
   std::vector<int> targets;
 
-  if(!imminent_collision)
+  if(!imminent_collision || move_dist_ > 100)
   {
     ROS_INFO("Modifier: No IC");
     result.request.op = getOperator();
