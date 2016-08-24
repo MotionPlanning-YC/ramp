@@ -141,7 +141,7 @@ void TrajectoryView::drawPopulation() {
     this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(3.5, false), pen);
   
 
-  double radius = 0.275;
+  double radius = 0.18;
   int radiusPixels = metersToPixels(radius, true);
 
   QPen penTraj;
@@ -197,7 +197,7 @@ void TrajectoryView::drawPopulation() {
 
         this->scene()->addEllipse(metersToPixels(p.at(0), true)-(radiusPixels/2),
                                     metersToPixels(p.at(1), false)+(radiusPixels/2),
-                                    metersToPixels(0.275f, true), metersToPixels(0.275f, false), pen);
+                                    metersToPixels(radius, true), metersToPixels(radius, false), pen);
       } //end if 1 point
 
       else if (points.size() > 0) {

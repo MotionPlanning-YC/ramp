@@ -1640,7 +1640,7 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
 {
   ros::Time time_start = ros::Time::now();
 
-  //ROS_INFO("In CollisionDetection::query"); 
+  ROS_INFO("In CollisionDetection::query"); 
   //ROS_INFO("trajectory.points.size(): %i", (int)segment.size());
   //ROS_INFO("ob_trajectory.points.size(): %i", (int)ob_trajectory.size());
 
@@ -1651,6 +1651,7 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
   float dist_threshold = coll_dist > 0.4 ? coll_dist : 0.4;
+  dist_threshold = 0.21;
 
   // Trajectories start in the future, obstacle trajectories start at the present time, 
   // set an offset for obstacle indices to account for this 
@@ -1684,14 +1685,14 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
     // there is collision
     if( dist <= dist_threshold) 
     {
-      /*ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
+      ROS_INFO("Points in collision: (%f,%f), and (%f,%f), dist: %f i: %i j: %i",
           p_i->positions.at(0),
           p_i->positions.at(1),
           p_ob->positions.at(0),
           p_ob->positions.at(1),
           dist,
           (int)i,
-          (int)j);*/
+          (int)j);
       
       result.collision_         = true;
       result.t_firstCollision_  = p_i->time_from_start.toSec();

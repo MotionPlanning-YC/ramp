@@ -112,13 +112,13 @@ void Modifier::buildModificationRequest(const Population& pop, bool imminent_col
 
   if(!imminent_collision)
   {
-    ROS_INFO("No IC");
+    ROS_INFO("Modifier: No IC");
     result.request.op = getOperator();
     targets           = getTargets(result.request.op, pop);
   }
   else
   {
-    ROS_INFO("calling Move because IC exists");
+    ROS_INFO("Modifier: Calling Move because IC exists");
     result.request.op = "move";
     targets.push_back(pop.calcBestIndex());  
   }

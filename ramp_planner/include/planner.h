@@ -480,7 +480,8 @@ class Planner {
 
 
     bool reset_;
-    bool print_enter_exit_;
+    bool log_enter_exit_;
+    bool log_switching_;
     int num_mods_;
     int num_succ_mods_;
 };
