@@ -42,7 +42,7 @@ bool checkGoal(ramp_msgs::TrajectoryRequest req)
   ramp_msgs::MotionState a = req.path.points.at(0).motionState;
   ramp_msgs::MotionState b = req.path.points.at(1).motionState;
 
-  if(utility.positionDistance(a.positions, b.positions) < 0.1)
+  if(utility.positionDistance(a.positions, b.positions) < 0.01)
   {
     return true;
   }

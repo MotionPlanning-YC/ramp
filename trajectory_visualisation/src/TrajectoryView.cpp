@@ -160,7 +160,7 @@ void TrajectoryView::drawPopulation() {
       //std::cout<<"\nrobot_id: "<<populations_.at(p).robot_id;
       //std::cout<<"\nfeasible: "<<(int)populations_.at(p).population.at(i).feasible;
       //std::cout<<"\npoints[0]: ("<<points.at(0).positions.at(0)<<", "<<points.at(0).positions.at(1)<<")\n";
-
+        
       // If movingOn, set to black
       if(t == populations_.at(p).population.size()-1) 
       {
@@ -255,7 +255,7 @@ void TrajectoryView::drawPopulation() {
           double dist = u.positionDistance(trj.holonomic_path.points[i].motionState.positions, p.positions);
           //ROS_INFO("dist: %f", dist);
 
-          if( dist*dist < 0.01 )
+          if( dist*dist < 0.3 )
           {
             i_end = i; 
             break;
