@@ -2790,7 +2790,8 @@ void Planner::planningCycleCallback()
       //////ROS_INFO("t_since_cc: %f", t_since_cc.toSec());
       //////ROS_INFO("movingOnCC_: %s", movingOnCC_.toString().c_str());
      
-      diff = movingOnCC_.getPointAtTime(t_since_cc.toSec());
+      //diff = movingOnCC_.getPointAtTime(t_since_cc.toSec());
+      diff = movingOn_.getPointAtTime(t_since_cc.toSec());
       
       ROS_INFO("movingOnCC_ at t_since_cc: %s", diff.toString().c_str());
       //////ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
@@ -2807,7 +2808,6 @@ void Planner::planningCycleCallback()
       startPlanning_ = m_cc_.add(temp);
 
       ROS_INFO("Adjusting movingOn");
-      //movingOn_ = movingOnCC_;
       movingOn_.offsetPositions(temp);
 
       //////ROS_INFO("Corrected startPlanning_: %s", startPlanning_.toString().c_str());
