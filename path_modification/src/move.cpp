@@ -62,7 +62,7 @@ const ramp_msgs::Path Move::perform()
     //ROS_INFO("theta_a: %f theta_b: %f", theta_a, theta_b);
 
     double diff_pos = utility_.findDistanceBetweenAngles(pos_theta, theta_b);
-    double diff_neg = utility_.findDistanceBetweenAngles(neg_theta, theta_b);
+    double diff_neg = utility_.findDistanceBetweenAngles(neg_theta, theta_a);
     Range dir_range_pos(0, diff_pos);
     Range dir_range_neg(0, diff_neg);
     //ROS_INFO("Positive range: [%f, %f]:", dir_range_pos.msg_.min, dir_range_pos.msg_.max);
