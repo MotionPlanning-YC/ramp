@@ -60,5 +60,9 @@ set_target_properties(testCollision PROPERTIES COMPILE_FLAGS -std=c++0x)
 target_link_libraries(testCollision ${catkin_LIBRARIES})
 add_dependencies(testCollision ramp_msgs_generate_messages_cpp)
 
+add_executable(test_move_op src/test_move_op.cpp src/utility.cpp)
+set_target_properties(test_move_op PROPERTIES COMPILE_FLAGS -std=c++0x)
+target_link_libraries(test_move_op ${catkin_LIBRARIES})
+add_dependencies(test_move_op ramp_msgs_generate_messages_cpp)
 
 

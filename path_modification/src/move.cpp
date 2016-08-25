@@ -49,10 +49,14 @@ const ramp_msgs::Path Move::perform()
 
     ROS_INFO("theta diff: %f max_theta: %f", theta_diff, max_theta);
     
+    double theta_a = utility_.displaceAngle(dir_, PI/2.);
+    double theta_b = utility_.displaceAngle(dir_, -PI/2.);
+    ROS_INFO("theta_a: %f theta_b: %f", theta_a, theta_b);
 
-    Range dir_range(0.1, max_theta);
+    Range dir_range_pos(pos_theta, theta_a);
+    Range dir_range_neg(theta_b, neg_theta);
 
-    double theta_displacement = dir_range.random();
+    double theta_displacement = dir_range_pos.random();
     double theta              = utility_.displaceAngle(neg_theta, theta_displacement);
 
     ROS_INFO("theta_displacement: %f theta: %f", theta_displacement, theta);
