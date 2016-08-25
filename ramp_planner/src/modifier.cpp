@@ -1,7 +1,7 @@
 #include "modifier.h"
 
 
-Modifier::Modifier(const ros::NodeHandle& h, const unsigned int n) : num_ops(n) 
+Modifier::Modifier(const ros::NodeHandle& h, const unsigned int n) : num_ops(n), move_dir_(101), move_dist_(101)
 {
   h_mod_req_ = new ModificationRequestHandler(h);
 }
@@ -110,7 +110,7 @@ void Modifier::buildModificationRequest(const Population& pop, bool imminent_col
   // Push the target paths onto the modification request
   std::vector<int> targets;
 
-  if(!imminent_collision || move_dist_ > 100)
+  if(!imminent_collision || (move_dist_ > 100 && move_dir_ > 100))
   {
     ROS_INFO("Modifier: No IC");
     result.request.op = getOperator();

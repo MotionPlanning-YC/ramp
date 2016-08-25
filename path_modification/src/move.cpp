@@ -25,22 +25,30 @@ const ramp_msgs::Path Move::perform()
     double ob_x = robo_x + dist_*cos(dir_);
     double ob_y = robo_y + dist_*sin(dir_);
 
-    double ob_size = 0.45;
+    double ob_radius = 0.4;
     ROS_INFO("robo pos: (%f, %f) ob pos: (%f, %f)", robo_x, robo_y, ob_x, ob_y);
 
-    double pos_x = ob_x + ob_size*cos(cir_displace_pos);
-    double pos_y = ob_y + ob_size*sin(cir_displace_pos);
+    ROS_INFO("ob_x: %f ob_radius: %f cir_displace_pos: %f cos(%f) ob_radius*cos(%f): %f +%f=%f", ob_x, ob_radius, cir_displace_pos, cir_displace_pos, cir_displace_pos, ob_radius*cos(cir_displace_pos), ob_x, ob_x+ob_radius*cos(cir_displace_pos));
+    double pos_x = ob_x + ob_radius*cos(cir_displace_pos);
+    double pos_y = ob_y + ob_radius*sin(cir_displace_pos);
+    std::vector<double> pos;
+    pos.push_back(pos_x);
+    pos.push_back(pos_y);
 
-    double neg_x = ob_x + ob_size*cos(cir_displace_neg);
-    double neg_y = ob_y + ob_size*sin(cir_displace_neg);
+    double neg_x = ob_x + ob_radius*cos(cir_displace_neg);
+    double neg_y = ob_y + ob_radius*sin(cir_displace_neg);
+    std::vector<double> neg;
+    neg.push_back(neg_x);
+    neg.push_back(neg_y);
 
     ROS_INFO("pos: (%f, %f) neg: (%f, %f)", pos_x, pos_y, neg_x, neg_y);
 
-    double r_pos = sqrt( pow(pos_x - robo_x, 2) + pow(pos_y - robo_y, 2) );
-    double r_neg = sqrt( pow(neg_x - robo_x, 2) + pow(neg_y - robo_y, 2) );
-
     double pos_theta = atan( (pos_y - robo_y) / (pos_x - robo_x) ); 
     double neg_theta = atan( (neg_y - robo_y) / (neg_x - robo_x) ); 
+
+    pos_theta = utility_.findAngleFromAToB(path_.points[0].motionState.positions, pos);
+    neg_theta = utility_.findAngleFromAToB(path_.points[0].motionState.positions, neg);
+
 
     double theta_diff = utility_.findDistanceBetweenAngles(pos_theta, neg_theta);
     double max_theta = (2.*PI) - theta_diff;
@@ -53,15 +61,30 @@ const ramp_msgs::Path Move::perform()
     double theta_b = utility_.displaceAngle(dir_, -PI/2.);
     ROS_INFO("theta_a: %f theta_b: %f", theta_a, theta_b);
 
-    Range dir_range_pos(pos_theta, theta_a);
-    Range dir_range_neg(theta_b, neg_theta);
+    double diff_pos = utility_.findDistanceBetweenAngles(pos_theta, theta_b);
+    double diff_neg = utility_.findDistanceBetweenAngles(neg_theta, theta_b);
+    Range dir_range_pos(0, diff_pos);
+    Range dir_range_neg(0, diff_neg);
+    ROS_INFO("Positive range: [%f, %f]:", dir_range_pos.msg_.min, dir_range_pos.msg_.max);
+    ROS_INFO("Negative range: [%f, %f]:", dir_range_neg.msg_.min, dir_range_neg.msg_.max);
 
-    double theta_displacement = dir_range_pos.random();
-    double theta              = utility_.displaceAngle(neg_theta, theta_displacement);
+    double theta_displacement, theta;
+    if(rand() % 2 == 0)
+    {
+      ROS_INFO("Displacing in positive range");
+      theta_displacement = dir_range_pos.random();
+      theta = utility_.displaceAngle(pos_theta, theta_displacement);
+    }
+    else
+    {
+      ROS_INFO("Displacing in negative range");
+      theta_displacement = dir_range_neg.random();
+      theta = utility_.displaceAngle(neg_theta, -theta_displacement);
+    }
 
     ROS_INFO("theta_displacement: %f theta: %f", theta_displacement, theta);
 
-    Range   dist_range(2*ob_size, 4*ob_size);
+    Range   dist_range(2*ob_radius, 4*ob_radius);
     double  dist = dist_range.random();
     ROS_INFO("dist: %f", dist);
 
