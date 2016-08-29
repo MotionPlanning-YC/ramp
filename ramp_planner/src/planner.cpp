@@ -2502,6 +2502,16 @@ void Planner::getTransitionTrajectory(const RampTrajectory& trj_movingOn, const 
 
   requestTrajectory(tr, result);
 
+  // Check that the transition has curves or is a straight-line
+  // path size will only equal 2 if one segment point was removed earlier in this method
+  if(result.msg_.curves.size() == 0 && p.msg_.points.size() > 2)
+  {
+    ROS_WARN("Could not plan a curve for transition. Returning blank trajectory");
+    RampTrajectory blank;
+    result = blank;
+  }
+  
+
   ////ROS_INFO("trj_transition: %s", result.toString().c_str());
   if(log_enter_exit_)
   {
