@@ -7,7 +7,7 @@
 
 Planner::Planner() : resolutionRate_(1.f / 10.f), ob_dists_timer_dur_(0.1), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(1.5f), 
   cc_started_(false), c_pc_(0), transThreshold_(1./50.), num_cc_(0), L_(0.33), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), 
- delta_t_switch_(0.1), stop_(false), moving_on_coll_(false), log_enter_exit_(true), log_switching_(false)
+ delta_t_switch_(0.1), stop_(false), moving_on_coll_(false), log_enter_exit_(true), log_switching_(true)
 {
   imminentCollisionCycle_ = ros::Duration(1.f / 20.f);
   generationsPerCC_       = controlCycle_.toSec() / planningCycle_.toSec();
@@ -3014,7 +3014,8 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
     requestEvaluation(T_new);
 
     // Set misc members
-    if(trajecs[0].msg_.curves.size() > 0 || trajecs[0].msg_.i_knotPoints.size() == 2)
+    //if(trajecs[0].msg_.curves.size() > 0 || trajecs[0].msg_.i_knotPoints.size() == 2)
+    if(trajecs[1].transitionTraj_.trajectory.points.size() > 0)
     {
       T_new.transitionTraj_ = trajecs.at(0).msg_;
     }
@@ -3102,8 +3103,13 @@ void Planner::switchTrajectory(const RampTrajectory& from, const RampTrajectory&
     full.msg_.t_start       = ros::Duration(t_start);
     switching.msg_.t_start  = full.msg_.t_start;
 
-    if(full.transitionTraj_.curves.size() > 0 || full.transitionTraj_.i_knotPoints.size() == 2)
+    double delta_theta = utility_.findDistanceBetweenAngles(full.msg_.trajectory.points[0].positions[2], 
+        full.msg_.trajectory.points[full.msg_.i_knotPoints[1]].positions[2]);
+
+    if(full.transitionTraj_.curves.size() > 0 || (full.transitionTraj_.i_knotPoints.size() == 2 && fabs(delta_theta) < 0.2))
     {
+      ROS_INFO("delta_theta: %f", delta_theta);
+      ROS_INFO("full.transitionTraj_.curves.size(): %i", (int)full.transitionTraj_.curves.size());
       full.transitionTraj_    = switching.msg_;
     }
 
