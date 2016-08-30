@@ -3008,7 +3008,7 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
  
   if(log_switching_)
   {
-    ROS_INFO("trajecs.size(): %i", (int)trajecs.size());
+    ROS_INFO("trajec.size(): %i", (int)trajec.msg_.trajectory.points.size());
   }
 
   // If a switch was possible
