@@ -1,6 +1,6 @@
 #include "evaluate.h"
 
-Evaluate::Evaluate() : Q(10000.f), orientation_infeasible_(0) {}
+Evaluate::Evaluate() : Q_coll_(10000.f), Q_kine_(100000.f), orientation_infeasible_(0) {}
 
 void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationResponse& res)
 {
@@ -210,11 +210,11 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, const double& offs
     if(trj.t_firstCollision.toSec() > 0 && trj.t_firstCollision.toSec() < 9998)
     {
       //ROS_INFO("In if t_firstCollision: %f", trj.t_firstCollision.toSec());
-      penalties += (Q / trj.t_firstCollision.toSec());
+      penalties += (Q_coll_ / trj.t_firstCollision.toSec());
     }
     else
     {
-      penalties += Q;
+      penalties += Q_coll_;
     }
 
     // If infeasible due to orientation change
@@ -223,7 +223,7 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, const double& offs
     {
       //ROS_INFO("In if orientation_infeasible_: %f", orientation_.getDeltaTheta(trj));
 
-      penalties += Q * (orientation_.getDeltaTheta(trj) / PI);
+      penalties += Q_coll_ * (orientation_.getDeltaTheta(trj) / PI);
     }
   }
 

@@ -2070,22 +2070,22 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
   // If a switch was possible
   if(trajecs.size() > 0)
   {
-    RampTrajectory T_new = trajecs.at(1);
-    Path p = T_new.msg_.holonomic_path;
+    result = trajecs.at(1);
+    Path p = result.msg_.holonomic_path;
     ////////ROS_INFO("Before eval, T_new.path: %s", T_new.path_.toString().c_str());
     ////ROS_INFO("to.msg.holonomic_path: %s", utility_.toString(to.msg_.holonomic_path).c_str());;
 
     // Evaluate T_new
     //ramp_msgs::EvaluationRequest er = buildEvaluationRequest(T_new);
-    requestEvaluation(T_new);
+    requestEvaluation(result);
 
     // Set misc members
-    T_new.transitionTraj_ = trajecs.at(0).msg_;
-    T_new.msg_.holonomic_path = p.msg_;
+    result.transitionTraj_ = trajecs.at(0).msg_;
+    result.msg_.holonomic_path = p.msg_;
 
     // Set result
-    result                  = T_new;
-    result.transitionTraj_  = trajecs.at(0).msg_;
+    //result                  = T_new;
+    //result.transitionTraj_  = trajecs.at(0).msg_;
     ////////ROS_INFO("result.transitionTraj.size(): %i", (int)result.transitionTraj_.trajectory.points.size());
 
     ////////ROS_INFO("After eval, T_new.path: %s", T_new.path_.toString().c_str());
@@ -2471,23 +2471,28 @@ void Planner::getTransitionTrajectory(const RampTrajectory& trj_movingOn, const 
   }*/
 
   // Check duplicates and speeds of segment points
-  for(int i=0;i<segmentPoints.size()-1;i++)
+  // Check p rather than segmentPoints because we may have already removed
+  // a segment point in previous check for similar segment orientations
+  for(int i=0;i<p.size()-1;i++)
   {
-    MotionState a = segmentPoints.at(i);
-    MotionState b = segmentPoints.at(i+1);
+    ramp_msgs::MotionState a = p.msg_.points.at(i).motionState;
+    ramp_msgs::MotionState b = p.msg_.points.at(i+1).motionState;
 
     // Check duplicate
-    if(utility_.positionDistance(a.msg_.positions, b.msg_.positions) < 0.1)
+    if(utility_.positionDistance(a.positions, b.positions) < 0.1)
     {
       if(log_switching_)
       {
         ROS_WARN("Will not plan a transition curve because there are duplicate segment points");
       }
-      if(p.msg_.points.size() > 2)
-      {
-        p.msg_.points.erase(p.msg_.points.begin()+i);
-      }
-      break;
+
+      // Only continue if 1st and 3rd can be connected with straight line
+      // However, this check is done before we reach this point
+      // Thus, it would require a stop and rotate to do transition
+      // Return here
+      RampTrajectory blank;
+      result = blank;
+      return;
     }
   } // end for
 
@@ -2997,42 +3002,23 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
 
   // Get transition trajectory
   ros::Time tt = ros::Time::now();
-  std::vector<RampTrajectory> trajecs;
-  switchTrajectory(from, to, t_start, trajecs);
+  RampTrajectory trajec;
+  switchTrajectory(from, to, t_start, trajec);
   ////////ROS_INFO("Time spent getting switch trajectory: %f", (ros::Time::now()-tt).toSec());
-  
+ 
   if(log_switching_)
   {
     ROS_INFO("trajecs.size(): %i", (int)trajecs.size());
   }
 
   // If a switch was possible
-  if(trajecs.size() > 0)
+  if(trajec.transitionTraj_.trajectory.points.size() > 0)
   {
     ////ROS_INFO("Switch was possible");
-    RampTrajectory T_new  = trajecs.at(1);
-    Path p                = T_new.msg_.holonomic_path;
-    
-    if(log_switching_)
-    {
-      ROS_INFO("T_new: %s", T_new.toString().c_str());
-    }
-
-    // Evaluate T_new
-    // First, set the starting time
-    T_new.msg_.t_start = ros::Duration(t_start);
-    requestEvaluation(T_new);
-
-    // Set misc members
-    //if(trajecs[0].msg_.curves.size() > 0 || trajecs[0].msg_.i_knotPoints.size() == 2)
-    if(trajecs[1].transitionTraj_.trajectory.points.size() > 0)
-    {
-      T_new.transitionTraj_ = trajecs.at(0).msg_;
-    }
-    T_new.msg_.holonomic_path = p.msg_;
 
     // Set result
-    result                  = T_new;
+    requestEvaluation(trajec);
+    result                  = trajec;
 
     if(log_switching_)
     {
@@ -3055,9 +3041,14 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
   {
     ROS_INFO("Exiting Planner::computeFullSwitch");
   }
-}
-    
-void Planner::switchTrajectory(const RampTrajectory& from, const RampTrajectory& to, const double& t_start, std::vector<RampTrajectory>& result)
+} // End computeFullSwitch
+
+
+
+/*
+ * Separate result into transition and full trajectory
+ */
+void Planner::switchTrajectory(const RampTrajectory& from, const RampTrajectory& to, const double& t_start, RampTrajectory& result)
 {
   if(log_enter_exit_)
   {
@@ -3071,7 +3062,7 @@ void Planner::switchTrajectory(const RampTrajectory& from, const RampTrajectory&
    */
   RampTrajectory switching, full;
   getTransitionTrajectory(from, to, t_start, switching);
-  full = switching;
+  result = switching;
 
   if(log_switching_ && switching.msg_.trajectory.points.size() > 0)
   {
@@ -3086,7 +3077,7 @@ void Planner::switchTrajectory(const RampTrajectory& from, const RampTrajectory&
 
   // If robot is at goal, full should only be 1 point,
   // check for this to prevent crashing
-  if(full.msg_.i_knotPoints.size() > 1)
+  if(result.msg_.i_knotPoints.size() > 1)
   {
     // Keep a counter for the knot points
     // Start at 1 because that should be the starting knot point of the curve
@@ -3101,30 +3092,25 @@ void Planner::switchTrajectory(const RampTrajectory& from, const RampTrajectory&
     //////ROS_INFO("full.path: %s", full.msg_.holonomic_path.toString().c_str());
 
     // Set full as the concatenating of switching and to
-    full = switching.concatenate(to, c_kp);
+    result = switching.concatenate(to, c_kp);
     
     //////ROS_INFO("full.path: %s", full.msg_.holonomic_path.toString().c_str());
 
 
     // Set the proper ID, path, and t_starts
-    full.msg_.id              = to.msg_.id;
-    full.msg_.holonomic_path  = to.msg_.holonomic_path;
+    result.msg_.id              = to.msg_.id;
+    result.msg_.holonomic_path  = to.msg_.holonomic_path;
 
-    full.msg_.t_start       = ros::Duration(t_start);
-    switching.msg_.t_start  = full.msg_.t_start;
+    result.msg_.t_start       = ros::Duration(t_start);
+    switching.msg_.t_start  = result.msg_.t_start;
 
-    double delta_theta = utility_.findDistanceBetweenAngles(full.msg_.trajectory.points[0].positions[2], 
-        full.msg_.trajectory.points[full.msg_.i_knotPoints[1]].positions[2]);
+    double delta_theta = utility_.findDistanceBetweenAngles(result.msg_.trajectory.points[0].positions[2], 
+        result.msg_.trajectory.points[result.msg_.i_knotPoints[1]].positions[2]);
 
-    if(full.transitionTraj_.curves.size() > 0 || (full.transitionTraj_.i_knotPoints.size() == 2 && fabs(delta_theta) < 0.2))
-    {
-      ROS_INFO("delta_theta: %f", delta_theta);
-      ROS_INFO("full.transitionTraj_.curves.size(): %i", (int)full.transitionTraj_.curves.size());
-      full.transitionTraj_    = switching.msg_;
-    }
+    ROS_INFO("delta_theta: %f", delta_theta);
+    ROS_INFO("full.transitionTraj_.curves.size(): %i", (int)full.transitionTraj_.curves.size());
 
-    result.push_back(switching);
-    result.push_back(full);
+    result.transitionTraj_ = switching.msg_;
   } // end if size > 1
   else if(log_switching_)
   {

@@ -123,7 +123,7 @@ void MobileRobot::updateCallback(const ros::TimerEvent& e) {
  *   It calls calculateSpeedsAndTimes to update the robot's vectors needed to move */
 void MobileRobot::updateTrajectory(const ramp_msgs::RampTrajectory& msg) 
 {
-  ROS_INFO("Time since last trajectory: %f", (ros::Time::now() - t_prev_traj_).toSec());
+  //ROS_INFO("Time since last trajectory: %f", (ros::Time::now() - t_prev_traj_).toSec());
   t_prev_traj_ = ros::Time::now();
   //ROS_INFO("Received RampTrajectory");
   //ROS_INFO("Trajectory: %s", utility_.toString(msg).c_str());

@@ -7,7 +7,7 @@ Change::Change(const ramp_msgs::Path p) : path_(p) {}
 
 const ramp_msgs::Path Change::perform() 
 {
-  ROS_INFO("Before: %s", utility_.toString(path_).c_str()); 
+  //ROS_INFO("Before: %s", utility_.toString(path_).c_str()); 
 
   if(path_.points.size() > 2) 
   {
@@ -44,6 +44,6 @@ const ramp_msgs::Path Change::perform()
     path_.points.at(i_knotPoint) = kp;
   } // end if points.size()>2
 
-  ROS_INFO("After: %s", utility_.toString(path_).c_str()); 
+  //ROS_INFO("After: %s", utility_.toString(path_).c_str()); 
   return path_;
 }

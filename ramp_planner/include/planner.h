@@ -286,7 +286,7 @@ class Planner {
 
     double  getEarliestStartTime(const RampTrajectory& from);
     void    getTransPop(const Population& pop, const RampTrajectory& movingOn, const double& t_start, Population& result);
-    void    switchTrajectory(const RampTrajectory& from, const RampTrajectory& to, const double& t_start, std::vector<RampTrajectory>& result);
+    void    switchTrajectory(const RampTrajectory& from, const RampTrajectory& to, const double& t_start, RampTrajectory& result);
     void    computeFullSwitch(const RampTrajectory& from, const RampTrajectory& to, const double& t_start, RampTrajectory& result);
 
 

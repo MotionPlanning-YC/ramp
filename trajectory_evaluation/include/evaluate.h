@@ -30,7 +30,8 @@ class Evaluate {
     ramp_msgs::RampTrajectory trajectory_;
     std::vector<ramp_msgs::RampTrajectory> ob_trjs_;
 
-    float Q;
+    double Q_coll_;
+    double Q_kine_;
 
     bool imminent_collision_;
 
