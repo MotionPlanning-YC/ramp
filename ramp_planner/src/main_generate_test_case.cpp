@@ -340,8 +340,8 @@ ObInfo generateObInfoGrid(const MotionState robot_state)
 {
   ObInfo result;
 
-  Range x(0.5, 2);
-  Range y(0.5, 2);
+  Range x(0.5, 1.5);
+  Range y(0.5, 1.5);
 
   double ob_x = x.random();
   
@@ -366,7 +366,7 @@ ObInfo generateObInfoGrid(const MotionState robot_state)
   result.v = v.random();
   result.w = w.random();
   
-  result.relative_direction = atan( ob_y / ob_x );
+  result.relative_direction = utility.displaceAngle(atan( ob_y / ob_x ), PI);
   
   return result;
 }
@@ -644,10 +644,8 @@ int main(int argc, char** argv) {
     ROS_INFO("Generate: Done sleeping for 1 second");
 
     // Publish dynamic obstacles
-    //pub_obs.publish(tc.ob_list);
+    pub_obs.publish(tc.ob_list);
 
-    // Wait for planner to generate obstacle trajectories
-    //while(my_planner.ob_trajectory_.size() < num_obs) {}
 
     /*
      * Wait for planner to run for time threshold

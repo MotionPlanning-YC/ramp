@@ -494,6 +494,22 @@ int main(int argc, char** argv) {
   ROS_INFO("Press Enter to start");
   std::cin.get();
 
+  MotionState start;
+  start.msg_.positions.push_back(0);
+  start.msg_.positions.push_back(0);
+  start.msg_.positions.push_back(PI/4.f);
+  start.msg_.velocities.push_back( 0.176 );
+  start.msg_.velocities.push_back( 0.176 );
+  start.msg_.velocities.push_back( 0 );
+
+
+  MotionState goal;
+  goal.msg_.positions.push_back(2);
+  goal.msg_.positions.push_back(2);
+  goal.msg_.positions.push_back(PI/4.f);
+
+
+
   ros::Duration d(1);
   for(int i=0;i<num_tests;i++)
   {
@@ -509,32 +525,16 @@ int main(int argc, char** argv) {
 
     ROS_INFO("Run: TC is generated, Preparing RAMP for test case");
 
-    /*
-     *
-     * Generate a test case
-     *
-     */
-
     MotionState initial_state;
     my_planner.randomMS(initial_state);
 
     /*
      * Set the obstacle transformations to be the initial position
      */
-    ob_tfs.clear();
-    for(int ob=0;ob<num_obs;ob++)
-    {
-      tf::Transform temp;
-      temp.setOrigin( tf::Vector3(initial_state.msg_.positions[0], initial_state.msg_.positions[1], 0));
-      
-      temp.setRotation(tf::createQuaternionFromYaw(0));
 
-      ob_tfs.push_back(temp);
-    }
-   
     /** Initialize the Planner */ 
-    my_planner.init(id, handle, initial_state, getGoal(initial_state, 2), ranges, population_size, sub_populations, 
-        ob_tfs, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction);
+    my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, ob_tfs, pt, gensBeforeCC, 
+        t_pc_rate, t_cc_rate, errorReduction);
     my_planner.modifications_   = modifications;
     my_planner.evaluations_     = evaluations;
     my_planner.seedPopulation_  = seedPopulation;

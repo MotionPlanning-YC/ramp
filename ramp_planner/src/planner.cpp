@@ -191,14 +191,23 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
   /** Transform point based on the obstacle's odometry frame */
   // Transform the position
   tf::Vector3 p_st(start.motionState.positions.at(0), start.motionState.positions.at(1), 0); 
-  tf::Vector3 p_st_tf = T_w_odom * p_st;
+  
+  /*
+   * Comment out for system-level testing
+   */
+  //tf::Vector3 p_st_tf = T_w_odom * p_st;
+  tf::Vector3 p_st_tf = p_st;
 
   //////ROS_INFO("p_st: (%f, %f, %f)", p_st.getX(), p_st.getY(), p_st.getZ());
   
   start.motionState.positions.at(0) = p_st_tf.getX();
   start.motionState.positions.at(1) = p_st_tf.getY();
-  start.motionState.positions.at(2) = utility_.displaceAngle(
-      tf::getYaw(T_w_odom.getRotation()), start.motionState.positions.at(2));
+
+  /*
+   * Comment out for system-level testing
+   */
+  //start.motionState.positions.at(2) = utility_.displaceAngle(
+      //tf::getYaw(T_w_odom.getRotation()), start.motionState.positions.at(2));
   
   //////ROS_INFO("start position after transform: %s", utility_.toString(start).c_str());
   
@@ -210,16 +219,22 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
 
   //////ROS_INFO("teta: %f phi: %f v: %f", teta, phi, v);
 
-  start.motionState.velocities.at(0) = v*cos(phi);
-  start.motionState.velocities.at(1) = v*sin(phi);
+
+  /*
+   * Comment out for system-level testing
+   */
+  //start.motionState.velocities.at(0) = v*cos(phi);
+  //start.motionState.velocities.at(1) = v*sin(phi);
 
   //////ROS_INFO("start (position and velocity) after transform: %s", utility_.toString(start).c_str());
 
 
-  if(v < 0) 
-  {
+  /*
+   * Comment out for system-level testing
+   */
+  /*if(v < 0) {
     start.motionState.positions.at(2) = utility_.displaceAngle(start.motionState.positions.at(2), PI);
-  }
+  }*/
   
   /***********************************************************************
    ***********************************************************************
@@ -288,6 +303,21 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 
   Population pop_obs;
   Population copy = population_;
+
+  /*if(msg.obstacles.size() > 0)
+  {
+    if( fabs( tf::getYaw(ob_T_w_odom_[0].getRotation())) < 0.01)
+    {
+
+      ROS_INFO("Changing tf");
+      for(int i=0;i<msg.obstacles.size();i++)
+      {
+        double theta = tf::getYaw(msg.obstacles[i].odom_t.pose.pose.orientation);
+        ROS_INFO("theta: %f", theta);
+        ob_T_w_odom_[i].setRotation(tf::createQuaternionFromYaw(-theta));
+      }
+    }
+  }*/
 
   // For each obstacle, predict its trajectory
   for(uint8_t i=0;i<msg.obstacles.size();i++)
