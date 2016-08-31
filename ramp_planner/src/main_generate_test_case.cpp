@@ -343,8 +343,8 @@ ObInfo generateObInfoGrid(const MotionState robot_state)
 {
   ObInfo result;
 
-  Range x(0.5, 1.5);
-  Range y(0.5, 1.5);
+  Range x(0.5, 2.);
+  Range y(0.5, 2.);
 
   double ob_x = x.random();
   

@@ -1651,6 +1651,7 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
   float dist_threshold = coll_dist > 0.4 ? coll_dist : 0.225;
+  dist_threshold = 0.225;
 
   // Trajectories start in the future, obstacle trajectories start at the present time, 
   // set an offset for obstacle indices to account for this 

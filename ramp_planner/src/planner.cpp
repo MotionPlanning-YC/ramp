@@ -373,14 +373,27 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 
     double dir = utility_.findAngleFromAToB(latestUpdate_.msg_.positions, 
         ob_trajectory_.at(i_closest).msg_.trajectory.points.at(0).positions);
+    double dist = fabs(utility_.positionDistance(latestUpdate_.msg_.positions, 
+          ob_trajectory_.at(i_closest).msg_.trajectory.points.at(0).positions));
+
     ROS_INFO("SENSING CYCLE dir: %f", dir);
     if( fabs(dir) < 0.001 )
     {
       dir = 0.001;
     }
     modifier_->move_dir_  = dir;
-    modifier_->move_dist_ = fabs(utility_.positionDistance(latestUpdate_.msg_.positions, ob_trajectory_.at(i_closest).msg_.trajectory.points.at(0).positions));
+    modifier_->move_dist_ = dist;
+
+    if(dist > COLL_DISTS[0])
+    {
+      i_COLL_DISTS_ = 0;
+    }
+    else
+    {
+      i_COLL_DISTS_ = 1;
+    }
   }
+ 
   else
   {
     modifier_->move_dir_ = startPlanning_.msg_.positions[2];
@@ -1437,6 +1450,7 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
     {
       t_IC_ = ros::Time::now();
     }
+  
 
     ic.data = true;
     imminent_collision_ = true;
@@ -1453,7 +1467,6 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
   {
     ROS_INFO("No imminent collision, t_firstCollision: %f", movingOn_.msg_.t_firstCollision.toSec());
     imminent_collision_ = false;
-    //num_ops_ = 5;
   }
 
   h_control_->sendIC(ic);
@@ -3227,8 +3240,6 @@ void Planner::doControlCycle()
     population_.trajectories_[i].msg_.t_start = ros::Duration(0);
   }*/
 
-  //population_ = evaluatePopulation(population_);
-  //evaluatePopulation();
 
   // Set the bestT
   RampTrajectory bestT = population_.getBest();
