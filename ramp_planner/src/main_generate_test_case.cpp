@@ -24,6 +24,7 @@ int                 pop_type;
 TrajectoryType      pt;
 std::vector<std::string> ob_topics;
 std::vector<tf::Transform> ob_tfs;
+ros::Publisher pub_obs;
 
 
 // Initializes a vector of Ranges that the Planner is initialized with
@@ -303,6 +304,8 @@ struct TestCaseTwo {
   ABTC abtc;
   std::vector<ObInfo> obs;
   ramp_msgs::ObstacleList ob_list;
+  std::vector<ramp_msgs::RampTrajectory> ob_trjs;
+  ros::Time t_begin;
 };
 
 ramp_msgs::Obstacle getStaticOb(ramp_msgs::Obstacle ob)
@@ -522,16 +525,32 @@ MotionState getGoal(const MotionState init, const double dim)
 /*
  * Publish obstacle information at 20Hz to simulate sensing cycles
  */
-void pubObTrj(const ros::TimerEvent e, const TestCase tc)
+void pubObTrj(const ros::TimerEvent e, TestCaseTwo& tc)
 {
-  ros::Duration d_elapsed = ros::Time::now() - tc.t_begin;
+  ROS_INFO("In pubObTrj");
 
+  ros::Duration d_elapsed = ros::Time::now() - tc.t_begin;
+  
   int index = d_elapsed.toSec() * 10;
 
-  trajectory_msgs::JointTrajectoryPoint p = tc.ob_trjs[0].msg_.trajectory.points[index];
+  for(int i=0;i<tc.ob_trjs.size();i++)
+  {
+    trajectory_msgs::JointTrajectoryPoint p = tc.ob_trjs[i].trajectory.points[index]; 
 
-  // Build new obstacle msg
-  ramp_msgs::Obstacle ob = buildObstacleMsg(p.positions[0], p.positions[1], tc.obs[0].v, p.positions[2], tc.obs[0].w);
+    ROS_INFO("New point: %s", utility.toString(p).c_str());
+    
+    
+    // Build new obstacle msg
+    ramp_msgs::Obstacle ob = buildObstacleMsg(p.positions[0], p.positions[1], tc.obs[i].v, p.positions[2], tc.obs[i].w);
+
+   
+    tc.obs[i].msg = ob;
+
+    tc.ob_list.obstacles[i] = ob;
+  }
+
+
+  pub_obs.publish(tc.ob_list);
 }
 
 
@@ -560,7 +579,9 @@ int main(int argc, char** argv) {
 
 
   // Make an ObstacleList Publisher
-  ros::Publisher pub_obs = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
+  pub_obs = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
+
+  ros::ServiceClient trj_gen = handle.serviceClient<ramp_msgs::TrajectorySrv>("trajectory_generator");
   
   // Set flag signifying that the next test case is not ready
   ros::param::set("/ramp/tc_generated", false);
@@ -605,6 +626,41 @@ int main(int argc, char** argv) {
     TestCaseTwo tc = generateTestCase(initial_state, num_obs);
     tc.abtc = abtc; 
 
+    /*
+     * Get trajectories for each obstacle
+     */
+    ramp_msgs::TrajectorySrv tr_srv;
+    for(int i=0;i<tc.obs.size();i++)
+    {
+      ramp_msgs::TrajectoryRequest tr;
+
+      tf::Transform tf;
+      tf.setOrigin( tf::Vector3(0,0,0) );
+      tf.setRotation( tf::createQuaternionFromYaw(0) );
+      MotionType mt = my_planner.findMotionType(tc.obs[i].msg);
+
+      ramp_msgs::Path p = my_planner.getObstaclePath(tc.obs[i].msg, tf, mt);
+
+      tr.path = p;
+      tr.type = PREDICTION;
+    
+      tr_srv.request.reqs.push_back(tr);
+   
+    }
+
+    // Call trajectory generator
+    if(trj_gen.call(tr_srv))
+    {
+      for(int i=0;i<tr_srv.response.resps.size();i++)
+      {
+        ROS_INFO("Traj: %s", utility.toString(tr_srv.response.resps[i].trajectory).c_str());
+        tc.ob_trjs.push_back(tr_srv.response.resps[i].trajectory);
+      }
+    }
+    else
+    {
+      ROS_ERROR("Error in getting obstacle trajectories");
+    }
  
     /*
      * Get static version of obstacles
@@ -616,7 +672,6 @@ int main(int argc, char** argv) {
     }
     ROS_INFO("Generate: obs_stat.size(): %i", (int)obs_stat.obstacles.size());
 
-    ROS_INFO("Generate: Test case generated");
 
     // Set flag signifying that the next test case is ready
     ros::param::set("/ramp/tc_generated", true);
@@ -646,6 +701,16 @@ int main(int argc, char** argv) {
     // Publish dynamic obstacles
     pub_obs.publish(tc.ob_list);
 
+    // Wait for planner to generate predicted trajectories
+    //while(my_planner.ob_trajectory_[0].trajectory.points.size() < 1) {}
+    
+
+    tc.t_begin = ros::Time::now();
+    
+    // Create timer to continuously publish obstacle information
+    ob_trj_timer = handle.createTimer(ros::Duration(1./20.), boost::bind(pubObTrj, _1, tc));
+
+
 
     /*
      * Wait for planner to run for time threshold
@@ -663,12 +728,6 @@ int main(int argc, char** argv) {
     // Set flag signifying that the next test case is not ready
     ros::param::set("/ramp/tc_generated", false);
     
-    // Set obstacle trajectories
-    /*tc.ob_trjs = my_planner.ob_trajectory_;
-
-    ob_trj_timer = handle.createTimer(ros::Duration(1./20.), boost::bind(pubObTrj, _1, tc));
-
-    tc.t_begin = ros::Time::now();*/
   } // end for
 
 
