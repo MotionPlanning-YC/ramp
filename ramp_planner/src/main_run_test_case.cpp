@@ -490,6 +490,8 @@ int main(int argc, char** argv) {
   ros::Duration d_test_case_thresh(20);
   
   ROS_INFO("Before for loop");
+  ROS_INFO("Press Enter to start");
+  std::cin.get();
 
   ros::Duration d(1);
   for(int i=0;i<num_tests;i++)
@@ -522,7 +524,8 @@ int main(int argc, char** argv) {
     my_planner.seedPopulation_  = seedPopulation;
 
     ROS_INFO("Planner initialized");
-    std::cin.get();
+    ROS_INFO("Start: %s", my_planner.start_.toString().c_str());
+    ROS_INFO("Goal: %s", my_planner.goal_.toString().c_str());
 
     /*
      * Prep test
@@ -541,21 +544,23 @@ int main(int argc, char** argv) {
      */
     my_planner.goTest(d_test_case_thresh.toSec());
     
-    // Stop publishing obs
+    
+    // Test case done, stop publishing obs
     my_planner.h_parameters_.setTestCase(false);
 
     // Reset Stage positions
     client_reset.call(reset_srv);
   }
 
-  ROS_INFO("Num tests: %d Num success: %d Percent: %d", num_tests, num_successful_tests, (num_successful_tests / num_tests*10));
+  /*ROS_INFO("Num tests: %d Num success: %d Percent: %d", num_tests, num_successful_tests, (num_successful_tests / 
+        num_tests*10));
   
   int count = num_generations[0];
   for(int i=1;i<num_generations.size();i++)
   {
     count+=num_generations[i];
   }
-  ROS_INFO("Average number of planning cycles: %f", (float)count / num_generations.size());
+  ROS_INFO("Average number of planning cycles: %f", (float)count / num_generations.size());*/
 
 
   std::cout<<"\n\nExiting Normally\n";

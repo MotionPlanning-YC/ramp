@@ -283,7 +283,6 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 {
   ROS_INFO("In sensingCycleCallback");
   ROS_INFO("msg: %s", utility_.toString(msg).c_str());
-  std::cin.get();
 
   ros::Time start = ros::Time::now();
 

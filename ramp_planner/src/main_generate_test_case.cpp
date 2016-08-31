@@ -509,16 +509,6 @@ int main(int argc, char** argv) {
 
   my_planner.ranges_ = ranges;
   
-  ROS_INFO("Parameters loaded. Please review them and press Enter to continue");
-  std::cin.get();
- 
-  ros::Subscriber sub_sc_     = handle.subscribe("obstacles", 1, &Planner::sensingCycleCallback,  &my_planner);
-  ros::Subscriber sub_update_ = handle.subscribe("update",    1, &Planner::updateCallback,        &my_planner);
-
-  ros::ServiceClient client_reset = handle.serviceClient<std_srvs::Empty>("reset_positions");
-  std_srvs::Empty reset_srv;
-
-
   ros::Timer ob_trj_timer;
   
   int num_tests = 1;
@@ -534,6 +524,7 @@ int main(int argc, char** argv) {
   ros::param::set("/ramp/tc_generated", false);
 
   ros::Duration d_history(1);
+  ros::Duration d_test_case_thresh(20);
   for(int i=0;i<num_tests;i++)
   {
     MotionState initial_state;
@@ -606,15 +597,30 @@ int main(int argc, char** argv) {
     // Wait for 1 second
     d_history.sleep();
 
+    ROS_INFO("Generate: Done sleeping for 1 second");
+
     // Publish dynamic obstacles
     //pub_obs.publish(tc.ob_list);
 
     // Wait for planner to generate obstacle trajectories
     //while(my_planner.ob_trajectory_.size() < num_obs) {}
 
+    /*
+     * Wait for planner to run for time threshold
+     */
+    while(start_tc)
+    {
+      handle.getParam("ramp/ready_tc", start_tc);
+      ROS_INFO("generate_test_case: start_tc: %s", start_tc ? "True" : "False");
+      r.sleep();
+      ros::spinOnce();
+    }
+
+    ROS_INFO("generate_test_case: Test case completed");
 
     // Set flag signifying that the next test case is not ready
     ros::param::set("/ramp/tc_generated", false);
+    
     // Set obstacle trajectories
     /*tc.ob_trjs = my_planner.ob_trajectory_;
 
@@ -630,14 +636,15 @@ int main(int argc, char** argv) {
 
 
 
-  ROS_INFO("Num tests: %d Num success: %d Percent: %d", num_tests, num_successful_tests, (num_successful_tests / num_tests*10));
+  /*ROS_INFO("Num tests: %d Num success: %d Percent: %d", num_tests, num_successful_tests, (num_successful_tests / 
+        num_tests*10));
   
   int count = num_generations[0];
   for(int i=1;i<num_generations.size();i++)
   {
     count+=num_generations[i];
   }
-  ROS_INFO("Average number of planning cycles: %f", (float)count / num_generations.size());
+  ROS_INFO("Average number of planning cycles: %f", (float)count / num_generations.size());*/
 
 
   std::cout<<"\n\nExiting Normally\n";
