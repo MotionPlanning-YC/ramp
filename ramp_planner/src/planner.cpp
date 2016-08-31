@@ -282,7 +282,8 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
 void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 {
   ROS_INFO("In sensingCycleCallback");
-  //////ROS_INFO("msg: %s", utility_.toString(msg).c_str());
+  ROS_INFO("msg: %s", utility_.toString(msg).c_str());
+  std::cin.get();
 
   ros::Time start = ros::Time::now();
 
@@ -372,7 +373,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 
   //sendPopulation(pop_obs);
 
-  ////ROS_INFO("Exiting sensingCycleCallback");
+  ROS_INFO("Exiting sensingCycleCallback");
 }
 
 
@@ -3771,10 +3772,6 @@ trajectory_msgs::JointTrajectoryPoint Planner::prepareForTestCase()
 
   //ROS_INFO("Population Initialized: %s", population_.toString().c_str());
 
-  ros::Duration d(1);
-  d.sleep();
-  std::cin.get();
-  
   
   // Create sub-transPops if enabled
   if(subPopulations_) 
@@ -3826,7 +3823,7 @@ void Planner::goTest(float sec)
    *  Do planning until robot has reached goal
    */
   ros::Time t_start = ros::Time::now();
-  goalThreshold_ = 0.5;
+  goalThreshold_ = 0.2;
 
   // Start the control cycles
   controlCycleTimer_.start();
@@ -3834,13 +3831,9 @@ void Planner::goTest(float sec)
 
 
   ////ROS_INFO("Sec > 0, %f", sec);
-  //std::cin.get();
-  //while( (ros::Time::now() - t_start).toSec() < controlCycle_.toSec() && ros::ok()) 
-  while( (latestUpdate_.comparePosition(relative_goal, false) > goalThreshold_) && ros::ok()) 
+  ros::Time t_begin = ros::Time::now();
+  while( (latestUpdate_.comparePosition(relative_goal, false) > goalThreshold_) && (t_begin - ros::Time::now()).toSec() < sec && ros::ok())
   {
-    //ROS_INFO("Time since last update: %f", (ros::Time::now()-t_prev_update_).toSec());
-    //ROS_INFO("relative_goal: %s \nlatestUpdate: %s", relative_goal.toString().c_str(), latestUpdate_.toString().c_str());
-    //ROS_INFO("latestUpdate_.comparePosition(relative_goal, false): %f", latestUpdate_.comparePosition(relative_goal, false));
     planningCycleCallback();
     r.sleep();
     ros::spinOnce(); 

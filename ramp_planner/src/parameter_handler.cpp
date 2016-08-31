@@ -12,3 +12,8 @@ void ParameterHandler::setCCStarted(bool cc)
 { 
   ros::param::set("ramp/cc_started", cc);
 }
+
+void ParameterHandler::setTestCase(bool ready_tc)
+{
+  ros::param::set("ramp/ready_tc", ready_tc);
+}

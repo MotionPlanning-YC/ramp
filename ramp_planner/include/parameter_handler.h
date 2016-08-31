@@ -8,8 +8,10 @@ class ParameterHandler {
     ParameterHandler(); 
 
     void setImminentCollision(bool ic); 
+    
     void setCCStarted(bool cc); 
-
+  
+    void setTestCase(bool ready_tc);
   private:
 };
 

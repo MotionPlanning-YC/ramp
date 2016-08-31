@@ -266,6 +266,13 @@ enum Group
   MIX      = 3
 };
 
+struct ABTC
+{
+  bool moving[9];
+  double times[9];
+  
+};
+
 
 struct ObInfo
 {
@@ -280,8 +287,7 @@ struct ObInfo
   bool faster;
 };
 
-struct TestCase 
-{
+struct TestCase {
   ros::Time t_begin;
   std::vector<ObInfo> obs;
   ramp_msgs::ObstacleList ob_list;
@@ -290,6 +296,13 @@ struct TestCase
   int history;
 
   bool success;
+};
+
+
+struct TestCaseTwo {
+  ABTC abtc;
+  std::vector<ObInfo> obs;
+  ramp_msgs::ObstacleList ob_list;
 };
 
 ramp_msgs::Obstacle getStaticOb(ramp_msgs::Obstacle ob)
@@ -422,6 +435,29 @@ TestCase generateTestCase(const MotionState robot_state, double inner_r, double 
   return result;
 }
 
+/*
+ * Does NOT generate an ABTC
+ * Put that in later on once single test case is working well
+ */
+TestCaseTwo generateTestCase(const MotionState robot_state, int num_obs)
+{
+  TestCaseTwo result;
+
+  // Generate all obstacles and push them onto test case
+  for(int i=0;i<num_obs;i++)
+  {
+    //ObInfo temp = generateObInfo(robot_state);
+    ObInfo temp = generateObInfoSimple(robot_state);
+
+    temp.msg = buildObstacleMsg(temp.x, temp.y, temp.v, temp.relative_direction, temp.w);
+    
+    result.obs.push_back(temp);
+    result.ob_list.obstacles.push_back(temp.msg);
+
+  }
+
+  return result;
+}
 
 
 MotionState getGoal(const MotionState init, const double dim)
@@ -443,6 +479,9 @@ MotionState getGoal(const MotionState init, const double dim)
 
 
 
+/*
+ * Publish obstacle information at 20Hz to simulate sensing cycles
+ */
 void pubObTrj(const ros::TimerEvent e, const TestCase tc)
 {
   ros::Duration d_elapsed = ros::Time::now() - tc.t_begin;
@@ -466,13 +505,13 @@ int main(int argc, char** argv) {
   loadParameters(handle);
   loadObstacleTF();
 
+  ros::Rate r(100);
+
   my_planner.ranges_ = ranges;
   
   ROS_INFO("Parameters loaded. Please review them and press Enter to continue");
-  //std::cin.get();
-
-  ros::Rate r(100);
-  
+  std::cin.get();
+ 
   ros::Subscriber sub_sc_     = handle.subscribe("obstacles", 1, &Planner::sensingCycleCallback,  &my_planner);
   ros::Subscriber sub_update_ = handle.subscribe("update",    1, &Planner::updateCallback,        &my_planner);
 
@@ -487,66 +526,109 @@ int main(int argc, char** argv) {
   std::vector<int> num_generations;
   std::vector<TestCase> test_cases;
 
-  ros::Duration d_test_case_thresh(20);
-  
-  ROS_INFO("Before for loop");
 
-  ros::Duration d(1);
+  // Make an ObstacleList Publisher
+  ros::Publisher pub_obs = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
+  
+  // Set flag signifying that the next test case is not ready
+  ros::param::set("/ramp/tc_generated", false);
+
+  ros::Duration d_history(1);
   for(int i=0;i<num_tests;i++)
   {
-    ROS_INFO("i: %i", i);
-
-    bool tc_generated = false;
-    while(!tc_generated)
-    {
-      handle.getParam("/ramp/tc_generated", tc_generated);
-      r.sleep();
-      ros::spinOnce();
-    }
-
-    ROS_INFO("Run: TC is generated, Preparing RAMP for test case");
+    MotionState initial_state;
+    my_planner.randomMS(initial_state);
 
     /*
      *
      * Generate a test case
      *
      */
-
-    MotionState initial_state;
-    my_planner.randomMS(initial_state);
    
-    /** Initialize the Planner */ 
-    my_planner.init(id, handle, initial_state, getGoal(initial_state, 1.5f), ranges, population_size, sub_populations, ob_tfs, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction);
-    my_planner.modifications_   = modifications;
-    my_planner.evaluations_     = evaluations;
-    my_planner.seedPopulation_  = seedPopulation;
+    /*
+     * Generate the test case
+     */
 
-    ROS_INFO("Planner initialized");
-    std::cin.get();
+    ABTC abtc;
 
     /*
-     * Prep test
+     * Create test case where all obstacles stop, move, stop for 1 second each
      */
-    // Initialize a population, perform a control cycle, and get the point at the end of current trajectory
-    auto p_next_cc = my_planner.prepareForTestCase();
+    for(int i_ob=0;i_ob<3;i_ob++)
+    {
+      abtc.moving[i_ob]   = 0;
+      abtc.moving[i_ob+3] = 1;
+      abtc.moving[i_ob+6] = 0;
+      abtc.times[i_ob] = 1;
+      abtc.times[i_ob+3] = 1;
+      abtc.times[i_ob+6] = 1;
+    }
 
-    ROS_INFO("Done with prepareForTestCase");
-
-
-    // Start publishing obstacle info
-    my_planner.h_parameters_.setTestCase(true); 
-
-    /*
-     * Run planner
-     */
-    my_planner.goTest(d_test_case_thresh.toSec());
     
-    // Stop publishing obs
-    my_planner.h_parameters_.setTestCase(false);
+    /*
+     * Get test data for the abtc
+     */
+    TestCaseTwo tc = generateTestCase(initial_state, num_obs);
+    tc.abtc = abtc; 
 
-    // Reset Stage positions
-    client_reset.call(reset_srv);
-  }
+ 
+    /*
+     * Get static version of obstacles
+     */
+    ramp_msgs::ObstacleList obs_stat;
+    for(int i=0;i<tc.obs.size();i++)
+    {
+      obs_stat.obstacles.push_back(getStaticOb(tc.obs[i].msg));
+    }
+
+    ROS_INFO("Generate: Test case generated");
+
+    // Set flag signifying that the next test case is ready
+    ros::param::set("/ramp/tc_generated", true);
+
+    ROS_INFO("Generate: Waiting for planner to prepare");
+    /*
+     * Wait for planner to be ready to start test case
+     */
+    bool start_tc = false;
+    while(!start_tc)
+    {
+      handle.getParam("/ramp/ready_tc", start_tc);
+      r.sleep();
+      ros::spinOnce();
+    }
+
+    ROS_INFO("Generate: Planner ready, publishing static obstacles");
+
+    // Publish static obstacles
+    pub_obs.publish(obs_stat);
+
+    // Wait for 1 second
+    d_history.sleep();
+
+    // Publish dynamic obstacles
+    //pub_obs.publish(tc.ob_list);
+
+    // Wait for planner to generate obstacle trajectories
+    //while(my_planner.ob_trajectory_.size() < num_obs) {}
+
+
+    // Set flag signifying that the next test case is not ready
+    ros::param::set("/ramp/tc_generated", false);
+    // Set obstacle trajectories
+    /*tc.ob_trjs = my_planner.ob_trajectory_;
+
+    ob_trj_timer = handle.createTimer(ros::Duration(1./20.), boost::bind(pubObTrj, _1, tc));
+
+    tc.t_begin = ros::Time::now();*/
+  } // end for
+
+
+
+
+
+
+
 
   ROS_INFO("Num tests: %d Num success: %d Percent: %d", num_tests, num_successful_tests, (num_successful_tests / num_tests*10));
   
