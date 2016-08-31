@@ -223,7 +223,7 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, const double& offs
     {
       //ROS_INFO("In if orientation_infeasible_: %f", orientation_.getDeltaTheta(trj));
 
-      penalties += Q_coll_ * (orientation_.getDeltaTheta(trj) / PI);
+      penalties += Q_kine_ * (orientation_.getDeltaTheta(trj) / PI);
     }
   }
 
