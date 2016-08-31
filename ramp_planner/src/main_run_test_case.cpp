@@ -429,6 +429,7 @@ MotionState getGoal(const MotionState init, const double dim)
   ROS_INFO("getGoal init: %s", init.toString().c_str());
 
   double r = sqrt( pow(dim,2) * 2 );
+  ROS_INFO("r: %f", r);
   double x = init.msg_.positions[0] + r*cos(PI/4.f);
   double y = init.msg_.positions[1] + r*sin(PI/4.f);
 
@@ -516,9 +517,24 @@ int main(int argc, char** argv) {
 
     MotionState initial_state;
     my_planner.randomMS(initial_state);
+
+    /*
+     * Set the obstacle transformations to be the initial position
+     */
+    ob_tfs.clear();
+    for(int ob=0;ob<num_obs;ob++)
+    {
+      tf::Transform temp;
+      temp.setOrigin( tf::Vector3(initial_state.msg_.positions[0], initial_state.msg_.positions[1], 0));
+      
+      temp.setRotation(tf::createQuaternionFromYaw(0));
+
+      ob_tfs.push_back(temp);
+    }
    
     /** Initialize the Planner */ 
-    my_planner.init(id, handle, initial_state, getGoal(initial_state, 1.5f), ranges, population_size, sub_populations, ob_tfs, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction);
+    my_planner.init(id, handle, initial_state, getGoal(initial_state, 2), ranges, population_size, sub_populations, 
+        ob_tfs, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction);
     my_planner.modifications_   = modifications;
     my_planner.evaluations_     = evaluations;
     my_planner.seedPopulation_  = seedPopulation;

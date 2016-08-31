@@ -1471,7 +1471,7 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg)
     latestUpdate_.msg_.accelerations.at(1) = msg.accelerations.at(0) * 
                                              sin(latestUpdate_.msg_.positions.at(2));
 
-    ////ROS_INFO("New latestUpdate_: %s", latestUpdate_.toString().c_str());
+    ROS_INFO("New latestUpdate_: %s", latestUpdate_.toString().c_str());
   } // end else
   
   ////ROS_INFO("Exiting Planner::updateCallback");

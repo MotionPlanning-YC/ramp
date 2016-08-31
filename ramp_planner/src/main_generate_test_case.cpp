@@ -335,6 +335,42 @@ ObInfo generateObInfoSimple(const MotionState robot_state)
   return result;
 }
 
+
+ObInfo generateObInfoGrid(const MotionState robot_state)
+{
+  ObInfo result;
+
+  Range x(0.5, 2);
+  Range y(0.5, 2);
+
+  double ob_x = x.random();
+  
+  // Round to 1 decimal place for grid of .1m x .1m
+  ob_x *= 10;
+  ob_x = round(ob_x);
+  ob_x /= 10;
+
+  double ob_y = y.random();
+  
+  // Round to 1 decimal place for grid of .1m x .1m
+  ob_y *= 10;
+  ob_y = round(ob_y);
+  ob_y /= 10;
+
+
+  Range v(0, 0.5);
+  Range w(0, PI/2.f);
+
+  result.x = ob_x;
+  result.y = ob_y;
+  result.v = v.random();
+  result.w = w.random();
+  
+  result.relative_direction = atan( ob_y / ob_x );
+  
+  return result;
+}
+
 ObInfo generateObInfo(const MotionState robot_state)
 {
   ObInfo result;
@@ -443,17 +479,21 @@ TestCaseTwo generateTestCase(const MotionState robot_state, int num_obs)
 {
   TestCaseTwo result;
 
+  ROS_INFO("In generateTestCase");
+  ROS_INFO("num_obs: %i", num_obs);
+
   // Generate all obstacles and push them onto test case
   for(int i=0;i<num_obs;i++)
   {
     //ObInfo temp = generateObInfo(robot_state);
-    ObInfo temp = generateObInfoSimple(robot_state);
+    ObInfo temp = generateObInfoGrid(robot_state);
 
     temp.msg = buildObstacleMsg(temp.x, temp.y, temp.v, temp.relative_direction, temp.w);
     
     result.obs.push_back(temp);
     result.ob_list.obstacles.push_back(temp.msg);
-
+    ROS_INFO("result.obs.size(): %i", (int)result.obs.size());
+    ROS_INFO("result.ob_list.obstacles.size(): %i", (int)result.ob_list.obstacles.size());
   }
 
   return result;
@@ -502,12 +542,14 @@ int main(int argc, char** argv) {
   ros::NodeHandle handle;
   
   // Load ros parameters and obstacle transforms
-  loadParameters(handle);
-  loadObstacleTF();
+  //loadParameters(handle);
+  //loadObstacleTF();
+
+  num_obs = 3;
 
   ros::Rate r(100);
 
-  my_planner.ranges_ = ranges;
+  //my_planner.ranges_ = ranges;
   
   ros::Timer ob_trj_timer;
   
@@ -528,7 +570,7 @@ int main(int argc, char** argv) {
   for(int i=0;i<num_tests;i++)
   {
     MotionState initial_state;
-    my_planner.randomMS(initial_state);
+    //my_planner.randomMS(initial_state);
 
     /*
      *
@@ -555,6 +597,7 @@ int main(int argc, char** argv) {
       abtc.times[i_ob+6] = 1;
     }
 
+    generateObInfoGrid(initial_state);
     
     /*
      * Get test data for the abtc
@@ -571,6 +614,7 @@ int main(int argc, char** argv) {
     {
       obs_stat.obstacles.push_back(getStaticOb(tc.obs[i].msg));
     }
+    ROS_INFO("Generate: obs_stat.size(): %i", (int)obs_stat.obstacles.size());
 
     ROS_INFO("Generate: Test case generated");
 
