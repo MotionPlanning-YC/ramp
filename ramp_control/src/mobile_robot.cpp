@@ -334,8 +334,7 @@ void MobileRobot::moveOnTrajectory()
     if(check_imminent_coll_)
     {
       ros::Time t_startIC = ros::Time::now();
-      while(imminent_coll_) 
-      {
+      while(imminent_coll_ && ros::ok()) {
         ROS_ERROR("Imminent Collision Exists, Stopping robot");
         sendTwist(zero_twist_);
         r_ic.sleep();

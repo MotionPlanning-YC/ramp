@@ -27,6 +27,14 @@ std::vector<tf::Transform> ob_tfs;
 ros::Publisher pub_obs;
 
 
+/*
+ * Data to collect
+ */
+RampTrajectory bestTrajec;
+int num_IC;
+bool IC;
+
+
 // Initializes a vector of Ranges that the Planner is initialized with
 void initDOF(const std::vector<double> dof_min, const std::vector<double> dof_max) 
 {
@@ -343,8 +351,8 @@ ObInfo generateObInfoGrid(const MotionState robot_state)
 {
   ObInfo result;
 
-  Range x(0.5, 2.);
-  Range y(0.5, 2.);
+  Range x(0.75, 2.);
+  Range y(0.75, 2.);
 
   double ob_x = x.random();
   
@@ -528,20 +536,34 @@ MotionState getGoal(const MotionState init, const double dim)
 void pubObTrj(const ros::TimerEvent e, TestCaseTwo& tc)
 {
   ROS_INFO("In pubObTrj");
+  ROS_INFO("tc.t_begin: %f", tc.t_begin.toSec());
+  ROS_INFO("ros::Time::now(): %f", ros::Time::now().toSec());
 
   ros::Duration d_elapsed = ros::Time::now() - tc.t_begin;
   
   int index = d_elapsed.toSec() * 10;
+  ROS_INFO("index: %i traj size: %i", index, (int)tc.ob_trjs[0].trajectory.points.size()); 
 
   for(int i=0;i<tc.ob_trjs.size();i++)
   {
-    trajectory_msgs::JointTrajectoryPoint p = tc.ob_trjs[i].trajectory.points[index]; 
+    int temp_index = index >= (tc.ob_trjs[i].trajectory.points.size()-1) ? tc.ob_trjs[i].trajectory.points.size()-1 : 
+      index;
+      
+    trajectory_msgs::JointTrajectoryPoint p = tc.ob_trjs[i].trajectory.points[temp_index]; 
 
     ROS_INFO("New point: %s", utility.toString(p).c_str());
     
-    
+
     // Build new obstacle msg
-    ramp_msgs::Obstacle ob = buildObstacleMsg(p.positions[0], p.positions[1], tc.obs[i].v, p.positions[2], tc.obs[i].w);
+    ramp_msgs::Obstacle ob;
+    if(index >= (tc.ob_trjs[i].trajectory.points.size()-1))
+    {
+      ob = buildObstacleMsg(p.positions[0], p.positions[1], 0, p.positions[2], 0);
+    }
+    else
+    {
+      ob = buildObstacleMsg(p.positions[0], p.positions[1], tc.obs[i].v, p.positions[2], tc.obs[i].w);
+    } 
 
    
     tc.obs[i].msg = ob;
@@ -554,6 +576,19 @@ void pubObTrj(const ros::TimerEvent e, TestCaseTwo& tc)
 }
 
 
+void bestTrajCb(const ramp_msgs::RampTrajectory::ConstPtr& msg) 
+{
+  bestTrajec.msg_ = *msg;
+}
+
+void imminentCollisionCb(const std_msgs::Bool msg)
+{
+  IC = msg.data;
+}
+
+
+
+
 int main(int argc, char** argv) {
   srand( time(0));
 
@@ -564,7 +599,7 @@ int main(int argc, char** argv) {
   //loadParameters(handle);
   //loadObstacleTF();
 
-  num_obs = 3;
+  num_obs = 1;
 
   ros::Rate r(100);
 
@@ -582,6 +617,10 @@ int main(int argc, char** argv) {
   pub_obs = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
 
   ros::ServiceClient trj_gen = handle.serviceClient<ramp_msgs::TrajectorySrv>("trajectory_generator");
+  ros::Subscriber sub_bestT = handle.subscribe("bestTrajec", 1, bestTrajCb);
+  ros::Subscriber sub_imminent_collision_ = handle.subscribe("imminent_collision", 1, imminentCollisionCb);
+
+
   
   // Set flag signifying that the next test case is not ready
   ros::param::set("/ramp/tc_generated", false);
@@ -718,16 +757,43 @@ int main(int argc, char** argv) {
     while(start_tc)
     {
       handle.getParam("ramp/ready_tc", start_tc);
-      ROS_INFO("generate_test_case: start_tc: %s", start_tc ? "True" : "False");
+      //ROS_INFO("generate_test_case: start_tc: %s", start_tc ? "True" : "False");
       r.sleep();
       ros::spinOnce();
     }
+    ros::Duration elasped = ros::Time::now() - tc.t_begin;
 
     ROS_INFO("generate_test_case: Test case completed");
 
     // Set flag signifying that the next test case is not ready
     ros::param::set("/ramp/tc_generated", false);
     
+
+    ob_trj_timer.stop();
+
+
+    /*
+     * Collect data
+     */
+
+    if(elasped < d_test_case_thresh)
+    {
+      ROS_INFO("Robot reached goal");
+    }  
+      
+
+    if(bestTrajec.msg_.feasible)
+    {
+      ROS_INFO("Feasible trajectory");
+    }
+
+    
+    if(IC)
+    {
+      ROS_INFO("IC");
+    }
+
+
   } // end for
 
 

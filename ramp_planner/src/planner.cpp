@@ -3872,7 +3872,8 @@ void Planner::goTest(float sec)
 
   ////ROS_INFO("Sec > 0, %f", sec);
   ros::Time t_begin = ros::Time::now();
-  while( (latestUpdate_.comparePosition(relative_goal, false) > goalThreshold_) && (t_begin - ros::Time::now()).toSec() < sec && ros::ok())
+  while( (latestUpdate_.comparePosition(relative_goal, false) > goalThreshold_) && (ros::Time::now() - t_begin).toSec() 
+      < sec && ros::ok())
   {
     planningCycleCallback();
     r.sleep();
