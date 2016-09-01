@@ -599,7 +599,7 @@ int main(int argc, char** argv) {
   //loadParameters(handle);
   //loadObstacleTF();
 
-  num_obs = 1;
+  num_obs = 3;
 
   ros::Rate r(100);
 

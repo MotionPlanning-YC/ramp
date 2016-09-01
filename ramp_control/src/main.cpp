@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
   setvbuf(stdout, NULL, _IOLBF, 4096);
  
   //handle.param("ramp_control/orientation", robot.initial_theta_, 0.785);
-  handle_local.param("orientation", robot.initial_theta_, 0.);
+  handle_local.param("orientation", robot.initial_theta_, 0.785);
   std::cout<<"\n*********robot.orientation: "<<robot.initial_theta_;
 
   bool sim=false;

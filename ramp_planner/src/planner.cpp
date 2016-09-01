@@ -2857,10 +2857,11 @@ void Planner::planningCycleCallback()
       // Find offset for thisPC
       diff = diff.subtractPosition(latestUpdate_, true);
       MotionState temp = diff_.subtractPosition(diff);
-      //////ROS_INFO("diff_: %s diff: %s temp: %s", diff_.toString().c_str(), diff.toString().c_str(), temp.toString().c_str());
       
       // diff_ is the overall offset of pop since last CC
       diff_ = diff_.subtractPosition(temp);
+      ROS_INFO("diff_: %s diff: %s temp: %s", diff_.toString().c_str(), diff.toString().c_str(), 
+          temp.toString().c_str());
 
       //////ROS_INFO("m_cc_: %s", m_cc_.toString().c_str());
       startPlanning_ = m_cc_.add(temp);
@@ -3864,6 +3865,8 @@ void Planner::goTest(float sec)
    */
   ros::Time t_start = ros::Time::now();
   goalThreshold_ = 0.2;
+  
+  diff_ = diff_.zero(3);
 
   // Start the control cycles
   controlCycleTimer_.start();
