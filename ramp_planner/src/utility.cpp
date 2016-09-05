@@ -220,6 +220,8 @@ const std::string Utility::toString(const ramp_msgs::MotionState mp) const {
   }
   result<<"]";
 
+  result<<"\nTime from start: "<<mp.time;
+
   return result.str();
 }
 

@@ -274,7 +274,7 @@ int main(int argc, char** argv) {
   loadObstacleTF();
 
   ROS_INFO("Parameters loaded. Please review them and press Enter to continue");
-  std::cin.get();
+  //std::cin.get();
  
   /** Initialize the Planner's handlers */ 
   my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, ob_tfs, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction); 

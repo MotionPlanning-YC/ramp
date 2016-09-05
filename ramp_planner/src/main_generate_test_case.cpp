@@ -1,6 +1,7 @@
 #include "planner.h"
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
+#include <fstream>
  
 
 Utility utility;
@@ -26,13 +27,19 @@ std::vector<std::string> ob_topics;
 std::vector<tf::Transform> ob_tfs;
 ros::Publisher pub_obs;
 
+std::vector<int> ob_delay;
+
 
 /*
  * Data to collect
  */
-RampTrajectory bestTrajec;
+ramp_msgs::RampTrajectory bestTrajec;
+std::vector<RampTrajectory> bestTrajec_at_end;
 int num_IC;
-bool IC;
+bool IC_occur;
+bool IC_current;
+MotionState latestUpdate;
+
 
 
 // Initializes a vector of Ranges that the Planner is initialized with
@@ -347,6 +354,33 @@ ObInfo generateObInfoSimple(const MotionState robot_state)
 }
 
 
+std::vector<double> getPos()
+{
+  Range x(0.75, 2.);
+  Range y(0.75, 2.);
+
+  double ob_x = x.random();
+  
+  // Round to 1 decimal place for grid of .1m x .1m
+  ob_x *= 10;
+  ob_x = round(ob_x);
+  ob_x /= 10;
+
+  double ob_y = y.random();
+  
+  // Round to 1 decimal place for grid of .1m x .1m
+  ob_y *= 10;
+  ob_y = round(ob_y);
+  ob_y /= 10;
+
+
+  std::vector<double> result;
+  result.push_back(ob_x);
+  result.push_back(ob_y);
+  return result;
+}
+
+
 ObInfo generateObInfoGrid(const MotionState robot_state)
 {
   ObInfo result;
@@ -429,7 +463,7 @@ ObInfo generateObInfo(const MotionState robot_state)
  */
 const ramp_msgs::Obstacle buildObstacleMsg(const double& p_x, const double& p_y, const double& v_mag, const double& v_direction, const double& w)
 {
-  ROS_INFO("p_x: %f p_y: %f, v_mag: %f v_direction: %f w: %f", p_x, p_y, v_mag, v_direction, w);
+  //ROS_INFO("p_x: %f p_y: %f, v_mag: %f v_direction: %f w: %f", p_x, p_y, v_mag, v_direction, w);
 
   ramp_msgs::Obstacle result;
 
@@ -496,8 +530,50 @@ TestCaseTwo generateTestCase(const MotionState robot_state, int num_obs)
   // Generate all obstacles and push them onto test case
   for(int i=0;i<num_obs;i++)
   {
-    //ObInfo temp = generateObInfo(robot_state);
     ObInfo temp = generateObInfoGrid(robot_state);
+
+    if(i == 1)
+    {
+      // Get position distance from other obstacle
+      std::vector<double> one, two;
+      one.push_back(result.obs[0].x);
+      one.push_back(result.obs[0].y);
+      two.push_back(temp.x);
+      two.push_back(temp.y);
+      double dist = utility.positionDistance(one, two);
+      while(dist < 0.2) {
+        ROS_INFO("one: (%f, %f) temp: (%f, %f)", one[0], one[1], two[0], two[1]);
+        
+        temp = generateObInfoGrid(robot_state);
+        two[0] = temp.x;
+        two[1] = temp.y;
+        dist = utility.positionDistance(one, two);
+      }
+
+    }
+    else if (i == 2)
+    {
+      // Get position distance from other two obstacles
+      std::vector<double> one, two, three;
+      one.push_back(result.obs[0].x);
+      one.push_back(result.obs[0].y);
+      two.push_back(result.obs[1].x);
+      two.push_back(result.obs[1].y);
+      three.push_back(temp.x);
+      three.push_back(temp.y);
+      double dist1 = utility.positionDistance(one, three);
+      double dist2 = utility.positionDistance(two, three);
+      while(dist1 < 0.2 || dist2 < 0.2)
+      {
+        
+        ROS_INFO("one: (%f, %f) two:(%f, %f) temp: (%f, %f)", one[0], one[1], two[0], two[1], three[0], three[1]);
+        temp = generateObInfoGrid(robot_state);
+        three[0] = temp.x;
+        three[1] = temp.y;
+        dist1 = utility.positionDistance(one, three);
+        dist2 = utility.positionDistance(two, three);
+      }
+    }
 
     temp.msg = buildObstacleMsg(temp.x, temp.y, temp.v, temp.relative_direction, temp.w);
     
@@ -535,40 +611,45 @@ MotionState getGoal(const MotionState init, const double dim)
  */
 void pubObTrj(const ros::TimerEvent e, TestCaseTwo& tc)
 {
-  ROS_INFO("In pubObTrj");
-  ROS_INFO("tc.t_begin: %f", tc.t_begin.toSec());
-  ROS_INFO("ros::Time::now(): %f", ros::Time::now().toSec());
+  //ROS_INFO("In pubObTrj");
+  //ROS_INFO("tc.t_begin: %f", tc.t_begin.toSec());
+  //ROS_INFO("ros::Time::now(): %f", ros::Time::now().toSec());
 
   ros::Duration d_elapsed = ros::Time::now() - tc.t_begin;
   
-  int index = d_elapsed.toSec() * 10;
-  ROS_INFO("index: %i traj size: %i", index, (int)tc.ob_trjs[0].trajectory.points.size()); 
+  //int index = d_elapsed.toSec() * 10;
+  //ROS_INFO("index: %i traj size: %i", index, (int)tc.ob_trjs[0].trajectory.points.size()); 
 
   for(int i=0;i<tc.ob_trjs.size();i++)
   {
-    int temp_index = index >= (tc.ob_trjs[i].trajectory.points.size()-1) ? tc.ob_trjs[i].trajectory.points.size()-1 : 
-      index;
-      
-    trajectory_msgs::JointTrajectoryPoint p = tc.ob_trjs[i].trajectory.points[temp_index]; 
-
-    ROS_INFO("New point: %s", utility.toString(p).c_str());
-    
-
-    // Build new obstacle msg
-    ramp_msgs::Obstacle ob;
-    if(index >= (tc.ob_trjs[i].trajectory.points.size()-1))
+    //ROS_INFO("i: %i ob_delay[%i]: %i", i, i, ob_delay[i]);
+    //ROS_INFO("Elapsed time: %f",(ros::Time::now() - tc.t_begin).toSec());
+    double d_elap_ob = d_elapsed.toSec() - ob_delay[i];
+    int index = d_elap_ob*10;
+    //ROS_INFO("d_elap_ob: %f index: %i", d_elap_ob, index);
+       
+    if( (ros::Time::now() - tc.t_begin).toSec() > ob_delay[i])
     {
-      ob = buildObstacleMsg(p.positions[0], p.positions[1], 0, p.positions[2], 0);
+      int temp_index = index >= (tc.ob_trjs[i].trajectory.points.size()-1) ? tc.ob_trjs[i].trajectory.points.size()-1 : 
+        index;
+        
+      trajectory_msgs::JointTrajectoryPoint p = tc.ob_trjs[i].trajectory.points[temp_index]; 
+
+      // Build new obstacle msg
+      ramp_msgs::Obstacle ob;
+      if(index >= (tc.ob_trjs[i].trajectory.points.size()-1))
+      {
+        ob = buildObstacleMsg(p.positions[0], p.positions[1], 0, p.positions[2], 0);
+      }
+      else
+      {
+        ob = buildObstacleMsg(p.positions[0], p.positions[1], tc.obs[i].v, p.positions[2], tc.obs[i].w);
+      } 
+
+     
+      tc.obs[i].msg = ob;
+      tc.ob_list.obstacles[i] = ob;
     }
-    else
-    {
-      ob = buildObstacleMsg(p.positions[0], p.positions[1], tc.obs[i].v, p.positions[2], tc.obs[i].w);
-    } 
-
-   
-    tc.obs[i].msg = ob;
-
-    tc.ob_list.obstacles[i] = ob;
   }
 
 
@@ -578,14 +659,29 @@ void pubObTrj(const ros::TimerEvent e, TestCaseTwo& tc)
 
 void bestTrajCb(const ramp_msgs::RampTrajectory::ConstPtr& msg) 
 {
-  bestTrajec.msg_ = *msg;
+  bestTrajec = *msg;
 }
 
 void imminentCollisionCb(const std_msgs::Bool msg)
 {
-  IC = msg.data;
+  IC_current = msg.data;
+  if(msg.data)
+  {
+    IC_occur = true;
+  }
 }
 
+
+void updateCb(const ramp_msgs::MotionState& msg)
+{
+  latestUpdate = msg;
+
+  tf::Transform T_w_odom;
+  T_w_odom.setOrigin(tf::Vector3(0,0,0));
+  T_w_odom.setRotation(tf::createQuaternionFromYaw(PI/4.));
+
+  latestUpdate.transformBase(T_w_odom);
+}
 
 
 
@@ -603,14 +699,25 @@ int main(int argc, char** argv) {
 
   ros::Rate r(100);
 
-  //my_planner.ranges_ = ranges;
+  /*
+   * Data to collect
+   */
+  std::vector<bool>   reached_goal;
+  std::vector<bool>   bestTrajec_fe;
+  std::vector<double> time_left;
+  std::vector<bool>   stuck_in_ic;
+  std::vector<bool>   ic_occurred;
+  std::vector<TestCaseTwo> test_cases;
+
   
   ros::Timer ob_trj_timer;
+  ob_trj_timer.stop();
   
-  int num_tests = 1;
-  int num_successful_tests = 0;
-  std::vector<int> num_generations;
-  std::vector<TestCase> test_cases;
+  int num_tests = 42;
+
+  ob_delay.push_back(2);
+  ob_delay.push_back(2);
+  ob_delay.push_back(4);
 
 
   // Make an ObstacleList Publisher
@@ -619,8 +726,29 @@ int main(int argc, char** argv) {
   ros::ServiceClient trj_gen = handle.serviceClient<ramp_msgs::TrajectorySrv>("trajectory_generator");
   ros::Subscriber sub_bestT = handle.subscribe("bestTrajec", 1, bestTrajCb);
   ros::Subscriber sub_imminent_collision_ = handle.subscribe("imminent_collision", 1, imminentCollisionCb);
+  ros::Subscriber sub_update = handle.subscribe("update", 1, updateCb);
 
 
+  std::ofstream f_reached;
+  f_reached.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level_data/8/reached_goal.txt", 
+      std::ios::out | std::ios::app | std::ios::binary);
+  
+  std::ofstream f_feasible;
+  f_feasible.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level_data/8/feasible.txt", std::ios::out 
+      | std::ios::app | std::ios::binary);
+
+  std::ofstream f_time_left;
+  f_time_left.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level_data/8/time_left.txt", 
+      std::ios::out | std::ios::app | std::ios::binary);
+  
+  std::ofstream f_ic_stuck;
+  f_ic_stuck.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level_data/8/ic_stuck.txt", std::ios::out 
+      | std::ios::app | std::ios::binary);
+  
+  std::ofstream f_ic_occurred;
+  f_ic_occurred.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level_data/8/ic_occurred.txt", 
+      std::ios::out | std::ios::app | std::ios::binary);
+  
   
   // Set flag signifying that the next test case is not ready
   ros::param::set("/ramp/tc_generated", false);
@@ -712,6 +840,8 @@ int main(int argc, char** argv) {
     ROS_INFO("Generate: obs_stat.size(): %i", (int)obs_stat.obstacles.size());
 
 
+    IC_occur = false;
+
     // Set flag signifying that the next test case is ready
     ros::param::set("/ramp/tc_generated", true);
 
@@ -738,14 +868,10 @@ int main(int argc, char** argv) {
     ROS_INFO("Generate: Done sleeping for 1 second");
 
     // Publish dynamic obstacles
-    pub_obs.publish(tc.ob_list);
-
-    // Wait for planner to generate predicted trajectories
-    //while(my_planner.ob_trajectory_[0].trajectory.points.size() < 1) {}
-    
+    //pub_obs.publish(tc.ob_list);
 
     tc.t_begin = ros::Time::now();
-    
+
     // Create timer to continuously publish obstacle information
     ob_trj_timer = handle.createTimer(ros::Duration(1./20.), boost::bind(pubObTrj, _1, tc));
 
@@ -776,43 +902,78 @@ int main(int argc, char** argv) {
      * Collect data
      */
 
-    if(elasped < d_test_case_thresh)
+
+    MotionState goal;
+    goal.msg_.positions.push_back(2);
+    goal.msg_.positions.push_back(2);
+    goal.msg_.positions.push_back(PI/4.f);
+    double dist = utility.positionDistance( goal.msg_.positions, latestUpdate.msg_.positions );
+
+    //if(elasped.toSec()+0.01 < d_test_case_thresh.toSec())
+    //if(bestTrajec.trajectory.points.size() < 3)
+    if(dist < 0.2)
     {
-      ROS_INFO("Robot reached goal");
-    }  
+      reached_goal.push_back(true);
+      f_reached<<true<<std::endl;
+    }
+    else
+    {
+      reached_goal.push_back(false);
+      f_reached<<false<<std::endl;
+    }
       
 
-    if(bestTrajec.msg_.feasible)
+    if(bestTrajec.feasible)
     {
-      ROS_INFO("Feasible trajectory");
+      bestTrajec_fe.push_back(true);
+      time_left.push_back( bestTrajec.trajectory.points[ bestTrajec.trajectory.points.size()-1 
+      ].time_from_start.toSec());
+
+      f_feasible<<true<<std::endl;
+      f_time_left<<bestTrajec.trajectory.points[ bestTrajec.trajectory.points.size()-1 
+      ].time_from_start.toSec()<<std::endl;
+    }
+    else
+    {
+      bestTrajec_fe.push_back(false);
+      f_feasible<<false<<std::endl;
+      //time_left.push_back(9999);
     }
 
     
-    if(IC)
+    if(IC_current)
     {
-      ROS_INFO("IC");
+      stuck_in_ic.push_back(true);
+      f_ic_stuck<<true<<std::endl;
+    }
+    else
+    {
+      stuck_in_ic.push_back(false);
+      f_ic_stuck<<false<<std::endl;
+    }
+
+    if(IC_occur)
+    {
+      ic_occurred.push_back(true);
+      f_ic_occurred<<true<<std::endl;
+    }
+    else
+    {
+      ic_occurred.push_back(false);
+      f_ic_occurred<<false<<std::endl;
     }
 
 
+    bestTrajec_at_end.push_back(bestTrajec);
+    test_cases.push_back(tc);
   } // end for
 
-
-
-
-
-
-
-
-  /*ROS_INFO("Num tests: %d Num success: %d Percent: %d", num_tests, num_successful_tests, (num_successful_tests / 
-        num_tests*10));
-  
-  int count = num_generations[0];
-  for(int i=1;i<num_generations.size();i++)
-  {
-    count+=num_generations[i];
-  }
-  ROS_INFO("Average number of planning cycles: %f", (float)count / num_generations.size());*/
-
+  f_reached.close();
+  f_feasible.close();
+  f_time_left.close();
+  f_ic_stuck.close();
+  f_ic_occurred.close();
+    
 
   std::cout<<"\n\nExiting Normally\n";
   ros::shutdown();

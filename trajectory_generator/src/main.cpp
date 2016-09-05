@@ -22,12 +22,12 @@ void fixDuplicates(ramp_msgs::TrajectoryRequest& req)
 
     if(utility.positionDistance(a.positions, b.positions) < 0.01)
     {
-      ROS_WARN("Consecutive duplicate knot points in path:\nPath[%i]:\n%s\nand\nPath[%i]\n%s\nRemoving knot point at index %i", 
-          i+1,
+      /*ROS_WARN("Consecutive duplicate knot points in path:\nPath[%i]:\n%s\nand\nPath[%i]\n%s\nRemoving knot point at 
+          index %i", i+1,
           utility.toString(a).c_str(),
           i+1,
           utility.toString(b).c_str(),
-          i);
+          i);*/
       req.path.points.erase(req.path.points.begin()+i+1);
       i--;
     }
@@ -60,7 +60,7 @@ bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
   {
     ramp_msgs::TrajectoryRequest treq = req.reqs.at(i); 
     ramp_msgs::TrajectoryResponse tres;
-    ROS_INFO("Trajectory Request Received: %s", utility.toString(treq).c_str());
+    //ROS_INFO("Trajectory Request Received: %s", utility.toString(treq).c_str());
 
     /*
      * Check for start == goal
@@ -104,7 +104,7 @@ bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
     {
       //ROS_WARN("First two knot points are equal!");
     }
-    ROS_INFO("Response: %s", utility.toString(tres).c_str());
+    //ROS_INFO("Response: %s", utility.toString(tres).c_str());
   
     res.resps.push_back(tres);
   }

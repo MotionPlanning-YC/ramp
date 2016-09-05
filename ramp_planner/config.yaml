@@ -1,4 +1,4 @@
-population_size: 5
+population_size: 10
 
 sub_populations: false 
 
@@ -8,7 +8,7 @@ evaluations: true
 
 seed_population: false 
 
-gens_before_control_cycle: 20
+gens_before_control_cycle: 10
 
 pop_traj_type: 1 #0=holonomic, 1=hybrid
 

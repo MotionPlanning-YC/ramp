@@ -483,7 +483,7 @@ int main(int argc, char** argv) {
 
   ros::Timer ob_trj_timer;
   
-  int num_tests = 1;
+  int num_tests = 42;
   int num_successful_tests = 0;
   std::vector<int> num_generations;
   std::vector<TestCase> test_cases;
@@ -514,7 +514,11 @@ int main(int argc, char** argv) {
   for(int i=0;i<num_tests;i++)
   {
     ROS_INFO("i: %i", i);
+    
+    // Test case done, stop publishing obs
+    my_planner.h_parameters_.setTestCase(false);
 
+    // Wait for test case to be generated
     bool tc_generated = false;
     while(!tc_generated)
     {
@@ -567,16 +571,6 @@ int main(int argc, char** argv) {
     // Reset Stage positions
     client_reset.call(reset_srv);
   }
-
-  /*ROS_INFO("Num tests: %d Num success: %d Percent: %d", num_tests, num_successful_tests, (num_successful_tests / 
-        num_tests*10));
-  
-  int count = num_generations[0];
-  for(int i=1;i<num_generations.size();i++)
-  {
-    count+=num_generations[i];
-  }
-  ROS_INFO("Average number of planning cycles: %f", (float)count / num_generations.size());*/
 
 
   std::cout<<"\n\nExiting Normally\n";
