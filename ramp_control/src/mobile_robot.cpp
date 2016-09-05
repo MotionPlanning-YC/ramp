@@ -123,10 +123,10 @@ void MobileRobot::updateCallback(const ros::TimerEvent& e) {
  *   It calls calculateSpeedsAndTimes to update the robot's vectors needed to move */
 void MobileRobot::updateTrajectory(const ramp_msgs::RampTrajectory& msg) 
 {
-  ROS_INFO("Time since last trajectory: %f", (ros::Time::now() - t_prev_traj_).toSec());
+  //ROS_INFO("Time since last trajectory: %f", (ros::Time::now() - t_prev_traj_).toSec());
   t_prev_traj_ = ros::Time::now();
-  ROS_INFO("Received RampTrajectory");
-  ROS_INFO("Trajectory: %s", utility_.toString(msg).c_str());
+  //ROS_INFO("Received RampTrajectory");
+  //ROS_INFO("Trajectory: %s", utility_.toString(msg).c_str());
   
   /*double sum = 0;
   for(int i=0;i<t_points_.size();i++)
@@ -220,7 +220,7 @@ void MobileRobot::calculateSpeedsAndTime () {
   }
 
 
-  printVectors();
+  //printVectors();
 } // End calculateSpeedsAndTime
 
 
@@ -324,7 +324,7 @@ void MobileRobot::moveOnTrajectory()
   // Execute the trajectory
   while(ros::ok() && (num_traveled_+1) < num_) 
   {
-    ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
+    //ROS_INFO("num_traveled_: %i/%i", num_traveled_, num_);
     //ROS_INFO("At state: %s", utility_.toString(motion_state_).c_str());
     s = ros::Time::now();
     restart_ = false;
@@ -342,7 +342,7 @@ void MobileRobot::moveOnTrajectory()
       }
       t_immiColl_ += ros::Time::now() - t_startIC;
     }
-    ROS_INFO("t_immiColl_: %f", t_immiColl_.toSec());
+    //ROS_INFO("t_immiColl_: %f", t_immiColl_.toSec());
 
     
     // If a new trajectory was received, restart the outer while 
@@ -352,11 +352,17 @@ void MobileRobot::moveOnTrajectory()
     }
 
     // Move to the next point
-    //ros::Time g_time = end_times.at(num_traveled_) + t_immiColl_;
-    ros::Time g_time = end_times.at(num_traveled_);
-    ROS_INFO("now: %f g_time: %f", ros::Time::now().toSec(), g_time.toSec());
+    ros::Time g_time = end_times.at(num_traveled_) + t_immiColl_;
+    //ros::Time g_time = end_times.at(num_traveled_);
+    //ROS_INFO("now: %f g_time: %f", ros::Time::now().toSec(), g_time.toSec());
     while(ros::ok() && ros::Time::now() < g_time) 
     {
+      // If a new trajectory was received, restart the outer while 
+      if(restart_)
+      {
+        continue;
+      }
+      
       twist_.linear.x   = speeds_linear_.at(num_traveled_);
       twist_.angular.z  = speeds_angular_.at(num_traveled_);
  
@@ -372,7 +378,7 @@ void MobileRobot::moveOnTrajectory()
         twist_.angular.z = dist/2.f;
       }
 
-      ROS_INFO("twist.linear.x: %f twist.angular.z: %f", twist_.linear.x, twist_.angular.z);
+      //ROS_INFO("twist.linear.x: %f twist.angular.z: %f", twist_.linear.x, twist_.angular.z);
 
       // Send the twist_message to move the robot
       sendTwist();
@@ -380,12 +386,6 @@ void MobileRobot::moveOnTrajectory()
       // Sleep
       r.sleep();
     
-      // If a new trajectory was received, restart the outer while 
-      if(restart_)
-      {
-        continue;
-      }
-      
       // Spin to check for updates
       ros::spinOnce();
     } // end while (move to the next point)

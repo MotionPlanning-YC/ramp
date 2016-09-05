@@ -2435,9 +2435,8 @@ void Planner::getTransitionTrajectory(const RampTrajectory& trj_movingOn, const 
    * then a curve cannot be planned.
    * return a blank trajectory
    */
-  if(fabs(utility_.findDistanceBetweenAngles( 
-        ms_startTrans.msg_.positions.at(2), ms_endOfMovingOn.msg_.positions.at(2))) > 0.12 ) 
-  {
+  double nec_theta = utility_.findAngleFromAToB(ms_startTrans.msg_.positions, ms_endOfMovingOn.msg_.positions);
+  if(fabs(utility_.findDistanceBetweenAngles( ms_startTrans.msg_.positions.at(2), nec_theta)) > 0.25 ) {
     if(log_switching_)
     {
       ROS_WARN("Robot does not have correct orientation to move on first segment of a transition curve");
@@ -3064,7 +3063,6 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
     ////ROS_INFO("Switch was possible");
 
     // Set result
-    requestEvaluation(trajec);
     result                  = trajec;
 
     if(log_switching_)
@@ -3083,6 +3081,8 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
     }
     result = to;
   }
+    
+  requestEvaluation(result);
 
   if(log_enter_exit_)
   {
@@ -3152,9 +3152,13 @@ void Planner::switchTrajectory(const RampTrajectory& from, const RampTrajectory&
     ROS_INFO("delta_theta: %f", delta_theta);
     ROS_INFO("full.transitionTraj_.curves.size(): %i", (int)full.transitionTraj_.curves.size());
 
+    
+    ROS_INFO("switching.msg_.curves.size(): %i switching.msg_.holonomic_path.points.size(): %i", 
+        (int)switching.msg_.curves.size(), (int)switching.msg_.holonomic_path.points.size());
     // Check that the switching trajectory is a curve or straight line, if true then set the transition trajectory
-    if(switching.msg_.curves.size() == 0 && switching.msg_.holonomic_path.points.size() > 2)
+    if(!(switching.msg_.curves.size() == 0 && switching.msg_.holonomic_path.points.size() > 2))
     {
+      ROS_INFO("Setting transition trajectory");
       result.transitionTraj_ = switching.msg_;
     }
   } // end if size > 1
