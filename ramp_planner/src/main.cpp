@@ -262,6 +262,7 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "ramp_planner");
   ros::NodeHandle handle;
 
+  ros::param::set("ramp/cc_started", false);
   std::cout<<"\nHandle namespace: "<<handle.getNamespace();
   
   ros::Subscriber sub_update_ = handle.subscribe("update", 1, &Planner::updateCallback, &my_planner);
@@ -297,7 +298,7 @@ int main(int argc, char** argv) {
   my_planner.go();
 
 
-  
+ 
   //****MotionState exp_results = my_planner.findAverageDiff();
   //****std::cout<<"\n\nAverage Difference: "<<exp_results.toString();
   
