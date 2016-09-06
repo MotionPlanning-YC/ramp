@@ -1234,6 +1234,8 @@ void Planner::buildEvaluationRequest(const RampTrajectory& trajec, ramp_msgs::Ev
 
   result.trans_possible = trajec.transitionTraj_.trajectory.points.size() > 0 || diff < 0.31;
 
+  result.trans_possible = trajec.transitionTraj_.trajectory.points.size() > 0;
+
   // Set offset for eval req
   if(diff_.msg_.positions.size() > 0)
   {
@@ -2429,6 +2431,7 @@ void Planner::getTransitionTrajectory(const RampTrajectory& trj_movingOn, const 
     ROS_INFO("ms_endOfMovingOn: %s", ms_endOfMovingOn.toString().c_str());
   }
 
+  bool no_curve=false;
  
   /*
    * If the robot does not have correct orientation to move on the first segment
@@ -2441,9 +2444,7 @@ void Planner::getTransitionTrajectory(const RampTrajectory& trj_movingOn, const 
     {
       ROS_WARN("Robot does not have correct orientation to move on first segment of a transition curve");
     }
-    RampTrajectory blank;
-    result = blank;
-    return;
+    no_curve = true;
   }
 
 
@@ -2503,7 +2504,7 @@ void Planner::getTransitionTrajectory(const RampTrajectory& trj_movingOn, const 
       ROS_WARN("Segments have the same orientation (%f, %f) - no need to plan a transition curve, use a straight-line trajectory", thetaS1, thetaS2);
       ROS_WARN("Removing the following point at index 1 of the Path: %s", p.at(1).toString().c_str());
     }
-    p.msg_.points.erase(p.msg_.points.begin()+1);
+    no_curve = true;
   }
 
   /*if(fabs(ms_endOfMovingOn.msg_.velocities[2]) > 0.1 && fabs(g.msg_.velocities[2]) > 0.1)
@@ -2534,16 +2535,20 @@ void Planner::getTransitionTrajectory(const RampTrajectory& trj_movingOn, const 
       // Only continue if 1st and 3rd can be connected with straight line
       // However, this check is done before we reach this point
       // Thus, it would require a stop and rotate to do transition
-      // Return here
-      RampTrajectory blank;
-      result = blank;
-      return;
+      // Mark no_curve here
+      no_curve = true;
     }
   } // end for
 
   /*
    * Get curve
    */
+
+  if(no_curve)
+  {
+    p.msg_.points.erase(p.msg_.points.begin()+1);
+  }
+
 
   // Build request and get trajectory
   ramp_msgs::TrajectoryRequest tr;
@@ -2552,17 +2557,8 @@ void Planner::getTransitionTrajectory(const RampTrajectory& trj_movingOn, const 
 
   requestTrajectory(tr, result);
 
-  // Comment out because we do this check in switchTrajectory
-  // Check that the transition has curves or is a straight-line
-  // path size will only equal 2 if one segment point was removed earlier in this method
-  /*if(result.msg_.curves.size() == 0 && p.msg_.points.size() > 2)
-  {
-    ROS_WARN("Could not plan a curve for transition. Returning blank trajectory");
-    RampTrajectory blank;
-    result = blank;
-  }*/
   
-
+  
   ////ROS_INFO("trj_transition: %s", result.toString().c_str());
   if(log_enter_exit_)
   {
@@ -2851,8 +2847,8 @@ void Planner::planningCycleCallback()
       ROS_INFO("t_since_cc: %f", t_since_cc.toSec());
       //////ROS_INFO("movingOnCC_: %s", movingOnCC_.toString().c_str());
      
-      //diff = movingOnCC_.getPointAtTime(t_since_cc.toSec());
-      diff = movingOn_.getPointAtTime(t_since_cc.toSec());
+      diff = movingOnCC_.getPointAtTime(t_since_cc.toSec());
+      //diff = movingOn_.getPointAtTime(t_since_cc.toSec());
       
       ROS_INFO("movingOnCC_ at t_since_cc: %s", diff.toString().c_str());
       ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
@@ -3082,6 +3078,7 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
     result = to;
   }
     
+  result = trajec;
   requestEvaluation(result);
 
   if(log_enter_exit_)
@@ -3156,7 +3153,15 @@ void Planner::switchTrajectory(const RampTrajectory& from, const RampTrajectory&
     ROS_INFO("switching.msg_.curves.size(): %i switching.msg_.holonomic_path.points.size(): %i", 
         (int)switching.msg_.curves.size(), (int)switching.msg_.holonomic_path.points.size());
     // Check that the switching trajectory is a curve or straight line, if true then set the transition trajectory
-    if(!(switching.msg_.curves.size() == 0 && switching.msg_.holonomic_path.points.size() > 2))
+    // Results from getTransitionTrajectory will either:
+    // 1) Have a smooth curve (successful transition)
+    // 2) Be a straight-line (successful transition)
+    // 3) Be a series of straight-line segments requiring a stop-and-rotate motion to switch segments (unsuccessful 
+    // transition)
+    if(switching.msg_.curves.size() > 0 || (switching.msg_.holonomic_path.points.size() == 2 && fabs(delta_theta) < 
+          0.25))
+    //if(!(switching.msg_.curves.size() == 0 && (switching.msg_.holonomic_path.points.size() > 2 || fabs(delta_theta) < 
+    //0.25)))
     {
       ROS_INFO("Setting transition trajectory");
       result.transitionTraj_ = switching.msg_;
