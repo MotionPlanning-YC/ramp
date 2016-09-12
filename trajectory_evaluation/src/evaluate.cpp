@@ -1,6 +1,6 @@
 #include "evaluate.h"
 
-Evaluate::Evaluate() : Q_coll_(10000.f), Q_kine_(100000.f), orientation_infeasible_(0) {}
+Evaluate::Evaluate() : Q_coll_(10000.f), Q_kine_(1000000.f), orientation_infeasible_(0) {}
 
 void Evaluate::perform(ramp_msgs::EvaluationRequest& req, ramp_msgs::EvaluationResponse& res)
 {
@@ -209,11 +209,14 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, const double& offs
     // Add the Penalty for being infeasible due to collision, at some point i was limiting the time to 10s, but i don't know why
     if(trj.t_firstCollision.toSec() > 0 && trj.t_firstCollision.toSec() < 9998)
     {
-      ////ROS_INFO("In if t_firstCollision: %f", trj.t_firstCollision.toSec());
+      ROS_INFO("In if t_firstCollision: %f", trj.t_firstCollision.toSec());
+      ROS_INFO("Collision penalty: %f",(Q_coll_ / trj.t_firstCollision.toSec()));
+         
       penalties += (Q_coll_ / trj.t_firstCollision.toSec());
     }
     else
     {
+      ROS_INFO("Collision penalty (Full): %f",Q_coll_);
       penalties += Q_coll_;
     }
 
@@ -221,9 +224,12 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, const double& offs
     // If there is imminent collision, do not add this penalty (it's okay to stop and rotate)
     if(orientation_infeasible_ && !imminent_collision_)
     {
-      ////ROS_INFO("In if orientation_infeasible_: %f", orientation_.getDeltaTheta(trj));
+      ROS_INFO("In if orientation_infeasible_: %f", orientation_.getDeltaTheta(trj));
+      ROS_INFO("Orientation penalty: %f", Q_kine_ * (orientation_.getDeltaTheta(trj) / PI));
 
-      penalties += Q_kine_ * (orientation_.getDeltaTheta(trj) / PI);
+      double delta_theta = orientation_.getDeltaTheta(trj) < 0.11 ? 0.1 : orientation_.getDeltaTheta(trj);
+
+      penalties += Q_kine_ * (delta_theta / PI);
     }
   }
 

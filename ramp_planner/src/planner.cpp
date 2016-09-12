@@ -590,16 +590,16 @@ const Population Planner::getPopulation( const MotionState init, const MotionSta
  */
 const uint8_t Planner::getIndexStartPathAdapting(const RampTrajectory t) const 
 {
-  /*////ROS_INFO("In Planner::getIndexStartPathAdapting");
+  ROS_INFO("In Planner::getIndexStartPathAdapting");
   ////ROS_INFO("t transTraj.size(): %i", (int)t.transitionTraj_.trajectory.points.size());
-  ////ROS_INFO("# of curves: %i", (int)t.msg_.curves.size());*/
+  ////ROS_INFO("# of curves: %i", (int)t.msg_.curves.size());
   uint8_t result;
   bool    has_curve = t.msg_.curves.size() > 0;
 
   if(t.transitionTraj_.trajectory.points.size() > 0) 
   {
     //////ROS_INFO("In t.transitionTraj_.trajectory.points.size() > 0");
-    result = t.transitionTraj_.i_knotPoints.size();
+    result = t.transitionTraj_.i_knotPoints.size()-1;
   }
   else if(t.msg_.curves.size() > 1 && t.transitionTraj_.trajectory.points.size() == 0)
   {
@@ -624,7 +624,7 @@ const uint8_t Planner::getIndexStartPathAdapting(const RampTrajectory t) const
     result++;
   }*/
 
-  //////ROS_INFO("getIndexStartPathAdapting returning: %i", result);
+  ROS_INFO("getIndexStartPathAdapting returning: %i", result);
   return result;
 }
 
@@ -1439,6 +1439,8 @@ void Planner::imminentCollisionCallback(const ros::TimerEvent& t)
   std_msgs::Bool ic;
 
   double time_threshold = controlCycle_.toSec();
+
+  ROS_INFO("movingOn: %s", movingOn_.toString().c_str());
     
   for(int o=0;o<ob_trajectory_.size();o++)
   {
@@ -2891,14 +2893,14 @@ void Planner::planningCycleCallback()
 
     //error_correct_durs_.push_back(ros::Time::now() - t_start_error);
   } // end if doing error correction 
-  /*else
+  
+  else
   {
-    ////ROS_INFO("Not doing error correction");
-    ////ROS_INFO("cc_started_: %s generation_: %i errorReduction_: %s fabs(latestUpdate_.msg_.velocities.at(2)): %f", 
-        cc_started_ ? "True" : "False", generation_,
-        errorReduction_ ? "True" : "False", 
-        fabs(latestUpdate_.msg_.velocities.at(2)));
-  }*/
+    ROS_INFO("Not doing error correction");
+    ROS_INFO("cc_started_: %s generation_: %i errorReduction_: %s \nlatestUpdate: %s", cc_started_ ? "True" : "False", 
+        generation_,
+        errorReduction_ ? "True" : "False", latestUpdate_.toString().c_str());
+  }
 
   //////ROS_INFO("Done with error correction!");
 
