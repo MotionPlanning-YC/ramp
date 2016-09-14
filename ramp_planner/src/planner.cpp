@@ -7,7 +7,7 @@
 
 Planner::Planner() : resolutionRate_(1.f / 10.f), ob_dists_timer_dur_(0.1), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(1.5f), 
   cc_started_(false), c_pc_(0), transThreshold_(1./50.), num_cc_(0), L_(0.33), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), 
- delta_t_switch_(0.1), stop_(false), moving_on_coll_(false), log_enter_exit_(true), log_switching_(true)
+ delta_t_switch_(0.05), stop_(false), moving_on_coll_(false), log_enter_exit_(true), log_switching_(true)
 {
   imminentCollisionCycle_ = ros::Duration(1.f / 20.f);
   generationsPerCC_       = controlCycle_.toSec() / planningCycle_.toSec();
@@ -1363,7 +1363,7 @@ void Planner::obICCallback(const ros::TimerEvent& e)
   ////ROS_INFO("Time since last obICCallback: %f", (ros::Time::now() - t_prevObIC_).toSec());
   t_prevObIC_ = ros::Time::now();
   //////ROS_INFO("In Planner::obICCallback");
-  double dist_theshold = 0.6f;
+  double dist_theshold = 0.5f;
   std_msgs::Bool ob_ic;
 
   double min_dist;
@@ -1374,6 +1374,7 @@ void Planner::obICCallback(const ros::TimerEvent& e)
   {
     double dist = utility_.positionDistance(ob_trajectory_.at(i).msg_.trajectory.points.at(0).positions, latestUpdate_.msg_.positions);
     ////ROS_INFO("ob %i dist: %f", (int)i, dist);
+    
     if(i < ob_dists_.size())
     {
       ob_dists_.at(i) = dist;
@@ -1382,6 +1383,7 @@ void Planner::obICCallback(const ros::TimerEvent& e)
     {
       ob_dists_.push_back(dist);
     }
+
     if(fabs(ob_dists_.at(i)) < dist_theshold)
     {
       //////ROS_INFO("Ob IC: True");
@@ -1397,8 +1399,25 @@ void Planner::obICCallback(const ros::TimerEvent& e)
     {
       min_dist = dist;
     }
+
+    // Now check dist from other obs
+    for(int j=0;j<ob_trajectory_.size();j++)
+    {
+      if(j != i)
+      {
+        double dist_ob = utility_.positionDistance(ob_trajectory_.at(i).msg_.trajectory.points.at(0).positions, ob_trajectory_.at(j).msg_.trajectory.points.at(0).positions);
+
+        if(dist_ob < dist_theshold)
+        {
+          ob_ic.data = true;
+          break;
+        } // end if dist < dist_threshold
+      } // end if i != j
+    } // end for each other obstacle
+    
+    // Send IC data
     h_control_->sendObIC(i, ob_ic);
-  }
+  } // end for each obstacle
 
   if(min_dist > COLL_DISTS[0])
   {
@@ -3058,10 +3077,10 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
   // If a switch was possible
   if(trajec.transitionTraj_.trajectory.points.size() > 0)
   {
-    ////ROS_INFO("Switch was possible");
+    ROS_INFO("Switch was possible");
 
     // Set result
-    result                  = trajec;
+    //result                  = trajec;
 
     if(log_switching_)
     {
@@ -3077,7 +3096,8 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
     {
       ROS_WARN("A switch was not possible, returning \"to\" trajectory: %s", to.toString().c_str());
     }
-    result = to;
+    trajec = to;
+    //result = to;
   }
     
   result = trajec;

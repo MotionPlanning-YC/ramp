@@ -370,7 +370,7 @@ int main(int argc, char** argv)
  
  for(uint8_t i=0;i<num_obs;i++)
  {
-   ROS_INFO("In for, i: %i", i);
+   //ROS_INFO("In for, i: %i", i);
    ob_ic.push_back(false);
    std::stringstream topic_str;
    topic_str<<"/obstacle_"<<(int)i<<"/ob_imminent_collision";

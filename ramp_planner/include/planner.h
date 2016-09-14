@@ -365,6 +365,7 @@ class Planner {
     double ob_dists_timer_dur_;
     void obICCallback(const ros::TimerEvent& e);
     std::vector<double> ob_dists_;
+    std::vector<double> ob_dists_from_obs_;
 
 
     /***** Data members *****/
