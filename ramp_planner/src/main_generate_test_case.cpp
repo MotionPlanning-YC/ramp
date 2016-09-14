@@ -327,9 +327,9 @@ ramp_msgs::Obstacle getStaticOb(ramp_msgs::Obstacle ob)
 {
   ramp_msgs::Obstacle result = ob; 
 
-  result.odom_t.twist.twist.linear.x = 0;
-  result.odom_t.twist.twist.linear.y = 0;
-  result.odom_t.twist.twist.linear.z = 0;
+  result.ob_ms.velocities[0] = 0;
+  result.ob_ms.velocities[1] = 0;
+  result.ob_ms.velocities[2] = 0;
 
   return result;
 }
@@ -454,7 +454,6 @@ ObInfo generateObInfo(const MotionState robot_state)
 }
 
 
-
 /*
  * p_x and p_y are the position values,                 range: [0, 3.5]
  * v_mag is the magnitude of the linear velocity,       range: [0, 0.25]
@@ -463,34 +462,30 @@ ObInfo generateObInfo(const MotionState robot_state)
  */
 const ramp_msgs::Obstacle buildObstacleMsg(const double& p_x, const double& p_y, const double& v_mag, const double& v_direction, const double& w)
 {
-  //ROS_INFO("p_x: %f p_y: %f, v_mag: %f v_direction: %f w: %f", p_x, p_y, v_mag, v_direction, w);
+  ROS_INFO("p_x: %f p_y: %f, v_mag: %f v_direction: %f w: %f", p_x, p_y, v_mag, v_direction, w);
 
   ramp_msgs::Obstacle result;
 
   // odom_msg describes the obstacle's position and velocity
   nav_msgs::Odometry odom_msg;
 
-  // Set the x,y position
-  odom_msg.pose.pose.position.x = p_x;
-  odom_msg.pose.pose.position.y = p_y; 
-  odom_msg.pose.pose.position.z = 0;
-
-  // Set orientation
-  odom_msg.pose.pose.orientation  = tf::createQuaternionMsgFromYaw(v_direction);
+  // Set the positions
+  result.ob_ms.positions.push_back(p_x);
+  result.ob_ms.positions.push_back(p_y);
+  result.ob_ms.positions.push_back(v_direction);
   
   // For linear velocity, calculate x and y components
   double v_x = v_mag*cos(v_direction);
   double v_y = v_mag*sin(v_direction);
 
   // Set velocities
-  odom_msg.twist.twist.linear.x   = v_x;
-  odom_msg.twist.twist.linear.y   = v_y;
-  odom_msg.twist.twist.angular.z  = w;
+  result.ob_ms.velocities.push_back(v_mag*cos(v_direction));
+  result.ob_ms.velocities.push_back(v_mag*sin(v_direction));
+  result.ob_ms.velocities.push_back(w);
 
-  // Set odom_msg and return result
-  result.odom_t = odom_msg;
   return result;
 }
+
 
 
 TestCase generateTestCase(const MotionState robot_state, double inner_r, double outter_r, int num_obs)
@@ -806,7 +801,7 @@ int main(int argc, char** argv) {
       tf.setRotation( tf::createQuaternionFromYaw(0) );
       MotionType mt = my_planner.findMotionType(tc.obs[i].msg);
 
-      ramp_msgs::Path p = my_planner.getObstaclePath(tc.obs[i].msg, tf, mt);
+      ramp_msgs::Path p = my_planner.getObstaclePath(tc.obs[i].msg, mt);
 
       tr.path = p;
       tr.type = PREDICTION;

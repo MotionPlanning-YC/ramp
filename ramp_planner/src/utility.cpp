@@ -360,9 +360,8 @@ const std::string Utility::toString(const ramp_msgs::Obstacle ob) const
 {
   std::ostringstream result;
 
-  result<<"Pose: ("<<ob.odom_t.pose.pose.position.x<<", "<<ob.odom_t.pose.pose.position.y<<", "<<ob.odom_t.pose.pose.position.z<<")";
-  result<<"Twist: ("<<ob.odom_t.twist.twist.linear.x<<", "<<ob.odom_t.twist.twist.linear.y<<", "<<ob.odom_t.twist.twist.linear.z<<")";
-
+  result<<"Pose: ("<<ob.ob_ms.positions[0]<<", "<<ob.ob_ms.positions[1]<<", "<<ob.ob_ms.positions[2]<<")";
+  result<<"Twist: ("<<ob.ob_ms.velocities[0]<<", "<<ob.ob_ms.velocities[1]<<", "<<ob.ob_ms.velocities[2]<<")";
 
   return result.str();
 }

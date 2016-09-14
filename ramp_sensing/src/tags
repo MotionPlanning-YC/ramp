@@ -4,66 +4,121 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-DYNAMIC_OBJECT_H	dynamic_object.h	2;"	d
-DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject() {$/;"	f	class:DynamicObject	signature:()
-DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject(nav_msgs::Odometry o) {$/;"	f	class:DynamicObject	signature:(nav_msgs::Odometry o)
-DynamicObject	dynamic_object.h	/^    DynamicObject();$/;"	p	class:DynamicObject	access:public	signature:()
-DynamicObject	dynamic_object.h	/^    DynamicObject(nav_msgs::Odometry p);$/;"	p	class:DynamicObject	access:public	signature:(nav_msgs::Odometry p)
-DynamicObject	dynamic_object.h	/^class DynamicObject {$/;"	c
-DynamicObject::DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject() {$/;"	f	class:DynamicObject	signature:()
-DynamicObject::DynamicObject	dynamic_object.cpp	/^DynamicObject::DynamicObject(nav_msgs::Odometry o) {$/;"	f	class:DynamicObject	signature:(nav_msgs::Odometry o)
-DynamicObject::DynamicObject	dynamic_object.h	/^    DynamicObject();$/;"	p	class:DynamicObject	access:public	signature:()
-DynamicObject::DynamicObject	dynamic_object.h	/^    DynamicObject(nav_msgs::Odometry p);$/;"	p	class:DynamicObject	access:public	signature:(nav_msgs::Odometry p)
-DynamicObject::buildObjectMsg	dynamic_object.cpp	/^ramp_msgs::Object DynamicObject::buildObjectMsg() {$/;"	f	class:DynamicObject	signature:()
-DynamicObject::buildObjectMsg	dynamic_object.h	/^    ramp_msgs::Object buildObjectMsg();$/;"	p	class:DynamicObject	access:public	signature:()
-DynamicObject::last_updated_	dynamic_object.h	/^    ros::Time last_updated_;$/;"	m	class:DynamicObject	access:public
-DynamicObject::odom_	dynamic_object.h	/^    std::vector<nav_msgs::Odometry> odom_;$/;"	m	class:DynamicObject	access:public
-DynamicObject::update	dynamic_object.cpp	/^void DynamicObject::update(nav_msgs::Odometry o) {$/;"	f	class:DynamicObject	signature:(nav_msgs::Odometry o)
-DynamicObject::update	dynamic_object.h	/^    void update(nav_msgs::Odometry o);$/;"	p	class:DynamicObject	access:public	signature:(nav_msgs::Odometry o)
-DynamicObject::~DynamicObject	dynamic_object.cpp	/^DynamicObject::~DynamicObject() {}$/;"	f	class:DynamicObject	signature:()
-DynamicObject::~DynamicObject	dynamic_object.h	/^    ~DynamicObject(); $/;"	p	class:DynamicObject	access:public	signature:()
-IR_OBJECT_H	ir_object.h	2;"	d
-IrObject	ir_object.cpp	/^IrObject::IrObject() : OBSTACLE_SIZE(0.3) {}$/;"	f	class:IrObject	signature:()
-IrObject	ir_object.cpp	/^IrObject::IrObject(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current) : OBSTACLE_SIZE(0.3){$/;"	f	class:IrObject	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
-IrObject	ir_object.h	/^    IrObject();$/;"	p	class:IrObject	access:public	signature:()
-IrObject	ir_object.h	/^    IrObject(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current);$/;"	p	class:IrObject	access:public	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
-IrObject	ir_object.h	/^class IrObject {$/;"	c
-IrObject::IrObject	ir_object.cpp	/^IrObject::IrObject() : OBSTACLE_SIZE(0.3) {}$/;"	f	class:IrObject	signature:()
-IrObject::IrObject	ir_object.cpp	/^IrObject::IrObject(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current) : OBSTACLE_SIZE(0.3){$/;"	f	class:IrObject	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
-IrObject::IrObject	ir_object.h	/^    IrObject();$/;"	p	class:IrObject	access:public	signature:()
-IrObject::IrObject	ir_object.h	/^    IrObject(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current);$/;"	p	class:IrObject	access:public	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
-IrObject::OBSTACLE_SIZE	ir_object.h	/^    const float OBSTACLE_SIZE;$/;"	m	class:IrObject	access:private
-IrObject::build	ir_object.cpp	/^void IrObject::build(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current) {$/;"	f	class:IrObject	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
-IrObject::build	ir_object.h	/^    void build(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current);$/;"	p	class:IrObject	access:public	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
-IrObject::buildIRObjectMsg	ir_object.cpp	/^const ramp_msgs::IRObject IrObject::buildIRObjectMsg() const {$/;"	f	class:IrObject	signature:() const
-IrObject::buildIRObjectMsg	ir_object.h	/^    const ramp_msgs::IRObject buildIRObjectMsg() const;$/;"	p	class:IrObject	access:public	signature:() const
-IrObject::x1	ir_object.h	/^    float x1;$/;"	m	class:IrObject	access:public
-IrObject::x2	ir_object.h	/^    float x2;$/;"	m	class:IrObject	access:public
-IrObject::y1	ir_object.h	/^    float y1;$/;"	m	class:IrObject	access:public
-IrObject::y2	ir_object.h	/^    float y2;$/;"	m	class:IrObject	access:public
-IrObject::~IrObject	ir_object.h	/^    ~IrObject() {}$/;"	f	class:IrObject	access:public	signature:()
-OBSTACLE_SIZE	ir_object.h	/^    const float OBSTACLE_SIZE;$/;"	m	class:IrObject	access:private
-build	ir_object.cpp	/^void IrObject::build(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current) {$/;"	f	class:IrObject	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
-build	ir_object.h	/^    void build(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current);$/;"	p	class:IrObject	access:public	signature:(const corobot_msgs::SensorMsg msg, const ramp_msgs::Configuration current)
-buildIRObjectMsg	ir_object.cpp	/^const ramp_msgs::IRObject IrObject::buildIRObjectMsg() const {$/;"	f	class:IrObject	signature:() const
-buildIRObjectMsg	ir_object.h	/^    const ramp_msgs::IRObject buildIRObjectMsg() const;$/;"	p	class:IrObject	access:public	signature:() const
-buildObjectMsg	dynamic_object.cpp	/^ramp_msgs::Object DynamicObject::buildObjectMsg() {$/;"	f	class:DynamicObject	signature:()
-buildObjectMsg	dynamic_object.h	/^    ramp_msgs::Object buildObjectMsg();$/;"	p	class:DynamicObject	access:public	signature:()
-last_updated_	dynamic_object.h	/^    ros::Time last_updated_;$/;"	m	class:DynamicObject	access:public
-list	main.cpp	/^ramp_msgs::ObjectList list;$/;"	v
-main	main.cpp	/^int main(int argc, char** argv) {$/;"	f	signature:(int argc, char** argv)
-odom_	dynamic_object.h	/^    std::vector<nav_msgs::Odometry> odom_;$/;"	m	class:DynamicObject	access:public
-otherRobot	main.cpp	/^DynamicObject otherRobot;$/;"	v
-prepareList	main.cpp	/^ramp_msgs::ObjectList prepareList() {$/;"	f	signature:()
+DirectoryOfThisScript	.ycm_extra_conf.py	/^def DirectoryOfThisScript():$/;"	f	access:public
+FlagsForFile	.ycm_extra_conf.py	/^def FlagsForFile( filename, **kwargs ):$/;"	f	access:public
+GetCompilationInfoForFile	.ycm_extra_conf.py	/^def GetCompilationInfoForFile( filename ):$/;"	f	access:public
+GetRosIncludeFlags	.ycm_extra_conf.py	/^def GetRosIncludeFlags():$/;"	f	access:public
+GetRosIncludePaths	.ycm_extra_conf.py	/^def GetRosIncludePaths():$/;"	f	access:public
+IsHeaderFile	.ycm_extra_conf.py	/^def IsHeaderFile( filename ):$/;"	f	access:public
+MakeRelativePathsInFlagsAbsolute	.ycm_extra_conf.py	/^def MakeRelativePathsInFlagsAbsolute( flags, working_directory ):$/;"	f	access:public
+OBSTACLE_H	obstacle.h	2;"	d
+Obstacle	obstacle.cpp	/^Obstacle::Obstacle() {$/;"	f	class:Obstacle	signature:()
+Obstacle	obstacle.cpp	/^Obstacle::Obstacle(const nav_msgs::Odometry o) $/;"	f	class:Obstacle	signature:(const nav_msgs::Odometry o)
+Obstacle	obstacle.h	/^    Obstacle();$/;"	p	class:Obstacle	access:public	signature:()
+Obstacle	obstacle.h	/^    Obstacle(const nav_msgs::Odometry p);$/;"	p	class:Obstacle	access:public	signature:(const nav_msgs::Odometry p)
+Obstacle	obstacle.h	/^class Obstacle $/;"	c
+Obstacle::Obstacle	obstacle.cpp	/^Obstacle::Obstacle() {$/;"	f	class:Obstacle	signature:()
+Obstacle::Obstacle	obstacle.cpp	/^Obstacle::Obstacle(const nav_msgs::Odometry o) $/;"	f	class:Obstacle	signature:(const nav_msgs::Odometry o)
+Obstacle::Obstacle	obstacle.h	/^    Obstacle();$/;"	p	class:Obstacle	access:public	signature:()
+Obstacle::Obstacle	obstacle.h	/^    Obstacle(const nav_msgs::Odometry p);$/;"	p	class:Obstacle	access:public	signature:(const nav_msgs::Odometry p)
+Obstacle::T_w_init_	obstacle.h	/^    tf::Transform T_w_init_;$/;"	m	class:Obstacle	access:public
+Obstacle::buildObstacleMsg	obstacle.cpp	/^const ramp_msgs::Obstacle Obstacle::buildObstacleMsg() $/;"	f	class:Obstacle	signature:()
+Obstacle::buildObstacleMsg	obstacle.h	/^    const ramp_msgs::Obstacle buildObstacleMsg();$/;"	p	class:Obstacle	access:public	signature:()
+Obstacle::doTF	obstacle.cpp	/^void Obstacle::doTF()$/;"	f	class:Obstacle	signature:()
+Obstacle::doTF	obstacle.h	/^    void doTF();$/;"	p	class:Obstacle	access:public	signature:()
+Obstacle::last_updated_	obstacle.h	/^    ros::Time last_updated_;$/;"	m	class:Obstacle	access:public
+Obstacle::ms	obstacle.h	/^    ramp_msgs::MotionState ms;$/;"	m	class:Obstacle	access:public
+Obstacle::odom_t	obstacle.h	/^    nav_msgs::Odometry odom_t;$/;"	m	class:Obstacle	access:public
+Obstacle::update	obstacle.cpp	/^void Obstacle::update(const nav_msgs::Odometry o) $/;"	f	class:Obstacle	signature:(const nav_msgs::Odometry o)
+Obstacle::update	obstacle.h	/^    void update(const nav_msgs::Odometry o);$/;"	p	class:Obstacle	access:public	signature:(const nav_msgs::Odometry o)
+Obstacle::~Obstacle	obstacle.cpp	/^Obstacle::~Obstacle() {}$/;"	f	class:Obstacle	signature:()
+Obstacle::~Obstacle	obstacle.h	/^    ~Obstacle(); $/;"	p	class:Obstacle	access:public	signature:()
+SOURCE_EXTENSIONS	.ycm_extra_conf.py	/^SOURCE_EXTENSIONS = [ '.cpp', '.cxx', '.cc', '.c', '.m', '.mm' ]$/;"	v
+T_w_init_	obstacle.h	/^    tf::Transform T_w_init_;$/;"	m	class:Obstacle	access:public
+Vector3	main.cpp	/^      temp.setOrigin( tf::Vector3(conf.at(0), conf.at(1), 0));$/;"	p	file:	signature:(conf.at(0), conf.at(1), 0)
+buildObstacleMsg	obstacle.cpp	/^const ramp_msgs::Obstacle Obstacle::buildObstacleMsg() $/;"	f	class:Obstacle	signature:()
+buildObstacleMsg	obstacle.h	/^    const ramp_msgs::Obstacle buildObstacleMsg();$/;"	p	class:Obstacle	access:public	signature:()
+close	main.cpp	/^  ifile.close();$/;"	p	file:	signature:()
+compilation_database_folder	.ycm_extra_conf.py	/^compilation_database_folder = ''$/;"	v
+conf	main.cpp	/^      std::vector<double> conf;$/;"	l
+cout	main.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
+cout	main.cpp	/^  std::cout<<"\\nSpinning\\n";$/;"	m	class:std	file:
+cout	main_alone.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
+cout	main_alone.cpp	/^  std::cout<<"\\nSpinning\\n";$/;"	m	class:std	file:
+createQuaternionFromYaw	main.cpp	/^      temp.setRotation(tf::createQuaternionFromYaw(conf.at(2)));$/;"	p	file:	signature:(conf.at(2))
+database	.ycm_extra_conf.py	/^  database = None$/;"	v
+database	.ycm_extra_conf.py	/^  database = ycm_core.CompilationDatabase( compilation_database_folder )$/;"	v
+default_flags	.ycm_extra_conf.py	/^default_flags = [$/;"	v
+delimiter	main.cpp	/^    std::string delimiter = ",";$/;"	l
+doTF	obstacle.cpp	/^void Obstacle::doTF()$/;"	f	class:Obstacle	signature:()
+doTF	obstacle.h	/^    void doTF();$/;"	p	class:Obstacle	access:public	signature:()
+flags	.ycm_extra_conf.py	/^flags = default_flags + GetRosIncludeFlags()$/;"	v
+handle	main.cpp	/^  ros::NodeHandle handle;$/;"	l
+handle	main_alone.cpp	/^  ros::NodeHandle handle;$/;"	l
+index	main.cpp	/^  int index = topic_index_map[topic];$/;"	l
+index	main_alone.cpp	/^  int index = topic_index_map[topic];$/;"	l
+init	main.cpp	/^  ros::init(argc, argv, "ramp_sensing");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+init	main_alone.cpp	/^  ros::init(argc, argv, "ramp_sensing");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+last_updated_	obstacle.h	/^    ros::Time last_updated_;$/;"	m	class:Obstacle	access:public
+line	main.cpp	/^    std::string line;$/;"	l
+list	main.cpp	/^ramp_msgs::ObstacleList list;$/;"	v
+list	main_alone.cpp	/^ramp_msgs::ObstacleList list;$/;"	v
+loadObstacleTF	main.cpp	/^void loadObstacleTF()$/;"	f	signature:()
+main	main.cpp	/^int main(int argc, char** argv) $/;"	f	signature:(int argc, char** argv)
+main	main_alone.cpp	/^int main(int argc, char** argv) $/;"	f	signature:(int argc, char** argv)
+ms	obstacle.h	/^    ramp_msgs::MotionState ms;$/;"	m	class:Obstacle	access:public
+ob_odoms	main.cpp	/^std::vector< std::string > ob_odoms;$/;"	v
+ob_odoms	main_alone.cpp	/^std::vector< std::string > ob_odoms;$/;"	v
+ob_tfs	main.cpp	/^std::vector<tf::Transform> ob_tfs;$/;"	v
+obs	main.cpp	/^std::vector< Obstacle> obs;$/;"	v
+obs	main_alone.cpp	/^std::vector<Obstacle> obs;$/;"	v
+odom_t	obstacle.h	/^    nav_msgs::Odometry odom_t;$/;"	m	class:Obstacle	access:public
+p_st	obstacle.cpp	/^  tf::Vector3 p_st(odom_t.pose.pose.position.x, odom_t.pose.pose.position.y, 0); $/;"	p	file:	signature:(odom_t.pose.pose.position.x, odom_t.pose.pose.position.y, 0)
+p_st_tf	obstacle.cpp	/^  tf::Vector3 p_st_tf = T_w_init_ * p_st;$/;"	l
+pos	main.cpp	/^      size_t pos = 0;$/;"	l
 pub_obj	main.cpp	/^ros::Publisher pub_obj;$/;"	v
-sendList	main.cpp	/^void sendList(const ros::TimerEvent& e) {$/;"	f	signature:(const ros::TimerEvent& e)
-update	dynamic_object.cpp	/^void DynamicObject::update(nav_msgs::Odometry o) {$/;"	f	class:DynamicObject	signature:(nav_msgs::Odometry o)
-update	dynamic_object.h	/^    void update(nav_msgs::Odometry o);$/;"	p	class:DynamicObject	access:public	signature:(nav_msgs::Odometry o)
-updateOtherRobotCb	main.cpp	/^void updateOtherRobotCb(const nav_msgs::Odometry& u) {$/;"	f	signature:(const nav_msgs::Odometry& u)
-x1	ir_object.h	/^    float x1;$/;"	m	class:IrObject	access:public
-x2	ir_object.h	/^    float x2;$/;"	m	class:IrObject	access:public
-y1	ir_object.h	/^    float y1;$/;"	m	class:IrObject	access:public
-y2	ir_object.h	/^    float y2;$/;"	m	class:IrObject	access:public
-~DynamicObject	dynamic_object.cpp	/^DynamicObject::~DynamicObject() {}$/;"	f	class:DynamicObject	signature:()
-~DynamicObject	dynamic_object.h	/^    ~DynamicObject(); $/;"	p	class:DynamicObject	access:public	signature:()
-~IrObject	ir_object.h	/^    ~IrObject() {}$/;"	f	class:IrObject	access:public	signature:()
+pub_obj	main_alone.cpp	/^ros::Publisher pub_obj;$/;"	v
+publish	main.cpp	/^  pub_obj.publish(list);$/;"	p	file:	signature:(list)
+publish	main_alone.cpp	/^  pub_obj.publish(list);$/;"	p	file:	signature:(list)
+publishList	main.cpp	/^void publishList(const ros::TimerEvent& e) $/;"	f	signature:(const ros::TimerEvent& e)
+publishList	main_alone.cpp	/^void publishList(const ros::TimerEvent& e) $/;"	f	signature:(const ros::TimerEvent& e)
+push_back	main.cpp	/^      ob_tfs.push_back(temp);$/;"	p	file:	signature:(temp)
+push_back	main.cpp	/^    list.obstacles.push_back(temp.buildObstacleMsg());$/;"	p	file:	signature:(temp.buildObstacleMsg())
+push_back	main.cpp	/^    obs.push_back(temp);$/;"	p	file:	signature:(temp)
+push_back	main.cpp	/^    subs_obs.push_back(sub_ob);$/;"	p	file:	signature:(sub_ob)
+push_back	main_alone.cpp	/^        list.obstacles.push_back(ob.buildObstacleMsg());$/;"	p	file:	signature:(ob.buildObstacleMsg())
+push_back	main_alone.cpp	/^        obs.push_back(ob);$/;"	p	file:	signature:(ob)
+push_back	main_alone.cpp	/^    list.obstacles.push_back(temp.buildObstacleMsg());$/;"	p	file:	signature:(temp.buildObstacleMsg())
+push_back	main_alone.cpp	/^    obs.push_back(temp);$/;"	p	file:	signature:(temp)
+rate	main.cpp	/^double rate;$/;"	v
+rate	main_alone.cpp	/^double rate;$/;"	v
+result	obstacle.cpp	/^  ramp_msgs::Obstacle result;$/;"	l
+ros::init	main.cpp	/^  ros::init(argc, argv, "ramp_sensing");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+ros::init	main_alone.cpp	/^  ros::init(argc, argv, "ramp_sensing");$/;"	p	class:ros	file:	signature:(argc, argv, Ó)
+ros::spin	main.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
+ros::spin	main_alone.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
+spin	main.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
+spin	main_alone.cpp	/^  ros::spin();$/;"	p	class:ros	file:	signature:()
+std::cout	main.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
+std::cout	main.cpp	/^  std::cout<<"\\nSpinning\\n";$/;"	m	class:std	file:
+std::cout	main_alone.cpp	/^  std::cout<<"\\nExiting Normally\\n";$/;"	m	class:std	file:
+std::cout	main_alone.cpp	/^  std::cout<<"\\nSpinning\\n";$/;"	m	class:std	file:
+stod	main.cpp	/^        conf.push_back(stod(token));$/;"	p	file:	signature:(token)
+stod	main.cpp	/^      conf.push_back(stod(line));$/;"	p	file:	signature:(line)
+sub_ob	main.cpp	/^    ros::Subscriber sub_ob = handle.subscribe<nav_msgs::Odometry>(ob_odoms.at(i), 1, boost::bind(updateOtherRobotCb, _1, ob_odoms.at(i)));$/;"	l
+sub_ob	main_alone.cpp	/^ros::Subscriber sub_ob;$/;"	v
+subs_obs	main.cpp	/^  std::vector< ros::Subscriber > subs_obs;$/;"	l
+temp	main.cpp	/^      tf::Transform temp;$/;"	l
+temp	obstacle.cpp	/^  nav_msgs::Odometry temp;$/;"	l
+testObstacleCallback	main_alone.cpp	/^void testObstacleCallback(const nav_msgs::Odometry::ConstPtr& o) $/;"	f	signature:(const nav_msgs::Odometry::ConstPtr& o)
+timer	main.cpp	/^  ros::Timer timer = handle.createTimer(ros::Duration(1.f \/ rate), publishList);$/;"	l
+timer	main_alone.cpp	/^    ros::Timer timer = handle.createTimer(ros::Duration(1.f \/ 5.f), publishList);$/;"	l
+token	main.cpp	/^      std::string token;$/;"	l
+topic_index_map	main.cpp	/^std::map< std::string, uint8_t > topic_index_map;$/;"	v
+topic_index_map	main_alone.cpp	/^std::map< std::string, uint8_t > topic_index_map;$/;"	v
+update	obstacle.cpp	/^void Obstacle::update(const nav_msgs::Odometry o) $/;"	f	class:Obstacle	signature:(const nav_msgs::Odometry o)
+update	obstacle.h	/^    void update(const nav_msgs::Odometry o);$/;"	p	class:Obstacle	access:public	signature:(const nav_msgs::Odometry o)
+updateOtherRobotCb	main.cpp	/^void updateOtherRobotCb(const nav_msgs::Odometry::ConstPtr& o, const std::string& topic) $/;"	f	signature:(const nav_msgs::Odometry::ConstPtr& o, const std::string& topic)
+updateOtherRobotCb	main_alone.cpp	/^void updateOtherRobotCb(const nav_msgs::Odometry::ConstPtr& o, const std::string& topic) $/;"	f	signature:(const nav_msgs::Odometry::ConstPtr& o, const std::string& topic)
+~Obstacle	obstacle.cpp	/^Obstacle::~Obstacle() {}$/;"	f	class:Obstacle	signature:()
+~Obstacle	obstacle.h	/^    ~Obstacle(); $/;"	p	class:Obstacle	access:public	signature:()

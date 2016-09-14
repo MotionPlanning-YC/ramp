@@ -22,7 +22,6 @@ int                 num_obs;
 int                 pop_type;
 TrajectoryType      pt;
 std::vector<std::string> ob_topics;
-std::vector<tf::Transform> ob_tfs;
 
 
 // Initializes a vector of Ranges that the Planner is initialized with
@@ -57,49 +56,6 @@ void initStartGoal(const std::vector<float> s, const std::vector<float> g)
 } // End initStartGoal
 
 
-
-void loadObstacleTF()
-{
-  std::ifstream ifile("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/obstacle_tf.txt", std::ios::in);
-
-  if(!ifile.is_open())
-  {
-    ROS_ERROR("Cannot open obstacle_tf.txt file!");
-  }
-  else
-  {
-    std::string line;
-    std::string delimiter = ",";
-    while( getline(ifile, line) )
-    {
-      ROS_INFO("Got line: %s", line.c_str());
-      std::vector<double> conf;
-      size_t pos = 0;
-      std::string token;
-      while((pos = line.find(delimiter)) != std::string::npos)
-      {
-        token = line.substr(0, pos);
-        ROS_INFO("Got token: %s", token.c_str());
-        conf.push_back(stod(token));
-        line.erase(0, pos+1);
-      } // end inner while
-    
-      ROS_INFO("Last token: %s", line.c_str());
-
-      conf.push_back(stod(line));
-
-      tf::Transform temp;
-      temp.setOrigin( tf::Vector3(conf.at(0), conf.at(1), 0));
-      temp.setRotation(tf::createQuaternionFromYaw(conf.at(2)));
-
-      ob_tfs.push_back(temp);
-      
-    } // end outter while
-  } // end else
-
-
-  ifile.close();
-}
 
 
 /** Loads all of the ros parameters from .yaml 
@@ -272,13 +228,11 @@ int main(int argc, char** argv) {
   // Load ros parameters
   loadParameters(handle);
 
-  loadObstacleTF();
-
   ROS_INFO("Parameters loaded. Please review them and press Enter to continue");
   //std::cin.get();
  
   /** Initialize the Planner's handlers */ 
-  my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, ob_tfs, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction); 
+  my_planner.init(id, handle, start, goal, ranges, population_size, sub_populations, pt, gensBeforeCC, t_pc_rate, t_cc_rate, errorReduction); 
   my_planner.modifications_   = modifications;
   my_planner.evaluations_     = evaluations;
   my_planner.seedPopulation_  = seedPopulation;

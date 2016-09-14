@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <string>
 #include "ros/ros.h"
 #include "nav_msgs/Odometry.h"
 #include "tf/transform_datatypes.h"
@@ -13,7 +15,56 @@ ramp_msgs::ObstacleList list;
 std::vector< std::string > ob_odoms;
 std::map< std::string, uint8_t > topic_index_map;
 
-/** Get the other robot's current odometry information and update the dynamicObject */
+std::vector<tf::Transform> ob_tfs;
+
+
+void loadObstacleTF()
+{
+  std::ifstream ifile("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/obstacle_tf.txt", std::ios::in);
+
+  if(!ifile.is_open())
+  {
+    ROS_ERROR("Cannot open obstacle_tf.txt file!");
+  }
+  else
+  {
+    std::string line;
+    std::string delimiter = ",";
+    while( getline(ifile, line) )
+    {
+      ROS_INFO("Got line: %s", line.c_str());
+      std::vector<double> conf;
+      size_t pos = 0;
+      std::string token;
+      while((pos = line.find(delimiter)) != std::string::npos)
+      {
+        token = line.substr(0, pos);
+        ROS_INFO("Got token: %s", token.c_str());
+        conf.push_back(std::stod(token));
+        line.erase(0, pos+1);
+      } // end inner while
+    
+      ROS_INFO("Last token: %s", line.c_str());
+
+      conf.push_back(std::stod(line));
+
+      tf::Transform temp;
+      temp.setOrigin( tf::Vector3(conf.at(0), conf.at(1), 0));
+      temp.setRotation(tf::createQuaternionFromYaw(conf.at(2)));
+
+      ob_tfs.push_back(temp);
+      
+    } // end outter while
+  } // end else
+
+
+  ifile.close();
+}
+
+
+
+
+/** Get the other robot's current odometry information and update the obstacle info */
 void updateOtherRobotCb(const nav_msgs::Odometry::ConstPtr& o, const std::string& topic) 
 {
   //ROS_INFO("In updateOtherRobotCb");
@@ -26,13 +77,13 @@ void updateOtherRobotCb(const nav_msgs::Odometry::ConstPtr& o, const std::string
     //ROS_INFO("In if obs.size() < index");
     Obstacle temp(*o);
     obs.push_back(temp);
-    list.obstacles.push_back(temp.buildObstacleMsg());
+    list.obstacles.push_back(temp.msg_);
   }
   else
   {
     //ROS_INFO("In else");
     obs.at(index).update(*o);
-    list.obstacles.at(index) = obs.at(index).buildObstacleMsg();
+    list.obstacles.at(index) = obs.at(index).msg_;
   }
 } //End updateOtherRobotCb
 
@@ -87,10 +138,17 @@ int main(int argc, char** argv)
     ROS_ERROR("ramp_sensing: Could not find sensing_cycle_rate rosparam!");
   }
 
+  loadObstacleTF();
+
   // Create subscribers
   std::vector< ros::Subscriber > subs_obs;
   for(uint8_t i=0;i<ob_odoms.size();i++)
   {
+    Obstacle temp;
+    temp.T_w_init_ = ob_tfs[i];
+    obs.push_back(temp);
+    list.obstacles.push_back(temp.msg_);
+
     ros::Subscriber sub_ob = handle.subscribe<nav_msgs::Odometry>(ob_odoms.at(i), 1, boost::bind(updateOtherRobotCb, _1, ob_odoms.at(i)));
     subs_obs.push_back(sub_ob);
   } // end for

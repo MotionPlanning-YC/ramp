@@ -21,9 +21,12 @@ catkin_package(
 
 include_directories(${catkin_INCLUDE_DIRS})
 
+## Debugging flag for using gdb
+set (CMAKE_CXX_FLAGS "-std=c++11")
+
 
 ## Declare a cpp executable
-add_executable(${PROJECT_NAME} src/main.cpp src/obstacle.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/obstacle.cpp src/utility.cpp)
 
 
 ## Specify libraries to link a library or executable target against

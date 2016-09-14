@@ -1,6 +1,7 @@
 #include "ros/ros.h"
 #include <iostream>
 #include "utility.h"
+#include "nav_msgs/Odometry.h"
 #include "ramp_msgs/Obstacle.h"
 #include "ramp_msgs/Population.h"
 #include "trajectory_request_handler.h"
@@ -28,7 +29,7 @@ const MotionType findMotionType(const ramp_msgs::Obstacle ob) {
   MotionType result;
 
   // Find the linear and angular velocities
-  tf::Vector3 v_linear;
+  /*tf::Vector3 v_linear;
   tf::vector3MsgToTF(ob.odom_t.twist.twist.linear, v_linear);
 
   tf::Vector3 v_angular;
@@ -36,7 +37,10 @@ const MotionType findMotionType(const ramp_msgs::Obstacle ob) {
 
   // Find magnitude of velocity vectors
   float mag_linear_t  = sqrt( tf::tfDot(v_linear, v_linear)   );
-  float mag_angular_t = sqrt( tf::tfDot(v_angular, v_angular) );
+  float mag_angular_t = sqrt( tf::tfDot(v_angular, v_angular) );*/
+
+  double mag_linear_t = sqrt( pow(ob.ob_ms.velocities[0], 2) + pow(ob.ob_ms.velocities[1], 2) );
+  double mag_angular_t = ob.ob_ms.velocities[2];
 
 
   // Translation only
@@ -80,42 +84,16 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
 
   // Create and initialize the first point in the path
   ramp_msgs::KnotPoint start;
-  start.motionState.positions.push_back(ob.odom_t.pose.pose.position.x);
-  start.motionState.positions.push_back(ob.odom_t.pose.pose.position.y);
-  start.motionState.positions.push_back(tf::getYaw(ob.odom_t.pose.pose.orientation));
-  std::cout<<"\nodom.pose.x: "<<ob.odom_t.pose.pose.position.x;
-  std::cout<<"\nodom.pose.y: "<<ob.odom_t.pose.pose.position.y;
-  std::cout<<"\nodom.twist.theta: "<<ob.odom_t.twist.twist.angular.z;
+  start.motionState = ob.ob_ms;
 
-  start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.x);
-  start.motionState.velocities.push_back(ob.odom_t.twist.twist.linear.y);
-  start.motionState.velocities.push_back(ob.odom_t.twist.twist.angular.z);
-
-  tf::Vector3 p_st(start.motionState.positions.at(0), start.motionState.positions.at(1), 0); 
-  tf::Vector3 p_st_tf = T_w_b * p_st;
-  std::cout<<"\np_st.x: "<<p_st.getX()<<" p_st.y: "<<p_st.getY()<<" p_st_tf.x: "<<p_st_tf.getX()<<" p_st_tf.y: "<<p_st_tf.getY();
-  start.motionState.positions.at(0) = p_st_tf.getX();
-  start.motionState.positions.at(1) = p_st_tf.getY();
-
-  
-  
-  
  
   std::cout<<"\nBefore changing velocities, start: "<<utility.toString(start);
   double teta = utility.findAngleToVector(start.motionState.positions);
   double phi = start.motionState.positions.at(2);
-  double v = start.motionState.velocities.at(0);
+  double v = sqrt( pow(start.motionState.velocities[0], 2) + pow(start.motionState.velocities[1], 2) );
   std::cout<<"\nteta: "<<teta<<" phi: "<<phi<<" v: "<<v;
   std::cout<<"\nsin(teta): "<<sin(teta)<<" cos(teta): "<<cos(teta);
   std::cout<<"\ncos("<<phi<<"): "<<cos(phi)<<" sin(phi): "<<sin(phi);
-  start.motionState.velocities.at(0) = v*cos(phi);
-  start.motionState.velocities.at(1) = v*sin(phi);
-  std::cout<<"\nAfter changing, start: "<<utility.toString(start);
-
-
-  if(v < 0) {
-    start.motionState.positions.at(2) = utility.displaceAngle(start.motionState.positions.at(2), PI);
-  }
 
   // Push the first point onto the path
   path.push_back(start);
@@ -128,8 +106,8 @@ const ramp_msgs::Path getObstaclePath(const ramp_msgs::Obstacle ob, const Motion
     ramp_msgs::KnotPoint goal;
 
     double theta = start.motionState.positions.at(2);
-    double delta_x = cos(phi)*ob.odom_t.twist.twist.linear.x;
-    double delta_y = sin(phi)*ob.odom_t.twist.twist.linear.x;
+    double delta_x = cos(phi)*v;
+    double delta_y = sin(phi)*v;
     std::cout<<"\ntheta: "<<theta<<" delta_x: "<<delta_x<<" delta_y: "<<delta_y;
    
 
@@ -203,7 +181,6 @@ const ramp_msgs::RampTrajectory getPredictedTrajectory(const ramp_msgs::Obstacle
 
 
 void odometryCallback(const nav_msgs::Odometry& msg) {
-  obstacle.odom_t = msg;
 
   odom_recv = true;
 }
@@ -229,15 +206,6 @@ void getAndSendTrajectory() {
 }
 
 
-void fakeOdom() {
-  obstacle.odom_t.pose.pose.position.x = 0.5;
-  obstacle.odom_t.pose.pose.position.y = 0.86602;
-  tf::quaternionTFToMsg(tf::createQuaternionFromYaw(2.356f), obstacle.odom_t.pose.pose.orientation);
-  obstacle.odom_t.twist.twist.linear.x = 0.25;
-  obstacle.odom_t.twist.twist.linear.y = 0.25;
-  obstacle.odom_t.twist.twist.angular.z = 0.25;
-  odom_recv = true;
-}
 
 
 
