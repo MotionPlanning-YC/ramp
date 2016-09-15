@@ -3010,15 +3010,12 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
     {
       ROS_WARN("A switch was not possible, returning \"to\" trajectory: %s", to.toString().c_str());
     }
-    //trajec = to;
-    //result = to;
+    trajec = to;
   }
     
-  ROS_WARN("trajec: %s", trajec.toString().c_str());
+  ROS_INFO("trajec: %s", trajec.toString().c_str());
 
   result = trajec;
-  
-  ROS_INFO("About to evaluate");
 
   requestEvaluation(result);
 
