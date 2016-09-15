@@ -19,7 +19,7 @@ catkin_package(
 ## Build ##
 ###########
 
-include_directories(${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Debugging flag for using gdb
 set (CMAKE_CXX_FLAGS "-std=c++11")

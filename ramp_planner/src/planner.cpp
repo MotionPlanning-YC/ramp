@@ -2760,7 +2760,7 @@ void Planner::planningCycleCallback()
    */
   // Must have started control cycles
   // errorReduction is true
-  // Not driving on straight line
+  // Not driving on curve
   if(errorReduction_ && !imminent_collision_ && cc_started_ && generation_ % 3 == 0 &&
       !(fabs(latestUpdate_.msg_.velocities.at(2)) > 0.1 && sqrt(pow(latestUpdate_.msg_.velocities[0],2) + pow(latestUpdate_.msg_.velocities[1],2)) > 0.01))
   {
@@ -3010,11 +3010,16 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
     {
       ROS_WARN("A switch was not possible, returning \"to\" trajectory: %s", to.toString().c_str());
     }
-    trajec = to;
+    //trajec = to;
     //result = to;
   }
     
+  ROS_WARN("trajec: %s", trajec.toString().c_str());
+
   result = trajec;
+  
+  ROS_INFO("About to evaluate");
+
   requestEvaluation(result);
 
   if(log_enter_exit_)
