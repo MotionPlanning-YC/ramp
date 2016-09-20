@@ -49,8 +49,8 @@ TrajectoryView::TrajectoryView(QWidget *parent)
 {
     width_ = 240;
     height_ = 240;
-    maxWidthMeters_ = 4.0f;
-    maxHeightMeters_ = 4.0f;
+    maxWidthMeters_ = 2.0f;
+    maxHeightMeters_ = 2.0f;
 
     // Setup the scene
     QGraphicsScene *scene = new QGraphicsScene(this);
@@ -86,7 +86,7 @@ void TrajectoryView::size_changed()
 void TrajectoryView::population(const ramp_msgs::Population& msg)
 // Update the population and called the drawing function
 {
-  std::cout<<"\n\nReceived Population from robot "<<msg.robot_id<<"\n";
+  //std::cout<<"\n\nReceived Population from robot "<<msg.robot_id<<"\n";
 
   populations_.clear();
   populations_.push_back(msg);
@@ -128,20 +128,25 @@ void TrajectoryView::drawPopulation() {
   QPen pen2 = QPen( QColor(0,0,255,150) ); 
   
   /* Draw some grid lines */
-    this->scene()->addLine(0, metersToPixels(3.5, false), width_-20, metersToPixels(3.5, false), pen);
+    /*this->scene()->addLine(0, metersToPixels(3.5, false), width_-20, metersToPixels(3.5, false), pen);
     this->scene()->addLine(metersToPixels(3.5, true), 0, metersToPixels(3.5, true), metersToPixels(3.5, false), pen);
     
     this->scene()->addLine(0, metersToPixels(3, false), width_-20, metersToPixels(3, false), pen);
-    this->scene()->addLine(metersToPixels(3, true), 0, metersToPixels(3, true), metersToPixels(3.5, false), pen);
+    this->scene()->addLine(metersToPixels(3, true), 0, metersToPixels(3, true), metersToPixels(3.5, false), pen);*/
     
     this->scene()->addLine(0, metersToPixels(2, false), width_-20, metersToPixels(2, false), pen);
-    this->scene()->addLine(metersToPixels(2, true), 0, metersToPixels(2, true), metersToPixels(3.5, false), pen);
+    this->scene()->addLine(metersToPixels(2, true), 0, metersToPixels(2, true), metersToPixels(2, false), pen);
     
     this->scene()->addLine(0, metersToPixels(1, false), width_-20, metersToPixels(1, false), pen);
-    this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(3.5, false), pen);
+    this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(2, false), pen);
   
+    this->scene()->addLine(0, metersToPixels(1.5, false), width_-20, metersToPixels(1.5, false), pen);
+    this->scene()->addLine(metersToPixels(1.5, true), 0, metersToPixels(1.5, true), metersToPixels(2, false), pen);
+    
+    this->scene()->addLine(0, metersToPixels(0.5, false), width_-20, metersToPixels(0.5, false), pen);
+    this->scene()->addLine(metersToPixels(0.5, true), 0, metersToPixels(0.5, true), metersToPixels(2, false), pen);
 
-  double radius = 0.18;
+  double radius = 0.22;
   int radiusPixels = metersToPixels(radius, true);
 
   QPen penTraj;
@@ -222,12 +227,23 @@ void TrajectoryView::drawPopulation() {
             pen = penTraj;               
           } // end if first point
 
-          // Draw a line to the next point
-          this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
-                         metersToPixels(points.at(j).positions.at(1), false),
-                         metersToPixels(points.at(j+2).positions.at(0), true),
-                         metersToPixels(points.at(j+2).positions.at(1), false),
-                         pen);
+          //if(points[j].positions[0] <= maxWidthMeters_ && points[j].positions[1] <= maxHeightMeters_ &&
+              //points[j].positions[0] >= 0 && points[j].positions[1] >= 0)
+          //{
+            // Draw a line to the next point
+            this->scene()->addLine(metersToPixels(points.at(j).positions.at(0), true),
+                           metersToPixels(points.at(j).positions.at(1), false),
+                           metersToPixels(points.at(j+2).positions.at(0), true),
+                           metersToPixels(points.at(j+2).positions.at(1), false),
+                           pen);
+          //} // end if within grid bounds
+          /*if(j == points.size()-2 && t == populations_.at(p).population.size()-1)
+          {
+            // Draw a circle
+            this->scene()->addEllipse(metersToPixels(points.at(j).positions.at(0), true)-(radiusPixels/2),
+                                      metersToPixels(points.at(j).positions.at(1), false)+(radiusPixels/2),
+                                      metersToPixels(radius, true), metersToPixels(radius, false), pen);
+          }*/
 
         } //end for each point in the trajectory
       } //end if many points
@@ -294,8 +310,8 @@ int const TrajectoryView::metersToPixels(float value, bool isWidth)
 {
     if (isWidth)
     {
-        if (value > maxWidthMeters_)
-            maxWidthMeters_ = value;
+        //if (value > maxWidthMeters_)
+            //maxWidthMeters_ = value;
 
         //return value * width_ / (maxWidthMeters_ - 1);
         return value * width_ / (maxWidthMeters_);
@@ -303,8 +319,8 @@ int const TrajectoryView::metersToPixels(float value, bool isWidth)
 
     if (!isWidth)
     {
-        if (value > maxHeightMeters_)
-            maxHeightMeters_ = value;
+        //if (value > maxHeightMeters_)
+            //maxHeightMeters_ = value;
         value *= -1;
 
         //return value * height_ / (maxHeightMeters_ - 1);

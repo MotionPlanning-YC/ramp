@@ -8,7 +8,7 @@ const bool Constraints::validKPForPath(const ramp_msgs::KnotPoint kp, const ramp
     return false;
   }
 
-  double L = 0.33;
+  double L = 0.25;
 
   for(uint8_t i=0;i<p.points.size();i++)
   {

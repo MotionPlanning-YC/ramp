@@ -693,11 +693,9 @@ const int Planner::estimateIfOnCurve(const MotionState ms, const ramp_msgs::Bezi
                                 (y >= curve.controlPoints.at(2).positions.at(1));
 
 
-  ROS_INFO("xSlope: %s xSlopeTwo: %s ySlope: %s ySlopeTwo: %s", xSlope ? "True" : "False", xSlopeTwo ? "True" : "False", 
-      ySlope ? "True" : "False", ySlopeTwo ? "True" : "False"); 
+  ROS_INFO("xSlope: %s xSlopeTwo: %s ySlope: %s ySlopeTwo: %s", xSlope ? "True" : "False", xSlopeTwo ? "True" : "False", ySlope ? "True" : "False", ySlopeTwo ? "True" : "False"); 
   
-  ROS_INFO("xSegOne: %s xSegTwo: %s ySegOne: %s ySegTwo: %s", xSegOne ? "True" : "False", xSegTwo ? "True" : "False", 
-      ySegOne ? "True" : "False", ySegTwo ?  "True" : "False");
+  ROS_INFO("xSegOne: %s xSegTwo: %s ySegOne: %s ySegTwo: %s", xSegOne ? "True" : "False", xSegTwo ? "True" : "False", ySegOne ? "True" : "False", ySegTwo ?  "True" : "False");
 
   bool xGood = (xSegOne || xSegTwo);
   bool yGood = (ySegOne || ySegTwo);
@@ -2512,7 +2510,7 @@ void Planner::getTransitionTrajectory(const RampTrajectory& trj_movingOn, const 
 /** Modify a Path */
 const std::vector<Path> Planner::modifyPath() 
 { 
-  //////ROS_INFO("About to modify a path, pop is: %s\n%s", population_.get(0).toString().c_str(), population_.get(1).toString().c_str());
+  ROS_INFO("About to modify a path, pop is: %s\n%s", population_.get(0).toString().c_str(), population_.get(1).toString().c_str());
   return modifier_->perform(population_, imminent_collision_);
 }
 
@@ -2794,8 +2792,7 @@ void Planner::planningCycleCallback()
       
       // diff_ is the overall offset of pop since last CC
       diff_ = diff_.subtractPosition(temp);
-      ROS_INFO("diff_: %s diff: %s temp: %s", diff_.toString().c_str(), diff.toString().c_str(), 
-          temp.toString().c_str());
+      ROS_INFO("diff_: %s diff: %s temp: %s", diff_.toString().c_str(), diff.toString().c_str(), temp.toString().c_str());
 
       ROS_INFO("m_cc_: %s", m_cc_.toString().c_str());
       startPlanning_ = m_cc_.add(temp);
@@ -2830,9 +2827,7 @@ void Planner::planningCycleCallback()
   else
   {
     ROS_INFO("Not doing error correction");
-    ROS_INFO("cc_started_: %s generation_: %i errorReduction_: %s \nlatestUpdate: %s", cc_started_ ? "True" : "False", 
-        generation_,
-        errorReduction_ ? "True" : "False", latestUpdate_.toString().c_str());
+    ROS_INFO("cc_started_: %s generation_: %i errorReduction_: %s \nlatestUpdate: %s", cc_started_ ? "True" : "False", generation_, errorReduction_ ? "True" : "False", latestUpdate_.toString().c_str());
   }
 
   //////ROS_INFO("Done with error correction!");
@@ -3010,7 +3005,7 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
     {
       ROS_WARN("A switch was not possible, returning \"to\" trajectory: %s", to.toString().c_str());
     }
-    trajec = to;
+    //trajec = to;
   }
     
   ROS_INFO("trajec: %s", trajec.toString().c_str());
@@ -3088,8 +3083,7 @@ void Planner::switchTrajectory(const RampTrajectory& from, const RampTrajectory&
     ROS_INFO("full.transitionTraj_.curves.size(): %i", (int)full.transitionTraj_.curves.size());
 
     
-    ROS_INFO("switching.msg_.curves.size(): %i switching.msg_.holonomic_path.points.size(): %i", 
-        (int)switching.msg_.curves.size(), (int)switching.msg_.holonomic_path.points.size());
+    ROS_INFO("switching.msg_.curves.size(): %i switching.msg_.holonomic_path.points.size(): %i", (int)switching.msg_.curves.size(), (int)switching.msg_.holonomic_path.points.size());
     // Check that the switching trajectory is a curve or straight line, if true then set the transition trajectory
     // Results from getTransitionTrajectory will either:
     // 1) Have a smooth curve (successful transition)
@@ -3930,7 +3924,7 @@ void Planner::go()
   // Do planning until robot has reached goal
   // D = 0.4 if considering mobile base, 0.2 otherwise
   ros::Time t_start = ros::Time::now();
-  goalThreshold_ = 0.5;
+  goalThreshold_ = 0.25;
   while( (latestUpdate_.comparePosition(goal_, false) > goalThreshold_) && ros::ok()) 
   {
     planningCycleCallback();

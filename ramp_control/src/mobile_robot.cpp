@@ -200,13 +200,14 @@ void MobileRobot::calculateSpeedsAndTime () {
     }
     trajectory_msgs::JointTrajectoryPoint current = trajectory_.trajectory.points.at(i);
     trajectory_msgs::JointTrajectoryPoint next    = trajectory_.trajectory.points.at(i+1);
-    //std::cout<<"\nPoint "<<i;
+    /*std::cout<<"\nPoint "<<i;
+    std::cout<<"\nCurrent: "<<utility_.toString(current);
+    std::cout<<"\nnext: "<<utility_.toString(next);*/
 
     //double vx = (next.positions.at(0) - current.positions.at(0)) / 0.1;
     //double vy = (next.positions.at(1) - current.positions.at(1)) / 0.1;
     double vx = next.velocities.at(0);
     double vy = next.velocities.at(1);
-    //ROS_INFO("t: %f v: %f vx: %f vy: %f", current.time_from_start.toSec(), sqrt(vx*vx+vy*vy), vx, vy);
 
     speeds_linear_.push_back( sqrt( pow(vx,2)
                                   + pow(vy,2) ));
@@ -214,6 +215,8 @@ void MobileRobot::calculateSpeedsAndTime () {
     double w = utility_.findDistanceBetweenAngles(current.positions.at(2), next.positions.at(2)) / 0.1;
     speeds_angular_.push_back( w ); 
 
+    ROS_INFO("t: %f v: %f vx: %f vy: %f w: %f", current.time_from_start.toSec(), sqrt(vx*vx+vy*vy), vx, vy, w);
+    
     end_times.push_back(start_time + next.time_from_start);
 
     orientations_.push_back( utility_.findAngleFromAToB(current.positions, next.positions) ); 
@@ -250,7 +253,7 @@ void MobileRobot::sendTwist(const geometry_msgs::Twist t) const
   // If we have the simulation up, publish to cmd_vel
   //if(sim_) 
   //{
-    pub_cmd_vel_.publish(t);
+    //pub_cmd_vel_.publish(t);
   //}
 }
 
@@ -321,6 +324,8 @@ void MobileRobot::moveOnTrajectory()
 
   ros::Time s;
 
+  double actual_theta, dist;
+
   // Execute the trajectory
   while(ros::ok() && (num_traveled_+1) < num_) 
   {
@@ -372,8 +377,8 @@ void MobileRobot::moveOnTrajectory()
       if(fabs(twist_.linear.x) > 0.0f && fabs(twist_.angular.z) < 0.0001f) 
       {
         //ROS_INFO("initial_theta_: %f motion_state_.positions.at(2): %f", initial_theta_, motion_state_.positions.at(2));
-        float actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
-        float dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
+        actual_theta = utility_.displaceAngle(initial_theta_, motion_state_.positions.at(2));
+        dist = utility_.findDistanceBetweenAngles(actual_theta, orientations_.at(num_traveled_));
         //ROS_INFO("actual_theta: %f orientations[%i]: %f dist: %f", actual_theta, num_traveled_, orientations_.at(num_traveled_), dist);
         twist_.angular.z = dist/2.f;
       }
@@ -402,7 +407,7 @@ void MobileRobot::moveOnTrajectory()
     // Spin once to check for updates in the trajectory
     ros::spinOnce();
 
-    t_points_.push_back(ros::Time::now() - s);
+    //t_points_.push_back(ros::Time::now() - s);
     //ROS_INFO("Point took %f", (ros::Time::now() - s).toSec());
   } // end while
 

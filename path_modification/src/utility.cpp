@@ -4,7 +4,7 @@ Utility::Utility() {
   for(unsigned int i=0;i<3;i++) {
     ramp_msgs::Range temp;
     temp.min = (i < 2 ? 0   : -PI);
-    temp.max = (i < 2 ? 3.5 :  PI);
+    temp.max = (i < 2 ? 2 :  PI);
     standardRanges_.push_back(temp);
   }
 }

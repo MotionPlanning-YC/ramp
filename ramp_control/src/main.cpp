@@ -27,7 +27,7 @@ void init_advertisers_subscribers(MobileRobot& robot, ros::NodeHandle& handle, b
   robot.pub_update_ = handle.advertise<ramp_msgs::MotionState>(MobileRobot::TOPIC_STR_UPDATE, 1000);
 
   if(simulation) {
-    robot.pub_cmd_vel_ = handle.advertise<geometry_msgs::Twist>("cmd_vel", 1000);
+    robot.pub_cmd_vel_ = handle.advertise<geometry_msgs::Twist>("cmd_vel", 10);
   }
  
   // Subscribers
@@ -36,7 +36,7 @@ void init_advertisers_subscribers(MobileRobot& robot, ros::NodeHandle& handle, b
 
   // Timers
   // 15 Hz seems to be the fastest possible while avoiding nan errors
-  robot.timer_ = handle.createTimer(ros::Duration(1.f / 15.f), &MobileRobot::updateCallback, &robot);
+  robot.timer_ = handle.createTimer(ros::Duration(1.f / 30.f), &MobileRobot::updateCallback, &robot);
 } // End init_advertisers_subscribers
 
 
@@ -79,12 +79,13 @@ int main(int argc, char** argv) {
 
   ros::NodeHandle handle;  
   ros::NodeHandle handle_local("~");
+
   ros::Subscriber sub_traj = handle.subscribe("bestTrajec", 1, trajCallback);
 
   setvbuf(stdout, NULL, _IOLBF, 4096);
  
   //handle.param("ramp_control/orientation", robot.initial_theta_, 0.785);
-  handle_local.param("orientation", robot.initial_theta_, 0.785);
+  handle_local.param("orientation", robot.initial_theta_, -0.785);
   std::cout<<"\n*********robot.orientation: "<<robot.initial_theta_;
 
   bool sim=false;

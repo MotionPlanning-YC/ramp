@@ -212,7 +212,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
     t = ros::Time::now();
     while(ros::ok() && (ros::Time::now() - t < d) && !ob_ic.at(index))
     {
-      twist.angular.z = (index == 1) ? -0.32 : -0.4;
+      twist.angular.z = (index == 1) ? -0.6 : -0.32;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }
@@ -226,7 +226,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
     t = ros::Time::now();
     while(ros::ok() && (ros::Time::now() - t < d) && !ob_ic.at(index))
     {
-      twist.angular.z = (index == 1) ? 0.32 : 0.4;
+      twist.angular.z = (index == 1) ? 0.32 : 0.6;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }
@@ -239,7 +239,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
     t = ros::Time::now();
     while(ros::ok() && (ros::Time::now() - t < d) && !ob_ic.at(index))
     {
-      twist.angular.z = (index == 1) ? -0.4 : -0.32;
+      twist.angular.z = (index == 1) ? -0.6 : -0.32;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }
@@ -253,7 +253,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
     t = ros::Time::now();
     while(ros::ok() && (ros::Time::now() - t < d) && !ob_ic.at(index))
     {
-      twist.angular.z = (index == 1) ? 0.32 : 0.4;
+      twist.angular.z = (index == 1) ? 0.32 : 0.6;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }
@@ -266,7 +266,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
     t = ros::Time::now();
     while(ros::ok() && (ros::Time::now() - t < d) && !ob_ic.at(index))
     {
-      twist.angular.z = (index == 1) ? -0.4 : -0.32;
+      twist.angular.z = (index == 1) ? -0.6 : -0.32;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }

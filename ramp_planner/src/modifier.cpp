@@ -68,7 +68,7 @@ const std::string Modifier::getOperator() const
 /** This method generates the random paths to use for the modification operator passed in as op argument */
 const std::vector<int> Modifier::getTargets(const std::string& op, const Population& pop) 
 {
-  //////ROS_INFO("In Modifier::getTargets");
+  //ROS_INFO("In Modifier::getTargets");
   //////ROS_INFO("pop.paths_.size(): %i", (int)pop.paths_.size());
   //////ROS_INFO("pop.trajec.size(): %i", (int)pop.trajectories_.size());
   //////ROS_INFO("Pop: %s", pop.toString().c_str());
@@ -94,7 +94,7 @@ const std::vector<int> Modifier::getTargets(const std::string& op, const Populat
   } // end if crossover 
 
 
-  //////ROS_INFO("Exiting Modifier::getTargets");
+  //ROS_INFO("Exiting Modifier::getTargets");
   return result;
 } // End getTargets
 
