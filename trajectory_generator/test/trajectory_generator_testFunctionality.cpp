@@ -29,23 +29,30 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_With_One_KnotP
     knotPoint.motionState.time = 0;    
     _path.points.push_back(knotPoint);
     }
+
+    ramp_msgs::TrajectoryRequest tr;
     
     // -----------------------------------------------------
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PREDICTION;
+    tr.path = _path;
+    tr.type = PREDICTION;
+
+    _trajectorySrv.request.reqs.push_back(tr);
+
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = PREDICTION;
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Expectations
-          EXPECT_LE(50, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_LE(50, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is less than 50 point";
 
-          EXPECT_GE(100, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_GE(100, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is greater than 75 point";
           
     }catch(...){
@@ -88,20 +95,25 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_With_Two_KnotP
 
     // -----------------------------------------------------
     
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = PREDICTION;
+    
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PREDICTION;
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = PREDICTION;
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Expectations
-          EXPECT_LE(75, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_LE(75, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is less than 50 point";
 
-          EXPECT_GE(150, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_GE(150, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is greater than 75 point";
           
     }catch(...){
@@ -162,23 +174,29 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_With_Three_Kno
     _temp.segmentPoints.push_back(_path.points.at(1).motionState);
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
+    
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HOLONOMIC;
+    tr.bezierCurves.push_back(_temp);
 
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = ALL_STRAIGHT_SEGMENTS;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HOLONOMIC;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Expectations
-          EXPECT_LE(50, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_LE(50, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is less than 50 point";
 
-          EXPECT_GE(500, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_GE(500, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is greater than 75 point";
           
     }catch(...){
@@ -256,22 +274,27 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_With_Four_Knot
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
     
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Expectations
-          EXPECT_LE(50, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_LE(50, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is less than 50 point";
 
-          EXPECT_GE(500, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_GE(500, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is greater than 75 point";
           
     }catch(...){
@@ -363,22 +386,27 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_With_Five_Knot
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Expectations
-          EXPECT_LE(50, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_LE(50, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is less than 50 point";
 
-          EXPECT_GE(500, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_GE(500, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is greater than 75 point";
           
     }catch(...){
@@ -484,22 +512,27 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_With_Six_KnotP
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
     
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Expectations
-          EXPECT_LE(50, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_LE(50, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is less than 50 point";
 
-          EXPECT_GE(500, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_GE(500, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is greater than 75 point";
           
     }catch(...){
@@ -619,22 +652,27 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_With_Seven_Kno
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Expectations
-          EXPECT_LE(50, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_LE(50, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is less than 50 point";
 
-          EXPECT_GE(500, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_GE(500, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is greater than 75 point";
           
     }catch(...){
@@ -768,22 +806,27 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_With_Eight_Kno
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Expectations
-          EXPECT_LE(50, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_LE(50, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is less than 50 point";
 
-          EXPECT_GE(500, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_GE(500, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is greater than 75 point";
           
     }catch(...){
@@ -932,22 +975,27 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_With_Nine_Knot
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
     
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Expectations
-          EXPECT_LE(50, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_LE(50, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is less than 50 point";
 
-          EXPECT_GE(500, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_GE(500, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is greater than 75 point";
           
     }catch(...){
@@ -1110,22 +1158,27 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_With_Ten_KnotP
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Expectations
-          EXPECT_LE(50, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_LE(50, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is less than 50 point";
 
-          EXPECT_GE(500, (_trajectoryRequest.response.trajectory.trajectory.points.size()))
+          EXPECT_GE(500, (_trajectorySrv.response.trajectory.trajectory.points.size()))
                     <<"Size of the trajectory is greater than 75 point";
           
     }catch(...){

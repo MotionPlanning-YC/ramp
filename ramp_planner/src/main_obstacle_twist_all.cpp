@@ -208,7 +208,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
     twist.linear.x = 0.25;
     //twist.angular.z = -0.68;
 
-    d = ros::Duration(2.f);
+    d = ros::Duration(1.5f);
     t = ros::Time::now();
     while(ros::ok() && (ros::Time::now() - t < d) && !ob_ic.at(index))
     {

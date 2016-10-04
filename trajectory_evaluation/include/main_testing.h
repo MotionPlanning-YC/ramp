@@ -26,34 +26,70 @@
 #include "tf/transform_datatypes.h"
 #include "ramp_msgs/Obstacle.h"
 
+
 Evaluate ev;
-CollisionDetection cd;
 Utility u;
 bool received_ob = false;
+std::vector<ros::Duration> t_data;
+int count_multiple = 0;
+int count_single = 0;
 
 
 /** Srv callback to evaluate a trajectory */
-bool handleRequest(ramp_msgs::EvaluationRequest::Request& req,
-                   ramp_msgs::EvaluationRequest::Response& res) 
+bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
+                   ramp_msgs::EvaluationSrv::Response& resps) 
 {
+  int s = reqs.reqs.size();
 
-  ev.setRequest(req);
-
-  cd.obstacle_trjs_ = req.obstacle_trjs;
+  if(s > 1)
+  {
+    count_multiple++;
+  }
+  else
+  {
+    count_single++;
+  }
   
-  // Make a QueryResult object
-  CollisionDetection::QueryResult qr;
 
-    cd.trajectory_  = req.trajectory;
-    qr = cd.perform();
+  ros::Time t_start = ros::Time::now();
+  ros::Duration t_elapsed;
+  for(uint8_t i=0;i<s;i++)
+  {
+    //t_start = ros::Time::now();
 
-  // Set response
-  res.feasible = !qr.collision_;
-  res.t_firstCollision = ros::Duration(qr.t_firstCollision_);
+    ramp_msgs::EvaluationResponse res;
+    //ROS_INFO("Robot Evaluating trajectory %i: %s", (int)i, u.toString(reqs.reqs[i].trajectory).c_str());
+    //////ROS_INFO("Obstacle size: %i", (int)reqs.reqs[i].obstacle_trjs.size());
+    //ROS_INFO("imminent_collision: %s", reqs.reqs[i].imminent_collision ? "True" : "False");
+    //ROS_INFO("coll_dist: %f", reqs.reqs[i].coll_dist);
+    //ROS_INFO("full_eval: %s", reqs.reqs[i].full_eval ? "True" : "False");
 
-  // Do fitness
-  res.fitness = ev.performFitness(qr);
+    // If more than one point
+    if(reqs.reqs.at(i).trajectory.trajectory.points.size() > 1)
+    {
+      ////////ROS_INFO("More than 1 point, performing evaluation");
+      ev.perform(reqs.reqs[i], res);
+    }
+    // Else we only have one point (goal point)
+    else
+    {
+      res.fitness = 1.f;
+      res.feasible = true;
+      res.t_firstCollision = ros::Duration(9999.f);
+    }
 
+    //ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
+    ros::Time t_vec = ros::Time::now();
+    resps.resps.push_back(res);
+    
+  }
+  t_elapsed = ros::Time::now() - t_start;
+  t_data.push_back(t_elapsed);
+  if(t_elapsed.toSec() > 0.01)
+  {
+    ////ROS_INFO("Long Eval Trajec (total: %i)", (int)reqs.reqs.size());
+  }
+  ////ROS_INFO("t_elapsed: %f", t_elapsed.toSec());
   return true;
 } //End handleRequest
 

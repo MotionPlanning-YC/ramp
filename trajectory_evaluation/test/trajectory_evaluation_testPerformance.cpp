@@ -66,9 +66,14 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
@@ -76,7 +81,7 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory evaluation
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -147,9 +152,14 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
@@ -157,7 +167,7 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory evaluation
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -228,9 +238,14 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
@@ -238,7 +253,7 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory evaluation
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -309,9 +324,14 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
@@ -319,7 +339,7 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory evaluation
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -390,9 +410,14 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
@@ -400,7 +425,7 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory evaluation
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -471,9 +496,14 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
@@ -481,7 +511,7 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory evaluation
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -552,9 +582,14 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
@@ -562,7 +597,7 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory evaluation
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -633,9 +668,14 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
@@ -643,7 +683,7 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory evaluation
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -714,9 +754,14 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
@@ -724,7 +769,7 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory evaluation
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -795,9 +840,14 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
@@ -805,7 +855,7 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory evaluation
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();

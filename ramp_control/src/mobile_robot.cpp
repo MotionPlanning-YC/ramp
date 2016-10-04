@@ -215,7 +215,7 @@ void MobileRobot::calculateSpeedsAndTime () {
     double w = utility_.findDistanceBetweenAngles(current.positions.at(2), next.positions.at(2)) / 0.1;
     speeds_angular_.push_back( w ); 
 
-    ROS_INFO("t: %f v: %f vx: %f vy: %f w: %f", current.time_from_start.toSec(), sqrt(vx*vx+vy*vy), vx, vy, w);
+    //ROS_INFO("t: %f v: %f vx: %f vy: %f w: %f", current.time_from_start.toSec(), sqrt(vx*vx+vy*vy), vx, vy, w);
     
     end_times.push_back(start_time + next.time_from_start);
 

@@ -39,21 +39,26 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_firstCollision = ros::Duration(9999.f);
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
+    
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
 
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Expectations
-          EXPECT_LE((10), (_evaluationRequest.response.fitness))
+          EXPECT_LE((10), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is less than 10";
 
-          EXPECT_GE((30), (_evaluationRequest.response.fitness))
+          EXPECT_GE((30), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is greater than 30";
           
     }catch(...){
@@ -103,20 +108,25 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Expectations
-          EXPECT_LE((10), (_evaluationRequest.response.fitness))
+          EXPECT_LE((10), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is less than 10";
 
-          EXPECT_GE((30), (_evaluationRequest.response.fitness))
+          EXPECT_GE((30), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is greater than 30";
           
     }catch(...){
@@ -179,20 +189,25 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Expectations
-          EXPECT_LE((10), (_evaluationRequest.response.fitness))
+          EXPECT_LE((10), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is less than 10";
 
-          EXPECT_GE((30), (_evaluationRequest.response.fitness))
+          EXPECT_GE((30), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is greater than 30";
           
     }catch(...){
@@ -268,20 +283,25 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Expectations
-          EXPECT_LE((10), (_evaluationRequest.response.fitness))
+          EXPECT_LE((10), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is less than 10";
 
-          EXPECT_GE((30), (_evaluationRequest.response.fitness))
+          EXPECT_GE((30), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is greater than 30";
           
     }catch(...){
@@ -370,20 +390,25 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Expectations
-          EXPECT_LE((10), (_evaluationRequest.response.fitness))
+          EXPECT_LE((10), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is less than 10";
 
-          EXPECT_GE((30), (_evaluationRequest.response.fitness))
+          EXPECT_GE((30), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is greater than 30";
           
     }catch(...){
@@ -486,20 +511,25 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Expectations
-          EXPECT_LE((10), (_evaluationRequest.response.fitness))
+          EXPECT_LE((10), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is less than 10";
 
-          EXPECT_GE((30), (_evaluationRequest.response.fitness))
+          EXPECT_GE((30), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is greater than 30";
           
     }catch(...){
@@ -614,20 +644,25 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Expectations
-          EXPECT_LE((10), (_evaluationRequest.response.fitness))
+          EXPECT_LE((10), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is less than 10";
 
-          EXPECT_GE((30), (_evaluationRequest.response.fitness))
+          EXPECT_GE((30), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is greater than 30";
           
     }catch(...){
@@ -755,20 +790,25 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Expectations
-          EXPECT_LE((10), (_evaluationRequest.response.fitness))
+          EXPECT_LE((10), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is less than 10";
 
-          EXPECT_GE((30), (_evaluationRequest.response.fitness))
+          EXPECT_GE((30), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is greater than 30";
           
     }catch(...){
@@ -910,20 +950,25 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Expectations
-          EXPECT_LE((10), (_evaluationRequest.response.fitness))
+          EXPECT_LE((10), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is less than 10";
 
-          EXPECT_GE((30), (_evaluationRequest.response.fitness))
+          EXPECT_GE((30), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is greater than 30";
           
     }catch(...){
@@ -1077,20 +1122,25 @@ TEST_F(trajectoryEvaluationFixtureTest, testEvaluationRequest_JointTrajectory_Wi
     _trajectory.t_start          = ros::Duration(2.0f);
     // -----------------------------------------------------
 
+    ramp_msgs::EvaluationRequest er;
+    er.trajectory = _trajectory;
+    er.currentTheta = (PI/4.f);
+
     // Initialize the evaluation request -------------------
-    _evaluationRequest.request.trajectory = _trajectory;
-    _evaluationRequest.request.currentTheta = (PI/4.f);
+    _evaluationSrv.request.reqs.push_back(er);
+    //_evaluationSrv.request.trajectory = _trajectory;
+    //_evaluationSrv.request.currentTheta = (PI/4.f);
     // -----------------------------------------------------
 
     try{          
           // Request a trajectory
-          _client.call(_evaluationRequest);
+          _client.call(_evaluationSrv);
           
           // Expectations
-          EXPECT_LE((10), (_evaluationRequest.response.fitness))
+          EXPECT_LE((10), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is less than 10";
 
-          EXPECT_GE((30), (_evaluationRequest.response.fitness))
+          EXPECT_GE((30), (_evaluationSrv.response.resps[0].fitness))
                     <<"The evaluation fitness is greater than 30";
           
     }catch(...){

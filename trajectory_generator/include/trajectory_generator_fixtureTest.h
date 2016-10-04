@@ -18,10 +18,12 @@
 #include "main_testing.h"
 
 // include messages that needed for client process (planner).
-#include "ramp_msgs/Path.h"
+/*#include "ramp_msgs/Path.h"
 #include "ramp_msgs/KnotPoint.h"
 #include "ramp_msgs/MotionState.h"
-#include "ramp_msgs/BezierCurve.h"
+#include "ramp_msgs/BezierCurve.h"*/
+
+#include "utility.h"
 
 class trajectoryGeneratorFixtureTest:public ::testing::Test{
     public:
@@ -34,7 +36,7 @@ class trajectoryGeneratorFixtureTest:public ::testing::Test{
         virtual void TearDown();
         
         //Callback method that calls the callback function of the server process (trajectory generator).
-        bool Callback(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res);
+        bool Callback(ramp_msgs::TrajectorySrv::Request& req, ramp_msgs::TrajectorySrv::Response& res);
 
         // Data Members.
         ros::NodeHandle client_handle, server_handle;
@@ -42,7 +44,7 @@ class trajectoryGeneratorFixtureTest:public ::testing::Test{
         ros::ServiceServer _service;
         
         // Argument for Trajectory Request. 
-        ramp_msgs::TrajectoryRequest _trajectoryRequest;
+        ramp_msgs::TrajectorySrv _trajectorySrv;
 
 };
 
@@ -53,13 +55,13 @@ trajectoryGeneratorFixtureTest::~trajectoryGeneratorFixtureTest(){}
 
 void trajectoryGeneratorFixtureTest::SetUp(){
   // Initialize client and server processes.  
-  _client = client_handle.serviceClient<ramp_msgs::TrajectoryRequest>("/trajectory_generator");
+  _client = client_handle.serviceClient<ramp_msgs::TrajectorySrv>("/trajectory_generator");
   _service = server_handle.advertiseService("/trajectory_generator", &trajectoryGeneratorFixtureTest::Callback,this);
 }        
 
 void trajectoryGeneratorFixtureTest::TearDown(){}
 
-bool trajectoryGeneratorFixtureTest::Callback(ramp_msgs::TrajectoryRequest::Request& req, ramp_msgs::TrajectoryRequest::Response& res){
+bool trajectoryGeneratorFixtureTest::Callback(ramp_msgs::TrajectorySrv::Request& req, ramp_msgs::TrajectorySrv::Response& res){
     if(requestCallback(req,res)){
         return true;
     }else{

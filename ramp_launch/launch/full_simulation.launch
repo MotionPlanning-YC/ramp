@@ -21,10 +21,10 @@ Change robot locations in world file
 <node name="trajectory_generator" pkg="trajectory_generator" type="trajectory_generator" output="screen" />
 
 <!-- Path Modification -->
-<node name="path_modification" pkg="path_modification" type="path_modification" output="log" />
+<node name="path_modification" pkg="path_modification" type="path_modification" output="screen" />
 
 <!-- Trajectory Evaluation -->
-<node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="log" />
+<node name="trajectory_evaluation" pkg="trajectory_evaluation" type="trajectory_evaluation" output="screen" />
 
 <!-- Planner -->
 <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" /> 
@@ -43,7 +43,7 @@ Change robot locations in world file
 
 
 <!-- Trajectory Visualization -->
-<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="log"/>
+<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen"/>
 
 
 

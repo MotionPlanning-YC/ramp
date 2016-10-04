@@ -65,12 +65,18 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_50
     _temp.segmentPoints.push_back(_path.points.at(1).motionState);
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
+    
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
 
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     
@@ -79,7 +85,7 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_50
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -150,11 +156,16 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_45
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     
@@ -163,7 +174,7 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_45
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -234,11 +245,16 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_40
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr); 
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     
@@ -247,7 +263,7 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_40
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -318,11 +334,16 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_35
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     
@@ -331,7 +352,7 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_35
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -403,10 +424,16 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_30
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
+
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     
@@ -415,7 +442,7 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_30
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -487,11 +514,16 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_25
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
  
     try{          
@@ -499,7 +531,7 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_25
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -570,11 +602,16 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_20
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     
@@ -583,7 +620,7 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_20
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -654,11 +691,16 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_15
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     
@@ -667,7 +709,7 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_15
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -738,11 +780,16 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_10
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     
@@ -751,7 +798,7 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_10
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();
@@ -822,11 +869,16 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_05
     _temp.segmentPoints.push_back(_path.points.at(2).motionState);
     // -----------------------------------------------------
 
+    ramp_msgs::TrajectoryRequest tr;
+    tr.path = _path;
+    tr.type = HYBRID;
+    tr.bezierCurves.push_back(_temp);
 
     // Initialize the trajectory request -------------------
-    _trajectoryRequest.request.path = _path;
-    _trajectoryRequest.request.type = PARTIAL_BEZIER;
-    _trajectoryRequest.request.bezierCurves.push_back(_temp);
+    _trajectorySrv.request.reqs.push_back(tr);
+    //_trajectorySrv.request.path = _path;
+    //_trajectorySrv.request.type = HYBRID;
+    //_trajectorySrv.request.bezierCurves.push_back(_temp);
     // -----------------------------------------------------
 
     
@@ -835,7 +887,7 @@ TEST_F(trajectoryGeneratorFixtureTest, testTrajectoryRequest_Path_3KnotPoints_05
           double _startTime = ros::Time::now().toSec();
           
           // Request a trajectory
-          _client.call(_trajectoryRequest);
+          _client.call(_trajectorySrv);
           
           // Save the end time.
           double _endTime = ros::Time::now().toSec();

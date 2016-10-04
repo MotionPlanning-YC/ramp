@@ -60,10 +60,10 @@ target_link_libraries(swap_test ${catkin_LIBRARIES})
 
 #========# Sub-system tests ==========#
 
-catkin_add_gtest(path_modification_testFunctionality test/path_modification_testFunctionality.cpp src/change.cpp src/constraints.cpp src/crossover.cpp src/delete.cpp src/insert.cpp src/modifier.cpp src/swap.cpp src/utility.cpp)
+catkin_add_gtest(path_modification_testFunctionality test/path_modification_testFunctionality.cpp src/change.cpp src/constraints.cpp src/crossover.cpp src/delete.cpp src/insert.cpp src/modifier.cpp src/move.cpp src/range.cpp src/swap.cpp src/utility.cpp)
 target_link_libraries(path_modification_testFunctionality ${catkin_LIBRARIES} pthread)
 
-catkin_add_gtest(path_modification_testPerformance test/path_modification_testPerformance.cpp src/change.cpp src/constraints.cpp src/crossover.cpp src/delete.cpp src/insert.cpp src/modifier.cpp src/swap.cpp src/utility.cpp)
+catkin_add_gtest(path_modification_testPerformance test/path_modification_testPerformance.cpp src/change.cpp src/constraints.cpp src/crossover.cpp src/delete.cpp src/insert.cpp src/modifier.cpp src/move.cpp src/range.cpp src/swap.cpp src/utility.cpp)
 target_link_libraries(path_modification_testPerformance ${catkin_LIBRARIES} pthread)
 
 ##============================================================================
