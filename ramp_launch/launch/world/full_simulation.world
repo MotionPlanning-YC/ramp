@@ -53,7 +53,7 @@ corobot
 (		  
   name "r0"
   color "blue"
-  pose [0 2 0 -45]
+  pose [0 0 0 45]
   size [0.18 0.18 0.5]
 )
 
@@ -61,7 +61,7 @@ corobot
 (
   name "r1"
   color "red"
-  pose [2 2 0 -135]
+  pose [3.5 3.5 0 -135]
   size [0.18 0.18 0.5]
 )
 
@@ -69,7 +69,7 @@ corobot
 (
   name "r2"
   color "red"
-  pose [0 0 0 90]
+  pose [2 0 0 135]
   size [0.18 0.18 0.5]
 )
 

@@ -49,8 +49,8 @@ TrajectoryView::TrajectoryView(QWidget *parent)
 {
     width_ = 240;
     height_ = 240;
-    maxWidthMeters_ = 2.0f;
-    maxHeightMeters_ = 2.0f;
+    maxWidthMeters_ = 3.5f;
+    maxHeightMeters_ = 3.5f;
 
     // Setup the scene
     QGraphicsScene *scene = new QGraphicsScene(this);
@@ -128,13 +128,21 @@ void TrajectoryView::drawPopulation() {
   QPen pen2 = QPen( QColor(0,0,255,150) ); 
   
   /* Draw some grid lines */
-    /*this->scene()->addLine(0, metersToPixels(3.5, false), width_-20, metersToPixels(3.5, false), pen);
+    this->scene()->addLine(0, metersToPixels(3.5, false), width_-20, metersToPixels(3.5, false), pen);
     this->scene()->addLine(metersToPixels(3.5, true), 0, metersToPixels(3.5, true), metersToPixels(3.5, false), pen);
     
     this->scene()->addLine(0, metersToPixels(3, false), width_-20, metersToPixels(3, false), pen);
-    this->scene()->addLine(metersToPixels(3, true), 0, metersToPixels(3, true), metersToPixels(3.5, false), pen);*/
+    this->scene()->addLine(metersToPixels(3, true), 0, metersToPixels(3, true), metersToPixels(3.5, false), pen);
     
     this->scene()->addLine(0, metersToPixels(2, false), width_-20, metersToPixels(2, false), pen);
+    this->scene()->addLine(metersToPixels(2, true), 0, metersToPixels(2, true), metersToPixels(3.5, false), pen);
+    
+    this->scene()->addLine(0, metersToPixels(1, false), width_-20, metersToPixels(1, false), pen);
+    this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(3.5, false), pen);
+  
+
+
+    /*this->scene()->addLine(0, metersToPixels(2, false), width_-20, metersToPixels(2, false), pen);
     this->scene()->addLine(metersToPixels(2, true), 0, metersToPixels(2, true), metersToPixels(2, false), pen);
     
     this->scene()->addLine(0, metersToPixels(1, false), width_-20, metersToPixels(1, false), pen);
@@ -144,7 +152,7 @@ void TrajectoryView::drawPopulation() {
     this->scene()->addLine(metersToPixels(1.5, true), 0, metersToPixels(1.5, true), metersToPixels(2, false), pen);
     
     this->scene()->addLine(0, metersToPixels(0.5, false), width_-20, metersToPixels(0.5, false), pen);
-    this->scene()->addLine(metersToPixels(0.5, true), 0, metersToPixels(0.5, true), metersToPixels(2, false), pen);
+    this->scene()->addLine(metersToPixels(0.5, true), 0, metersToPixels(0.5, true), metersToPixels(2, false), pen);*/
 
   double radius = 0.22;
   int radiusPixels = metersToPixels(radius, true);

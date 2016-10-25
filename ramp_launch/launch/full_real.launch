@@ -20,7 +20,7 @@
 
 
 <!-- Planner -->
-<node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" /> 
+<node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="log" /> 
 
 
 
@@ -38,7 +38,7 @@
 
 
 <!-- Sensing nodes -->
-<node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="screen" />
+<node name="ramp_sensing" pkg="ramp_sensing" type="ramp_sensing" output="log" />
 
 
 <!-- Obstacle motion commands -->

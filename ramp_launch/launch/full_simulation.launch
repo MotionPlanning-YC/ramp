@@ -37,7 +37,7 @@ Change robot locations in world file
   <remap from="odometry" to="robot_0/odom" />
   <remap from="cmd_vel" to="robot_0/cmd_vel" />
   <param name="simulation" type="bool" value="true" />
-  <param name="orientation" type="double" value="-0.785" />
+  <param name="orientation" type="double" value="0.785" />
   <param name="check_imminent_coll" type="bool" value="true" />
 </node>
 
