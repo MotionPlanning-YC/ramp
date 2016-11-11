@@ -157,7 +157,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
   /*
    * Set motion for Obstacle 1
    */
-  if(index == 2)
+  if(index == 1)
   {
     
     
@@ -222,7 +222,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
     twist.linear.x = 0.2;
     //twist.angular.z = 0.4;
 
-    d = ros::Duration(2.);
+    d = ros::Duration(2.5);
     t = ros::Time::now();
     while(ros::ok() && (ros::Time::now() - t < d) && !ob_ic.at(index))
     {
@@ -239,7 +239,7 @@ void publishToOb(const ros::TimerEvent e, const int index)
     t = ros::Time::now();
     while(ros::ok() && (ros::Time::now() - t < d) && !ob_ic.at(index))
     {
-      twist.angular.z = (index == 1) ? -0.6 : -0.32;
+      twist.angular.z = (index == 1) ? -0.6 : -0.4;
       ob_pubs.at(index).publish(twist);
       r.sleep();
     }

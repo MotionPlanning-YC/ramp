@@ -34,11 +34,11 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
     //t_start = ros::Time::now();
 
     ramp_msgs::EvaluationResponse res;
-    //ROS_INFO("Robot Evaluating trajectory %i: %s", (int)i, u.toString(reqs.reqs[i].trajectory).c_str());
+    ROS_INFO("Robot Evaluating trajectory %i: %s", (int)i, u.toString(reqs.reqs[i].trajectory).c_str());
     //////ROS_INFO("Obstacle size: %i", (int)reqs.reqs[i].obstacle_trjs.size());
-    //ROS_INFO("imminent_collision: %s", reqs.reqs[i].imminent_collision ? "True" : "False");
-    //ROS_INFO("coll_dist: %f", reqs.reqs[i].coll_dist);
-    //ROS_INFO("full_eval: %s", reqs.reqs[i].full_eval ? "True" : "False");
+    ROS_INFO("imminent_collision: %s", reqs.reqs[i].imminent_collision ? "True" : "False");
+    ROS_INFO("coll_dist: %f", reqs.reqs[i].coll_dist);
+    ROS_INFO("full_eval: %s", reqs.reqs[i].full_eval ? "True" : "False");
 
     // If more than one point
     if(reqs.reqs.at(i).trajectory.trajectory.points.size() > 1)
@@ -54,7 +54,7 @@ bool handleRequest(ramp_msgs::EvaluationSrv::Request& reqs,
       res.t_firstCollision = ros::Duration(9999.f);
     }
 
-    //ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
+    ROS_INFO("Done evaluating, fitness: %f feasible: %s t_firstCollision: %f", res.fitness, res.feasible ? "True" : "False", res.t_firstCollision.toSec());
     ros::Time t_vec = ros::Time::now();
     resps.resps.push_back(res);
     
@@ -87,10 +87,10 @@ void reportData(int sig)
   for(int i=1;i<ev.t_numeric_.size();i++)
   {
     avg += ev.t_numeric_[i].toSec();
-    ////ROS_INFO("t_numeric_: %f", ev.t_numeric_.at(i).toSec());
+    ROS_INFO("t_numeric_: %f", ev.t_numeric_.at(i).toSec());
   }
   avg /= ev.t_numeric_.size();
-  ////ROS_INFO("Average t_numeric_ duration: %f", avg);
+  ROS_INFO("Average t_numeric_ duration: %f", avg);
 
   
 
@@ -199,10 +199,10 @@ void reportData(int sig)
   for(int i=1;i<t_data.size();i++)
   {
     avg += t_data.at(i).toSec();
-    ////ROS_INFO("traj_eval: %f", t_data.at(i).toSec());
+    ROS_INFO("traj_eval: %f", t_data.at(i).toSec());
   }
   avg /= t_data.size();
-  ////ROS_INFO("Average traj_eval duration: %f", avg);
+  ROS_INFO("Average traj_eval duration: %f", avg);
 
   ////ROS_INFO("# of single evaluations: %i", count_single);
   ////ROS_INFO("# of multiple evaluations: %i", count_multiple);
@@ -227,12 +227,12 @@ int main(int argc, char** argv) {
   /** ***Testing*** */
 
 
-  /*ros::AsyncSpinner spinner(8);
+  ros::AsyncSpinner spinner(8);
   std::cout<<"\nWaiting for requests...\n";
   spinner.start();
-  ros::waitForShutdown();*/
+  ros::waitForShutdown();
 
-  ros::spin();
+  //ros::spin();
 
   printf("\nTrajectory Evaluation exiting normally\n");
   return 0;

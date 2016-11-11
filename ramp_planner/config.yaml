@@ -12,9 +12,9 @@ gens_before_control_cycle: 20
 
 pop_traj_type: 1 #0=holonomic, 1=hybrid
 
-fixed_control_cycle_rate: 1.6
+fixed_control_cycle_rate: 2
 
-sensing_cycle_rate: 20
+sensing_cycle_rate: 15
 
 error_reduction: true
 
@@ -23,13 +23,13 @@ num_of_obstacles: 2
 # Turtlebot obstacle topics
 #obstacle_odoms: ['/obstacle_1/odom', '/obstacle_2/odom', '/obstacle_3/odom']
 #obstacle_vels: ['/obstacle_1/mobile_base/commands/velocity', '/obstacle_2/mobile_base/commands/velocity', '/obstacle_3/mobile_base/commands/velocity']
-#obstacle_odoms: ['/obstacle_1/odom', '/obstacle_2/odom']
-#obstacle_vels: ['/obstacle_1/mobile_base/commands/velocity', '/obstacle_2/mobile_base/commands/velocity']
+obstacle_odoms: ['/obstacle_1/odom', '/obstacle_2/odom']
+obstacle_vels: ['/obstacle_1/mobile_base/commands/velocity', '/obstacle_2/mobile_base/commands/velocity']
 
 # Stage simulator obstacle topics
 #obstacle_odoms: ['/robot_1/odom', '/robot_2/odom', '/robot_3/odom']
-obstacle_odoms: ['/robot_1/odom', '/robot_2/odom']
-obstacle_vels: ['/robot_1/cmd_vel', '/robot_2/cmd_vel']
+#obstacle_odoms: ['/robot_1/odom', '/robot_2/odom']
+#obstacle_vels: ['/robot_1/cmd_vel', '/robot_2/cmd_vel']
 #obstacle_vels: ['/robot_1/cmd_vel', '/robot_2/cmd_vel', '/robot_3/cmd_vel']
 
-obstacle_delays: [0, 0, 0]
+obstacle_delays: [2, 0, 0]
