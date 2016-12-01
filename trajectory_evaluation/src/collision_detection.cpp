@@ -43,7 +43,7 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
   
   ////////ROS_INFO("s_segment: %i", (int)s_segment);
 
-  double radius = 0.22f;
+  double radius = 0.5f;
   
   std::vector<double> t;
   double t_final;
@@ -346,7 +346,7 @@ void CollisionDetection::NoMotionNoMotion(const trajectory_msgs::JointTrajectory
 {
 
   double dist = sqrt( pow(b.positions[0] - a.positions[0],2) + pow(b.positions[0] - a.positions[0],2) );
-  double radius = 0.19f;
+  double radius = 0.5f;
   if(dist < radius*2.f)
   {
     points_of_collision.push_back(a.positions);
@@ -1725,7 +1725,7 @@ void CollisionDetection::query(const std::vector<trajectory_msgs::JointTrajector
   int i=0, j=0;
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
-  float radius = 0.22f;
+  float radius = 0.5f;
 
   while(i<segment.size())
   //for(i=0;i<segment.size() && j<j_stop;i++) 
@@ -1827,7 +1827,7 @@ void CollisionDetection::query(const ramp_msgs::RampTrajectory& trajectory, cons
   //////////ROS_INFO("i_stop: %i", i_stop);
   
   // For every point, check circle detection on a subset of the obstacle's trajectory
-  float radius = 0.19f;
+  float radius = 0.5f;
   for(uint16_t i=0;i<i_stop;i++) 
   {
     

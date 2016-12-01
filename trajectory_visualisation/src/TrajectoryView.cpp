@@ -47,10 +47,10 @@
 TrajectoryView::TrajectoryView(QWidget *parent)
     : QGraphicsView(parent)
 {
-    width_ = 240;
-    height_ = 240;
-    maxWidthMeters_ = 3.5f;
-    maxHeightMeters_ = 3.5f;
+    width_ = 540;
+    height_ = 540;
+    maxWidthMeters_ = 2.5f;
+    maxHeightMeters_ = 10.f;
 
     // Setup the scene
     QGraphicsScene *scene = new QGraphicsScene(this);
@@ -70,8 +70,8 @@ TrajectoryView::TrajectoryView(QWidget *parent)
 
 
 
-void TrajectoryView::size_changed()
 // Change the scene size to the updated one when the user resizes the window
+void TrajectoryView::size_changed()
 {
 
     width_ = this->parentWidget()->frameSize().width();
@@ -128,6 +128,38 @@ void TrajectoryView::drawPopulation() {
   QPen pen2 = QPen( QColor(0,0,255,150) ); 
   
   /* Draw some grid lines */
+    /*
+     * 3.5m square
+     */
+    /*this->scene()->addLine(0, metersToPixels(3.5, false), width_-20, metersToPixels(3.5, false), pen);
+    this->scene()->addLine(metersToPixels(3.5, true), 0, metersToPixels(3.5, true), metersToPixels(3.5, false), pen);
+    
+    this->scene()->addLine(0, metersToPixels(3, false), width_-20, metersToPixels(3, false), pen);
+    this->scene()->addLine(metersToPixels(3, true), 0, metersToPixels(3, true), metersToPixels(3.5, false), pen);
+    
+    this->scene()->addLine(0, metersToPixels(2, false), width_-20, metersToPixels(2, false), pen);
+    this->scene()->addLine(metersToPixels(2, true), 0, metersToPixels(2, true), metersToPixels(3.5, false), pen);
+    
+    this->scene()->addLine(0, metersToPixels(1, false), width_-20, metersToPixels(1, false), pen);
+    this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(3.5, false), pen);*/
+  
+    /*
+     * 2.5x10 
+     */ 
+    //addLine(start_x, start_y, end_x, end_y)
+    // Horizontal lines
+    for(int i=1;i<=10;i++)
+    {
+      this->scene()->addLine(0, metersToPixels(i, false), width_-20, metersToPixels(i, false), pen);
+    }
+    // Vertical lines
+    for(int i=1;i<=2.5;i++)
+    {
+      this->scene()->addLine(metersToPixels(i, true), 0, metersToPixels(i, true), metersToPixels(height_-20, false), pen);
+    }
+
+    /*this->scene()->addLine(0, metersToPixels(10, false), width_-20, metersToPixels(10, false), pen);
+
     this->scene()->addLine(0, metersToPixels(3.5, false), width_-20, metersToPixels(3.5, false), pen);
     this->scene()->addLine(metersToPixels(3.5, true), 0, metersToPixels(3.5, true), metersToPixels(3.5, false), pen);
     
@@ -138,10 +170,12 @@ void TrajectoryView::drawPopulation() {
     this->scene()->addLine(metersToPixels(2, true), 0, metersToPixels(2, true), metersToPixels(3.5, false), pen);
     
     this->scene()->addLine(0, metersToPixels(1, false), width_-20, metersToPixels(1, false), pen);
-    this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(3.5, false), pen);
+    this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(3.5, false), pen);*/
   
 
-
+    /*
+     * 2m square
+     */
     /*this->scene()->addLine(0, metersToPixels(2, false), width_-20, metersToPixels(2, false), pen);
     this->scene()->addLine(metersToPixels(2, true), 0, metersToPixels(2, true), metersToPixels(2, false), pen);
     

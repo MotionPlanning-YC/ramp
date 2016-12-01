@@ -1,8 +1,8 @@
 #include "utility.h"
 
 Utility::Utility() {
-  Range range0(0, 3.5);
-  Range range1(0, 3.5);
+  Range range0(0, 2.5);
+  Range range1(0, 10.f);
   Range range2(-PI, PI);
   standardRanges.push_back(range0);
   standardRanges.push_back(range1);
