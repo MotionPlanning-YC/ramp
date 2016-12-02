@@ -40,21 +40,21 @@ void CollisionDetection::perform(const ramp_msgs::RampTrajectory& trajectory, co
   uint8_t segment;
   int8_t ob_i;
   std::vector< std::vector<double> > points_of_collision;
-  
+ 
   ////////ROS_INFO("s_segment: %i", (int)s_segment);
 
   double radius = 0.5f;
-  
+ 
   std::vector<double> t;
   double t_final;
-  
+ 
   ////////ROS_INFO("obstacle_trjs_.size(): %i", (int)obstacle_trjs.size());
 
   // Predict the obstacle's trajectory
   for(ob_i=0;ob_i<s;ob_i++)
   {
     ////////ROS_INFO("ob_i: %i", (int)ob_i);
-    
+
     ros::Time t_points = ros::Time::now();
     const trajectory_msgs::JointTrajectoryPoint& ob_a = obstacle_trjs[ob_i].trajectory.points[0];
     const trajectory_msgs::JointTrajectoryPoint& ob_b = obstacle_trjs[ob_i].trajectory.points[ 

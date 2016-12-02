@@ -118,7 +118,7 @@ default_flags = [
 '../llvm/tools/clang/include',
 '-I',
 '.',
-'-I',
+'-I/usr/include/qt4',
 './ClangCompleter',
 '-isystem',
 './tests/gmock/gtest',

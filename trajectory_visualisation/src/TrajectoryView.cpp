@@ -57,14 +57,14 @@ TrajectoryView::TrajectoryView(QWidget *parent)
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     scene->setSceneRect(0, 0, width_, height_);
 
+    
+
     setScene(scene);
     setCacheMode(CacheBackground);
     setViewportUpdateMode(BoundingRectViewportUpdate);
     setRenderHint(QPainter::Antialiasing);
     setTransformationAnchor(AnchorUnderMouse);
     setWindowTitle(tr("Trajectory View"));
-
-
 }
 
 
@@ -73,11 +73,8 @@ TrajectoryView::TrajectoryView(QWidget *parent)
 // Change the scene size to the updated one when the user resizes the window
 void TrajectoryView::size_changed()
 {
-
     width_ = this->parentWidget()->frameSize().width();
     height_ = this->parentWidget()->frameSize().height();
-    std::cout<<"\nwidth: "<<width_;
-    std::cout<<"\nheight: "<<height_<<"\n";
 
     this->resize(width_,height_);
     this->scene()->setSceneRect(0, -height_, width_-10, height_-10);// We need to make the scene a little smaller than the frame
