@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
     //Make the main window appear
     MainWindow w;
     w.show();
+    w.trajView.size_changed();
 
     // The main window is fully loaded, we can now delete the splash screen
     splash->finish(&w);

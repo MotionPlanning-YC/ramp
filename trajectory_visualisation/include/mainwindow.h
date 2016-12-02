@@ -19,13 +19,13 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void resizeEvent(QResizeEvent *); //execute this function when the window size changes
+    TrajectoryView trajView; // The trajectory visualisation widget
 protected:
 
 signals:
 
 private:
     Ui::MainWindow *ui;
-    TrajectoryView trajView; // The trajectory visualisation widget
     Ros r; // The Ros thread that subscribes and advertise topics
     int argc;
     char **argv;
