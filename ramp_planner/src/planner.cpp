@@ -217,6 +217,8 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   ROS_INFO("msg: %s", utility_.toString(msg).c_str());
 
   ros::Time start = ros::Time::now();
+  ros::Duration d(start - t_prevCC_);
+  
 
   Population pop_obs;
   Population copy = population_;
@@ -264,7 +266,10 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
     population_.setStartTime(t_start_new); 
   }
 
-  evaluatePopulation();
+  if(d.toSec() < (controlCycle_.toSec()-0.1))
+  {
+    evaluatePopulation();
+  } // end if below threshold since last CC
   
   
   if(cc_started_)
@@ -1126,7 +1131,8 @@ void Planner::buildEvaluationRequest(const RampTrajectory& trajec, ramp_msgs::Ev
     result.imminent_collision = true;
   }*/
 
-  result.imminent_collision = imminent_collision_;
+  double v = sqrt( pow(latestUpdate_.msg_.velocities[2], 2) + pow(latestUpdate_.msg_.velocities[2],2) );
+  result.imminent_collision = imminent_collision_ || v < 0.1;
   result.coll_dist = COLL_DISTS[i_COLL_DISTS_];
 
   // full_eval is for predicting segments that are not generated
@@ -3005,7 +3011,7 @@ void Planner::computeFullSwitch(const RampTrajectory& from, const RampTrajectory
     {
       ROS_WARN("A switch was not possible, returning \"to\" trajectory: %s", to.toString().c_str());
     }
-    //trajec = to;
+    trajec = to;
   }
     
   ROS_INFO("trajec: %s", trajec.toString().c_str());
@@ -3085,15 +3091,13 @@ void Planner::switchTrajectory(const RampTrajectory& from, const RampTrajectory&
     
     ROS_INFO("switching.msg_.curves.size(): %i switching.msg_.holonomic_path.points.size(): %i", (int)switching.msg_.curves.size(), (int)switching.msg_.holonomic_path.points.size());
     // Check that the switching trajectory is a curve or straight line, if true then set the transition trajectory
-    // Results from getTransitionTrajectory will either:
+    // Results from getTransitionTrajectory will be one of the following:
     // 1) Have a smooth curve (successful transition)
     // 2) Be a straight-line (successful transition)
     // 3) Be a series of straight-line segments requiring a stop-and-rotate motion to switch segments (unsuccessful 
     // transition)
     if(switching.msg_.curves.size() > 0 || (switching.msg_.holonomic_path.points.size() == 2 && fabs(delta_theta) < 
           0.25))
-    //if(!(switching.msg_.curves.size() == 0 && (switching.msg_.holonomic_path.points.size() > 2 || fabs(delta_theta) < 
-    //0.25)))
     {
       ROS_INFO("Setting transition trajectory");
       result.transitionTraj_ = switching.msg_;
