@@ -77,8 +77,15 @@ void TrajectoryView::size_changed()
     height_ = this->parentWidget()->frameSize().height();
 
     this->resize(width_,height_);
+    //this->scene()->setSceneRect(0, -height_, width_-10, height_-10);// We need to make the scene a little smaller than the frame
+}
+
+void TrajectoryView::size_changed_manual()
+{
+    this->resize(width_,height_);
     this->scene()->setSceneRect(0, -height_, width_-10, height_-10);// We need to make the scene a little smaller than the frame
 }
+
 
 void TrajectoryView::population(const ramp_msgs::Population& msg)
 // Update the population and called the drawing function
@@ -145,15 +152,21 @@ void TrajectoryView::drawPopulation() {
      */ 
     //addLine(start_x, start_y, end_x, end_y)
     // Horizontal lines
-    for(int i=1;i<=10;i++)
+    for(int i=0;i<=10;i++)
     {
-      this->scene()->addLine(0, metersToPixels(i, false), width_-20, metersToPixels(i, false), pen);
+      this->scene()->addLine(0, metersToPixels(i+0.1, false), width_-10, metersToPixels(i+0.1, false), pen);
     }
     // Vertical lines
-    for(int i=1;i<=2.5;i++)
+    for(int i=0;i<=2.5;i++)
     {
-      this->scene()->addLine(metersToPixels(i, true), 0, metersToPixels(i, true), metersToPixels(height_-20, false), pen);
+      this->scene()->addLine(metersToPixels(i, true), 0, metersToPixels(i, true), metersToPixels(height_-10, false), pen);
     }
+    
+    //ROS_INFO("old width_: %i height_: %i", width_, height_);
+    width_ = (height_ * 3.f) / 10.f;
+    //ROS_INFO("new width_: %i", width_);
+    size_changed_manual();
+    
 
     /*this->scene()->addLine(0, metersToPixels(10, false), width_-20, metersToPixels(10, false), pen);
 
@@ -185,7 +198,7 @@ void TrajectoryView::drawPopulation() {
     this->scene()->addLine(0, metersToPixels(0.5, false), width_-20, metersToPixels(0.5, false), pen);
     this->scene()->addLine(metersToPixels(0.5, true), 0, metersToPixels(0.5, true), metersToPixels(2, false), pen);*/
 
-  double radius = 0.22;
+  double radius = 0.5;
   int radiusPixels = metersToPixels(radius, true);
 
   QPen penTraj;

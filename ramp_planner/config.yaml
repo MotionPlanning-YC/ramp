@@ -18,13 +18,13 @@ sensing_cycle_rate: 15
 
 error_reduction: true
 
-num_of_obstacles: 2
+num_of_obstacles: 0
 
 # Turtlebot obstacle topics
 #obstacle_odoms: ['/obstacle_1/odom', '/obstacle_2/odom', '/obstacle_3/odom']
 #obstacle_vels: ['/obstacle_1/mobile_base/commands/velocity', '/obstacle_2/mobile_base/commands/velocity', '/obstacle_3/mobile_base/commands/velocity']
-obstacle_odoms: ['/obstacle_1/odom', '/obstacle_2/odom']
-obstacle_vels: ['/obstacle_1/mobile_base/commands/velocity', '/obstacle_2/mobile_base/commands/velocity']
+#obstacle_odoms: ['/obstacle_1/odom', '/obstacle_2/odom']
+#obstacle_vels: ['/obstacle_1/mobile_base/commands/velocity', '/obstacle_2/mobile_base/commands/velocity']
 
 # Stage simulator obstacle topics
 #obstacle_odoms: ['/robot_1/odom', '/robot_2/odom', '/robot_3/odom']

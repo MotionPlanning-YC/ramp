@@ -214,6 +214,7 @@ const ramp_msgs::Path Planner::getObstaclePath(const ramp_msgs::Obstacle ob, con
 void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
 {
   ROS_INFO("In sensingCycleCallback");
+  ROS_INFO("msg.obstacles.size(): %i", (int) msg.obstacles.size());
   ROS_INFO("msg: %s", utility_.toString(msg).c_str());
 
   ros::Time start = ros::Time::now();
@@ -257,7 +258,7 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   } // end for
 
   ros::Time s = ros::Time::now();
-  
+
   if(cc_started_)
   {
     ros::Duration d_since_cc = ros::Time::now() - t_prevCC_;

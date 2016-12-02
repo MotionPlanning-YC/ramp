@@ -55,6 +55,7 @@ class TrajectoryView : public QGraphicsView
  public:
      TrajectoryView(QWidget *parent = 0);
      void size_changed(void); // Change the scene size to the updated one when the user resizes the window
+     void size_changed_manual();
 
  public slots:
      void population(const ramp_msgs::Population& msg); //receive the list of trajectories and display them
