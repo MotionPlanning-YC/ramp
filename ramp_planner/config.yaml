@@ -25,9 +25,11 @@ error_reduction: true
 #obstacle_vels: ['/obstacle_1/mobile_base/commands/velocity', '/obstacle_2/mobile_base/commands/velocity']
 
 # Stage simulator obstacle topics
-#obstacle_odoms: ['/robot_1/odom', '/robot_2/odom', '/robot_3/odom']
+# No obstacles
+obstacle_odoms: []
+obstacle_vels: []
+obstacle_delays: []
+
 #obstacle_odoms: ['/robot_1/odom', '/robot_2/odom']
 #obstacle_vels: ['/robot_1/cmd_vel', '/robot_2/cmd_vel']
-#obstacle_vels: ['/robot_1/cmd_vel', '/robot_2/cmd_vel', '/robot_3/cmd_vel']
-
-obstacle_delays: [2, 0, 0]
+#obstacle_delays: [2, 0]
