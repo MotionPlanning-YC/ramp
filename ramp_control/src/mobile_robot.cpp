@@ -251,10 +251,10 @@ void MobileRobot::sendTwist(const geometry_msgs::Twist t) const
   pub_twist_.publish(t); 
 
   // If we have the simulation up, publish to cmd_vel
-  //if(sim_) 
-  //{
-    //pub_cmd_vel_.publish(t);
-  //}
+  if(sim_) 
+  {
+    pub_cmd_vel_.publish(t);
+  }
 }
 
 

@@ -152,15 +152,25 @@ void TrajectoryView::drawPopulation() {
      */ 
     //addLine(start_x, start_y, end_x, end_y)
     // Horizontal lines
-    for(int i=0;i<=10;i++)
+    for(int i=0;i<=maxHeightMeters_;i++)
     {
       this->scene()->addLine(0, metersToPixels(i+0.1, false), width_-10, metersToPixels(i+0.1, false), pen);
     }
     // Vertical lines
-    for(int i=0;i<=2.5;i++)
+    for(int i=0;i<=maxWidthMeters_;i++)
     {
       this->scene()->addLine(metersToPixels(i, true), 0, metersToPixels(i, true), metersToPixels(height_-10, false), pen);
     }
+
+    ROS_INFO("maxWidthMeters_: %f ceil(maxWidthMeters_): %f", maxWidthMeters_, ceil(maxWidthMeters_));
+
+    // If maxWidthMeters_ is not an integer, draw the last line
+    if(ceil(maxWidthMeters_) != maxWidthMeters_)
+    {
+      ROS_INFO("Drawing last line");
+      this->scene()->addLine(metersToPixels(maxWidthMeters_, true), 0, metersToPixels(maxWidthMeters_, true), metersToPixels(height_-10, false), pen);
+    }
+    
     
     //ROS_INFO("old width_: %i height_: %i", width_, height_);
     width_ = (height_ * 3.f) / 10.f;

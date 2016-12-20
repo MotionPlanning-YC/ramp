@@ -7,7 +7,7 @@
 
 Planner::Planner() : resolutionRate_(1.f / 10.f), ob_dists_timer_dur_(0.1), generation_(0), i_rt(1), goalThreshold_(0.4), num_ops_(6), D_(1.5f), 
   cc_started_(false), c_pc_(0), transThreshold_(1./50.), num_cc_(0), L_(0.33), h_traj_req_(0), h_eval_req_(0), h_control_(0), modifier_(0), 
- delta_t_switch_(0.05), stop_(false), moving_on_coll_(false), log_enter_exit_(true), log_switching_(true)
+ delta_t_switch_(0.1), stop_(false), moving_on_coll_(false), log_enter_exit_(true), log_switching_(true)
 {
   imminentCollisionCycle_ = ros::Duration(1.f / 20.f);
   generationsPerCC_       = controlCycle_.toSec() / planningCycle_.toSec();
@@ -3045,7 +3045,7 @@ void Planner::switchTrajectory(const RampTrajectory& from, const RampTrajectory&
    * if we can find one before next CC
    */
   RampTrajectory switching, full;
-  getTransitionTrajectory(from, to, t_start, switching);
+  getTransitionTrajectory(from, to, t_start-0.01, switching);
   result = switching;
 
   if(log_switching_ && switching.msg_.trajectory.points.size() > 0)
@@ -3265,6 +3265,7 @@ void Planner::doControlCycle()
     ROS_INFO("Trajectory %i: %s", i, population_.get(i).toString().c_str());
   }
 
+  diff_.zero();
  
   ros::Time t_startAdapt = ros::Time::now();
   
@@ -3281,13 +3282,13 @@ void Planner::doControlCycle()
 
   // Why do this here? Non-hybrids are replaced by hybrids and 
   // hybrids are evaluated after created
-  evaluatePopulation();
+  //evaluatePopulation();
 
   ros::Duration d_adapt = ros::Time::now() - t_startAdapt;
   adapt_durs_.push_back(d_adapt);
 
   
-  ROS_INFO("After adaptation and evaluation:");
+  ROS_INFO("After adaptation:");
   //ROS_INFO("Pop earliest time: %f", population_.getEarliestStartTime().toSec());
   for(int i=0;i<population_.size();i++)
   {
@@ -3318,7 +3319,6 @@ void Planner::doControlCycle()
   }
   //////ROS_INFO("Time spent getting trans pop: %f", d_trans.toSec());
 
-  diff_.zero();
 
 
   // If error reduction

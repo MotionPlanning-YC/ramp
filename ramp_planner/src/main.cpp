@@ -189,7 +189,7 @@ void loadParameters(const ros::NodeHandle handle)
   {
     handle.getParam("ramp/obstacle_topics", ob_topics);
     ROS_INFO("ob_topics.size(): %i", (int)ob_topics.size());
-    for(int i=0;i<ob_topics.size();i++)
+    for(int i=0;i<num_obs;i++)
     {
       ROS_INFO("ob_topics[%i]: %s", i, ob_topics.at(i).c_str());
     }
