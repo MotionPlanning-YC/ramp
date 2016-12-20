@@ -6,7 +6,7 @@ MobileBase::MobileBase() : planning_full_(false), i_XDOF_(0), i_THETADOF_(1)
   reflexxesData_.rml = 0;
   reflexxesData_.inputParameters = 0;
   reflexxesData_.outputParameters = 0;
-  MAX_SPEED = 0.25f;
+  MAX_SPEED = 1.f;
 } 
 
 
@@ -62,28 +62,21 @@ void MobileBase::initReflexxes()
   // Set up the motion constraints (max velocity, acceleration and jerk)
   // Maximum velocity   
   reflexxesData_.inputParameters->MaxVelocityVector->VecData[0] = MAX_SPEED * cos(PI/4.f);
-  reflexxesData_.inputParameters->MaxVelocityVector->VecData[1] = PI/2.f;
-  //reflexxesData_.inputParameters->MaxVelocityVector->VecData[1] = MAX_SPEED * sin(PI/4.f);
-  //reflexxesData_.inputParameters->MaxVelocityVector->VecData[2] = PI/2.f;
+  reflexxesData_.inputParameters->MaxVelocityVector->VecData[1] = (2.f*PI)/3.f;
   
 
   // Maximum acceleration
   reflexxesData_.inputParameters->MaxAccelerationVector->VecData[0] = 1.;
-  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1] = PI/2.f;
-  //reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1] = 1.;
-  //reflexxesData_.inputParameters->MaxAccelerationVector->VecData[2] = PI/2.f;
+  reflexxesData_.inputParameters->MaxAccelerationVector->VecData[1] = (2.f*PI)/3.f;
   
 
   // As the maximum jerk values are not known, this is just to try
   reflexxesData_.inputParameters->MaxJerkVector->VecData[0] = 1;
   reflexxesData_.inputParameters->MaxJerkVector->VecData[1] = PI;
-  //reflexxesData_.inputParameters->MaxJerkVector->VecData[1] = 1;
-  //reflexxesData_.inputParameters->MaxJerkVector->VecData[2] = PI;
 
   // Set flag value to know if Reflexxes has been called yet
   reflexxesData_.outputParameters->NewPositionVector->VecData[0] = -99;
   reflexxesData_.outputParameters->NewPositionVector->VecData[1] = -99;
-  //reflexxesData_.outputParameters->NewPositionVector->VecData[2] = -99;
 
 
   // Result

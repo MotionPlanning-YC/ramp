@@ -1,6 +1,7 @@
 #include "control_handler.h"
 
-ControlHandler::ControlHandler(const ros::NodeHandle& h) : handle_(h) {
+ControlHandler::ControlHandler(const ros::NodeHandle& h) : handle_(h) 
+{
   pub_bestTrajec_ = handle_.advertise<ramp_msgs::RampTrajectory>("bestTrajec", 1000);
   pub_population_ = handle_.advertise<ramp_msgs::Population>("population", 1000);
   

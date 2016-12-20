@@ -18,7 +18,6 @@ bool                seedPopulation;
 bool                errorReduction;
 double              t_cc_rate;
 double              t_pc_rate;
-int                 num_obs;
 int                 pop_type;
 TrajectoryType      pt;
 std::vector<std::string> ob_topics;
@@ -178,22 +177,6 @@ void loadParameters(const ros::NodeHandle handle)
     ROS_INFO("errorReduction: %s", errorReduction ? "True" : "False");
   }
 
-  if(handle.hasParam("ramp/num_of_obstacles"))
-  {
-    handle.getParam("ramp/num_of_obstacles", num_obs);
-    ROS_INFO("num_of_obstacles: %i", num_obs);
-  }
-
-
-  if(handle.hasParam("ramp/obstacle_topics"))
-  {
-    handle.getParam("ramp/obstacle_topics", ob_topics);
-    ROS_INFO("ob_topics.size(): %i", (int)ob_topics.size());
-    for(int i=0;i<ob_topics.size();i++)
-    {
-      ROS_INFO("ob_topics[%i]: %s", i, ob_topics.at(i).c_str());
-    }
-  }
 
 
 

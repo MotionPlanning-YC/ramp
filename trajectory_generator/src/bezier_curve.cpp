@@ -7,7 +7,7 @@ BezierCurve::BezierCurve() : initialized_(false), deallocated_(false), reachedVM
   reflexxesData_.rml = 0;
   reflexxesData_.inputParameters  = 0;
   reflexxesData_.outputParameters = 0;
-  MAX_SPEED = 0.25f;
+  MAX_SPEED = 1.f;
 }
 
 BezierCurve::~BezierCurve() 
@@ -118,7 +118,7 @@ const bool BezierCurve::verify() const
   //////////ROS_INFO("In BezierCurve::verify()");
 
   double v_max = MAX_SPEED;
-  double w_max = PI/2.f;
+  double w_max = (2.f*PI)/3.f;
 
   double u_dot_max = getUDotMax(u_dot_0_);
 

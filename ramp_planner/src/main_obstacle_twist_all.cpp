@@ -4,7 +4,6 @@
 #include "ramp_msgs/ObstacleList.h"
 #include "utility.h"
 
-int num_obs;
 std::vector< std::string > ob_odoms;
 std::vector< std::string > ob_vels;
 std::vector< ros::Publisher > ob_pubs;
@@ -19,24 +18,11 @@ std::vector<bool> ob_ic;
 
 void getObstacleParams(const ros::NodeHandle handle)
 {
-  if(handle.hasParam("/ramp/num_of_obstacles"))
-  {
-    handle.getParam("/ramp/num_of_obstacles", num_obs);
-    ROS_INFO("num_of_obstacles: %i", num_obs);
-  }
-  else
-  {
-    ROS_ERROR("Cannot find /ramp/num_of_obstacles");
-  }
-
-
-
   if(handle.hasParam("/ramp/obstacle_odoms"))
   {
     handle.getParam("/ramp/obstacle_odoms", ob_odoms);
     ROS_INFO("ob_odoms.size(): %i", (int)ob_odoms.size());
-    //for(int i=0;i<ob_odoms.size();i++)
-    for(int i=0;i<num_obs;i++)
+    for(int i=0;i<ob_odoms.size();i++)
     {
       ROS_INFO("ob_odoms[%i]: %s", i, ob_odoms.at(i).c_str());
     }
@@ -47,8 +33,7 @@ void getObstacleParams(const ros::NodeHandle handle)
   {
     handle.getParam("/ramp/obstacle_vels", ob_vels);
     ROS_INFO("ob_vels.size(): %i", (int)ob_vels.size());
-    //for(int i=0;i<ob_vels.size();i++)
-    for(int i=0;i<num_obs;i++)
+    for(int i=0;i<ob_vels.size();i++)
     {
       ROS_INFO("ob_vels[%i]: %s", i, ob_vels.at(i).c_str());
     }
@@ -59,8 +44,7 @@ void getObstacleParams(const ros::NodeHandle handle)
   {
     handle.getParam("/ramp/obstacle_delays", ob_delays);
 
-    //for(int i=0;i<ob_delays.size();i++)
-    for(int i=0;i<num_obs;i++)
+    for(int i=0;i<ob_delays.size();i++)
     {
       ROS_INFO("ob_delay[%i]: %f", i, ob_delays.at(i));
       dur_delays.push_back(ros::Duration(ob_delays.at(i)));
@@ -334,7 +318,7 @@ int main(int argc, char** argv)
   //std::cin.get();
   
   // Create publishers
-  for(uint8_t i=0;i<num_obs;i++)
+  for(uint8_t i=0;i<ob_vels.size();i++)
   {
     ros::Publisher pub_twist = handle.advertise<geometry_msgs::Twist>(ob_vels.at(i), 1000);
     ob_pubs.push_back(pub_twist);
@@ -361,14 +345,14 @@ int main(int argc, char** argv)
  
 
   // Start timers
-  for(uint8_t i=0;i<num_obs;i++)
+  for(uint8_t i=0;i<ob_delays.size();i++)
   {
     ros::Timer temp = handle.createTimer(ros::Duration(ob_delays.at(i)), boost::bind(publishToOb, _1, i), true, true);
     ob_timers.push_back(temp);
   }
 
  
- for(uint8_t i=0;i<num_obs;i++)
+ for(uint8_t i=0;i<ob_odoms.size();i++)
  {
    //ROS_INFO("In for, i: %i", i);
    ob_ic.push_back(false);

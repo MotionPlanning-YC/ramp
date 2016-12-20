@@ -24,7 +24,9 @@ QT4_ADD_RESOURCES(QT_RESOURCES_CPP ${QT_RESOURCES})
 QT4_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
 QT4_WRAP_CPP(QT_MOC_HPP ${QT_MOC})
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} /usr/include/qt4)
+
+set (CMAKE_CXX_FLAGS "-g")
 
 ##############################################################################
 # Binaries

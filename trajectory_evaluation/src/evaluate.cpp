@@ -140,31 +140,43 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, const double& offs
   if(trj.feasible)
   {
     //ROS_INFO("In if(feasible)");
+    
+    // Get total time to execute trajectory
     double T = trj.trajectory.points.at(trj.trajectory.points.size()-1).time_from_start.toSec();
 
+    /*
+     * Trajectory point generation ends at the end of the non-holonomic segment
+     * For the remaining segments, estimate the time and orientation change needed to execute them
+     */
+
+    // p = last non-holonomic point on trajectory
     trajectory_msgs::JointTrajectoryPoint p = trj.trajectory.points.at(trj.trajectory.points.size()-1);
     //////ROS_INFO("p: %s", utility_.toString(p).c_str());
-    uint16_t i_end=0;
 
-    // Find knot point index where non-holonomic segment ends
+    // Find knot point index on holonomic path where non-holonomic segment ends
+    uint16_t i_end=0;
     for(uint16_t i=0;i<trj.holonomic_path.points.size();i++)
     {
       //////ROS_INFO("i: %i trj.holonomic_path.points.size(): %i", (int)i, (int)trj.holonomic_path.points.size());
       double dist = utility_.positionDistance(trj.holonomic_path.points[i].motionState.positions, p.positions);
 
-      //////ROS_INFO("trj.holonomic_path[%i]: %s", (int)i, utility_.toString(trj.holonomic_path.points[i].motionState).c_str());
-      ////////ROS_INFO("dist: %f", dist);
+      ROS_INFO("trj.holonomic_path[%i]: %s", (int)i, utility_.toString(trj.holonomic_path.points[i].motionState).c_str());
+      ROS_INFO("dist: %f", dist);
+      ROS_INFO("offset: %f", offset);
 
       // Account for some offset
-      if( dist*dist < (0.01 + offset) )
+      if( dist*dist < (0.2 + offset) )
       {
         i_end = i; 
         break;
       }
     } // end for
-
+    
     //ROS_INFO("i_end: %i", (int)i_end);
     //ROS_INFO("trj.holonomic_path.points.size(): %i", (int)trj.holonomic_path.points.size());
+
+    // For each segment in remaining holonomic path,
+    // accumulate the distance and orientation change needed for remaining segment
     double dist=0;
     double delta_theta=0;
     double last_theta = p.positions[2];
@@ -184,6 +196,7 @@ void Evaluate::performFitness(ramp_msgs::RampTrajectory& trj, const double& offs
     double max_v=0.25/2;
     double max_w=PI/8.f;
 
+    // Estimate how long to execute positional and angular displacements based on max velocity
     double estimated_linear   = dist / max_v;
     double estimated_rotation = delta_theta / max_w;
 

@@ -30,11 +30,11 @@
 <node name="ramp_control" pkg="ramp_control" type="ramp_control" output="log" >
   <remap from="odometry" to="odom" />
   <param name="simulation" value="true" />
-  <param name="orientation" type="double" value="0.785" />
+  <param name="orientation" type="double" value="1.5708" />
 </node>
 
 
 <!-- Trajectory Visualization -->
-<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" />
+<node name="trajectory_visualisation" pkg="trajectory_visualisation" type="trajectory_visualisation" output="screen" /> 
 
 </launch>

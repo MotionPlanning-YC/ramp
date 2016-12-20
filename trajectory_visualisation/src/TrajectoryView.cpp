@@ -47,15 +47,17 @@
 TrajectoryView::TrajectoryView(QWidget *parent)
     : QGraphicsView(parent)
 {
-    width_ = 240;
-    height_ = 240;
-    maxWidthMeters_ = 3.5f;
-    maxHeightMeters_ = 3.5f;
+    width_ = 540;
+    height_ = 540;
+    maxWidthMeters_ = 2.5f;
+    maxHeightMeters_ = 10.f;
 
     // Setup the scene
     QGraphicsScene *scene = new QGraphicsScene(this);
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     scene->setSceneRect(0, 0, width_, height_);
+
+    
 
     setScene(scene);
     setCacheMode(CacheBackground);
@@ -63,25 +65,27 @@ TrajectoryView::TrajectoryView(QWidget *parent)
     setRenderHint(QPainter::Antialiasing);
     setTransformationAnchor(AnchorUnderMouse);
     setWindowTitle(tr("Trajectory View"));
-
-
 }
 
 
 
 
-void TrajectoryView::size_changed()
 // Change the scene size to the updated one when the user resizes the window
+void TrajectoryView::size_changed()
 {
-
     width_ = this->parentWidget()->frameSize().width();
     height_ = this->parentWidget()->frameSize().height();
-    std::cout<<"\nwidth: "<<width_;
-    std::cout<<"\nheight: "<<height_<<"\n";
 
+    this->resize(width_,height_);
+    //this->scene()->setSceneRect(0, -height_, width_-10, height_-10);// We need to make the scene a little smaller than the frame
+}
+
+void TrajectoryView::size_changed_manual()
+{
     this->resize(width_,height_);
     this->scene()->setSceneRect(0, -height_, width_-10, height_-10);// We need to make the scene a little smaller than the frame
 }
+
 
 void TrajectoryView::population(const ramp_msgs::Population& msg)
 // Update the population and called the drawing function
@@ -128,6 +132,54 @@ void TrajectoryView::drawPopulation() {
   QPen pen2 = QPen( QColor(0,0,255,150) ); 
   
   /* Draw some grid lines */
+    /*
+     * 3.5m square
+     */
+    /*this->scene()->addLine(0, metersToPixels(3.5, false), width_-20, metersToPixels(3.5, false), pen);
+    this->scene()->addLine(metersToPixels(3.5, true), 0, metersToPixels(3.5, true), metersToPixels(3.5, false), pen);
+    
+    this->scene()->addLine(0, metersToPixels(3, false), width_-20, metersToPixels(3, false), pen);
+    this->scene()->addLine(metersToPixels(3, true), 0, metersToPixels(3, true), metersToPixels(3.5, false), pen);
+    
+    this->scene()->addLine(0, metersToPixels(2, false), width_-20, metersToPixels(2, false), pen);
+    this->scene()->addLine(metersToPixels(2, true), 0, metersToPixels(2, true), metersToPixels(3.5, false), pen);
+    
+    this->scene()->addLine(0, metersToPixels(1, false), width_-20, metersToPixels(1, false), pen);
+    this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(3.5, false), pen);*/
+  
+    /*
+     * 2.5x10 
+     */ 
+    //addLine(start_x, start_y, end_x, end_y)
+    // Horizontal lines
+    for(int i=0;i<=maxHeightMeters_;i++)
+    {
+      this->scene()->addLine(0, metersToPixels(i+0.1, false), width_-10, metersToPixels(i+0.1, false), pen);
+    }
+    // Vertical lines
+    for(int i=0;i<=maxWidthMeters_;i++)
+    {
+      this->scene()->addLine(metersToPixels(i, true), 0, metersToPixels(i, true), metersToPixels(height_-10, false), pen);
+    }
+
+    ROS_INFO("maxWidthMeters_: %f ceil(maxWidthMeters_): %f", maxWidthMeters_, ceil(maxWidthMeters_));
+
+    // If maxWidthMeters_ is not an integer, draw the last line
+    if(ceil(maxWidthMeters_) != maxWidthMeters_)
+    {
+      ROS_INFO("Drawing last line");
+      this->scene()->addLine(metersToPixels(maxWidthMeters_, true), 0, metersToPixels(maxWidthMeters_, true), metersToPixels(height_-10, false), pen);
+    }
+    
+    
+    //ROS_INFO("old width_: %i height_: %i", width_, height_);
+    width_ = (height_ * 3.f) / 10.f;
+    //ROS_INFO("new width_: %i", width_);
+    size_changed_manual();
+    
+
+    /*this->scene()->addLine(0, metersToPixels(10, false), width_-20, metersToPixels(10, false), pen);
+
     this->scene()->addLine(0, metersToPixels(3.5, false), width_-20, metersToPixels(3.5, false), pen);
     this->scene()->addLine(metersToPixels(3.5, true), 0, metersToPixels(3.5, true), metersToPixels(3.5, false), pen);
     
@@ -138,10 +190,12 @@ void TrajectoryView::drawPopulation() {
     this->scene()->addLine(metersToPixels(2, true), 0, metersToPixels(2, true), metersToPixels(3.5, false), pen);
     
     this->scene()->addLine(0, metersToPixels(1, false), width_-20, metersToPixels(1, false), pen);
-    this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(3.5, false), pen);
+    this->scene()->addLine(metersToPixels(1, true), 0, metersToPixels(1, true), metersToPixels(3.5, false), pen);*/
   
 
-
+    /*
+     * 2m square
+     */
     /*this->scene()->addLine(0, metersToPixels(2, false), width_-20, metersToPixels(2, false), pen);
     this->scene()->addLine(metersToPixels(2, true), 0, metersToPixels(2, true), metersToPixels(2, false), pen);
     
@@ -154,7 +208,7 @@ void TrajectoryView::drawPopulation() {
     this->scene()->addLine(0, metersToPixels(0.5, false), width_-20, metersToPixels(0.5, false), pen);
     this->scene()->addLine(metersToPixels(0.5, true), 0, metersToPixels(0.5, true), metersToPixels(2, false), pen);*/
 
-  double radius = 0.22;
+  double radius = 0.5;
   int radiusPixels = metersToPixels(radius, true);
 
   QPen penTraj;
