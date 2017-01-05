@@ -6,6 +6,8 @@
 #include "tf/transform_datatypes.h"
 #include "ramp_msgs/ObstacleList.h"
 #include "obstacle.h"
+#include "nav_msgs/OccupancyGrid.h"
+#include "map_msgs/OccupancyGridUpdate.h"
 
 
 double rate;
@@ -99,6 +101,11 @@ void publishList(const ros::TimerEvent& e)
 
 
 
+void costmapCb(const nav_msgs::OccupancyGrid grid)
+{
+  ROS_INFO("Got a new costmap!");
+}
+
 
 int main(int argc, char** argv) 
 {
@@ -112,7 +119,7 @@ int main(int argc, char** argv)
   handle.getParam("ramp_sensing/other_robot_odom", other_robot_odom);
   std::cout<<"\nother_robot_odom:"<<other_robot_odom;*/
 
-  if(handle.hasParam("/ramp/obstacle_odoms"))
+  /*if(handle.hasParam("/ramp/obstacle_odoms"))
   {
     ROS_INFO("Found rosparam obstacle_odoms");
     handle.getParam("/ramp/obstacle_odoms", ob_odoms);
@@ -151,13 +158,15 @@ int main(int argc, char** argv)
 
     ros::Subscriber sub_ob = handle.subscribe<nav_msgs::Odometry>(ob_odoms.at(i), 1, boost::bind(updateOtherRobotCb, _1, ob_odoms.at(i)));
     subs_obs.push_back(sub_ob);
-  } // end for
+  } // end for*/
+
+  ros::Subscriber sub_costmap = handle.subscribe<nav_msgs::OccupancyGrid>("/costmap_node/costmap/costmap", 1, &costmapCb);
 
   //Publishers
   pub_obj = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
 
   //Timers
-  ros::Timer timer = handle.createTimer(ros::Duration(1.f / rate), publishList);
+  //ros::Timer timer = handle.createTimer(ros::Duration(1.f / rate), publishList);
    
 
   std::cout<<"\nSpinning\n";

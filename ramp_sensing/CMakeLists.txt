@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ramp_sensing)
 
-find_package(catkin REQUIRED COMPONENTS message_generation ramp_msgs roscpp tf)
+find_package(catkin REQUIRED COMPONENTS map_msgs message_generation nav_msgs ramp_msgs roscpp tf)
 
 #######################################
 ## Declare ROS messages and services ##
