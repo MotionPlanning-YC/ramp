@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(ramp_sensing)
 
 find_package(catkin REQUIRED COMPONENTS map_msgs message_generation nav_msgs ramp_msgs roscpp tf)
+find_package(OpenCV REQUIRED)
 
 #######################################
 ## Declare ROS messages and services ##
@@ -19,20 +20,13 @@ catkin_package(
 ## Build ##
 ###########
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 ## Debugging flag for using gdb
 set (CMAKE_CXX_FLAGS "-std=c++11")
 
 
-## Declare a cpp executable
-add_executable(${PROJECT_NAME} src/main.cpp src/obstacle.cpp src/utility.cpp)
-
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp ramp_msgs_generate_messages_cpp)
+add_executable(${PROJECT_NAME} src/circle_packer.cpp src/main.cpp src/obstacle.cpp src/utility.cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBS})
+add_dependencies(${PROJECT_NAME} ramp_msgs_generate_messages_cpp)
 

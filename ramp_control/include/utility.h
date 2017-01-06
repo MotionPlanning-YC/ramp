@@ -6,7 +6,8 @@
 #include <string>
 #include <sstream>
 #include <math.h>
-#include "ramp_msgs/TrajectorySrv.h"
+#include "ramp_msgs/TrajectoryRequest.h"
+#include "ramp_msgs/TrajectoryResponse.h"
 #include "ramp_msgs/Range.h"
 
 

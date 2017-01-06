@@ -101,6 +101,8 @@ void publishList(const ros::TimerEvent& e)
 
 
 
+
+
 void costmapCb(const nav_msgs::OccupancyGrid grid)
 {
   ROS_INFO("Got a new costmap!");
