@@ -8,6 +8,7 @@
 #include "obstacle.h"
 #include "nav_msgs/OccupancyGrid.h"
 #include "map_msgs/OccupancyGridUpdate.h"
+#include "circle_packer.h"
 
 
 double rate;
@@ -106,6 +107,7 @@ void publishList(const ros::TimerEvent& e)
 void costmapCb(const nav_msgs::OccupancyGrid grid)
 {
   ROS_INFO("Got a new costmap!");
+  CirclePacker c(grid);
 }
 
 

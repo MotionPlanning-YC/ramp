@@ -10,6 +10,7 @@
 #include "ramp_msgs/Range.h"
 #include <ros/console.h>
 #include <vector>
+#include <ros/console.h>
 
 #define PI 3.14159f
 
