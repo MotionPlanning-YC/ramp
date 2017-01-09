@@ -2,10 +2,10 @@
 
 
 
-CirclePacker::CirclePacker(nav_msgs::OccupancyGrid g)
+CirclePacker::CirclePacker(nav_msgs::OccupancyGridConstPtr g)
 {
   ROS_INFO("In CirclePacker::CirclePacker()");
-  grid = g;
+  grid_ = g;
   convertOGtoMat();
 }
 
@@ -14,36 +14,20 @@ CirclePacker::~CirclePacker() {}
 void CirclePacker::convertOGtoMat()
 {
   ROS_INFO("In CirclePacker::convertOGtoMat");
-  
-  // Initialize the src Mat
-  src.create(grid.info.width, grid.info.height, CV_8UC1);
-  ROS_INFO("Created src");
 
-  for(int i=0;i<grid.info.width;i++)
-  {
-    for(int j=0;j<grid.info.height;j++)
-    {
-      // Make a Scalar array for each value in grid
-      // Then use Mat(rows, cols, type, values)
-      
-      cv::Point p;
-      int row = i*grid.info.width;
-      int col = row + j;
-      p.x = grid.data[row];
-      p.y = grid.data[col];
-      
-      src.at(i,j) = p;
-    }
-  }
+  
+  // Use the GridMap2D library to convert from nav_msgs::OccupancyGrid to cv::Mat
+  gridmap_2d::GridMap2D gmap(grid_, false);
 
   // Create a window
   cv::namedWindow("testing", CV_WINDOW_AUTOSIZE);
 
-  //dst = cv::Scalar::all(0);
-  //src.copyTo(dst, src);
-
   // Show the image
-  imshow("testing", src);
+  //cv::imshow("testing", gmap.distanceMap());
+  cv::imshow("testing", src);
+
+  // PRESS ESC TO BEFORE CLOSING WINDOW, OTHERWISE THE PROGRAM WILL HANG
+  cv::waitKey(0);
 }
 
 void CirclePacker::CannyThreshold(int, void*)

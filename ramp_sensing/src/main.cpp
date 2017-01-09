@@ -104,7 +104,7 @@ void publishList(const ros::TimerEvent& e)
 
 
 
-void costmapCb(const nav_msgs::OccupancyGrid grid)
+void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
 {
   ROS_INFO("Got a new costmap!");
   CirclePacker c(grid);
