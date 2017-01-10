@@ -353,8 +353,10 @@ std::vector<Cell> CirclePacker::getCellsFromEdges(const std::vector<Edge> edges)
 }
 
 
-std::vector<Circle> CirclePacker::go()
+std::vector< std::vector<Circle> > CirclePacker::go()
 {
+  std::vector< std::vector<Circle> > result;
+
   // Create a matrix of the same size and type as src
   dst.create( src.size(), src.type() );
 
@@ -378,42 +380,59 @@ std::vector<Circle> CirclePacker::go()
     cv::convexHull( detected_contours[i], hull[i], false );
   }
   
+  ROS_INFO("hull.size(): %i", (int)hull.size());
   
   // Build a polygon for each convex hull
-  Polygon p;
-  for(int i=0;i<hull[2].size()-1;i++)
+  for(int h=0;h<hull.size();h++)
   {
-    std::cout<<"\nPoint "<<i<<" ("<<hull[2][i].x<<", "<<hull[2][i].y<<")";
-    Edge temp;
-    temp.start.x = hull[2][i].x;
-    temp.start.y = hull[2][i].y;
+    Polygon p;
+    for(int i=0;i<hull[h].size()-1;i++)
+    {
+      std::cout<<"\nPoint "<<i<<" ("<<hull[h][i].x<<", "<<hull[h][i].y<<")";
+      Edge temp;
+      temp.start.x = hull[h][i].x;
+      temp.start.y = hull[h][i].y;
 
-    temp.end.x = hull[2][i+1].x;
-    temp.end.y = hull[2][i+1].y;
+      temp.end.x = hull[h][i+1].x;
+      temp.end.y = hull[h][i+1].y;
+
+      p.edges.push_back(temp);
+    }
+    
+    // Last edge
+    Edge temp;
+    temp.start.x = hull[h][hull[h].size()-1].x;
+    temp.start.y = hull[h][hull[h].size()-1].y;
+
+    temp.end.x = hull[h][0].x;
+    temp.end.y = hull[h][0].y;
 
     p.edges.push_back(temp);
+   
+    // Build the set of normals for the polygon 
+    for(int i=0;i<p.edges.size();i++)
+    {
+      p.normals.push_back(computeNormal(p.edges[i]));
+    }
+    
+    // Pack the polygon and return the set of circles 
+    std::vector<Circle> cirs = getCirclesFromPoly(p);
+    ROS_INFO("cirs.size(): %i", (int)cirs.size());
+
+    result.push_back(cirs);
   }
   
-  // Last edge
-  Edge temp;
-  temp.start.x = hull[2][hull[2].size()-1].x;
-  temp.start.y = hull[2][hull[2].size()-1].y;
-
-  temp.end.x = hull[2][0].x;
-  temp.end.y = hull[2][0].y;
-
-  p.edges.push_back(temp);
- 
-  // Build the set of normals for the polygon 
-  for(int i=0;i<p.edges.size();i++)
+  ROS_INFO("result size: %i", (int)result.size());
+  for(int i=0;i<result.size();i++)
   {
-    p.normals.push_back(computeNormal(p.edges[i]));
+    ROS_INFO("result[%i].size(): %i", i, (int)result[i].size());
+    for(int j=0;j<result[i].size();j++)
+    {
+      ROS_INFO("Circle %i, Center: (%i, %i) Radius: %f", j, result[i][j].center.x, result[i][j].center.y, result[i][j].radius);
+    }
   }
-  
-  // Pack the polygon and return the set of circles 
-  std::vector<Circle> cirs = getCirclesFromPoly(p);
-  ROS_INFO("cirs.size(): %i", (int)cirs.size());
+
   ROS_INFO("Leaving go()");
 
-  return cirs;
+  return result;
 }
