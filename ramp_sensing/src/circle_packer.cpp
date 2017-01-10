@@ -5,44 +5,58 @@
 CirclePacker::CirclePacker(nav_msgs::OccupancyGridConstPtr g)
 {
   ROS_INFO("In CirclePacker::CirclePacker()");
-  grid_ = g;
-  convertOGtoMat();
+  grid_ = *g;
+  convertOGtoMat(g);
 }
 
 CirclePacker::~CirclePacker() {}
 
-void CirclePacker::convertOGtoMat()
+void CirclePacker::convertOGtoMat(nav_msgs::OccupancyGridConstPtr g)
 {
   ROS_INFO("In CirclePacker::convertOGtoMat");
 
   
   // Use the GridMap2D library to convert from nav_msgs::OccupancyGrid to cv::Mat
-  gridmap_2d::GridMap2D gmap(grid_, false);
+  gridmap_2d::GridMap2D gmap(g, false);
 
   // Create a window
   cv::namedWindow("testing", CV_WINDOW_AUTOSIZE);
 
+  src = gmap.binaryMap();
+
   // Show the image
-  //cv::imshow("testing", gmap.distanceMap());
-  cv::imshow("testing", src);
+  //cv::imshow("testing", src);
 
   // PRESS ESC TO BEFORE CLOSING WINDOW, OTHERWISE THE PROGRAM WILL HANG
-  cv::waitKey(0);
+  //cv::waitKey(0);
 }
 
 void CirclePacker::CannyThreshold(int, void*)
 {
   /// Reduce noise with a kernel 3x3
-  blur( src_gray, detected_edges, cv::Size(3,3) );
+  blur( src, detected_edges, cv::Size(3,3) );
+
+  std::cout<<"\nDetected Edges: "<<detected_edges;
+  ROS_INFO("detected_edges type: %i", detected_edges.type());
+  ROS_INFO("lowThreshold: %i", lowThreshold);
+
+  // Somehow, lowThreshold is being converted to unsigned int before this point
+  // its value is 32767 (-1 for unsigned 4-byte int)
+  // Set the value back to 0 for edge detection to work
+  lowThreshold = 0;
 
   /// Canny detector
-  Canny( detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size );
+  cv::Canny( detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size );
 
   /// Using Canny's output as a mask, we display our result
   dst = cv::Scalar::all(0);
 
+  std::cout<<"\nDetected Edges: "<<detected_edges;
+
   src.copyTo( dst, detected_edges);
-  imshow( window_name, dst );
+  cv::imshow("detected_edges", dst);
+  cv::waitKey(0);
+  //imshow( window_name, dst );
 }
 
 double CirclePacker::getMinDistToPoly(const Polygon& poly, const Cell& cell)
@@ -345,7 +359,7 @@ std::vector<Circle> CirclePacker::go()
   dst.create( src.size(), src.type() );
 
   // Convert to grayscale
-  cvtColor(src, src_gray, CV_BGR2GRAY);
+  //cvtColor(src, src_gray, CV_BGR2GRAY);
 
   // Get the edges
   CannyThreshold(0, 0);
@@ -354,6 +368,8 @@ std::vector<Circle> CirclePacker::go()
   std::vector< std::vector<cv::Point> > detected_contours;
   std::vector<cv::Vec4i> hierarchy;
   cv::findContours(detected_edges, detected_contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+
+  ROS_INFO("detected_contours size: %i", (int)detected_contours.size());
 
   // Find convex hull for each set of contour points
   std::vector< std::vector<cv::Point> > hull(detected_contours.size());
@@ -387,7 +403,7 @@ std::vector<Circle> CirclePacker::go()
   temp.end.y = hull[2][0].y;
 
   p.edges.push_back(temp);
-  
+ 
   // Build the set of normals for the polygon 
   for(int i=0;i<p.edges.size();i++)
   {
@@ -396,4 +412,8 @@ std::vector<Circle> CirclePacker::go()
   
   // Pack the polygon and return the set of circles 
   std::vector<Circle> cirs = getCirclesFromPoly(p);
+  ROS_INFO("cirs.size(): %i", (int)cirs.size());
+  ROS_INFO("Leaving go()");
+
+  return cirs;
 }

@@ -23,7 +23,7 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 ## Debugging flag for using gdb
-set (CMAKE_CXX_FLAGS "-std=c++11")
+set (CMAKE_CXX_FLAGS "-std=c++11 -g -O0")
 
 
 add_executable(${PROJECT_NAME} src/circle_packer.cpp src/GridMap2D.cpp src/main.cpp src/obstacle.cpp src/utility.cpp)

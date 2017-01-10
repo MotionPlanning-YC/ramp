@@ -108,6 +108,8 @@ void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
 {
   ROS_INFO("Got a new costmap!");
   CirclePacker c(grid);
+  c.go();
+  ROS_INFO("Leaving Cb");
 }
 
 
