@@ -9,10 +9,11 @@
 #include "nav_msgs/OccupancyGrid.h"
 #include "map_msgs/OccupancyGridUpdate.h"
 #include "circle_packer.h"
+#include <visualization_msgs/Marker.h>
 
 
 double rate;
-ros::Publisher pub_obj;
+ros::Publisher pub_obj, pub_rviz;
 std::vector< Obstacle> obs;
 ramp_msgs::ObstacleList list;
 std::vector< std::string > ob_odoms;
@@ -110,6 +111,36 @@ void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
   CirclePacker c(grid);
   c.go();
   ROS_INFO("Leaving Cb");
+
+  visualization_msgs::Marker marker;
+  marker.header.stamp = ros::Time::now();
+  marker.header.frame_id = "/base_footprint";
+  marker.ns = "basic_shapes";
+  marker.id = 0;
+  marker.type = visualization_msgs::Marker::SPHERE;
+  marker.action = visualization_msgs::Marker::ADD;
+  marker.pose.position.x = 0;
+  marker.pose.position.y = 0;
+  marker.pose.position.z = 0;
+  marker.pose.orientation.x = 0.0;
+  marker.pose.orientation.y = 0.0;
+  marker.pose.orientation.z = 0.0;
+  marker.pose.orientation.w = 1.0;
+  marker.scale.x = 1;
+  marker.scale.y = 0.1;
+  marker.scale.z = 0.01;
+  marker.color.r = 0;
+  marker.color.g = 1;
+  marker.color.b = 0;
+  marker.color.a = 1;
+  marker.lifetime = ros::Duration();
+  
+  ros::Rate r(10);
+  while(ros::ok())
+  {
+    pub_rviz.publish(marker);
+    r.sleep();
+  }
 }
 
 
@@ -170,6 +201,7 @@ int main(int argc, char** argv)
 
   //Publishers
   pub_obj = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
+  pub_rviz = handle.advertise<visualization_msgs::Marker>("visualization_marker",1);
 
   //Timers
   //ros::Timer timer = handle.createTimer(ros::Duration(1.f / rate), publishList);

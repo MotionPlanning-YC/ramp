@@ -3,6 +3,8 @@
 #include "utility.h"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
+#include "GridMap2D.h"
+#include <nav_msgs/OccupancyGrid.h>
 #include <queue>
 
 struct Edge
@@ -53,8 +55,10 @@ struct CompareDist
 class CirclePacker 
 {
   public:
-    CirclePacker(cv::Mat);
+    CirclePacker(nav_msgs::OccupancyGridConstPtr);
     ~CirclePacker();
+
+    void convertOGtoMat(nav_msgs::OccupancyGridConstPtr);
 
     void CannyThreshold(int, void*);
     double getMinDistToPoly(const Polygon&, const Cell&);
@@ -63,14 +67,22 @@ class CirclePacker
 
     Normal computeNormal(Edge);
     bool cellInPoly(Polygon, cv::Point);
+    
     std::vector<Circle> getCirclesFromPoly(Polygon);
+    std::vector<Circle> getCirclesFromEdgeSets(const std::vector< std::vector<Edge> > edge_sets);
+    std::vector<Circle> getCirclesFromEdges(const std::vector<Edge> edges, const cv::Point robot_cen);
+    
     std::vector<Triangle> triangulatePolygon(const Polygon&);
-    std::vector<Cell> getCellsFromEdges(const std::vector<Edge>);
 
-    std::vector<Circle> go();
+    std::vector< std::vector<Circle> > go();
   private:
+
+    Utility utility_;
+
     cv::Mat src, src_gray;
     cv::Mat dst, detected_edges;
+
+    nav_msgs::OccupancyGrid grid_;
 
     int edgeThresh = 1;
     int lowThreshold;
