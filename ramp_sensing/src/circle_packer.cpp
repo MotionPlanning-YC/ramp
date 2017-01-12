@@ -344,10 +344,103 @@ std::vector<Triangle> CirclePacker::triangulatePolygon(const Polygon& poly)
   return result;
 }
 
-
-std::vector<Cell> CirclePacker::getCellsFromEdges(const std::vector<Edge> edges)
+std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std::vector<Edge> > edge_sets)
 {
-  std::vector<Cell> result;
+  std::vector<Circle> result;
+
+  for(int i=0;i<edge_sets.size();i++)
+  {
+    // For each set of edges, find the minimum and maximum values for x and y
+    int x_min = edge_sets[i][0].start.x, 
+        y_min = edge_sets[i][0].start.y, 
+        x_max = x_min, 
+        y_max = y_min;
+    for(int j=1;j<edge_sets[i].size();j++)
+    {
+      if( edge_sets[i][j].start.x < x_min )
+      {
+        x_min = edge_sets[i][j].start.x;
+      } 
+      if( edge_sets[i][j].start.x > x_max )
+      {
+        x_max = edge_sets[i][j].start.x;
+      } 
+      if( edge_sets[i][j].start.y < y_min )
+      {
+        y_min = edge_sets[i][j].start.y;
+      } 
+      if( edge_sets[i][j].start.y > y_max )
+      {
+        y_max = edge_sets[i][j].start.y;
+      } 
+    } // end inner for
+
+    // Get difference between min+max for both x and y
+    double x_diff = fabs(x_max - x_min);
+    double y_diff = fabs(y_max - y_min);
+
+    // Set radius to half of the largest difference (half because difference would be diameter)
+    double r = x_diff > y_diff ? x_diff/2.f : y_diff/2.f;
+
+    // Find approximate center 
+    cv::Point cen; 
+    cen.x = (x_max + x_min) / 2.f;
+    cen.y = (y_max + y_min) / 2.f;
+
+    Circle temp;
+    temp.radius = r;
+    temp.center = cen;
+
+    result.push_back(temp);
+  } // end outter for
+  
+  return result;
+}
+
+std::vector<Circle> CirclePacker::getCirclesFromEdges(const std::vector<Edge> edges, const cv::Point robot_cen)
+{
+  std::vector<Circle> result;
+
+  for(int i=0;i<edges.size();i++)
+  {
+    Circle temp;
+
+    ROS_INFO("Edge endpoints: (%i,%i) (%i,%i)", edges[i].start.x, edges[i].start.y, edges[i].end.x, edges[i].end.y);
+
+    // Get length of edge to use as diameter of circle
+    double dist = sqrt( pow(edges[i].end.x - edges[i].start.x, 2) + pow(edges[i].end.y - edges[i].start.y, 2) );
+    temp.radius = dist/2.f;
+    
+    // Get the midpoint of the edge
+    double x_mid = (edges[i].end.x + edges[i].start.x) / 2.f;
+    double y_mid = (edges[i].end.y + edges[i].start.y) / 2.f;
+    
+    // Get angle between robot center and edge midpoint
+    std::vector<double> rob_cen; 
+    rob_cen.push_back(robot_cen.x); 
+    rob_cen.push_back(robot_cen.y);
+    std::vector<double> edge_mid;
+    edge_mid.push_back(x_mid);
+    edge_mid.push_back(y_mid);
+    
+    double theta = utility_.findAngleFromAToB(rob_cen, edge_mid); 
+    double phi = utility_.displaceAngle(PI, theta);
+
+    // Get circle center with phi
+    double psi = utility_.displaceAngle(phi, PI);
+    double delta_x = temp.radius*cos(psi);
+    double delta_y = temp.radius*sin(psi);
+
+    double x_cen = x_mid + delta_x;
+    double y_cen = y_mid + delta_y;
+
+    ROS_INFO("Edge midpoint: (%f, %f) theta: %f phi: %f psi: %f Circle center: (%f, %f)", x_mid, y_mid, theta, phi, psi, x_cen, y_cen);
+
+    temp.center.x = x_cen;
+    temp.center.y = y_cen;
+
+    result.push_back(temp);
+  }
 
   return result;
 }
@@ -373,8 +466,70 @@ std::vector< std::vector<Circle> > CirclePacker::go()
 
   ROS_INFO("detected_contours size: %i", (int)detected_contours.size());
 
+  /*
+   * Get every edge in 1 vector, and make a circle for each edge
+   */
+
+  // Make Edges from detected contour points (endpoints of edges)
+  std::vector< std::vector<Edge> > edge_sets;
+  std::vector<Edge> edges;
+  for(int i=0;i<detected_contours.size();i++)
+  {
+    std::vector<Edge> set;
+    ROS_INFO("detected_contours[%i].size(): %i", i, (int)detected_contours[i].size());
+    for(int j=0;j<detected_contours[i].size()-1;j++)
+    {
+      ROS_INFO("detected_contours[%i][%i]: (%i, %i)", i, j, detected_contours[i][j].x, detected_contours[i][j].y);
+      Edge temp;
+      temp.start.x = detected_contours[i][j].x;
+      temp.start.y = detected_contours[i][j].y;
+
+      temp.end.x = detected_contours[i][j+1].x;
+      temp.end.y = detected_contours[i][j+1].y;
+
+      edges.push_back(temp);
+      set.push_back(temp);
+    }
+    
+    Edge temp;
+    temp.start.x = detected_contours[i][detected_contours[i].size()-1].x;
+    temp.start.y = detected_contours[i][detected_contours[i].size()-1].y;
+
+    temp.end.x = detected_contours[i][0].x;
+    temp.end.y = detected_contours[i][0].y;
+
+    edges.push_back(temp);
+    set.push_back(temp);
+
+    edge_sets.push_back(set);
+  }
+  ROS_INFO("Edges.size(): %i", (int)edges.size());
+
+  cv::Point robo_cen;
+  robo_cen.x = 0;
+  robo_cen.y = 0;
+
+  std::vector<Circle> cirs_from_edges = getCirclesFromEdges(edges, robo_cen);
+  ROS_INFO("cirs_from_edges size: %i", (int)cirs_from_edges.size());
+  for(int i=0;i<cirs_from_edges.size();i++)
+  {
+    ROS_INFO("Circle %i - Center: (%i, %i) Radius: %f", i, cirs_from_edges[i].center.x, cirs_from_edges[i].center.y, cirs_from_edges[i].radius);
+  }
+
+  /*std::vector<Circle> cirs_from_sets = getCirclesFromEdgeSets(edge_sets);
+  for(int i=0;i<cirs_from_sets.size();i++)
+  {
+    ROS_INFO("Circle %i - Center: (%i, %i) Radius: %f", i, cirs_from_sets[i].center.x, cirs_from_sets[i].center.y, cirs_from_sets[i].radius);
+  }*/
+
+
+  /*
+   * Get every set of edges, and make a circle for each set
+   */
+
+
   // Find convex hull for each set of contour points
-  std::vector< std::vector<cv::Point> > hull(detected_contours.size());
+  /*std::vector< std::vector<cv::Point> > hull(detected_contours.size());
   for(int i=0;i<detected_contours.size();i++)
   {
     cv::convexHull( detected_contours[i], hull[i], false );
@@ -430,7 +585,7 @@ std::vector< std::vector<Circle> > CirclePacker::go()
     {
       ROS_INFO("Circle %i, Center: (%i, %i) Radius: %f", j, result[i][j].center.x, result[i][j].center.y, result[i][j].radius);
     }
-  }
+  }*/
 
   ROS_INFO("Leaving go()");
 
