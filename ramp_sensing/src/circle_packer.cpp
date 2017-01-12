@@ -344,6 +344,50 @@ std::vector<Triangle> CirclePacker::triangulatePolygon(const Polygon& poly)
   return result;
 }
 
+
+visualization_msgs::Marker CirclePacker::getMarkerForCircle(const Circle c) const
+{
+  visualization_msgs::Marker result;
+
+  result.header.stamp = ros::Time::now();
+  result.header.frame_id = "/base_footprint";
+  result.ns = "basic_shapes";
+  result.id = 0;
+  result.type = visualization_msgs::result::SPHERE;
+  result.action = visualization_msgs::result::ADD;
+  result.pose.position.x = c.center.x;
+  result.pose.position.y = c.center.y;
+  result.pose.position.z = 0;
+  result.pose.orientation.x = 0.0;
+  result.pose.orientation.y = 0.0;
+  result.pose.orientation.z = 0.0;
+  result.pose.orientation.w = 1.0;
+  result.scale.x = c.radius*2.f;
+  result.scale.y = c.radius*2.f;
+  result.scale.z = 0.01;
+  result.color.r = 0;
+  result.color.g = 1;
+  result.color.b = 0;
+  result.color.a = 1;
+  result.lifetime = ros::Duration();
+
+  return result;
+}
+
+
+std::vector<visualization_msgs::Marker> CirclePacker::getMarkers(const std::vector<Circle> cirs) const
+{
+  std::vector<visualization_msgs::Marker> result;
+
+  for(int i=0;i<cirs.size();i++)
+  {
+    result.push_back(getMarkerForCircle(cirs[i]);
+  }
+
+  return result;
+}
+
+
 std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std::vector<Edge> > edge_sets)
 {
   std::vector<Circle> result;

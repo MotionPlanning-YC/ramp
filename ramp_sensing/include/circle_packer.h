@@ -6,6 +6,7 @@
 #include "GridMap2D.h"
 #include <nav_msgs/OccupancyGrid.h>
 #include <queue>
+#include <visualization_msgs/Marker.h>
 
 struct Edge
 {
@@ -67,6 +68,9 @@ class CirclePacker
 
     Normal computeNormal(Edge);
     bool cellInPoly(Polygon, cv::Point);
+
+    visualization_msgs::Marker getMarkerForCircle(const Circle c) const;
+    std::vector<visualization_msgs::Marker> getMarkers(const std::vector<Circle> cirs) const;
     
     std::vector<Circle> getCirclesFromPoly(Polygon);
     std::vector<Circle> getCirclesFromEdgeSets(const std::vector< std::vector<Edge> > edge_sets);
@@ -84,13 +88,14 @@ class CirclePacker
 
     nav_msgs::OccupancyGrid grid_;
 
+    std::vector<visualization_msgs::Marker> markers_;
+
     int edgeThresh = 1;
     int lowThreshold;
     int const max_lowThreshold = 100;
     int ratio = 3;
     int kernel_size = 3;
     std::string window_name = "Edge Map";
-    //cv::RNG rng(12345);
 
 };
 
