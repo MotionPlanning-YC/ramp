@@ -276,7 +276,8 @@ std::vector<Circle> CirclePacker::getCirclesFromPoly(Polygon poly)
       Cell c = updated_pq.top();
       Circle temp;
 
-      temp.center = c.p;
+      temp.center.x = c.p.x;
+      temp.center.y = c.p.y;
       temp.radius = c.dist;
 
       result.push_back(temp);
@@ -353,8 +354,9 @@ visualization_msgs::Marker CirclePacker::getMarkerForCircle(const Circle c) cons
   result.header.frame_id = "/base_footprint";
   result.ns = "basic_shapes";
   result.id = 0;
-  result.type = visualization_msgs::result::SPHERE;
-  result.action = visualization_msgs::result::ADD;
+  
+  result.type = visualization_msgs::Marker::SPHERE;
+  result.action = visualization_msgs::Marker::ADD;
   result.pose.position.x = c.center.x;
   result.pose.position.y = c.center.y;
   result.pose.position.z = 0;
@@ -375,13 +377,14 @@ visualization_msgs::Marker CirclePacker::getMarkerForCircle(const Circle c) cons
 }
 
 
+
 std::vector<visualization_msgs::Marker> CirclePacker::getMarkers(const std::vector<Circle> cirs) const
 {
   std::vector<visualization_msgs::Marker> result;
 
   for(int i=0;i<cirs.size();i++)
   {
-    result.push_back(getMarkerForCircle(cirs[i]);
+    result.push_back(getMarkerForCircle(cirs[i]));
   }
 
   return result;
@@ -392,8 +395,11 @@ std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std:
 {
   std::vector<Circle> result;
 
+  ROS_INFO("In CirclePacker::getCirclesFromEdgeSets");
+
   for(int i=0;i<edge_sets.size();i++)
   {
+    ROS_INFO("Edge set %i", i);
     // For each set of edges, find the minimum and maximum values for x and y
     int x_min = edge_sets[i][0].start.x, 
         y_min = edge_sets[i][0].start.y, 
@@ -401,6 +407,7 @@ std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std:
         y_max = y_min;
     for(int j=1;j<edge_sets[i].size();j++)
     {
+      ROS_INFO("\tEdge %i - start: (%i,%i) end: (%i,%i)", j, edge_sets[i][j].start.y, edge_sets[i][j].start.x, edge_sets[i][j].end.y, edge_sets[i][j].end.x);
       if( edge_sets[i][j].start.x < x_min )
       {
         x_min = edge_sets[i][j].start.x;
@@ -419,20 +426,33 @@ std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std:
       } 
     } // end inner for
 
+    ROS_INFO("\tx_min: %i x_max: %i y_min: %i y_max: %i", x_min, x_max, y_min, y_max);
+
     // Get difference between min+max for both x and y
     double x_diff = fabs(x_max - x_min);
     double y_diff = fabs(y_max - y_min);
+
+    ROS_INFO("\tx_diff: %f y_diff: %f", x_diff, y_diff);
 
     // Set radius to half of the largest difference (half because difference would be diameter)
     double r = x_diff > y_diff ? x_diff/2.f : y_diff/2.f;
 
     // Find approximate center 
-    cv::Point cen; 
-    cen.x = (x_max + x_min) / 2.f;
-    cen.y = (y_max + y_min) / 2.f;
+    // FLIP X AND Y!!
+    Point cen; 
+    cen.x = (y_max + y_min) / 2.f;
+    cen.y = (x_max + x_min) / 2.f;
+
+    // Translate the center by 0.075cm in both directions
+    cen.x+=1.5;
+    cen.y+=1.5;
+
+    ROS_INFO("\tCenter: (%f,%f) Radius: %f", cen.x, cen.y, r);
 
     Circle temp;
-    temp.radius = r;
+
+    // Inflate radius by 20cm
+    temp.radius = r+4;
     temp.center = cen;
 
     result.push_back(temp);
@@ -490,9 +510,9 @@ std::vector<Circle> CirclePacker::getCirclesFromEdges(const std::vector<Edge> ed
 }
 
 
-std::vector< std::vector<Circle> > CirclePacker::go()
+std::vector<Circle> CirclePacker::go()
 {
-  std::vector< std::vector<Circle> > result;
+  std::vector<Circle> result;
 
   // Create a matrix of the same size and type as src
   dst.create( src.size(), src.type() );
@@ -508,9 +528,11 @@ std::vector< std::vector<Circle> > CirclePacker::go()
   
   // Get the contour points
   ros::Time t_start_contour = ros::Time::now();
+
   std::vector< std::vector<cv::Point> > detected_contours;
   std::vector<cv::Vec4i> hierarchy;
   cv::findContours(detected_edges, detected_contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+  
   ros::Duration d_contour(ros::Time::now() - t_start_contour);
 
   //ROS_INFO("detected_contours size: %i", (int)detected_contours.size());
@@ -554,11 +576,16 @@ std::vector< std::vector<Circle> > CirclePacker::go()
   }
   //ROS_INFO("Edges.size(): %i", (int)edges.size());
 
+
+
+
+
+  /*ros::Time t_start_cirs_from_edges = ros::Time::now();
+  
   cv::Point robo_cen;
   robo_cen.x = 0;
   robo_cen.y = 0;
 
-  ros::Time t_start_cirs_from_edges = ros::Time::now();
   std::vector<Circle> cirs_from_edges = getCirclesFromEdges(edges, robo_cen);
   ros::Duration d_cirs_from_edges(ros::Time::now() - t_start_cirs_from_edges);
 
@@ -566,7 +593,7 @@ std::vector< std::vector<Circle> > CirclePacker::go()
   for(int i=0;i<cirs_from_edges.size();i++)
   {
     ROS_INFO("Circle %i - Center: (%i, %i) Radius: %f", i, cirs_from_edges[i].center.x, cirs_from_edges[i].center.y, cirs_from_edges[i].radius);
-  }
+  }*/
 
   ros::Time t_start_cirs_from_sets = ros::Time::now();
   std::vector<Circle> cirs_from_sets = getCirclesFromEdgeSets(edge_sets);
@@ -574,7 +601,8 @@ std::vector< std::vector<Circle> > CirclePacker::go()
 
   for(int i=0;i<cirs_from_sets.size();i++)
   {
-    ROS_INFO("Circle %i - Center: (%i, %i) Radius: %f", i, cirs_from_sets[i].center.x, cirs_from_sets[i].center.y, cirs_from_sets[i].radius);
+    ROS_INFO("Circle %i - Center: (%f, %f) Radius: %f", i, cirs_from_sets[i].center.x, cirs_from_sets[i].center.y, cirs_from_sets[i].radius);
+    result.push_back(cirs_from_sets[i]);
   }
 
 
@@ -644,7 +672,7 @@ std::vector< std::vector<Circle> > CirclePacker::go()
 
   ROS_INFO("d_edges_detect: %f", d_edges_detect.toSec());
   ROS_INFO("d_contour: %f", d_contour.toSec());
-  ROS_INFO("d_cirs_from_edges: %f", d_cirs_from_edges.toSec());
+  //ROS_INFO("d_cirs_from_edges: %f", d_cirs_from_edges.toSec());
   ROS_INFO("d_cirs_from_sets: %f", d_cirs_from_sets.toSec());
 
   ROS_INFO("Leaving go()");

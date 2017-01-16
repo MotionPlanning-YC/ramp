@@ -5,6 +5,7 @@
 #include <tf/transform_datatypes.h>
 #include <vector>
 #include "utility.h"
+#include "circle_packer.h"
 
 class Obstacle 
 {
@@ -20,6 +21,9 @@ class Obstacle
     //Hold odometry information for t and t-1
     nav_msgs::Odometry odom_t;
 
+    // Hold Circle information
+    Circle cir_;
+
     //Time of last update
     ros::Time last_updated_;
 
@@ -29,6 +33,8 @@ class Obstacle
     /** Methods */
 
     void update(const nav_msgs::Odometry o);
+
+    void update(const Circle c);
 
     void doTF();
 

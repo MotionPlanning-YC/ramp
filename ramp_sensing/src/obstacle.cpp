@@ -30,6 +30,16 @@ void Obstacle::update(const nav_msgs::Odometry o)
   last_updated_ = ros::Time::now();
 }
 
+
+void Obstacle::update(const Circle c)
+{
+  cir_ = c;
+
+  // Do I need to call doTF()?
+  
+  last_updated_ = ros::Time::now();
+}
+
 void Obstacle::doTF()
 {
   ramp_msgs::MotionState ms;

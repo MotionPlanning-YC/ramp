@@ -37,10 +37,15 @@ struct Cell
   double dist;
 };
 
+struct Point
+{
+  double x;
+  double y;
+};
 
 struct Circle
 {
-  cv::Point center;
+  Point center;
   double radius;
 };
 
@@ -78,7 +83,7 @@ class CirclePacker
     
     std::vector<Triangle> triangulatePolygon(const Polygon&);
 
-    std::vector< std::vector<Circle> > go();
+    std::vector<Circle> go();
   private:
 
     Utility utility_;

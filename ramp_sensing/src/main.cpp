@@ -9,7 +9,7 @@
 #include "nav_msgs/OccupancyGrid.h"
 #include "map_msgs/OccupancyGridUpdate.h"
 #include "circle_packer.h"
-#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 
 
 double rate;
@@ -102,6 +102,85 @@ void publishList(const ros::TimerEvent& e)
 } //End sendList
 
 
+std::vector<visualization_msgs::Marker> convertObsToMarkers()
+{
+  std::vector<visualization_msgs::Marker> result;
+  for(int i=0;i<obs.size();i++)
+  {
+    visualization_msgs::Marker marker;
+    marker.header.stamp = ros::Time::now();
+    marker.header.frame_id = "/base_footprint";
+    marker.ns = "basic_shapes";
+    marker.id = i;
+    
+    marker.type = visualization_msgs::Marker::SPHERE;
+    marker.action = visualization_msgs::Marker::ADD;
+
+    // This needs to be generalized to the costmap resolution
+    double x = (obs[i].cir_.center.x - 40) / 20.f;
+    double y = (obs[i].cir_.center.y - 40) / 20.f;
+
+    //y *= -1;
+
+
+    marker.pose.position.x = x;
+    marker.pose.position.y = y;
+    marker.pose.position.z = 0;
+    marker.pose.orientation.x = 0.0;
+    marker.pose.orientation.y = 0.0;
+    marker.pose.orientation.z = 0.0;
+    marker.pose.orientation.w = 1.0;
+
+    double radius = obs[i].cir_.radius / 20.f;
+    ROS_INFO("x: %f y: %f radius: %f", x, y, radius);
+    
+    marker.scale.x = radius;
+    marker.scale.y = radius;
+    marker.scale.z = 0.1;
+    marker.color.r = 0;
+    marker.color.g = 1;
+    marker.color.b = 0;
+    marker.color.a = 1;
+    marker.lifetime = ros::Duration();
+
+    result.push_back(marker);
+  }
+
+  return result;
+}
+
+void publishMarkers(const ros::TimerEvent& e)
+{
+  
+  // Publish a single Marker
+  visualization_msgs::MarkerArray result;
+
+  
+  std::vector<visualization_msgs::Marker> markers = convertObsToMarkers();
+
+  ROS_INFO("Publishing %i markers", (int)markers.size());
+
+  result.markers = markers;
+
+  pub_rviz.publish(result);
+
+
+
+  //ROS_INFO("markers.size(): %i", (int)markers.size());
+  /*for(int i=0;i<markers.size();i++)
+  {
+    if(i==0 && markers.size() > 0)
+    {
+      ROS_INFO("markers.size(): %i", (int)markers.size());
+      for(int j=0;j<markers.size();j++)
+      {
+        ROS_INFO("Circle %i scale: %f, %f", j, markers[j].scale.x, markers[j].scale.y);
+      }
+    }
+    pub_rviz.publish(markers[i]);
+  }*/
+}
+
 
 
 
@@ -109,7 +188,23 @@ void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
 {
   ROS_INFO("Got a new costmap!");
   CirclePacker c(grid);
-  c.go();
+  std::vector<Circle> cirs = c.go();
+
+  for(int i=0;i<cirs.size();i++)
+  {
+    if(obs.size() > i)
+    {
+      obs[i].update(cirs[i]);
+    }
+    else
+    {
+      Obstacle o; 
+      o.cir_ = cirs[i];
+      obs.push_back(o);
+    }
+  }
+ 
+  ROS_INFO("obs.size(): %i", (int)obs.size());
   ROS_INFO("Leaving Cb");
 }
 
@@ -171,10 +266,11 @@ int main(int argc, char** argv)
 
   //Publishers
   pub_obj = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
-  pub_rviz = handle.advertise<visualization_msgs::Marker>("visualization_marker",1);
+  pub_rviz = handle.advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 1);
 
   //Timers
   //ros::Timer timer = handle.createTimer(ros::Duration(1.f / rate), publishList);
+  ros::Timer timer_markers = handle.createTimer(ros::Duration(1.f/10.f), publishMarkers);
    
 
   std::cout<<"\nSpinning\n";
