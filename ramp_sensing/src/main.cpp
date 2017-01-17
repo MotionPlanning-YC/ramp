@@ -18,6 +18,7 @@ std::vector< Obstacle> obs;
 ramp_msgs::ObstacleList list;
 std::vector< std::string > ob_odoms;
 std::map< std::string, uint8_t > topic_index_map;
+nav_msgs::OccupancyGrid global_grid;
 
 std::vector<tf::Transform> ob_tfs;
 
@@ -109,16 +110,26 @@ std::vector<visualization_msgs::Marker> convertObsToMarkers()
   {
     visualization_msgs::Marker marker;
     marker.header.stamp = ros::Time::now();
-    marker.header.frame_id = "/base_footprint";
+    marker.header.frame_id = "/map";
     marker.ns = "basic_shapes";
     marker.id = i;
     
     marker.type = visualization_msgs::Marker::SPHERE;
     marker.action = visualization_msgs::Marker::ADD;
 
+    double x_origin = global_grid.info.origin.position.x;
+    double y_origin = global_grid.info.origin.position.y;
+    
+    ROS_INFO("Before translate: x_origin: %f y_origin: %f", x_origin, y_origin);
+
+    x_origin *= 20;
+    y_origin *= 20;
+    
+    ROS_INFO("After translate: x_origin: %f y_origin: %f", x_origin, y_origin);
+
     // This needs to be generalized to the costmap resolution
-    double x = (obs[i].cir_.center.x - 40) / 20.f;
-    double y = (obs[i].cir_.center.y - 40) / 20.f;
+    double x = (obs[i].cir_.center.x + x_origin) / 20.f;
+    double y = (obs[i].cir_.center.y + y_origin) / 20.f;
 
     //y *= -1;
 
@@ -186,22 +197,18 @@ void publishMarkers(const ros::TimerEvent& e)
 
 void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
 {
+  global_grid = *grid;
   ROS_INFO("Got a new costmap!");
   CirclePacker c(grid);
   std::vector<Circle> cirs = c.go();
 
+  obs.clear();
+
   for(int i=0;i<cirs.size();i++)
   {
-    if(obs.size() > i)
-    {
-      obs[i].update(cirs[i]);
-    }
-    else
-    {
-      Obstacle o; 
-      o.cir_ = cirs[i];
-      obs.push_back(o);
-    }
+    Obstacle o; 
+    o.cir_ = cirs[i];
+    obs.push_back(o);
   }
  
   ROS_INFO("obs.size(): %i", (int)obs.size());
