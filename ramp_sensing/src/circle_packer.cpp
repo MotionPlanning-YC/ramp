@@ -4,7 +4,7 @@
 
 CirclePacker::CirclePacker(nav_msgs::OccupancyGridConstPtr g)
 {
-  ROS_INFO("In CirclePacker::CirclePacker()");
+  //ROS_INFO("In CirclePacker::CirclePacker()");
   grid_ = *g;
   convertOGtoMat(g);
 }
@@ -13,7 +13,7 @@ CirclePacker::~CirclePacker() {}
 
 void CirclePacker::convertOGtoMat(nav_msgs::OccupancyGridConstPtr g)
 {
-  ROS_INFO("In CirclePacker::convertOGtoMat");
+  //ROS_INFO("In CirclePacker::convertOGtoMat");
 
   
   // Use the GridMap2D library to convert from nav_msgs::OccupancyGrid to cv::Mat
@@ -133,15 +133,15 @@ void CirclePacker::deleteCellsInCir(const std::vector<Cell>& cells, const Circle
 
 Normal CirclePacker::computeNormal(Edge e)
 {
-  std::cout<<"\ne.start: "<<e.start.x<<" "<<e.start.y;
-  std::cout<<"\ne.end: "<<e.end.x<<" "<<e.end.y;
+  //std::cout<<"\ne.start: "<<e.start.x<<" "<<e.start.y;
+  //std::cout<<"\ne.end: "<<e.end.x<<" "<<e.end.y;
   Normal result;
   result.a = e.end.y - e.start.y;
   result.b = -(e.end.x - e.start.x);
 
   result.c = -((result.a*e.start.x) + (result.b*e.start.y));
 
-  std::cout<<"\na: "<<result.a<<" b: "<<result.b<<" c: "<<result.c;
+  //std::cout<<"\na: "<<result.a<<" b: "<<result.b<<" c: "<<result.c;
   return result;
 }
 
@@ -150,12 +150,12 @@ bool CirclePacker::cellInPoly(Polygon poly, cv::Point cell)
 {
   for(int i=0;i<poly.normals.size();i++)
   {
-    std::cout<<"\nnormal a: "<<poly.normals[i].a<<" b: "<<poly.normals[i].b<<" c: "<<poly.normals[i].c;
+    //std::cout<<"\nnormal a: "<<poly.normals[i].a<<" b: "<<poly.normals[i].b<<" c: "<<poly.normals[i].c;
     double d = poly.normals[i].a*cell.x + poly.normals[i].b*cell.y + poly.normals[i].c;
-    std::cout<<"\ncell center: "<<cell.x<<", "<<cell.y<<" d: "<<d;
+    //std::cout<<"\ncell center: "<<cell.x<<", "<<cell.y<<" d: "<<d;
     if(d > -0.000001)
     {
-      std::cout<<"\nNot in polygon";
+      //std::cout<<"\nNot in polygon";
       return false;
     }
   }
@@ -166,7 +166,7 @@ bool CirclePacker::cellInPoly(Polygon poly, cv::Point cell)
 
 std::vector<Circle> CirclePacker::getCirclesFromPoly(Polygon poly)
 {
-  std::cout<<"\n# of edges: "<<poly.edges.size();
+  //std::cout<<"\n# of edges: "<<poly.edges.size();
   std::vector<Circle> result;
   std::vector<cv::Point> vertices;
   
@@ -208,7 +208,7 @@ std::vector<Circle> CirclePacker::getCirclesFromPoly(Polygon poly)
   double start_x = MIN_WIDTH + round/2.f;
   double start_y = MIN_LENGTH + round/2.f;
 
-  std::cout<<"\nMAX_WIDTH: "<<MAX_WIDTH<<" MAX_LENGTH: "<<MAX_LENGTH<<" width_count: "<<width_count<<" length_count: "<<length_count;
+  //std::cout<<"\nMAX_WIDTH: "<<MAX_WIDTH<<" MAX_LENGTH: "<<MAX_LENGTH<<" width_count: "<<width_count<<" length_count: "<<length_count;
 
   std::vector<Cell> cells;
  
@@ -216,14 +216,14 @@ std::vector<Circle> CirclePacker::getCirclesFromPoly(Polygon poly)
   {
     for(int j=0;j<length_count;j++)
     {
-      std::cout<<"\ni: "<<i<<" j: "<<j<<" round: "<<round;
+      //std::cout<<"\ni: "<<i<<" j: "<<j<<" round: "<<round;
       double x = start_x + (round * (i)); 
       double y = start_y + (round * (j));
       Cell temp;
       temp.p.x = x;
       temp.p.y = y;
     
-      std::cout<<"\n("<<temp.p.x<<", "<<temp.p.y<<")";
+      //std::cout<<"\n("<<temp.p.x<<", "<<temp.p.y<<")";
 
       if(cellInPoly(poly, temp.p))
       {
@@ -238,7 +238,7 @@ std::vector<Circle> CirclePacker::getCirclesFromPoly(Polygon poly)
 
   while(cells.size() > 0)
   {
-    std::cout<<"\nIn while cells.size(): "<<cells.size()<<" result.size(): "<<result.size();
+    //std::cout<<"\nIn while cells.size(): "<<cells.size()<<" result.size(): "<<result.size();
     cells = reduced_cells;
 
     std::priority_queue<Cell, std::vector<Cell>, CompareDist> updated_pq;
@@ -284,11 +284,11 @@ std::vector<Circle> CirclePacker::getCirclesFromPoly(Polygon poly)
     }
   }
   
-  std::cout<<"\nFinal number of circles: "<<result.size();
+  /*std::cout<<"\nFinal number of circles: "<<result.size();
   for(int i=0;i<result.size();i++)
   {
     std::cout<<"\nCircle "<<i<<" ("<<result[i].center.x<<", "<<result[i].center.y<<") radius: "<<result[i].radius;
-  }
+  }*/
 
   return result;
 }
@@ -395,11 +395,11 @@ std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std:
 {
   std::vector<Circle> result;
 
-  ROS_INFO("In CirclePacker::getCirclesFromEdgeSets");
+  //ROS_INFO("In CirclePacker::getCirclesFromEdgeSets");
 
   for(int i=0;i<edge_sets.size();i++)
   {
-    ROS_INFO("Edge set %i", i);
+    //ROS_INFO("Edge set %i", i);
     // For each set of edges, find the minimum and maximum values for x and y
     int x_min = edge_sets[i][0].start.x, 
         y_min = edge_sets[i][0].start.y, 
@@ -407,7 +407,7 @@ std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std:
         y_max = y_min;
     for(int j=1;j<edge_sets[i].size();j++)
     {
-      ROS_INFO("\tEdge %i - start: (%i,%i) end: (%i,%i)", j, edge_sets[i][j].start.y, edge_sets[i][j].start.x, edge_sets[i][j].end.y, edge_sets[i][j].end.x);
+      //ROS_INFO("\tEdge %i - start: (%i,%i) end: (%i,%i)", j, edge_sets[i][j].start.y, edge_sets[i][j].start.x, edge_sets[i][j].end.y, edge_sets[i][j].end.x);
       if( edge_sets[i][j].start.x < x_min )
       {
         x_min = edge_sets[i][j].start.x;
@@ -426,13 +426,13 @@ std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std:
       } 
     } // end inner for
 
-    ROS_INFO("\tx_min: %i x_max: %i y_min: %i y_max: %i", x_min, x_max, y_min, y_max);
+    //ROS_INFO("\tx_min: %i x_max: %i y_min: %i y_max: %i", x_min, x_max, y_min, y_max);
 
     // Get difference between min+max for both x and y
     double x_diff = fabs(x_max - x_min);
     double y_diff = fabs(y_max - y_min);
 
-    ROS_INFO("\tx_diff: %f y_diff: %f", x_diff, y_diff);
+    //ROS_INFO("\tx_diff: %f y_diff: %f", x_diff, y_diff);
 
     // Set radius to half of the largest difference (half because difference would be diameter)
     double r = x_diff > y_diff ? x_diff/2.f : y_diff/2.f;
@@ -447,7 +447,7 @@ std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std:
     cen.x+=1.5;
     cen.y+=1.5;
 
-    ROS_INFO("\tCenter: (%f,%f) Radius: %f", cen.x, cen.y, r);
+    //ROS_INFO("\tCenter: (%f,%f) Radius: %f", cen.x, cen.y, r);
 
     Circle temp;
 
@@ -601,7 +601,7 @@ std::vector<Circle> CirclePacker::go()
 
   for(int i=0;i<cirs_from_sets.size();i++)
   {
-    ROS_INFO("Circle %i - Center: (%f, %f) Radius: %f", i, cirs_from_sets[i].center.x, cirs_from_sets[i].center.y, cirs_from_sets[i].radius);
+    //ROS_INFO("Circle %i - Center: (%f, %f) Radius: %f", i, cirs_from_sets[i].center.x, cirs_from_sets[i].center.y, cirs_from_sets[i].radius);
     result.push_back(cirs_from_sets[i]);
   }
 
@@ -675,7 +675,7 @@ std::vector<Circle> CirclePacker::go()
   //ROS_INFO("d_cirs_from_edges: %f", d_cirs_from_edges.toSec());
   ROS_INFO("d_cirs_from_sets: %f", d_cirs_from_sets.toSec());
 
-  ROS_INFO("Leaving go()");
+  //ROS_INFO("Leaving go()");
 
   return result;
 }

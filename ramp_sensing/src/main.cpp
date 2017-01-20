@@ -22,6 +22,8 @@ nav_msgs::OccupancyGrid global_grid;
 
 std::vector<tf::Transform> ob_tfs;
 
+size_t prev_size;
+
 
 void loadObstacleTF()
 {
@@ -120,12 +122,12 @@ std::vector<visualization_msgs::Marker> convertObsToMarkers()
     double x_origin = global_grid.info.origin.position.x;
     double y_origin = global_grid.info.origin.position.y;
     
-    ROS_INFO("Before translate: x_origin: %f y_origin: %f", x_origin, y_origin);
+    //ROS_INFO("Before translate: x_origin: %f y_origin: %f", x_origin, y_origin);
 
     x_origin *= 20;
     y_origin *= 20;
     
-    ROS_INFO("After translate: x_origin: %f y_origin: %f", x_origin, y_origin);
+    //ROS_INFO("After translate: x_origin: %f y_origin: %f", x_origin, y_origin);
 
     // This needs to be generalized to the costmap resolution
     double x = (obs[i].cir_.center.x + x_origin) / 20.f;
@@ -143,7 +145,7 @@ std::vector<visualization_msgs::Marker> convertObsToMarkers()
     marker.pose.orientation.w = 1.0;
 
     double radius = obs[i].cir_.radius / 20.f;
-    ROS_INFO("x: %f y: %f radius: %f", x, y, radius);
+    //ROS_INFO("x: %f y: %f radius: %f", x, y, radius);
     
     marker.scale.x = radius;
     marker.scale.y = radius;
@@ -152,7 +154,7 @@ std::vector<visualization_msgs::Marker> convertObsToMarkers()
     marker.color.g = 1;
     marker.color.b = 0;
     marker.color.a = 1;
-    marker.lifetime = ros::Duration();
+    marker.lifetime = ros::Duration(0.1);
 
     result.push_back(marker);
   }
@@ -169,7 +171,7 @@ void publishMarkers(const ros::TimerEvent& e)
   
   std::vector<visualization_msgs::Marker> markers = convertObsToMarkers();
 
-  ROS_INFO("Publishing %i markers", (int)markers.size());
+  //ROS_INFO("Publishing %i markers", (int)markers.size());
 
   result.markers = markers;
 
@@ -198,9 +200,11 @@ void publishMarkers(const ros::TimerEvent& e)
 void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
 {
   global_grid = *grid;
-  ROS_INFO("Got a new costmap!");
+  //ROS_INFO("Got a new costmap!");
   CirclePacker c(grid);
   std::vector<Circle> cirs = c.go();
+
+  prev_size = obs.size();
 
   obs.clear();
 
@@ -211,8 +215,8 @@ void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
     obs.push_back(o);
   }
  
-  ROS_INFO("obs.size(): %i", (int)obs.size());
-  ROS_INFO("Leaving Cb");
+  //ROS_INFO("obs.size(): %i", (int)obs.size());
+  //ROS_INFO("Leaving Cb");
 }
 
 

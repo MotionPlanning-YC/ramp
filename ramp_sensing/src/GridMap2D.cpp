@@ -94,7 +94,7 @@ void GridMap2D::setMap(const nav_msgs::OccupancyGridConstPtr& grid_map, bool unk
 
   updateDistanceMap();
 
-  ROS_INFO("GridMap2D created with %d x %d cells at %f resolution.", m_mapInfo.width, m_mapInfo.height, m_mapInfo.resolution);
+  //ROS_INFO("GridMap2D created with %d x %d cells at %f resolution.", m_mapInfo.width, m_mapInfo.height, m_mapInfo.resolution);
 }
 
 nav_msgs::OccupancyGrid GridMap2D::toOccupancyGridMsg() const{
@@ -129,7 +129,7 @@ void GridMap2D::setMap(const cv::Mat& binaryMap){
   // distance map now contains distance in meters:
   m_distMap = m_distMap * m_mapInfo.resolution;
 
-  ROS_INFO("GridMap2D copied from existing cv::Mat with %d x %d cells at %f resolution.", m_mapInfo.width, m_mapInfo.height, m_mapInfo.resolution);
+  //ROS_INFO("GridMap2D copied from existing cv::Mat with %d x %d cells at %f resolution.", m_mapInfo.width, m_mapInfo.height, m_mapInfo.resolution);
 
 }
 
