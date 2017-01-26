@@ -7,6 +7,9 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <queue>
 #include <visualization_msgs/Marker.h>
+#include "data.h"
+#include "circle.h"
+#include "mystuff.h"
 
 struct Edge
 {
@@ -74,14 +77,17 @@ class CirclePacker
     Normal computeNormal(Edge);
     bool cellInPoly(Polygon, cv::Point);
 
-    visualization_msgs::Marker getMarkerForCircle(const Circle c) const;
-    std::vector<visualization_msgs::Marker> getMarkers(const std::vector<Circle> cirs) const;
+    std::vector<Circle> combineOverlappingCircles(const std::vector<Circle> cs);
     
     std::vector<Circle> getCirclesFromPoly(Polygon);
     std::vector<Circle> getCirclesFromEdgeSets(const std::vector< std::vector<Edge> > edge_sets);
     std::vector<Circle> getCirclesFromEdges(const std::vector<Edge> edges, const cv::Point robot_cen);
     
     std::vector<Triangle> triangulatePolygon(const Polygon&);
+
+
+    CircleFit CircleFitFitByTaubin(Data& data);
+    int CircleFitByLevenbergMarquardtFull (Data& data, CircleFit& circleIni, reals LambdaIni, CircleFit& circle);
 
     std::vector<Circle> go();
   private:

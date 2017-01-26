@@ -18,6 +18,17 @@ const double Utility::positionDistance(const std::vector<double> a, const std::v
   return sqrt( pow(d_x,2) + pow(d_y,2) );
 } // End euclideanDistance
 
+const double Utility::positionDistance(const double ax, const double ay, const double bx, const double by) const
+{
+  std::vector<double> a, b;
+
+  a.push_back(ax);
+  a.push_back(ay);
+  b.push_back(bx);
+  b.push_back(by);
+
+  return positionDistance(a, b);
+}
 
 /** This method returns the angle that will form a straight line from position a to position b. a and b are [x, y] vectors. */
 const double Utility::findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const 

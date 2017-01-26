@@ -10,8 +10,9 @@
 #include "map_msgs/OccupancyGridUpdate.h"
 #include "circle_packer.h"
 #include <visualization_msgs/MarkerArray.h>
+#include "utility.h"
 
-
+Utility util;
 double rate;
 ros::Publisher pub_obj, pub_rviz;
 std::vector< Obstacle> obs;
@@ -22,8 +23,13 @@ nav_msgs::OccupancyGrid global_grid;
 
 std::vector<tf::Transform> ob_tfs;
 
+std::vector<Circle> prev_cirs;
+
 size_t prev_size;
 
+ros::Time t_last_costmap;
+
+int count;
 
 void loadObstacleTF()
 {
@@ -108,6 +114,17 @@ void publishList(const ros::TimerEvent& e)
 std::vector<visualization_msgs::Marker> convertObsToMarkers()
 {
   std::vector<visualization_msgs::Marker> result;
+  
+  double x_origin = global_grid.info.origin.position.x;
+  double y_origin = global_grid.info.origin.position.y;
+  
+  //ROS_INFO("Before translate: x_origin: %f y_origin: %f", x_origin, y_origin);
+
+  x_origin /= global_grid.info.resolution;
+  y_origin /= global_grid.info.resolution;
+  
+  //ROS_INFO("After translate: x_origin: %f y_origin: %f", x_origin, y_origin);
+
   for(int i=0;i<obs.size();i++)
   {
     visualization_msgs::Marker marker;
@@ -119,22 +136,12 @@ std::vector<visualization_msgs::Marker> convertObsToMarkers()
     marker.type = visualization_msgs::Marker::SPHERE;
     marker.action = visualization_msgs::Marker::ADD;
 
-    double x_origin = global_grid.info.origin.position.x;
-    double y_origin = global_grid.info.origin.position.y;
-    
-    //ROS_INFO("Before translate: x_origin: %f y_origin: %f", x_origin, y_origin);
-
-    x_origin *= 20;
-    y_origin *= 20;
-    
-    //ROS_INFO("After translate: x_origin: %f y_origin: %f", x_origin, y_origin);
-
     // This needs to be generalized to the costmap resolution
-    double x = (obs[i].cir_.center.x + x_origin) / 20.f;
-    double y = (obs[i].cir_.center.y + y_origin) / 20.f;
-
-    //y *= -1;
-
+    double x = (obs[i].cir_.center.x + x_origin) * global_grid.info.resolution;
+    double y = (obs[i].cir_.center.y + y_origin) * global_grid.info.resolution;
+    
+    //ROS_INFO("Before translation: (%f, %f) After translation: (%f, %f)", obs[i].cir_.center.x, obs[i].cir_.center.y, x, y);
+    
 
     marker.pose.position.x = x;
     marker.pose.position.y = y;
@@ -144,8 +151,12 @@ std::vector<visualization_msgs::Marker> convertObsToMarkers()
     marker.pose.orientation.z = 0.0;
     marker.pose.orientation.w = 1.0;
 
-    double radius = obs[i].cir_.radius / 20.f;
-    //ROS_INFO("x: %f y: %f radius: %f", x, y, radius);
+    double radius = obs[i].cir_.radius * global_grid.info.resolution;
+    ROS_INFO("x: %f y: %f radius: %f", x, y, radius);
+    
+    obs[i].cir_.center.x = x;
+    obs[i].cir_.center.y = y;
+    obs[i].cir_.radius = radius;
     
     marker.scale.x = radius;
     marker.scale.y = radius;
@@ -180,38 +191,150 @@ void publishMarkers(const ros::TimerEvent& e)
 
 
   //ROS_INFO("markers.size(): %i", (int)markers.size());
-  /*for(int i=0;i<markers.size();i++)
+  /*for(int i=0;i<result.markers.size();i++)
   {
-    if(i==0 && markers.size() > 0)
+    if(i==0 && result.markers.size() > 0)
     {
-      ROS_INFO("markers.size(): %i", (int)markers.size());
-      for(int j=0;j<markers.size();j++)
+      ROS_INFO("result.markers.size(): %i", (int)result.markers.size());
+      for(int j=0;j<result.markers.size();j++)
       {
-        ROS_INFO("Circle %i scale: %f, %f", j, markers[j].scale.x, markers[j].scale.y);
+        ROS_INFO("Circle %i scale: %f, %f", j, result.markers[j].scale.x, result.markers[j].scale.y);
       }
     }
-    pub_rviz.publish(markers[i]);
   }*/
 }
 
 
+int getClosestPrev(Circle m, std::vector<Circle> N)
+{
+  int min_index = 0;
 
+  std::vector<double> center;
+  center.push_back(m.center.x);
+  center.push_back(m.center.y);
+
+  //ROS_INFO("center: [%f, %f]", center[0], center[1]);
+
+  if(prev_cirs.size() > 0)
+  {
+
+    std::vector<double> prev_center;
+    prev_center.push_back(N.at(0).center.x);
+    prev_center.push_back(N.at(0).center.y);
+
+    double dist = util.positionDistance(center, prev_center);
+    
+    //ROS_INFO("Prev center: [%f, %f]", prev_center[0], prev_center[1]);
+    //ROS_INFO("dist: %f", dist);
+
+    for(int i=1;i<N.size();i++)
+    {
+      prev_center.at(0) =  N[i].center.x;
+      prev_center.at(1) =  N[i].center.y;
+
+      if( util.positionDistance(center, prev_center) < dist )
+      {
+        dist =  util.positionDistance(center, prev_center);
+        min_index = i;
+      }
+    }
+
+    //ROS_INFO("min_index: %i dist: %f", min_index, dist);
+  }
+
+  else
+  {
+    return -1;
+  }
+
+  return min_index;
+}
 
 void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
 {
+  ros::Duration d_elapsed = ros::Time::now() - t_last_costmap;
+  t_last_costmap = ros::Time::now();
+
+  double grid_resolution = grid->info.resolution; 
+
   global_grid = *grid;
   //ROS_INFO("Got a new costmap!");
   CirclePacker c(grid);
   std::vector<Circle> cirs = c.go();
+  
+  std::vector<Circle> over = c.combineOverlappingCircles(cirs);
+  ROS_INFO("over.size(): %i", (int)over.size());
+  for(int i=0;i<over.size();i++)
+  {
+    ROS_INFO("Overlapping Circle %i - Center: (%f, %f) Radius: %f", i, over[i].center.x, over[i].center.y, over[i].radius);
+  }
 
-  prev_size = obs.size();
 
+  //ROS_INFO("cirs.size(): %i obs.size(): %i", (int)cirs.size(), (int)obs.size());
+
+  std::vector<int> cir_prev_cen_index;
+  std::vector<double> linear_vs;
+  std::vector<double> angular_vs;
+  if(cirs.size() == prev_cirs.size() || cirs.size() < prev_cirs.size())
+  {
+    // Find closest previous circle for each new circle
+    for(int i=0;i<cirs.size();i++)
+    {
+      int index = getClosestPrev(cirs[i], prev_cirs);
+      ROS_INFO("Circle %i center: (%f,%f)", i, cirs[i].center.x, cirs[i].center.y);
+      ROS_INFO("Closest prev: Circle %i center: (%f, %f)", i, prev_cirs[index].center.x, prev_cirs[index].center.y);
+      cir_prev_cen_index.push_back(index);
+
+      // Find velocities
+      std::vector<double> pc;
+      pc.push_back(prev_cirs[index].center.x);
+      pc.push_back(prev_cirs[index].center.y);
+      std::vector<double> cc;
+      cc.push_back(cirs[i].center.x);
+      cc.push_back(cirs[i].center.y);
+      double theta = util.findAngleFromAToB(pc, cc);
+      double linear_v = (util.positionDistance(pc, cc) / d_elapsed.toSec()) * grid_resolution;
+      ROS_INFO("dist: %f time: %f linear_v: %f converted: %f", util.positionDistance(pc, cc), d_elapsed.toSec(), util.positionDistance(pc, cc) / d_elapsed.toSec(), linear_v);
+    }
+  }
+  else
+  {
+    ROS_INFO("********************************************************************************");
+    ROS_INFO("More new circles than previous circles!");
+    // Find closest new circle for each prev center
+    // Do this because the other way could match 2 new circles to the same prev center
+    for(int i=0;i<prev_cirs.size();i++)
+    {
+      int index = getClosestPrev(prev_cirs[i], cirs);
+      ROS_INFO("Circle %i center: (%f,%f)", i, cirs[i].center.x, cirs[i].center.y);
+      ROS_INFO("Closest prev: Circle %i center: (%f, %f)", i, prev_cirs[i].center.x, prev_cirs[i].center.y);
+      cir_prev_cen_index.push_back(index);
+    }
+    ROS_INFO("********************************************************************************");
+  }
+  
+  // Set prev_cirs variable!
+  prev_cirs = cirs;
+
+  /*
+   *  Compute Circle velocity
+   */
+  // Create Obstacle for each circle?
+
+  // After finding velocities, populate Obstacle list
   obs.clear();
 
   for(int i=0;i<cirs.size();i++)
   {
     Obstacle o; 
     o.cir_ = cirs[i];
+    obs.push_back(o);
+  }
+
+  for(int i=0;i<over.size();i++)
+  {
+    Obstacle o;
+    o.cir_ = over[i];
     obs.push_back(o);
   }
  
@@ -225,6 +348,7 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "ramp_sensing");
   ros::NodeHandle handle;
   
+  //count = 0;
 
   //Get parameters
   

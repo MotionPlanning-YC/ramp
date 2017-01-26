@@ -21,6 +21,7 @@ class Utility {
     std::vector<ramp_msgs::Range> standardRanges_;
 
     const double positionDistance(const std::vector<double> a, const std::vector<double> b) const;
+    const double positionDistance(const double ax, const double ay, const double bx, const double by) const;
     
     const double findAngleFromAToB(const std::vector<double> a, const std::vector<double> b) const;
 
