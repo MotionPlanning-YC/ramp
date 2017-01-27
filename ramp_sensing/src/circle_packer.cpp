@@ -677,64 +677,113 @@ std::vector<Triangle> CirclePacker::triangulatePolygon(const Polygon& poly)
 }
 
 
-
-std::vector<Circle> CirclePacker::combineOverlappingCircles(const std::vector<Circle> cs)
+void CirclePacker::combineTwoCircles(const Circle a, const Circle b, Circle& result) const
 {
-  std::vector<Circle> result;
+  // Get the midpoint between the arcles
+  std::vector<double> vec, midpoint;
+  vec.push_back( b.center.x - a.center.x );
+  vec.push_back( b.center.y - a.center.y );
 
-  int pairs=0;
-  
-  Circle i = cs[0];
-  Circle ii = cs[1];
-  
-  double max_r = i.radius > ii.radius ? i.radius : ii.radius;
-  double inflate = 0.5;
+  ROS_INFO("vec: [%f, %f]", vec[0], vec[1]);
 
-  double threshold = max_r + inflate;
+  midpoint.push_back( a.center.x + (0.5*vec[0]) ); 
+  midpoint.push_back( a.center.y + (0.5*vec[1]) ); 
 
-  double d = utility_.positionDistance(i.center.x, i.center.y, ii.center.x, ii.center.y);
+  ROS_INFO("midpoint: (%f, %f)", midpoint[0], midpoint[1]);
 
-  ROS_INFO(" i - Center: (%f, %f) Radius: %f",  i.center.x,  i.center.y,  i.radius);
-  ROS_INFO("ii - Center: (%f, %f) Radius: %f", ii.center.x, ii.center.y, ii.radius);
-  ROS_INFO("max_r: %f threshold: %f d: %f", max_r, threshold, d);
+  // Get the distance from the midpoint to each center
+  double d_mid_i = utility_.positionDistance(midpoint[0], midpoint[1], a.center.x, a.center.y);
+  double d_mid_ii = utility_.positionDistance(midpoint[0], midpoint[1], b.center.x, b.center.y);
 
-  if( d < threshold )
-  {
-    std::vector<double> vec, midpoint;
-    vec.push_back( ii.center.x - i.center.x );
-    vec.push_back( ii.center.y - i.center.y );
+  double R = d_mid_i > d_mid_ii ? d_mid_i+a.radius : d_mid_ii+b.radius;
 
-    ROS_INFO("vec: [%f, %f]", vec[0], vec[1]);
+  ROS_INFO("d_mid_i: %f d_mid_ii: %f R: %f", d_mid_i, d_mid_ii, R);
 
-    midpoint.push_back( i.center.x + (0.5*vec[0]) ); 
-    midpoint.push_back( i.center.y + (0.5*vec[1]) ); 
-
-    ROS_INFO("midpoint: (%f, %f)", midpoint[0], midpoint[1]);
-
-    double d_mid_i = utility_.positionDistance(midpoint[0], midpoint[1], i.center.x, i.center.y);
-    double d_mid_ii = utility_.positionDistance(midpoint[0], midpoint[1], ii.center.x, ii.center.y);
-
-    double R = d_mid_i > d_mid_ii ? d_mid_i+i.radius : d_mid_ii+ii.radius;
-
-    ROS_INFO("d_mid_i: %f d_mid_ii: %f R: %f", d_mid_i, d_mid_ii, R);
-
-    Circle c;
-    c.center.x = midpoint[0];
-    c.center.y = midpoint[1];
-    c.radius = R;
-    result.push_back(c);
-  }
-
-  return result;
+  result.center.x = midpoint[0];
+  result.center.y = midpoint[1];
+  result.radius = R;
 }
+
+
+// result is a final list of circles: contains both the combined ones and the ones that were not combined
+void CirclePacker::combineOverlappingCircles(std::vector<Circle> cs, std::vector<Circle>& result) const
+{
+  ROS_INFO("In combineOverlappingCircles");
+  for(int i=0;i<cs.size();i++)
+  {
+    ROS_INFO("Circle %i - Center: (%f, %f) Radius: %f", i, cs[i].center.x, cs[i].center.y, cs[i].radius);
+  }
+  int pairs=0;
+
+  //result = cs;
+
+  int i=0,j=0;
+
+  while(i<cs.size()-1)
+  {
+    ROS_INFO("i: %i", i);
+    ROS_INFO("cs.size(): %i", (int)cs.size());
+    Circle ci = cs[i];
+    ROS_INFO("ci - Center: (%f, %f) Radius: %f", ci.center.x, ci.center.y, ci.radius);
+    j = i+1;
+    double inflate = 7.5;
+    double threshold = 0.;
+
+    while(j<cs.size())
+    {
+      ROS_INFO("j: %i", j);
+
+      // Check if they overlap
+      Circle cj = cs[j];
+      ROS_INFO("cj - Center: (%f, %f) Radius: %f", cj.center.x, cj.center.y, cj.radius);
+     
+      double max_r = ci.radius > cj.radius ? ci.radius : cj.radius;
+      threshold = max_r + inflate;
+
+      double d = utility_.positionDistance(ci.center.x, ci.center.y, cj.center.x, cj.center.y);
+      ROS_INFO("d: %f threshold: %f", d, threshold);
+
+      if(d < threshold)
+      {
+        ROS_INFO("Combining the Circles!");
+
+        // Combine them
+        Circle temp;
+        combineTwoCircles(ci, cj, temp);
+        ROS_INFO("Result - Center: (%f, %f) Radius: %f", temp.center.x, temp.center.y, temp.radius);
+
+        // If combined, replace both circles with overlapping circle
+        // Replace i by setting it to temp, erase the circle at j
+        result.push_back(temp);
+        cs[i] = temp;
+        cs.erase(cs.begin()+j, cs.begin()+j+1);
+        //result.erase(cs.begin()+j, cs.begin()+j+1);
+
+        // Then, decrement j to get next circle for comparison
+        j--;
+      }
+
+      j++;
+    } // end inner while
+
+    i++;
+  } // end outter while
+
+  result = cs;
+  ROS_INFO("After Overlapping:");
+  /*for(int i=0;i<cs.size();i++)
+  {
+    ROS_INFO("Circle %i - Center: (%f, %f) Radius: %f", i, cs[i].center.x, cs[i].center.y, cs[i].radius);
+    result.push_back(cs[i]);
+  }*/
+} // End combineOverlappingCircles
 
 
 
 std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std::vector<Edge> > edge_sets)
 {
   std::vector<Circle> result;
-
-  ROS_INFO("In CirclePacker::getCirclesFromEdgeSets");
+  //ROS_INFO("In CirclePacker::getCirclesFromEdgeSets");
 
  
 
@@ -775,13 +824,13 @@ std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std:
     } // end inner for
     
     // For each edge set, build a Data object
-    Data d(edge_sets[i].size(), X.data(), Y.data());
+    /*Data d(edge_sets[i].size(), X.data(), Y.data());
     CircleFit cf = CircleFitFitByTaubin(d);
     cf.print();
 
     CircleFit out;
     CircleFitByLevenbergMarquardtFull(d, cf, 0.1, out);
-    out.print();
+    out.print();*/
     
 
 

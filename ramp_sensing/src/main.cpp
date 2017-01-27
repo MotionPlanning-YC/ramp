@@ -262,17 +262,23 @@ void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
   CirclePacker c(grid);
   std::vector<Circle> cirs = c.go();
   
-  std::vector<Circle> over = c.combineOverlappingCircles(cirs);
-  ROS_INFO("over.size(): %i", (int)over.size());
-  for(int i=0;i<over.size();i++)
+  // This seg faults if I don't check size > 0
+  // Figure out why...
+  std::vector<Circle> over;
+  if(cirs.size() > 0)
   {
-    ROS_INFO("Overlapping Circle %i - Center: (%f, %f) Radius: %f", i, over[i].center.x, over[i].center.y, over[i].radius);
+    c.combineOverlappingCircles(cirs, over);
+    ROS_INFO("over.size(): %i", (int)over.size());
+    for(int i=0;i<over.size();i++)
+    {
+      ROS_INFO("Overlapping Circle %i - Center: (%f, %f) Radius: %f", i, over[i].center.x, over[i].center.y, over[i].radius);
+    }
   }
 
 
   //ROS_INFO("cirs.size(): %i obs.size(): %i", (int)cirs.size(), (int)obs.size());
 
-  std::vector<int> cir_prev_cen_index;
+  /*std::vector<int> cir_prev_cen_index;
   std::vector<double> linear_vs;
   std::vector<double> angular_vs;
   if(cirs.size() == prev_cirs.size() || cirs.size() < prev_cirs.size())
@@ -314,7 +320,7 @@ void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
   }
   
   // Set prev_cirs variable!
-  prev_cirs = cirs;
+  prev_cirs = cirs;*/
 
   /*
    *  Compute Circle velocity
@@ -324,13 +330,14 @@ void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
   // After finding velocities, populate Obstacle list
   obs.clear();
 
-  for(int i=0;i<cirs.size();i++)
+  /*for(int i=0;i<cirs.size();i++)
   {
     Obstacle o; 
     o.cir_ = cirs[i];
     obs.push_back(o);
-  }
+  }*/
 
+  ROS_INFO("Drawing %i Circles", (int)over.size());
   for(int i=0;i<over.size();i++)
   {
     Obstacle o;
