@@ -25,6 +25,9 @@ std::vector<tf::Transform> ob_tfs;
 
 std::vector<Circle> prev_cirs;
 
+// prev_velocities[cycle][circle]
+std::vector< std::vector<double> > prev_velocities;
+
 size_t prev_size;
 
 ros::Time t_last_costmap;
@@ -250,6 +253,86 @@ int getClosestPrev(Circle m, std::vector<Circle> N)
   return min_index;
 }
 
+
+std::vector<double> velocityFromOnePrev(const std::vector<Circle> cirs, const std::vector<Circle> prev_cirs, const ros::Duration d_elapsed, const double grid_resolution)
+{
+  std::vector<double> result;
+
+  std::vector<int> cir_prev_cen_index;
+  std::vector<double> linear_vs;
+  std::vector<double> angular_vs;
+  if(cirs.size() == prev_cirs.size() || cirs.size() < prev_cirs.size())
+  {
+    // Find closest previous circle for each new circle
+    for(int i=0;i<cirs.size();i++)
+    {
+      int index = getClosestPrev(cirs[i], prev_cirs);
+      ROS_INFO("Circle %i center: (%f,%f)", i, cirs[i].center.x, cirs[i].center.y);
+      ROS_INFO("Closest prev: Circle %i center: (%f, %f)", i, prev_cirs[index].center.x, prev_cirs[index].center.y);
+      cir_prev_cen_index.push_back(index);
+
+      // Find velocities
+      std::vector<double> pc;
+      pc.push_back(prev_cirs[index].center.x);
+      pc.push_back(prev_cirs[index].center.y);
+      std::vector<double> cc;
+      cc.push_back(cirs[i].center.x);
+      cc.push_back(cirs[i].center.y);
+      double theta = util.findAngleFromAToB(pc, cc);
+      double linear_v = (util.positionDistance(pc, cc) / d_elapsed.toSec()) * grid_resolution;
+      result.push_back(linear_v);
+      ROS_INFO("dist: %f time: %f linear_v: %f converted: %f", util.positionDistance(pc, cc), d_elapsed.toSec(), util.positionDistance(pc, cc) / d_elapsed.toSec(), linear_v);
+    }
+  }
+
+  // This doesn't actually compute velocity, it just sets a new prev_cir
+  else
+  {
+    ROS_INFO("********************************************************************************");
+    ROS_INFO("More new circles than previous circles!");
+    // Find closest new circle for each prev center
+    // Do this because the other way could match 2 new circles to the same prev center
+    for(int i=0;i<prev_cirs.size();i++)
+    {
+      int index = getClosestPrev(prev_cirs[i], cirs);
+      ROS_INFO("Circle %i center: (%f,%f)", i, cirs[i].center.x, cirs[i].center.y);
+      ROS_INFO("Closest prev: Circle %i center: (%f, %f)", i, prev_cirs[i].center.x, prev_cirs[i].center.y);
+      cir_prev_cen_index.push_back(index);
+    }
+    ROS_INFO("********************************************************************************");
+  }
+
+  return result;
+}
+
+
+std::vector<double> velocityFromNPrev(const std::vector<Circle> cirs, const std::vector<Circle> prev_cirs, const ros::Duration d_elapsed, const double grid_resolution, int N)
+{
+  ROS_INFO("In velocityFromNPrev");
+  std::vector<double> result;
+
+  // Get velocity from one cycle prev
+  result = velocityFromOnePrev(cirs, prev_cirs, d_elapsed, grid_resolution);
+  ROS_INFO("velocityFromOnePrev: %f", result.size() > 0 ? result[0] : 0);
+
+  // Average the results
+  for(int i=0;i<result.size();i++)
+  {
+    ROS_INFO("Circle %i prev velocities", i);
+    for(int j=prev_velocities.size()-2;j>prev_velocities.size()-N-1 && j>-1;j--)
+    {
+      ROS_INFO("Velocity at prev cycle %i: %f", (int)prev_velocities.size()-j, prev_velocities[j][i]);
+      result[i] += prev_velocities[j][i];
+    }
+
+    result[i] /= N;
+    ROS_INFO("Average: %f", result[i]);
+  }
+  
+
+  return result;
+}
+
 void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
 {
   ros::Duration d_elapsed = ros::Time::now() - t_last_costmap;
@@ -275,52 +358,25 @@ void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
     }
   }
 
+  cirs = over;
 
   //ROS_INFO("cirs.size(): %i obs.size(): %i", (int)cirs.size(), (int)obs.size());
+  /*std::vector<double> velocities = velocityFromOnePrev(cirs, prev_cirs, d_elapsed, grid_resolution);
+  ROS_INFO("Velocities returned from going back one cycle:");*/
 
-  /*std::vector<int> cir_prev_cen_index;
-  std::vector<double> linear_vs;
-  std::vector<double> angular_vs;
-  if(cirs.size() == prev_cirs.size() || cirs.size() < prev_cirs.size())
+  int N = 60;
+  std::vector<double> velocities = velocityFromNPrev(cirs, prev_cirs, d_elapsed, grid_resolution, N);
+  
+  for(int i=0;i<velocities.size();i++)
   {
-    // Find closest previous circle for each new circle
-    for(int i=0;i<cirs.size();i++)
-    {
-      int index = getClosestPrev(cirs[i], prev_cirs);
-      ROS_INFO("Circle %i center: (%f,%f)", i, cirs[i].center.x, cirs[i].center.y);
-      ROS_INFO("Closest prev: Circle %i center: (%f, %f)", i, prev_cirs[index].center.x, prev_cirs[index].center.y);
-      cir_prev_cen_index.push_back(index);
+    ROS_INFO("Velocity %i: %f", i, velocities[i]);
+  }
 
-      // Find velocities
-      std::vector<double> pc;
-      pc.push_back(prev_cirs[index].center.x);
-      pc.push_back(prev_cirs[index].center.y);
-      std::vector<double> cc;
-      cc.push_back(cirs[i].center.x);
-      cc.push_back(cirs[i].center.y);
-      double theta = util.findAngleFromAToB(pc, cc);
-      double linear_v = (util.positionDistance(pc, cc) / d_elapsed.toSec()) * grid_resolution;
-      ROS_INFO("dist: %f time: %f linear_v: %f converted: %f", util.positionDistance(pc, cc), d_elapsed.toSec(), util.positionDistance(pc, cc) / d_elapsed.toSec(), linear_v);
-    }
-  }
-  else
-  {
-    ROS_INFO("********************************************************************************");
-    ROS_INFO("More new circles than previous circles!");
-    // Find closest new circle for each prev center
-    // Do this because the other way could match 2 new circles to the same prev center
-    for(int i=0;i<prev_cirs.size();i++)
-    {
-      int index = getClosestPrev(prev_cirs[i], cirs);
-      ROS_INFO("Circle %i center: (%f,%f)", i, cirs[i].center.x, cirs[i].center.y);
-      ROS_INFO("Closest prev: Circle %i center: (%f, %f)", i, prev_cirs[i].center.x, prev_cirs[i].center.y);
-      cir_prev_cen_index.push_back(index);
-    }
-    ROS_INFO("********************************************************************************");
-  }
+  prev_velocities.push_back(velocities);
+
   
   // Set prev_cirs variable!
-  prev_cirs = cirs;*/
+  prev_cirs = cirs;
 
   /*
    *  Compute Circle velocity
@@ -330,20 +386,13 @@ void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
   // After finding velocities, populate Obstacle list
   obs.clear();
 
-  /*for(int i=0;i<cirs.size();i++)
+  for(int i=0;i<cirs.size();i++)
   {
     Obstacle o; 
     o.cir_ = cirs[i];
     obs.push_back(o);
-  }*/
-
-  ROS_INFO("Drawing %i Circles", (int)over.size());
-  for(int i=0;i<over.size();i++)
-  {
-    Obstacle o;
-    o.cir_ = over[i];
-    obs.push_back(o);
   }
+
  
   //ROS_INFO("obs.size(): %i", (int)obs.size());
   //ROS_INFO("Leaving Cb");
