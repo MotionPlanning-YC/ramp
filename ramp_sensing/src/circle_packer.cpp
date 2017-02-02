@@ -1,5 +1,5 @@
 #include "circle_packer.h"
-#include "Utilties.cpp"
+//#include "Utilties.cpp"
 
 
 
@@ -14,7 +14,7 @@ CirclePacker::~CirclePacker() {}
 
 
 
-int CirclePacker::CircleFitByLevenbergMarquardtFull (Data& data, CircleFit& circleIni, reals LambdaIni, CircleFit& circle)
+/*int CirclePacker::CircleFitByLevenbergMarquardtFull (Data& data, CircleFit& circleIni, reals LambdaIni, CircleFit& circle)
 /*                                     <------------------ Input ------------------->  <-- Output -->
 
        Geometric circle fit to a given set of data points (in 2D)
@@ -63,7 +63,7 @@ int CirclePacker::CircleFitByLevenbergMarquardtFull (Data& data, CircleFit& circ
          
     Nikolai Chernov,  February 2014
 */
-{
+/*{
     int code,i,iter,inner,IterMAX=99;
     
     reals factorUp=10.,factorDown=0.04,lambda,ParLimit=1.e+6;
@@ -194,7 +194,7 @@ enough:
     circle = Old;
     
     return code;
-}
+}*/
 
 
 
@@ -202,7 +202,7 @@ enough:
 
 
 
-CircleFit CirclePacker::CircleFitFitByTaubin (Data& data)
+/*CircleFit CirclePacker::CircleFitFitByTaubin (Data& data)
 /*  
       CircleFit fit to a given set of data points (in 2D)
       
@@ -249,7 +249,7 @@ CircleFit CirclePacker::CircleFitFitByTaubin (Data& data)
        Nikolai Chernov  (September 2012)
 
 */
-{
+/*{
     int i,iter,IterMAX=99;
     
     reals Xi,Yi,Zi;
@@ -328,7 +328,7 @@ CircleFit CirclePacker::CircleFitFitByTaubin (Data& data)
     circle.j = iter;  //  return the number of iterations, too
     
     return circle;
-}
+}*/
 
 
 

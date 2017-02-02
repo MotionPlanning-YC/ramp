@@ -26,8 +26,8 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 set (CMAKE_CXX_FLAGS "-std=c++11 -g -O0")
 
 
-add_executable(${PROJECT_NAME} src/circle_packer.cpp src/GridMap2D.cpp src/main.cpp src/obstacle.cpp src/circle.cpp src/data.cpp src/utility.cpp)
-#add_executable(${PROJECT_NAME} src/circle_packer.cpp src/GridMap2D.cpp src/main.cpp src/obstacle.cpp src/utility.cpp)
+#add_executable(${PROJECT_NAME} src/circle_packer.cpp src/GridMap2D.cpp src/main.cpp src/obstacle.cpp src/circle.cpp src/data.cpp src/utility.cpp)
+add_executable(${PROJECT_NAME} src/circle_packer.cpp src/GridMap2D.cpp src/main.cpp src/obstacle.cpp src/utility.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_dependencies(${PROJECT_NAME} ramp_msgs_generate_messages_cpp)
 

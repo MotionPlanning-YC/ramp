@@ -306,6 +306,80 @@ std::vector<double> velocityFromOnePrev(const std::vector<Circle> cirs, const st
 }
 
 
+// Get N random samples?
+std::vector<double> getSamples(const std::vector<double> vels, const int N)
+{
+  std::vector<double> result;
+
+  return result;
+}
+
+
+// Fit normal distribution to velocity?
+// index 0 = mean, 1 = variance
+std::vector<double> fitNormal(const std::vector<double> points)
+{
+  ROS_INFO("In fitNormal");
+  ROS_INFO("points.size(): %i", (int)points.size());
+
+  std::vector<double> result;
+
+  double mean = points[0];
+  for(int i=0;i<points.size();i++)
+  {
+    ROS_INFO("Points[%i]: %f", i, points[i]);
+    mean += points[i];
+  }
+  mean /= points.size();
+  ROS_INFO("Mean: %f", mean);
+
+  double std=0;
+  for(int i=0;i<points.size();i++)
+  {
+    double diff = pow(points[i] - mean,2);
+    std += diff;
+  }
+  std /= points.size();
+
+  ROS_INFO("Variance: %f", std);
+
+  result.push_back(mean);
+  result.push_back(std);
+
+  ROS_INFO("Exiting fitNormal");
+  return result;
+}
+
+
+
+std::vector<double> addNorm(const std::vector<double> n1, const std::vector<double> n2)
+{
+  std::vector<double> result;
+
+  result.push_back(n1[0] + n2[0]); 
+  result.push_back(n1[1] + n2[1]); 
+
+  return result;
+}
+
+
+std::vector<double> multiplyNorm(const std::vector<double> n1, const std::vector<double> n2)
+{
+  std::vector<double> result;
+
+  double var_result = 1.f / ((1.f/n1[1]) + (1.f/n2[1]));
+
+  double mean_result = ( (n1[0] / n1[1]) + (n2[0] / n2[1]) ) * var_result;
+
+  result.push_back(mean_result);
+  result.push_back(var_result);
+
+  return result;
+}
+
+
+
+
 std::vector<double> velocityFromNPrev(const std::vector<Circle> cirs, const std::vector<Circle> prev_cirs, const ros::Duration d_elapsed, const double grid_resolution, int N)
 {
   ROS_INFO("In velocityFromNPrev");
@@ -315,14 +389,26 @@ std::vector<double> velocityFromNPrev(const std::vector<Circle> cirs, const std:
   result = velocityFromOnePrev(cirs, prev_cirs, d_elapsed, grid_resolution);
   ROS_INFO("velocityFromOnePrev: %f", result.size() > 0 ? result[0] : 0);
 
+  // Build points vector for normal distribution
+  std::vector<double> points; 
+
   // Average the results
   for(int i=0;i<result.size();i++)
   {
     ROS_INFO("Circle %i prev velocities", i);
     for(int j=prev_velocities.size()-2;j>prev_velocities.size()-N-1 && j>-1;j--)
     {
-      ROS_INFO("Velocity at prev cycle %i: %f", (int)prev_velocities.size()-j, prev_velocities[j][i]);
-      result[i] += prev_velocities[j][i];
+      if(prev_velocities[j].size() > i)
+      {
+        ROS_INFO("Velocity at prev cycle %i: %f", (int)prev_velocities.size()-j, prev_velocities[j][i]);
+        result[i] += prev_velocities[j][i];
+        points.push_back(prev_velocities[j][i]);
+      }
+    }
+
+    if(points.size() > 0)
+    {
+      std::vector<double> norm = fitNormal(points);
     }
 
     result[i] /= N;
@@ -364,7 +450,7 @@ void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
   /*std::vector<double> velocities = velocityFromOnePrev(cirs, prev_cirs, d_elapsed, grid_resolution);
   ROS_INFO("Velocities returned from going back one cycle:");*/
 
-  int N = 60;
+  int N = 15;
   std::vector<double> velocities = velocityFromNPrev(cirs, prev_cirs, d_elapsed, grid_resolution, N);
   
   for(int i=0;i<velocities.size();i++)

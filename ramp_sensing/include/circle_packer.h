@@ -7,9 +7,9 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <queue>
 #include <visualization_msgs/Marker.h>
-#include "data.h"
-#include "circle.h"
-#include "mystuff.h"
+//#include "data.h"
+//#include "circle.h"
+//#include "mystuff.h"
 
 struct Edge
 {
@@ -87,8 +87,8 @@ class CirclePacker
     std::vector<Triangle> triangulatePolygon(const Polygon&);
 
 
-    CircleFit CircleFitFitByTaubin(Data& data);
-    int CircleFitByLevenbergMarquardtFull (Data& data, CircleFit& circleIni, reals LambdaIni, CircleFit& circle);
+    //CircleFit CircleFitFitByTaubin(Data& data);
+    //int CircleFitByLevenbergMarquardtFull (Data& data, CircleFit& circleIni, reals LambdaIni, CircleFit& circle);
 
     std::vector<Circle> go();
   private:
