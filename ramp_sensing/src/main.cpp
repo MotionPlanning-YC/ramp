@@ -34,6 +34,18 @@ ros::Time t_last_costmap;
 
 int count;
 
+
+struct NormalDist1D
+{
+  double mean;
+  double variance;
+};
+
+
+// Initial belief
+NormalDist1D init_bel;
+
+
 void loadObstacleTF()
 {
   std::ifstream ifile("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/obstacle_tf.txt", std::ios::in);
@@ -317,12 +329,12 @@ std::vector<double> getSamples(const std::vector<double> vels, const int N)
 
 // Fit normal distribution to velocity?
 // index 0 = mean, 1 = variance
-std::vector<double> fitNormal(const std::vector<double> points)
+NormalDist1D fitNormal(const std::vector<double> points)
 {
   ROS_INFO("In fitNormal");
   ROS_INFO("points.size(): %i", (int)points.size());
 
-  std::vector<double> result;
+  NormalDist1D result;
 
   double mean = points[0];
   for(int i=0;i<points.size();i++)
@@ -343,8 +355,8 @@ std::vector<double> fitNormal(const std::vector<double> points)
 
   ROS_INFO("Variance: %f", std);
 
-  result.push_back(mean);
-  result.push_back(std);
+  result.mean = mean;
+  result.variance = std;
 
   ROS_INFO("Exiting fitNormal");
   return result;
@@ -352,27 +364,27 @@ std::vector<double> fitNormal(const std::vector<double> points)
 
 
 
-std::vector<double> addNorm(const std::vector<double> n1, const std::vector<double> n2)
+NormalDist1D addNorm(const NormalDist1D n1, const NormalDist1D n2)
 {
-  std::vector<double> result;
+  NormalDist1D result;
 
-  result.push_back(n1[0] + n2[0]); 
-  result.push_back(n1[1] + n2[1]); 
+  result.mean = n1.mean + n2.mean;
+  result.variance = n1.variance + n2.variance;
 
   return result;
 }
 
 
-std::vector<double> multiplyNorm(const std::vector<double> n1, const std::vector<double> n2)
+NormalDist1D multiplyNorm(const NormalDist1D n1, const NormalDist1D n2)
 {
-  std::vector<double> result;
+  NormalDist1D result;
 
-  double var_result = 1.f / ((1.f/n1[1]) + (1.f/n2[1]));
+  double var_result = 1.f / ((1.f/n1.mean) + (1.f/n2.mean));
 
-  double mean_result = ( (n1[0] / n1[1]) + (n2[0] / n2[1]) ) * var_result;
+  double mean_result = ( (n1.variance / n1.mean) + (n2.variance / n2.mean) ) * var_result;
 
-  result.push_back(mean_result);
-  result.push_back(var_result);
+  result.mean = mean_result;
+  result.variance = var_result;
 
   return result;
 }
@@ -408,7 +420,7 @@ std::vector<double> velocityFromNPrev(const std::vector<Circle> cirs, const std:
 
     if(points.size() > 0)
     {
-      std::vector<double> norm = fitNormal(points);
+      NormalDist1D norm = fitNormal(points);
     }
 
     result[i] /= N;
@@ -548,6 +560,9 @@ int main(int argc, char** argv)
   //Timers
   //ros::Timer timer = handle.createTimer(ros::Duration(1.f / rate), publishList);
   ros::Timer timer_markers = handle.createTimer(ros::Duration(1.f/10.f), publishMarkers);
+
+  init_bel.mean = 0;
+  init_bel.variance = 5;
    
 
   std::cout<<"\nSpinning\n";

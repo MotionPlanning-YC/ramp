@@ -508,6 +508,7 @@ std::vector<Circle> CirclePacker::getCirclesFromPoly(Polygon poly)
     vertices.push_back(poly.edges[i].end);
   }
   
+  // Find minimum and maximum x and y
   double MAX_LENGTH= vertices[0].y;
   double MAX_WIDTH = vertices[0].x;
   double MIN_LENGTH= vertices[0].y;
@@ -534,8 +535,12 @@ std::vector<Circle> CirclePacker::getCirclesFromPoly(Polygon poly)
   }
 
   double round = 1;
+
+  // Find number of cells in both directions
   int width_count = (MAX_WIDTH - MIN_WIDTH) / round;
   int length_count = (MAX_LENGTH - MIN_LENGTH) / round;
+
+  // Start from the center
   double start_x = MIN_WIDTH + round/2.f;
   double start_y = MIN_LENGTH + round/2.f;
 
@@ -780,48 +785,53 @@ void CirclePacker::combineOverlappingCircles(std::vector<Circle> cs, std::vector
 
 
 
+
+double CirclePacker::getMedian(const std::vector<double> points) const
+{
+  // Sort points
+  
+
+  // Take the middle element
+
+}
+
 std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std::vector<Edge> > edge_sets)
 {
   std::vector<Circle> result;
   //ROS_INFO("In CirclePacker::getCirclesFromEdgeSets");
 
  
+  std::vector<Point> means;
 
+  // For each edge set (i.e. polygon)
   for(int i=0;i<edge_sets.size();i++)
   {
     ROS_INFO("Edge set %i", i);
-    
-    std::vector<double> X, Y;
+      
+    Point temp_center;
   
     // For each set of edges, find the minimum and maximum values for x and y
-    int x_min = edge_sets[i][0].start.x, 
-        y_min = edge_sets[i][0].start.y, 
-        x_max = x_min, 
-        y_max = y_min;
+    // Find the mean of x and y
+    int x_mean = edge_sets[i][0].start.x;
+    int y_mean = edge_sets[i][0].start.y;
     for(int j=1;j<edge_sets[i].size();j++)
     {
       X.push_back(edge_sets[i][j].start.x);
       Y.push_back(edge_sets[i][j].start.y);
 
+      x_mean += edge_sets[i][j].start.x;
+      y_mean += edge_sets[i][j].start.y;
 
       ROS_INFO("\tEdge %i - start: (%i,%i) end: (%i,%i)", j, edge_sets[i][j].start.y, edge_sets[i][j].start.x, edge_sets[i][j].end.y, edge_sets[i][j].end.x);
-      if( edge_sets[i][j].start.x < x_min )
-      {
-        x_min = edge_sets[i][j].start.x;
-      } 
-      if( edge_sets[i][j].start.x > x_max )
-      {
-        x_max = edge_sets[i][j].start.x;
-      } 
-      if( edge_sets[i][j].start.y < y_min )
-      {
-        y_min = edge_sets[i][j].start.y;
-      } 
-      if( edge_sets[i][j].start.y > y_max )
-      {
-        y_max = edge_sets[i][j].start.y;
-      } 
     } // end inner for
+
+    x_mean /= edge_sets[i].size();
+    y_mean /= edge_sets[i].size();
+
+    // Swap x and y
+    temp_center.x = y_mean;
+    temp_center.y = x_mean;
+    means.push_back(temp_center);
     
     // For each edge set, build a Data object
     /*Data d(edge_sets[i].size(), X.data(), Y.data());
@@ -832,8 +842,6 @@ std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std:
     CircleFitByLevenbergMarquardtFull(d, cf, 0.1, out);
     out.print();*/
     
-
-
 
     //ROS_INFO("\tx_min: %i x_max: %i y_min: %i y_max: %i", x_min, x_max, y_min, y_max);
 
@@ -847,7 +855,7 @@ std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std:
     double r = x_diff > y_diff ? x_diff/2.f : y_diff/2.f;
 
     /*  
-     * Find approximate center
+     * Find approximate center by taking half of min and max in both directions
      */
     //****************************************************************************
     // FLIP/SWAP X AND Y!!
@@ -856,21 +864,17 @@ std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std:
     // to the OpenCV image coordinate system 
     // which starts in the top left corner, x points right, y points down
     //****************************************************************************
-    Point cen; 
-    cen.x = (y_max + y_min) / 2.f;
-    cen.y = (x_max + x_min) / 2.f;
-
-    // Translate the center by 0.075cm in both directions
-    cen.x+=1.5;
-    cen.y+=1.5;
-
-    ROS_INFO("\tCenter: (%f,%f) Radius: %f", cen.x, cen.y, r);
 
     Circle temp;
 
+    // Translate the center by 0.075cm in both directions
     // Inflate radius by 20cm
     temp.radius = r+4;
-    temp.center = cen;
+    temp.center = temp_center;
+    temp.center.x += 1.5;
+    temp.center.y += 1.5;
+    
+    ROS_INFO("\tCenter: (%f,%f) Radius: %f", temp.center.x, temp.center.y, temp.radius);
 
     result.push_back(temp);
   } // end outter for
