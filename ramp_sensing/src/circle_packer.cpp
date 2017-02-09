@@ -812,17 +812,36 @@ std::vector<Circle> CirclePacker::getCirclesFromEdgeSets(const std::vector< std:
   
     // For each set of edges, find the minimum and maximum values for x and y
     // Find the mean of x and y
+    int x_min = edge_sets[i][0].start.x, 
+    y_min = edge_sets[i][0].start.y, 
+    x_max = x_min, 
+    y_max = y_min; 
     int x_mean = edge_sets[i][0].start.x;
     int y_mean = edge_sets[i][0].start.y;
     for(int j=1;j<edge_sets[i].size();j++)
     {
-      X.push_back(edge_sets[i][j].start.x);
-      Y.push_back(edge_sets[i][j].start.y);
-
       x_mean += edge_sets[i][j].start.x;
       y_mean += edge_sets[i][j].start.y;
 
       ROS_INFO("\tEdge %i - start: (%i,%i) end: (%i,%i)", j, edge_sets[i][j].start.y, edge_sets[i][j].start.x, edge_sets[i][j].end.y, edge_sets[i][j].end.x);
+
+      // Get the minimum and maximum x and y values to compute the circle's radius
+      if( edge_sets[i][j].start.x < x_min )
+      {
+        x_min = edge_sets[i][j].start.x;
+      } 
+      if( edge_sets[i][j].start.x > x_max )
+      {
+        x_max = edge_sets[i][j].start.x;
+      } 
+      if( edge_sets[i][j].start.y < y_min )
+      {
+        y_min = edge_sets[i][j].start.y;
+      } 
+      if( edge_sets[i][j].start.y > y_max )
+      {
+        y_max = edge_sets[i][j].start.y;
+      }
     } // end inner for
 
     x_mean /= edge_sets[i].size();

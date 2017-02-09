@@ -12,6 +12,17 @@
 #include <visualization_msgs/MarkerArray.h>
 #include "utility.h"
 
+
+#include <filter/extendedkalmanfilter.h>
+#include <model/linearanalyticsystemmodel_gaussianuncertainty.h>
+#include <model/linearanalyticmeasurementmodel_gaussianuncertainty.h>
+#include <pdf/linearanalyticconditionalgaussian.h>
+#include <pdf/analyticconditionalgaussian.h>
+#include "nonlinearanalyticconditionalgaussian.h"
+//using namespace MatrixWrapper;
+//using namespace BFL;
+
+
 Utility util;
 double rate;
 ros::Publisher pub_obj, pub_rviz;
@@ -430,6 +441,92 @@ std::vector<double> velocityFromNPrev(const std::vector<Circle> cirs, const std:
 
   return result;
 }
+
+void measurement_model(Circle temp)
+{
+  //  z_k+1 = H_x_k+1
+  MatrixWrapper::Matrix H(1,2);
+
+  // Set x and y
+  H(1,1) = temp.center.x;
+  H(1,2) = temp.center.y;
+
+  BFL::ColumnVector meas_noise_mu(1);
+  meas_noise_mu(1) = 0; //MU_MEAS_NOISE
+
+  MatrixWrapper::SymmetricMatrix meas_noise_cov(1);
+  meas_noise_cov(1,1) = 0;//SIGMA_MEAS_NOISE
+
+  // Make the Gaussian
+  BFL::Gaussian measurement_uncertainty(meas_noise_mu, meas_noise_cov);
+
+  // Make the pdf
+  BFL::LinearAnalyticConditionalGaussian meas_pdf(H, measurement_uncertainty);
+
+  // Make model
+  BFL::LinearAnalyticMeasurementModelGaussianUncertainty meas_model(&meas_pdf); 
+ }
+
+void prior_model()
+{
+  // Build prior distribution
+  BFL::ColumnVector prior_mu(2);
+  prior_mu(1) = 0; //PRIOR_MU_X
+  prior_mu(2) = 0; //PRIOR_MU_Y
+
+  MatrixWrapper::SymmetricMatrix prior_cov(2);
+  prior_cov(1,1) = 0; //PRIOR_COV_X
+  prior_cov(1,2) = 0.0;
+  prior_cov(2,1) = 0.0;
+  prior_cov(2,2) = 0; //PRIOR_COV_Y
+
+  BFL::Gaussian prior(prior_mu, prior_cov);
+}
+
+void linear_system_model()
+{
+
+  // Build system for x_k+1 = A_x_k + B_u_k
+  // x_k is current state...u_k is the control to move to the next state
+  // This measures how accurately the robot can follow controls
+  MatrixWrapper::Matrix A(2,2);
+  A(1,1) = 1.0;
+  A(1,2) = 0.0;
+  A(2,1) = 0.0;
+  A(2,2) = 1.0;
+
+  MatrixWrapper::Matrix B(2,2);
+  B(1,1) = cos(0.8);
+  B(1,2) = 0.0;
+  B(2,1) = 0.0;
+  B(2,2) = cos(0.8);
+
+  std::vector<MatrixWrapper::Matrix> AB(2);
+  AB[0] = A;
+  AB[1] = B;
+
+  // Create Gaussian
+  BFL::ColumnVector sys_noise_mu(2);
+  sys_noise_mu(1) = 0; // MU_SYSTEM_NOISE_X
+  sys_noise_mu(2) = 0; // MU_SYSTEM_NOISE_Y
+
+  // Create covariance martix
+  MatrixWrapper::SymmetricMatrix sys_noise_cov(2);
+  sys_noise_cov = 0.0;
+  sys_noise_cov(1,1) = 0; // SIGMA_SYSTEM_NOISE_X
+  sys_noise_cov(1,2) = 0.0;
+  sys_noise_cov(2,1) = 0.0;
+  sys_noise_cov(2,2) = 0; // SIGMA_SYSTEM_NOISE_Y
+
+  BFL::Gaussian system_uncertainty(sys_noise_mu, sys_noise_cov);
+  
+  // Create pdf
+  BFL::LinearAnalyticConditionalGaussian sys_pdf(AB, system_uncertainty);
+
+  // Create system model from pdf
+  BFL::LinearAnalyticSystemModelGaussianUncertainty sys_model(&sys_pdf);
+}
+
 
 void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
 {
