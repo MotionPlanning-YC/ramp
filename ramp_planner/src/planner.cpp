@@ -1122,8 +1122,14 @@ void Planner::buildEvaluationRequest(const RampTrajectory& trajec, ramp_msgs::Ev
     result.imminent_collision = true;
   }*/
 
-  double v = sqrt( pow(latestUpdate_.msg_.velocities[2], 2) + pow(latestUpdate_.msg_.velocities[2],2) );
-  result.imminent_collision = imminent_collision_ || v < 0.1;
+  double v = sqrt( pow(latestUpdate_.msg_.velocities[0], 2) + pow(latestUpdate_.msg_.velocities[1], 2) );
+  double w = sqrt( pow(latestUpdate_.msg_.velocities[2], 2) + pow(latestUpdate_.msg_.velocities[2], 2) );
+
+  ROS_INFO("latestUpdate_: %s", latestUpdate_.toString().c_str());
+  ROS_INFO("imminent_collision_: %s v: %f", imminent_collision_ ? "True" : "False", v);
+
+  // If the robot is in imminent collision or is stopped and rotating
+  result.imminent_collision = imminent_collision_ || (v < 0.01 && w > 0.1);
   result.coll_dist = COLL_DISTS[i_COLL_DISTS_];
 
   // full_eval is for predicting segments that are not generated
@@ -1136,17 +1142,19 @@ void Planner::buildEvaluationRequest(const RampTrajectory& trajec, ramp_msgs::Ev
   {
     //ROS_INFO("trajec.msg_.trajectory.points[0]: %s\n trajec.msg_.trajectory.points[i_knotpoints[1]]: %s", utility_.toString(trajec.msg_.trajectory.points[0]).c_str(), utility_.toString(trajec.msg_.trajectory.points[ trajec.msg_.i_knotPoints[1] ]).c_str());
   }
+
+  // Necessary theta to move on trajec's first segment
   double nec_theta = utility_.findAngleFromAToB(trajec.msg_.trajectory.points[0].positions, trajec.msg_.trajectory.points[ trajec.msg_.i_knotPoints[1] ].positions);
 
+  // Robot's theta at the end of the control cycle or
+  // it's current theta if it's not moving
   double end = movingOn_.msg_.trajectory.points.size() > 0 ? movingOn_.msg_.trajectory.points[ movingOn_.msg_.trajectory.points.size()-1 ].positions[2] : latestUpdate_.msg_.positions[2];
 
   double diff = fabs(utility_.findDistanceBetweenAngles(nec_theta, end));
   
   //ROS_INFO("nec_theta: %f end: %f diff: %f", nec_theta, end, diff);
 
-  //result.trans_possible = trajec.transitionTraj_.trajectory.msg_.curves.size() > 0 || diff < 0.31;
-
-  result.trans_possible = trajec.transitionTraj_.curves.size() > 0;
+  result.trans_possible = trajec.transitionTraj_.curves.size() > 0 || diff < 0.31;
 
   // Set offset for eval req
   if(diff_.msg_.positions.size() > 0)
@@ -1452,7 +1460,7 @@ void Planner::updateCallback(const ramp_msgs::MotionState& msg)
     latestUpdate_.msg_.accelerations.at(1) = msg.accelerations.at(0) * 
                                              sin(latestUpdate_.msg_.positions.at(2));
 
-    //ROS_INFO("New latestUpdate_: %s", latestUpdate_.toString().c_str());
+    ROS_INFO("New latestUpdate_: %s", latestUpdate_.toString().c_str());
   } // end else
   
   ////ROS_INFO("Exiting Planner::updateCallback");
