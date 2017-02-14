@@ -3,6 +3,7 @@
 #include "utility.h"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
+#include "opencv2/features2d.hpp"
 #include "GridMap2D.h"
 #include <nav_msgs/OccupancyGrid.h>
 #include <queue>
@@ -81,6 +82,9 @@ class CirclePacker
     void combineOverlappingCircles(std::vector<Circle> cs, std::vector<Circle>& result) const;
 
     double getMedian(const std::vector<double> points) const;
+
+    Point findCenterOfPixels(const std::vector<cv::Point> pixels) const;
+    std::vector<double> getWeights(const std::vector<cv::Point> pixels, const Point center) const;
     
     std::vector<Circle> getCirclesFromPoly(Polygon);
     std::vector<Circle> getCirclesFromEdgeSets(const std::vector< std::vector<Edge> > edge_sets);
@@ -92,6 +96,7 @@ class CirclePacker
     //CircleFit CircleFitFitByTaubin(Data& data);
     //int CircleFitByLevenbergMarquardtFull (Data& data, CircleFit& circleIni, reals LambdaIni, CircleFit& circle);
 
+    Circle getCircleFromKeypoint(const cv::KeyPoint k) const;
     std::vector<Circle> go();
   private:
 

@@ -46,6 +46,34 @@ ros::Time t_last_costmap;
 int count;
 
 
+
+
+/*********************************
+ * Variables for BFL
+ *********************************/
+
+/*
+ * Linear System
+ */
+BFL::LinearAnalyticConditionalGaussian* sys_pdf=0;
+BFL::LinearAnalyticSystemModelGaussianUncertainty* sys_model=0;
+
+
+/*
+ * Measurement model
+ */
+//MatrixWrapper::Matrix* H=0;
+BFL::LinearAnalyticConditionalGaussian* meas_pdf=0;
+BFL::LinearAnalyticMeasurementModelGaussianUncertainty* meas_model=0;
+
+
+
+/*
+ * Prior distribution
+ */
+BFL::Gaussian* prior=0;
+
+
 struct NormalDist1D
 {
   double mean;
@@ -442,7 +470,19 @@ std::vector<double> velocityFromNPrev(const std::vector<Circle> cirs, const std:
   return result;
 }
 
-void measurement_model(Circle temp)
+void prediction(BFL::ExtendedKalmanFilter& filter, const BFL::SystemModel<MatrixWrapper::ColumnVector>* sys_model, const MatrixWrapper::ColumnVector& u)
+{
+  //filter.SysUpdate(sys_model, u);
+}
+
+
+BFL::ExtendedKalmanFilter makeFilter(BFL::Gaussian prior)
+{
+  BFL::ExtendedKalmanFilter filter(&prior);
+  return filter;
+}
+
+void init_measurement_model(Circle temp)
 {
   //  z_k+1 = H_x_k+1
   MatrixWrapper::Matrix H(1,2);
@@ -461,13 +501,13 @@ void measurement_model(Circle temp)
   BFL::Gaussian measurement_uncertainty(meas_noise_mu, meas_noise_cov);
 
   // Make the pdf
-  BFL::LinearAnalyticConditionalGaussian meas_pdf(H, measurement_uncertainty);
+  meas_pdf = new BFL::LinearAnalyticConditionalGaussian(H, measurement_uncertainty);
 
   // Make model
-  BFL::LinearAnalyticMeasurementModelGaussianUncertainty meas_model(&meas_pdf); 
+  meas_model = new BFL::LinearAnalyticMeasurementModelGaussianUncertainty(meas_pdf);
  }
 
-void prior_model()
+void init_prior_model()
 {
   // Build prior distribution
   BFL::ColumnVector prior_mu(2);
@@ -480,10 +520,10 @@ void prior_model()
   prior_cov(2,1) = 0.0;
   prior_cov(2,2) = 0; //PRIOR_COV_Y
 
-  BFL::Gaussian prior(prior_mu, prior_cov);
+  prior = new BFL::Gaussian(prior_mu, prior_cov);
 }
 
-void linear_system_model()
+void init_linear_system_model()
 {
 
   // Build system for x_k+1 = A_x_k + B_u_k
@@ -521,10 +561,10 @@ void linear_system_model()
   BFL::Gaussian system_uncertainty(sys_noise_mu, sys_noise_cov);
   
   // Create pdf
-  BFL::LinearAnalyticConditionalGaussian sys_pdf(AB, system_uncertainty);
+  sys_pdf = new BFL::LinearAnalyticConditionalGaussian(AB, system_uncertainty);
 
   // Create system model from pdf
-  BFL::LinearAnalyticSystemModelGaussianUncertainty sys_model(&sys_pdf);
+  sys_model = new BFL::LinearAnalyticSystemModelGaussianUncertainty(sys_pdf);
 }
 
 
@@ -559,7 +599,7 @@ void costmapCb(const nav_msgs::OccupancyGridConstPtr grid)
   /*std::vector<double> velocities = velocityFromOnePrev(cirs, prev_cirs, d_elapsed, grid_resolution);
   ROS_INFO("Velocities returned from going back one cycle:");*/
 
-  int N = 15;
+  int N = 0;
   std::vector<double> velocities = velocityFromNPrev(cirs, prev_cirs, d_elapsed, grid_resolution, N);
   
   for(int i=0;i<velocities.size();i++)
