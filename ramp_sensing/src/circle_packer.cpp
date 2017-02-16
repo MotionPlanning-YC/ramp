@@ -1036,14 +1036,14 @@ std::vector<Circle> CirclePacker::go()
 
   // Setup params
   cv::SimpleBlobDetector::Params params;
-  params.minDistBetweenBlobs = 0.1f;
+  params.minDistBetweenBlobs = 1.f;
   params.filterByInertia = false;
   params.filterByConvexity = false;
   params.filterByColor = false;
   params.filterByCircularity = false;
   params.filterByArea = true;
-  params.minArea = 0.1f;
-  params.maxArea = 500.0f;
+  params.minArea = 10.f;
+  params.maxArea = 5000.0f;
 
   // Make object
   cv::Ptr<cv::SimpleBlobDetector> blobs_detector = cv::SimpleBlobDetector::create(params);   
