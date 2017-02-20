@@ -276,7 +276,6 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   if(cc_started_)
   {
     //////ROS_INFO("Evaluating movingOn_ in SC");
-    //movingOn_       = evaluateTrajectory(movingOn_);
     evaluateTrajectory(movingOn_, false);
     moving_on_coll_ = !movingOn_.msg_.feasible;
   }
@@ -335,8 +334,6 @@ void Planner::sensingCycleCallback(const ramp_msgs::ObstacleList& msg)
   ros::Duration d(1);
   d.sleep();
   std::cin.get();*/
-
-  //sendPopulation(pop_obs);
 
   ROS_INFO("Exiting sensingCycleCallback");
 }

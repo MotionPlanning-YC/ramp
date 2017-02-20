@@ -225,14 +225,12 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "ramp_sensing");
   ros::NodeHandle handle;
   
+  /*
+   * Code for using odom topics to sense obstacles
+   */
 
   //Get parameters
-  
-  /*std::string other_robot_odom;
-  handle.getParam("ramp_sensing/other_robot_odom", other_robot_odom);
-  std::cout<<"\nother_robot_odom:"<<other_robot_odom;*/
-
-  /*if(handle.hasParam("/ramp/obstacle_odoms"))
+  if(handle.hasParam("/ramp/obstacle_odoms"))
   {
     ROS_INFO("Found rosparam obstacle_odoms");
     handle.getParam("/ramp/obstacle_odoms", ob_odoms);
@@ -271,17 +269,24 @@ int main(int argc, char** argv)
 
     ros::Subscriber sub_ob = handle.subscribe<nav_msgs::Odometry>(ob_odoms.at(i), 1, boost::bind(updateOtherRobotCb, _1, ob_odoms.at(i)));
     subs_obs.push_back(sub_ob);
-  } // end for*/
+  } // end for
 
-  ros::Subscriber sub_costmap = handle.subscribe<nav_msgs::OccupancyGrid>("/costmap_node/costmap/costmap", 1, &costmapCb);
+  pub_obj = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
+  ros::Timer timer = handle.createTimer(ros::Duration(1.f / rate), publishList);
+
+
+
+  /*
+   * Below is the code for using costmaps to sense obstacles
+   */
+
+  /*ros::Subscriber sub_costmap = handle.subscribe<nav_msgs::OccupancyGrid>("/costmap_node/costmap/costmap", 1, &costmapCb);
 
   //Publishers
-  pub_obj = handle.advertise<ramp_msgs::ObstacleList>("obstacles", 1);
   pub_rviz = handle.advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 1);
 
   //Timers
-  //ros::Timer timer = handle.createTimer(ros::Duration(1.f / rate), publishList);
-  ros::Timer timer_markers = handle.createTimer(ros::Duration(1.f/10.f), publishMarkers);
+  ros::Timer timer_markers = handle.createTimer(ros::Duration(1.f/10.f), publishMarkers);*/
    
 
   std::cout<<"\nSpinning\n";

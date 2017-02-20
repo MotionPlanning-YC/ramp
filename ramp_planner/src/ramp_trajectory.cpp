@@ -375,7 +375,7 @@ void RampTrajectory::offsetPositions(const MotionState& diff)
 {
   //////ROS_INFO("In RampTrajectory::offsetPositions");
  
-  // Go through all the points and subtract diff
+  // Go through all the points and add diff
   for(uint16_t i=0;i<msg_.trajectory.points.size();i++)
   {
     MotionState temp(msg_.trajectory.points.at(i));
@@ -424,9 +424,9 @@ void RampTrajectory::offsetPositions(const MotionState& diff)
     MotionState c1(msg_.curves.at(c).controlPoints.at(1));
     MotionState c2(msg_.curves.at(c).controlPoints.at(2));
 
-    msg_.curves.at(c).controlPoints.at(0) = c0.subtractPosition(diff).msg_;
-    msg_.curves.at(c).controlPoints.at(1) = c1.subtractPosition(diff).msg_;
-    msg_.curves.at(c).controlPoints.at(2) = c2.subtractPosition(diff).msg_;
+    msg_.curves.at(c).controlPoints.at(0) = c0.add(diff).msg_;
+    msg_.curves.at(c).controlPoints.at(1) = c1.add(diff).msg_;
+    msg_.curves.at(c).controlPoints.at(2) = c2.add(diff).msg_;
     //////ROS_INFO("After fixing curve: %s", utility_.toString(msg_.curves.at(0)).c_str());
   } // end for
 
