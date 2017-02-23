@@ -358,14 +358,13 @@ void MobileRobot::moveOnTrajectory()
 
     // Move to the next point
     ros::Time g_time = end_times.at(num_traveled_) + t_immiColl_;
-    //ros::Time g_time = end_times.at(num_traveled_);
-    //ROS_INFO("now: %f g_time: %f", ros::Time::now().toSec(), g_time.toSec());
+    //ROS_INFO("now: %f g_time: %f t_immiColl_: %f", ros::Time::now().toSec(), g_time.toSec(), t_immiColl_.toSec());
     while(ros::ok() && ros::Time::now() < g_time) 
     {
       // If a new trajectory was received, restart the outer while 
       if(restart_)
       {
-        continue;
+        break;
       }
       
       twist_.linear.x   = speeds_linear_.at(num_traveled_);

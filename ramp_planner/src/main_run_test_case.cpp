@@ -432,7 +432,7 @@ int main(int argc, char** argv) {
 
   ros::Timer ob_trj_timer;
   
-  int num_tests = 5;
+  int num_tests = 20;
   int num_successful_tests = 0;
   std::vector<int> num_generations;
   std::vector<TestCase> test_cases;
@@ -457,6 +457,8 @@ int main(int argc, char** argv) {
   goal.msg_.positions.push_back(2);
   goal.msg_.positions.push_back(PI/4.f);
 
+
+  RampTrajectory blank;
 
 
   ros::Duration d(1);
@@ -491,6 +493,7 @@ int main(int argc, char** argv) {
     my_planner.modifications_   = modifications;
     my_planner.evaluations_     = evaluations;
     my_planner.seedPopulation_  = seedPopulation;
+    my_planner.imminent_collision_ = false;
 
     ROS_INFO("Planner initialized");
     ROS_INFO("Start: %s", my_planner.start_.toString().c_str());

@@ -67,6 +67,7 @@ bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
      */
     if(treq.path.points.size() == 2 && checkGoal(treq))
     {
+      ROS_INFO("start == goal");
       tres.trajectory.trajectory.points.push_back(utility.getTrajectoryPoint(treq.path.points.at(0).motionState));
       tres.trajectory.i_knotPoints.push_back(0);
       res.resps.push_back(tres);
@@ -102,7 +103,7 @@ bool requestCallback( ramp_msgs::TrajectorySrv::Request& req,
 
     if( tres.trajectory.i_knotPoints[0] == tres.trajectory.i_knotPoints[1] )
     {
-      //ROS_WARN("First two knot points are equal!");
+      ROS_WARN("First two knot points are equal!");
     }
     //ROS_INFO("Response: %s", utility.toString(tres).c_str());
   
