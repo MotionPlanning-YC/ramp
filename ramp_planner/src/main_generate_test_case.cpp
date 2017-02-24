@@ -289,9 +289,7 @@ enum Group
 
 struct ABTC
 {
-  bool moving[9];
-  double times[9];
-  
+  std::vector<int> abtc;
 };
 
 
@@ -633,38 +631,47 @@ void setICs(const ros::TimerEvent e, TestCaseTwo& tc)
  */
 void pubObTrj(const ros::TimerEvent e, TestCaseTwo& tc)
 {
-  //ROS_INFO("In pubObTrj");
+  ROS_INFO("In pubObTrj");
   //ROS_INFO("tc.t_begin: %f", tc.t_begin.toSec());
   //ROS_INFO("ros::Time::now(): %f", ros::Time::now().toSec());
 
   ros::Duration d_elapsed = ros::Time::now() - tc.t_begin;
-  
-  //int index = d_elapsed.toSec() * 10;
-  //ROS_INFO("index: %i traj size: %i", index, (int)tc.ob_trjs[0].trajectory.points.size()); 
 
   for(int i=0;i<tc.ob_trjs.size();i++)
   {
     ros::Duration d_lastCb = ros::Time::now() - t_lastObMove[i];
     double d_elap_ob = d_elapsed.toSec() - ob_delay[i];
+    
+    // Build new obstacle msg
+    ramp_msgs::Obstacle ob;
 
     //ROS_INFO("d_lastCb: %f t_lastObMove[%i]: %f", d_lastCb.toSec(), i, t_lastObMove[i].toSec());
  
     int index = d_lastCb.toSec() >= 0.1 ? last_index[i]+1 : last_index[i];
+    ROS_INFO("index: %i traj size: %i", index, (int)tc.ob_trjs[i].trajectory.points.size()); 
+    ROS_INFO("(ros::Time::now() - tc.t_begin).toSec(): %f", (ros::Time::now() - tc.t_begin).toSec()); 
+    ROS_INFO("ob_delay[%i]: %i", i, ob_delay[i]);
+    ROS_INFO("d_elap_ob: %f", d_elap_ob);
+    ROS_INFO("Traj size: %i", (int)tc.ob_trjs[i].trajectory.points.size());
 
-    if((ros::Time::now() - tc.t_begin).toSec() > ob_delay[i])
-        //&& d_elap_ob*10 < tc.ob_trjs[i].trajectory.points.size())
+    // If the time since test case began is greater than obstacle's delay (i.e. start moving ob)
+    // and elapsed time since ob started moving is less than its trajectory size
+    if((ros::Time::now() - tc.t_begin).toSec() > ob_delay[i]
+        && d_elap_ob*10 < tc.ob_trjs[i].trajectory.points.size())
     {
       int temp_index = index >= (tc.ob_trjs[i].trajectory.points.size()-1) ? tc.ob_trjs[i].trajectory.points.size()-1 : 
         index;
+     
 
-      //ROS_INFO("temp_index: %i trajec size: %i", temp_index, (int)tc.ob_trjs[i].trajectory.points.size());
+      ROS_INFO("temp_index: %i trajec size: %i", temp_index, (int)tc.ob_trjs[i].trajectory.points.size());
       trajectory_msgs::JointTrajectoryPoint p = tc.ob_trjs[i].trajectory.points[temp_index]; 
 
-      // Build new obstacle msg
-      ramp_msgs::Obstacle ob;
       
       if(!ics[i])
       {
+        ROS_INFO("d_elapsed.toSec()*10: %f", d_elapsed.toSec()*10);
+        ROS_INFO("tc.ob_trjs[i].trajectory.points.size(): %i", (int)tc.ob_trjs[i].trajectory.points.size());
+
         if(temp_index >= (tc.ob_trjs[i].trajectory.points.size()-1) ||
           // or elapsed time since start is over the trajectory length
            d_elapsed.toSec()*10 > tc.ob_trjs[i].trajectory.points.size())
@@ -685,16 +692,26 @@ void pubObTrj(const ros::TimerEvent e, TestCaseTwo& tc)
       }
       else
       {
+        ROS_INFO("In Imminent Collision");
+        p = tc.ob_trjs[i].trajectory.points[last_index[i]]; 
         ob = buildObstacleMsg(p.positions[0], p.positions[1], 0, p.positions[2], 0);
       }
         
       tc.obs[i].msg = ob;
       tc.ob_list.obstacles[i] = ob;
+    } // end if
+    else
+    {
+      ROS_INFO("In outer else");
+      trajectory_msgs::JointTrajectoryPoint p = tc.ob_trjs[i].trajectory.points[last_index[i]]; 
+      ob = buildObstacleMsg(p.positions[0], p.positions[1], 0, p.positions[2], 0);
+      tc.obs[i].msg = ob;
+      tc.ob_list.obstacles[i] = ob;
     }
-  }
+    ROS_INFO("Ob v: (%f, %f)", tc.ob_list.obstacles[i].ob_ms.velocities[0], tc.ob_list.obstacles[i].ob_ms.velocities[1]);
+  } // end for
 
-
-  //ROS_INFO("Exiting pubObTrj");
+  ROS_INFO("Exiting pubObTrj");
   pub_obs.publish(tc.ob_list);
 }
 
@@ -737,7 +754,7 @@ int main(int argc, char** argv) {
   //loadParameters(handle);
   //loadObstacleTF();
 
-  num_obs = 2;
+  num_obs = 3;
 
   ros::Rate r(100);
 
@@ -757,12 +774,13 @@ int main(int argc, char** argv) {
   ob_trj_timer.stop();
   ics_timer.stop();
   
-  int num_tests = 20;
+  int num_tests = 200;
 
   ob_delay.push_back(0);
-  ob_delay.push_back(0);
-  //ob_delay.push_back(2);
-  ob_stop_time.push_back(5);
+  ob_delay.push_back(2);
+  ob_delay.push_back(9);
+  ob_stop_time.push_back(2);
+  ob_stop_time.push_back(7);
   ob_stop_time.push_back(5);
 
 
@@ -817,19 +835,10 @@ int main(int argc, char** argv) {
      */
 
     ABTC abtc;
+    abtc.abtc.push_back(0);
+    abtc.abtc.push_back(2);
+    abtc.abtc.push_back(4);
 
-    /*
-     * Create test case where all obstacles stop, move, stop for 1 second each
-     */
-    for(int i_ob=0;i_ob<3;i_ob++)
-    {
-      abtc.moving[i_ob]   = 0;
-      abtc.moving[i_ob+3] = 1;
-      abtc.moving[i_ob+6] = 0;
-      abtc.times[i_ob] = 1;
-      abtc.times[i_ob+3] = 1;
-      abtc.times[i_ob+6] = 1;
-    }
 
     generateObInfoGrid(initial_state);
     
@@ -925,6 +934,7 @@ int main(int argc, char** argv) {
 
     // Publish static obstacles
     pub_obs.publish(obs_stat);
+    tc.ob_list = obs_stat;
 
     // Wait for 1 second
     d_history.sleep();
@@ -981,7 +991,7 @@ int main(int argc, char** argv) {
 
     //if(elasped.toSec()+0.01 < d_test_case_thresh.toSec())
     //if(bestTrajec.trajectory.points.size() < 3)
-    if(dist < 0.5)
+    if(dist < 0.33)
     {
       reached_goal.push_back(true);
       f_reached<<true<<std::endl;
