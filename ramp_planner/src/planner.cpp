@@ -1216,9 +1216,28 @@ void Planner::buildEvaluationRequest(const RampTrajectory& trajec, ramp_msgs::Ev
   // Set necessary theta to be the orientation at the end of the transition
   // For straight-lines, this should pass, but for stop-and-rotate transitions, this should fail
   // (For curves, transition trajectory will have curves.size() > 0 so we don't worry about that)
-  double nec_theta = trajec.transitionTraj_.trajectory.points.size() > 0 ?
-    trajec.msg_.trajectory.points[ trajec.transitionTraj_.trajectory.points.size()-1 ].positions[2] :
-    utility_.findAngleFromAToB(trajec.msg_.trajectory.points[0].positions, trajec.msg_.trajectory.points[ trajec.msg_.i_knotPoints[1] ].positions);
+  double nec_theta;
+  if(trajec.msg_.i_knotPoints.size() < 1 || trajec.msg_.trajectory.points.size() < trajec.msg_.i_knotPoints[1])
+  {
+    nec_theta = trajec.msg_.trajectory.points[ trajec.msg_.trajectory.points.size()-1 ].positions[2];
+  }
+  else
+  {
+    nec_theta = trajec.transitionTraj_.trajectory.points.size() > 0 ?
+      trajec.msg_.trajectory.points[ trajec.transitionTraj_.trajectory.points.size()-1 ].positions[2] :
+      utility_.findAngleFromAToB(trajec.msg_.trajectory.points[0].positions, trajec.msg_.trajectory.points[ trajec.msg_.i_knotPoints[1] ].positions);
+  }
+
+  /*
+   * Previous way of setting nec_theta, but this crashed quite ofen
+   * Fix this bug 
+   
+   nec_theta = trajec.transitionTraj_.trajectory.points.size() > 0 ?
+      trajec.msg_.trajectory.points[ trajec.transitionTraj_.trajectory.points.size()-1 ].positions[2] :
+      utility_.findAngleFromAToB(trajec.msg_.trajectory.points[0].positions, trajec.msg_.trajectory.points[ trajec.msg_.i_knotPoints[1] ].positions);*/
+
+
+
 
   // Robot's theta at the end of the control cycle or
   // it's current theta if it's not moving

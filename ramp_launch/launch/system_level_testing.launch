@@ -20,7 +20,7 @@
 
 <!-- Planner -->
 <!-- <node name="ramp_planner" pkg="ramp_planner" type="ramp_planner" output="screen" /> -->
-<node name="run_test_case" pkg="ramp_planner" type="run_test_case" output="screen" />
+<node name="run_test_case" pkg="ramp_planner" type="run_test_case" launch-prefix="xterm -e gdb --args" output="screen" />
 <node name="generate_test_case" pkg="ramp_planner" type="generate_test_case" output="screen" />
 
 <!-- Sensing -->

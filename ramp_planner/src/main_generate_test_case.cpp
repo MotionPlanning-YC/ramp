@@ -631,7 +631,7 @@ void setICs(const ros::TimerEvent e, TestCaseTwo& tc)
  */
 void pubObTrj(const ros::TimerEvent e, TestCaseTwo& tc)
 {
-  ROS_INFO("In pubObTrj");
+  //ROS_INFO("In pubObTrj");
   //ROS_INFO("tc.t_begin: %f", tc.t_begin.toSec());
   //ROS_INFO("ros::Time::now(): %f", ros::Time::now().toSec());
 
@@ -647,71 +647,51 @@ void pubObTrj(const ros::TimerEvent e, TestCaseTwo& tc)
 
     //ROS_INFO("d_lastCb: %f t_lastObMove[%i]: %f", d_lastCb.toSec(), i, t_lastObMove[i].toSec());
  
-    int index = d_lastCb.toSec() >= 0.1 ? last_index[i]+1 : last_index[i];
-    ROS_INFO("index: %i traj size: %i", index, (int)tc.ob_trjs[i].trajectory.points.size()); 
+    // Get the index on the trajectory (based on time since ob traj should have began, i.e. ob_delay)
+    int index = d_elap_ob*10;
+
+    /*ROS_INFO("index: %i traj size: %i", index, (int)tc.ob_trjs[i].trajectory.points.size()); 
     ROS_INFO("(ros::Time::now() - tc.t_begin).toSec(): %f", (ros::Time::now() - tc.t_begin).toSec()); 
     ROS_INFO("ob_delay[%i]: %i", i, ob_delay[i]);
     ROS_INFO("d_elap_ob: %f", d_elap_ob);
-    ROS_INFO("Traj size: %i", (int)tc.ob_trjs[i].trajectory.points.size());
+    ROS_INFO("Traj size: %i", (int)tc.ob_trjs[i].trajectory.points.size());*/
 
     // If the time since test case began is greater than obstacle's delay (i.e. start moving ob)
-    // and elapsed time since ob started moving is less than its trajectory size
-    if((ros::Time::now() - tc.t_begin).toSec() > ob_delay[i]
-        && d_elap_ob*10 < tc.ob_trjs[i].trajectory.points.size())
+    // start updating this obstacle's position and velocity
+    if((ros::Time::now() - tc.t_begin).toSec() > ob_delay[i])
     {
+      
+      // Check that the time since traj began is not larger than traj time
       int temp_index = index >= (tc.ob_trjs[i].trajectory.points.size()-1) ? tc.ob_trjs[i].trajectory.points.size()-1 : 
         index;
      
 
-      ROS_INFO("temp_index: %i trajec size: %i", temp_index, (int)tc.ob_trjs[i].trajectory.points.size());
+      //ROS_INFO("temp_index: %i trajec size: %i", temp_index, (int)tc.ob_trjs[i].trajectory.points.size());
       trajectory_msgs::JointTrajectoryPoint p = tc.ob_trjs[i].trajectory.points[temp_index]; 
 
-      
-      if(!ics[i])
-      {
-        ROS_INFO("d_elapsed.toSec()*10: %f", d_elapsed.toSec()*10);
-        ROS_INFO("tc.ob_trjs[i].trajectory.points.size(): %i", (int)tc.ob_trjs[i].trajectory.points.size());
+    
+      //ROS_INFO("d_elapsed.toSec()*10: %f", d_elapsed.toSec()*10);
+      //ROS_INFO("tc.ob_trjs[i].trajectory.points.size(): %i", (int)tc.ob_trjs[i].trajectory.points.size());
 
-        if(temp_index >= (tc.ob_trjs[i].trajectory.points.size()-1) ||
-          // or elapsed time since start is over the trajectory length
-           d_elapsed.toSec()*10 > tc.ob_trjs[i].trajectory.points.size())
-        {
-          ob = buildObstacleMsg(p.positions[0], p.positions[1], 0, p.positions[2], 0);
-        }
-        else
-        {
-          ob = buildObstacleMsg(p.positions[0], p.positions[1], tc.obs[i].v, p.positions[2], tc.obs[i].w);
-        } 
-
-        if(index > last_index[i])
-        {
-          t_lastObMove[i] = ros::Time::now();
-        }
-        
-        last_index[i] = temp_index;
-      }
-      else
+      // If the temp_index is larger than the trajectory size, publish obstacle with 0 velocity
+      if(temp_index >= (tc.ob_trjs[i].trajectory.points.size()-1))
       {
-        ROS_INFO("In Imminent Collision");
-        p = tc.ob_trjs[i].trajectory.points[last_index[i]]; 
         ob = buildObstacleMsg(p.positions[0], p.positions[1], 0, p.positions[2], 0);
       }
+      // Else, publish the obstacle at trajectory point[temp_index]
+      else
+      {
+        ob = buildObstacleMsg(p.positions[0], p.positions[1], tc.obs[i].v, p.positions[2], tc.obs[i].w);
+      } 
         
       tc.obs[i].msg = ob;
       tc.ob_list.obstacles[i] = ob;
     } // end if
-    else
-    {
-      ROS_INFO("In outer else");
-      trajectory_msgs::JointTrajectoryPoint p = tc.ob_trjs[i].trajectory.points[last_index[i]]; 
-      ob = buildObstacleMsg(p.positions[0], p.positions[1], 0, p.positions[2], 0);
-      tc.obs[i].msg = ob;
-      tc.ob_list.obstacles[i] = ob;
-    }
-    ROS_INFO("Ob v: (%f, %f)", tc.ob_list.obstacles[i].ob_ms.velocities[0], tc.ob_list.obstacles[i].ob_ms.velocities[1]);
+    
+    //ROS_INFO("Ob v: (%f, %f)", tc.ob_list.obstacles[i].ob_ms.velocities[0], tc.ob_list.obstacles[i].ob_ms.velocities[1]);
   } // end for
 
-  ROS_INFO("Exiting pubObTrj");
+  //ROS_INFO("Exiting pubObTrj");
   pub_obs.publish(tc.ob_list);
 }
 
@@ -774,14 +754,14 @@ int main(int argc, char** argv) {
   ob_trj_timer.stop();
   ics_timer.stop();
   
-  int num_tests = 200;
+  int num_tests = 2;
 
   ob_delay.push_back(0);
-  ob_delay.push_back(2);
-  ob_delay.push_back(9);
-  ob_stop_time.push_back(2);
-  ob_stop_time.push_back(7);
-  ob_stop_time.push_back(5);
+  ob_delay.push_back(4);
+  ob_delay.push_back(6);
+  ob_stop_time.push_back(3);
+  ob_stop_time.push_back(10);
+  ob_stop_time.push_back(10);
 
 
   // Make an ObstacleList Publisher
@@ -794,23 +774,23 @@ int main(int argc, char** argv) {
 
 
   std::ofstream f_reached;
-  f_reached.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/1/reached_goal.txt", 
+  f_reached.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/8/reached_goal.txt", 
       std::ios::out | std::ios::app | std::ios::binary);
   
   std::ofstream f_feasible;
-  f_feasible.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/1/feasible.txt", std::ios::out 
+  f_feasible.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/8/feasible.txt", std::ios::out 
       | std::ios::app | std::ios::binary);
 
   std::ofstream f_time_left;
-  f_time_left.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/1//time_left.txt", 
+  f_time_left.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/8/time_left.txt", 
       std::ios::out | std::ios::app | std::ios::binary);
   
   std::ofstream f_ic_stuck;
-  f_ic_stuck.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/1//ic_stuck.txt", std::ios::out 
+  f_ic_stuck.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/8/ic_stuck.txt", std::ios::out 
       | std::ios::app | std::ios::binary);
   
   std::ofstream f_ic_occurred;
-  f_ic_occurred.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/1//ic_occurred.txt", 
+  f_ic_occurred.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/8/ic_occurred.txt", 
       std::ios::out | std::ios::app | std::ios::binary);
   
   
@@ -948,7 +928,7 @@ int main(int argc, char** argv) {
 
     // Create timer to continuously publish obstacle information
     ob_trj_timer = handle.createTimer(ros::Duration(1./20.), boost::bind(pubObTrj, _1, tc));
-    ics_timer = handle.createTimer(ros::Duration(1./25.), boost::bind(setICs, _1, tc));
+    //ics_timer = handle.createTimer(ros::Duration(1./25.), boost::bind(setICs, _1, tc));
 
 
 
@@ -1008,6 +988,12 @@ int main(int argc, char** argv) {
       bestTrajec_fe.push_back(true);
       time_left.push_back( bestTrajec.trajectory.points[ bestTrajec.trajectory.points.size()-1 
       ].time_from_start.toSec());
+
+      if(bestTrajec.trajectory.points[ bestTrajec.trajectory.points.size()-1 
+      ].time_from_start.toSec() > 1000)
+      {
+        ROS_INFO("bestTrajec: %s", utility.toString(bestTrajec).c_str());
+      }
 
       f_feasible<<true<<std::endl;
       f_time_left<<bestTrajec.trajectory.points[ bestTrajec.trajectory.points.size()-1 

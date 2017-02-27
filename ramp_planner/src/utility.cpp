@@ -64,6 +64,11 @@ const double Utility::findAngleFromAToB(const std::vector<double> a, const std::
 {
   double result;
 
+  if(a.size() < 2 || b.size() < 2)
+  {
+    ROS_INFO("a.size(): %i, b.size(): %i", (int)a.size(), (int)b.size());
+  }
+
   // If the positions are the same, return the orientation the robot already has
   if(fabs(positionDistance(a, b)) < 0.01 && a.size() > 2)
   {
