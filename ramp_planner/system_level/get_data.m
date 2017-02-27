@@ -21,6 +21,7 @@ end
 
 
 data_fe = importdata(f_fe{1});
+data_fe = importdata(f_fe{8});
     
 % Go through each f_fe
 for i=1:size(f_fe,2)
