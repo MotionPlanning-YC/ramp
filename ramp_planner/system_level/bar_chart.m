@@ -8,5 +8,5 @@ y_tick = {'0'; '10'; '20'; '30'; '40'; '50'; '60'; '70'};
 ylabel('% of test cases');
 set(gca, 'XTicklabel', x);
 set(gca, 'YTicklabel', y_tick);
-set(gca, 'FontSize', 8);
+set(gca, 'FontSize', 14);
 set(gcf, 'Position', [10 10 250 250]);

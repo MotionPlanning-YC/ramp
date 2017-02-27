@@ -754,14 +754,14 @@ int main(int argc, char** argv) {
   ob_trj_timer.stop();
   ics_timer.stop();
   
-  int num_tests = 2;
+  int num_tests = 24;
 
   ob_delay.push_back(0);
-  ob_delay.push_back(4);
-  ob_delay.push_back(6);
-  ob_stop_time.push_back(3);
-  ob_stop_time.push_back(10);
-  ob_stop_time.push_back(10);
+  ob_delay.push_back(2);
+  ob_delay.push_back(7);
+  ob_stop_time.push_back(5);
+  ob_stop_time.push_back(4);
+  ob_stop_time.push_back(5);
 
 
   // Make an ObstacleList Publisher
@@ -774,23 +774,23 @@ int main(int argc, char** argv) {
 
 
   std::ofstream f_reached;
-  f_reached.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/8/reached_goal.txt", 
+  f_reached.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/9/reached_goal.txt", 
       std::ios::out | std::ios::app | std::ios::binary);
   
   std::ofstream f_feasible;
-  f_feasible.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/8/feasible.txt", std::ios::out 
+  f_feasible.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/9/feasible.txt", std::ios::out 
       | std::ios::app | std::ios::binary);
 
   std::ofstream f_time_left;
-  f_time_left.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/8/time_left.txt", 
+  f_time_left.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/9/time_left.txt", 
       std::ios::out | std::ios::app | std::ios::binary);
   
   std::ofstream f_ic_stuck;
-  f_ic_stuck.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/8/ic_stuck.txt", std::ios::out 
+  f_ic_stuck.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/9/ic_stuck.txt", std::ios::out 
       | std::ios::app | std::ios::binary);
   
   std::ofstream f_ic_occurred;
-  f_ic_occurred.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/8/ic_occurred.txt", 
+  f_ic_occurred.open("/home/sterlingm/ros_workspace/src/ramp/ramp_planner/system_level/advanced_robotics/9/ic_occurred.txt", 
       std::ios::out | std::ios::app | std::ios::binary);
   
   
