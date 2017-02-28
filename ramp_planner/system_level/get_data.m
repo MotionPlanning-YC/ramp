@@ -49,20 +49,23 @@ end
 
 % Initialize percentage arrays
 perc_fe = zeros(1,8, 'double');
+perc_infe = zeros(1,8, 'double');
 perc_re = zeros(1,8, 'double');
 perc_ic_st = zeros(1,8, 'double');
 
 % Get percentages
 for i=1:size(abtc,2)
-    s = sum(data_fe(:,i) == 1);
-    perc_fe(i) = s / 100.0;
-    
     s = sum(data_re(:,i) == 1);
-    perc_re(i) = s / 100.0;
+    perc_re(i) = s / size(data_re,1);
+    
+    s = sum(data_fe(:,i) == 1);
+    perc_fe(i) = (s / size(data_fe,1)) - perc_re(i);
     
     s = sum(data_ic_st(:,i) == 1);
-    perc_ic_st(i) = s / 100.0;
+    perc_ic_st(i) = s / size(data_ic_st,1);
     
+    all = perc_fe(i)+perc_re(i)+perc_ic_st(i);
+    perc_infe(i) = 1 - all;
 end
 
 % Time-left is a little different...
@@ -87,11 +90,12 @@ end
 
 
 % Get percentages
-s = sum(data_all_fe(:) == 1);
-perc_all_fe = s / size(data_all_fe,1);
 
 s = sum(data_all_re(:) == 1);
 perc_all_re = s / size(data_all_re,1);
+
+s = sum(data_all_fe(:) == 1);
+perc_all_fe = (s / size(data_all_fe,1)) - perc_all_re;
 
 s = sum(data_all_ic_st(:) == 1);
 perc_all_ic_st = s / size(data_all_ic_st,1);
@@ -101,7 +105,8 @@ tl_hist = hist(data_all_tl, nbins);
 bar(tl_hist);
 xlabel('Seconds left in trajectory');
 
-perc_all = [perc_all_fe-perc_all_re-perc_all_ic_st perc_all_re 1-perc_all_fe perc_all_ic_st];
+
+perc_all = [perc_all_re perc_all_fe 1-(perc_all_re+perc_all_fe+perc_all_ic_st) perc_all_ic_st];
 perc_values = {sprintf('%.0f%%', 100*perc_all(1)); sprintf('%.0f%%', 100*perc_all(2)); sprintf('%.0f%%', 100*perc_all(3)); sprintf('%.0f%%', 100*perc_all(4))};
 
 strs = {strcat('Goal: ', perc_values{1}) ; strcat('Feasible: ', perc_values{2}) ; strcat('Infeasible: ', perc_values{3}); strcat('I.C. (stuck): ', perc_values{4})};
@@ -110,42 +115,3 @@ p = pie(perc_all, strs);
 set(p(2:2:8),'FontSize',12);
 set(gcf, 'Position', [10 10 500 500]);
 
-
-
-% Old scripts
-% tl = importdata(strcat('1/', f_tl));
-% tl = [tl; importdata(strcat('2/', f_tl))];
-% tl = [tl; importdata(strcat('3/', f_tl))];
-% tl = [tl; importdata(strcat('4/', f_tl))];
-% tl = [tl; importdata(strcat('5/', f_tl))];
-% tl = [tl; importdata(strcat('6/', f_tl))];
-% tl = [tl; importdata(strcat('7/', f_tl))];
-% tl = [tl; importdata(strcat('8/', f_tl))];
-% 
-% re = importdata(strcat('1/', f_re));
-% re = [re; importdata(strcat('2/', f_re))];
-% re = [re; importdata(strcat('3/', f_re))];
-% re = [re; importdata(strcat('4/', f_re))];
-% re = [re; importdata(strcat('5/', f_re))];
-% re = [re; importdata(strcat('6/', f_re))];
-% re = [re; importdata(strcat('7/', f_re))];
-% re = [re; importdata(strcat('8/', f_re))];
-% 
-% ic_st = importdata(strcat('1/', f_ic_st));
-% ic_st = [ic_st; importdata(strcat('2/', f_ic_st))];
-% ic_st = [ic_st; importdata(strcat('3/', f_ic_st))];
-% ic_st = [ic_st; importdata(strcat('4/', f_ic_st))];
-% ic_st = [ic_st; importdata(strcat('5/', f_ic_st))];
-% ic_st = [ic_st; importdata(strcat('6/', f_ic_st))];
-% ic_st = [ic_st; importdata(strcat('7/', f_ic_st))];
-% ic_st = [ic_st; importdata(strcat('8/', f_ic_st))];
-% 
-% 
-% ic_oc = importdata(strcat('1/', f_ic_oc));
-% ic_oc = [ic_oc; importdata(strcat('2/', f_ic_oc))];
-% ic_oc = [ic_oc; importdata(strcat('3/', f_ic_oc))];
-% ic_oc = [ic_oc; importdata(strcat('4/', f_ic_oc))];
-% ic_oc = [ic_oc; importdata(strcat('5/', f_ic_oc))];
-% ic_oc = [ic_oc; importdata(strcat('6/', f_ic_oc))];
-% ic_oc = [ic_oc; importdata(strcat('7/', f_ic_oc))];
-% ic_oc = [ic_oc; importdata(strcat('8/', f_ic_oc))];
